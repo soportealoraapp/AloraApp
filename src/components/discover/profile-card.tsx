@@ -1,73 +1,162 @@
-
 "use client";
 
-import { useState } from 'react';
-import type { UserProfile } from '@/lib/mock-data';
-import { Card, CardContent } from '@/components/ui/card';
-import Image from 'next/image';
-import { Button } from '@/components/ui/button';
-import { Heart, MessageSquare, Eye, CheckCircle, Sparkles, MapPin } from 'lucide-react';
-import { Badge } from '@/components/ui/badge';
-import Link from 'next/link';
-import { useToast } from '@/hooks/use-toast';
-import { cn } from '@/lib/utils';
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Heart, MessageSquare, Eye, Sparkles, Loader2 } from "lucide-react";
+import Image from "next/image";
+import Link from "next/link";
+import { UserProfile } from "@/lib/firebase/types";
+import { cn } from "@/lib/utils";
+import { useState } from "react";
+import { useMatches } from "@/hooks/use-matches";
 
 interface ProfileCardProps {
   profile: UserProfile;
+  compatibility: number;
+  onRefresh?: () => void;
 }
 
-export function ProfileCard({ profile }: ProfileCardProps) {
-    const { toast } = useToast();
-    const [isLiked, setIsLiked] = useState(false);
+export function ProfileCard({ profile, compatibility, onRefresh }: ProfileCardProps) {
+  const { sendLike } = useMatches();
+  const [liked, setLiked] = useState(false);
+  const [superLiked, setSuperLiked] = useState(false);
+  const [loading, setLoading] = useState(false);
 
-    const handleLike = () => {
-        setIsLiked(true);
-        toast({
-            title: `Te ha gustado ${profile.name} ✨`,
-            description: "¡Ojalá hagan match! Te notificaremos.",
-        });
+  const handleLike = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (liked || loading) return;
+
+    setLoading(true);
+    try {
+      await sendLike(profile.uid, 'like');
+      setLiked(true);
+      onRefresh?.();
+    } catch (error) {
+      console.error('Error sending like:', error);
+    } finally {
+      setLoading(false);
     }
+  };
+
+  const handleSuperLike = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (superLiked || loading) return;
+
+    setLoading(true);
+    try {
+      await sendLike(profile.uid, 'superlike');
+      setSuperLiked(true);
+      setLiked(true);
+      onRefresh?.();
+    } catch (error) {
+      console.error('Error sending superlike:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
-    <Card className="group w-full overflow-hidden rounded-xl shadow-lg transition-all hover:shadow-2xl">
-      <CardContent className="relative p-0">
-        <Image
-          src={profile.photos[0]}
-          alt={`Photo of ${profile.name}`}
-          width={600}
-          height={800}
-          className="aspect-[3/4] w-full object-cover transition-transform duration-500 group-hover:scale-105"
-          data-ai-hint="person"
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
-        <div className="absolute bottom-0 left-0 right-0 p-4 text-white">
-          <div className="flex items-center gap-2">
-            <h3 className="text-2xl font-bold font-headline">{profile.name}, {profile.age}</h3>
-            {profile.isVerified && <CheckCircle className="h-5 w-5 text-white fill-primary stroke-background" />}
-          </div>
-           <p className="text-sm opacity-90 flex items-center gap-1.5 mt-1">
-             <MapPin className="h-4 w-4" /> {profile.city.split(',')[0]}
-            </p>
-          <div className="mt-2 flex items-center gap-2">
-            <Sparkles className="h-4 w-4 text-white/80" />
-            <span className="text-sm font-bold">{profile.compatibility}% Compatible</span>
-          </div>
+    <Card className="overflow-hidden hover:shadow-lg transition-shadow">
+      <Link href={`/profile/${profile.uid}`}>
+        <div className="relative aspect-[3/4]">
+          <Image
+            src={profile.photos?.[0] || '/placeholder.jpg'}
+            alt={profile.displayName}
+            fill
+            className="object-cover"
+            data-ai-hint="person"
+          />
+          {profile.isVerified && (
+            <Badge className="absolute top-2 right-2 bg-primary text-primary-foreground">
+              ✓ Verificada
+            </Badge>
+          )}
         </div>
-        <div className="absolute bottom-[-100%] flex w-full justify-around bg-background/80 p-3 backdrop-blur-sm transition-all duration-300 group-hover:bottom-0">
-          <Button onClick={handleLike} size="icon" variant="ghost" className={cn("h-14 w-14 rounded-full bg-white/20 shadow-lg", isLiked ? "text-white bg-primary" : "text-primary hover:bg-primary hover:text-primary-foreground")} disabled={isLiked}>
-            <Heart className={cn("h-7 w-7", isLiked && "fill-current")} />
+      </Link>
+
+      <CardContent className="p-4 space-y-3">
+        <div>
+          <div className="flex items-baseline justify-between">
+            <h3 className="font-semibold text-lg font-headline">
+              {profile.displayName}, {profile.age}
+            </h3>
+            <div className="flex items-center gap-1 text-sm text-pink-500 font-semibold">
+              <Sparkles className="h-4 w-4" />
+              <span>{compatibility}%</span>
+            </div>
+          </div>
+          <p className="text-sm text-muted-foreground">{profile.city}</p>
+        </div>
+
+        {profile.interests && profile.interests.length > 0 && (
+          <div className="flex flex-wrap gap-1">
+            {profile.interests.slice(0, 3).map((interest) => (
+              <Badge key={interest} variant="secondary" className="text-xs">
+                {interest}
+              </Badge>
+            ))}
+            {profile.interests.length > 3 && (
+              <Badge variant="outline" className="text-xs">
+                +{profile.interests.length - 3}
+              </Badge>
+            )}
+          </div>
+        )}
+
+        <div className="grid grid-cols-3 gap-2">
+          <Button
+            size="sm"
+            variant={liked ? "default" : "outline"}
+            onClick={handleLike}
+            disabled={liked || loading}
+            className={cn(liked && "bg-pink-500 hover:bg-pink-600")}
+          >
+            {loading ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <>
+                <Heart className={cn("h-4 w-4 mr-1", liked && "fill-current")} />
+                {liked ? "Liked" : "Like"}
+              </>
+            )}
           </Button>
-          <Button asChild size="icon" variant="ghost" className="h-14 w-14 rounded-full bg-white/20 text-accent-foreground hover:bg-accent hover:text-primary-foreground shadow-lg">
-             <Link href={`/chat/${profile.id}`}>
-                <MessageSquare className="h-7 w-7" />
-             </Link>
+
+          <Button size="sm" variant="outline" asChild>
+            <Link href={`/chat/${profile.uid}`}>
+              <MessageSquare className="h-4 w-4 mr-1" />
+              Chat
+            </Link>
           </Button>
-          <Button asChild size="icon" variant="ghost" className="h-14 w-14 rounded-full bg-white/20 text-secondary-foreground hover:bg-secondary hover:text-primary-foreground shadow-lg">
-            <Link href={`/profile/${profile.id}`}>
-                <Eye className="h-7 w-7" />
+
+          <Button size="sm" variant="outline" asChild>
+            <Link href={`/profile/${profile.uid}`}>
+              <Eye className="h-4 w-4 mr-1" />
+              Ver
             </Link>
           </Button>
         </div>
+
+        <Button
+          size="sm"
+          variant="secondary"
+          className="w-full bg-gradient-to-r from-pink-500 to-violet-500 text-white hover:from-pink-600 hover:to-violet-600"
+          onClick={handleSuperLike}
+          disabled={superLiked || loading}
+        >
+          {loading ? (
+            <Loader2 className="h-4 w-4 animate-spin mr-1" />
+          ) : (
+            <>
+              <Sparkles className="h-4 w-4 mr-1" />
+              {superLiked ? "Super Match Enviado" : "Super Match"}
+            </>
+          )}
+        </Button>
       </CardContent>
     </Card>
   );

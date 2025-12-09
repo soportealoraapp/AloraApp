@@ -1,55 +1,60 @@
 "use client";
 
-import { useActionState, useEffect, useRef } from "react";
-import { useFormStatus } from "react-dom";
-import { sendChatMessage, type ChatMessage } from "@/lib/actions";
-import { Input } from "@/components/ui/input";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { SendHorizonal } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
+import { Input } from "@/components/ui/input";
+import { Send, Loader2 } from "lucide-react";
 
-function SubmitButton() {
-  const { pending } = useFormStatus();
-  return (
-    <Button type="submit" size="icon" disabled={pending}>
-      <SendHorizonal className="h-5 w-5" />
-      <span className="sr-only">Enviar</span>
-    </Button>
-  );
+interface ChatInputProps {
+  onSend: (message: string) => Promise<void>;
+  disabled?: boolean;
+  placeholder?: string;
 }
 
-export function ChatInput({ onNewMessage }: { onNewMessage: (message: ChatMessage) => void }) {
-  const [state, formAction] = useActionState(sendChatMessage, {});
-  const formRef = useRef<HTMLFormElement>(null);
-  const { toast } = useToast();
+export function ChatInput({ onSend, disabled, placeholder = "Escribe un mensaje..." }: ChatInputProps) {
+  const [message, setMessage] = useState("");
+  const [sending, setSending] = useState(false);
 
-  useEffect(() => {
-    if (state?.message) {
-      formRef.current?.reset();
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!message.trim() || disabled || sending) return;
+
+    const messageToSend = message;
+    setMessage("");
+    setSending(true);
+
+    try {
+      await onSend(messageToSend);
+    } catch (error) {
+      console.error("Error sending message:", error);
+      setMessage(messageToSend);
+    } finally {
+      setSending(false);
     }
-    if (state?.newMessage) {
-        onNewMessage(state.newMessage);
-    }
-    if (state?.error) {
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: state.error,
-      });
-    }
-  }, [state, onNewMessage, toast]);
+  };
 
   return (
-    <form ref={formRef} action={formAction} className="flex w-full items-center space-x-2">
+    <form onSubmit={handleSubmit} className="flex gap-2">
       <Input
-        id="message"
-        name="message"
-        placeholder="Escribe un mensaje..."
+        value={message}
+        onChange={(e) => setMessage(e.target.value)}
+        placeholder={placeholder}
+        disabled={disabled || sending}
         className="flex-1"
-        autoComplete="off"
-        required
+        maxLength={500}
       />
-      <SubmitButton />
+      <Button
+        type="submit"
+        size="icon"
+        disabled={disabled || sending || !message.trim()}
+      >
+        {sending ? (
+          <Loader2 className="h-4 w-4 animate-spin" />
+        ) : (
+          <Send className="h-4 w-4" />
+        )}
+      </Button>
     </form>
   );
 }

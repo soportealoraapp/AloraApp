@@ -1,427 +1,504 @@
-
-
 "use client";
 
-import { useState, useRef } from 'react';
-import { useRouter } from 'next/navigation';
-import { allInterests, allValues, mockUser, zodiacSigns, educationLevels, lifestyleOptions, allMusicGenres, allPersonalGuideOptions, PersonalGuideItem } from '@/lib/mock-data';
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { useAuth } from "@/contexts/AuthContext";
+import { useProfile } from "@/hooks/use-profile";
+import { storageService } from "@/lib/firebase/storage-service";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { ArrowLeft, Check, Star, Trash2, Upload, Edit, Music, UserCheck } from "lucide-react";
-import { Badge } from '@/components/ui/badge';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-  DialogClose,
-} from "@/components/ui/dialog"
-import { useToast } from '@/hooks/use-toast';
-import Image from 'next/image';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import placeholderImages from '@/lib/placeholder-images.json';
+import { Badge } from "@/components/ui/badge";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { ArrowLeft, Upload, X, Loader2, GripVertical } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import Image from "next/image";
+import { Skeleton } from "@/components/ui/skeleton";
 
-export default function EditProfilePage() {
+const lifestyleOptions = {
+    smoking: ["No fumo", "Ocasionalmente", "Sí, fumo"],
+    drinking: ["No bebo", "Socialmente", "Regularmente"],
+    children: ["No tengo", "Tengo hijos", "Quiero tener"],
+    religion: ["Ninguna", "Cristiana", "Católica", "Musulmana", "Judía", "Budista", "Otra"],
+};
+
+const zodiacSigns = ["Aries", "Tauro", "Géminis", "Cáncer", "Leo", "Virgo", "Libra", "Escorpio", "Sagitario", "Capricornio", "Acuario", "Piscis"];
+const educationLevels = ["Secundaria", "Preparatoria", "Universidad", "Licenciatura", "Maestría", "Doctorado"];
+const allInterests = ['Viajar', 'Yoga', 'Arte', 'Música', 'Cocinar', 'Leer', 'Deportes', 'Cine', 'Fotografía', 'Bailar', 'Tecnología', 'Naturaleza', 'Moda', 'Escritura', 'Gaming'];
+const allValues = ['Honestidad', 'Amabilidad', 'Crecimiento', 'Lealtad', 'Humor', 'Aventura', 'Respeto', 'Creatividad', 'Empatía', 'Autenticidad'];
+const allMusicGenres = ['Pop', 'Rock', 'Jazz', 'Clásica', 'Electrónica', 'Hip-Hop', 'Reggaeton', 'Salsa', 'Country', 'Indie', 'R&B', 'Folk'];
+
+export default function ProfileEditPage() {
     const router = useRouter();
+    const { user, profile: currentProfile, refreshProfile } = useAuth();
+    const { updateProfile } = useProfile();
     const { toast } = useToast();
-    const [name, setName] = useState(mockUser.name);
-    const [city, setCity] = useState(mockUser.city);
-    const [status, setStatus] = useState(mockUser.status);
-    const [bio, setBio] = useState(mockUser.bio);
-    const [interests, setInterests] = useState(mockUser.interests);
-    const [values, setValues] = useState(mockUser.values);
-    const [musicGenres, setMusicGenres] = useState(mockUser.musicGenres);
-    const [photos, setPhotos] = useState(mockUser.photos);
-    const [personalGuide, setPersonalGuide] = useState<PersonalGuideItem[]>(mockUser.personalGuide || []);
-    
-    // New state for detailed info
-    const [zodiacSign, setZodiacSign] = useState(mockUser.zodiacSign);
-    const [education, setEducation] = useState(mockUser.education);
-    const [smoking, setSmoking] = useState(mockUser.smoking);
-    const [drinking, setDrinking] = useState(mockUser.drinking);
-    const [children, setChildren] = useState(mockUser.children);
-    const [religion, setReligion] = useState(mockUser.religion);
 
+    const [loading, setLoading] = useState(false);
+    const [uploading, setUploading] = useState(false);
+    const [displayName, setDisplayName] = useState("");
+    const [city, setCity] = useState("");
+    const [bio, setBio] = useState("");
+    const [status, setStatus] = useState("");
+    const [photos, setPhotos] = useState<string[]>([]);
+    const [zodiacSign, setZodiacSign] = useState("");
+    const [education, setEducation] = useState("");
+    const [smoking, setSmoking] = useState("");
+    const [drinking, setDrinking] = useState("");
+    const [children, setChildren] = useState("");
+    const [religion, setReligion] = useState("");
+    const [interests, setInterests] = useState<string[]>([]);
+    const [values, setValues] = useState<string[]>([]);
+    const [musicGenres, setMusicGenres] = useState<string[]>([]);
 
-    const fileInputRef = useRef<HTMLInputElement>(null);
-
-    const handleSave = () => {
-        // Here you would typically save the data to a backend
-        console.log({ status, bio, interests, values, photos, personalGuide });
-        toast({
-            title: "Perfil guardado ✨",
-            description: "Tus cambios se han guardado exitosamente.",
-        });
-        router.push('/profile/me');
-    };
-
-    const toggleSelection = (item: string, list: string[], setList: (list: string[]) => void, max: number) => {
-        if (list.includes(item)) {
-            setList(list.filter(i => i !== item));
-        } else {
-            if (list.length < max) {
-                setList([...list, item]);
-            } else {
-                toast({
-                    variant: "destructive",
-                    title: "Límite alcanzado",
-                    description: `Puedes seleccionar hasta ${max} elementos.`,
-                })
-            }
+    useEffect(() => {
+        if (currentProfile) {
+            setDisplayName(currentProfile.displayName || "");
+            setCity(currentProfile.city || "");
+            setBio(currentProfile.bio || "");
+            setStatus(currentProfile.status || "");
+            setPhotos(currentProfile.photos || []);
+            setZodiacSign(currentProfile.zodiacSign || "");
+            setEducation(currentProfile.education || "");
+            setSmoking(currentProfile.smoking || "");
+            setDrinking(currentProfile.drinking || "");
+            setChildren(currentProfile.children || "");
+            setReligion(currentProfile.religion || "");
+            setInterests(currentProfile.interests || []);
+            setValues(currentProfile.values || []);
+            setMusicGenres(currentProfile.musicGenres || []);
         }
-    };
-    
-    const toggleGuideSelection = (item: PersonalGuideItem) => {
-        const max = 3;
-        if (personalGuide.some(g => g.title === item.title)) {
-            setPersonalGuide(personalGuide.filter(g => g.title !== item.title));
-        } else {
-            if (personalGuide.length < max) {
-                setPersonalGuide([...personalGuide, item]);
-            } else {
-                 toast({
-                    variant: "destructive",
-                    title: "Límite alcanzado",
-                    description: `Puedes seleccionar hasta ${max} guías personales.`,
-                })
-            }
-        }
-    };
+    }, [currentProfile]);
 
-    const handlePhotoUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-        if (event.target.files) {
-            const files = Array.from(event.target.files);
-            const newPhotoUrls = files.map(file => URL.createObjectURL(file));
-            
-            if (photos.length + newPhotoUrls.length > 6) {
-                 toast({
-                    variant: "destructive",
-                    title: "Límite de fotos alcanzado",
-                    description: "Puedes tener un máximo de 6 fotos.",
-                });
-                return;
-            }
+    const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const files = e.target.files;
+        if (!files || !user) return;
 
-            setPhotos(prevPhotos => [...prevPhotos, ...newPhotoUrls]);
-        }
-    };
-
-    const triggerFileUpload = () => {
-        fileInputRef.current?.click();
-    };
-
-    const setAsProfilePicture = (photoToSet: string) => {
-        setPhotos([photoToSet, ...photos.filter(p => p !== photoToSet)]);
-        toast({
-            title: "¡Nueva foto de perfil! ✨",
-            description: "Tu foto principal ha sido actualizada.",
-        });
-    };
-
-    const deletePhoto = (photoToDelete: string) => {
-        if (photos.length <= 1) {
+        if (photos.length + files.length > 6) {
             toast({
                 variant: "destructive",
-                title: "Acción no permitida",
-                description: "Debes tener al menos una foto en tu perfil.",
+                title: "Límite de fotos",
+                description: "Puedes subir máximo 6 fotos",
             });
             return;
         }
-        setPhotos(photos.filter(p => p !== photoToDelete));
+
+        setUploading(true);
+        try {
+            const urls = await storageService.uploadProfilePhotos(user.uid, Array.from(files));
+            setPhotos([...photos, ...urls]);
+
+            toast({
+                title: "Fotos subidas",
+                description: `${files.length} foto(s) añadidas`,
+            });
+        } catch (error) {
+            console.error("Error uploading photos:", error);
+            toast({
+                variant: "destructive",
+                title: "Error",
+                description: "No se pudieron subir las fotos",
+            });
+        } finally {
+            setUploading(false);
+        }
     };
+
+    const removePhoto = (index: number) => {
+        setPhotos(photos.filter((_, i) => i !== index));
+    };
+
+    const movePhoto = (fromIndex: number, toIndex: number) => {
+        const newPhotos = [...photos];
+        const [removed] = newPhotos.splice(fromIndex, 1);
+        newPhotos.splice(toIndex, 0, removed);
+        setPhotos(newPhotos);
+    };
+
+    const toggleInterest = (interest: string) => {
+        setInterests(prev =>
+            prev.includes(interest)
+                ? prev.filter(i => i !== interest)
+                : prev.length < 10
+                    ? [...prev, interest]
+                    : prev
+        );
+    };
+
+    const toggleValue = (value: string) => {
+        setValues(prev =>
+            prev.includes(value)
+                ? prev.filter(v => v !== value)
+                : prev.length < 5
+                    ? [...prev, value]
+                    : prev
+        );
+    };
+
+    const toggleMusicGenre = (genre: string) => {
+        setMusicGenres(prev =>
+            prev.includes(genre)
+                ? prev.filter(g => g !== genre)
+                : prev.length < 5
+                    ? [...prev, genre]
+                    : prev
+        );
+    };
+
+    const handleSave = async () => {
+        if (!user) return;
+
+        setLoading(true);
+        try {
+            await updateProfile({
+                displayName,
+                city,
+                bio,
+                status,
+                photos,
+                zodiacSign,
+                education,
+                smoking,
+                drinking,
+                children,
+                religion,
+                interests,
+                values,
+                musicGenres,
+            });
+
+            await refreshProfile();
+
+            toast({
+                title: "Perfil actualizado",
+                description: "Tus cambios han sido guardados",
+            });
+
+            router.push("/profile");
+        } catch (error) {
+            console.error("Error saving profile:", error);
+            toast({
+                variant: "destructive",
+                title: "Error",
+                description: "No se pudo guardar el perfil",
+            });
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    if (!currentProfile) {
+        return (
+            <div className="md:pl-60">
+                <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b bg-background/80 px-4 backdrop-blur-sm sm:px-6">
+                    <Skeleton className="h-8 w-48" />
+                </header>
+                <main className="p-4 space-y-4">
+                    {[1, 2, 3].map(i => <Skeleton key={i} className="h-32 rounded-lg" />)}
+                </main>
+            </div>
+        );
+    }
 
     return (
         <div className="md:pl-60">
-            <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b bg-background/80 px-4 backdrop-blur-sm sm:px-6">
-                <div className='flex items-center gap-4'>
-                    <Button variant="ghost" size="icon" onClick={() => router.back()}>
-                        <ArrowLeft className="h-5 w-5" />
-                    </Button>
-                    <h1 className="text-xl font-semibold md:text-2xl font-headline">Editar Perfil</h1>
-                </div>
-                <Button onClick={handleSave}>Guardar</Button>
+            <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b bg-background/80 px-4 backdrop-blur-sm sm:px-6">
+                <Button variant="ghost" size="icon" onClick={() => router.back()}>
+                    <ArrowLeft className="h-5 w-5" />
+                </Button>
+                <h1 className="text-xl font-semibold md:text-2xl font-headline">Editar Perfil</h1>
+                <Button onClick={handleSave} disabled={loading} className="ml-auto">
+                    {loading ? (
+                        <>
+                            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                            Guardando...
+                        </>
+                    ) : (
+                        "Guardar Cambios"
+                    )}
+                </Button>
             </header>
 
-            <main className="p-4 space-y-6 pb-20">
+            <main className="p-4 space-y-6 pb-24">
                 <Card>
                     <CardHeader>
-                        <CardTitle>Tus Fotos</CardTitle>
-                        <CardDescription>La primera foto es tu foto de perfil. Puedes subir hasta 6 fotos.</CardDescription>
+                        <CardTitle>Fotos ({photos.length}/6)</CardTitle>
                     </CardHeader>
-                    <CardContent className="grid grid-cols-3 gap-4">
-                        {photos.map((photo, i) => (
-                             <div key={i} className="relative aspect-square group">
-                                <Image 
-                                    src={photo} 
-                                    alt={`Tu foto ${i + 1}`} 
-                                    fill
-                                    className="rounded-lg object-cover"
-                                />
-                                {i === 0 && (
-                                    <div className="absolute top-1 left-1 bg-primary text-primary-foreground p-1 rounded-full text-xs flex items-center gap-1">
-                                        <Star className="h-3 w-3" />
-                                    </div>
-                                )}
-                                <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity rounded-lg flex flex-col items-center justify-center gap-1">
-                                    {i !== 0 && (
-                                        <Button size="sm" variant="ghost" className="text-white hover:bg-white/20 h-auto p-1" onClick={() => setAsProfilePicture(photo)}>
-                                            <Star className="h-4 w-4 mr-1"/>
-                                            Principal
+                    <CardContent className="space-y-4">
+                        <div className="grid grid-cols-3 gap-3">
+                            {photos.map((photo, index) => (
+                                <div key={index} className="relative aspect-square rounded-lg overflow-hidden group">
+                                    <Image src={photo} alt={`Foto ${index + 1}`} fill className="object-cover" />
+                                    <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                                        {index > 0 && (
+                                            <Button size="sm" variant="secondary" onClick={() => movePhoto(index, index - 1)}>
+                                                ←
+                                            </Button>
+                                        )}
+                                        <Button size="sm" variant="destructive" onClick={() => removePhoto(index)}>
+                                            <X className="h-4 w-4" />
                                         </Button>
+                                        {index < photos.length - 1 && (
+                                            <Button size="sm" variant="secondary" onClick={() => movePhoto(index, index + 1)}>
+                                                →
+                                            </Button>
+                                        )}
+                                    </div>
+                                    {index === 0 && (
+                                        <Badge className="absolute top-2 left-2">Principal</Badge>
                                     )}
-                                    <Button size="sm" variant="ghost" className="text-white hover:bg-white/20 h-auto p-1" onClick={() => deletePhoto(photo)}>
-                                        <Trash2 className="h-4 w-4 mr-1"/>
-                                        Eliminar
-                                    </Button>
                                 </div>
-                            </div>
-                        ))}
-                         {photos.length < 6 && (
-                            <div 
-                                className="relative aspect-square flex items-center justify-center border-2 border-dashed rounded-lg cursor-pointer hover:border-primary hover:bg-secondary"
-                                onClick={triggerFileUpload}
-                            >
-                                <div className="text-center text-muted-foreground">
-                                    <Upload className="h-8 w-8 mx-auto"/>
-                                    <span>Añadir foto</span>
-                                </div>
-                                <input
+                            ))}
+                        </div>
+
+                        {photos.length < 6 && (
+                            <div>
+                                <Input
                                     type="file"
-                                    ref={fileInputRef}
+                                    accept="image/*"
                                     multiple
-                                    accept="image/png, image/jpeg, image/webp"
-                                    className="hidden"
                                     onChange={handlePhotoUpload}
+                                    disabled={uploading}
+                                    className="hidden"
+                                    id="photo-upload"
                                 />
+                                <Label htmlFor="photo-upload">
+                                    <div className="border-2 border-dashed rounded-lg p-6 text-center cursor-pointer hover:border-primary transition-colors">
+                                        {uploading ? (
+                                            <Loader2 className="h-8 w-8 animate-spin mx-auto mb-2" />
+                                        ) : (
+                                            <Upload className="h-8 w-8 mx-auto mb-2" />
+                                        )}
+                                        <p className="text-sm text-muted-foreground">
+                                            {uploading ? "Subiendo..." : "Click para subir fotos"}
+                                        </p>
+                                    </div>
+                                </Label>
                             </div>
                         )}
                     </CardContent>
                 </Card>
 
                 <Card>
-                    <CardHeader><CardTitle>Sobre mí</CardTitle></CardHeader>
-                    <CardContent className="space-y-4">
-                        <div className="space-y-2">
-                            <Label htmlFor="name">Tu nombre</Label>
-                            <Input id="name" value={name} onChange={(e) => setName(e.target.value)} placeholder='¿Cómo te llamas?' />
-                        </div>
-                        <div className="space-y-2">
-                            <Label htmlFor="city">Tu ciudad</Label>
-                            <Input id="city" value={city} onChange={(e) => setCity(e.target.value)} placeholder='Ej: Madrid, España' />
-                        </div>
-                         <div className="space-y-2">
-                            <Label htmlFor="status">Tu estado</Label>
-                            <Input id="status" value={status} onChange={(e) => setStatus(e.target.value)} placeholder='Ej: Buscando algo serio y real ✨' />
-                        </div>
-                         <div className="space-y-2">
-                            <Label htmlFor="bio">Tu biografía</Label>
-                            <Textarea id="bio" value={bio} onChange={(e) => setBio(e.target.value)} placeholder='Cuéntale a la gente un poco sobre ti...' rows={4}/>
-                        </div>
-                    </CardContent>
-                </Card>
-                
-                <Card>
-                    <CardHeader><CardTitle>Información Básica</CardTitle></CardHeader>
-                    <CardContent className="space-y-4">
-                        <div className="space-y-2">
-                            <Label>Signo Zodiacal</Label>
-                            <Select value={zodiacSign} onValueChange={setZodiacSign}>
-                                <SelectTrigger><SelectValue placeholder="Selecciona tu signo" /></SelectTrigger>
-                                <SelectContent><ScrollArea className="h-72">{zodiacSigns.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}</ScrollArea></SelectContent>
-                            </Select>
-                        </div>
-                         <div className="space-y-2">
-                            <Label>Nivel de estudios</Label>
-                             <Select value={education} onValueChange={setEducation}>
-                                <SelectTrigger><SelectValue placeholder="Selecciona tu nivel de estudios" /></SelectTrigger>
-                                <SelectContent>{educationLevels.map(e => <SelectItem key={e} value={e}>{e}</SelectItem>)}</SelectContent>
-                            </Select>
-                        </div>
-                    </CardContent>
-                </Card>
-
-                 <Card>
-                    <CardHeader><CardTitle>Estilo de Vida</CardTitle></CardHeader>
-                    <CardContent className="space-y-4">
-                        <div className="space-y-2">
-                            <Label>Tabaco</Label>
-                             <Select value={smoking} onValueChange={setSmoking}>
-                                <SelectTrigger><SelectValue placeholder="¿Fumas?" /></SelectTrigger>
-                                <SelectContent>{lifestyleOptions.smoking.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent>
-                            </Select>
-                        </div>
-                        <div className="space-y-2">
-                            <Label>Alcohol</Label>
-                             <Select value={drinking} onValueChange={setDrinking}>
-                                <SelectTrigger><SelectValue placeholder="¿Bebes alcohol?" /></SelectTrigger>
-                                <SelectContent>{lifestyleOptions.drinking.map(d => <SelectItem key={d} value={d}>{d}</SelectItem>)}</SelectContent>
-                            </Select>
-                        </div>
-                         <div className="space-y-2">
-                            <Label>Hijos</Label>
-                             <Select value={children} onValueChange={setChildren}>
-                                <SelectTrigger><SelectValue placeholder="¿Tienes o quieres hijos?" /></SelectTrigger>
-                                <SelectContent>{lifestyleOptions.children.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent>
-                            </Select>
-                        </div>
-                         <div className="space-y-2">
-                            <Label>Religión</Label>
-                             <Select value={religion} onValueChange={setReligion}>
-                                <SelectTrigger><SelectValue placeholder="¿Cuál es tu religión?" /></SelectTrigger>
-                                <SelectContent>{lifestyleOptions.religion.map(r => <SelectItem key={r} value={r}>{r}</SelectItem>)}</SelectContent>
-                            </Select>
-                        </div>
-                    </CardContent>
-                </Card>
-
-                 <Card>
-                    <CardHeader className="flex flex-row items-center justify-between">
-                        <div>
-                            <CardTitle className="flex items-center gap-2"><UserCheck className="h-5 w-5"/> Guía Personal</CardTitle>
-                            <CardDescription>Ayuda a otros a entender cómo te comunicas. (Máx. 3)</CardDescription>
-                        </div>
-                        <Dialog>
-                            <DialogTrigger asChild>
-                                <Button variant="ghost" size="icon"><Edit className="h-4 w-4"/></Button>
-                            </DialogTrigger>
-                            <DialogContent className="max-w-md">
-                                <DialogHeader>
-                                    <DialogTitle>Selecciona tu Guía Personal</DialogTitle>
-                                </DialogHeader>
-                                <ScrollArea className="max-h-80 -mx-4 px-4">
-                                    <div className="flex flex-col gap-2 py-4">
-                                    {allPersonalGuideOptions.map(option => (
-                                        <button key={option.title} onClick={() => toggleGuideSelection(option)} className={`p-3 rounded-md text-left ${personalGuide.some(g => g.title === option.title) ? 'bg-primary/20' : 'bg-secondary'}`}>
-                                            <p className="font-semibold">{option.title}</p>
-                                            <p className="text-sm text-muted-foreground">{option.description}</p>
-                                        </button>
-                                    ))}
-                                    </div>
-                                </ScrollArea>
-                                 <DialogClose asChild><Button>Hecho</Button></DialogClose>
-                            </DialogContent>
-                        </Dialog>
+                    <CardHeader>
+                        <CardTitle>Información Básica</CardTitle>
                     </CardHeader>
-                    <CardContent className="space-y-2">
-                        {personalGuide.length > 0 ? personalGuide.map(g => (
-                            <div key={g.title} className="p-3 rounded-lg bg-secondary">
-                                <p className="font-semibold text-sm">{g.title}</p>
-                                <p className="text-xs text-muted-foreground">{g.description}</p>
+                    <CardContent className="space-y-4">
+                        <div className="space-y-2">
+                            <Label htmlFor="displayName">Nombre</Label>
+                            <Input
+                                id="displayName"
+                                value={displayName}
+                                onChange={(e) => setDisplayName(e.target.value)}
+                                placeholder="Tu nombre"
+                            />
+                        </div>
+
+                        <div className="space-y-2">
+                            <Label htmlFor="city">Ciudad</Label>
+                            <Input
+                                id="city"
+                                value={city}
+                                onChange={(e) => setCity(e.target.value)}
+                                placeholder="Madrid, España"
+                            />
+                        </div>
+
+                        <div className="space-y-2">
+                            <Label htmlFor="status">Estado</Label>
+                            <Input
+                                id="status"
+                                value={status}
+                                onChange={(e) => setStatus(e.target.value)}
+                                placeholder="Conociendo gente nueva"
+                                maxLength={50}
+                            />
+                        </div>
+
+                        <div className="space-y-2">
+                            <Label htmlFor="bio">Biografía</Label>
+                            <Textarea
+                                id="bio"
+                                value={bio}
+                                onChange={(e) => setBio(e.target.value)}
+                                placeholder="Cuéntanos sobre ti..."
+                                rows={4}
+                                maxLength={500}
+                            />
+                            <p className="text-xs text-muted-foreground text-right">
+                                {bio.length}/500
+                            </p>
+                        </div>
+                    </CardContent>
+                </Card>
+
+                <Card>
+                    <CardHeader>
+                        <CardTitle>Detalles</CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                        <div className="grid grid-cols-2 gap-4">
+                            <div className="space-y-2">
+                                <Label>Signo Zodiacal</Label>
+                                <Select value={zodiacSign} onValueChange={setZodiacSign}>
+                                    <SelectTrigger>
+                                        <SelectValue placeholder="Seleccionar" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {zodiacSigns.map(sign => (
+                                            <SelectItem key={sign} value={sign}>{sign}</SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
                             </div>
-                        )) : <p className="text-sm text-muted-foreground">Añade guías para mejorar la comunicación.</p>}
+
+                            <div className="space-y-2">
+                                <Label>Educación</Label>
+                                <Select value={education} onValueChange={setEducation}>
+                                    <SelectTrigger>
+                                        <SelectValue placeholder="Seleccionar" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {educationLevels.map(level => (
+                                            <SelectItem key={level} value={level}>{level}</SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-4">
+                            <div className="space-y-2">
+                                <Label>Tabaco</Label>
+                                <Select value={smoking} onValueChange={setSmoking}>
+                                    <SelectTrigger>
+                                        <SelectValue placeholder="Seleccionar" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {lifestyleOptions.smoking.map(option => (
+                                            <SelectItem key={option} value={option}>{option}</SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                            </div>
+
+                            <div className="space-y-2">
+                                <Label>Alcohol</Label>
+                                <Select value={drinking} onValueChange={setDrinking}>
+                                    <SelectTrigger>
+                                        <SelectValue placeholder="Seleccionar" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {lifestyleOptions.drinking.map(option => (
+                                            <SelectItem key={option} value={option}>{option}</SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-4">
+                            <div className="space-y-2">
+                                <Label>Hijos</Label>
+                                <Select value={children} onValueChange={setChildren}>
+                                    <SelectTrigger>
+                                        <SelectValue placeholder="Seleccionar" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {lifestyleOptions.children.map(option => (
+                                            <SelectItem key={option} value={option}>{option}</SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                            </div>
+
+                            <div className="space-y-2">
+                                <Label>Religión</Label>
+                                <Select value={religion} onValueChange={setReligion}>
+                                    <SelectTrigger>
+                                        <SelectValue placeholder="Seleccionar" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {lifestyleOptions.religion.map(option => (
+                                            <SelectItem key={option} value={option}>{option}</SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                        </div>
                     </CardContent>
                 </Card>
 
                 <Card>
-                    <CardHeader className="flex flex-row items-center justify-between">
-                        <div>
-                            <CardTitle>Intereses</CardTitle>
-                            <CardDescription>Selecciona hasta 10.</CardDescription>
-                        </div>
-                        <Dialog>
-                            <DialogTrigger asChild>
-                                <Button variant="ghost" size="icon"><Edit className="h-4 w-4"/></Button>
-                            </DialogTrigger>
-                            <DialogContent className="max-w-md">
-                                <DialogHeader>
-                                <DialogTitle>Selecciona tus intereses</DialogTitle>
-                                </DialogHeader>
-                                <ScrollArea className="max-h-80 -mx-4 px-4">
-                                <div className="flex flex-wrap gap-2 py-4">
-                                {allInterests.map(interest => (
-                                    <button key={interest} onClick={() => toggleSelection(interest, interests, setInterests, 10)}>
-                                        <Badge variant={interests.includes(interest) ? 'default' : 'secondary'} className="text-base py-1 px-3 cursor-pointer">
-                                            {interest}
-                                            {interests.includes(interest) && <Check className="ml-2 h-4 w-4"/>}
-                                        </Badge>
-                                    </button>
-                                ))}
-                                </div>
-                                </ScrollArea>
-                                <DialogClose asChild><Button>Hecho</Button></DialogClose>
-                            </DialogContent>
-                        </Dialog>
+                    <CardHeader>
+                        <CardTitle>Intereses (hasta 10)</CardTitle>
                     </CardHeader>
-                    <CardContent className="flex flex-wrap gap-2">
-                        {interests.length > 0 ? interests.map(i => <Badge key={i}>{i}</Badge>) : <p className="text-sm text-muted-foreground">Añade tus intereses para conectar mejor.</p>}
-                    </CardContent>
-                </Card>
-                <Card>
-                     <CardHeader className="flex flex-row items-center justify-between">
-                        <div>
-                            <CardTitle>Valores</CardTitle>
-                            <CardDescription>Selecciona hasta 5.</CardDescription>
+                    <CardContent>
+                        <div className="flex flex-wrap gap-2">
+                            {allInterests.map(interest => (
+                                <Badge
+                                    key={interest}
+                                    variant={interests.includes(interest) ? "default" : "outline"}
+                                    className="cursor-pointer"
+                                    onClick={() => toggleInterest(interest)}
+                                >
+                                    {interest}
+                                </Badge>
+                            ))}
                         </div>
-                        <Dialog>
-                            <DialogTrigger asChild>
-                                <Button variant="ghost" size="icon"><Edit className="h-4 w-4"/></Button>
-                            </DialogTrigger>
-                            <DialogContent className="max-w-md">
-                                <DialogHeader>
-                                <DialogTitle>Selecciona tus valores</DialogTitle>
-                                </DialogHeader>
-                                <ScrollArea className="max-h-80 -mx-4 px-4">
-                                    <div className="flex flex-wrap gap-2 py-4">
-                                    {allValues.map(value => (
-                                        <button key={value} onClick={() => toggleSelection(value, values, setValues, 5)}>
-                                            <Badge variant={values.includes(value) ? 'default' : 'secondary'} className="text-base py-1 px-3 cursor-pointer">
-                                                {value}
-                                                {values.includes(value) && <Check className="ml-2 h-4 w-4"/>}
-                                            </Badge>
-                                        </button>
-                                    ))}
-                                    </div>
-                                </ScrollArea>
-                                 <DialogClose asChild><Button>Hecho</Button></DialogClose>
-                            </DialogContent>
-                        </Dialog>
-                    </CardHeader>
-                    <CardContent className="flex flex-wrap gap-2">
-                        {values.length > 0 ? values.map(v => <Badge variant="secondary" key={v}>{v}</Badge>) : <p className="text-sm text-muted-foreground">Tus valores nos ayudan a encontrar 'matches' compatibles.</p>}
-                    </CardContent>
-                </Card>
-                
-                <Card>
-                     <CardHeader className="flex flex-row items-center justify-between">
-                        <div>
-                            <CardTitle className="flex items-center gap-2"><Music className="h-5 w-5"/> Gustos Musicales</CardTitle>
-                            <CardDescription>Selecciona hasta 5 géneros.</CardDescription>
-                        </div>
-                        <Dialog>
-                            <DialogTrigger asChild>
-                                <Button variant="ghost" size="icon"><Edit className="h-4 w-4"/></Button>
-                            </DialogTrigger>
-                            <DialogContent className="max-w-md">
-                                <DialogHeader>
-                                <DialogTitle>Selecciona tus gustos musicales</DialogTitle>
-                                </DialogHeader>
-                                <ScrollArea className="max-h-80 -mx-4 px-4">
-                                    <div className="flex flex-wrap gap-2 py-4">
-                                    {allMusicGenres.map(genre => (
-                                        <button key={genre} onClick={() => toggleSelection(genre, musicGenres, setMusicGenres, 5)}>
-                                            <Badge variant={musicGenres.includes(genre) ? 'default' : 'secondary'} className="text-base py-1 px-3 cursor-pointer">
-                                                {genre}
-                                                {musicGenres.includes(genre) && <Check className="ml-2 h-4 w-4"/>}
-                                            </Badge>
-                                        </button>
-                                    ))}
-                                    </div>
-                                </ScrollArea>
-                                 <DialogClose asChild><Button>Hecho</Button></DialogClose>
-                            </DialogContent>
-                        </Dialog>
-                    </CardHeader>
-                    <CardContent className="flex flex-wrap gap-2">
-                        {musicGenres.length > 0 ? musicGenres.map(genre => <Badge variant="outline" key={genre}>{genre}</Badge>) : <p className="text-sm text-muted-foreground">Añade tu música para encontrar gente con tu misma vibra.</p>}
+                        <p className="text-xs text-muted-foreground mt-2">
+                            {interests.length}/10 seleccionados
+                        </p>
                     </CardContent>
                 </Card>
 
+                <Card>
+                    <CardHeader>
+                        <CardTitle>Valores (hasta 5)</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <div className="flex flex-wrap gap-2">
+                            {allValues.map(value => (
+                                <Badge
+                                    key={value}
+                                    variant={values.includes(value) ? "default" : "outline"}
+                                    className="cursor-pointer"
+                                    onClick={() => toggleValue(value)}
+                                >
+                                    {value}
+                                </Badge>
+                            ))}
+                        </div>
+                        <p className="text-xs text-muted-foreground mt-2">
+                            {values.length}/5 seleccionados
+                        </p>
+                    </CardContent>
+                </Card>
 
+                <Card>
+                    <CardHeader>
+                        <CardTitle>Gustos Musicales (hasta 5)</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <div className="flex flex-wrap gap-2">
+                            {allMusicGenres.map(genre => (
+                                <Badge
+                                    key={genre}
+                                    variant={musicGenres.includes(genre) ? "default" : "outline"}
+                                    className="cursor-pointer"
+                                    onClick={() => toggleMusicGenre(genre)}
+                                >
+                                    {genre}
+                                </Badge>
+                            ))}
+                        </div>
+                        <p className="text-xs text-muted-foreground mt-2">
+                            {musicGenres.length}/5 seleccionados
+                        </p>
+                    </CardContent>
+                </Card>
             </main>
         </div>
     );
