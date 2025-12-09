@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState } from "react";
@@ -9,42 +8,100 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Link from "next/link";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Camera, Users, Heart, Shield } from "lucide-react";
+import { Camera } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
-
-const GoogleIcon = (props: React.SVGProps<SVGSVGElement>) => (
-  <svg {...props} role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-    <title>Google</title>
-    <path d="M12.48 10.92v3.28h7.84c-.24 1.84-.85 3.18-1.73 4.1-1.02 1.02-2.3 1.62-3.96 1.62-3.33 0-6.03-2.7-6.03-6.03s2.7-6.03 6.03-6.03c1.87 0 3.13.77 3.9 1.5l2.73-2.73C18.74 1.94 15.96 1 12.48 1 7.02 1 3 5.02 3 9.5s4.02 8.5 9.48 8.5c2.9 0 5.2-1 6.84-2.62 1.73-1.68 2.34-4.27 2.34-6.42 0-.84-.08-1.48-.18-2.08h-9.8z" fill="currentColor"/>
-  </svg>
-);
-
-const AppleIcon = (props: React.SVGProps<SVGSVGElement>) => (
-  <svg {...props} role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-    <title>Apple</title>
-    <path d="M12.15,2.5a5.17,5.17,0,0,0-4.3,2.44A5.22,5.22,0,0,0,5.31,9.78c0,3.13,2,6,5.13,6,1,0,2.18-.4,3.34-1.2a.5.5,0,0,1,.65.65c-1.31,1-2.8,1.6-4.29,1.6-3.8,0-6.7-3.06-6.7-7.22,0-2.3,1.15-4.43,3.2-5.59A5.4,5.4,0,0,1,12.15,2.5Zm.28-2.5C9.4,0,7,2.1,7,5.18,7,6.86,7.85,8.41,9.15,9.23a4.84,4.84,0,0,1,3.42.33,4.55,4.55,0,0,0,3.31,1.49c3.15,0,5.12-2.36,5.12-5.31,0-2.27-1.55-4.21-3.7-4.74A7.2,7.2,0,0,0,12.43,0Z" fill="currentColor"/>
-  </svg>
-);
+import { authService } from "@/lib/firebase/auth-service";
+import { profileService } from "@/lib/firebase/profile-service";
+import { preferencesService } from "@/lib/firebase/preferences-service";
+import { referralService } from "@/lib/firebase/referral-service";
+import { useToast } from "@/hooks/use-toast";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 type Step = "initial" | "onboarding" | "verification" | "complete";
 
 export default function SignupPage() {
   const [step, setStep] = useState<Step>("initial");
   const [gender, setGender] = useState<"woman" | "man" | "non-binary" | "">("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [displayName, setDisplayName] = useState("");
+  const [age, setAge] = useState("");
+  const [city, setCity] = useState("");
+  const [selectedInterests, setSelectedInterests] = useState<string[]>([]);
+  const [selectedValues, setSelectedValues] = useState<string[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
   const router = useRouter();
+  const { toast } = useToast();
 
-  const handleInitialSubmit = (e: React.FormEvent) => {
+  const handleInitialSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!gender) {
+      setError("Por favor selecciona tu género");
+      return;
+    }
     setStep("onboarding");
   };
-  
-  const handleOnboardingSubmit = (e: React.FormEvent) => {
+
+  const handleOnboardingSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setStep("verification");
+    setLoading(true);
+    setError("");
+
+    try {
+      // Create user account
+      const user = await authService.signUp(email, password, displayName);
+
+      // Create profile in Firestore
+      await profileService.createProfile(user.uid, {
+        email,
+        displayName,
+        age: parseInt(age),
+        gender: gender as any,
+        city,
+        photos: [],
+        interests: selectedInterests,
+        values: selectedValues,
+        musicGenres: [],
+        status: "Conociendo gente nueva",
+        bio: "",
+        isVerified: false,
+        verificationStatus: "none",
+        seeking: "all",
+        uid: user.uid,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        lastActive: new Date(),
+        isPremium: false,
+        isActive: true,
+      });
+
+      // Create default preferences
+      await preferencesService.createPreferences(user.uid);
+
+      // Create referral code
+      await referralService.createReferralCode(user.uid);
+
+      toast({
+        title: "¡Cuenta creada!",
+        description: "Por favor verifica tu email para continuar.",
+      });
+
+      setStep("verification");
+    } catch (error: any) {
+      console.error("Signup error:", error);
+      setError(error.message || "Error al crear la cuenta");
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleVerificationSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    toast({
+      title: "Verificación pendiente",
+      description: "La funcionalidad de verificación por selfie se implementará próximamente. Por ahora puedes explorar la app.",
+    });
     router.push("/discover");
   };
 
@@ -55,6 +112,25 @@ export default function SignupPage() {
     complete: 100
   }[step];
 
+  const toggleInterest = (interest: string) => {
+    setSelectedInterests(prev =>
+      prev.includes(interest)
+        ? prev.filter(i => i !== interest)
+        : prev.length < 10
+          ? [...prev, interest]
+          : prev
+    );
+  };
+
+  const toggleValue = (value: string) => {
+    setSelectedValues(prev =>
+      prev.includes(value)
+        ? prev.filter(v => v !== value)
+        : prev.length < 5
+          ? [...prev, value]
+          : prev
+    );
+  };
 
   const renderStep = () => {
     switch (step) {
@@ -62,12 +138,62 @@ export default function SignupPage() {
         return (
           <form onSubmit={handleInitialSubmit} className="space-y-4">
             <div className="space-y-2">
+              <Label htmlFor="name">Tu nombre</Label>
+              <Input
+                id="name"
+                type="text"
+                placeholder="Nombre"
+                value={displayName}
+                onChange={(e) => setDisplayName(e.target.value)}
+                required
+              />
+            </div>
+            <div className="space-y-2">
               <Label htmlFor="email">Correo electrónico</Label>
-              <Input id="email" type="email" placeholder="tu@ejemplo.com" required />
+              <Input
+                id="email"
+                type="email"
+                placeholder="tu@ejemplo.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+              />
             </div>
             <div className="space-y-2">
               <Label htmlFor="password">Contraseña</Label>
-              <Input id="password" type="password" required />
+              <Input
+                id="password"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                minLength={6}
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="age">Edad</Label>
+                <Input
+                  id="age"
+                  type="number"
+                  min="18"
+                  max="100"
+                  value={age}
+                  onChange={(e) => setAge(e.target.value)}
+                  required
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="city">Ciudad</Label>
+                <Input
+                  id="city"
+                  type="text"
+                  placeholder="Madrid, España"
+                  value={city}
+                  onChange={(e) => setCity(e.target.value)}
+                  required
+                />
+              </div>
             </div>
             <div className="space-y-2">
               <Label>Soy</Label>
@@ -84,45 +210,70 @@ export default function SignupPage() {
                   <RadioGroupItem value="man" id="man" className="sr-only" />
                   Hombre
                 </Label>
-                 <Label htmlFor="non-binary" className="flex flex-col items-center justify-center rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary cursor-pointer w-full text-sm">
+                <Label htmlFor="non-binary" className="flex flex-col items-center justify-center rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary cursor-pointer w-full text-sm">
                   <RadioGroupItem value="non-binary" id="non-binary" className="sr-only" />
                   No binario
                 </Label>
               </RadioGroup>
             </div>
-            <Button type="submit" className="w-full font-bold" disabled={!gender}>
+            <Button type="submit" className="w-full font-bold" disabled={!gender || loading}>
               Continuar
             </Button>
           </form>
         );
       case "onboarding":
+        const allInterests = ['Viajar', 'Yoga', 'Arte', 'Música', 'Cocinar', 'Leer', 'Deportes', 'Cine', 'Fotografía', 'Bailar'];
+        const allValues = ['Honestidad', 'Amabilidad', 'Crecimiento', 'Lealtad', 'Humor', 'Aventura', 'Respeto', 'Creatividad'];
+
         return (
-           <form onSubmit={handleOnboardingSubmit} className="space-y-4 text-left">
+          <form onSubmit={handleOnboardingSubmit} className="space-y-4 text-left">
             <div className="space-y-2">
-              <Label>¿Cuáles son tus intereses? (Selecciona hasta 5)</Label>
-               <div className="flex flex-wrap gap-2">
-                 {['Viajar', 'Yoga', 'Arte', 'Música', 'Cocinar', 'Leer'].map(item => <Button type="button" key={item} variant="outline" size="sm">{item}</Button>)}
+              <Label>¿Cuáles son tus intereses? (Selecciona hasta 10)</Label>
+              <div className="flex flex-wrap gap-2">
+                {allInterests.map(item => (
+                  <Button
+                    type="button"
+                    key={item}
+                    variant={selectedInterests.includes(item) ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => toggleInterest(item)}
+                  >
+                    {item}
+                  </Button>
+                ))}
               </div>
             </div>
-             <div className="space-y-2">
-              <Label>¿Qué valores son importantes para ti?</Label>
-               <div className="flex flex-wrap gap-2">
-                 {['Honestidad', 'Amabilidad', 'Crecimiento', 'Lealtad', 'Humor'].map(item => <Button type="button" key={item} variant="outline" size="sm">{item}</Button>)}
+            <div className="space-y-2">
+              <Label>¿Qué valores son importantes para ti? (Hasta 5)</Label>
+              <div className="flex flex-wrap gap-2">
+                {allValues.map(item => (
+                  <Button
+                    type="button"
+                    key={item}
+                    variant={selectedValues.includes(item) ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => toggleValue(item)}
+                  >
+                    {item}
+                  </Button>
+                ))}
               </div>
             </div>
-            <Button type="submit" className="w-full font-bold">Siguiente Paso</Button>
+            <Button type="submit" className="w-full font-bold" disabled={loading}>
+              {loading ? "Creando cuenta..." : "Crear Cuenta"}
+            </Button>
           </form>
         );
       case "verification":
         return (
           <div className="text-center space-y-4">
-              <div className="mx-auto bg-primary/20 rounded-full h-20 w-20 flex items-center justify-center">
-                <Camera className="h-10 w-10 text-primary" />
-              </div>
-              <p>Para la seguridad de todos, requerimos una rápida verificación con selfie. Esto no aparecerá en tu perfil.</p>
-              <Button onClick={handleVerificationSubmit} className="w-full font-bold">
-                Abrir Cámara
-              </Button>
+            <div className="mx-auto bg-primary/20 rounded-full h-20 w-20 flex items-center justify-center">
+              <Camera className="h-10 w-10 text-primary" />
+            </div>
+            <p>Para la seguridad de todos, te pediremos una verificación con selfie más adelante. Por ahora, explora la app.</p>
+            <Button onClick={handleVerificationSubmit} className="w-full font-bold">
+              Explorar Alora
+            </Button>
           </div>
         );
     }
@@ -154,30 +305,19 @@ export default function SignupPage() {
         <Progress value={progress} className="w-full mt-4" />
       </CardHeader>
       <CardContent>
-        {renderStep()}
-        {step === "initial" && (
-          <>
-            <div className="relative my-6">
-              <div className="absolute inset-0 flex items-center">
-                <span className="w-full border-t" />
-              </div>
-              <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-card px-2 text-muted-foreground">O continuar con</span>
-              </div>
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <Button variant="outline"><GoogleIcon className="mr-2 h-4 w-4" /> Google</Button>
-              <Button variant="outline"><AppleIcon className="mr-2 h-4 w-4" /> Apple</Button>
-            </div>
-          </>
+        {error && (
+          <Alert variant="destructive" className="mb-4">
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
         )}
+        {renderStep()}
       </CardContent>
       <CardFooter className="justify-center text-sm">
         <p>
-            ¿Ya tienes una cuenta?{" "}
-            <Link href="/login" className="font-semibold text-primary hover:underline">
-              Inicia sesión
-            </Link>
+          ¿Ya tienes una cuenta?{" "}
+          <Link href="/login" className="font-semibold text-primary hover:underline">
+            Inicia sesión
+          </Link>
         </p>
       </CardFooter>
     </Card>
