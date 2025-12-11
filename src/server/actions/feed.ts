@@ -38,10 +38,29 @@ export async function getDynamicFeed(currentUserId: string): Promise<{ profile: 
             })
         );
 
-        // 4. Sort by Intelligent Score
-        scoredCandidates.sort((a, b) => b.score.total - a.score.total);
+        // 3.5 Apply Plan Boosts
+        const boostMultipliers: Record<string, number> = {
+            'free': 1.0,
+            'plus': 1.05, // 5% boost
+            'premium': 1.12 // 12% boost
+        };
 
-        return scoredCandidates;
+        const finalCandidates = scoredCandidates.map(c => {
+            const plan = c.profile.plan || 'free';
+            const boost = boostMultipliers[plan] || 1.0;
+            return {
+                ...c,
+                score: {
+                    ...c.score,
+                    total: Math.round(c.score.total * boost)
+                }
+            };
+        });
+
+        // 4. Sort by Intelligent Score
+        finalCandidates.sort((a, b) => b.score.total - a.score.total);
+
+        return finalCandidates;
 
     } catch (error) {
         console.error("Error generating dynamic feed", error);

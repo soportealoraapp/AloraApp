@@ -12,6 +12,7 @@ export interface User {
 }
 
 export interface UserProfile extends User {
+    plan?: 'free' | 'plus' | 'premium';
     gender: 'woman' | 'man' | 'non-binary';
     seeking: 'women' | 'men' | 'all';
     age: number;

@@ -6,6 +6,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useMemo } from "react";
 import { profileInsightsGenerator } from "@/ai/profile-insights/generator";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { SectionTitle } from "@/components/ui/custom/SectionTitle";
 
 export default function AnalyticsPage() {
@@ -96,6 +97,23 @@ export default function AnalyticsPage() {
                                 </BarChart>
                             </ResponsiveContainer>
                         </div>
+                    </CardContent>
+                </Card>
+
+                {/* Upgrade Prompt */}
+                <Card className="col-span-1 md:col-span-2 border-2 border-pink-500 bg-gradient-to-r from-pink-50 to-purple-50 cursor-pointer hover:shadow-2xl transition-all">
+                    <CardContent className="flex flex-col md:flex-row items-center justify-between p-6">
+                        <Button asChild className="w-full bg-transparent hover:bg-transparent shadow-none text-left p-0 h-auto">
+                            <a href="/settings/subscription" className="flex flex-col md:flex-row items-center w-full gap-4">
+                                <div className="space-y-1">
+                                    <h3 className="text-xl font-bold text-gray-900">¿Quieres insights más profundos?</h3>
+                                    <p className="text-gray-600">Desbloquea el análisis de comportamiento y matchmaking predictivo con Premium.</p>
+                                </div>
+                                <div className="bg-pink-500 text-white px-6 py-2 rounded-full font-bold whitespace-nowrap">
+                                    Ver Planes
+                                </div>
+                            </a>
+                        </Button>
                     </CardContent>
                 </Card>
             </div>
