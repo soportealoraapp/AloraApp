@@ -44,3 +44,15 @@ export async function claimDailyBonus(userId: string) {
         lastUpdated: FieldValue.serverTimestamp()
     }, { merge: true });
 }
+
+export async function rewardChatAction(userId: string, action: 'icebreaker' | 'revival' | 'healthy_chat') {
+    let points = 0;
+    switch (action) {
+        case 'icebreaker': points = 3; break;
+        case 'revival': points = 10; break;
+        case 'healthy_chat': points = 5; break;
+    }
+    if (points > 0) {
+        await addHeartScore(userId, points, `Chat Action: ${action}`);
+    }
+}
