@@ -45,7 +45,7 @@ export async function claimDailyBonus(userId: string) {
     }, { merge: true });
 }
 
-export async function rewardChatAction(userId: string, action: 'icebreaker' | 'revival' | 'healthy_chat' | 'voice_message' | 'host_event' | 'attend_event') {
+export async function rewardChatAction(userId: string, action: 'icebreaker' | 'revival' | 'healthy_chat' | 'voice_message' | 'host_event' | 'attend_event' | 'become_guide' | 'ambassador_event') {
     let points = 0;
     switch (action) {
         case 'icebreaker': points = 3; break;
@@ -54,6 +54,8 @@ export async function rewardChatAction(userId: string, action: 'icebreaker' | 'r
         case 'voice_message': points = 5; break;
         case 'host_event': points = 30; break;
         case 'attend_event': points = 20; break;
+        case 'become_guide': points = 100; break;
+        case 'ambassador_event': points = 50; break;
     }
     if (points > 0) {
         await addHeartScore(userId, points, `Chat Action: ${action}`);
