@@ -18,7 +18,7 @@ export interface Badge {
 export interface Mission {
     id: string;
     title: string;
-    type: 'message' | 'like' | 'profile' | 'analytics';
+    type: 'message' | 'like' | 'profile' | 'analytics' | 'social';
     target: number;
     progress: number;
     completed: boolean;
