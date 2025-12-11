@@ -47,7 +47,16 @@ export async function getDynamicFeed(currentUserId: string): Promise<{ profile: 
 
         const finalCandidates = scoredCandidates.map(c => {
             const plan = c.profile.plan || 'free';
-            const boost = boostMultipliers[plan] || 1.0;
+            let boost = boostMultipliers[plan] || 1.0;
+
+            // Phase 5: Gentle Boost for Plus/Premium (Simulated random factor)
+            if (plan === 'plus' || plan === 'premium') {
+                // Random small boost to simulate "Gentle Boost" being active sometimes
+                if (Math.random() > 0.4) {
+                    boost += (plan === 'plus' ? 0.02 : 0.03);
+                }
+            }
+
             return {
                 ...c,
                 score: {

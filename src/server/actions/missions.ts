@@ -1,0 +1,12 @@
+'use server';
+
+import { Mission } from '@/lib/domain/gamification';
+
+export async function getDailyMissions(userId: string): Promise<Mission[]> {
+    // In production, fetch from DB based on user state/plan
+    return [
+        { id: 'm1', title: 'Envía un mensaje', type: 'message', target: 1, progress: 0, completed: false, rewardPoints: 10 },
+        { id: 'm2', title: 'Da 5 likes', type: 'like', target: 5, progress: 2, completed: false, rewardPoints: 5 },
+        { id: 'm3', title: 'Completa tu perfil', type: 'profile', target: 1, progress: 1, completed: true, rewardPoints: 15 },
+    ];
+}
