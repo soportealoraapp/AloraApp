@@ -1,3 +1,5 @@
+'use client';
+
 import {
     collection,
     doc,
@@ -13,29 +15,18 @@ import {
     limit,
 } from 'firebase/firestore';
 import { db } from './config';
-import { Like, Match } from './types';
+import { Like, Match, UserProfile } from './types';
 import { profileService } from './profile-service';
 
 export const matchingService = {
     // Calculate compatibility score
-    calculateCompatibility(user1Profile: any, user2Profile: any): number {
+    calculateCompatibility(user1Profile: UserProfile, user2Profile: UserProfile): number {
         let score = 0;
         let totalWeight = 0;
 
-        // Interests (30%)
-        const interestsWeight = 30;
-        const interestsMatch = user1Profile.interests?.filter((i: string) =>
-            user2Profile.interests?.includes(i)
-        ).length || 0;
-        const interestsScore = user1Profile.interests?.length > 0
-            ? (interestsMatch / user1Profile.interests.length) * interestsWeight
-            : 0;
-        score += interestsScore;
-        totalWeight += interestsWeight;
-
-        // Values (25%)
-        const valuesWeight = 25;
-        const valuesMatch = user1Profile.values?.filter((v: string) =>
+        // 1. Values (30%) - Shared values are critical for long term safety/alignment
+        const valuesWeight = 30;
+        const valuesMatch = user1Profile.values?.filter((v) =>
             user2Profile.values?.includes(v)
         ).length || 0;
         const valuesScore = user1Profile.values?.length > 0
@@ -44,18 +35,29 @@ export const matchingService = {
         score += valuesScore;
         totalWeight += valuesWeight;
 
-        // Lifestyle (15%)
-        const lifestyleWeight = 15;
+        // 2. Interests (25%)
+        const interestsWeight = 25;
+        const interestsMatch = user1Profile.interests?.filter((i) =>
+            user2Profile.interests?.includes(i)
+        ).length || 0;
+        const interestsScore = user1Profile.interests?.length > 0
+            ? (interestsMatch / user1Profile.interests.length) * interestsWeight
+            : 0;
+        score += interestsScore;
+        totalWeight += interestsWeight;
+
+        // 3. Lifestyle (20%) - Smoking, Drinking, Children
+        const lifestyleWeight = 20;
         let lifestyleScore = 0;
-        if (user1Profile.smoking === user2Profile.smoking) lifestyleScore += 5;
-        if (user1Profile.drinking === user2Profile.drinking) lifestyleScore += 5;
-        if (user1Profile.children === user2Profile.children) lifestyleScore += 5;
+        if (user1Profile.smoking === user2Profile.smoking) lifestyleScore += 6.6;
+        if (user1Profile.drinking === user2Profile.drinking) lifestyleScore += 6.6;
+        if (user1Profile.children === user2Profile.children) lifestyleScore += 6.8;
         score += lifestyleScore;
         totalWeight += lifestyleWeight;
 
-        // Music (10%)
+        // 4. Music (10%)
         const musicWeight = 10;
-        const musicMatch = user1Profile.musicGenres?.filter((g: string) =>
+        const musicMatch = user1Profile.musicGenres?.filter((g) =>
             user2Profile.musicGenres?.includes(g)
         ).length || 0;
         const musicScore = user1Profile.musicGenres?.length > 0
@@ -64,15 +66,15 @@ export const matchingService = {
         score += musicScore;
         totalWeight += musicWeight;
 
-        // Education (10%)
-        const educationWeight = 10;
+        // 5. Education (5%)
+        const educationWeight = 5;
         const educationScore = user1Profile.education === user2Profile.education
             ? educationWeight
             : 0;
         score += educationScore;
         totalWeight += educationWeight;
 
-        // Age compatibility (10%)
+        // 6. Age compatibility (10%)
         const ageWeight = 10;
         const ageDiff = Math.abs(user1Profile.age - user2Profile.age);
         const ageScore = ageDiff <= 5 ? ageWeight : ageDiff <= 10 ? ageWeight / 2 : 0;
@@ -80,7 +82,7 @@ export const matchingService = {
         totalWeight += ageWeight;
 
         // Normalize to 0-100
-        return Math.round((score / totalWeight) * 100);
+        return Math.min(100, Math.round((score / totalWeight) * 100));
     },
 
     // Send like
@@ -211,5 +213,15 @@ export const matchingService = {
         }
 
         return null;
+    },
+
+    // Pass profile
+    async sendPass(fromUserId: string, toUserId: string): Promise<void> {
+        const passRef = doc(db, 'passes', `${fromUserId}_${toUserId}`);
+        await setDoc(passRef, {
+            fromUserId,
+            toUserId,
+            createdAt: serverTimestamp(),
+        });
     },
 };

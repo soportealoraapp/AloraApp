@@ -23,7 +23,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 export default function ChatWindowPage() {
     const params = useParams();
     const router = useRouter();
-    const { user } = useAuth();
+    const { user, profile } = useAuth();
     const matchId = params.id as string;
     const { messages, loading, sending, sendMessage, markAsRead } = useChat(matchId);
     const { matches } = useMatches();
@@ -177,16 +177,26 @@ export default function ChatWindowPage() {
             </main>
 
             <div className="border-t bg-background p-4">
-                <ChatInput
-                    onSend={handleSendMessage}
-                    disabled={sending || !otherUserId}
-                    placeholder="Escribe un mensaje..."
-                />
-                {sending && (
-                    <div className="flex items-center justify-center mt-2 text-xs text-muted-foreground">
-                        <Loader2 className="h-3 w-3 animate-spin mr-1" />
-                        Enviando...
+                {messages.length === 0 && profile?.gender !== 'woman' ? (
+                    <div className="flex flex-col items-center justify-center p-4 bg-muted/50 rounded-lg text-center">
+                        <Sparkles className="h-8 w-8 text-primary mb-2" />
+                        <p className="font-semibold text-primary">Las mujeres dan el primer paso</p>
+                        <p className="text-sm text-muted-foreground">Debes esperar a que ella inicie la conversación.</p>
                     </div>
+                ) : (
+                    <>
+                        <ChatInput
+                            onSend={handleSendMessage}
+                            disabled={sending || !otherUserId}
+                            placeholder="Escribe un mensaje..."
+                        />
+                        {sending && (
+                            <div className="flex items-center justify-center mt-2 text-xs text-muted-foreground">
+                                <Loader2 className="h-3 w-3 animate-spin mr-1" />
+                                Enviando...
+                            </div>
+                        )}
+                    </>
                 )}
             </div>
         </div>

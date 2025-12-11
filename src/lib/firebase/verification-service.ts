@@ -12,12 +12,13 @@ import { VerificationRequest } from './types';
 
 export const verificationService = {
     // Submit verification request
-    async submitVerification(userId: string, selfieUrl: string): Promise<string> {
-        const verificationData = {
+    async submitVerification(userId: string, selfieUrl: string, idPhotoUrl: string): Promise<string> {
+        const verificationData: Omit<VerificationRequest, 'id'> = {
             userId,
             selfieUrl,
-            status: 'pending' as const,
-            createdAt: serverTimestamp(),
+            idPhotoUrl,
+            status: 'pending',
+            createdAt: serverTimestamp() as any, // Cast to any to avoid type check issues with FieldValue vs Date
         };
 
         const verificationRef = await addDoc(collection(db, 'verificationRequests'), verificationData);

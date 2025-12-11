@@ -1,0 +1,21 @@
+{
+    "name": "Alora Dating",
+    "short_name": "Alora",
+    "description": "Citas con seguridad y perspectiva femenina",
+    "start_url": "/discover",
+    "display": "standalone",
+    "background_color": "#FDF7F9",
+    "theme_color": "#F48FB1",
+    "icons": [
+        {
+            "src": "/icons/icon-192x192.png",
+            "sizes": "192x192",
+            "type": "image/png"
+        },
+        {
+            "src": "/icons/icon-512x512.png",
+            "sizes": "512x512",
+            "type": "image/png"
+        }
+    ]
+}

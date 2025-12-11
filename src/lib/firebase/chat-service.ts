@@ -25,6 +25,30 @@ export const chatService = {
         text: string,
         type: 'text' | 'icebreaker' = 'text'
     ): Promise<Message> {
+        // --- WOMEN FIRST CHECK ---
+        // 1. Check if there are existing messages in this match
+        const messagesQuery = query(
+            collection(db, 'messages'),
+            where('matchId', '==', matchId),
+            firestoreLimit(1)
+        );
+        const existingMessages = await getDocs(messagesQuery);
+
+        // 2. If no messages (it's the first one), check sender's gender
+        if (existingMessages.empty) {
+            // We need to fetch the profile to check gender. 
+            // Importing profileService here might cause circular deps if not careful, but it is in same lib.
+            // Lazy import or ensuring profileService is independent helps. 
+            // Ideally we pass senderGender as arg, but to be secure we fetch it.
+            const { profileService } = await import('./profile-service');
+            const senderProfile = await profileService.getProfile(senderId);
+
+            if (senderProfile?.gender !== 'woman') {
+                throw new Error("Solo las mujeres pueden iniciar la conversación.");
+            }
+        }
+        // -------------------------
+
         // Moderate message with AI
         const moderationResult = await filterOffensiveMessages({ text });
 

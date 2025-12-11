@@ -54,6 +54,13 @@ export const storageService = {
         return downloadURL;
     },
 
+    // Upload verification ID
+    async uploadVerificationID(userId: string, file: File): Promise<string> {
+        const storageRef = ref(storage, `users/${userId}/verification/id_photo.jpg`);
+        await uploadBytes(storageRef, file);
+        return await getDownloadURL(storageRef);
+    },
+
     // Upload chat image
     async uploadChatImage(matchId: string, file: File): Promise<string> {
         const timestamp = Date.now();

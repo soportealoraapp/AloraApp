@@ -100,6 +100,7 @@ export interface VerificationRequest {
     id: string;
     userId: string;
     selfieUrl: string;
+    idPhotoUrl: string;
     status: 'pending' | 'approved' | 'rejected';
     createdAt: Date;
     reviewedAt?: Date;
