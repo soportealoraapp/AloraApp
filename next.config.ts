@@ -8,7 +8,11 @@ const withPWA = require('next-pwa')({
 });
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  // Hardening & Performance
+  poweredByHeader: false,
+  compress: true, // Gzip by default, Brotli if supported by node/hosting
+  reactStrictMode: true,
+
   typescript: {
     ignoreBuildErrors: true,
   },
@@ -17,7 +21,9 @@ const nextConfig: NextConfig = {
   },
   images: {
     formats: ['image/avif', 'image/webp'],
-    minimumCacheTTL: 60,
+    minimumCacheTTL: 31536000,
+    deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
+    imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
     remotePatterns: [
       {
         protocol: 'https',
@@ -31,8 +37,15 @@ const nextConfig: NextConfig = {
         protocol: 'https',
         hostname: 'firebasestorage.googleapis.com',
       },
+      {
+        protocol: 'https',
+        hostname: '*.googleusercontent.com',
+      }
     ],
   },
+  experimental: {
+    optimizePackageImports: ['lucide-react', 'date-fns', 'framer-motion'],
+  }
 };
 
 export default withPWA(nextConfig);
