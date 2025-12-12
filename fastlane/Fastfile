@@ -1,20 +1,27 @@
 default_platform(:android)
 
 platform :android do
-  desc "Runs all the tests"
-  lane :test do
-    gradle(task: "test")
+  desc "Submit a new Release to Play Store Internal Test Track"
+  lane :internal do
+    gradle(task: "bundleRelease")
+    upload_to_play_store(
+      track: 'internal',
+      aab: 'app/build/outputs/bundle/release/app-release.aab',
+      skip_upload_apk: true,
+      skip_upload_metadata: false,
+      skip_upload_images: false,
+      skip_upload_screenshots: false
+    )
   end
 
-  desc "Submit a new Beta Build to Play Store Internal Test Track"
-  lane :beta do
-    gradle(task: "bundleRelease")
-    upload_to_play_store(track: 'internal')
-  end
-
-  desc "Deploy a new version to the Google Play"
-  lane :deploy do
-    gradle(task: "bundleRelease")
-    upload_to_play_store(track: 'production')
+  desc "Promote Internal to Production"
+  lane :promote_to_prod do
+    upload_to_play_store(
+      track: 'production',
+      track_promote_to: 'production',
+      skip_upload_apk: true,
+      skip_upload_aab: true,
+      rollout: '0.01' # 1% Rollout
+    )
   end
 end
