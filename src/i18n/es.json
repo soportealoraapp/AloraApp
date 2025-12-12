@@ -1,0 +1,18 @@
+{
+    "common": {
+        "welcome": "Bienvenido a Alora",
+        "login": "Iniciar Sesión",
+        "match_found": "¡Es un Match!",
+        "loading": "Cargando..."
+    },
+    "profile": {
+        "edit": "Editar Perfil",
+        "voice_intro": "Intro de Voz",
+        "deep_chemistry": "Química Profunda"
+    },
+    "safety": {
+        "report": "Reportar Usuario",
+        "block": "Bloquear",
+        "safety_center": "Centro de Seguridad"
+    }
+}
