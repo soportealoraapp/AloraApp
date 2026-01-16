@@ -1,75 +1,46 @@
 import { adminDb } from '../admin';
-import { FieldValue } from 'firebase-admin/firestore';
-import { UserProfile, SocialStreak } from '../types';
+import { UserProfile } from '../types';
 
 export const retentionServerService = {
-    async updateStreak(userId: string): Promise<void> {
-        try {
-            const userRef = adminDb.collection('profiles').doc(userId);
-            const userDoc = await userRef.get();
-            const profile = userDoc.data() as UserProfile;
+    async detectUserFatigue(userId: string): Promise<{ isFatigued: boolean; score: number }> {
+        const userSnap = await adminDb.collection('profiles').doc(userId).get();
+        const profile = userSnap.data() as UserProfile;
 
-            const now = new Date();
-            const lastActive = profile.streaks?.lastActiveAt
-                ? (profile.streaks.lastActiveAt instanceof Date ? profile.streaks.lastActiveAt : (profile.streaks.lastActiveAt as any).toDate())
-                : null;
+        if (!profile) return { isFatigued: false, score: 0 };
 
-            let updatedStreak: SocialStreak = profile.streaks || { currentCount: 0, lastActiveAt: now, longestCount: 0 };
+        const lastActiveRaw = profile.lastActive as any;
+        const lastActive = lastActiveRaw?.toDate ? lastActiveRaw.toDate() : new Date(lastActiveRaw || Date.now());
+        const daysSinceActive = (new Date().getTime() - lastActive.getTime()) / (1000 * 3600 * 24);
 
-            if (!lastActive) {
-                updatedStreak.currentCount = 1;
-                updatedStreak.lastActiveAt = now;
-            } else {
-                const diffMs = now.getTime() - lastActive.getTime();
-                const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+        // Fatigue Score Heuristics
+        let fatigueScore = 0;
 
-                if (diffDays === 1) {
-                    // Incremental streak
-                    updatedStreak.currentCount += 1;
-                    updatedStreak.lastActiveAt = now;
-                } else if (diffDays > 1) {
-                    // Streak broken
-                    updatedStreak.currentCount = 1;
-                    updatedStreak.lastActiveAt = now;
-                }
-                // If diffDays === 0, nothing changes (already active today)
-            }
+        // 1. Inactivity decay
+        if (daysSinceActive > 3) fatigueScore += 30;
+        if (daysSinceActive > 7) fatigueScore += 60;
+        if (daysSinceActive > 14) fatigueScore += 100;
 
-            if (updatedStreak.currentCount > (updatedStreak.longestCount || 0)) {
-                updatedStreak.longestCount = updatedStreak.currentCount;
-            }
+        // 2. Interaction decay (Check last 5 days swipes)
+        // ... (simplified for now)
 
-            await userRef.update({
-                streaks: updatedStreak,
-                lastActive: FieldValue.serverTimestamp()
-            });
-
-            // v1.8: Grant reward for streaks (e.g., every 7 days)
-            if (updatedStreak.currentCount > 0 && updatedStreak.currentCount % 7 === 0) {
-                await userRef.update({
-                    totalBoosts: FieldValue.increment(1)
-                });
-
-                await adminDb.collection('system_logs').add({
-                    event: 'streak_reward_granted',
-                    userId,
-                    streak: updatedStreak.currentCount,
-                    reward: 'boost',
-                    timestamp: FieldValue.serverTimestamp()
-                });
-            }
-
-        } catch (error) {
-            console.error('Error updating streak:', error);
-        }
+        return {
+            isFatigued: fatigueScore >= 60,
+            score: fatigueScore
+        };
     },
 
-    async checkMissions(userId: string): Promise<any> {
-        // Simple mock of daily missions
-        return [
-            { id: 'daily_login', title: 'Visita Alora hoy', description: 'Mantén tu racha activa.', completed: true },
-            { id: 'send_icebreaker', title: 'Usa la IA', description: 'Inicia un chat con un rompehielos.', completed: false },
-            { id: 'invite_friend', title: 'Trae un amigo', description: 'Gana un Boost por cada invitado.', completed: false }
-        ];
+    async getWeeklyAnchors(userId: string) {
+        // Fetch personalized hooks to bring user back
+        const circlesSnap = await adminDb.collection('communities').limit(3).get();
+        const eventsSnap = await adminDb.collection('events')
+            .where('status', '==', 'planned')
+            .limit(2)
+            .get();
+
+        return {
+            suggestedCircles: circlesSnap.docs.map(d => ({ id: d.id, ...d.data() })),
+            trendingEvents: eventsSnap.docs.map(d => ({ id: d.id, ...d.data() })),
+            message: "Ha sido una semana movida en Alora. Mira lo que te perdiste."
+        };
     }
 };

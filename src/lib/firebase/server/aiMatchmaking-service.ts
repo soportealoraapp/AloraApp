@@ -9,6 +9,7 @@ export interface CompatibilityV2 {
         behavioralSimilarity: number;
         convEngagement: number;
         diversityFactor: number;
+        socialAffinity: number; // v2.5
     };
     explanation: string[];
 }
@@ -34,11 +35,14 @@ export const aiMatchmakingServerService = {
                 // 3. Conversation Engagement Potential - 25%
                 const engagementScore = await this.predictConversationSuccess(u1.uid, u2.uid);
 
-                // 4. Diversity & Recency Factor (Anti-Echo Chamber) - 20%
+                // 4. Diversity & Recency Factor (Anti-Echo Chamber) - 10%
                 const diversityScore = this.calculateDiversityFactor(u2);
 
-                // Weighted aggregation
-                const totalScore = (valueScore * 0.3) + (behaviorScore * 0.25) + (engagementScore * 0.25) + (diversityScore * 0.2);
+                // 5. Social Context Affinity (Circles & Events) - 20%
+                const socialScore = await this.calculateSocialContextAffinity(u1.uid, u2.uid);
+
+                // Weighted aggregation (v2.5 Adjustments)
+                const totalScore = (valueScore * 0.25) + (behaviorScore * 0.20) + (engagementScore * 0.25) + (diversityScore * 0.10) + (socialScore * 0.20);
 
                 return {
                     score: Math.min(100, Math.round(totalScore)),
@@ -47,7 +51,8 @@ export const aiMatchmakingServerService = {
                         valueAffininty: Math.round(valueScore),
                         behavioralSimilarity: Math.round(behaviorScore),
                         convEngagement: Math.round(engagementScore),
-                        diversityFactor: Math.round(diversityScore)
+                        diversityFactor: Math.round(diversityScore),
+                        socialAffinity: Math.round(socialScore)
                     },
                     explanation: this.generateExplanation(valueScore, behaviorScore, engagementScore, diversityScore)
                 };
@@ -58,7 +63,7 @@ export const aiMatchmakingServerService = {
                 fallbackValue: {
                     score: 50,
                     potentialScore: 50,
-                    breakdown: { valueAffininty: 50, behavioralSimilarity: 50, convEngagement: 50, diversityFactor: 50 },
+                    breakdown: { valueAffininty: 50, behavioralSimilarity: 50, convEngagement: 50, diversityFactor: 50, socialAffinity: 50 },
                     explanation: ["Asignado automáticamente por optimización de costos"]
                 }
             }
@@ -135,5 +140,27 @@ export const aiMatchmakingServerService = {
         if (e > 70) reasons.push("Su potencial de conversación es excelente");
         if (d > 80) reasons.push("Nuevo perfil en tu zona");
         return reasons.length > 0 ? reasons : ["Compatibilidad equilibrada"];
+    },
+
+    async calculateSocialContextAffinity(userId1: string, userId2: string): Promise<number> {
+        // Find shared circles and events
+        const [circles1, circles2, events1, events2] = await Promise.all([
+            adminDb.collection('community_members').where('userId', '==', userId1).get(),
+            adminDb.collection('community_members').where('userId', '==', userId2).get(),
+            adminDb.collection('event_participants').where('userId', '==', userId1).get(),
+            adminDb.collection('event_participants').where('userId', '==', userId2).get()
+        ]);
+
+        const c1Ids = new Set(circles1.docs.map(d => d.data().circleId));
+        const sharedCircles = circles2.docs.filter(d => c1Ids.has(d.data().circleId)).length;
+
+        const e1Ids = new Set(events1.docs.map(d => d.data().eventId));
+        const sharedEvents = events2.docs.filter(d => e1Ids.has(d.data().eventId)).length;
+
+        let score = 50; // Baseline
+        score += (sharedCircles * 10);
+        score += (sharedEvents * 25);
+
+        return Math.min(100, score);
     }
 };
