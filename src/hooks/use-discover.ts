@@ -1,63 +1,68 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
-import { UserProfile } from '@/lib/domain/types'; // Updated type // Actually keep old if needed or domain
+import { UserProfile } from '@/lib/domain/types';
 import { getDynamicFeed } from '@/server/actions/feed';
 
 interface DiscoverProfile {
     profile: UserProfile;
     compatibility: number;
-    score?: any; // For the new AI score structure
+    score?: any;
 }
 
 export function useDiscover(searchTerm: string = '', limit: number = 20) {
     const { user } = useAuth();
-    const [profiles, setProfiles] = useState<DiscoverProfile[]>([]);
+    const [profilesData, setProfilesData] = useState<DiscoverProfile[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const [retryCount, setRetryCount] = useState(0);
 
     const fetchProfiles = useCallback(async () => {
-        if (!user) {
+        if (!user?.uid) {
             setLoading(false);
             return;
         }
 
         try {
             setLoading(true);
-            // DIRECT SERVER ACTION CALL
-            // This bypasses the old API route effectively
             const feed = await getDynamicFeed(user.uid);
 
-            // Map to expected structure (keeping compatibility field for backward compat)
             const mapped = feed.map(item => ({
                 profile: item.profile,
-                compatibility: item.score.components.baseCompatibility, // adapter
+                compatibility: item.score?.details?.quizCompatibility || item.score?.total || 0,
                 score: item.score
             }));
 
-            setProfiles(mapped);
+            setProfilesData(mapped);
             setError(null);
         } catch (err) {
-            console.error(err);
-            setError('Error cargando feed inteligente');
-            setProfiles([]);
+            console.error('Discover fetch error:', err);
+            setError('No pudimos cargar nuevos perfiles. Verifica tu conexión.');
+            // Silent retry could be implemented here or manual
         } finally {
             setLoading(false);
         }
-    }, [user]);
+    }, [user?.uid]); // Only depend on uid
 
     useEffect(() => {
         fetchProfiles();
-    }, [fetchProfiles]);
+    }, [fetchProfiles, retryCount]);
+
+    const memoizedProfiles = useMemo(() => {
+        if (!searchTerm) return profilesData;
+        return profilesData.filter(p =>
+            p.profile.name.toLowerCase().includes(searchTerm.toLowerCase())
+        );
+    }, [profilesData, searchTerm]);
 
     const refresh = () => {
-        fetchProfiles();
+        setRetryCount(prev => prev + 1);
     };
 
     return {
-        profiles,
-        setProfiles, // added to allow optimistic updates
+        profiles: memoizedProfiles,
+        setProfiles: setProfilesData,
         loading,
         error,
         refresh,

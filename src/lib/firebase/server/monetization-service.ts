@@ -14,15 +14,19 @@ export const monetizationServerService = {
                 updatedAt: FieldValue.serverTimestamp()
             });
 
-            // Log event
-            await adminDb.collection('system_logs').add({
-                event: 'subscription_activated',
-                userId,
-                type: 'plus',
-                expiresAt,
-                timestamp: FieldValue.serverTimestamp()
-            });
+            // Track Business Event
+            const { monitoringServerService } = await import('./monitoring-service');
+            await monitoringServerService.trackBusinessEvent('subscription_purchased', userId, { type: 'plus', durationDays });
+
         } catch (error) {
+            const { monitoringServerService } = await import('./monitoring-service');
+            await monitoringServerService.log({
+                level: 'critical',
+                category: 'monetization',
+                message: `Failed to activate Plus for user ${userId}`,
+                userId,
+                details: { error: (error as Error).message }
+            });
             console.error('Error activating Plus:', error);
             throw error;
         }

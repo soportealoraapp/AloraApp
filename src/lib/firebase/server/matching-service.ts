@@ -37,6 +37,23 @@ export const matchingServerService = {
             const userDoc = await adminDb.collection('profiles').doc(fromUserId).get();
             const fromProfile = userDoc.data() as UserProfile;
 
+            // 1. Safety Check: Blocks
+            const blockId = `${fromUserId}_${toUserId}`;
+            const reverseBlockId = `${toUserId}_${fromUserId}`;
+            const [block1, block2] = await Promise.all([
+                adminDb.collection('blocks').doc(blockId).get(),
+                adminDb.collection('blocks').doc(reverseBlockId).get()
+            ]);
+
+            if (block1.exists || block2.exists) {
+                return { matched: false };
+            }
+
+            // 2. Safety Check: restricted/banned
+            if (fromProfile?.trustStatus === 'restricted' || fromProfile?.trustStatus === 'banned') {
+                return { matched: false };
+            }
+
             // v1.7 & v1.8: Rate limiting (Silent)
             const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000);
             const recentLikes = await adminDb.collection('likes')
@@ -44,7 +61,7 @@ export const matchingServerService = {
                 .where('createdAt', '>', oneHourAgo)
                 .get();
 
-            let limit = fromProfile?.trustStatus === 'restricted' ? 5 : 50;
+            let limit = (fromProfile?.trustStatus as string) === 'restricted' ? 5 : 50;
             // v1.8: Plus users have 500/hour (practically unlimited for humans)
             if (fromProfile?.subscriptionStatus === 'plus') limit = 500;
 
@@ -115,13 +132,13 @@ export const matchingServerService = {
 
             return { matched: false };
         } catch (error) {
-            console.error('Error in sendLike:', error);
-            await adminDb.collection('system_logs').add({
-                event: 'error_send_like',
-                fromUserId,
-                toUserId,
-                error: (error as Error).message,
-                timestamp: FieldValue.serverTimestamp()
+            const { monitoringServerService } = await import('./monitoring-service');
+            await monitoringServerService.log({
+                level: 'error',
+                category: 'matching',
+                message: `Error in sendLike: ${(error as Error).message}`,
+                userId: fromUserId,
+                details: { toUserId }
             });
             throw error;
         }

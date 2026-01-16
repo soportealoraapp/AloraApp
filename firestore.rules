@@ -91,5 +91,25 @@ service cloud.firestore {
       allow read: if isOwner(scoreId);
       allow write: if false;
     }
+
+    // v1.8: Monetization & Growth
+    match /boosts/{boostId} {
+      allow read: if isAuthenticated() && resource.data.userId == request.auth.uid;
+      allow write: if false;
+    }
+
+    match /referrals/{referralId} {
+      allow read: if isAuthenticated() && (
+        resource.data.referrerId == request.auth.uid || 
+        resource.data.referredId == request.auth.uid
+      );
+      allow write: if false;
+    }
+
+    // v1.5: Compatibility
+    match /compatibility_profiles/{userId} {
+      allow read: if isAuthenticated() && !isBlocked(userId, request.auth.uid);
+      allow write: if isOwner(userId) && isCompliant();
+    }
   }
 }
