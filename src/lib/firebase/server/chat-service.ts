@@ -27,6 +27,20 @@ export const chatServerService = {
                 if (senderProfile?.gender !== 'woman') {
                     throw new Error("Solo las mujeres pueden iniciar la conversación.");
                 }
+
+                // v1.7: Restricted user limit
+                if (senderProfile?.trustStatus === 'restricted') {
+                    const today = new Date();
+                    today.setHours(0, 0, 0, 0);
+                    const dailyChats = await adminDb.collection('matches')
+                        .where('initiatedBy', '==', senderId)
+                        .where('createdAt', '>', today)
+                        .get();
+
+                    if (dailyChats.size >= 2) {
+                        throw new Error("Has alcanzado el límite de nuevos chats por hoy.");
+                    }
+                }
             }
 
             // 2. Initial Message Persistence (Marked as pending)
@@ -99,6 +113,14 @@ export const chatServerService = {
                 if (msgData) {
                     const { notificationServerService } = await import('./notification-service');
                     await notificationServerService.sendPushToUser(msgData.receiverId, "Nuevo mensaje 💬", text.length > 50 ? `${text.substring(0, 50)}...` : text);
+                }
+            } else if (status === 'flagged') {
+                // v1.7: Trigger Trust Score update
+                const msgDoc = await adminDb.collection('messages').doc(messageId).get();
+                const msgData = msgDoc.data();
+                if (msgData) {
+                    const { trustServerService } = await import('./trust-service');
+                    await trustServerService.updateTrustScore(msgData.senderId);
                 }
             }
         } catch (error) {

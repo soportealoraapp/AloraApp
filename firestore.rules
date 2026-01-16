@@ -11,16 +11,26 @@ service cloud.firestore {
     }
     
     function getProfile(userId) {
-      return get(/databases/$(database)/documents/profiles/$(userId));
+      return get(/databases/$(database)/documents/profiles/$(userId)).data;
+    }
+
+    function isCompliant() {
+      let profile = getProfile(request.auth.uid);
+      return profile.consentVersion == '1.7' && profile.trustStatus != 'banned';
+    }
+
+    function isBlocked(userId, guestId) {
+      return exists(/databases/$(database)/documents/blocks/$(userId)_$(guestId)) ||
+             exists(/databases/$(database)/documents/blocks/$(guestId)_$(userId));
     }
     
     function isParticipant(userIds) {
       return request.auth.uid in userIds;
     }
 
-    // Profiles: Anyone auth can read, only owner can write
+    // Profiles: Anyone auth can read (unless blocked), only owner can write
     match /profiles/{userId} {
-      allow read: if isAuthenticated();
+      allow read: if isAuthenticated() && !isBlocked(userId, request.auth.uid);
       allow create: if isOwner(userId);
       allow update: if isOwner(userId);
       allow delete: if isOwner(userId);
@@ -31,30 +41,40 @@ service cloud.firestore {
       allow read: if isAuthenticated() && (
         resource.data.fromUserId == request.auth.uid || 
         resource.data.toUserId == request.auth.uid
-      );
-      allow write: if false; // Production Hardening: Block client-side writes
+      ) && !isBlocked(resource.data.fromUserId, resource.data.toUserId);
+      allow write: if false; 
     }
     
     // Matches: Only involved users can read. Writes ONLY via API (Admin)
     match /matches/{matchId} {
-      allow read: if isAuthenticated() && isParticipant(resource.data.users);
-      allow write: if false; // Production Hardening: Block client-side writes
+      allow read: if isAuthenticated() && isParticipant(resource.data.users) && 
+                  !isBlocked(resource.data.users[0], resource.data.users[1]);
+      allow write: if false; 
     }
     
     // Messages: Only match participants can read. 
-    // CREATE is also blocked from client to enforce server-side moderation and "Women First" logic.
     match /messages/{messageId} {
       allow read: if isAuthenticated() && (
         resource.data.senderId == request.auth.uid || 
         resource.data.receiverId == request.auth.uid
       );
       
-      // Updates only for marking as read by the recipient
       allow update: if isAuthenticated() && 
         resource.data.receiverId == request.auth.uid &&
         request.resource.data.diff(resource.data).affectedKeys().hasOnly(['readAt']);
       
-      allow create, delete: if false; // Production Hardening: Enforce API for messaging
+      allow create, delete: if false; 
+    }
+
+    // Blocks & Reports: READ/WRITE only via API (Admin)
+    match /blocks/{blockId} {
+      allow read: if isAuthenticated() && (resource.data.blockerId == request.auth.uid);
+      allow write: if false;
+    }
+
+    match /reports/{reportId} {
+      allow read: if isAuthenticated() && (resource.data.reporterId == request.auth.uid);
+      allow write: if false;
     }
     
     // Verification Requests: User creates, Admin reads/updates
@@ -64,9 +84,12 @@ service cloud.firestore {
       allow update: if false; 
     }
 
-    // AI Logs: Read/Write only for admins (or internal only, set to false for client)
-    match /ai_logs/{logId} {
-      allow read, write: if false;
+    // AI & System Logs: Read/Write only for admins
+    match /ai_logs/{logId} { allow read, write: if false; }
+    match /system_logs/{logId} { allow read, write: if false; }
+    match /user_trust_scores/{scoreId} { 
+      allow read: if isOwner(scoreId);
+      allow write: if false;
     }
   }
 }

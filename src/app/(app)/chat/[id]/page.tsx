@@ -20,6 +20,8 @@ import Link from "next/link";
 import { Skeleton } from "@/components/ui/skeleton";
 
 import { MessageBubble } from "@/components/chat/message-bubble";
+import { ReportDialog } from "@/components/safety/ReportDialog";
+import { BlockDialog } from "@/components/safety/BlockDialog";
 
 export default function ChatWindowPage() {
     const params = useParams();
@@ -33,6 +35,8 @@ export default function ChatWindowPage() {
     const [icebreakers, setIcebreakers] = useState<string[]>([]);
     const [loadingIcebreakers, setLoadingIcebreakers] = useState(false);
     const [showIcebreakers, setShowIcebreakers] = useState(false);
+    const [showReportDialog, setShowReportDialog] = useState(false);
+    const [showBlockDialog, setShowBlockDialog] = useState(false);
 
     const match = matches.find((m) => m.id === matchId);
     const otherUserId = match?.users.find((uid) => uid !== user?.uid);
@@ -74,18 +78,11 @@ export default function ChatWindowPage() {
     };
 
     const handleUnmatch = () => {
-        toast({
-            title: "Match deshecho",
-            description: "Ya no aparecerá en tus conversaciones",
-        });
-        router.push("/chat");
+        setShowBlockDialog(true);
     };
 
     const handleReport = () => {
-        toast({
-            title: "Reporte enviado",
-            description: "Revisaremos tu reporte pronto",
-        });
+        setShowReportDialog(true);
     };
 
     if (loading && messages.length === 0) {
@@ -140,8 +137,8 @@ export default function ChatWindowPage() {
                         <DropdownMenuItem onClick={handleReport}>
                             Reportar
                         </DropdownMenuItem>
-                        <DropdownMenuItem onClick={handleUnmatch} className="text-destructive">
-                            Deshacer match
+                        <DropdownMenuItem onClick={() => setShowBlockDialog(true)} className="text-destructive">
+                            Bloquear y deshacer match
                         </DropdownMenuItem>
                     </DropdownMenuContent>
                 </DropdownMenu>
@@ -253,6 +250,22 @@ export default function ChatWindowPage() {
                     </>
                 )}
             </div>
+            {otherUserId && (
+                <>
+                    <ReportDialog
+                        isOpen={showReportDialog}
+                        onClose={() => setShowReportDialog(false)}
+                        reportedId={otherUserId}
+                        matchId={matchId}
+                    />
+                    <BlockDialog
+                        isOpen={showBlockDialog}
+                        onClose={() => setShowBlockDialog(false)}
+                        blockedId={otherUserId}
+                        onSuccess={() => router.push('/chat')}
+                    />
+                </>
+            )}
         </div>
     );
 }

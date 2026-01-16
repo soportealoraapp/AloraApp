@@ -3,6 +3,7 @@ export interface UserProfile {
     email: string;
     displayName: string;
     age: number;
+    birthDate?: Date; // v1.7 Age Gate
     gender: 'woman' | 'man' | 'non-binary';
     seeking: 'women' | 'men' | 'all';
     city: string;
@@ -26,6 +27,8 @@ export interface UserProfile {
     lastActive: Date;
     isPremium: boolean;
     isActive: boolean;
+    consentVersion?: string; // v1.7 Compliance
+    trustStatus: 'clean' | 'watchlist' | 'restricted' | 'banned'; // v1.7 Trust Score
 }
 
 export interface PersonalGuideItem {
@@ -80,12 +83,34 @@ export interface Report {
     id: string;
     reporterId: string;
     reportedId: string;
-    reason: string;
+    matchId?: string; // v1.7
+    messageIds?: string[]; // v1.7
+    category: 'harassment' | 'offensive_language' | 'sexual_content' | 'impersonation' | 'spam_fraud' | 'other'; // v1.7
     description?: string;
     status: 'pending' | 'reviewed' | 'resolved';
     createdAt: Date;
     reviewedAt?: Date;
     reviewedBy?: string;
+}
+
+export interface UserTrustScore {
+    userId: string;
+    score: number; // 0-100
+    flagsCount: number;
+    reportsReceived: number;
+    blocksReceived: number;
+    rejectionsCount: number;
+    lastCalculated: Date;
+}
+
+export interface AdminAction {
+    id: string;
+    adminId: string;
+    targetUserId: string;
+    type: 'warn' | 'restrict' | 'ban' | 'pardon';
+    reason: string;
+    createdAt: Date;
+    expiresAt?: Date;
 }
 
 export interface Referral {

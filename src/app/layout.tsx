@@ -4,6 +4,7 @@ import { Toaster } from '@/components/ui/toaster';
 import { cn } from '@/lib/utils';
 import { ThemeProvider } from '@/components/theme-provider';
 import { AuthProvider } from '@/contexts/AuthContext';
+import { SafetyGuard } from '@/components/safety/SafetyGuard';
 
 
 export const metadata: Metadata = {
@@ -34,7 +35,9 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <AuthProvider>
-            {children}
+            <SafetyGuard>
+              {children}
+            </SafetyGuard>
             <Toaster />
           </AuthProvider>
         </ThemeProvider>

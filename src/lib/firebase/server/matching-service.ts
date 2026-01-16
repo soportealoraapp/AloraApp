@@ -34,13 +34,24 @@ export const matchingServerService = {
 
     async sendLike(fromUserId: string, toUserId: string, type: 'like' | 'superlike' = 'like'): Promise<{ matched: boolean; matchId?: string }> {
         try {
-            const likeId = `${fromUserId}_${toUserId}`;
-            const likeRef = adminDb.collection('likes').doc(likeId);
+            const userDoc = await adminDb.collection('profiles').doc(fromUserId).get();
+            const fromProfile = userDoc.data() as UserProfile;
 
-            const existingLike = await likeRef.get();
-            if (existingLike.exists) {
+            // v1.7: Rate limiting (Silent)
+            const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000);
+            const recentLikes = await adminDb.collection('likes')
+                .where('fromUserId', '==', fromUserId)
+                .where('createdAt', '>', oneHourAgo)
+                .get();
+
+            const limit = fromProfile?.trustStatus === 'restricted' ? 5 : 50;
+            if (recentLikes.size >= limit) {
+                // Return success: false but matching UI usually handles this gracefully or with a retry
                 return { matched: false };
             }
+
+            const likeId = `${fromUserId}_${toUserId}`;
+            const likeRef = adminDb.collection('likes').doc(likeId);
 
             await likeRef.set({
                 id: likeId,
