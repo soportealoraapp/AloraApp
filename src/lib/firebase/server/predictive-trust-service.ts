@@ -12,6 +12,9 @@ export const predictiveTrustServerService = {
             const trustDoc = await trustRef.get();
             const currentStats = trustDoc.data() as UserTrustScore;
 
+            // v2.6: Contextual Baseline
+            // let contextScores = (currentStats as any).contextScores || { dating: 100, community: 100, events: 100 };
+
             // Thresholds & Signals
             const now = Date.now();
             const last24h = new Date(now - 24 * 60 * 60 * 1000);
@@ -40,6 +43,10 @@ export const predictiveTrustServerService = {
             // Signal 4: Massive Rejections (Passes)
             if (recentPasses.size > 300) riskPoints += 20;
 
+            // Signal 5: Trust Decay (Inactivity/Ghosting) - v2.6
+            const decay = await this.calculateTrustDecay(userId);
+            riskPoints += decay;
+
             const finalRiskScore = Math.min(100, riskPoints);
 
             // Determine Intervention Level
@@ -59,6 +66,31 @@ export const predictiveTrustServerService = {
             console.error("Error in predictive risk calculation:", error);
             return { riskTrendScore: 0, interventionLevel: 0 };
         }
+    },
+
+    async calculateTrustDecay(userId: string): Promise<number> {
+        const userSnap = await adminDb.collection('profiles').doc(userId).get();
+        const profile = userSnap.data();
+
+        if (!profile) return 0;
+
+        const lastActiveRaw = (profile as any).lastActive;
+        const lastActive = lastActiveRaw?.toDate ? lastActiveRaw.toDate() : new Date(lastActiveRaw || Date.now());
+        const daysInactive = (Date.now() - lastActive.getTime()) / (1000 * 3600 * 24);
+
+        let decayPoints = 0;
+        if (daysInactive > 14) decayPoints += 10;
+        if (daysInactive > 30) decayPoints += 30;
+
+        return decayPoints;
+    },
+
+    async updateContextualScore(userId: string, domain: 'dating' | 'community' | 'events', delta: number): Promise<void> {
+        const trustRef = adminDb.collection('user_trust_scores').doc(userId);
+        await trustRef.update({
+            [`contextScores.${domain}`]: FieldValue.increment(delta),
+            lastCalculated: FieldValue.serverTimestamp()
+        });
     },
 
     async applyIntervention(userId: string, level: 0 | 1 | 2 | 3, reason: string): Promise<void> {
