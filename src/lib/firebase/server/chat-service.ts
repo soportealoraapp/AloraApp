@@ -28,6 +28,13 @@ export const chatServerService = {
                     throw new Error("Solo las mujeres pueden iniciar la conversación.");
                 }
 
+                // v2.1: Silent Intervention Level 3 (Chat Freeze)
+                const trustSnap = await adminDb.collection('user_trust_scores').doc(senderId).get();
+                const trustData = trustSnap.data();
+                if (trustData?.interventionLevel >= 3) {
+                    throw new Error("No pudimos iniciar esta conversación. Intenta más tarde.");
+                }
+
                 // v1.7: Restricted user limit
                 if (senderProfile?.trustStatus === 'restricted') {
                     const today = new Date();
@@ -54,6 +61,20 @@ export const chatServerService = {
                 type,
                 createdAt: FieldValue.serverTimestamp(),
             };
+
+            // v2.1: Preemptive Moderation (Tone Analysis - Mock)
+            const lowerText = text.toLowerCase();
+            const badWords = ['odio', 'muere', 'feo', 'estúpido', 'tonta'];
+            if (badWords.some(word => lowerText.includes(word))) {
+                // Pre-moderation injection
+                await adminDb.collection('messages').add({
+                    matchId,
+                    senderId: 'system',
+                    text: "🔔 Recordatorio: Mantén una conversación amable para que Alora siga siendo un espacio seguro.",
+                    type: 'system',
+                    createdAt: FieldValue.serverTimestamp()
+                });
+            }
 
             const messageRef = await adminDb.collection('messages').add(messageData);
 

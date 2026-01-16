@@ -41,10 +41,16 @@ export const trustServerService = {
                 status = 'watchlist';
             }
 
-            // 4. Persist
+            // 4. v2.1: Predictive Risk Analysis
+            const { predictiveTrustServerService } = await import('./predictive-trust-service');
+            const predictiveRisk = await predictiveTrustServerService.calculatePredictiveRisk(userId);
+
+            // 5. Persist
             const trustData: UserTrustScore = {
                 userId,
                 score,
+                riskTrendScore: predictiveRisk.riskTrendScore,
+                interventionLevel: predictiveRisk.interventionLevel,
                 flagsCount,
                 reportsReceived: reportsCount,
                 blocksReceived: blocksCount,

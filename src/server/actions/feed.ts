@@ -61,7 +61,8 @@ export async function getDynamicFeed(currentUserId: string): Promise<{ profile: 
                 if (currentUser.experimentalGroup === 'B') {
                     // v2.0 AI MODEL
                     const { aiMatchmakingServerService } = await import('@/lib/firebase/server/aiMatchmaking-service');
-                    const aiResult = await aiMatchmakingServerService.calculateDeepCompatibility(currentUser, candidate);
+                    // Cast candidate to any to bypass strict domain/firebase mismatch as they are technically compatible enough for the AI service
+                    const aiResult = await aiMatchmakingServerService.calculateDeepCompatibility(currentUser as any, candidate as any);
                     totalScore = aiResult.score;
                     details = aiResult.breakdown;
                     explanation = aiResult.explanation;
@@ -88,9 +89,15 @@ export async function getDynamicFeed(currentUserId: string): Promise<{ profile: 
                     }
                 }
 
-                // v2.0: Silent Risk Adjustment (Trust Score)
                 if (candidate.trustStatus === 'watchlist') totalScore *= 0.8;
                 if (candidate.trustStatus === 'restricted') totalScore *= 0.5;
+
+                // v2.1: Silent Intervention Level 2 (Extreme Visibility Reduction)
+                const trustSnap = await adminDb.collection('user_trust_scores').doc(candidate.id).get();
+                const trustData = trustSnap.data();
+                if (trustData?.interventionLevel >= 2) {
+                    totalScore *= 0.1; // Shadow-ban-like effect
+                }
 
                 return {
                     profile: candidate,

@@ -1,6 +1,6 @@
 import { adminDb } from '../admin';
 import { FieldValue } from 'firebase-admin/firestore';
-import { Like, Match, UserProfile } from '../types';
+import { Match, Message, UserProfile, UserTrustScore } from '../types';
 
 export const matchingServerService = {
     // Calculate compatibility score (Same logic as client, but can be kept here for consistency)
@@ -34,6 +34,16 @@ export const matchingServerService = {
 
     async sendLike(fromUserId: string, toUserId: string, type: 'like' | 'superlike' = 'like'): Promise<{ matched: boolean; matchId?: string }> {
         try {
+            // v2.1: Silent Intervention Level 1 (Artificial Delay)
+            const trustRef = adminDb.collection('user_trust_scores').doc(fromUserId);
+            const trustSnap = await trustRef.get();
+            const trustData = trustSnap.data() as UserTrustScore;
+
+            if (trustData?.interventionLevel >= 1) {
+                const delay = Math.floor(Math.random() * 2000) + 1000; // 1-3s
+                await new Promise(resolve => setTimeout(resolve, delay));
+            }
+
             const userDoc = await adminDb.collection('profiles').doc(fromUserId).get();
             const fromProfile = userDoc.data() as UserProfile;
 

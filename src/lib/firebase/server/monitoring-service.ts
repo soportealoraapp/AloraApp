@@ -5,7 +5,7 @@ export type LogLevel = 'info' | 'warn' | 'error' | 'critical';
 
 export interface LogEvent {
     level: LogLevel;
-    category: 'auth' | 'monetization' | 'matching' | 'safety' | 'system';
+    category: 'auth' | 'monetization' | 'matching' | 'safety' | 'system' | 'safety_drift';
     message: string;
     userId?: string;
     details?: Record<string, any>;
@@ -32,10 +32,10 @@ export const monitoringServerService = {
         }
     },
 
-    async trackBusinessEvent(type: 'subscription_purchased' | 'boost_activated' | 'referral_used' | 'report_filed' | 'like_sent' | 'match_created', userId: string, details?: Record<string, any>): Promise<void> {
+    async trackBusinessEvent(type: 'subscription_purchased' | 'boost_activated' | 'referral_used' | 'report_filed' | 'like_sent' | 'match_created' | 'saved_conversation' | 'safety_intervention', userId: string, details?: Record<string, any>): Promise<void> {
         await this.log({
             level: 'info',
-            category: (type === 'report_filed' || type === 'match_created' || type === 'like_sent') ? 'safety' : 'monetization',
+            category: (type === 'report_filed' || type === 'match_created' || type === 'like_sent' || type === 'saved_conversation' || type === 'safety_intervention') ? 'safety' : 'monetization',
             message: `Business Event: ${type}`,
             userId,
             details

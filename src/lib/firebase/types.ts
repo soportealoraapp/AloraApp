@@ -137,11 +137,23 @@ export interface Report {
 export interface UserTrustScore {
     userId: string;
     score: number; // 0-100
+    riskTrendScore: number; // v2.1: 0-100, temporal risk
+    interventionLevel: 0 | 1 | 2 | 3; // v2.1: current silent penalty level
     flagsCount: number;
     reportsReceived: number;
     blocksReceived: number;
     rejectionsCount: number;
     lastCalculated: Date;
+    interventionHistory?: Intervention[]; // v2.1
+}
+
+export interface Intervention {
+    type: 'delay' | 'visibility_reduction' | 'chat_freeze';
+    level: number;
+    startedAt: Date;
+    endsAt?: Date;
+    reason: string;
+    active: boolean;
 }
 
 export interface AdminAction {
