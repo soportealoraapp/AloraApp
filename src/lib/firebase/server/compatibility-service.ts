@@ -1,5 +1,5 @@
-import { adminDb } from '../firebase/admin';
-import { UserCompatibilityProfile } from '../firebase/types';
+import { adminDb } from '../admin';
+import { UserCompatibilityProfile } from '../types';
 import { FieldValue } from 'firebase-admin/firestore';
 
 export const compatibilityServerService = {

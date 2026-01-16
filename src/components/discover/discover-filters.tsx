@@ -21,7 +21,19 @@ import { ScrollArea } from "../ui/scroll-area";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
 import { Separator } from "../ui/separator";
 import { RadioGroup, RadioGroupItem } from "../ui/radio-group";
-import type { Filters } from "@/app/(app)/discover/page";
+
+// Local type definition to avoid circular import
+export interface Filters {
+  ageRange: [number, number];
+  distance: number;
+  seeking: 'women' | 'men' | 'all';
+  verifiedOnly: boolean;
+  interests: string[];
+  values: string[];
+  smoking?: string;
+  drinking?: string;
+  children?: string;
+}
 
 
 interface DiscoverFiltersProps {
@@ -51,12 +63,12 @@ export function DiscoverFilters({ open, onOpenChange, onApplyFilters, initialFil
     if (list.includes(item)) {
       setter(list.filter((i) => i !== item));
     } else {
-        if(list.length < max) {
-            setter([...list, item]);
-        }
+      if (list.length < max) {
+        setter([...list, item]);
+      }
     }
   };
-  
+
   const handleApply = () => {
     onApplyFilters({
       ageRange,
@@ -103,120 +115,120 @@ export function DiscoverFilters({ open, onOpenChange, onApplyFilters, initialFil
           <SheetTitle className="font-headline">Filtros de Búsqueda</SheetTitle>
         </SheetHeader>
         <ScrollArea className="flex-1 -mx-6 px-6">
-            <div className="space-y-8 py-4">
-                <div className="space-y-4">
-                    <Label>Busco a</Label>
-                    <RadioGroup defaultValue="women" value={seeking} onValueChange={(v: "women" | "men" | "all") => setSeeking(v)} className="grid grid-cols-3 gap-2">
-                         <div>
-                            <RadioGroupItem value="women" id="r-women" className="peer sr-only" />
-                            <Label htmlFor="r-women" className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-transparent p-3 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary cursor-pointer">
-                                Mujeres
-                            </Label>
-                        </div>
-                         <div>
-                            <RadioGroupItem value="men" id="r-men" className="peer sr-only" />
-                            <Label htmlFor="r-men" className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-transparent p-3 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary cursor-pointer">
-                                Hombres
-                            </Label>
-                        </div>
-                         <div>
-                            <RadioGroupItem value="all" id="r-all" className="peer sr-only" />
-                            <Label htmlFor="r-all" className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-transparent p-3 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary cursor-pointer">
-                                Todos
-                            </Label>
-                        </div>
-                    </RadioGroup>
+          <div className="space-y-8 py-4">
+            <div className="space-y-4">
+              <Label>Busco a</Label>
+              <RadioGroup defaultValue="women" value={seeking} onValueChange={(v: "women" | "men" | "all") => setSeeking(v)} className="grid grid-cols-3 gap-2">
+                <div>
+                  <RadioGroupItem value="women" id="r-women" className="peer sr-only" />
+                  <Label htmlFor="r-women" className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-transparent p-3 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary cursor-pointer">
+                    Mujeres
+                  </Label>
                 </div>
-
-                <div className="space-y-4">
-                    <Label>Rango de Edad: {ageRange[0]} - {ageRange[1]} años</Label>
-                    <Slider
-                    value={ageRange}
-                    onValueChange={(value: [number, number]) => setAgeRange(value)}
-                    min={18}
-                    max={60}
-                    step={1}
-                    />
+                <div>
+                  <RadioGroupItem value="men" id="r-men" className="peer sr-only" />
+                  <Label htmlFor="r-men" className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-transparent p-3 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary cursor-pointer">
+                    Hombres
+                  </Label>
                 </div>
-                 <div className="space-y-4">
-                    <Label>Distancia: hasta {distance[0]} km</Label>
-                    <Slider
-                    value={distance}
-                    onValueChange={(value: [number]) => setDistance(value)}
-                    min={5}
-                    max={200}
-                    step={5}
-                    />
+                <div>
+                  <RadioGroupItem value="all" id="r-all" className="peer sr-only" />
+                  <Label htmlFor="r-all" className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-transparent p-3 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary cursor-pointer">
+                    Todos
+                  </Label>
                 </div>
-
-                <div className="space-y-3">
-                    <Label>Verificación de Perfil</Label>
-                    <div className="flex items-center space-x-2 rounded-lg border p-3">
-                        <Switch id="verified-only" checked={verifiedOnly} onCheckedChange={setVerifiedOnly}/>
-                        <Label htmlFor="verified-only" className="flex-grow cursor-pointer">Mostrar solo perfiles verificados</Label>
-                    </div>
-                </div>
-
-                <Separator />
-
-                <div className="space-y-4">
-                    <h4 className="font-semibold">Estilo de vida</h4>
-                     <div className="space-y-2">
-                        <Label>Tabaco</Label>
-                        <Select value={selectedSmoking} onValueChange={setSelectedSmoking}>
-                            <SelectTrigger><SelectValue placeholder="Cualquiera" /></SelectTrigger>
-                            <SelectContent>{lifestyleOptions.smoking.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent>
-                        </Select>
-                    </div>
-                     <div className="space-y-2">
-                        <Label>Alcohol</Label>
-                        <Select value={selectedDrinking} onValueChange={setSelectedDrinking}>
-                            <SelectTrigger><SelectValue placeholder="Cualquiera" /></SelectTrigger>
-                            <SelectContent>{lifestyleOptions.drinking.map(d => <SelectItem key={d} value={d}>{d}</SelectItem>)}</SelectContent>
-                        </Select>
-                    </div>
-                     <div className="space-y-2">
-                        <Label>Hijos</Label>
-                        <Select value={selectedChildren} onValueChange={setSelectedChildren}>
-                            <SelectTrigger><SelectValue placeholder="Cualquiera" /></SelectTrigger>
-                            <SelectContent>{lifestyleOptions.children.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent>
-                        </Select>
-                    </div>
-                </div>
-
-                <Separator />
-
-
-                <div className="space-y-3">
-                    <Label>Intereses en Común (hasta 10)</Label>
-                    <div className="flex flex-wrap gap-2">
-                    {allInterests.slice(0, 20).map((interest) => (
-                        <button key={interest} onClick={() => toggleSelection(interest, selectedInterests, setSelectedInterests, 10)}>
-                            <Badge variant={selectedInterests.includes(interest) ? 'default' : 'secondary'} className="cursor-pointer text-sm py-1">
-                                {interest}
-                            </Badge>
-                        </button>
-                    ))}
-                    </div>
-                </div>
-
-                <div className="space-y-3">
-                    <Label>Valores Compartidos (hasta 5)</Label>
-                    <div className="flex flex-wrap gap-2">
-                    {allValues.slice(0, 15).map((value) => (
-                        <button key={value} onClick={() => toggleSelection(value, selectedValues, setSelectedValues)}>
-                            <Badge variant={selectedValues.includes(value) ? 'default' : 'secondary'} className="cursor-pointer text-sm py-1">
-                                {value}
-                            </Badge>
-                        </button>
-                    ))}
-                    </div>
-                </div>
+              </RadioGroup>
             </div>
+
+            <div className="space-y-4">
+              <Label>Rango de Edad: {ageRange[0]} - {ageRange[1]} años</Label>
+              <Slider
+                value={ageRange}
+                onValueChange={(value: [number, number]) => setAgeRange(value)}
+                min={18}
+                max={60}
+                step={1}
+              />
+            </div>
+            <div className="space-y-4">
+              <Label>Distancia: hasta {distance[0]} km</Label>
+              <Slider
+                value={distance}
+                onValueChange={(value: [number]) => setDistance(value)}
+                min={5}
+                max={200}
+                step={5}
+              />
+            </div>
+
+            <div className="space-y-3">
+              <Label>Verificación de Perfil</Label>
+              <div className="flex items-center space-x-2 rounded-lg border p-3">
+                <Switch id="verified-only" checked={verifiedOnly} onCheckedChange={setVerifiedOnly} />
+                <Label htmlFor="verified-only" className="flex-grow cursor-pointer">Mostrar solo perfiles verificados</Label>
+              </div>
+            </div>
+
+            <Separator />
+
+            <div className="space-y-4">
+              <h4 className="font-semibold">Estilo de vida</h4>
+              <div className="space-y-2">
+                <Label>Tabaco</Label>
+                <Select value={selectedSmoking} onValueChange={setSelectedSmoking}>
+                  <SelectTrigger><SelectValue placeholder="Cualquiera" /></SelectTrigger>
+                  <SelectContent>{lifestyleOptions.smoking.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Alcohol</Label>
+                <Select value={selectedDrinking} onValueChange={setSelectedDrinking}>
+                  <SelectTrigger><SelectValue placeholder="Cualquiera" /></SelectTrigger>
+                  <SelectContent>{lifestyleOptions.drinking.map(d => <SelectItem key={d} value={d}>{d}</SelectItem>)}</SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Hijos</Label>
+                <Select value={selectedChildren} onValueChange={setSelectedChildren}>
+                  <SelectTrigger><SelectValue placeholder="Cualquiera" /></SelectTrigger>
+                  <SelectContent>{lifestyleOptions.children.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            <Separator />
+
+
+            <div className="space-y-3">
+              <Label>Intereses en Común (hasta 10)</Label>
+              <div className="flex flex-wrap gap-2">
+                {allInterests.slice(0, 20).map((interest) => (
+                  <button key={interest} onClick={() => toggleSelection(interest, selectedInterests, setSelectedInterests, 10)}>
+                    <Badge variant={selectedInterests.includes(interest) ? 'default' : 'secondary'} className="cursor-pointer text-sm py-1">
+                      {interest}
+                    </Badge>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="space-y-3">
+              <Label>Valores Compartidos (hasta 5)</Label>
+              <div className="flex flex-wrap gap-2">
+                {allValues.slice(0, 15).map((value) => (
+                  <button key={value} onClick={() => toggleSelection(value, selectedValues, setSelectedValues)}>
+                    <Badge variant={selectedValues.includes(value) ? 'default' : 'secondary'} className="cursor-pointer text-sm py-1">
+                      {value}
+                    </Badge>
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
         </ScrollArea>
         <SheetFooter className="grid grid-cols-2 gap-2 pt-4">
-            <Button variant="secondary" onClick={handleClearFilters}>Limpiar</Button>
-            <Button onClick={handleApply}>Aplicar Filtros</Button>
+          <Button variant="secondary" onClick={handleClearFilters}>Limpiar</Button>
+          <Button onClick={handleApply}>Aplicar Filtros</Button>
         </SheetFooter>
       </SheetContent>
     </Sheet>

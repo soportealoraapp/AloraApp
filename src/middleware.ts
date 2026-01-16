@@ -7,30 +7,30 @@ const rateLimitMap = new Map();
 function rateLimit(ip: string, limit: number, windowMs: number) {
     const now = Date.now();
     const windowStart = now - windowMs;
-    
+
     // Cleanup old entries
     if (Math.random() < 0.1) { // 10% chance to cleanup to save ops
-         for (const [key, value] of rateLimitMap.entries()) {
-             if (value.timestamp < windowStart) rateLimitMap.delete(key);
-         }
+        for (const [key, value] of rateLimitMap.entries()) {
+            if (value.timestamp < windowStart) rateLimitMap.delete(key);
+        }
     }
 
     const record = rateLimitMap.get(ip) || { count: 0, timestamp: now };
-    
+
     if (record.timestamp < windowStart) {
         record.count = 1;
         record.timestamp = now;
     } else {
         record.count += 1;
     }
-    
+
     rateLimitMap.set(ip, record);
     return record.count <= limit;
 }
 
 export async function middleware(request: NextRequest) {
-    const ip = request.ip || '127.0.0.1';
-    
+    const ip = request.headers.get('x-forwarded-for')?.split(',')[0] || '127.0.0.1';
+
     // 1. Rate Limiting (Hardening)
     // 100 requests per minute
     if (!rateLimit(ip, 100, 60 * 1000)) {

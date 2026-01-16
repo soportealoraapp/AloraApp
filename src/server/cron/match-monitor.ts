@@ -8,7 +8,7 @@ export async function runMatchMonitor() {
 
     // 1. Get active matches < 3 days old with no messages
     // Query mock
-    const staleMatches = []; // fetch logic here
+    const staleMatches: { id: string }[] = []; // fetch logic here
 
     for (const match of staleMatches) {
         // Check if message sent

@@ -18,19 +18,30 @@ export const lifestyleOptions = {
 };
 
 export interface UserProfile {
+    id?: string;
     uid: string;
     displayName: string;
+    name?: string;
     email?: string;
     photoURL?: string;
+    photos?: string[];
     age: number;
     bio?: string;
+    city?: string;
     interests?: string[];
     values?: string[];
+    musicGenres?: string[];
     smoking?: string;
     drinking?: string;
     children?: string;
     isVerified?: boolean;
     isActive?: boolean;
+    role?: string;
+    plan?: string;
+    trustStatus?: string;
+    subscriptionStatus?: string;
+    totalBoosts?: number;
+    streaks?: number;
 }
 
 export const mockProfiles: UserProfile[] = [];

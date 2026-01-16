@@ -12,7 +12,7 @@ export async function becomeGuide(userId: string) {
     const userDoc = await adminDb.collection('profiles').doc(userId).get();
     const socialEnergy = userDoc.data()?.socialEnergy || 0;
 
-    if (score.score > 200 && stars.length >= 12 && socialEnergy > 75) {
+    if (score.score > 200 && stars >= 12 && socialEnergy > 75) {
         await adminDb.collection('profiles').doc(userId).update({
             roles: FieldValue.arrayUnion('GUIDE'),
             guideSince: FieldValue.serverTimestamp()
