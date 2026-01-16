@@ -8,9 +8,10 @@ import Image from 'next/image';
 interface FloatingMatchCardProps {
     profile: UserProfile;
     onSwipe: (direction: 'left' | 'right') => void;
+    compatibility?: number;
 }
 
-export function FloatingMatchCard({ profile, onSwipe }: FloatingMatchCardProps) {
+export function FloatingMatchCard({ profile, onSwipe, compatibility }: FloatingMatchCardProps) {
     const controls = useAnimation();
 
     const handleDragEnd = async (event: any, info: PanInfo) => {
@@ -45,7 +46,16 @@ export function FloatingMatchCard({ profile, onSwipe }: FloatingMatchCardProps) 
                     className="object-cover pointer-events-none"
                     priority
                 />
-                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent p-6 text-white">
+                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent p-6 text-white min-h-[160px] flex flex-col justify-end">
+                    {compatibility && compatibility >= 80 && (
+                        <motion.div
+                            initial={{ scale: 0.8, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            className="bg-pink-500/80 backdrop-blur-md text-white px-3 py-1 rounded-full text-xs font-bold w-fit mb-3 flex items-center gap-1 border border-pink-300/30 shadow-[0_0_15px_rgba(236,72,153,0.5)]"
+                        >
+                            <span className="animate-pulse">✨</span> {compatibility}% Compatible
+                        </motion.div>
+                    )}
                     <h2 className="text-3xl font-bold">{profile.name}, {profile.age}</h2>
                     <p className="text-white/80 line-clamp-2">{profile.bio}</p>
                 </div>

@@ -1,6 +1,4 @@
-"use client";
-
-import { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useChat } from "@/hooks/use-chat";
 import { useAuth } from "@/contexts/AuthContext";
@@ -17,6 +15,7 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useToast } from "@/hooks/use-toast";
+import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import { Skeleton } from "@/components/ui/skeleton";
 
@@ -31,6 +30,9 @@ export default function ChatWindowPage() {
     const { matches } = useMatches();
     const { toast } = useToast();
     const messagesEndRef = useRef<HTMLDivElement>(null);
+    const [icebreakers, setIcebreakers] = useState<string[]>([]);
+    const [loadingIcebreakers, setLoadingIcebreakers] = useState(false);
+    const [showIcebreakers, setShowIcebreakers] = useState(false);
 
     const match = matches.find((m) => m.id === matchId);
     const otherUserId = match?.users.find((uid) => uid !== user?.uid);
@@ -42,6 +44,29 @@ export default function ChatWindowPage() {
             markAsRead();
         }
     }, [messages, markAsRead]);
+
+    const fetchIcebreakers = async () => {
+        if (!matchId || !otherUserId) return;
+        setLoadingIcebreakers(true);
+        try {
+            const response = await fetch('/api/chat/icebreakers', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ matchId, otherUserId })
+            });
+            const data = await response.json();
+            setIcebreakers(data.icebreakers || []);
+            setShowIcebreakers(true);
+        } catch (error) {
+            toast({
+                title: "Error",
+                description: "No pudimos generar sugerencias.",
+                variant: "destructive"
+            });
+        } finally {
+            setLoadingIcebreakers(false);
+        }
+    };
 
     const handleSendMessage = async (text: string) => {
         if (!otherUserId) return;
@@ -122,7 +147,7 @@ export default function ChatWindowPage() {
                 </DropdownMenu>
             </header>
 
-            <main className="flex-1 overflow-y-auto p-4 space-y-4 touch-pan-y overscroll-contain">
+            <main className="flex-1 overflow-y-auto p-4 space-y-4 touch-pan-y overscroll-contain relative">
                 {messages.length === 0 ? (
                     <div className="flex flex-col items-center justify-center min-h-[50vh] text-center">
                         <div className="bg-primary/10 rounded-full p-6 mb-4">
@@ -132,6 +157,14 @@ export default function ChatWindowPage() {
                         <p className="text-muted-foreground mb-4">
                             Empieza la conversación con un mensaje amigable
                         </p>
+                        <Button
+                            onClick={fetchIcebreakers}
+                            disabled={loadingIcebreakers}
+                            className="rounded-full bg-gradient-to-r from-pink-500 to-rose-400 text-white"
+                        >
+                            {loadingIcebreakers ? <Loader2 className="animate-spin mr-2" /> : <Sparkles className="mr-2 h-4 w-4" />}
+                            Sugerir rompehielos
+                        </Button>
                     </div>
                 ) : (
                     <>
@@ -147,6 +180,42 @@ export default function ChatWindowPage() {
                         <div ref={messagesEndRef} className="h-4" />
                     </>
                 )}
+
+                <AnimatePresence>
+                    {showIcebreakers && (
+                        <motion.div
+                            initial={{ opacity: 0, y: 50 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: 50 }}
+                            className="absolute bottom-4 left-4 right-4 z-30"
+                        >
+                            <Card className="p-4 shadow-2xl border-pink-100 bg-white/95 backdrop-blur-sm rounded-3xl">
+                                <div className="flex justify-between items-center mb-4">
+                                    <h4 className="font-bold text-pink-700 flex items-center gap-2">
+                                        <Sparkles className="w-4 h-4" /> Ideas para empezar
+                                    </h4>
+                                    <Button variant="ghost" size="sm" onClick={() => setShowIcebreakers(false)} className="rounded-full">
+                                        Cerrar
+                                    </Button>
+                                </div>
+                                <div className="space-y-2">
+                                    {icebreakers.map((text, i) => (
+                                        <button
+                                            key={i}
+                                            onClick={() => {
+                                                handleSendMessage(text);
+                                                setShowIcebreakers(false);
+                                            }}
+                                            className="w-full text-left p-3 text-sm rounded-2xl bg-pink-50 hover:bg-pink-100 transition-colors text-gray-700 border border-pink-100"
+                                        >
+                                            {text}
+                                        </button>
+                                    ))}
+                                </div>
+                            </Card>
+                        </motion.div>
+                    )}
+                </AnimatePresence>
             </main>
 
             <div className="border-t bg-background p-4">
@@ -158,6 +227,18 @@ export default function ChatWindowPage() {
                     </div>
                 ) : (
                     <>
+                        <div className="flex items-center gap-2 mb-2">
+                            <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={fetchIcebreakers}
+                                disabled={loadingIcebreakers}
+                                className="text-xs text-pink-500 rounded-full h-8 px-3 hover:bg-pink-50"
+                            >
+                                {loadingIcebreakers ? <Loader2 className="animate-spin mr-1 h-3 w-3" /> : <Sparkles className="mr-1 h-3 w-3" />}
+                                Sugerir mensaje
+                            </Button>
+                        </div>
                         <ChatInput
                             onSend={handleSendMessage}
                             disabled={sending || !otherUserId}

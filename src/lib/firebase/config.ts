@@ -12,17 +12,22 @@ const firebaseConfig = {
   appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
 };
 
-let app: FirebaseApp;
-let auth: Auth;
-let db: Firestore;
-let storage: FirebaseStorage;
+import { getMessaging, Messaging } from 'firebase/messaging';
 
-if (typeof window !== 'undefined' && !getApps().length) {
-  app = initializeApp(firebaseConfig);
-  auth = getAuth(app);
-  db = getFirestore(app);
-  storage = getStorage(app);
+const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
+const auth = getAuth(app);
+const db = getFirestore(app);
+const storage = getStorage(app);
+
+let messaging: Messaging | undefined;
+
+if (typeof window !== 'undefined') {
+  try {
+    messaging = getMessaging(app);
+  } catch (err) {
+    console.warn("Messaging not supported in this browser", err);
+  }
 }
 
-export { auth, db, storage };
+export { auth, db, storage, messaging };
 export default app;

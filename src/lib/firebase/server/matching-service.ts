@@ -90,6 +90,13 @@ export const matchingServerService = {
                     timestamp: FieldValue.serverTimestamp()
                 });
 
+                // v1.5: Send Push Notifications
+                const { notificationServerService } = await import('./notification-service');
+                await Promise.all([
+                    notificationServerService.sendPushToUser(fromUserId, "¡Es un Match! 💖", `Has conectado con alguien increíble.`),
+                    notificationServerService.sendPushToUser(toUserId, "¡Es un Match! 💖", `Descubre quién te ha dado like.`)
+                ]);
+
                 return { matched: true, matchId };
             }
 

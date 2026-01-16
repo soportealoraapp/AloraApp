@@ -8,19 +8,18 @@
  * - FilterOffensiveMessagesOutput - The return type for the filterOffensiveMessages function.
  */
 
-import {ai} from '@/ai/genkit';
-import {z} from 'genkit';
+import { ai } from '@/ai/genkit';
+import { z } from 'genkit';
 
 const FilterOffensiveMessagesInputSchema = z.object({
   text: z.string().describe('El texto a verificar por contenido ofensivo.'),
 });
 export type FilterOffensiveMessagesInput = z.infer<typeof FilterOffensiveMessagesInputSchema>;
 
-const FilterOffensiveMessagesOutputSchema = z.object({
-  isOffensive: z.boolean().describe('Si el texto de entrada se considera ofensivo.'),
-  filteredText: z
-    .string()
-    .describe('El texto filtrado, con las partes ofensivas reemplazadas o eliminadas.'),
+filteredText: z
+  .string()
+  .describe('El texto filtrado, con las partes ofensivas reemplazadas o eliminadas.'),
+  category: z.string().optional().describe('La categoría de la ofensa detectada (hate, harassment, etc).'),
 });
 export type FilterOffensiveMessagesOutput = z.infer<typeof FilterOffensiveMessagesOutputSchema>;
 
@@ -32,11 +31,11 @@ export async function filterOffensiveMessages(
 
 const prompt = ai.definePrompt({
   name: 'filterOffensiveMessagesPrompt',
-  input: {schema: FilterOffensiveMessagesInputSchema},
-  output: {schema: FilterOffensiveMessagesOutputSchema},
+  input: { schema: FilterOffensiveMessagesInputSchema },
+  output: { schema: FilterOffensiveMessagesOutputSchema },
   prompt: `Eres una IA de moderación de contenido que filtra mensajes ofensivos.
 
-  Determina si el siguiente texto es ofensivo. Si lo es, devuelve verdadero para isOffensive y una versión filtrada del texto con las partes ofensivas reemplazadas por asteriscos. Si no es ofensivo, devuelve falso para isOffensive y el texto original para filteredText.
+  Determina si el siguiente texto es ofensivo. Si lo es, devuelve verdadero para isOffensive, una versión filtrada del texto con las partes ofensivas reemplazadas por asteriscos en filteredText, y una categoría breve (ej: "odio", "acoso", "sexual") en category. Si no es ofensivo, devuelve falso para isOffensive, el texto original para filteredText y deja category vacío.
 
   Texto: {{{text}}}
   `, safetySettings: [
@@ -66,7 +65,7 @@ const filterOffensiveMessagesFlow = ai.defineFlow(
     outputSchema: FilterOffensiveMessagesOutputSchema,
   },
   async input => {
-    const {output} = await prompt(input);
+    const { output } = await prompt(input);
     return output!;
   }
 );

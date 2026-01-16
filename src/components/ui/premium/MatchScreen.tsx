@@ -41,19 +41,31 @@ export function MatchScreen({ userProfile, matchedProfile, onChat, onKeepSwiping
 
             <div className="flex items-center justify-center gap-8 mb-12 relative z-10">
                 <motion.div
-                    initial={{ x: -100, opacity: 0 }}
-                    animate={{ x: 0, opacity: 1 }}
-                    transition={{ delay: 0.3 }}
+                    initial={{ x: -150, opacity: 0, rotate: -15 }}
+                    animate={{ x: 0, opacity: 1, rotate: 0 }}
+                    transition={{ type: "spring", damping: 15, delay: 0.2 }}
                 >
                     <AvatarGlow src={userProfile.photos[0]} size="xl" className="border-4 border-white rounded-full shadow-[0_0_50px_rgba(244,143,177,0.6)]" />
                 </motion.div>
 
-                <div className="text-4xl">❤️</div>
+                <motion.div
+                    initial={{ scale: 0 }}
+                    animate={{ scale: [0, 1.2, 1] }}
+                    transition={{ delay: 0.8, type: "spring" }}
+                    className="text-5xl"
+                >
+                    <motion.div
+                        animate={{ scale: [1, 1.2, 1] }}
+                        transition={{ repeat: Infinity, duration: 1.5 }}
+                    >
+                        ❤️
+                    </motion.div>
+                </motion.div>
 
                 <motion.div
-                    initial={{ x: 100, opacity: 0 }}
-                    animate={{ x: 0, opacity: 1 }}
-                    transition={{ delay: 0.3 }}
+                    initial={{ x: 150, opacity: 0, rotate: 15 }}
+                    animate={{ x: 0, opacity: 1, rotate: 0 }}
+                    transition={{ type: "spring", damping: 15, delay: 0.2 }}
                 >
                     <AvatarGlow src={matchedProfile.photos[0]} size="xl" className="border-4 border-white rounded-full shadow-[0_0_50px_rgba(168,85,247,0.6)]" />
                 </motion.div>

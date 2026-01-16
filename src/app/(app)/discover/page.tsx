@@ -105,6 +105,7 @@ export default function DiscoverPage() {
                 <FloatingMatchCard
                   key={currentProfile.uid}
                   profile={currentProfile as unknown as UserProfile}
+                  compatibility={profiles[0]?.compatibility}
                   onSwipe={handleSwipe}
                 />
               </div>

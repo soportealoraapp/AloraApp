@@ -91,6 +91,16 @@ export const chatServerService = {
                 isOffensive: moderationResult.isOffensive,
                 timestamp: FieldValue.serverTimestamp()
             });
+
+            // v1.5: Send Push Notification if approved
+            if (status === 'approved') {
+                const msgDoc = await adminDb.collection('messages').doc(messageId).get();
+                const msgData = msgDoc.data();
+                if (msgData) {
+                    const { notificationServerService } = await import('./notification-service');
+                    await notificationServerService.sendPushToUser(msgData.receiverId, "Nuevo mensaje 💬", text.length > 50 ? `${text.substring(0, 50)}...` : text);
+                }
+            }
         } catch (error) {
             console.error('Error in moderateMessage:', error);
             await adminDb.collection('system_logs').add({

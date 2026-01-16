@@ -136,3 +136,31 @@ export interface UserPreferences {
         likes: boolean;
     };
 }
+
+export interface UserCompatibilityProfile {
+    userId: string;
+    quizzes: {
+        [quizId: string]: {
+            answers: Record<string, number | string>;
+            completedAt: Date;
+        };
+    };
+    globalValues: string[];
+    lastUpdatedAt: Date;
+}
+
+export interface QuizQuestion {
+    id: string;
+    text: string;
+    type: 'scale' | 'choice';
+    options?: { label: string; value: string | number }[];
+    category: string;
+}
+
+export interface Quiz {
+    id: string;
+    title: string;
+    description: string;
+    questions: QuizQuestion[];
+    icon: string;
+}

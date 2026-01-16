@@ -30,12 +30,34 @@ export async function getCompatibilityScore(userId: string, candidateId: string)
     // 3. Score
     const result = hybridScorer.score(features);
 
-    // 4. Explain
-    const explanation = explainability.explainScore(result);
+    // 4. v1.5: Compatibility Quizzes Integration
+    const { compatibilityServerService } = await import('@/lib/firebase/server/compatibility-service');
+    const [profileA, profileB] = await Promise.all([
+        compatibilityServerService.getCompatibilityProfile(userId),
+        compatibilityServerService.getCompatibilityProfile(candidateId)
+    ]);
+
+    let quizScore = 0;
+    let finalScore = result.totalScore;
+
+    if (profileA && profileB) {
+        quizScore = compatibilityServerService.calculateScore(profileA, profileB);
+        // We give 40% weight to quizzes and 60% to the base hybrid model if quizzes are completed
+        finalScore = (result.totalScore * 0.6) + (quizScore * 0.4);
+    }
+
+    // 5. Explain
+    const explanation = explainability.explainScore({
+        ...result,
+        totalScore: finalScore
+    });
 
     return {
-        score: result.totalScore,
-        breakdown: result.breakdown,
+        score: finalScore,
+        breakdown: {
+            ...result.breakdown,
+            quizCompatibility: quizScore
+        },
         explanation
     };
 }
