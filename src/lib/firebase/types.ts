@@ -51,6 +51,8 @@ export interface Message {
     receiverId: string;
     text: string;
     isFiltered: boolean;
+    status: 'pending' | 'approved' | 'flagged';
+    moderationCategory?: string;
     createdAt: Date;
     readAt?: Date;
     type: 'text' | 'image' | 'icebreaker';

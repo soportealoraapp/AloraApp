@@ -20,6 +20,8 @@ import { useToast } from "@/hooks/use-toast";
 import Link from "next/link";
 import { Skeleton } from "@/components/ui/skeleton";
 
+import { MessageBubble } from "@/components/chat/message-bubble";
+
 export default function ChatWindowPage() {
     const params = useParams();
     const router = useRouter();
@@ -35,6 +37,7 @@ export default function ChatWindowPage() {
 
     useEffect(() => {
         if (messages.length > 0) {
+            // Scroll to bottom when messages change
             messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
             markAsRead();
         }
@@ -62,37 +65,37 @@ export default function ChatWindowPage() {
 
     if (loading && messages.length === 0) {
         return (
-            <div className="md:pl-60">
-                <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b bg-background/80 px-4 backdrop-blur-sm sm:px-6">
+            <div className="md:pl-60 h-screen flex flex-col">
+                <header className="flex h-16 items-center gap-4 border-b bg-background/80 px-4 backdrop-blur-sm sm:px-6 shrink-0">
                     <Skeleton className="h-10 w-10 rounded-full" />
                     <Skeleton className="h-6 w-32" />
                 </header>
-                <main className="flex flex-col h-[calc(100vh-4rem)] p-4">
-                    <div className="flex-1 space-y-4">
-                        {[1, 2, 3].map((i) => (
-                            <Skeleton key={i} className="h-16 w-3/4" />
-                        ))}
-                    </div>
+                <main className="flex-1 space-y-4 p-4">
+                    {[1, 2, 3].map((i) => (
+                        <div key={i} className={cn("flex", i % 2 === 0 ? "justify-end" : "justify-start")}>
+                            <Skeleton className="h-16 w-3/4 rounded-2xl" />
+                        </div>
+                    ))}
                 </main>
             </div>
         );
     }
 
     return (
-        <div className="md:pl-60 flex flex-col h-screen">
-            <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b bg-background/80 px-4 backdrop-blur-sm sm:px-6">
+        <div className="md:pl-60 flex flex-col h-[100dvh]">
+            <header className="flex h-16 items-center gap-4 border-b bg-background/80 px-4 backdrop-blur-sm sm:px-6 shrink-0 z-20">
                 <Button variant="ghost" size="icon" onClick={() => router.back()}>
                     <ArrowLeft className="h-5 w-5" />
                 </Button>
 
-                <Link href={`/profile/${otherUserId}`} className="flex items-center gap-3 flex-1">
-                    <div className="flex flex-col">
-                        <span className="font-semibold">
+                <Link href={`/profile/${otherUserId}`} className="flex items-center gap-3 flex-1 overflow-hidden">
+                    <div className="flex flex-col truncate">
+                        <span className="font-semibold truncate">
                             Usuario #{otherUserId?.slice(0, 8)}
                         </span>
                         {match && (
-                            <span className="text-xs text-muted-foreground flex items-center gap-1">
-                                <Sparkles className="h-3 w-3" />
+                            <span className="text-[10px] text-muted-foreground flex items-center gap-1">
+                                <Sparkles className="h-3 w-3 text-primary" />
                                 {match.compatibility}% compatible
                             </span>
                         )}
@@ -119,9 +122,9 @@ export default function ChatWindowPage() {
                 </DropdownMenu>
             </header>
 
-            <main className="flex-1 overflow-y-auto p-4 space-y-4">
+            <main className="flex-1 overflow-y-auto p-4 space-y-4 touch-pan-y overscroll-contain">
                 {messages.length === 0 ? (
-                    <div className="flex flex-col items-center justify-center h-full text-center">
+                    <div className="flex flex-col items-center justify-center min-h-[50vh] text-center">
                         <div className="bg-primary/10 rounded-full p-6 mb-4">
                             <Sparkles className="h-12 w-12 text-primary" />
                         </div>
@@ -132,46 +135,16 @@ export default function ChatWindowPage() {
                     </div>
                 ) : (
                     <>
-                        {messages.map((message) => {
-                            const isOwnMessage = message.senderId === user?.uid;
-
-                            return (
-                                <div
+                        <div className="flex flex-col gap-4">
+                            {messages.map((message) => (
+                                <MessageBubble
                                     key={message.id}
-                                    className={cn(
-                                        "flex",
-                                        isOwnMessage ? "justify-end" : "justify-start"
-                                    )}
-                                >
-                                    <Card
-                                        className={cn(
-                                            "max-w-[70%] px-4 py-2",
-                                            isOwnMessage
-                                                ? "bg-primary text-primary-foreground"
-                                                : "bg-secondary"
-                                        )}
-                                    >
-                                        <p className="text-sm whitespace-pre-wrap break-words">
-                                            {message.text}
-                                        </p>
-                                        <p
-                                            className={cn(
-                                                "text-xs mt-1",
-                                                isOwnMessage
-                                                    ? "text-primary-foreground/70"
-                                                    : "text-muted-foreground"
-                                            )}
-                                        >
-                                            {new Date(message.createdAt).toLocaleTimeString([], {
-                                                hour: "2-digit",
-                                                minute: "2-digit",
-                                            })}
-                                        </p>
-                                    </Card>
-                                </div>
-                            );
-                        })}
-                        <div ref={messagesEndRef} />
+                                    message={message}
+                                    isMe={message.senderId === user?.uid}
+                                />
+                            ))}
+                        </div>
+                        <div ref={messagesEndRef} className="h-4" />
                     </>
                 )}
             </main>

@@ -15,6 +15,8 @@ interface VerificationUploadProps {
     onComplete: () => void;
 }
 
+import { CameraCapture } from './CameraCapture';
+
 export function VerificationUpload({ onComplete }: VerificationUploadProps) {
     const { user } = useAuth();
     const { toast } = useToast();
@@ -23,6 +25,7 @@ export function VerificationUpload({ onComplete }: VerificationUploadProps) {
     const [selfiePreview, setSelfiePreview] = useState<string | null>(null);
     const [idPreview, setIdPreview] = useState<string | null>(null);
     const [uploading, setUploading] = useState(false);
+    const [isCameraOpen, setIsCameraOpen] = useState(false);
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, type: 'selfie' | 'id') => {
         if (e.target.files && e.target.files[0]) {
@@ -39,6 +42,17 @@ export function VerificationUpload({ onComplete }: VerificationUploadProps) {
             };
             reader.readAsDataURL(file);
         }
+    };
+
+    const handleCameraCapture = (blob: Blob) => {
+        const file = new File([blob], "selfie.jpg", { type: "image/jpeg" });
+        setSelfieFile(file);
+        const reader = new FileReader();
+        reader.onloadend = () => {
+            setSelfiePreview(reader.result as string);
+        };
+        reader.readAsDataURL(file);
+        setIsCameraOpen(false);
     };
 
     const handleSubmit = async () => {
@@ -74,31 +88,32 @@ export function VerificationUpload({ onComplete }: VerificationUploadProps) {
 
     return (
         <div className="space-y-6">
+            {isCameraOpen && (
+                <CameraCapture
+                    onCapture={handleCameraCapture}
+                    onCancel={() => setIsCameraOpen(false)}
+                />
+            )}
+
             <div className="space-y-4">
-                <div className="border-2 border-dashed rounded-lg p-6 text-center hover:bg-muted/50 transition-colors">
-                    <Label htmlFor="selfie-upload" className="cursor-pointer block w-full">
-                        {selfiePreview ? (
-                            <div className="relative h-48 w-full mx-auto">
-                                <Image src={selfiePreview} alt="Selfie preview" fill className="object-contain" />
-                                <div className="absolute inset-0 flex items-center justify-center bg-black/40 text-white opacity-0 hover:opacity-100 transition-opacity">
-                                    Cambiar foto
-                                </div>
+                <div
+                    className="border-2 border-dashed rounded-lg p-6 text-center hover:bg-muted/50 transition-colors cursor-pointer"
+                    onClick={() => setIsCameraOpen(true)}
+                >
+                    {selfiePreview ? (
+                        <div className="relative h-48 w-full mx-auto">
+                            <Image src={selfiePreview} alt="Selfie preview" fill className="object-contain" />
+                            <div className="absolute inset-0 flex items-center justify-center bg-black/40 text-white opacity-0 hover:opacity-100 transition-opacity">
+                                Repetir foto
                             </div>
-                        ) : (
-                            <div className="flex flex-col items-center gap-2">
-                                <Camera className="h-10 w-10 text-muted-foreground" />
-                                <span className="font-semibold">Subir Selfie</span>
-                                <span className="text-xs text-muted-foreground">Muestra tu rostro claramente</span>
-                            </div>
-                        )}
-                        <input
-                            id="selfie-upload"
-                            type="file"
-                            accept="image/*"
-                            className="hidden"
-                            onChange={(e) => handleFileChange(e, 'selfie')}
-                        />
-                    </Label>
+                        </div>
+                    ) : (
+                        <div className="flex flex-col items-center gap-2">
+                            <Camera className="h-10 w-10 text-muted-foreground" />
+                            <span className="font-semibold">Tomar Selfie</span>
+                            <span className="text-xs text-muted-foreground">Usa tu cámara para verificar tu rostro</span>
+                        </div>
+                    )}
                 </div>
 
                 <div className="border-2 border-dashed rounded-lg p-6 text-center hover:bg-muted/50 transition-colors">

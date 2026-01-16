@@ -7,12 +7,12 @@ Alora es una aplicación de citas diseñada para crear un espacio seguro y auté
 ## ✨ Características Principales
 
 - 🔐 **Autenticación real** (Email, Google, Apple)
-- 💖 **Matching inteligente** con algoritmo de compatibilidad 0-100%
-- 💬 **Chat en tiempo real** con moderación AI
-- ✔️ **Verificación de identidad** con badge visible
-- 🛡️ **Seguridad avanzada** (bloqueo, reportes, modo incógnito)
-- 📸 **Perfiles ricos** con galería de fotos
-- 🎯 **Filtros inteligentes** (edad, intereses, valores, verificados)
+- 🔐 **Seguridad Hardened**: Lógica crítica (likes, matches) migrada totalmente al servidor (API Routes + Admin SDK) para prevenir exploits.
+- 💖 **Matching inteligente**: Algoritmo de compatibilidad protegido y optimizado.
+- 💬 **Chat en tiempo real**: Moderación AI asincrónica mejorada (Genkit + Gemini) con indicadores de estado (enviando/filtrado).
+- ✔️ **Verificación Real-Time**: Captura directa de selfie desde la cámara integrada para una verificación de identidad más robusta.
+- 🛡️ **Reglas de Seguridad**: Firestore y Storage configurados con el principio de mínimo privilegio.
+- 📱 **Estabilidad Mobile**: Scroll y viewport optimizados para dispositivos móviles (Capacitor).
 - 🎨 **UI/UX femenino** con tonos suaves y microcopy empático
 
 ## 🚀 Getting Started

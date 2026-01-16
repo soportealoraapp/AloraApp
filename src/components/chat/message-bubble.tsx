@@ -1,64 +1,62 @@
 import { cn } from '@/lib/utils';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Badge } from '@/components/ui/badge';
-import type { ChatMessage } from '@/lib/actions';
-import type { UserProfile } from '@/lib/mock-data';
-import { mockUser } from '@/lib/mock-data';
-import { AlertCircle } from 'lucide-react';
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip"
-
+import { AlertCircle, Loader2, Check, CheckCheck } from 'lucide-react';
+import { Message } from '@/lib/firebase/types';
+import { Card } from '@/components/ui/card';
 
 interface MessageBubbleProps {
-  message: ChatMessage;
-  participant: UserProfile;
+  message: Message;
+  isMe: boolean;
 }
 
-export function MessageBubble({ message, participant }: MessageBubbleProps) {
-  const isMe = message.sender === 'me';
-  const senderAvatar = isMe ? mockUser.photos[0] : participant.photos[0];
-  const senderName = isMe ? mockUser.name : participant.name;
+export function MessageBubble({ message, isMe }: MessageBubbleProps) {
+  const isPending = message.status === 'pending';
+  const isFlagged = message.status === 'flagged';
 
   return (
-    <div className={cn('flex items-end gap-2', isMe ? 'justify-end' : 'justify-start')}>
-      {!isMe && (
-        <Avatar className="h-8 w-8 border">
-          <AvatarImage src={senderAvatar} alt={senderName} data-ai-hint="person" />
-          <AvatarFallback>{senderName.charAt(0)}</AvatarFallback>
-        </Avatar>
-      )}
-      <div
+    <div className={cn('flex flex-col gap-1 w-full', isMe ? 'items-end' : 'items-start')}>
+      <Card
         className={cn(
-          'max-w-[75%] rounded-2xl px-4 py-2',
-          isMe ? 'rounded-br-md bg-primary text-primary-foreground' : 'rounded-bl-md bg-secondary text-secondary-foreground'
+          'max-w-[75%] rounded-2xl px-4 py-2 relative',
+          isMe
+            ? 'rounded-br-md bg-primary text-primary-foreground'
+            : 'rounded-bl-md bg-secondary text-secondary-foreground',
+          isFlagged && 'opacity-50 grayscale'
         )}
       >
-        <p className="text-sm">{message.text}</p>
-        {message.isFiltered && (
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <div className="mt-1 flex items-center gap-1 text-xs opacity-70">
-                  <AlertCircle className="h-3 w-3" />
-                  <span>Filtrado</span>
-                </div>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>Este mensaje fue filtrado por contenido potencialmente ofensivo.</p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-        )}
-      </div>
-      {isMe && (
-         <Avatar className="h-8 w-8 border">
-          <AvatarImage src={senderAvatar} alt={senderName} data-ai-hint="person" />
-          <AvatarFallback>{senderName.charAt(0)}</AvatarFallback>
-        </Avatar>
+        <p className="text-sm whitespace-pre-wrap break-words">
+          {isFlagged && !isMe ? "Mensaje oculto por moderación" : message.text}
+        </p>
+
+        <div className="flex items-center justify-end gap-1 mt-1">
+          <span className={cn(
+            "text-[10px]",
+            isMe ? "text-primary-foreground/70" : "text-muted-foreground"
+          )}>
+            {message.createdAt ? new Date(message.createdAt).toLocaleTimeString([], {
+              hour: "2-digit",
+              minute: "2-digit",
+            }) : ""}
+          </span>
+
+          {isMe && (
+            <div className="flex items-center">
+              {isPending ? (
+                <Loader2 className="h-2.5 w-2.5 animate-spin" />
+              ) : message.readAt ? (
+                <CheckCheck className="h-3 w-3 text-primary-foreground" />
+              ) : (
+                <Check className="h-3 w-3 opacity-70" />
+              )}
+            </div>
+          )}
+        </div>
+      </Card>
+
+      {isFlagged && isMe && (
+        <div className="flex items-center gap-1 text-[10px] text-destructive px-1">
+          <AlertCircle className="h-3 w-3" />
+          <span>No enviado. Contenido inapropiado.</span>
+        </div>
       )}
     </div>
   );

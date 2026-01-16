@@ -14,10 +14,8 @@ service cloud.firestore {
       return get(/databases/$(database)/documents/profiles/$(userId));
     }
     
-    function isWoman() {
-      // Check if the authenticated user has gender 'woman' in their profile
-      let profile = getProfile(request.auth.uid);
-      return profile != null && profile.data.gender == 'woman';
+    function isParticipant(userIds) {
+      return request.auth.uid in userIds;
     }
 
     // Profiles: Anyone auth can read, only owner can write
@@ -28,53 +26,47 @@ service cloud.firestore {
       allow delete: if isOwner(userId);
     }
     
-    // Likes: Users can create likes from themselves
+    // Likes: READ ONLY for involved users. Writes ONLY via API (Admin)
     match /likes/{likeId} {
       allow read: if isAuthenticated() && (
         resource.data.fromUserId == request.auth.uid || 
         resource.data.toUserId == request.auth.uid
       );
-      allow create: if isAuthenticated() && request.resource.data.fromUserId == request.auth.uid;
-      allow update: if isAuthenticated() && (
-        resource.data.fromUserId == request.auth.uid || 
-        // Allow updating 'isMutual' by the system/recipient flow (if handled client side, which is risky, but common in simple apps. 
-        // Ideally strict backend triggers handle this, but for now allow matches to update mutual status)
-        resource.data.toUserId == request.auth.uid
-      );
+      allow write: if false; // Production Hardening: Block client-side writes
     }
     
-    // Matches: Only involved users can read
+    // Matches: Only involved users can read. Writes ONLY via API (Admin)
     match /matches/{matchId} {
-      allow read: if isAuthenticated() && request.auth.uid in resource.data.users;
-      // Creation is usually done via triggers or by the second user matching
-      allow create: if isAuthenticated() && request.auth.uid in request.resource.data.users;
-      allow update: if isAuthenticated() && request.auth.uid in resource.data.users;
+      allow read: if isAuthenticated() && isParticipant(resource.data.users);
+      allow write: if false; // Production Hardening: Block client-side writes
     }
     
-    // Messages: Only match participants can read/write
+    // Messages: Only match participants can read. 
+    // CREATE is also blocked from client to enforce server-side moderation and "Women First" logic.
     match /messages/{messageId} {
       allow read: if isAuthenticated() && (
         resource.data.senderId == request.auth.uid || 
         resource.data.receiverId == request.auth.uid
       );
       
-      allow create: if isAuthenticated() && 
-        request.resource.data.senderId == request.auth.uid;
-        // WOMEN FIRST LOGIC ENFORCEMENT ON DB LEVEL IS HARD WITHOUT COMPLEX QUERIES
-        // We will rely on App Logic for the "First Message" check, but could try here if we had match data
-    
-      allow update: if isAuthenticated() && (
-        resource.data.senderId == request.auth.uid || 
-        resource.data.receiverId == request.auth.uid
-      ); // Allow marking as read
+      // Updates only for marking as read by the recipient
+      allow update: if isAuthenticated() && 
+        resource.data.receiverId == request.auth.uid &&
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['readAt']);
+      
+      allow create, delete: if false; // Production Hardening: Enforce API for messaging
     }
     
-    // Verification Requests: User creates, only Admin reads/updates (or user reads own)
+    // Verification Requests: User creates, Admin reads/updates
     match /verificationRequests/{requestId} {
       allow read: if isAuthenticated() && (resource.data.userId == request.auth.uid);
       allow create: if isAuthenticated() && request.resource.data.userId == request.auth.uid;
-      // Only allow updates if admin (omitted for now as we don't have roles defined yet, strict owner check)
       allow update: if false; 
+    }
+
+    // AI Logs: Read/Write only for admins (or internal only, set to false for client)
+    match /ai_logs/{logId} {
+      allow read, write: if false;
     }
   }
 }
