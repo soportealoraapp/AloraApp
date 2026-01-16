@@ -5,9 +5,28 @@ import { AvatarGlow } from '../custom/AvatarGlow';
 import { PinkButton } from '../custom/PinkButton';
 import { UserProfile } from '@/lib/domain/types';
 import { useEffect, useState } from 'react';
-import Confetti from 'react-confetti';
 import { EMOTIONAL_MOTION } from '@/lib/constants/motion-config';
 import { BRAND_VOICE } from '@/lib/constants/brand-voice';
+
+// Simple confetti replacement (CSS-based)
+const SimpleConfetti = ({ width, height }: { width: number; height: number }) => (
+    <div className="fixed inset-0 pointer-events-none overflow-hidden z-50">
+        {Array.from({ length: 50 }).map((_, i) => (
+            <div
+                key={i}
+                className="absolute animate-confetti"
+                style={{
+                    left: `${Math.random() * 100}%`,
+                    animationDelay: `${Math.random() * 2}s`,
+                    backgroundColor: ['#ff69b4', '#ff1493', '#ffb6c1', '#ffc0cb', '#ff85a2'][i % 5],
+                    width: '10px',
+                    height: '10px',
+                    borderRadius: '50%',
+                }}
+            />
+        ))}
+    </div>
+);
 
 interface MatchScreenProps {
     userProfile: UserProfile;
@@ -26,7 +45,7 @@ export function MatchScreen({ userProfile, matchedProfile, onChat, onKeepSwiping
     return (
         <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-black/90 backdrop-blur-sm text-white">
             <div className="absolute inset-0 overflow-hidden">
-                <Confetti width={windowSize.width} height={windowSize.height} numberOfPieces={200} gravity={0.1} colors={['#F48FB1', '#ffffff']} />
+                <SimpleConfetti width={windowSize.width} height={windowSize.height} />
             </div>
 
             <motion.div

@@ -16,9 +16,11 @@ const FilterOffensiveMessagesInputSchema = z.object({
 });
 export type FilterOffensiveMessagesInput = z.infer<typeof FilterOffensiveMessagesInputSchema>;
 
-filteredText: z
-  .string()
-  .describe('El texto filtrado, con las partes ofensivas reemplazadas o eliminadas.'),
+const FilterOffensiveMessagesOutputSchema = z.object({
+  isOffensive: z.boolean().describe('Si el texto contiene contenido ofensivo.'),
+  filteredText: z
+    .string()
+    .describe('El texto filtrado, con las partes ofensivas reemplazadas o eliminadas.'),
   category: z.string().optional().describe('La categoría de la ofensa detectada (hate, harassment, etc).'),
 });
 export type FilterOffensiveMessagesOutput = z.infer<typeof FilterOffensiveMessagesOutputSchema>;
@@ -38,24 +40,7 @@ const prompt = ai.definePrompt({
   Determina si el siguiente texto es ofensivo. Si lo es, devuelve verdadero para isOffensive, una versión filtrada del texto con las partes ofensivas reemplazadas por asteriscos en filteredText, y una categoría breve (ej: "odio", "acoso", "sexual") en category. Si no es ofensivo, devuelve falso para isOffensive, el texto original para filteredText y deja category vacío.
 
   Texto: {{{text}}}
-  `, safetySettings: [
-    {
-      category: 'HARM_CATEGORY_HATE_SPEECH',
-      threshold: 'BLOCK_LOW_AND_ABOVE',
-    },
-    {
-      category: 'HARM_CATEGORY_DANGEROUS_CONTENT',
-      threshold: 'BLOCK_ONLY_HIGH',
-    },
-    {
-      category: 'HARM_CATEGORY_HARASSMENT',
-      threshold: 'BLOCK_MEDIUM_AND_ABOVE',
-    },
-    {
-      category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT',
-      threshold: 'BLOCK_LOW_AND_ABOVE',
-    },
-  ],
+  `,
 });
 
 const filterOffensiveMessagesFlow = ai.defineFlow(

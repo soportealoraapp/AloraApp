@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useEffect, useRef, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useChat } from "@/hooks/use-chat";
