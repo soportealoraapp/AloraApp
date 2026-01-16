@@ -32,6 +32,16 @@ export const monitoringServerService = {
         }
     },
 
+    async trackBusinessEvent(type: 'subscription_purchased' | 'boost_activated' | 'referral_used' | 'report_filed' | 'like_sent' | 'match_created' | 'saved_conversation' | 'safety_intervention' | 'community_join' | 'event_rsvp', userId: string, details?: Record<string, any>): Promise<void> {
+        await this.log({
+            level: 'info',
+            category: 'system',
+            message: `Business Event: ${type}`,
+            userId: userId,
+            details: { ...details, type }
+        });
+    },
+
     async trackFinancialMetric(type: 'cost_per_match' | 'ai_spend_dau' | 'revenue_ratio', value: number, details?: Record<string, any>): Promise<void> {
         await this.log({
             level: 'info',
