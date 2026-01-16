@@ -1,5 +1,7 @@
 import type { NextConfig } from 'next';
 
+import path from 'path';
+
 const withPWA = require('next-pwa')({
   dest: 'public',
   register: true,
@@ -12,6 +14,15 @@ const nextConfig: NextConfig = {
   poweredByHeader: false,
   compress: true, // Gzip by default, Brotli if supported by node/hosting
   reactStrictMode: true,
+
+  webpack: (config) => {
+    config.resolve.alias = {
+      ...config.resolve.alias,
+      '@opentelemetry/exporter-jaeger': path.resolve(__dirname, 'src/stubs/opentelemetry-exporter-jaeger'),
+      '@genkit-ai/firebase': path.resolve(__dirname, 'src/stubs/genkit-ai-firebase'),
+    };
+    return config;
+  },
 
   typescript: {
     ignoreBuildErrors: true,
