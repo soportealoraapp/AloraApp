@@ -32,13 +32,21 @@ export const monitoringServerService = {
         }
     },
 
-    async trackBusinessEvent(type: 'subscription_purchased' | 'boost_activated' | 'referral_used' | 'report_filed' | 'like_sent' | 'match_created' | 'saved_conversation' | 'safety_intervention', userId: string, details?: Record<string, any>): Promise<void> {
+    async trackFinancialMetric(type: 'cost_per_match' | 'ai_spend_dau' | 'revenue_ratio', value: number, details?: Record<string, any>): Promise<void> {
         await this.log({
             level: 'info',
-            category: (type === 'report_filed' || type === 'match_created' || type === 'like_sent' || type === 'saved_conversation' || type === 'safety_intervention') ? 'safety' : 'monetization',
-            message: `Business Event: ${type}`,
-            userId,
-            details
+            category: 'system',
+            message: `Financial Metric: ${type} = ${value}`,
+            details: { ...details, value }
+        });
+    },
+
+    async trackAIUsage(taskKey: string, durationMs: number, estimatedCost: number): Promise<void> {
+        await adminDb.collection('ai_cost_logs').add({
+            taskKey,
+            durationMs,
+            estimatedCost,
+            timestamp: FieldValue.serverTimestamp()
         });
     }
 };

@@ -3,9 +3,14 @@
 import { adminDb } from '../firebase/admin';
 import { UserProfile } from '@/lib/domain/types';
 import { getCompatibilityScore } from './compatibility/getCompatibilityScore';
+import { FieldValue } from 'firebase-admin/firestore'; // Added this import for FieldValue
 
 export async function getDynamicFeed(currentUserId: string): Promise<{ profile: UserProfile; score: any }[]> {
     try {
+        // v2.2: Feature Flag Check
+        const { featureFlagsServerService } = await import('@/lib/firebase/server/featureFlags-service');
+        const isAIEnabled = await featureFlagsServerService.isEnabled('aiMatchmaking');
+
         // 1. Fetch Current User & Assign A/B Group if missing
         const userRef = adminDb.collection('profiles').doc(currentUserId);
         const currentUserSnap = await userRef.get();
@@ -19,6 +24,21 @@ export async function getDynamicFeed(currentUserId: string): Promise<{ profile: 
         }
 
         const currentUser = { ...currentUserData, id: currentUserSnap.id } as UserProfile;
+
+        // v2.2: Bucketed Cache for Standard Users
+        const cacheKey = `feed_${currentUserId}_${currentUser.seeking}`;
+        if (currentUser.subscriptionStatus !== 'plus') {
+            const cacheRef = adminDb.collection('feed_cache').doc(cacheKey);
+            const cacheSnap = await cacheRef.get();
+            if (cacheSnap.exists) {
+                const cacheData = cacheSnap.data();
+                const now = Date.now();
+                const expiresAt = (cacheData?.expiresAt as any).toDate().getTime();
+                if (expiresAt > now) {
+                    return cacheData?.results || [];
+                }
+            }
+        }
 
         // 2. Fetch Interactions (Blocks, Likes, Passes)
         const [blocks1, blocks2, likes, passes] = await Promise.all([
@@ -58,7 +78,10 @@ export async function getDynamicFeed(currentUserId: string): Promise<{ profile: 
                 let details: any;
                 let explanation: string[];
 
-                if (currentUser.experimentalGroup === 'B') {
+                // v2.2: Force Legacy if AI is disabled or Kill Switch is active
+                const forceLegacy = !isAIEnabled || (await featureFlagsServerService.isKillSwitchActive());
+
+                if (currentUser.experimentalGroup === 'B' && !forceLegacy) {
                     // v2.0 AI MODEL
                     const { aiMatchmakingServerService } = await import('@/lib/firebase/server/aiMatchmaking-service');
                     // Cast candidate to any to bypass strict domain/firebase mismatch as they are technically compatible enough for the AI service
@@ -112,6 +135,17 @@ export async function getDynamicFeed(currentUserId: string): Promise<{ profile: 
 
         // 5. Sort by Score
         scoredCandidates.sort((a, b) => (b.score.total as number) - (a.score.total as number));
+
+        // v2.2: Cache Results for Standard Users
+        if (currentUser.subscriptionStatus !== 'plus') {
+            const expiresAt = new Date();
+            expiresAt.setHours(expiresAt.getHours() + 1); // 1h bucket
+            await adminDb.collection('feed_cache').doc(cacheKey).set({
+                results: scoredCandidates,
+                expiresAt,
+                createdAt: FieldValue.serverTimestamp()
+            });
+        }
 
         return scoredCandidates;
 

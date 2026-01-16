@@ -19,43 +19,50 @@ export const aiMatchmakingServerService = {
      * Hybrid scoring based on Quizzes, Behavior, and Conversation Dynamics.
      */
     async calculateDeepCompatibility(u1: UserProfile, u2: UserProfile): Promise<CompatibilityV2> {
-        try {
-            // 1. Value Affinity (From Quizzes) - 30%
-            const valueScore = await this.calculateValueAffinity(u1.uid, u2.uid);
+        const { aiCostGuardServerService } = await import('./aiCostGuard-service');
+        const taskKey = `compatibility_${[u1.uid, u2.uid].sort().join('_')}`;
 
-            // 2. Behavioral Similarity (Activity, Likes, Filters) - 25%
-            const behaviorScore = this.calculateBehavioralSimilarity(u1, u2);
+        return aiCostGuardServerService.executeWithGuard<CompatibilityV2>(
+            taskKey,
+            async () => {
+                // 1. Value Affinity (From Quizzes) - 30%
+                const valueScore = await this.calculateValueAffinity(u1.uid, u2.uid);
 
-            // 3. Conversation Engagement Potential - 25%
-            const engagementScore = await this.predictConversationSuccess(u1.uid, u2.uid);
+                // 2. Behavioral Similarity (Activity, Likes, Filters) - 25%
+                const behaviorScore = this.calculateBehavioralSimilarity(u1, u2);
 
-            // 4. Diversity & Recency Factor (Anti-Echo Chamber) - 20%
-            const diversityScore = this.calculateDiversityFactor(u2);
+                // 3. Conversation Engagement Potential - 25%
+                const engagementScore = await this.predictConversationSuccess(u1.uid, u2.uid);
 
-            // Weighted aggregation
-            const totalScore = (valueScore * 0.3) + (behaviorScore * 0.25) + (engagementScore * 0.25) + (diversityScore * 0.2);
+                // 4. Diversity & Recency Factor (Anti-Echo Chamber) - 20%
+                const diversityScore = this.calculateDiversityFactor(u2);
 
-            return {
-                score: Math.min(100, Math.round(totalScore)),
-                potentialScore: Math.round(engagementScore),
-                breakdown: {
-                    valueAffininty: Math.round(valueScore),
-                    behavioralSimilarity: Math.round(behaviorScore),
-                    convEngagement: Math.round(engagementScore),
-                    diversityFactor: Math.round(diversityScore)
-                },
-                explanation: this.generateExplanation(valueScore, behaviorScore, engagementScore, diversityScore)
-            };
-        } catch (error) {
-            console.error("Error calculating AI Compatibility:", error);
-            // Fallback to simple compatibility
-            return {
-                score: 50,
-                potentialScore: 50,
-                breakdown: { valueAffininty: 50, behavioralSimilarity: 50, convEngagement: 50, diversityFactor: 50 },
-                explanation: ["Usando modelo de respaldo"]
-            };
-        }
+                // Weighted aggregation
+                const totalScore = (valueScore * 0.3) + (behaviorScore * 0.25) + (engagementScore * 0.25) + (diversityScore * 0.2);
+
+                return {
+                    score: Math.min(100, Math.round(totalScore)),
+                    potentialScore: Math.round(engagementScore),
+                    breakdown: {
+                        valueAffininty: Math.round(valueScore),
+                        behavioralSimilarity: Math.round(behaviorScore),
+                        convEngagement: Math.round(engagementScore),
+                        diversityFactor: Math.round(diversityScore)
+                    },
+                    explanation: this.generateExplanation(valueScore, behaviorScore, engagementScore, diversityScore)
+                };
+            },
+            {
+                priority: 'deferred',
+                ttlHours: 48,
+                fallbackValue: {
+                    score: 50,
+                    potentialScore: 50,
+                    breakdown: { valueAffininty: 50, behavioralSimilarity: 50, convEngagement: 50, diversityFactor: 50 },
+                    explanation: ["Asignado automáticamente por optimización de costos"]
+                }
+            }
+        );
     },
 
     async calculateValueAffinity(u1Id: string, u2Id: string): Promise<number> {
