@@ -8,9 +8,14 @@ import { Settings, Edit, MapPin, Briefcase, Cigarette, GlassWater, Baby, Star, B
 import Image from "next/image";
 import Link from "next/link";
 import { Skeleton } from "@/components/ui/skeleton";
+import { BoostActivation } from "@/components/premium/BoostActivation";
+import { MissionCenter } from "@/components/retention/MissionCenter";
+import { PaywallModal } from "@/components/premium/PaywallModal";
+import { useState } from "react";
 
 export default function ProfilePage() {
   const { profile, loading } = useAuth();
+  const [showPaywall, setShowPaywall] = useState(false);
 
   if (loading || !profile) {
     return (
@@ -81,25 +86,42 @@ export default function ProfilePage() {
         </div>
 
         <div className="p-4 space-y-6">
-          <div>
-            <div className="flex items-baseline gap-2">
-              <h2 className="text-3xl font-bold font-headline">
-                {profile.displayName}, {profile.age}
-              </h2>
-              {profile.isVerified && (
-                <CheckCircle className="h-6 w-6 text-primary" />
-              )}
+          <div className="flex justify-between items-start">
+            <div className="flex-1">
+              <div className="flex items-baseline gap-2">
+                <h2 className="text-3xl font-bold font-headline">
+                  {profile.displayName}, {profile.age}
+                </h2>
+                {profile.isVerified && (
+                  <CheckCircle className="h-6 w-6 text-primary" />
+                )}
+                {profile.subscriptionStatus === 'plus' && (
+                  <Badge className="bg-gradient-to-r from-pink-500 to-rose-400 text-white font-bold">PLUS</Badge>
+                )}
+              </div>
+              <div className="flex items-center gap-2 text-muted-foreground mt-1">
+                <MapPin className="h-4 w-4" />
+                <p>{profile.city}</p>
+              </div>
             </div>
-            <div className="flex items-center gap-2 text-muted-foreground mt-2">
-              <MapPin className="h-4 w-4" />
-              <p>{profile.city}</p>
-            </div>
-            {profile.status && (
-              <p className="text-muted-foreground mt-2 text-lg">
-                "{profile.status}"
-              </p>
-            )}
+            <BoostActivation />
           </div>
+
+          {profile.subscriptionStatus !== 'plus' && (
+            <Card className="bg-gradient-to-r from-pink-500/10 to-rose-400/10 border-pink-200">
+              <CardContent className="p-4 flex items-center justify-between">
+                <div>
+                  <h4 className="font-bold text-pink-700">Pásate a Alora Plus</h4>
+                  <p className="text-xs text-pink-600">Likes ilimitados y mucho más.</p>
+                </div>
+                <Button size="sm" className="bg-pink-500 text-white rounded-full" onClick={() => setShowPaywall(true)}>
+                  Mejorar
+                </Button>
+              </CardContent>
+            </Card>
+          )}
+
+          <MissionCenter />
 
           {profile.bio && (
             <Card>
@@ -211,6 +233,7 @@ export default function ProfilePage() {
           )}
         </div>
       </main>
+      <PaywallModal isOpen={showPaywall} onClose={() => setShowPaywall(false)} />
     </div>
   );
 }

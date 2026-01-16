@@ -29,6 +29,46 @@ export interface UserProfile {
     isActive: boolean;
     consentVersion?: string; // v1.7 Compliance
     trustStatus: 'clean' | 'watchlist' | 'restricted' | 'banned'; // v1.7 Trust Score
+
+    // v1.8 Monetization & Growth
+    subscriptionStatus: 'free' | 'plus';
+    subscriptionExpiresAt?: Date;
+    boostExpiresAt?: Date;
+    totalBoosts: number;
+    streaks: SocialStreak;
+    referralCode: string;
+    invitedCount: number;
+}
+
+export interface SocialStreak {
+    currentCount: number;
+    lastActiveAt: Date;
+    longestCount: number;
+}
+
+export interface BoostInstance {
+    id: string;
+    userId: string;
+    activatedAt: Date;
+    expiresAt: Date;
+    type: 'purchase' | 'reward';
+}
+
+export interface Mission {
+    id: string;
+    title: string;
+    type: 'quiz' | 'chat' | 'referral' | 'login';
+    target: number;
+    reward: 'boost' | 'badge';
+    description: string;
+}
+
+export interface UserMissionProgress {
+    userId: string;
+    missionId: string;
+    currentValue: number;
+    isCompleted: boolean;
+    completedAt?: Date;
 }
 
 export interface PersonalGuideItem {

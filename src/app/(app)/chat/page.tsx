@@ -13,6 +13,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useToast } from "@/hooks/use-toast";
 import { Skeleton } from "@/components/ui/skeleton";
+import { LikesReceivedList } from "@/components/match/LikesReceivedList";
 
 export default function ChatPage() {
     const { user } = useAuth();
@@ -148,77 +149,76 @@ export default function ChatPage() {
                         )}
                     </TabsContent>
 
-                    <TabsContent value="new" className="space-y-2 mt-4">
-                        {newMatches.length === 0 ? (
-                            <Card>
-                                <CardContent className="flex flex-col items-center justify-center py-12">
-                                    <Heart className="h-12 w-12 text-muted-foreground mb-4" />
-                                    <p className="text-muted-foreground text-center">
-                                        No tienes nuevos matches por el momento
-                                    </p>
-                                </CardContent>
-                            </Card>
-                        ) : (
-                            newMatches.map((like) => (
-                                <Card key={like.id}>
-                                    <CardContent className="flex items-center gap-4 p-4">
-                                        <Link href={`/profile/${like.fromUserId}?source=new-match`} className="flex items-center gap-4 flex-1">
-                                            <div className="relative h-14 w-14 rounded-full overflow-hidden flex-shrink-0">
-                                                <Image
-                                                    src="/placeholder.jpg"
-                                                    alt="Profile"
-                                                    fill
-                                                    className="object-cover"
-                                                />
-                                                {like.type === 'superlike' && (
-                                                    <div className="absolute inset-0 bg-gradient-to-br from-pink-500/50 to-violet-500/50" />
-                                                )}
-                                            </div>
-                                            <div className="flex-1 min-w-0">
-                                                <div className="flex items-center gap-2">
-                                                    <p className="font-semibold truncate">Usuario #{like.fromUserId.slice(0, 8)}</p>
-                                                    {like.type === 'superlike' && (
-                                                        <Badge className="bg-gradient-to-r from-pink-500 to-violet-500 text-white">
-                                                            Super Like
-                                                        </Badge>
-                                                    )}
+                    <TabsContent value="new" className="space-y-4 mt-4">
+                        <LikesReceivedList />
+
+                        <div className="pt-4 border-t">
+                            <h4 className="font-bold text-sm mb-3 text-muted-foreground">Matches Recientes</h4>
+                            {newMatches.length === 0 ? (
+                                <p className="text-center py-8 text-sm text-muted-foreground">No tienes matches pendientes de respuesta.</p>
+                            ) : (
+                                <div className="space-y-2">
+                                    {newMatches.map((like) => (
+                                        <Card key={like.id}>
+                                            <CardContent className="flex items-center gap-4 p-4">
+                                                <Link href={`/profile/${like.fromUserId}?source=new-match`} className="flex items-center gap-4 flex-1">
+                                                    <div className="relative h-14 w-14 rounded-full overflow-hidden flex-shrink-0 border-2 border-pink-100">
+                                                        <Image
+                                                            src="/placeholder.jpg"
+                                                            alt="Profile"
+                                                            fill
+                                                            className="object-cover"
+                                                        />
+                                                    </div>
+                                                    <div className="flex-1 min-w-0">
+                                                        <div className="flex items-center gap-2">
+                                                            <p className="font-semibold truncate">Usuario #{like.fromUserId.slice(0, 8)}</p>
+                                                            {like.type === 'superlike' && (
+                                                                <Badge className="bg-gradient-to-r from-pink-500 to-violet-500 text-white">
+                                                                    Super Like
+                                                                </Badge>
+                                                            )}
+                                                        </div>
+                                                        <p className="text-sm text-muted-foreground">
+                                                            Match mutuo • Chatea ahora
+                                                        </p>
+                                                    </div>
+                                                </Link>
+                                                <div className="flex gap-2">
+                                                    <Button
+                                                        size="icon"
+                                                        variant="ghost"
+                                                        className="text-muted-foreground hover:text-red-500"
+                                                        onClick={(e) => {
+                                                            e.preventDefault();
+                                                            handleRejectMatch(like);
+                                                        }}
+                                                        disabled={processingMatch === like.fromUserId}
+                                                    >
+                                                        <X className="h-4 w-4" />
+                                                    </Button>
+                                                    <Button
+                                                        size="icon"
+                                                        className="bg-pink-500 text-white rounded-full"
+                                                        onClick={(e) => {
+                                                            e.preventDefault();
+                                                            handleAcceptMatch(like);
+                                                        }}
+                                                        disabled={processingMatch === like.fromUserId}
+                                                    >
+                                                        {processingMatch === like.fromUserId ? (
+                                                            <Loader2 className="h-4 w-4 animate-spin" />
+                                                        ) : (
+                                                            <MessageSquare className="h-4 w-4" />
+                                                        )}
+                                                    </Button>
                                                 </div>
-                                                <p className="text-sm text-muted-foreground">
-                                                    Le gustaste • Toca para ver perfil
-                                                </p>
-                                            </div>
-                                        </Link>
-                                        <div className="flex gap-2">
-                                            <Button
-                                                size="icon"
-                                                variant="outline"
-                                                onClick={(e) => {
-                                                    e.preventDefault();
-                                                    handleRejectMatch(like);
-                                                }}
-                                                disabled={processingMatch === like.fromUserId}
-                                            >
-                                                <X className="h-4 w-4" />
-                                            </Button>
-                                            <Button
-                                                size="icon"
-                                                onClick={(e) => {
-                                                    e.preventDefault();
-                                                    handleAcceptMatch(like);
-                                                }}
-                                                disabled={processingMatch === like.fromUserId}
-                                            >
-                                                {processingMatch === like.fromUserId ? (
-                                                    <Loader2 className="h-4 w-4 animate-spin" />
-                                                ) : (
-                                                    <CheckCircle className="h-4 w-4" />
-                                                )}
-                                            </Button>
-                                        </div>
-                                    </CardContent>
-                                </Card>
-                            ))
-                        )}
+                                            </CardContent>
+                                        </Card>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
                     </TabsContent>
                 </Tabs>
             </main>

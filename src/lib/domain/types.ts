@@ -25,6 +25,9 @@ export interface UserProfile extends User {
         lng: number;
         city: string;
     };
+    subscriptionStatus?: 'free' | 'plus';
+    boostExpiresAt?: any;
+    trustStatus?: 'clean' | 'watchlist' | 'restricted' | 'banned';
 }
 
 export interface Match {

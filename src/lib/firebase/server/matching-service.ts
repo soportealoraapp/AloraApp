@@ -37,16 +37,18 @@ export const matchingServerService = {
             const userDoc = await adminDb.collection('profiles').doc(fromUserId).get();
             const fromProfile = userDoc.data() as UserProfile;
 
-            // v1.7: Rate limiting (Silent)
+            // v1.7 & v1.8: Rate limiting (Silent)
             const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000);
             const recentLikes = await adminDb.collection('likes')
                 .where('fromUserId', '==', fromUserId)
                 .where('createdAt', '>', oneHourAgo)
                 .get();
 
-            const limit = fromProfile?.trustStatus === 'restricted' ? 5 : 50;
+            let limit = fromProfile?.trustStatus === 'restricted' ? 5 : 50;
+            // v1.8: Plus users have 500/hour (practically unlimited for humans)
+            if (fromProfile?.subscriptionStatus === 'plus') limit = 500;
+
             if (recentLikes.size >= limit) {
-                // Return success: false but matching UI usually handles this gracefully or with a retry
                 return { matched: false };
             }
 

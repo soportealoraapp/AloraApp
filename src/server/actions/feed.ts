@@ -28,15 +28,26 @@ export async function getDynamicFeed(currentUserId: string): Promise<{ profile: 
 
                 let totalScore = deepScore.score;
 
-                // Boosts
-                if (candidate.plan === 'plus') totalScore += 5;
-                if (candidate.plan === 'premium') totalScore += 12;
+                // v1.8: Subscription & Active Boost
+                if (candidate.subscriptionStatus === 'plus') {
+                    totalScore += 10;
+                }
+
+                if (candidate.boostExpiresAt) {
+                    const boostExpires = candidate.boostExpiresAt instanceof Date
+                        ? candidate.boostExpiresAt
+                        : (candidate.boostExpiresAt as any).toDate();
+
+                    if (boostExpires > new Date()) {
+                        totalScore += 40; // Massive boost
+                    }
+                }
 
                 return {
                     profile: candidate,
                     score: {
                         total: Math.min(100, Math.round(totalScore)),
-                        details: deepScore.breakdown,
+                        details: deepScore.breakdown, // fixed property name
                         explanation: deepScore.explanation
                     }
                 };
