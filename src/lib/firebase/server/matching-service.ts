@@ -47,6 +47,18 @@ export const matchingServerService = {
             const userDoc = await adminDb.collection('profiles').doc(fromUserId).get();
             const fromProfile = userDoc.data() as UserProfile;
 
+            // P0-FIX: Soft-delete enforcement
+            if (!fromProfile || fromProfile.isActive === false) {
+                return { matched: false };
+            }
+
+            // Also check target user
+            const targetDoc = await adminDb.collection('profiles').doc(toUserId).get();
+            const toProfile = targetDoc.data() as UserProfile;
+            if (!toProfile || toProfile.isActive === false) {
+                return { matched: false };
+            }
+
             // 1. Safety Check: Blocks
             const blockId = `${fromUserId}_${toUserId}`;
             const reverseBlockId = `${toUserId}_${fromUserId}`;

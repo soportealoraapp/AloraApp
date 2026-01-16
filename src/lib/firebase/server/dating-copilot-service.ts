@@ -45,12 +45,41 @@ export const datingCopilotServerService = {
     },
 
     async getCoachAdvice(userId: string, userIntent: string): Promise<string> {
-        // Basic coaching logic
+        // 1. Crisis Filter (P0 Safety)
+        const crisisKeywords = ['suicidio', 'morir', 'matar', 'hacer daño', 'acabar con todo'];
+        if (crisisKeywords.some(kw => userIntent.toLowerCase().includes(kw))) {
+            const { monitoringServerService } = await import('./monitoring-service');
+            await monitoringServerService.log({
+                level: 'critical',
+                category: 'safety',
+                message: `CRISIS DETECTED: User ${userId} mentioned self-harm.`,
+                userId
+            });
+            return "Parece que estás pasando por un momento muy difícil. Por favor, recuerda que no estás solo. Puedes contactar con profesionales en [Línea de Ayuda Local]. Yo soy una IA de acompañamiento, no puedo sustituir la ayuda profesional necesaria en estos casos.";
+        }
+
+        // 2. Prompt Injection / Jailbreak Filter (P1-FIX: normalize unicode)
+        const normalizedIntent = userIntent.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+        const jailbreakTriggers = ['system prompt', 'ignora las reglas', 'developer mode', 'hazte pasar por', 'olvida tus instrucciones', 'act as', 'ignore previous'];
+        if (jailbreakTriggers.some(kw => normalizedIntent.includes(kw))) {
+            return "Lo siento, como tu Copilot solo puedo hablar sobre bienestar emocional y relaciones.";
+        }
+
+        // 3. Basic coaching logic
         if (userIntent.includes('ansiedad')) {
             return "Es normal sentir nervios. Respira profundo. Recuerda que tú también estás evaluando si esa persona encaja contigo.";
         }
 
         return "Cuéntame más sobre cómo te sientes antes de enviar ese mensaje.";
+    },
+
+    async clearEphemeralContext(userId: string): Promise<void> {
+        // P0-FIX: Actually delete ephemeral AI context data
+        const contextRef = adminDb.collection('profiles').doc(userId).collection('copilot_context');
+        const batch = adminDb.batch();
+        const docs = await contextRef.get();
+        docs.forEach(d => batch.delete(d.ref));
+        await batch.commit();
     },
 
     async detectPatterns(userId: string): Promise<string[]> {
