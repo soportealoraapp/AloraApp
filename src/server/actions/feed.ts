@@ -6,10 +6,19 @@ import { getCompatibilityScore } from './compatibility/getCompatibilityScore';
 
 export async function getDynamicFeed(currentUserId: string): Promise<{ profile: UserProfile; score: any }[]> {
     try {
-        // 1. Fetch Current User
-        const currentUserSnap = await adminDb.collection('profiles').doc(currentUserId).get();
+        // 1. Fetch Current User & Assign A/B Group if missing
+        const userRef = adminDb.collection('profiles').doc(currentUserId);
+        const currentUserSnap = await userRef.get();
         if (!currentUserSnap.exists) return [];
-        const currentUser = { id: currentUserSnap.id, ...currentUserSnap.data() } as UserProfile;
+
+        let currentUserData = currentUserSnap.data() as UserProfile;
+        if (!currentUserData.experimentalGroup) {
+            const group = Math.random() > 0.5 ? 'B' : 'A';
+            await userRef.update({ experimentalGroup: group });
+            currentUserData.experimentalGroup = group;
+        }
+
+        const currentUser = { ...currentUserData, id: currentUserSnap.id } as UserProfile;
 
         // 2. Fetch Interactions (Blocks, Likes, Passes)
         const [blocks1, blocks2, likes, passes] = await Promise.all([
@@ -30,21 +39,39 @@ export async function getDynamicFeed(currentUserId: string): Promise<{ profile: 
         // 3. Fetch Candidates
         const candidatesSnap = await adminDb.collection('profiles')
             .where('gender', '==', currentUser.seeking === 'women' ? 'woman' : 'man')
-            .where('trustStatus', '!=', 'banned') // Hide banned users
-            .limit(50) // Fetch more to filter out excluded
+            .where('trustStatus', '!=', 'banned')
+            .limit(50)
             .get();
 
         const candidates = candidatesSnap.docs
-            .map(doc => ({ id: doc.id, ...doc.data() } as UserProfile))
+            .map(doc => {
+                const data = doc.data();
+                return { ...data, uid: doc.id, id: doc.id } as any; // any to avoid strict domain/firebase mismatch in this context
+            })
             .filter(p => !excludedIds.has(p.id))
-            .slice(0, 20); // Keep only 20
+            .slice(0, 30);
 
-        // 4. Calculate Scores
+        // 4. Calculate Scores based on experimental group
         const scoredCandidates = await Promise.all(
             candidates.map(async (candidate) => {
-                const deepScore = await getCompatibilityScore(currentUserId, candidate.id);
+                let totalScore: number;
+                let details: any;
+                let explanation: string[];
 
-                let totalScore = deepScore.score;
+                if (currentUser.experimentalGroup === 'B') {
+                    // v2.0 AI MODEL
+                    const { aiMatchmakingServerService } = await import('@/lib/firebase/server/aiMatchmaking-service');
+                    const aiResult = await aiMatchmakingServerService.calculateDeepCompatibility(currentUser, candidate);
+                    totalScore = aiResult.score;
+                    details = aiResult.breakdown;
+                    explanation = aiResult.explanation;
+                } else {
+                    // v1.x LEGACY MODEL
+                    const deepScore = await getCompatibilityScore(currentUserId, candidate.id);
+                    totalScore = deepScore.score;
+                    details = deepScore.breakdown;
+                    explanation = deepScore.explanation;
+                }
 
                 // v1.8: Subscription & Active Boost
                 if (candidate.subscriptionStatus === 'plus') {
@@ -61,19 +88,23 @@ export async function getDynamicFeed(currentUserId: string): Promise<{ profile: 
                     }
                 }
 
+                // v2.0: Silent Risk Adjustment (Trust Score)
+                if (candidate.trustStatus === 'watchlist') totalScore *= 0.8;
+                if (candidate.trustStatus === 'restricted') totalScore *= 0.5;
+
                 return {
                     profile: candidate,
                     score: {
                         total: Math.min(100, Math.round(totalScore)),
-                        details: deepScore.breakdown,
-                        explanation: deepScore.explanation
+                        details,
+                        explanation
                     }
                 };
             })
         );
 
         // 5. Sort by Score
-        scoredCandidates.sort((a, b) => b.score.total - a.score.total);
+        scoredCandidates.sort((a, b) => (b.score.total as number) - (a.score.total as number));
 
         return scoredCandidates;
 

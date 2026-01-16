@@ -38,6 +38,7 @@ export interface UserProfile {
     streaks: SocialStreak;
     referralCode: string;
     invitedCount: number;
+    experimentalGroup?: 'A' | 'B'; // v2.0 A/B Testing
 }
 
 export interface SocialStreak {

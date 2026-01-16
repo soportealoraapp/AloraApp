@@ -62,6 +62,10 @@ export const chatServerService = {
                 lastMessageAt: FieldValue.serverTimestamp(),
             });
 
+            // v2.0: Update Match Quality Metrics
+            const { matchQualityServerService } = await import('./matchQuality-service');
+            await matchQualityServerService.updateOnMessage(matchId, senderId);
+
             return {
                 ...messageData,
                 id: messageRef.id,

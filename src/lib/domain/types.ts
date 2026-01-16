@@ -28,6 +28,7 @@ export interface UserProfile extends User {
     subscriptionStatus?: 'free' | 'plus';
     boostExpiresAt?: any;
     trustStatus?: 'clean' | 'watchlist' | 'restricted' | 'banned';
+    experimentalGroup?: 'A' | 'B';
 }
 
 export interface Match {

@@ -127,6 +127,10 @@ export const matchingServerService = {
                     notificationServerService.sendPushToUser(toUserId, "¡Es un Match! 💖", `Descubre quién te ha dado like.`)
                 ]);
 
+                // v2.0: Initialize Quality Tracking
+                const { matchQualityServerService } = await import('./matchQuality-service');
+                await matchQualityServerService.initializeQualityTracking(matchId, fromProfile.experimentalGroup || 'A');
+
                 return { matched: true, matchId };
             }
 
