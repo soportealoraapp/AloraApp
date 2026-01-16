@@ -6,6 +6,8 @@ import { PinkButton } from '../custom/PinkButton';
 import { UserProfile } from '@/lib/domain/types';
 import { useEffect, useState } from 'react';
 import Confetti from 'react-confetti';
+import { EMOTIONAL_MOTION } from '@/lib/constants/motion-config';
+import { BRAND_VOICE } from '@/lib/constants/brand-voice';
 
 interface MatchScreenProps {
     userProfile: UserProfile;
@@ -28,15 +30,15 @@ export function MatchScreen({ userProfile, matchedProfile, onChat, onKeepSwiping
             </div>
 
             <motion.div
-                initial={{ scale: 0.5, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                transition={{ type: "spring", stiffness: 260, damping: 20 }}
+                initial={EMOTIONAL_MOTION.matchReveal.initial}
+                animate={EMOTIONAL_MOTION.matchReveal.animate}
+                transition={EMOTIONAL_MOTION.matchReveal.transition as any}
                 className="z-10 text-center mb-10"
             >
                 <h1 className="text-6xl font-black italic bg-clip-text text-transparent bg-gradient-to-r from-pink-400 to-purple-400 drop-shadow-lg">
-                    It's a Match!
+                    {BRAND_VOICE.nudges.newMatch}
                 </h1>
-                <p className="mt-2 text-xl text-white/80">A ella también le gustas</p>
+                <p className="mt-2 text-xl text-white/80">Todo gran vínculo comienza con una conexión especial.</p>
             </motion.div>
 
             <div className="flex items-center justify-center gap-8 mb-12 relative z-10">

@@ -10,11 +10,11 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/co
 import { useDiscover } from "@/hooks/use-discover";
 import { useAuth } from "@/contexts/AuthContext";
 import { matchingService } from "@/lib/firebase/matching-service";
-import { useMm } from "@/hooks/use-matches"; // Assuming this hook exists or likely useMatches
-// Wait, I used useMatches before. Let imports be correct.
+import { useMatches } from "@/hooks/use-matches";
 import { useToast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
 import { UserProfile } from "@/lib/domain/types";
+import { BRAND_VOICE } from "@/lib/constants/brand-voice";
 
 // ... (keep filters imports if needed, simplified for brevity in this artifact)
 
@@ -42,7 +42,7 @@ export default function DiscoverPage() {
 
     try {
       if (direction === 'right') {
-        const isMatch = await matchingService.sendLike(currentUserProfile.uid, profileToActOn.uid);
+        const isMatch = await matchingService.sendLike((currentUserProfile as any).uid || (currentUserProfile as any).id, (profileToActOn as any).uid || (profileToActOn as any).id);
         if (isMatch) {
           // Trigger Match Screen
           // We need to fetch the full profile or assume profileToActOn is enough
@@ -51,7 +51,7 @@ export default function DiscoverPage() {
           setShowMatchScreen(true);
         }
       } else {
-        await matchingService.sendPass(currentUserProfile.uid, profileToActOn.uid);
+        await matchingService.sendPass((currentUserProfile as any).uid || (currentUserProfile as any).id, (profileToActOn as any).uid || (profileToActOn as any).id);
       }
     } catch (error) {
       console.error("Action failed", error);
@@ -91,9 +91,10 @@ export default function DiscoverPage() {
       <main className="flex-1 flex flex-col items-center justify-center p-4 relative">
         <AnimatePresence>
           {loading ? (
-            <div className="flex flex-col items-center">
-              <Loader2 className="h-10 w-10 animate-spin text-pink-500" />
-              <p className="mt-4 text-pink-400">Buscando personas increíbles...</p>
+            <div className="flex flex-col items-center text-center px-6">
+              <Loader2 className="h-10 w-10 animate-spin text-pink-500 mb-4" />
+              <p className="text-pink-500 font-semibold">{BRAND_VOICE.states.emptyFeed.title}</p>
+              <p className="text-pink-400 text-sm mt-1">{BRAND_VOICE.states.emptyFeed.subtitle}</p>
             </div>
           ) : currentProfile ? (
             <div className="w-full max-w-sm h-[600px] relative">
@@ -103,7 +104,7 @@ export default function DiscoverPage() {
               )}
               <div className="relative z-10 h-full">
                 <FloatingMatchCard
-                  key={currentProfile.uid}
+                  key={currentProfile.id}
                   profile={currentProfile as unknown as UserProfile}
                   compatibility={profiles[0]?.compatibility}
                   onSwipe={handleSwipe}
@@ -111,9 +112,15 @@ export default function DiscoverPage() {
               </div>
             </div>
           ) : (
-            <div className="text-center">
-              <p className="text-xl text-gray-500 mb-4">No hay más perfiles por ahora</p>
-              <Button onClick={() => refresh()} className="bg-pink-500 text-white">Volver a cargar</Button>
+            <div className="text-center px-8">
+              <div className="bg-pink-50 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6">
+                <RefreshCcw className="h-10 w-10 text-pink-300" />
+              </div>
+              <p className="text-xl font-bold text-gray-800 mb-2">{BRAND_VOICE.states.noMatches.title}</p>
+              <p className="text-gray-500 mb-8 max-w-xs mx-auto">{BRAND_VOICE.states.noMatches.subtitle}</p>
+              <Button onClick={() => refresh()} className="bg-gradient-to-r from-pink-500 to-rose-500 text-white px-8 py-6 rounded-2xl shadow-lg hover:shadow-xl transition-all">
+                Explorar de nuevo
+              </Button>
             </div>
           )}
         </AnimatePresence>

@@ -14,6 +14,7 @@ import Link from "next/link";
 import { useToast } from "@/hooks/use-toast";
 import { Skeleton } from "@/components/ui/skeleton";
 import { LikesReceivedList } from "@/components/match/LikesReceivedList";
+import { BRAND_VOICE } from "@/lib/constants/brand-voice";
 
 export default function ChatPage() {
     const { user } = useAuth();
@@ -103,12 +104,12 @@ export default function ChatPage() {
                         {filteredMatches.length === 0 ? (
                             <Card>
                                 <CardContent className="flex flex-col items-center justify-center py-12">
-                                    <MessageSquare className="h-12 w-12 text-muted-foreground mb-4" />
-                                    <p className="text-muted-foreground text-center mb-2">
-                                        Aún no tienes conversaciones
+                                    <MessageSquare className="h-16 w-16 text-pink-200 mb-6" />
+                                    <p className="text-xl font-bold text-gray-800 text-center mb-2">
+                                        {BRAND_VOICE.states.noMatches.title}
                                     </p>
-                                    <p className="text-sm text-muted-foreground text-center">
-                                        Empieza a dar likes en la sección Descubrir
+                                    <p className="text-sm text-muted-foreground text-center max-w-xs">
+                                        {BRAND_VOICE.states.noMatches.subtitle}
                                     </p>
                                     <Button asChild className="mt-4">
                                         <Link href="/discover">Ir a Descubrir</Link>
