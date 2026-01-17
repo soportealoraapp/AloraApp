@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
 // POST /api/chat/send
+export const dynamic = 'force-dynamic';
 export async function POST(request: NextRequest) {
     const { createClient } = await import('@/lib/supabase/server');
     const supabase = await createClient();
