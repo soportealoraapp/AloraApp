@@ -34,8 +34,8 @@ export function StepInterests({ data, onUpdate, onNext, onPrev, userId }: any) {
 
     return (
         <div className="space-y-6">
-            <h2 className="text-2xl font-bold text-center mb-2">Tus Intereses</h2>
-            <p className="text-center text-muted-foreground mb-6">Selecciona hasta 10 cosas que te gusten</p>
+            <h2 className="text-2xl font-bold text-center mb-2 dark:text-white">Tus Intereses</h2>
+            <p className="text-center text-muted-foreground dark:text-gray-400 mb-6 font-medium">Selecciona hasta 10 cosas que te gusten</p>
 
             <div className="flex flex-wrap gap-2 justify-center">
                 {INTERESTS_LIST.map((interest, idx) => (
@@ -47,9 +47,9 @@ export function StepInterests({ data, onUpdate, onNext, onPrev, userId }: any) {
                     >
                         <Badge
                             variant={selected.includes(interest) ? "default" : "outline"}
-                            className={`cursor-pointer px-4 py-2 text-sm transition-all ${selected.includes(interest)
-                                ? "bg-primary hover:bg-primary/90 scale-105 text-primary-foreground"
-                                : "hover:bg-accent hover:text-accent-foreground border-input"
+                            className={`cursor-pointer px-4 py-2 text-sm transition-all duration-300 ${selected.includes(interest)
+                                ? "bg-primary hover:bg-primary/90 scale-102 text-primary-foreground shadow-sm"
+                                : "hover:bg-accent hover:text-accent-foreground border-input dark:border-pink-900/40 dark:text-gray-200"
                                 }`}
                             onClick={() => toggleInterest(interest)}
                         >
@@ -60,13 +60,13 @@ export function StepInterests({ data, onUpdate, onNext, onPrev, userId }: any) {
             </div>
 
             <div className="flex gap-4 mt-8">
-                <Button variant="outline" onClick={onPrev} className="w-1/3 hover:bg-muted active:scale-95 transition-transform">Atrás</Button>
+                <Button variant="outline" onClick={onPrev} className="w-1/3 hover:bg-muted dark:hover:bg-pink-950/20 active:scale-[0.98] transition-all border-pink-100 dark:border-pink-900/30">Atrás</Button>
                 <Button
                     onClick={handleNext}
-                    className="w-2/3 hover:scale-105 active:scale-95 transition-transform"
+                    className="w-2/3 hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 shadow-md shadow-pink-100 dark:shadow-pink-950/10"
                     disabled={selected.length === 0}
                 >
-                    Siguiente
+                    Continuar
                 </Button>
             </div>
         </div>

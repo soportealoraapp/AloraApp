@@ -27,14 +27,14 @@ export function StepBasicInfo({ data, onUpdate, onNext, userId }: any) {
 
             <div className="space-y-4">
                 <div className="space-y-2">
-                    <Label htmlFor="displayName">Nombre</Label>
+                    <Label htmlFor="displayName" className="dark:text-pink-300">Nombre</Label>
                     <GlowInput>
                         <Input
                             id="displayName"
                             value={localData.displayName || ''}
                             onChange={(e) => handleChange('displayName', e.target.value)}
                             placeholder="Tu nombre"
-                            className="bg-white"
+                            className="bg-white dark:bg-card"
                             aria-label="Nombre completo"
                         />
                     </GlowInput>
@@ -42,26 +42,26 @@ export function StepBasicInfo({ data, onUpdate, onNext, userId }: any) {
 
                 <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
-                        <Label htmlFor="age">Edad</Label>
+                        <Label htmlFor="age" className="dark:text-pink-300">Edad</Label>
                         <GlowInput>
                             <Input
                                 id="age"
                                 type="number"
                                 value={localData.age || ''}
                                 onChange={(e) => handleChange('age', parseInt(e.target.value))}
-                                className="bg-white"
+                                className="bg-white dark:bg-card"
                                 aria-label="Edad"
                             />
                         </GlowInput>
                     </div>
                     <div className="space-y-2">
-                        <Label htmlFor="gender">Género</Label>
+                        <Label htmlFor="gender" className="dark:text-pink-300">Género</Label>
                         <GlowInput>
                             <Select onValueChange={(v) => handleChange('gender', v)} defaultValue={localData.gender}>
-                                <SelectTrigger id="gender" className="bg-white">
+                                <SelectTrigger id="gender" className="bg-white dark:bg-card">
                                     <SelectValue placeholder="Selecciona" />
                                 </SelectTrigger>
-                                <SelectContent>
+                                <SelectContent className="dark:bg-card">
                                     <SelectItem value="woman">Mujer</SelectItem>
                                     <SelectItem value="man">Hombre</SelectItem>
                                     <SelectItem value="non-binary">No binario</SelectItem>
@@ -72,13 +72,13 @@ export function StepBasicInfo({ data, onUpdate, onNext, userId }: any) {
                 </div>
 
                 <div className="space-y-2">
-                    <Label htmlFor="seeking">Busco...</Label>
+                    <Label htmlFor="seeking" className="dark:text-pink-300">Busco...</Label>
                     <GlowInput>
                         <Select onValueChange={(v) => handleChange('seeking', v)} defaultValue={localData.seeking}>
-                            <SelectTrigger id="seeking" className="bg-white">
+                            <SelectTrigger id="seeking" className="bg-white dark:bg-card">
                                 <SelectValue placeholder="Interés" />
                             </SelectTrigger>
-                            <SelectContent>
+                            <SelectContent className="dark:bg-card">
                                 <SelectItem value="men">Hombres</SelectItem>
                                 <SelectItem value="women">Mujeres</SelectItem>
                                 <SelectItem value="all">Todos</SelectItem>
@@ -90,7 +90,7 @@ export function StepBasicInfo({ data, onUpdate, onNext, userId }: any) {
 
             <Button
                 onClick={handleNext}
-                className="w-full mt-8 hover:scale-105 active:scale-95 transition-transform"
+                className="w-full mt-8 hover:scale-[1.02] active:scale-[0.98] transition-transform duration-300"
                 disabled={!localData.displayName || !localData.age || !localData.gender}
             >
                 Continuar

@@ -57,23 +57,23 @@ export function OnboardingWizard() {
         setStep(prev => Math.min(prev + 1, totalSteps));
     };
     const prevStep = () => setStep(prev => Math.max(prev - 1, 1));
-    const userId = user?.id || user?.uid;
+    const userId = user?.id;
 
     return (
-        <div className="max-w-md mx-auto p-6 bg-white rounded-3xl shadow-xl min-h-[600px] flex flex-col border border-pink-50">
+        <div className="max-w-md mx-auto p-6 bg-white dark:bg-card rounded-3xl shadow-xl dark:shadow-pink-900/10 min-h-[600px] flex flex-col border border-pink-50 dark:border-pink-900/20 transition-colors duration-500">
             <div className="mb-8">
-                <Progress value={(step / totalSteps) * 100} className="h-2 bg-pink-100" />
-                <p className="text-center text-[10px] font-bold uppercase tracking-widest text-pink-400 mt-2">Paso {step} de {totalSteps}</p>
+                <Progress value={(step / totalSteps) * 100} className="h-2 bg-pink-100 dark:bg-pink-900/30" />
+                <p className="text-center text-[10px] font-bold uppercase tracking-widest text-pink-400 dark:text-pink-300 mt-2">Paso {step} de {totalSteps}</p>
             </div>
 
             <div className="flex-1 relative">
                 <AnimatePresence mode="wait">
                     <motion.div
                         key={step}
-                        initial={{ x: 50, opacity: 0 }}
+                        initial={{ x: 30, opacity: 0 }}
                         animate={{ x: 0, opacity: 1 }}
-                        exit={{ x: -50, opacity: 0 }}
-                        transition={{ type: "spring", damping: 25, stiffness: 200 }}
+                        exit={{ x: -30, opacity: 0 }}
+                        transition={{ type: "spring", damping: 30, stiffness: 150 }}
                         className="h-full"
                     >
                         {step === 1 && <StepBasicInfo userId={userId} data={formData} onUpdate={saveProgress} onNext={nextStep} />}
