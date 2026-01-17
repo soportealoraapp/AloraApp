@@ -200,6 +200,34 @@ model CopilotEvent {
   @@map("copilot_events")
 }
 
+model AiCoachSession {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  messages  AiMessage[]
+  
+  summary   String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@map("ai_coach_sessions")
+}
+
+model AiMessage {
+  id        String   @id @default(uuid())
+  sessionId String
+  session   AiCoachSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  
+  role      String   // user, assistant, system
+  content   String   @db.Text
+  metadata  Json?
+  
+  createdAt DateTime @default(now())
+  
+  @@map("ai_messages")
+}
+
 // -----------------------------------------------------------------------------
 // RELATIONSHIP INTELLIGENCE (v3.1)
 // -----------------------------------------------------------------------------
