@@ -9,6 +9,7 @@ import { storageService } from '@/lib/firebase/storage-service';
 import { verificationService } from '@/lib/firebase/verification-service';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
+import { trackEvent } from '@/lib/tracking/client';
 import Image from 'next/image';
 
 interface VerificationUploadProps {
@@ -69,6 +70,9 @@ export function VerificationUpload({ onComplete }: VerificationUploadProps) {
             // 3. Submit Request
             await verificationService.submitVerification(user.uid, selfieUrl, idUrl);
 
+            trackEvent('VERIFICATION_SUBMITTED', { userId: user.uid });
+            trackEvent('REGISTRATION_STEP_COMPLETED', { step: 4, userId: user.uid });
+
             toast({
                 title: "Verificación enviada",
                 description: "Revisaremos tu identidad pronto. ¡Gracias!",
@@ -86,6 +90,11 @@ export function VerificationUpload({ onComplete }: VerificationUploadProps) {
         }
     };
 
+    const handleSkip = () => {
+        trackEvent('REGISTRATION_STEP_COMPLETED', { step: 4, userId: user?.uid, skipped: true });
+        onComplete();
+    };
+
     return (
         <div className="space-y-6">
             {isCameraOpen && (
@@ -97,11 +106,11 @@ export function VerificationUpload({ onComplete }: VerificationUploadProps) {
 
             <div className="space-y-4">
                 <div
-                    className="border-2 border-dashed rounded-lg p-6 text-center hover:bg-muted/50 transition-colors cursor-pointer"
+                    className="border-2 border-dashed rounded-lg p-6 text-center hover:bg-muted/50 transition-colors cursor-pointer group hover:border-primary/50"
                     onClick={() => setIsCameraOpen(true)}
                 >
                     {selfiePreview ? (
-                        <div className="relative h-48 w-full mx-auto">
+                        <div className="relative h-48 w-full mx-auto animate-in fade-in zoom-in duration-300">
                             <Image src={selfiePreview} alt="Selfie preview" fill className="object-contain" />
                             <div className="absolute inset-0 flex items-center justify-center bg-black/40 text-white opacity-0 hover:opacity-100 transition-opacity">
                                 Repetir foto
@@ -109,17 +118,17 @@ export function VerificationUpload({ onComplete }: VerificationUploadProps) {
                         </div>
                     ) : (
                         <div className="flex flex-col items-center gap-2">
-                            <Camera className="h-10 w-10 text-muted-foreground" />
+                            <Camera className="h-10 w-10 text-muted-foreground group-hover:text-primary transition-colors" />
                             <span className="font-semibold">Tomar Selfie</span>
                             <span className="text-xs text-muted-foreground">Usa tu cámara para verificar tu rostro</span>
                         </div>
                     )}
                 </div>
 
-                <div className="border-2 border-dashed rounded-lg p-6 text-center hover:bg-muted/50 transition-colors">
+                <div className="border-2 border-dashed rounded-lg p-6 text-center hover:bg-muted/50 transition-colors group hover:border-primary/50">
                     <Label htmlFor="id-upload" className="cursor-pointer block w-full">
                         {idPreview ? (
-                            <div className="relative h-48 w-full mx-auto">
+                            <div className="relative h-48 w-full mx-auto animate-in fade-in zoom-in duration-300">
                                 <Image src={idPreview} alt="ID preview" fill className="object-contain" />
                                 <div className="absolute inset-0 flex items-center justify-center bg-black/40 text-white opacity-0 hover:opacity-100 transition-opacity">
                                     Cambiar documento
@@ -127,7 +136,7 @@ export function VerificationUpload({ onComplete }: VerificationUploadProps) {
                             </div>
                         ) : (
                             <div className="flex flex-col items-center gap-2">
-                                <Upload className="h-10 w-10 text-muted-foreground" />
+                                <Upload className="h-10 w-10 text-muted-foreground group-hover:text-primary transition-colors" />
                                 <span className="font-semibold">Subir Identificación</span>
                                 <span className="text-xs text-muted-foreground">DNI, Pasaporte o Licencia</span>
                             </div>
@@ -143,20 +152,30 @@ export function VerificationUpload({ onComplete }: VerificationUploadProps) {
                 </div>
             </div>
 
-            <Button
-                onClick={handleSubmit}
-                className="w-full font-bold"
-                disabled={!selfieFile || !idFile || uploading}
-            >
-                {uploading ? (
-                    <>
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        Subiendo...
-                    </>
-                ) : (
-                    "Enviar Verificación"
-                )}
-            </Button>
+            <div className="space-y-4 pt-4">
+                <Button
+                    onClick={handleSubmit}
+                    className="w-full font-bold hover:scale-105 active:scale-95 transition-transform"
+                    disabled={!selfieFile || !idFile || uploading}
+                >
+                    {uploading ? (
+                        <>
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                            Subiendo...
+                        </>
+                    ) : (
+                        "Enviar Verificación"
+                    )}
+                </Button>
+
+                <button
+                    onClick={handleSkip}
+                    disabled={uploading}
+                    className="w-full text-center text-sm text-muted-foreground hover:text-primary transition-colors underline decoration-dotted"
+                >
+                    Lo haré más tarde
+                </button>
+            </div>
         </div>
     );
 }

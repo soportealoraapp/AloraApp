@@ -29,13 +29,16 @@ export function PremiumFeatureGate({
     }
 
     const [clickCount, setClickCount] = React.useState(0);
+    const [isShaking, setIsShaking] = React.useState(false);
 
     const handleUnlockClick = () => {
         setClickCount(prev => prev + 1);
 
         // TRUST & SAFETY: Detect excessive clicking (e.g. attempting to bypass or frustration)
-        if (clickCount > 5) {
-            if (userId) trackEvent('RISK_FLAG_EXCESSIVE_CLICKS', { userId, feature: featureName, count: clickCount });
+        if (clickCount >= 5) {
+            setIsShaking(true);
+            setTimeout(() => setIsShaking(false), 500);
+            if (userId) trackEvent('RISK_FLAG_EXCESSIVE_CLICKS', { userId, feature: featureName, count: clickCount + 1 });
             return; // Prevent further action spam
         }
 
@@ -46,7 +49,7 @@ export function PremiumFeatureGate({
     };
 
     return (
-        <Card className="border-dashed border-2 relative overflow-hidden group hover:border-primary/50 transition-colors duration-500">
+        <Card className={`border-dashed border-2 relative overflow-hidden group hover:border-primary/50 transition-all duration-500 ${isShaking ? 'animate-shake border-red-500/50' : ''}`}>
             <div className="absolute inset-0 bg-background/60 backdrop-blur-[2px] z-10 flex items-center justify-center p-6 transition-all duration-500">
                 <div className="text-center space-y-4 max-w-sm relative">
                     {featureName && (

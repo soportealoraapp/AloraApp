@@ -47,13 +47,13 @@ function WellbeingDashboardComponent({ stats, onRefresh, userId }: { stats: Well
                 </div>
 
                 <div className="grid gap-4 md:grid-cols-3">
-                    <Card className="hover:border-primary/20 transition-colors hover:shadow-md cursor-default">
+                    <Card className="hover:border-primary/20 transition-all hover:shadow-md cursor-default hover:-translate-y-1">
                         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                             <Tooltip>
-                                <TooltipTrigger className="cursor-help">
-                                    <div className="flex items-center gap-2">
+                                <TooltipTrigger asChild>
+                                    <div className="flex items-center gap-2 cursor-help">
                                         <CardTitle className="text-sm font-medium">Social Battery</CardTitle>
-                                        <Battery className="h-4 w-4 text-muted-foreground" />
+                                        <Battery className={cn("h-4 w-4 text-muted-foreground", stats.batteryLevel < 30 && "text-red-500 animate-pulse")} />
                                     </div>
                                 </TooltipTrigger>
                                 <TooltipContent>Energy available for social interactions.</TooltipContent>
@@ -63,16 +63,16 @@ function WellbeingDashboardComponent({ stats, onRefresh, userId }: { stats: Well
                             <div className="text-2xl font-bold tracking-tight">{stats.batteryLevel}%</div>
                             <Progress value={stats.batteryLevel} className={`mt-2 h-2 ${getBatteryColor(stats.batteryLevel)}`} />
                             <p className="text-xs text-muted-foreground mt-2 font-medium">
-                                {stats.batteryLevel > 70 ? "⚡ Charged & Ready" : "⚠️ Needs Recharge"}
+                                {stats.batteryLevel > 70 ? "⚡ Charged & Ready" : stats.batteryLevel > 30 ? "⚠️ Needs Recharge" : "🚨 Low Battery"}
                             </p>
                         </CardContent>
                     </Card>
 
-                    <Card className="hover:border-primary/20 transition-colors hover:shadow-md cursor-default">
+                    <Card className="hover:border-primary/20 transition-all hover:shadow-md cursor-default hover:-translate-y-1">
                         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                             <Tooltip>
-                                <TooltipTrigger className="cursor-help">
-                                    <div className="flex items-center gap-2">
+                                <TooltipTrigger asChild>
+                                    <div className="flex items-center gap-2 cursor-help">
                                         <CardTitle className="text-sm font-medium">Emotional Clarity</CardTitle>
                                         <Heart className="h-4 w-4 text-muted-foreground" />
                                     </div>
@@ -86,11 +86,11 @@ function WellbeingDashboardComponent({ stats, onRefresh, userId }: { stats: Well
                         </CardContent>
                     </Card>
 
-                    <Card className="hover:border-primary/20 transition-colors hover:shadow-md cursor-default">
+                    <Card className="hover:border-primary/20 transition-all hover:shadow-md cursor-default hover:-translate-y-1">
                         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                             <Tooltip>
-                                <TooltipTrigger className="cursor-help">
-                                    <div className="flex items-center gap-2">
+                                <TooltipTrigger asChild>
+                                    <div className="flex items-center gap-2 cursor-help">
                                         <CardTitle className="text-sm font-medium">Mindset</CardTitle>
                                         <Brain className="h-4 w-4 text-muted-foreground" />
                                     </div>
@@ -106,8 +106,8 @@ function WellbeingDashboardComponent({ stats, onRefresh, userId }: { stats: Well
                 </div>
 
                 {stats.batteryLevel < 30 && (
-                    <Alert variant="destructive" className="border-red-500/50 bg-red-500/10 animate-pulse">
-                        <Battery className="h-4 w-4" />
+                    <Alert variant="destructive" className="border-red-500/50 bg-red-500/10 animate-in fade-in slide-in-from-top-2 duration-500">
+                        <Battery className="h-4 w-4 animate-pulse" />
                         <AlertTitle>Recharge Recommended</AlertTitle>
                         <AlertDescription className="flex flex-col gap-2">
                             <span className="text-xs opacity-90">
@@ -116,7 +116,7 @@ function WellbeingDashboardComponent({ stats, onRefresh, userId }: { stats: Well
                             <Button
                                 variant="outline"
                                 size="sm"
-                                className="w-fit h-7 text-xs bg-transparent border-red-500/30 hover:bg-red-500/20"
+                                className="w-fit h-7 text-xs bg-transparent border-red-500/30 hover:bg-red-500/20 active:scale-95 transition-all"
                                 onClick={() => userId && trackEvent('WELLBEING_ACTION_BREAK', { userId })}
                             >
                                 Schedule a Break
@@ -125,7 +125,7 @@ function WellbeingDashboardComponent({ stats, onRefresh, userId }: { stats: Well
                     </Alert>
                 )}
 
-                <Card>
+                <Card className="hover:shadow-lg transition-shadow">
                     <CardHeader>
                         <CardTitle className="text-lg">Recent Insights</CardTitle>
                     </CardHeader>
@@ -151,7 +151,6 @@ function WellbeingDashboardComponent({ stats, onRefresh, userId }: { stats: Well
                 </Card>
             </div>
         </TooltipProvider>
-    );
     );
 }
 

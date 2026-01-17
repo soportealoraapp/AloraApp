@@ -87,9 +87,24 @@ body {
 
 @layer base {
   * {
-    @apply border-border;
+    @apply border-border outline-none focus-visible:ring-2 focus-visible:ring-primary/20 transition-all duration-300;
   }
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground antialiased;
+  }
+}
+
+@layer utilities {
+  .glass {
+    @apply bg-white/70 backdrop-blur-md border border-white/20 shadow-xl;
+  }
+  
+  .animate-confetti {
+    animation: confetti-fall 3s ease-out infinite;
+  }
+
+  @keyframes confetti-fall {
+    0% { transform: translateY(-100vh) rotate(0deg); opacity: 1; }
+    100% { transform: translateY(100vh) rotate(360deg); opacity: 0; }
   }
 }

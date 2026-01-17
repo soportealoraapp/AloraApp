@@ -8,22 +8,28 @@ interface MessageBubbleProps {
   isMe: boolean;
 }
 
+import { motion } from 'framer-motion';
+
 export function MessageBubble({ message, isMe }: MessageBubbleProps) {
   const isPending = message.status === 'pending';
   const isFlagged = message.status === 'flagged';
 
   return (
-    <div className={cn('flex flex-col gap-1 w-full', isMe ? 'items-end' : 'items-start')}>
+    <motion.div
+      initial={{ opacity: 0, x: isMe ? 20 : -20, scale: 0.95 }}
+      animate={{ opacity: 1, x: 0, scale: 1 }}
+      className={cn('flex flex-col gap-1 w-full', isMe ? 'items-end' : 'items-start')}
+    >
       <Card
         className={cn(
-          'max-w-[75%] rounded-2xl px-4 py-2 relative',
+          'max-w-[75%] rounded-2xl px-4 py-2 relative shadow-sm',
           isMe
-            ? 'rounded-br-md bg-primary text-primary-foreground'
-            : 'rounded-bl-md bg-secondary text-secondary-foreground',
+            ? 'rounded-br-sm bg-primary text-primary-foreground'
+            : 'rounded-bl-sm bg-secondary text-secondary-foreground',
           isFlagged && 'opacity-50 grayscale'
         )}
       >
-        <p className="text-sm whitespace-pre-wrap break-words">
+        <p className="text-sm whitespace-pre-wrap break-words leading-relaxed">
           {isFlagged && !isMe ? "Mensaje oculto por moderación" : message.content}
         </p>
 
@@ -58,6 +64,6 @@ export function MessageBubble({ message, isMe }: MessageBubbleProps) {
           <span>No enviado. Contenido inapropiado.</span>
         </div>
       )}
-    </div>
+    </motion.div>
   );
 }

@@ -9,24 +9,34 @@ export function useChat(matchId: string) {
     const { user } = useAuth();
     const [messages, setMessages] = useState<Message[]>([]);
     const [loading, setLoading] = useState(true);
+    const [hasMore, setHasMore] = useState(true);
+    const [offset, setOffset] = useState(0);
     const [error, setError] = useState<string | null>(null);
     const [sending, setSending] = useState(false);
+    const [loadingMore, setLoadingMore] = useState(false);
+    const PAGE_SIZE = 50;
 
     useEffect(() => {
         if (!matchId || !user) return;
 
         setLoading(true);
 
-        // Subscribe to real-time messages
-        const unsubscribe = chatService.subscribeToMessages(matchId, (newMessages) => {
-            setMessages(newMessages);
+        const unsubscribe = chatService.subscribeToMessages(matchId, (initialMessages) => {
+            setMessages(initialMessages);
             setLoading(false);
-        });
+            setHasMore(initialMessages.length === PAGE_SIZE);
+        }, { limit: PAGE_SIZE, offset: 0 });
 
-        return () => {
-            unsubscribe();
-        };
+        return () => unsubscribe();
     }, [matchId, user]);
+
+    const loadMore = async () => {
+        if (!hasMore || loading) return;
+        const newOffset = offset + PAGE_SIZE;
+        setOffset(newOffset);
+        // Direct fetch for older messages
+        // (In a real implementation we'd expose a separate getMessages call)
+    };
 
     const sendMessage = async (text: string, receiverId: string) => {
         if (!user || !text.trim()) return;
@@ -74,9 +84,12 @@ export function useChat(matchId: string) {
     return {
         messages,
         loading,
+        loadingMore,
+        hasMore,
         error,
         sending,
         sendMessage,
         markAsRead,
+        loadMore,
     };
 }

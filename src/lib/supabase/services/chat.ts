@@ -2,18 +2,25 @@ import { createClient } from '../client'
 import { Message } from '@/lib/domain/types'
 
 export const chatService = {
-    subscribeToMessages(matchId: string, callback: (messages: Message[]) => void) {
+    subscribeToMessages(matchId: string, callback: (messages: Message[]) => void, options?: { limit?: number; offset?: number }) {
         const supabase = createClient()
 
         // Initial fetch
-        supabase
+        let query = supabase
             .from('messages')
             .select('*')
             .eq('match_id', matchId)
-            .order('created_at', { ascending: true })
-            .then(({ data }) => {
-                if (data) callback(data as any as Message[])
-            })
+            .order('created_at', { ascending: false });
+
+        if (options?.limit) {
+            const from = options.offset || 0;
+            const to = from + options.limit - 1;
+            query = query.range(from, to);
+        }
+
+        query.then(({ data }) => {
+            if (data) callback((data as any as Message[]).reverse())
+        })
 
         // Realtime subscription
         const channel = supabase

@@ -24,6 +24,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { MessageBubble } from "@/components/chat/message-bubble";
 import { ReportDialog } from "@/components/safety/ReportDialog";
 import { BlockDialog } from "@/components/safety/BlockDialog";
+import { trackEvent } from "@/lib/tracking/client";
 
 export default function ChatWindowPage() {
     const params = useParams();
@@ -77,6 +78,9 @@ export default function ChatWindowPage() {
     const handleSendMessage = async (text: string) => {
         if (!otherUserId) return;
         await sendMessage(text, otherUserId);
+        if (user) {
+            trackEvent('AI_COACH_MESSAGE', { userId: user.uid, matchId });
+        }
     };
 
     const handleUnmatch = () => {

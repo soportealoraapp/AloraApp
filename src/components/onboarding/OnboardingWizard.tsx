@@ -49,29 +49,36 @@ export function OnboardingWizard() {
         }
     };
 
-    const nextStep = () => setStep(prev => Math.min(prev + 1, totalSteps));
+    const nextStep = () => {
+        if (step === totalSteps) {
+            router.push('/discover');
+            return;
+        }
+        setStep(prev => Math.min(prev + 1, totalSteps));
+    };
     const prevStep = () => setStep(prev => Math.max(prev - 1, 1));
+    const userId = user?.id || user?.uid;
 
     return (
-        <div className="max-w-md mx-auto p-6 bg-white rounded-3xl shadow-xl min-h-[600px] flex flex-col">
+        <div className="max-w-md mx-auto p-6 bg-white rounded-3xl shadow-xl min-h-[600px] flex flex-col border border-pink-50">
             <div className="mb-8">
                 <Progress value={(step / totalSteps) * 100} className="h-2 bg-pink-100" />
-                <p className="text-center text-sm text-muted-foreground mt-2">Paso {step} de {totalSteps}</p>
+                <p className="text-center text-[10px] font-bold uppercase tracking-widest text-pink-400 mt-2">Paso {step} de {totalSteps}</p>
             </div>
 
-            <div className="flex-1 overflow-hidden relative">
+            <div className="flex-1 relative">
                 <AnimatePresence mode="wait">
                     <motion.div
                         key={step}
-                        initial={{ x: 20, opacity: 0 }}
+                        initial={{ x: 50, opacity: 0 }}
                         animate={{ x: 0, opacity: 1 }}
-                        exit={{ x: -20, opacity: 0 }}
-                        transition={{ duration: 0.3 }}
+                        exit={{ x: -50, opacity: 0 }}
+                        transition={{ type: "spring", damping: 25, stiffness: 200 }}
                         className="h-full"
                     >
-                        {step === 1 && <StepBasicInfo data={formData} onUpdate={saveProgress} onNext={nextStep} />}
-                        {step === 2 && <StepInterests data={formData} onUpdate={saveProgress} onNext={nextStep} onPrev={prevStep} />}
-                        {step === 3 && <StepPhotos userId={user?.id || user?.uid} data={formData} onUpdate={saveProgress} onNext={nextStep} onPrev={prevStep} />}
+                        {step === 1 && <StepBasicInfo userId={userId} data={formData} onUpdate={saveProgress} onNext={nextStep} />}
+                        {step === 2 && <StepInterests userId={userId} data={formData} onUpdate={saveProgress} onNext={nextStep} onPrev={prevStep} />}
+                        {step === 3 && <StepPhotos userId={userId} data={formData} onUpdate={saveProgress} onNext={nextStep} onPrev={prevStep} />}
                         {step === 4 && <StepVerification onComplete={() => router.push('/discover')} />}
                     </motion.div>
                 </AnimatePresence>
