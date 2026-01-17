@@ -1,39 +1,54 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { requireAuth } from '@/lib/middleware/auth';
-import { chatServerService } from '@/lib/firebase/server/chat-service';
+import { prisma } from '@/lib/prisma';
 
 // POST /api/chat/send
 export async function POST(request: NextRequest) {
-    const decoded = await requireAuth(request);
-    if (decoded instanceof NextResponse) return decoded;
+    const { createClient } = await import('@/lib/supabase/server');
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+
+    if (!user) {
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
 
     try {
-        const { matchId, receiverId, text, type } = await request.json();
+        const { matchId, text, type } = await request.json();
 
-        if (!matchId || !receiverId || !text) {
-            return NextResponse.json(
-                { error: 'matchId, receiverId, and text are required' },
-                { status: 400 }
-            );
+        if (!matchId || !text) {
+            return NextResponse.json({ error: 'Missing fields' }, { status: 400 });
         }
 
-        const message = await chatServerService.sendMessage(
-            matchId,
-            decoded.uid,
-            receiverId,
-            text,
-            type || 'text'
-        );
+        // Verify match ownership
+        const match = await prisma.match.findUnique({
+            where: { id: matchId },
+            include: { user1: true, user2: true }
+        });
 
-        // Fire and forget moderation (Simulating async behavior for v1.0)
-        // In a real production environment, this would be a background job.
-        chatServerService.moderateMessage(message.id, text).catch(err => {
-            console.error('Moderation error for message:', message.id, err);
+        if (!match || (match.user1Id !== user.id && match.user2Id !== user.id)) {
+            return NextResponse.json({ error: 'Match not found or unauthorized' }, { status: 403 });
+        }
+
+        // Create Message
+        const message = await prisma.message.create({
+            data: {
+                matchId,
+                senderId: user.id,
+                content: text,
+                type: type || 'text',
+                status: 'sent'
+            }
+        });
+
+        // Update Match updatedAt
+        await prisma.match.update({
+            where: { id: matchId },
+            data: { updatedAt: new Date() }
         });
 
         return NextResponse.json(message);
+
     } catch (error) {
         console.error('Error sending message:', error);
-        return NextResponse.json({ error: error instanceof Error ? error.message : 'Internal server error' }, { status: 500 });
+        return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
     }
 }

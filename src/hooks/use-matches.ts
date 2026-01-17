@@ -2,8 +2,11 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
-import { Match, Like } from '@/lib/firebase/types';
+import { Match } from '@/lib/domain/types';
 import { useToast } from './use-toast';
+
+// Temporary local type until Like is defined in domain
+type Like = any;
 
 export function useMatches() {
     const { user } = useAuth();
@@ -21,17 +24,10 @@ export function useMatches() {
 
         try {
             setLoading(true);
-            const token = await user.getIdToken();
 
-            // Fetch matches existentes
-            const matchesResponse = await fetch('/api/match/feed', {
-                headers: { 'Authorization': `Bearer ${token}` },
-            });
-
-            // Fetch nuevos matches (quien te gustó)
-            const newMatchesResponse = await fetch('/api/match/new', {
-                headers: { 'Authorization': `Bearer ${token}` },
-            });
+            // Cookie auth handles authentication automatically
+            const matchesResponse = await fetch('/api/match/feed');
+            const newMatchesResponse = await fetch('/api/match/new');
 
             if (!matchesResponse.ok || !newMatchesResponse.ok) {
                 throw new Error('Error al cargar matches');
@@ -58,11 +54,10 @@ export function useMatches() {
         if (!user) return;
 
         try {
-            const token = await user.getIdToken();
+            // Cookie auth handles authentication automatically
             const response = await fetch('/api/match/like', {
                 method: 'POST',
                 headers: {
-                    'Authorization': `Bearer ${token}`,
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({ toUserId, type }),

@@ -6,7 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Heart, MessageSquare, Eye, Sparkles, Loader2 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { UserProfile } from "@/lib/firebase/types";
+import { UserProfile } from "@/lib/domain/types";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
 import { useMatches } from "@/hooks/use-matches";
@@ -31,7 +31,7 @@ export function ProfileCard({ profile, compatibility, onRefresh }: ProfileCardPr
 
     setLoading(true);
     try {
-      await sendLike(profile.uid, 'like');
+      await sendLike(profile.id, 'like');
       setLiked(true);
       onRefresh?.();
     } catch (error) {
@@ -49,7 +49,7 @@ export function ProfileCard({ profile, compatibility, onRefresh }: ProfileCardPr
 
     setLoading(true);
     try {
-      await sendLike(profile.uid, 'superlike');
+      await sendLike(profile.id, 'superlike');
       setSuperLiked(true);
       setLiked(true);
       onRefresh?.();
@@ -62,7 +62,7 @@ export function ProfileCard({ profile, compatibility, onRefresh }: ProfileCardPr
 
   return (
     <Card className="overflow-hidden hover:shadow-lg transition-shadow">
-      <Link href={`/profile/${profile.uid}`}>
+      <Link href={`/profile/${profile.id}`}>
         <div className="relative aspect-[3/4]">
           <Image
             src={profile.photos?.[0] || '/placeholder.jpg'}
@@ -127,14 +127,14 @@ export function ProfileCard({ profile, compatibility, onRefresh }: ProfileCardPr
           </Button>
 
           <Button size="sm" variant="outline" asChild>
-            <Link href={`/chat/${profile.uid}`}>
+            <Link href={`/chat/${profile.id}`}>
               <MessageSquare className="h-4 w-4 mr-1" />
               Chat
             </Link>
           </Button>
 
           <Button size="sm" variant="outline" asChild>
-            <Link href={`/profile/${profile.uid}`}>
+            <Link href={`/profile/${profile.id}`}>
               <Eye className="h-4 w-4 mr-1" />
               Ver
             </Link>

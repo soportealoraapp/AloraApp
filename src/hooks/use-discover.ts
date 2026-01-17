@@ -19,14 +19,14 @@ export function useDiscover(searchTerm: string = '', limit: number = 20) {
     const [retryCount, setRetryCount] = useState(0);
 
     const fetchProfiles = useCallback(async () => {
-        if (!user?.uid) {
+        if (!user?.id) {
             setLoading(false);
             return;
         }
 
         try {
             setLoading(true);
-            const feed = await getDynamicFeed(user.uid);
+            const feed = await getDynamicFeed(user.id);
 
             const mapped = feed.map(item => ({
                 profile: item.profile,
@@ -43,7 +43,7 @@ export function useDiscover(searchTerm: string = '', limit: number = 20) {
         } finally {
             setLoading(false);
         }
-    }, [user?.uid]); // Only depend on uid
+    }, [user?.id]); // Only depend on id
 
     useEffect(() => {
         fetchProfiles();
@@ -52,7 +52,7 @@ export function useDiscover(searchTerm: string = '', limit: number = 20) {
     const memoizedProfiles = useMemo(() => {
         if (!searchTerm) return profilesData;
         return profilesData.filter(p =>
-            p.profile.name.toLowerCase().includes(searchTerm.toLowerCase())
+            (p.profile.displayName || p.profile.name || '').toLowerCase().includes(searchTerm.toLowerCase())
         );
     }, [profilesData, searchTerm]);
 

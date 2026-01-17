@@ -5,8 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
-import { doc, setDoc } from "firebase/firestore";
-import { db } from "@/lib/firebase/config";
+import { updateUserProfile } from "@/server/actions/user";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
 import { StepBasicInfo } from "./StepBasicInfo";
@@ -36,11 +35,15 @@ export function OnboardingWizard() {
         setFormData(updatedData);
 
         try {
-            await setDoc(doc(db, "profiles", user.uid), {
-                ...updatedData,
-                updatedAt: new Date(),
-                isCompleted: step === totalSteps // simplified logic
-            }, { merge: true });
+            try {
+                await updateUserProfile(user.id || user.uid || '', {
+                    ...updatedData,
+                    createdAt: undefined, // Don't wipe
+                    isCompleted: step === totalSteps // simplified logic
+                } as any);
+            } catch (e) {
+                console.error("Auto-save failed", e);
+            }
         } catch (e) {
             console.error("Auto-save failed", e);
         }
@@ -68,7 +71,7 @@ export function OnboardingWizard() {
                     >
                         {step === 1 && <StepBasicInfo data={formData} onUpdate={saveProgress} onNext={nextStep} />}
                         {step === 2 && <StepInterests data={formData} onUpdate={saveProgress} onNext={nextStep} onPrev={prevStep} />}
-                        {step === 3 && <StepPhotos userId={user?.uid} data={formData} onUpdate={saveProgress} onNext={nextStep} onPrev={prevStep} />}
+                        {step === 3 && <StepPhotos userId={user?.id || user?.uid} data={formData} onUpdate={saveProgress} onNext={nextStep} onPrev={prevStep} />}
                         {step === 4 && <StepVerification onComplete={() => router.push('/discover')} />}
                     </motion.div>
                 </AnimatePresence>

@@ -1,9 +1,9 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
-import { Message } from '@/lib/firebase/types';
-import { chatService } from '@/lib/firebase/chat-service';
+import { Message } from '@/lib/domain/types';
+import { chatService } from '@/lib/supabase/services/chat';
 
 export function useChat(matchId: string) {
     const { user } = useAuth();
@@ -33,12 +33,11 @@ export function useChat(matchId: string) {
 
         try {
             setSending(true);
-            const token = await user.getIdToken();
 
+            // Cookie auth handles authentication automatically
             const response = await fetch('/api/chat/send', {
                 method: 'POST',
                 headers: {
-                    'Authorization': `Bearer ${token}`,
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
@@ -66,7 +65,7 @@ export function useChat(matchId: string) {
         if (!user || !matchId) return;
 
         try {
-            await chatService.markMatchMessagesAsRead(matchId, user.uid);
+            await chatService.markMatchMessagesAsRead(matchId, user.id);
         } catch (err) {
             console.error('Error marking messages as read:', err);
         }

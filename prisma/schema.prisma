@@ -1,0 +1,371 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+// -----------------------------------------------------------------------------
+// CORE DOMAIN
+// -----------------------------------------------------------------------------
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  name      String?
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  deletedAt DateTime? // Soft delete
+
+  // Core Relations
+  profile   Profile?
+  sessions  Session[]
+  sentMessages Message[] @relation("SentMessages")
+  
+  // Auditing
+  auditLogs AuditLog[]
+
+  // Matches
+  matchesAsUser1 Match[] @relation("MatchUser1")
+  matchesAsUser2 Match[] @relation("MatchUser2")
+
+  // Interactions (Likes/Passes)
+  sentInteractions     Interaction[] @relation("InteractionSender")
+  receivedInteractions Interaction[] @relation("InteractionReceiver")
+
+  // Relationships (v3.1)
+  relationshipsAsPartner1 RelationshipContext[] @relation("RelPartner1")
+  relationshipsAsPartner2 RelationshipContext[] @relation("RelPartner2")
+
+  // Block/Report
+  blockedUsers Block[] @relation("UserBlocker")
+  
+  // Notifications
+  notifications Notification[]
+
+  @@map("users")
+}
+
+model Profile {
+  id     String @id @default(uuid())
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Basic Info
+  displayName String?
+  bio         String?
+  age         Int?
+  gender      String?
+  photos      String[] // URL array
+  
+  // Preferences
+  seeking     String?
+  interests   String[]
+  values      String[]
+  
+  // Status
+  isVerified         Boolean @default(false)
+  subscriptionStatus String  @default("free") // free, plus, premium
+  trustStatus        String  @default("clean") // clean, watchlist, banned
+  lastActiveAt       DateTime @default(now())
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("profiles")
+}
+
+model Session {
+  id           String   @id @default(uuid())
+  userId       String
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  token        String   @unique // Refresh token or session ID
+  expiresAt    DateTime
+  ipAddress    String?
+  userAgent    String?
+  isValid      Boolean  @default(true)
+  
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([userId])
+  @@map("sessions")
+}
+
+model Match {
+  id        String   @id @default(uuid())
+  
+  user1Id   String
+  user1     User     @relation("MatchUser1", fields: [user1Id], references: [id])
+  
+  user2Id   String
+  user2     User     @relation("MatchUser2", fields: [user2Id], references: [id])
+  
+  score     Float    @default(0) // Compatibility Score
+  isActive  Boolean  @default(true)
+  
+  // State
+  stage     String   @default("talking") // talking, dating, relationship, unmatched
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  deletedAt DateTime? // Soft delete (Unmatch)
+
+  messages  Message[]
+  
+  // AI Context
+  copilotContext CopilotContext?
+
+  @@unique([user1Id, user2Id])
+  @@map("matches")
+}
+
+model Message {
+  id        String   @id @default(uuid())
+  matchId   String
+  match     Match    @relation(fields: [matchId], references: [id], onDelete: Cascade)
+  
+  senderId  String
+  sender    User     @relation("SentMessages", fields: [senderId], references: [id])
+  
+  content   String
+  type      String   @default("text") // text, image, icebreaker
+  status    String   @default("sent") // sent, delivered, read, flagged
+  
+  readAt    DateTime?
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  deletedAt DateTime?
+
+  @@index([matchId])
+  @@map("messages")
+}
+
+model Interaction {
+  id        String   @id @default(uuid())
+  
+  fromUserId String
+  fromUser   User    @relation("InteractionSender", fields: [fromUserId], references: [id], onDelete: Cascade)
+  
+  toUserId   String
+  toUser     User    @relation("InteractionReceiver", fields: [toUserId], references: [id], onDelete: Cascade)
+  
+  type      String   // like, superlike, pass
+  
+  createdAt DateTime @default(now())
+
+  @@unique([fromUserId, toUserId])
+  @@map("interactions")
+}
+
+// -----------------------------------------------------------------------------
+// AI / COPILOT DOMAIN
+// -----------------------------------------------------------------------------
+
+model CopilotContext {
+  id        String   @id @default(uuid())
+  matchId   String   @unique
+  match     Match    @relation(fields: [matchId], references: [id], onDelete: Cascade)
+
+  // Awareness
+  summary         String?   @db.Text
+  sentimentScore  Float?
+  topicsDiscussed String[]
+  nextMoveSuggestion String?
+
+  lastAnalyzedAt  DateTime?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  events CopilotEvent[]
+
+  @@map("copilot_context")
+}
+
+model CopilotEvent {
+  id               String   @id @default(uuid())
+  copilotContextId String
+  context          CopilotContext @relation(fields: [copilotContextId], references: [id], onDelete: Cascade)
+
+  eventType        String // suggestion_given, intervention, nudge
+  details          Json?
+  
+  createdAt        DateTime @default(now())
+
+  @@map("copilot_events")
+}
+
+// -----------------------------------------------------------------------------
+// RELATIONSHIP INTELLIGENCE (v3.1)
+// -----------------------------------------------------------------------------
+
+model RelationshipContext {
+  id        String   @id @default(uuid())
+  
+  partner1Id String
+  partner1   User    @relation("RelPartner1", fields: [partner1Id], references: [id])
+  
+  partner2Id String
+  partner2   User    @relation("RelPartner2", fields: [partner2Id], references: [id])
+
+  status    String   @default("active") // active, paused, ended
+  startDate DateTime @default(now())
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  deletedAt DateTime?
+
+  notes     CommunicationNote[]
+  conflicts ConflictReflection[]
+
+  @@map("relationship_context")
+}
+
+model CommunicationNote {
+  id             String @id @default(uuid())
+  relationshipId String
+  relationship   RelationshipContext @relation(fields: [relationshipId], references: [id], onDelete: Cascade)
+
+  content        String
+  category       String // appreciation, observation, request
+  
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  deletedAt      DateTime?
+
+  @@map("communication_notes")
+}
+
+model ConflictReflection {
+  id             String @id @default(uuid())
+  relationshipId String
+  relationship   RelationshipContext @relation(fields: [relationshipId], references: [id], onDelete: Cascade)
+
+  trigger        String
+  myReaction     String
+  resolution     String?
+  
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@map("conflict_reflections")
+}
+
+// -----------------------------------------------------------------------------
+// WELLBEING & POST-DATING CARE (v3.2)
+// -----------------------------------------------------------------------------
+
+model WellbeingEvent {
+  id        String   @id @default(uuid())
+  userId    String // Can link to User if strictly coupled, or loose for analytics
+  
+  type      String   // fatigue_detected, ghosting_intervention, burnout_warning
+  severity  String   // low, medium, high
+  metadata  Json?
+
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@map("wellbeing_events")
+}
+
+model PostDatingEvent {
+  id        String   @id @default(uuid())
+  userId    String
+  matchId   String?  // Optional reference to past match
+
+  type      String   // breakup, rejection, ghosted
+  notes     String?
+
+  createdAt DateTime @default(now())
+  
+  @@map("post_dating_events")
+}
+
+model CooldownState {
+  id        String   @id @default(uuid())
+  userId    String   @unique
+  
+  isActive  Boolean  @default(true)
+  reason    String? // breakup_recovery, burnout
+  endsAt    DateTime?
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("cooldown_state")
+}
+
+model ClosureArtifact {
+  id        String   @id @default(uuid())
+  userId    String
+  
+  type      String   // unsent_letter, voice_memo, reflection
+  content   String   @db.Text
+  isPrivate Boolean  @default(true) // Always private by design usually
+  
+  createdAt DateTime @default(now())
+  deletedAt DateTime?
+
+  @@map("closure_artifacts")
+}
+
+// -----------------------------------------------------------------------------
+// SYSTEM & INFRA
+// -----------------------------------------------------------------------------
+
+model AuditLog {
+  id          String   @id @default(uuid())
+  userId      String?
+  user        User?    @relation(fields: [userId], references: [id])
+  
+  action      String
+  ipAddress   String?
+  details     Json?
+  
+  timestamp   DateTime @default(now())
+
+  @@map("audit_logs")
+}
+
+model RateLimit {
+  id        String   @id @default(uuid())
+  key       String   @unique // userId_action or ip_action
+  count     Int      @default(0)
+  lastReset DateTime @default(now())
+
+  @@map("rate_limits")
+}
+
+model Block {
+  id        String   @id @default(uuid())
+  blockerId String
+  blocker   User     @relation("UserBlocker", fields: [blockerId], references: [id])
+  blockedId String   // No relation needed to blocked user if they might be deleted
+  
+  reason    String?
+  createdAt DateTime @default(now())
+
+  @@unique([blockerId, blockedId])
+  @@map("blocks")
+}
+
+model Notification {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  type      String   // match, message, system
+  title     String
+  body      String
+  readAt    DateTime?
+  
+  createdAt DateTime @default(now())
+
+  @@map("notifications")
+}

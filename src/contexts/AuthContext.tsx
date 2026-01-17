@@ -1,10 +1,10 @@
 'use client';
 
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { User, onAuthStateChanged } from 'firebase/auth';
-import { auth } from '@/lib/firebase/config';
-import { profileService } from '@/lib/firebase/profile-service';
-import { UserProfile } from '@/lib/firebase/types';
+import { User } from '@supabase/supabase-js';
+import { createClient } from '@/lib/supabase/client';
+import { profileService } from '@/lib/supabase/services/profile';
+import { UserProfile } from '@/lib/domain/types';
 
 interface AuthContextType {
     user: User | null;
@@ -26,11 +26,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const [user, setUser] = useState<User | null>(null);
     const [profile, setProfile] = useState<UserProfile | null>(null);
     const [loading, setLoading] = useState(true);
+    const supabase = createClient();
 
     const refreshProfile = async () => {
         if (user) {
             try {
-                const userProfile = await profileService.getProfile(user.uid);
+                const userProfile = await profileService.getProfile(user.id);
                 setProfile(userProfile);
             } catch (error) {
                 console.error('Error loading profile:', error);
@@ -39,33 +40,49 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     };
 
     useEffect(() => {
-        const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
-            setUser(firebaseUser);
+        // Initial session check
+        const checkSession = async () => {
+            try {
+                const { data: { session } } = await supabase.auth.getSession();
+                setUser(session?.user ?? null);
 
-            if (firebaseUser) {
-                try {
-                    const userProfile = await profileService.getProfile(firebaseUser.uid);
+                if (session?.user) {
+                    const userProfile = await profileService.getProfile(session.user.id);
                     setProfile(userProfile);
-
-                    // Update last active
-                    await profileService.updateLastActive(firebaseUser.uid);
-                } catch (error) {
-                    console.error('Error loading profile:', error);
-                    setProfile(null);
+                    await profileService.updateLastActive(session.user.id);
                 }
-            } else {
+            } catch (error) {
+                console.error("Session check error", error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        checkSession();
+
+        // Auth state changes
+        const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
+            const currentUser = session?.user ?? null;
+            setUser(currentUser);
+
+            if (currentUser && currentUser.id !== user?.id) {
+                // User changed (e.g. login), fetch profile
+                const userProfile = await profileService.getProfile(currentUser.id);
+                setProfile(userProfile);
+            } else if (!currentUser) {
                 setProfile(null);
             }
 
             setLoading(false);
         });
 
-        return () => unsubscribe();
+        return () => {
+            subscription.unsubscribe();
+        };
     }, []);
 
     const handleSignOut = async () => {
-        const { authService } = await import('@/lib/firebase/auth-service');
-        await authService.signOut();
+        await supabase.auth.signOut();
         setUser(null);
         setProfile(null);
     };

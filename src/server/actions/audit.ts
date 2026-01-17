@@ -1,24 +1,22 @@
 'use server';
 
-import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
-import { db } from '@/lib/firebase/config';
-import { AuditLog } from '@/lib/domain/types';
+import { prisma } from '@/lib/prisma';
 
 export async function logAuditAction(
     userId: string,
-    action: AuditLog['action'],
+    action: string,
     details?: any
 ) {
     try {
-        await addDoc(collection(db, 'auditLogs'), {
-            userId,
-            action,
-            details,
-            timestamp: serverTimestamp(),
-            userAgent: 'server-action', // simplified
+        await prisma.auditLog.create({
+            data: {
+                userId,
+                action,
+                details: details ?? {},
+            },
         });
     } catch (error) {
         console.error('Failed to log audit action', error);
-        // Fail silently to not block user flow
+        // Fail silently
     }
 }

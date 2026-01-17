@@ -1,6 +1,6 @@
 import { cn } from '@/lib/utils';
 import { AlertCircle, Loader2, Check, CheckCheck } from 'lucide-react';
-import { Message } from '@/lib/firebase/types';
+import { Message } from '@/lib/domain/types';
 import { Card } from '@/components/ui/card';
 
 interface MessageBubbleProps {
@@ -24,7 +24,7 @@ export function MessageBubble({ message, isMe }: MessageBubbleProps) {
         )}
       >
         <p className="text-sm whitespace-pre-wrap break-words">
-          {isFlagged && !isMe ? "Mensaje oculto por moderación" : message.text}
+          {isFlagged && !isMe ? "Mensaje oculto por moderación" : message.content}
         </p>
 
         <div className="flex items-center justify-end gap-1 mt-1">

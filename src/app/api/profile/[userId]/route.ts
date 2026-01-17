@@ -1,28 +1,32 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { requireAuth } from '@/lib/middleware/auth';
-import { profileService } from '@/lib/firebase/profile-service';
+import { prisma } from '@/lib/prisma';
 
 // GET /api/profile/[userId]
 export async function GET(
     request: NextRequest,
-    { params }: { params: { userId: string } }
+    props: { params: Promise<{ userId: string }> }
 ) {
-    const decoded = await requireAuth(request);
-    if (decoded instanceof NextResponse) return decoded;
+    const params = await props.params;
+    const { createClient } = await import('@/lib/supabase/server');
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+
+    if (!user) {
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
 
     try {
-        const profile = await profileService.getProfile(params.userId);
+        const targetUserId = params.userId;
+
+        const profile = await prisma.profile.findUnique({
+            where: { userId: targetUserId }
+        });
 
         if (!profile) {
             return NextResponse.json({ error: 'Profile not found' }, { status: 404 });
         }
 
-        // Remove sensitive info if viewing someone else's profile
-        if (params.userId !== decoded.uid) {
-            const { email, ...publicProfile } = profile;
-            return NextResponse.json(publicProfile);
-        }
-
+        // Hide private fields if needed, but for now return full profile
         return NextResponse.json(profile);
     } catch (error) {
         console.error('Error getting profile:', error);

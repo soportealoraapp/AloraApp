@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
-import { UserProfile } from '@/lib/firebase/types';
+import { UserProfile } from '@/lib/domain/types';
 
 export function useProfile(userId?: string) {
     const { user, profile: currentUserProfile } = useAuth();
@@ -20,7 +20,7 @@ export function useProfile(userId?: string) {
             }
 
             // Si el userId es el del usuario actual, usar el del context
-            if (user && userId === user.uid) {
+            if (user && userId === user.id) {
                 setProfile(currentUserProfile);
                 setLoading(false);
                 return;
@@ -29,12 +29,8 @@ export function useProfile(userId?: string) {
             // Fetch otro perfil
             try {
                 setLoading(true);
-                const token = await user?.getIdToken();
-                const response = await fetch(`/api/profile/${userId}`, {
-                    headers: {
-                        'Authorization': `Bearer ${token}`,
-                    },
-                });
+                // Cookie auth handles authentication automatically
+                const response = await fetch(`/api/profile/${userId}`);
 
                 if (!response.ok) {
                     throw new Error('Error al cargar el perfil');
@@ -54,11 +50,10 @@ export function useProfile(userId?: string) {
 
     const updateProfile = async (updates: Partial<UserProfile>) => {
         try {
-            const token = await user?.getIdToken();
+            // Cookie auth handles authentication automatically
             const response = await fetch('/api/profile', {
                 method: 'PUT',
                 headers: {
-                    'Authorization': `Bearer ${token}`,
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify(updates),

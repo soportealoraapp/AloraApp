@@ -1,62 +1,19 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
-
-// Simple in-memory rate limiter for Edge
-const rateLimitMap = new Map();
-
-function rateLimit(ip: string, limit: number, windowMs: number) {
-    const now = Date.now();
-    const windowStart = now - windowMs;
-
-    // Cleanup old entries
-    if (Math.random() < 0.1) { // 10% chance to cleanup to save ops
-        for (const [key, value] of rateLimitMap.entries()) {
-            if (value.timestamp < windowStart) rateLimitMap.delete(key);
-        }
-    }
-
-    const record = rateLimitMap.get(ip) || { count: 0, timestamp: now };
-
-    if (record.timestamp < windowStart) {
-        record.count = 1;
-        record.timestamp = now;
-    } else {
-        record.count += 1;
-    }
-
-    rateLimitMap.set(ip, record);
-    return record.count <= limit;
-}
+import { updateSession } from '@/lib/supabase/middleware';
 
 export async function middleware(request: NextRequest) {
-    const ip = request.headers.get('x-forwarded-for')?.split(',')[0] || '127.0.0.1';
+    // 1. Supabase Auth Session Update
+    const response = await updateSession(request);
 
-    // 1. Rate Limiting (Hardening)
-    // 100 requests per minute
-    if (!rateLimit(ip, 100, 60 * 1000)) {
-        return new NextResponse(JSON.stringify({ error: 'Too many requests' }), {
-            status: 429,
-            headers: { 'Content-Type': 'application/json' }
-        });
-    }
-
-    const session = request.cookies.get('__session');
-
-    // 2. Auth Check
-    if (!session && request.nextUrl.pathname.startsWith('/app')) {
-        return NextResponse.redirect(new URL('/login', request.url));
-    }
-
-    const response = NextResponse.next();
-
-    // 3. Security Headers (Helmet-like)
+    // 2. Security Headers (CSP)
     const csp = `
         default-src 'self';
-        script-src 'self' 'unsafe-eval' 'unsafe-inline' https://apis.google.com;
-        style-src 'self' 'unsafe-inline';
-        img-src 'self' blob: data: https://lh3.googleusercontent.com;
-        font-src 'self' data:;
-        connect-src 'self' https://securetoken.googleapis.com https://identitytoolkit.googleapis.com https://firestore.googleapis.com;
+        script-src 'self' 'unsafe-eval' 'unsafe-inline' https://apis.google.com https://js.stripe.com;
+        style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
+        img-src 'self' blob: data: https://lh3.googleusercontent.com https://your-project.supabase.co https://placehold.co https://picsum.photos;
+        font-src 'self' data: https://fonts.gstatic.com;
+        connect-src 'self' https://securetoken.googleapis.com https://your-project.supabase.co;
         worker-src 'self' blob:;
         frame-src 'self' https://js.stripe.com;
         object-src 'none';
@@ -80,5 +37,15 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-    matcher: ['/((?!api|_next/static|_next/image|favicon.ico).*)'],
+    matcher: [
+        /*
+         * Match all request paths except for the ones starting with:
+         * - _next/static (static files)
+         * - _next/image (image optimization files)
+         * - favicon.ico (favicon file)
+         * - images - .svg, .png, .jpg, .jpeg, .gif, .webp
+         * Feel free to modify this pattern to include more paths.
+         */
+        '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+    ],
 };

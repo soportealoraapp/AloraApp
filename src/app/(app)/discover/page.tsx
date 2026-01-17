@@ -9,7 +9,6 @@ import { Filter, Loader2, RefreshCcw } from "lucide-react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { useDiscover } from "@/hooks/use-discover";
 import { useAuth } from "@/contexts/AuthContext";
-import { matchingService } from "@/lib/firebase/matching-service";
 import { useMatches } from "@/hooks/use-matches";
 import { useToast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
@@ -21,6 +20,7 @@ import { BRAND_VOICE } from "@/lib/constants/brand-voice";
 export default function DiscoverPage() {
   const { profile: currentUserProfile } = useAuth();
   const { profiles, loading, refresh, setProfiles } = useDiscover("");
+  const { sendLike } = useMatches();
   const { toast } = useToast();
   const router = useRouter();
 
@@ -42,16 +42,14 @@ export default function DiscoverPage() {
 
     try {
       if (direction === 'right') {
-        const isMatch = await matchingService.sendLike((currentUserProfile as any).uid || (currentUserProfile as any).id, (profileToActOn as any).uid || (profileToActOn as any).id);
-        if (isMatch) {
+        const result = await sendLike((profileToActOn as any).uid || (profileToActOn as any).id, 'like');
+        if (result?.matched) {
           // Trigger Match Screen
-          // We need to fetch the full profile or assume profileToActOn is enough
-          // Profile in discover might be slightly different structure, let's cast
           setMatchedProfile(profileToActOn as unknown as UserProfile);
           setShowMatchScreen(true);
         }
       } else {
-        await matchingService.sendPass((currentUserProfile as any).uid || (currentUserProfile as any).id, (profileToActOn as any).uid || (profileToActOn as any).id);
+        await sendLike((profileToActOn as any).uid || (profileToActOn as any).id, 'pass');
       }
     } catch (error) {
       console.error("Action failed", error);

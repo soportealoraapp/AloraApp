@@ -1,126 +1,104 @@
 'use server';
 
-import { adminDb } from '../firebase/admin';
+import { prisma } from '@/lib/prisma';
 import { UserProfile } from '@/lib/domain/types';
 import { getCompatibilityScore } from './compatibility/getCompatibilityScore';
-import { FieldValue } from 'firebase-admin/firestore'; // Added this import for FieldValue
 
 export async function getDynamicFeed(currentUserId: string): Promise<{ profile: UserProfile; score: any }[]> {
     try {
-        // v2.2: Feature Flag Check
-        const { featureFlagsServerService } = await import('@/lib/firebase/server/featureFlags-service');
-        const isAIEnabled = await featureFlagsServerService.isEnabled('aiMatchmaking');
+        // 1. Fetch Current User
+        const currentUser = await prisma.user.findUnique({
+            where: { id: currentUserId },
+            include: { profile: true }
+        });
 
-        // 1. Fetch Current User & Assign A/B Group if missing
-        const userRef = adminDb.collection('profiles').doc(currentUserId);
-        const currentUserSnap = await userRef.get();
-        if (!currentUserSnap.exists) return [];
+        if (!currentUser || !currentUser.profile) return [];
 
-        let currentUserData = currentUserSnap.data() as UserProfile;
-        if (!currentUserData.experimentalGroup) {
-            const group = Math.random() > 0.5 ? 'B' : 'A';
-            await userRef.update({ experimentalGroup: group });
-            currentUserData.experimentalGroup = group;
-        }
+        // Cast to domain type (mapping Prisma profile to UserProfile)
+        const currentUserProfile: UserProfile = {
+            id: currentUser.id,
+            uid: currentUser.id, // Legacy compat
+            ...currentUser.profile,
+            // Ensure all required fields by UserProfile are present (defaulting if nullable in Prisma)
+            isVerified: currentUser.profile.isVerified,
+            verificationStatus: currentUser.profile.isVerified ? 'verified' : 'unverified',
+            subscriptionStatus: currentUser.profile.subscriptionStatus as any,
+            trustStatus: currentUser.profile.trustStatus as any,
+            photos: currentUser.profile.photos,
+            interests: currentUser.profile.interests,
+            values: currentUser.profile.values,
+            age: currentUser.profile.age || 18,
+            gender: currentUser.profile.gender || 'other',
+            seeking: currentUser.profile.seeking || 'everyone',
+            displayName: currentUser.profile.displayName || 'User',
+            bio: currentUser.profile.bio || '',
+            createdAt: currentUser.profile.createdAt,
+        };
 
-        const currentUser = { ...currentUserData, id: currentUserSnap.id } as UserProfile;
-
-        // v2.2: Bucketed Cache for Standard Users
-        const cacheKey = `feed_${currentUserId}_${currentUser.seeking}`;
-        if (currentUser.subscriptionStatus !== 'plus') {
-            const cacheRef = adminDb.collection('feed_cache').doc(cacheKey);
-            const cacheSnap = await cacheRef.get();
-            if (cacheSnap.exists) {
-                const cacheData = cacheSnap.data();
-                const now = Date.now();
-                const expiresAt = (cacheData?.expiresAt as any).toDate().getTime();
-                if (expiresAt > now) {
-                    return cacheData?.results || [];
-                }
-            }
-        }
-
-        // 2. Fetch Interactions (Blocks, Likes, Passes)
-        const [blocks1, blocks2, likes, passes] = await Promise.all([
-            adminDb.collection('blocks').where('blockerId', '==', currentUserId).get(),
-            adminDb.collection('blocks').where('blockedId', '==', currentUserId).get(),
-            adminDb.collection('likes').where('fromUserId', '==', currentUserId).get(),
-            adminDb.collection('passes').where('fromUserId', '==', currentUserId).get()
+        // 2. Get Excluded IDs (Blocks, Interactions, Matches)
+        const [blocks1, blocks2, interactions, matches1, matches2] = await Promise.all([
+            prisma.block.findMany({ where: { blockerId: currentUserId }, select: { blockedId: true } }),
+            prisma.block.findMany({ where: { blockedId: currentUserId }, select: { blockerId: true } }),
+            prisma.interaction.findMany({ where: { fromUserId: currentUserId }, select: { toUserId: true } }),
+            prisma.match.findMany({ where: { user1Id: currentUserId }, select: { user2Id: true } }),
+            prisma.match.findMany({ where: { user2Id: currentUserId }, select: { user1Id: true } }),
         ]);
 
         const excludedIds = new Set([
             currentUserId,
-            ...blocks1.docs.map(doc => doc.data().blockedId),
-            ...blocks2.docs.map(doc => doc.data().blockerId),
-            ...likes.docs.map(doc => doc.data().toUserId),
-            ...passes.docs.map(doc => doc.data().toUserId)
+            ...blocks1.map(b => b.blockedId),
+            ...blocks2.map(b => b.blockerId),
+            ...interactions.map(i => i.toUserId),
+            ...matches1.map(m => m.user2Id),
+            ...matches2.map(m => m.user1Id)
         ]);
 
         // 3. Fetch Candidates
-        const candidatesSnap = await adminDb.collection('profiles')
-            .where('gender', '==', currentUser.seeking === 'women' ? 'woman' : 'man')
-            .where('trustStatus', '!=', 'banned')
-            .limit(50)
-            .get();
+        const genderFilter = currentUserProfile.seeking === 'everyone'
+            ? {}
+            : { gender: currentUserProfile.seeking === 'women' ? 'woman' : 'man' };
 
-        const candidates = candidatesSnap.docs
-            .map(doc => {
-                const data = doc.data();
-                return { ...data, uid: doc.id, id: doc.id } as any; // any to avoid strict domain/firebase mismatch in this context
-            })
-            .filter(p => !excludedIds.has(p.id))
-            .slice(0, 30);
+        const candidates = await prisma.profile.findMany({
+            where: {
+                userId: { notIn: Array.from(excludedIds) },
+                trustStatus: { not: 'banned' },
+                ...genderFilter
+            },
+            take: 50,
+            include: { user: true } // Need user for ID
+        });
 
-        // 4. Calculate Scores based on experimental group
+        // 4. Calculate Scores
         const scoredCandidates = await Promise.all(
-            candidates.map(async (candidate) => {
-                let totalScore: number;
-                let details: any;
-                let explanation: string[];
+            candidates.map(async (candidateProfile) => {
+                const candidate: UserProfile = {
+                    id: candidateProfile.userId,
+                    uid: candidateProfile.userId,
+                    ...candidateProfile,
+                    isVerified: candidateProfile.isVerified,
+                    verificationStatus: candidateProfile.isVerified ? 'verified' : 'unverified',
+                    subscriptionStatus: candidateProfile.subscriptionStatus as any,
+                    trustStatus: candidateProfile.trustStatus as any,
+                    photos: candidateProfile.photos,
+                    interests: candidateProfile.interests,
+                    values: candidateProfile.values,
+                    age: candidateProfile.age || 18,
+                    gender: candidateProfile.gender || 'other',
+                    seeking: candidateProfile.seeking || 'everyone',
+                    displayName: candidateProfile.displayName || 'User',
+                    bio: candidateProfile.bio || '',
+                    createdAt: candidateProfile.createdAt,
+                };
 
-                // v2.2: Force Legacy if AI is disabled or Kill Switch is active
-                const forceLegacy = !isAIEnabled || (await featureFlagsServerService.isKillSwitchActive());
+                // Legacy Logic (v1.x) - AI features can be re-enabled later via config
+                const deepScore = await getCompatibilityScore(currentUserId, candidate.id);
+                let totalScore = deepScore.score;
+                const details = deepScore.breakdown;
+                const explanation = deepScore.explanation;
 
-                if (currentUser.experimentalGroup === 'B' && !forceLegacy) {
-                    // v2.0 AI MODEL
-                    const { aiMatchmakingServerService } = await import('@/lib/firebase/server/aiMatchmaking-service');
-                    // Cast candidate to any to bypass strict domain/firebase mismatch as they are technically compatible enough for the AI service
-                    const aiResult = await aiMatchmakingServerService.calculateDeepCompatibility(currentUser as any, candidate as any);
-                    totalScore = aiResult.score;
-                    details = aiResult.breakdown;
-                    explanation = aiResult.explanation;
-                } else {
-                    // v1.x LEGACY MODEL
-                    const deepScore = await getCompatibilityScore(currentUserId, candidate.id);
-                    totalScore = deepScore.score;
-                    details = deepScore.breakdown;
-                    explanation = deepScore.explanation;
-                }
-
-                // v1.8: Subscription & Active Boost
-                if (candidate.subscriptionStatus === 'plus') {
-                    totalScore += 10;
-                }
-
-                if (candidate.boostExpiresAt) {
-                    const boostExpires = candidate.boostExpiresAt instanceof Date
-                        ? candidate.boostExpiresAt
-                        : (candidate.boostExpiresAt as any).toDate();
-
-                    if (boostExpires > new Date()) {
-                        totalScore += 40; // Massive boost
-                    }
-                }
-
+                // Adjustments
+                if (candidate.subscriptionStatus === 'plus') totalScore += 10;
                 if (candidate.trustStatus === 'watchlist') totalScore *= 0.8;
-                if (candidate.trustStatus === 'restricted') totalScore *= 0.5;
-
-                // v2.1: Silent Intervention Level 2 (Extreme Visibility Reduction)
-                const trustSnap = await adminDb.collection('user_trust_scores').doc(candidate.id).get();
-                const trustData = trustSnap.data();
-                if (trustData?.interventionLevel >= 2) {
-                    totalScore *= 0.1; // Shadow-ban-like effect
-                }
 
                 return {
                     profile: candidate,
@@ -133,19 +111,8 @@ export async function getDynamicFeed(currentUserId: string): Promise<{ profile: 
             })
         );
 
-        // 5. Sort by Score
-        scoredCandidates.sort((a, b) => (b.score.total as number) - (a.score.total as number));
-
-        // v2.2: Cache Results for Standard Users
-        if (currentUser.subscriptionStatus !== 'plus') {
-            const expiresAt = new Date();
-            expiresAt.setHours(expiresAt.getHours() + 1); // 1h bucket
-            await adminDb.collection('feed_cache').doc(cacheKey).set({
-                results: scoredCandidates,
-                expiresAt,
-                createdAt: FieldValue.serverTimestamp()
-            });
-        }
+        // 5. Sort
+        scoredCandidates.sort((a, b) => b.score.total - a.score.total);
 
         return scoredCandidates;
 
