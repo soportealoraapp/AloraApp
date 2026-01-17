@@ -14,17 +14,25 @@ interface WellbeingStats {
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Button } from "@/components/ui/button";
 import { RefreshCw } from "lucide-react";
+import { trackEvent } from "@/lib/tracking/client";
 
-export function WellbeingDashboard({ stats, onRefresh }: { stats: WellbeingStats; onRefresh?: () => void }) {
+import * as React from 'react';
+
+function WellbeingDashboardComponent({ stats, onRefresh, userId }: { stats: WellbeingStats; onRefresh?: () => void; userId?: string }) {
     const getBatteryColor = (level: number) => {
         if (level > 70) return "bg-green-500 shadow-[0_0_10px_rgba(34,197,94,0.3)]";
         if (level > 30) return "bg-yellow-500";
         return "bg-red-500 animate-pulse";
     };
 
+    const handleRefresh = () => {
+        if (userId) trackEvent('WELLBEING_REFRESH', { userId });
+        onRefresh?.();
+    }
+
     return (
         <TooltipProvider>
-            <div className="space-y-6">
+            <div className="space-y-6 animate-in slide-in-from-bottom-2 duration-500">
                 <div className="flex justify-between items-center bg-card p-4 rounded-lg border shadow-sm">
                     <div className="space-y-1">
                         <h2 className="text-xl font-bold tracking-tight flex items-center gap-2">
@@ -33,13 +41,13 @@ export function WellbeingDashboard({ stats, onRefresh }: { stats: WellbeingStats
                         </h2>
                         <p className="text-xs text-muted-foreground">Real-time emotional and social health tracking.</p>
                     </div>
-                    <Button variant="ghost" size="icon" onClick={onRefresh} className="hover:bg-muted/50">
+                    <Button variant="ghost" size="icon" onClick={handleRefresh} className="hover:bg-muted/50 active:rotate-180 transition-transform duration-500">
                         <RefreshCw className="h-4 w-4 text-muted-foreground" />
                     </Button>
                 </div>
 
                 <div className="grid gap-4 md:grid-cols-3">
-                    <Card className="hover:border-primary/20 transition-colors">
+                    <Card className="hover:border-primary/20 transition-colors hover:shadow-md cursor-default">
                         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                             <Tooltip>
                                 <TooltipTrigger className="cursor-help">
@@ -60,7 +68,7 @@ export function WellbeingDashboard({ stats, onRefresh }: { stats: WellbeingStats
                         </CardContent>
                     </Card>
 
-                    <Card className="hover:border-primary/20 transition-colors">
+                    <Card className="hover:border-primary/20 transition-colors hover:shadow-md cursor-default">
                         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                             <Tooltip>
                                 <TooltipTrigger className="cursor-help">
@@ -78,7 +86,7 @@ export function WellbeingDashboard({ stats, onRefresh }: { stats: WellbeingStats
                         </CardContent>
                     </Card>
 
-                    <Card className="hover:border-primary/20 transition-colors">
+                    <Card className="hover:border-primary/20 transition-colors hover:shadow-md cursor-default">
                         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                             <Tooltip>
                                 <TooltipTrigger className="cursor-help">
@@ -98,11 +106,21 @@ export function WellbeingDashboard({ stats, onRefresh }: { stats: WellbeingStats
                 </div>
 
                 {stats.batteryLevel < 30 && (
-                    <Alert variant="destructive" className="border-red-500/50 bg-red-500/10">
+                    <Alert variant="destructive" className="border-red-500/50 bg-red-500/10 animate-pulse">
                         <Battery className="h-4 w-4" />
-                        <AlertTitle>Low Social Battery Alert</AlertTitle>
-                        <AlertDescription>
-                            Signs of fatigue detected. Recommendation: Pause matching for 24h to recover.
+                        <AlertTitle>Recharge Recommended</AlertTitle>
+                        <AlertDescription className="flex flex-col gap-2">
+                            <span className="text-xs opacity-90">
+                                You seem a bit drained. Alora recommends taking a break from swiping for 24 hours.
+                            </span>
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                className="w-fit h-7 text-xs bg-transparent border-red-500/30 hover:bg-red-500/20"
+                                onClick={() => userId && trackEvent('WELLBEING_ACTION_BREAK', { userId })}
+                            >
+                                Schedule a Break
+                            </Button>
                         </AlertDescription>
                     </Alert>
                 )}
@@ -134,4 +152,7 @@ export function WellbeingDashboard({ stats, onRefresh }: { stats: WellbeingStats
             </div>
         </TooltipProvider>
     );
+    );
 }
+
+export const WellbeingDashboard = React.memo(WellbeingDashboardComponent);

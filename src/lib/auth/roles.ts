@@ -24,3 +24,13 @@ export function assertSubscription(profile: UserProfile | null, feature: keyof t
         throw new Error(`Unauthorized: Upgrade to ${PERMISSIONS[feature][0]} to access ${feature}`);
     }
 }
+
+/**
+ * Safe check for UI components that doesn't throw.
+ * Returns false if profile is null or tier is insufficient.
+ */
+export function canAccess(profile: UserProfile | null, feature: keyof typeof PERMISSIONS): boolean {
+    if (!profile) return false;
+    const tier = (profile.subscriptionStatus as SubscriptionTier) || 'free';
+    return hasAccess(tier, feature);
+}

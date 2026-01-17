@@ -13,19 +13,19 @@ datasource db {
 // -----------------------------------------------------------------------------
 
 model User {
-  id        String   @id @default(uuid())
-  email     String   @unique
+  id        String    @id @default(uuid())
+  email     String    @unique
   name      String?
-  isActive  Boolean  @default(true)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  isActive  Boolean   @default(true)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
   deletedAt DateTime? // Soft delete
 
   // Core Relations
-  profile   Profile?
-  sessions  Session[]
+  profile      Profile?
+  sessions     Session[]
   sentMessages Message[] @relation("SentMessages")
-  
+
   // Auditing
   auditLogs AuditLog[]
 
@@ -43,9 +43,16 @@ model User {
 
   // Block/Report
   blockedUsers Block[] @relation("UserBlocker")
-  
+
   // Notifications
   notifications Notification[]
+
+  // AI & Wellbeing (v3.x)
+  aiCoachSessions  AiCoachSession[]
+  wellbeingEvents  WellbeingEvent[]
+  postDatingEvents PostDatingEvent[]
+  cooldownState    CooldownState?
+  closureArtifacts ClosureArtifact[]
 
   @@map("users")
 }
@@ -61,16 +68,16 @@ model Profile {
   age         Int?
   gender      String?
   photos      String[] // URL array
-  
+
   // Preferences
-  seeking     String?
-  interests   String[]
-  values      String[]
-  
+  seeking   String?
+  interests String[]
+  values    String[]
+
   // Status
-  isVerified         Boolean @default(false)
-  subscriptionStatus String  @default("free") // free, plus, premium
-  trustStatus        String  @default("clean") // clean, watchlist, banned
+  isVerified         Boolean  @default(false)
+  subscriptionStatus String   @default("free") // free, plus, premium
+  trustStatus        String   @default("clean") // clean, watchlist, banned
   lastActiveAt       DateTime @default(now())
 
   createdAt DateTime @default(now())
@@ -80,43 +87,43 @@ model Profile {
 }
 
 model Session {
-  id           String   @id @default(uuid())
-  userId       String
-  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  token        String   @unique // Refresh token or session ID
-  expiresAt    DateTime
-  ipAddress    String?
-  userAgent    String?
-  isValid      Boolean  @default(true)
-  
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  token     String   @unique // Refresh token or session ID
+  expiresAt DateTime
+  ipAddress String?
+  userAgent String?
+  isValid   Boolean  @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([userId])
   @@map("sessions")
 }
 
 model Match {
-  id        String   @id @default(uuid())
-  
-  user1Id   String
-  user1     User     @relation("MatchUser1", fields: [user1Id], references: [id])
-  
-  user2Id   String
-  user2     User     @relation("MatchUser2", fields: [user2Id], references: [id])
-  
-  score     Float    @default(0) // Compatibility Score
-  isActive  Boolean  @default(true)
-  
+  id String @id @default(uuid())
+
+  user1Id String
+  user1   User   @relation("MatchUser1", fields: [user1Id], references: [id])
+
+  user2Id String
+  user2   User   @relation("MatchUser2", fields: [user2Id], references: [id])
+
+  score    Float   @default(0) // Compatibility Score
+  isActive Boolean @default(true)
+
   // State
-  stage     String   @default("talking") // talking, dating, relationship, unmatched
-  
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  stage String @default("talking") // talking, dating, relationship, unmatched
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
   deletedAt DateTime? // Soft delete (Unmatch)
 
-  messages  Message[]
-  
+  messages Message[]
+
   // AI Context
   copilotContext CopilotContext?
 
@@ -125,21 +132,21 @@ model Match {
 }
 
 model Message {
-  id        String   @id @default(uuid())
-  matchId   String
-  match     Match    @relation(fields: [matchId], references: [id], onDelete: Cascade)
-  
-  senderId  String
-  sender    User     @relation("SentMessages", fields: [senderId], references: [id])
-  
-  content   String
-  type      String   @default("text") // text, image, icebreaker
-  status    String   @default("sent") // sent, delivered, read, flagged
-  
-  readAt    DateTime?
-  
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id      String @id @default(uuid())
+  matchId String
+  match   Match  @relation(fields: [matchId], references: [id], onDelete: Cascade)
+
+  senderId String
+  sender   User   @relation("SentMessages", fields: [senderId], references: [id])
+
+  content String
+  type    String @default("text") // text, image, icebreaker
+  status  String @default("sent") // sent, delivered, read, flagged
+
+  readAt DateTime?
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
   deletedAt DateTime?
 
   @@index([matchId])
@@ -147,16 +154,16 @@ model Message {
 }
 
 model Interaction {
-  id        String   @id @default(uuid())
-  
+  id String @id @default(uuid())
+
   fromUserId String
-  fromUser   User    @relation("InteractionSender", fields: [fromUserId], references: [id], onDelete: Cascade)
-  
-  toUserId   String
-  toUser     User    @relation("InteractionReceiver", fields: [toUserId], references: [id], onDelete: Cascade)
-  
-  type      String   // like, superlike, pass
-  
+  fromUser   User   @relation("InteractionSender", fields: [fromUserId], references: [id], onDelete: Cascade)
+
+  toUserId String
+  toUser   User   @relation("InteractionReceiver", fields: [toUserId], references: [id], onDelete: Cascade)
+
+  type String // like, superlike, pass
+
   createdAt DateTime @default(now())
 
   @@unique([fromUserId, toUserId])
@@ -168,19 +175,19 @@ model Interaction {
 // -----------------------------------------------------------------------------
 
 model CopilotContext {
-  id        String   @id @default(uuid())
-  matchId   String   @unique
-  match     Match    @relation(fields: [matchId], references: [id], onDelete: Cascade)
+  id      String @id @default(uuid())
+  matchId String @unique
+  match   Match  @relation(fields: [matchId], references: [id], onDelete: Cascade)
 
   // Awareness
-  summary         String?   @db.Text
-  sentimentScore  Float?
-  topicsDiscussed String[]
+  summary            String?  @db.Text
+  sentimentScore     Float?
+  topicsDiscussed    String[]
   nextMoveSuggestion String?
 
-  lastAnalyzedAt  DateTime?
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  lastAnalyzedAt DateTime?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
 
   events CopilotEvent[]
 
@@ -188,43 +195,43 @@ model CopilotContext {
 }
 
 model CopilotEvent {
-  id               String   @id @default(uuid())
+  id               String         @id @default(uuid())
   copilotContextId String
   context          CopilotContext @relation(fields: [copilotContextId], references: [id], onDelete: Cascade)
 
-  eventType        String // suggestion_given, intervention, nudge
-  details          Json?
-  
-  createdAt        DateTime @default(now())
+  eventType String // suggestion_given, intervention, nudge
+  details   Json?
+
+  createdAt DateTime @default(now())
 
   @@map("copilot_events")
 }
 
 model AiCoachSession {
-  id        String   @id @default(uuid())
-  userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
-  messages  AiMessage[]
-  
+  id     String @id @default(uuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  messages AiMessage[]
+
   summary   String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  
+
   @@map("ai_coach_sessions")
 }
 
 model AiMessage {
-  id        String   @id @default(uuid())
+  id        String         @id @default(uuid())
   sessionId String
   session   AiCoachSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
-  
-  role      String   // user, assistant, system
-  content   String   @db.Text
-  metadata  Json?
-  
+
+  role     String // user, assistant, system
+  content  String @db.Text
+  metadata Json?
+
   createdAt DateTime @default(now())
-  
+
   @@map("ai_messages")
 }
 
@@ -233,19 +240,19 @@ model AiMessage {
 // -----------------------------------------------------------------------------
 
 model RelationshipContext {
-  id        String   @id @default(uuid())
-  
+  id String @id @default(uuid())
+
   partner1Id String
-  partner1   User    @relation("RelPartner1", fields: [partner1Id], references: [id])
-  
+  partner1   User   @relation("RelPartner1", fields: [partner1Id], references: [id])
+
   partner2Id String
-  partner2   User    @relation("RelPartner2", fields: [partner2Id], references: [id])
+  partner2   User   @relation("RelPartner2", fields: [partner2Id], references: [id])
 
   status    String   @default("active") // active, paused, ended
   startDate DateTime @default(now())
-  
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
   deletedAt DateTime?
 
   notes     CommunicationNote[]
@@ -255,31 +262,31 @@ model RelationshipContext {
 }
 
 model CommunicationNote {
-  id             String @id @default(uuid())
+  id             String              @id @default(uuid())
   relationshipId String
   relationship   RelationshipContext @relation(fields: [relationshipId], references: [id], onDelete: Cascade)
 
-  content        String
-  category       String // appreciation, observation, request
-  
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
-  deletedAt      DateTime?
+  content  String
+  category String // appreciation, observation, request
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
 
   @@map("communication_notes")
 }
 
 model ConflictReflection {
-  id             String @id @default(uuid())
+  id             String              @id @default(uuid())
   relationshipId String
   relationship   RelationshipContext @relation(fields: [relationshipId], references: [id], onDelete: Cascade)
 
-  trigger        String
-  myReaction     String
-  resolution     String?
-  
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  trigger    String
+  myReaction String
+  resolution String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@map("conflict_reflections")
 }
@@ -289,12 +296,13 @@ model ConflictReflection {
 // -----------------------------------------------------------------------------
 
 model WellbeingEvent {
-  id        String   @id @default(uuid())
-  userId    String // Can link to User if strictly coupled, or loose for analytics
-  
-  type      String   // fatigue_detected, ghosting_intervention, burnout_warning
-  severity  String   // low, medium, high
-  metadata  Json?
+  id     String @id @default(uuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  type     String // fatigue_detected, ghosting_intervention, burnout_warning
+  severity String // low, medium, high
+  metadata Json?
 
   createdAt DateTime @default(now())
 
@@ -303,26 +311,28 @@ model WellbeingEvent {
 }
 
 model PostDatingEvent {
-  id        String   @id @default(uuid())
-  userId    String
-  matchId   String?  // Optional reference to past match
+  id      String  @id @default(uuid())
+  userId  String
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  matchId String? // Optional reference to past match
 
-  type      String   // breakup, rejection, ghosted
-  notes     String?
+  type  String // breakup, rejection, ghosted
+  notes String?
 
   createdAt DateTime @default(now())
-  
+
   @@map("post_dating_events")
 }
 
 model CooldownState {
-  id        String   @id @default(uuid())
-  userId    String   @unique
-  
-  isActive  Boolean  @default(true)
-  reason    String? // breakup_recovery, burnout
-  endsAt    DateTime?
-  
+  id     String @id @default(uuid())
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  isActive Boolean   @default(true)
+  reason   String? // breakup_recovery, burnout
+  endsAt   DateTime?
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -330,14 +340,15 @@ model CooldownState {
 }
 
 model ClosureArtifact {
-  id        String   @id @default(uuid())
-  userId    String
-  
-  type      String   // unsent_letter, voice_memo, reflection
-  content   String   @db.Text
-  isPrivate Boolean  @default(true) // Always private by design usually
-  
-  createdAt DateTime @default(now())
+  id     String @id @default(uuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  type      String // unsent_letter, voice_memo, reflection
+  content   String  @db.Text
+  isPrivate Boolean @default(true) // Always private by design usually
+
+  createdAt DateTime  @default(now())
   deletedAt DateTime?
 
   @@map("closure_artifacts")
@@ -348,15 +359,15 @@ model ClosureArtifact {
 // -----------------------------------------------------------------------------
 
 model AuditLog {
-  id          String   @id @default(uuid())
-  userId      String?
-  user        User?    @relation(fields: [userId], references: [id])
-  
-  action      String
-  ipAddress   String?
-  details     Json?
-  
-  timestamp   DateTime @default(now())
+  id     String  @id @default(uuid())
+  userId String?
+  user   User?   @relation(fields: [userId], references: [id])
+
+  action    String
+  ipAddress String?
+  details   Json?
+
+  timestamp DateTime @default(now())
 
   @@map("audit_logs")
 }
@@ -371,11 +382,11 @@ model RateLimit {
 }
 
 model Block {
-  id        String   @id @default(uuid())
+  id        String @id @default(uuid())
   blockerId String
-  blocker   User     @relation("UserBlocker", fields: [blockerId], references: [id])
-  blockedId String   // No relation needed to blocked user if they might be deleted
-  
+  blocker   User   @relation("UserBlocker", fields: [blockerId], references: [id])
+  blockedId String // No relation needed to blocked user if they might be deleted
+
   reason    String?
   createdAt DateTime @default(now())
 
@@ -384,15 +395,15 @@ model Block {
 }
 
 model Notification {
-  id        String   @id @default(uuid())
-  userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
-  type      String   // match, message, system
-  title     String
-  body      String
-  readAt    DateTime?
-  
+  id     String @id @default(uuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  type   String // match, message, system
+  title  String
+  body   String
+  readAt DateTime?
+
   createdAt DateTime @default(now())
 
   @@map("notifications")
