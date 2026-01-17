@@ -54,7 +54,7 @@
     "html2canvas": "^1.4.1",
     "lucide-react": "^0.475.0",
     "natural": "^8.1.0",
-    "next": "15.3.3",
+    "next": "15.3.8",
     "next-pwa": "^5.6.0",
     "next-themes": "^0.3.0",
     "patch-package": "^8.0.0",
