@@ -4,27 +4,34 @@ import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { Plus, X, Loader2 } from "lucide-react";
 import Image from "next/image";
-import { storageService } from "@/lib/firebase/storage-service";
+import { useUploadThing } from "@/utils/uploadthing";
+import { useToast } from "@/hooks/use-toast";
 
 export function StepPhotos({ userId, data, onUpdate, onNext, onPrev }: any) {
     const [photos, setPhotos] = useState<string[]>(data.photos || []);
-    const [uploading, setUploading] = useState(false);
+    const { toast } = useToast();
+
+    const { startUpload, isUploading } = useUploadThing("imageUploader", {
+        onClientUploadComplete: (res: any) => {
+            if (res && res.length > 0) {
+                const newUrls = res.map((r: any) => r.url);
+                const updatedPhotos = [...photos, ...newUrls];
+                setPhotos(updatedPhotos);
+                onUpdate({ photos: updatedPhotos });
+                toast({ title: "Foto subida correctamente" });
+            }
+        },
+        onUploadError: (error: Error) => {
+            toast({ title: "Error al subir", description: error.message, variant: "destructive" });
+        },
+    });
 
     const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-        if (!e.target.files || !e.target.files[0] || !userId) return;
+        if (!e.target.files || !userId) return;
+        const files = Array.from(e.target.files);
+        if (files.length === 0) return;
 
-        setUploading(true);
-        try {
-            const file = e.target.files[0];
-            const url = await storageService.uploadProfilePhoto(userId, file, photos.length);
-            const newPhotos = [...photos, url];
-            setPhotos(newPhotos);
-            onUpdate({ photos: newPhotos });
-        } catch (error) {
-            console.error("Upload failed", error);
-        } finally {
-            setUploading(false);
-        }
+        await startUpload(files);
     };
 
     const removePhoto = (index: number) => {
@@ -40,7 +47,7 @@ export function StepPhotos({ userId, data, onUpdate, onNext, onPrev }: any) {
 
             <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                 {photos.map((url, index) => (
-                    <div key={url} className="relative aspect-[3/4] rounded-xl overflow-hidden shadow-sm group">
+                    <div key={url} className="relative aspect-[3/4] rounded-xl overflow-hidden shadow-sm group bg-muted">
                         <Image src={url} alt={`Photo ${index}`} fill className="object-cover" />
                         <button
                             onClick={() => removePhoto(index)}
@@ -52,24 +59,24 @@ export function StepPhotos({ userId, data, onUpdate, onNext, onPrev }: any) {
                 ))}
 
                 {photos.length < 6 && (
-                    <label className="flex flex-col items-center justify-center aspect-[3/4] border-2 border-dashed border-pink-200 rounded-xl cursor-pointer hover:bg-pink-50 transition-colors">
-                        {uploading ? (
-                            <Loader2 className="h-8 w-8 animate-spin text-pink-500" />
+                    <label className={`flex flex-col items-center justify-center aspect-[3/4] border-2 border-dashed border-muted-foreground/25 rounded-xl cursor-pointer hover:bg-muted/50 transition-colors ${isUploading ? 'opacity-50 pointer-events-none' : ''}`}>
+                        {isUploading ? (
+                            <Loader2 className="h-8 w-8 animate-spin text-primary" />
                         ) : (
                             <>
-                                <Plus className="h-8 w-8 text-pink-400 mb-2" />
-                                <span className="text-sm text-pink-500 font-medium">Añadir</span>
+                                <Plus className="h-8 w-8 text-muted-foreground mb-2" />
+                                <span className="text-sm text-primary font-medium">Añadir</span>
                             </>
                         )}
-                        <input type="file" accept="image/*" className="hidden" onChange={handleUpload} disabled={uploading} />
+                        <input type="file" accept="image/*" className="hidden" onChange={handleUpload} disabled={isUploading} multiple />
                     </label>
                 )}
             </div>
 
             <div className="flex gap-4 mt-8">
                 <Button variant="outline" onClick={onPrev} className="w-1/3">Atrás</Button>
-                <Button onClick={onNext} className="w-2/3 bg-pink-500 hover:bg-pink-600" disabled={photos.length < 2}>
-                    Siguiente
+                <Button onClick={onNext} className="w-2/3" disabled={photos.length < 2 || isUploading}>
+                    {isUploading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Siguiente"}
                 </Button>
             </div>
         </div>

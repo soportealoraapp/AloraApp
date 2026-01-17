@@ -68,7 +68,7 @@ export function StepBasicInfo({ data, onUpdate, onNext }: any) {
                 </div>
             </div>
 
-            <Button onClick={handleNext} className="w-full bg-pink-500 hover:bg-pink-600 mt-8">
+            <Button onClick={handleNext} className="w-full mt-8">
                 Continuar
             </Button>
         </div>
