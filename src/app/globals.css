@@ -3,7 +3,13 @@
 @tailwind utilities;
 
 body {
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-pt-sans), Arial, Helvetica, sans-serif;
+  @apply text-base md:text-sm;
+}
+
+html {
+  scroll-behavior: smooth;
+  height: 100%;
 }
 
 @layer base {
@@ -87,10 +93,13 @@ body {
 
 @layer base {
   * {
-    @apply border-border outline-none focus-visible:ring-2 focus-visible:ring-primary/20 transition-all duration-300;
+    @apply border-border outline-none;
+    -webkit-tap-highlight-color: transparent;
   }
   body {
-    @apply bg-background text-foreground antialiased;
+    @apply bg-background text-foreground antialiased selection:bg-primary/20;
+    min-height: 100vh;
+    min-height: -webkit-fill-available;
   }
 }
 

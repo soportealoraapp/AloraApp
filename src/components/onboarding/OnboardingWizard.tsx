@@ -36,7 +36,7 @@ export function OnboardingWizard() {
 
         try {
             try {
-                await updateUserProfile(user.id || user.uid || '', {
+                await updateUserProfile((user as any).id || (user as any).uid || '', {
                     ...updatedData,
                     createdAt: undefined, // Don't wipe
                     isCompleted: step === totalSteps // simplified logic
@@ -60,26 +60,39 @@ export function OnboardingWizard() {
     const userId = user?.id;
 
     return (
-        <div className="max-w-md mx-auto p-6 bg-white dark:bg-card rounded-3xl shadow-xl dark:shadow-pink-900/10 min-h-[600px] flex flex-col border border-pink-50 dark:border-pink-900/20 transition-colors duration-500">
-            <div className="mb-8">
+        <div className="max-w-md w-full mx-auto p-4 md:p-6 bg-white dark:bg-card rounded-3xl shadow-xl dark:shadow-pink-900/10 min-h-[550px] md:min-h-[600px] flex flex-col border border-pink-50 dark:border-pink-900/20 transition-colors duration-500 overflow-hidden">
+            <div className="mb-6 md:mb-8">
                 <Progress value={(step / totalSteps) * 100} className="h-2 bg-pink-100 dark:bg-pink-900/30" />
                 <p className="text-center text-[10px] font-bold uppercase tracking-widest text-pink-400 dark:text-pink-300 mt-2">Paso {step} de {totalSteps}</p>
             </div>
 
-            <div className="flex-1 relative">
+            <div className="flex-1 relative flex flex-col">
                 <AnimatePresence mode="wait">
                     <motion.div
                         key={step}
-                        initial={{ x: 30, opacity: 0 }}
+                        initial={{ x: 20, opacity: 0 }}
                         animate={{ x: 0, opacity: 1 }}
-                        exit={{ x: -30, opacity: 0 }}
-                        transition={{ type: "spring", damping: 30, stiffness: 150 }}
-                        className="h-full"
+                        exit={{ x: -20, opacity: 0 }}
+                        transition={{ type: "spring", damping: 35, stiffness: 180 }}
+                        className="flex-1 flex flex-col"
                     >
                         {step === 1 && <StepBasicInfo userId={userId} data={formData} onUpdate={saveProgress} onNext={nextStep} />}
                         {step === 2 && <StepInterests userId={userId} data={formData} onUpdate={saveProgress} onNext={nextStep} onPrev={prevStep} />}
                         {step === 3 && <StepPhotos userId={userId} data={formData} onUpdate={saveProgress} onNext={nextStep} onPrev={prevStep} />}
-                        {step === 4 && <StepVerification onComplete={() => router.push('/discover')} />}
+                        {step === 4 && (
+                            <div className="flex-1 flex flex-col">
+                                <StepVerification onComplete={() => router.push('/discover')} />
+                                <div className="mt-auto pt-6 text-center">
+                                    <Button
+                                        variant="ghost"
+                                        className="text-muted-foreground hover:text-primary text-xs"
+                                        onClick={() => router.push('/discover')}
+                                    >
+                                        Lo haré más tarde
+                                    </Button>
+                                </div>
+                            </div>
+                        )}
                     </motion.div>
                 </AnimatePresence>
             </div>

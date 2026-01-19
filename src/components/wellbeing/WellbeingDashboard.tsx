@@ -15,6 +15,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { Button } from "@/components/ui/button";
 import { RefreshCw } from "lucide-react";
 import { trackEvent } from "@/lib/tracking/client";
+import { cn } from "@/lib/utils";
 
 import * as React from 'react';
 
@@ -32,22 +33,22 @@ function WellbeingDashboardComponent({ stats, onRefresh, userId }: { stats: Well
 
     return (
         <TooltipProvider>
-            <div className="space-y-6 animate-in slide-in-from-bottom-2 duration-500">
-                <div className="flex justify-between items-center bg-card p-4 rounded-lg border shadow-sm">
+            <div className="space-y-6 animate-in slide-in-from-bottom-2 duration-700">
+                <div className="flex flex-col md:flex-row justify-between items-start md:items-center bg-card p-5 md:p-4 rounded-3xl border shadow-sm gap-4">
                     <div className="space-y-1">
                         <h2 className="text-xl font-bold tracking-tight flex items-center gap-2">
                             Wellbeing Monitor
-                            <Badge variant="outline" className="text-xs font-normal bg-background/50">Live</Badge>
+                            <Badge variant="outline" className="text-[10px] font-bold bg-background/50 border-primary/20 text-primary">Live</Badge>
                         </h2>
-                        <p className="text-xs text-muted-foreground">Real-time emotional and social health tracking.</p>
+                        <p className="text-xs text-muted-foreground font-medium">Real-time emotional and social health tracking.</p>
                     </div>
-                    <Button variant="ghost" size="icon" onClick={handleRefresh} className="hover:bg-muted/50 active:rotate-180 transition-transform duration-500">
+                    <Button variant="ghost" size="icon" onClick={handleRefresh} className="hover:bg-muted/50 active:rotate-180 transition-transform duration-700 rounded-full h-10 w-10 self-end md:self-auto">
                         <RefreshCw className="h-4 w-4 text-muted-foreground" />
                     </Button>
                 </div>
 
-                <div className="grid gap-4 md:grid-cols-3">
-                    <Card className="hover:border-primary/20 transition-all hover:shadow-md cursor-default hover:-translate-y-1">
+                <div className="grid gap-4 grid-cols-1 md:grid-cols-3">
+                    <Card className="rounded-3xl hover:border-primary/20 transition-all hover:shadow-xl hover:shadow-pink-500/5 cursor-default group">
                         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                             <Tooltip>
                                 <TooltipTrigger asChild>

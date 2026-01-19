@@ -78,7 +78,7 @@ export default function QADashboard() {
                     </div>
                     <div>
                         <h1 className="text-xl font-bold tracking-tight">Alora QA Dashboard</h1>
-                        <p className="text-xs text-muted-foreground font-medium uppercase tracking-widest">Version 3.6.0 Production Polish</p>
+                        <p className="text-xs text-muted-foreground font-medium uppercase tracking-widest">Version 3.7.0 Premium Polish</p>
                     </div>
                 </div>
                 <div className="flex items-center gap-2">

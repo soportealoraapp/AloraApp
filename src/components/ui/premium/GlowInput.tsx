@@ -1,12 +1,19 @@
-'use client';
-
-import { Input } from "@/components/ui/input";
+import * as React from "react";
+import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 
 export function GlowInput({ className, children, ...props }: { className?: string; children: React.ReactNode }) {
     return (
         <div className="relative group">
-            <div className="absolute -inset-0.5 bg-gradient-to-r from-pink-400 to-purple-400 rounded-lg blur opacity-0 group-focus-within:opacity-50 transition duration-500"></div>
+            <motion.div
+                className="absolute -inset-0.5 bg-gradient-to-r from-pink-400 to-purple-400 rounded-lg blur"
+                initial={{ opacity: 0 }}
+                whileFocus={{ opacity: 0.5 }}
+                animate={{ opacity: 0 }}
+                transition={{ type: "spring", damping: 30, stiffness: 150 }}
+                style={{ pointerEvents: 'none' }}
+            />
+            <div className="absolute -inset-0.5 bg-gradient-to-r from-pink-400 to-purple-400 rounded-lg blur opacity-0 group-focus-within:opacity-40 transition-opacity duration-500" />
             <div className={cn("relative", className)}>
                 {children}
             </div>

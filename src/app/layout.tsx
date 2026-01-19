@@ -10,6 +10,23 @@ import { SafetyGuard } from '@/components/safety/SafetyGuard';
 export const metadata: Metadata = {
   title: 'Alora: Su Espacio Seguro',
   description: 'Tu espacio seguro para conocer a alguien especial.',
+  manifest: '/manifest.json',
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: 'default',
+    title: 'Alora',
+  },
+  formatDetection: {
+    telephone: false,
+  },
+};
+
+export const viewport = {
+  themeColor: '#F48FB1',
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
 };
 
 export default function RootLayout({
