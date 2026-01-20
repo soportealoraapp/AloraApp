@@ -1,10 +1,30 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
-import { updateSession } from '@/lib/supabase/middleware';
+import { updateSession, createClient } from '@/lib/supabase/middleware';
 
 export async function middleware(request: NextRequest) {
-    // 1. Supabase Auth Session Update
+    // 1. Supabase Auth Session Update & Protection
     const response = await updateSession(request);
+    const { data: { user } } = await (await createClient(request, response)).auth.getUser();
+
+    const isAppRoute = request.nextUrl.pathname.startsWith('/discover') ||
+        request.nextUrl.pathname.startsWith('/profile') ||
+        request.nextUrl.pathname.startsWith('/messages') ||
+        request.nextUrl.pathname.startsWith('/chat') ||
+        request.nextUrl.pathname.startsWith('/settings') ||
+        request.nextUrl.pathname.startsWith('/qa');
+
+    const isAuthRoute = request.nextUrl.pathname.startsWith('/login') ||
+        request.nextUrl.pathname.startsWith('/signup') ||
+        request.nextUrl.pathname.startsWith('/auth');
+
+    if (isAppRoute && !user) {
+        return NextResponse.redirect(new URL('/login', request.url));
+    }
+
+    if (isAuthRoute && user && !request.nextUrl.pathname.startsWith('/auth/callback')) {
+        return NextResponse.redirect(new URL('/discover', request.url));
+    }
 
     // 2. Security Headers (CSP)
     const csp = `

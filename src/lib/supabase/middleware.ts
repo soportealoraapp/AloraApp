@@ -1,12 +1,8 @@
-import { createServerClient } from '@supabase/ssr'
+import { createServerClient, type CookieOptions } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
-export async function updateSession(request: NextRequest) {
-    let supabaseResponse = NextResponse.next({
-        request,
-    })
-
-    const supabase = createServerClient(
+export async function createClient(request: NextRequest, response: NextResponse) {
+    return createServerClient(
         process.env.NEXT_PUBLIC_SUPABASE_URL!,
         process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
         {
@@ -18,22 +14,22 @@ export async function updateSession(request: NextRequest) {
                     cookiesToSet.forEach(({ name, value, options }) =>
                         request.cookies.set(name, value)
                     )
-                    supabaseResponse = NextResponse.next({
-                        request,
-                    })
                     cookiesToSet.forEach(({ name, value, options }) =>
-                        supabaseResponse.cookies.set(name, value, options)
+                        response.cookies.set(name, value, options)
                     )
                 },
             },
         }
     )
+}
 
-    // Do not run Supabase middleware to force refresh session here for now
-    // to avoid conflicts with existing logic until fully migrated.
-    // const {
-    //   data: { user },
-    // } = await supabase.auth.getUser()
+export async function updateSession(request: NextRequest) {
+    let supabaseResponse = NextResponse.next({
+        request,
+    })
+
+    const supabase = await createClient(request, supabaseResponse);
+    await supabase.auth.getUser();
 
     return supabaseResponse
 }

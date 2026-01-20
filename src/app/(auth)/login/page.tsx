@@ -67,15 +67,14 @@ export default function LoginPage() {
 
     try {
       await authService.signInWithGoogle();
-      toast({
-        title: "¡Bienvenida!",
-        description: "Has iniciado sesión con Google.",
-      });
-      router.push("/discover");
+      // Supabase handles the redirect to /auth/callback
     } catch (error: any) {
       console.error("Google login error:", error);
-      setError("Error al iniciar sesión con Google.");
-    } finally {
+      if (error.message?.includes("provider is not enabled")) {
+        setError("El inicio de sesión con Google no está habilitado actualmente.");
+      } else {
+        setError("Error al conectar con Google. Por favor, intenta de nuevo.");
+      }
       setLoading(false);
     }
   };
@@ -86,15 +85,14 @@ export default function LoginPage() {
 
     try {
       await authService.signInWithApple();
-      toast({
-        title: "¡Bienvenida!",
-        description: "Has iniciado sesión con Apple.",
-      });
-      router.push("/discover");
+      // Supabase handles the redirect to /auth/callback
     } catch (error: any) {
       console.error("Apple login error:", error);
-      setError("Error al iniciar sesión con Apple.");
-    } finally {
+      if (error.message?.includes("provider is not enabled")) {
+        setError("El inicio de sesión con Apple no está habilitado actualmente.");
+      } else {
+        setError("Error al conectar con Apple. Por favor, intenta de nuevo.");
+      }
       setLoading(false);
     }
   };

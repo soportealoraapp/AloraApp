@@ -14,11 +14,11 @@ export async function getDynamicFeed(currentUserId: string): Promise<{ profile: 
 
         if (!currentUser || !currentUser.profile) return [];
 
-        // Cast to domain type (mapping Prisma profile to UserProfile)
         const currentUserProfile: UserProfile = {
+            ...currentUser.profile,
             id: currentUser.id,
             uid: currentUser.id, // Legacy compat
-            ...currentUser.profile,
+            email: currentUser.email, // Ensure email is present
             // Ensure all required fields by UserProfile are present (defaulting if nullable in Prisma)
             isVerified: currentUser.profile.isVerified,
             verificationStatus: currentUser.profile.isVerified ? 'verified' : 'unverified',
@@ -28,8 +28,8 @@ export async function getDynamicFeed(currentUserId: string): Promise<{ profile: 
             interests: currentUser.profile.interests,
             values: currentUser.profile.values,
             age: currentUser.profile.age || 18,
-            gender: currentUser.profile.gender || 'other',
-            seeking: currentUser.profile.seeking || 'everyone',
+            gender: (currentUser.profile.gender as any) || 'other',
+            seeking: (currentUser.profile.seeking as any) || 'everyone',
             displayName: currentUser.profile.displayName || 'User',
             bio: currentUser.profile.bio || '',
             createdAt: currentUser.profile.createdAt,
@@ -72,9 +72,10 @@ export async function getDynamicFeed(currentUserId: string): Promise<{ profile: 
         const scoredCandidates = await Promise.all(
             candidates.map(async (candidateProfile) => {
                 const candidate: UserProfile = {
+                    ...candidateProfile,
                     id: candidateProfile.userId,
                     uid: candidateProfile.userId,
-                    ...candidateProfile,
+                    email: candidateProfile.user.email, // Use email from included user
                     isVerified: candidateProfile.isVerified,
                     verificationStatus: candidateProfile.isVerified ? 'verified' : 'unverified',
                     subscriptionStatus: candidateProfile.subscriptionStatus as any,
@@ -83,14 +84,13 @@ export async function getDynamicFeed(currentUserId: string): Promise<{ profile: 
                     interests: candidateProfile.interests,
                     values: candidateProfile.values,
                     age: candidateProfile.age || 18,
-                    gender: candidateProfile.gender || 'other',
-                    seeking: candidateProfile.seeking || 'everyone',
+                    gender: (candidateProfile.gender as any) || 'other',
+                    seeking: (candidateProfile.seeking as any) || 'everyone',
                     displayName: candidateProfile.displayName || 'User',
                     bio: candidateProfile.bio || '',
                     createdAt: candidateProfile.createdAt,
                 };
 
-                // Legacy Logic (v1.x) - AI features can be re-enabled later via config
                 const deepScore = await getCompatibilityScore(currentUserId, candidate.id);
                 let totalScore = deepScore.score;
                 const details = deepScore.breakdown;
@@ -111,10 +111,11 @@ export async function getDynamicFeed(currentUserId: string): Promise<{ profile: 
             })
         );
 
-        // 5. Sort
-        scoredCandidates.sort((a, b) => b.score.total - a.score.total);
+        // 5. Filter & Sort
+        const visibleCandidates = scoredCandidates.filter(c => c.profile.photos && c.profile.photos.length >= 2);
+        visibleCandidates.sort((a, b) => b.score.total - a.score.total);
 
-        return scoredCandidates;
+        return visibleCandidates;
 
     } catch (error) {
         console.error("Error generating dynamic feed", error);

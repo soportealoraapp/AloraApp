@@ -50,7 +50,7 @@ export function StepPhotos({ userId, data, onUpdate, onNext, onPrev }: any) {
     return (
         <div className="space-y-6">
             <h2 className="text-2xl font-bold text-center mb-2 dark:text-white">Tus Fotos</h2>
-            <p className="text-center text-muted-foreground dark:text-gray-400 mb-6 font-medium">Sube al menos 2 fotos para continuar</p>
+            <p className="text-center text-muted-foreground dark:text-gray-400 mb-6 font-medium">Sube fotos para aparecer en recomendaciones (opcional)</p>
 
             <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                 {photos.map((url, index) => (
@@ -80,15 +80,22 @@ export function StepPhotos({ userId, data, onUpdate, onNext, onPrev }: any) {
                 )}
             </div>
 
-            <div className="flex gap-4 mt-8">
-                <Button variant="outline" onClick={onPrev} className="w-1/3 hover:bg-muted dark:hover:bg-pink-950/10 active:scale-[0.98] transition-all border-pink-100 dark:border-pink-900/40">Atrás</Button>
-                <Button
-                    onClick={handleNext}
-                    className="w-2/3 hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 shadow-md shadow-pink-100 dark:shadow-pink-950/10"
-                    disabled={photos.length < 2 || isUploading}
-                >
-                    {isUploading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Continuar"}
-                </Button>
+            <div className="flex flex-col gap-3 mt-8">
+                <div className="flex gap-4">
+                    <Button variant="outline" onClick={onPrev} className="w-1/3 hover:bg-muted dark:hover:bg-pink-950/10 active:scale-[0.98] transition-all border-pink-100 dark:border-pink-900/40">Atrás</Button>
+                    <Button
+                        onClick={handleNext}
+                        className="w-2/3 hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 shadow-md shadow-pink-100 dark:shadow-pink-950/10"
+                        disabled={isUploading}
+                    >
+                        {isUploading ? <Loader2 className="h-4 w-4 animate-spin" /> : (photos.length > 0 ? "Continuar" : "Saltar por ahora")}
+                    </Button>
+                </div>
+                {photos.length === 0 && (
+                    <p className="text-[10px] text-center text-muted-foreground px-4">
+                        * Podrás añadir fotos más tarde desde tu perfil para empezar a recibir matches.
+                    </p>
+                )}
             </div>
         </div>
     );
