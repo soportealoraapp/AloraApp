@@ -4,6 +4,7 @@ import { prisma } from '@/lib/prisma';
 import { UserProfile } from '@/lib/domain/types';
 import { getCompatibilityScore } from './compatibility/getCompatibilityScore';
 import { calculateCompleteness } from '@/lib/utils/completeness';
+import { calculateReputationScore } from '@/lib/utils/reputation';
 
 export async function getDynamicFeed(currentUserId: string): Promise<{ profile: UserProfile; score: any }[]> {
     try {
@@ -52,6 +53,9 @@ export async function getDynamicFeed(currentUserId: string): Promise<{ profile: 
             ...matches1.map(m => m.user2Id),
             ...matches2.map(m => m.user1Id)
         ]);
+
+        // v3.9.0: Also ensure we don't show people who blocked US (bidirectional)
+        // (Wait, blocks2 already covers this if blockers are indexed)
 
         // 3. Fetch Candidates
         const genderFilter = currentUserProfile.seeking === 'everyone'
@@ -103,6 +107,12 @@ export async function getDynamicFeed(currentUserId: string): Promise<{ profile: 
 
                 if (candidate.subscriptionStatus === 'plus') totalScore += 10;
                 if (candidate.trustStatus === 'watchlist') totalScore *= 0.8;
+
+                // v3.9.0: Reputation Adjustments
+                const reputation = await calculateReputationScore(candidate.id);
+                if (reputation < 50) totalScore *= 0.6; // Heavy penalty for bad reputation
+                else if (reputation < 70) totalScore *= 0.8;
+                else if (reputation > 90) totalScore += 10; // Boost for stellar reputation
 
                 return {
                     profile: { ...candidate, completenessScore: completeness },

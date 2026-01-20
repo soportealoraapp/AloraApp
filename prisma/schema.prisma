@@ -53,6 +53,11 @@ model User {
   postDatingEvents PostDatingEvent[]
   cooldownState    CooldownState?
   closureArtifacts ClosureArtifact[]
+  
+  // v3.9.0 Moderation
+  reportsSent     Report[] @relation("UserReporter")
+  reportsReceived Report[] @relation("UserReported")
+  blockedBy       Block[]  @relation("UserBlocked")
 
   @@map("users")
 }
@@ -78,6 +83,7 @@ model Profile {
   isVerified         Boolean  @default(false)
   subscriptionStatus String   @default("free") // free, plus, premium
   trustStatus        String   @default("clean") // clean, watchlist, banned
+  reputationScore    Int      @default(100) // v3.9.0 Secret Score
   lastActiveAt       DateTime @default(now())
 
   createdAt DateTime @default(now())
@@ -385,7 +391,8 @@ model Block {
   id        String @id @default(uuid())
   blockerId String
   blocker   User   @relation("UserBlocker", fields: [blockerId], references: [id])
-  blockedId String // No relation needed to blocked user if they might be deleted
+  blockedId String
+  blocked   User   @relation("UserBlocked", fields: [blockedId], references: [id])
 
   reason    String?
   createdAt DateTime @default(now())
@@ -407,4 +414,20 @@ model Notification {
   createdAt DateTime @default(now())
 
   @@map("notifications")
+}
+
+model Report {
+  id         String   @id @default(uuid())
+  reporterId String
+  reporter   User     @relation("UserReporter", fields: [reporterId], references: [id])
+  reportedId String
+  reported   User     @relation("UserReported", fields: [reportedId], references: [id])
+  
+  reason     String
+  details    String?
+  status     String   @default("pending") // pending, reviewed, dismissed, resolved
+  createdAt  DateTime @default(now())
+
+  @@index([reportedId])
+  @@map("reports")
 }

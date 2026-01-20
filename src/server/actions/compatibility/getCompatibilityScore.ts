@@ -62,8 +62,9 @@ export async function getCompatibilityScore(userId: string, candidateId: string)
             quizCompatibility: 0 // Legacy
         },
         explanation: [
-            `You share ${commonInterests.length} interests`,
-            commonValues.length > 0 ? `You both value ${commonValues[0]}` : "Diverse values"
+            `Ambos comparten ${commonInterests.length} intereses.`,
+            commonValues.length > 0 ? `Coinciden en valores como ${commonValues[0]}.` : "Tienen visiones complementarias.",
+            candidateProfile.lastActiveAt && (new Date().getTime() - candidateProfile.lastActiveAt.getTime()) < 3600000 ? "🔥 Muy activo ahora." : "Perfil activo."
         ]
     };
 }

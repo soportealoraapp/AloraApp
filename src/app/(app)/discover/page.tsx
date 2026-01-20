@@ -26,6 +26,8 @@ export default function DiscoverPage() {
 
   const [matchedProfile, setMatchedProfile] = useState<UserProfile | null>(null);
   const [showMatchScreen, setShowMatchScreen] = useState(false);
+  const [swipeCount, setSwipeCount] = useState(0);
+  const SWIPE_LIMIT = 20;
 
   // We show the top card
   const currentProfile = profiles[0]?.profile;
@@ -33,7 +35,18 @@ export default function DiscoverPage() {
   const handleSwipe = async (direction: 'left' | 'right') => {
     if (!currentProfile || !currentUserProfile) return;
 
+    if (swipeCount >= SWIPE_LIMIT) {
+      toast({
+        title: "¡Tómate un respiro! 🧘",
+        description: "Has dado muchos likes. Vuelve en un momento para asegurar conexiones de calidad.",
+        variant: "default"
+      });
+      return;
+    }
+
     const profileToActOn = currentProfile;
+    setSwipeCount(prev => prev + 1);
+
     // Optimistic removal
     const remainingProfiles = profiles.slice(1);
     // cast to any to bypass type mismatch if useDiscover returns different types

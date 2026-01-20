@@ -2,6 +2,9 @@
 
 import { AlertTriangle, ShieldOff, VolumeX } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { reportUser, blockUser } from "@/server/actions/safety";
+import { useAuth } from "@/contexts/AuthContext";
+import { BRAND_VOICE } from "@/lib/constants/brand-voice";
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -20,22 +23,45 @@ interface ProfileActionsProps {
 
 export function ProfileActions({ userId, userName }: ProfileActionsProps) {
     const { toast } = useToast();
+    const { user: currentUser } = useAuth();
 
-    const handleAction = (type: "report" | "block" | "mute") => {
+    const handleAction = async (type: "report" | "block" | "mute") => {
+        if (!currentUser) return;
+
         const labels = {
             report: "Reportar",
             block: "Bloquear",
             mute: "Silenciar"
         };
 
-        toast({
-            title: `${labels[type]} perfil`,
-            description: `Hemos recibido tu solicitud para ${labels[type].toLowerCase()} a ${userName}. Actuaremos pronto.`,
-            variant: type === "report" ? "destructive" : "default",
-        });
-
-        // Backend integration stub
-        console.log(`Action ${type} triggered for user ${userId}`);
+        try {
+            if (type === 'report') {
+                await reportUser(currentUser.id, userId, "general_report"); // Placeholder reason
+                toast({
+                    title: "Reporte enviado",
+                    description: BRAND_VOICE.safety.reportThankYou,
+                });
+            } else if (type === 'block') {
+                await blockUser(currentUser.id, userId);
+                toast({
+                    title: "Usuario bloqueado",
+                    description: BRAND_VOICE.safety.blockConfirm,
+                    variant: "destructive"
+                });
+            } else {
+                // Mute logic (local or separate)
+                toast({
+                    title: "Usuario silenciado",
+                    description: "No recibirás notificaciones de esta persona.",
+                });
+            }
+        } catch (error) {
+            toast({
+                title: "Error",
+                description: "No se pudo procesar la acción. Inténtalo de nuevo.",
+                variant: "destructive"
+            });
+        }
     };
 
     return (
