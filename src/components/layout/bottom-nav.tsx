@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Heart, MessageSquare, Puzzle, User, Compass, Star } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { motion } from 'framer-motion';
 import { Logo } from '../logo';
 
 const navItems = [
@@ -21,21 +22,27 @@ export function BottomNav() {
   return (
     <>
       {/* Bottom Navigation for Mobile */}
-      <nav className="fixed bottom-0 left-0 right-0 z-50 border-t bg-background/80 backdrop-blur-sm md:hidden">
-        <div className="flex justify-around">
-          {navItems.map(({ href, icon: Icon, label }) => (
-            <Link key={href} href={href} className="flex-1">
-              <div
-                className={cn(
-                  'flex flex-col items-center gap-1 p-3 text-muted-foreground transition-colors hover:text-primary',
-                  pathname.startsWith(href) ? 'text-primary' : ''
-                )}
-              >
-                <Icon className="h-6 w-6" />
-                <span className="text-xs font-medium">{label}</span>
-              </div>
-            </Link>
-          ))}
+      <nav className="fixed bottom-0 left-0 right-0 z-50 border-t bg-background/90 backdrop-blur-md md:hidden pb-safe">
+        <div className="flex justify-around items-stretch h-16">
+          {navItems.map(({ href, icon: Icon, label }) => {
+            const isActive = pathname.startsWith(href);
+            return (
+              <Link key={href} href={href} className="flex-1 flex flex-col items-center justify-center">
+                <motion.div
+                  whileTap={{ scale: 0.9 }}
+                  className={cn(
+                    'flex flex-col items-center gap-0.5 transition-colors',
+                    isActive ? 'text-primary' : 'text-muted-foreground'
+                  )}
+                >
+                  <Icon className={cn("h-6 w-6 transition-all", isActive ? "scale-110" : "")} />
+                  <span className={cn("text-[10px] font-bold tracking-tight uppercase", isActive ? "opacity-100" : "opacity-70")}>
+                    {label}
+                  </span>
+                </motion.div>
+              </Link>
+            );
+          })}
         </div>
       </nav>
 

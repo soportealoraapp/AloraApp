@@ -62,16 +62,16 @@ export function VerificationUpload({ onComplete }: VerificationUploadProps) {
         setUploading(true);
         try {
             // 1. Upload Selfie
-            const selfieUrl = await storageService.uploadVerificationSelfie(user.uid, selfieFile);
+            const selfieUrl = await storageService.uploadImage(selfieFile, `temp/verifications/${user.id}/selfie`);
 
             // 2. Upload ID
-            const idUrl = await storageService.uploadVerificationID(user.uid, idFile);
+            const idUrl = await storageService.uploadImage(idFile, `temp/verifications/${user.id}/id`);
 
             // 3. Submit Request
-            await verificationService.submitVerification(user.uid, selfieUrl, idUrl);
+            await verificationService.submitVerification(user.id, selfieUrl);
 
-            trackEvent('VERIFICATION_SUBMITTED', { userId: user.uid });
-            trackEvent('REGISTRATION_STEP_COMPLETED', { step: 4, userId: user.uid });
+            trackEvent('VERIFICATION_SUBMITTED', { userId: user.id });
+            trackEvent('REGISTRATION_STEP_COMPLETED', { step: 4, userId: user.id });
 
             toast({
                 title: "Verificación enviada",
@@ -91,7 +91,7 @@ export function VerificationUpload({ onComplete }: VerificationUploadProps) {
     };
 
     const handleSkip = () => {
-        trackEvent('REGISTRATION_STEP_COMPLETED', { step: 4, userId: user?.uid, skipped: true });
+        trackEvent('REGISTRATION_STEP_COMPLETED', { step: 4, userId: user?.id, skipped: true });
         onComplete();
     };
 
@@ -106,7 +106,7 @@ export function VerificationUpload({ onComplete }: VerificationUploadProps) {
 
             <div className="space-y-4">
                 <div
-                    className="border-2 border-dashed rounded-lg p-6 text-center hover:bg-muted/50 transition-colors cursor-pointer group hover:border-primary/50"
+                    className="border-2 border-dashed border-border dark:border-pink-900/40 rounded-2xl p-6 text-center hover:bg-muted/50 transition-all cursor-pointer group hover:border-primary/50 active:scale-[0.98]"
                     onClick={() => setIsCameraOpen(true)}
                 >
                     {selfiePreview ? (
@@ -125,7 +125,7 @@ export function VerificationUpload({ onComplete }: VerificationUploadProps) {
                     )}
                 </div>
 
-                <div className="border-2 border-dashed rounded-lg p-6 text-center hover:bg-muted/50 transition-colors group hover:border-primary/50">
+                <div className="border-2 border-dashed border-border dark:border-pink-900/40 rounded-2xl p-6 text-center hover:bg-muted/50 transition-all group hover:border-primary/50 active:scale-[0.98]">
                     <Label htmlFor="id-upload" className="cursor-pointer block w-full">
                         {idPreview ? (
                             <div className="relative h-48 w-full mx-auto animate-in fade-in zoom-in duration-300">
@@ -155,7 +155,7 @@ export function VerificationUpload({ onComplete }: VerificationUploadProps) {
             <div className="space-y-4 pt-4">
                 <Button
                     onClick={handleSubmit}
-                    className="w-full font-bold hover:scale-105 active:scale-95 transition-transform"
+                    className="w-full h-12 font-bold shadow-md shadow-pink-100 dark:shadow-pink-950/10"
                     disabled={!selfieFile || !idFile || uploading}
                 >
                     {uploading ? (

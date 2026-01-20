@@ -33,7 +33,7 @@ export async function GET(request: NextRequest) {
 
             // Format to match feed structure (without score)
             return NextResponse.json(profiles.map(p => ({
-                profile: { ...p, id: p.userId, uid: p.userId, photos: p.photos || [] },
+                profile: { ...p, id: p.userId, photos: p.photos || [] },
                 score: { total: 0, details: {}, explanation: [] }
             })));
         }

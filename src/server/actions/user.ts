@@ -19,7 +19,6 @@ export const getUserProfile = unstable_cache(
             const profile = user.profile;
             return {
                 id: user.id,
-                uid: user.id, // Legacy compat
                 email: user.email,
                 name: user.name || '',
                 isVerified: profile.isVerified,
@@ -53,7 +52,7 @@ export async function updateUserProfile(userId: string, data: Partial<UserProfil
         // Strip non-profile fields or use safe update
         // Here assuming data keys match Profile model roughly or ignored
         // This is a simplification for robustness
-        const { id, uid, email, isVerified, createdAt, subscriptionStatus, trustStatus, ...profileUpdates } = data;
+        const { id, email, isVerified, createdAt, subscriptionStatus, trustStatus, ...profileUpdates } = data;
 
         await prisma.profile.update({
             where: { userId },

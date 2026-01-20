@@ -59,7 +59,12 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         ref={ref}
         whileHover={{ scale: 1.02 }}
         whileTap={{ scale: 0.98 }}
-        transition={{ type: "spring", stiffness: 400, damping: 10 }}
+        transition={{
+          type: "spring",
+          stiffness: 180,
+          damping: 35,
+          mass: 1
+        }}
         {...(props as any)}
       />
     )

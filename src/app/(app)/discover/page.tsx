@@ -42,14 +42,14 @@ export default function DiscoverPage() {
 
     try {
       if (direction === 'right') {
-        const result = await sendLike((profileToActOn as any).uid || (profileToActOn as any).id, 'like');
+        const result = await sendLike(profileToActOn.id, 'like');
         if (result?.matched) {
           // Trigger Match Screen
-          setMatchedProfile(profileToActOn as unknown as UserProfile);
+          setMatchedProfile(profileToActOn);
           setShowMatchScreen(true);
         }
       } else {
-        await sendLike((profileToActOn as any).uid || (profileToActOn as any).id, 'pass');
+        await sendLike(profileToActOn.id, 'pass');
       }
     } catch (error) {
       console.error("Action failed", error);
@@ -103,7 +103,7 @@ export default function DiscoverPage() {
               <div className="relative z-10 h-full">
                 <FloatingMatchCard
                   key={currentProfile.id}
-                  profile={currentProfile as unknown as UserProfile}
+                  profile={currentProfile}
                   compatibility={profiles[0]?.compatibility}
                   onSwipe={handleSwipe}
                 />

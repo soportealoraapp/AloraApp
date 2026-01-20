@@ -9,41 +9,47 @@ body {
 
 html {
   scroll-behavior: smooth;
-  height: 100%;
+  height: -webkit-fill-available;
 }
 
 @layer base {
   :root {
     /* Alora Pink Palette */
-    --background: 330 33% 98%; /* Soft pinkish white #FDF7F9 */
-    --foreground: 335 20% 20%; /* Dark soft brown/pink */
-    
+    --background: 330 33% 98%;
+    /* Soft pinkish white #FDF7F9 */
+    --foreground: 335 20% 20%;
+    /* Dark soft brown/pink */
+
     --card: 0 0% 100%;
     --card-foreground: 335 20% 20%;
-    
+
     --popover: 0 0% 100%;
     --popover-foreground: 335 20% 20%;
-    
-    --primary: 335 85% 76%; /* #F48FB1 Main Pink */
+
+    --primary: 335 85% 76%;
+    /* #F48FB1 Main Pink */
     --primary-foreground: 0 0% 100%;
-    
-    --secondary: 330 40% 94%; /* Very light pink */
+
+    --secondary: 330 40% 94%;
+    /* Very light pink */
     --secondary-foreground: 335 40% 40%;
-    
+
     --muted: 330 20% 94%;
     --muted-foreground: 335 10% 50%;
-    
-    --accent: 280 40% 90%; /* Soft Purple */
+
+    --accent: 280 40% 90%;
+    /* Soft Purple */
     --accent-foreground: 280 40% 30%;
-    
+
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 98%;
 
     --border: 335 20% 90%;
     --input: 335 20% 90%;
     --ring: 335 85% 76%;
-    
-    --radius: 1rem; /* Softer, rounder corners */
+
+    --radius: 1rem;
+    /* Softer, rounder corners */
 
     --sidebar-background: 0 0% 98%;
     --sidebar-foreground: 240 5.3% 26.1%;
@@ -54,6 +60,7 @@ html {
     --sidebar-border: 220 13% 91%;
     --sidebar-ring: 217.2 91.2% 59.8%;
   }
+
   .dark {
     --background: 340 10% 12%;
     --foreground: 336 100% 97%;
@@ -96,6 +103,7 @@ html {
     @apply border-border outline-none;
     -webkit-tap-highlight-color: transparent;
   }
+
   body {
     @apply bg-background text-foreground antialiased selection:bg-primary/20;
     min-height: 100vh;
@@ -107,13 +115,20 @@ html {
   .glass {
     @apply bg-white/70 backdrop-blur-md border border-white/20 shadow-xl;
   }
-  
+
   .animate-confetti {
     animation: confetti-fall 3s ease-out infinite;
   }
 
   @keyframes confetti-fall {
-    0% { transform: translateY(-100vh) rotate(0deg); opacity: 1; }
-    100% { transform: translateY(100vh) rotate(360deg); opacity: 0; }
+    0% {
+      transform: translateY(-100vh) rotate(0deg);
+      opacity: 1;
+    }
+
+    100% {
+      transform: translateY(100vh) rotate(360deg);
+      opacity: 0;
+    }
   }
 }

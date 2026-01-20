@@ -13,7 +13,6 @@ export interface User {
 
 // Full Profile (Core)
 export interface UserProfile extends User {
-    uid?: string; // Legacy alias for id
     displayName: string;
     bio?: string;
     age: number;
@@ -24,6 +23,16 @@ export interface UserProfile extends User {
     values: string[];
     city?: string;
 
+    // Rich Profile Fields (Dating App Essentials)
+    zodiacSign?: string;
+    education?: string;
+    smoking?: 'no' | 'yes' | 'occasionally' | string;
+    drinking?: 'no' | 'yes' | 'occasionally' | string;
+    children?: 'yes' | 'no' | 'maybe' | string;
+    religion?: string;
+    personalGuide?: { title: string; description: string }[];
+    musicGenres?: string[];
+
     // Status
     subscriptionStatus?: 'free' | 'plus' | 'premium';
     verificationStatus?: 'verified' | 'unverified'; // UI helper
@@ -32,6 +41,7 @@ export interface UserProfile extends User {
     // v3.x
     experimentalGroup?: 'A' | 'B';
     compatibility?: number; // UI helper
+    completenessScore?: number; // v3.8.0
 }
 
 export interface Match {
@@ -42,6 +52,7 @@ export interface Match {
     updatedAt?: Date;
     lastMessage?: Message; // UI helper
     stage?: string;
+    compatibility?: number; // UI helper
 }
 
 export interface Message {

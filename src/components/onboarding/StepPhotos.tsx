@@ -54,11 +54,12 @@ export function StepPhotos({ userId, data, onUpdate, onNext, onPrev }: any) {
 
             <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                 {photos.map((url, index) => (
-                    <div key={url} className="relative aspect-[3/4] rounded-xl overflow-hidden shadow-sm group bg-muted transition-transform hover:scale-[1.02]">
+                    <div key={url} className="relative aspect-[3/4] rounded-xl overflow-hidden shadow-sm group bg-muted transition-transform hover:scale-[1.02] active:scale-[0.98]">
                         <Image src={url} alt={`Photo ${index}`} fill className="object-cover" />
                         <button
                             onClick={() => removePhoto(index)}
-                            className="absolute top-2 right-2 bg-black/50 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity z-10"
+                            className="absolute top-2 right-2 bg-black/50 text-white rounded-full p-2 opacity-0 group-hover:opacity-100 transition-opacity z-10"
+                            aria-label="Eliminar foto"
                         >
                             <X className="h-4 w-4" />
                         </button>
@@ -66,7 +67,7 @@ export function StepPhotos({ userId, data, onUpdate, onNext, onPrev }: any) {
                 ))}
 
                 {photos.length < 6 && (
-                    <label className={`flex flex-col items-center justify-center aspect-[3/4] border-2 border-dashed border-muted-foreground/25 dark:border-pink-900/30 rounded-xl cursor-pointer hover:bg-muted/50 dark:hover:bg-pink-950/10 transition-all hover:border-primary/50 group ${isUploading ? 'opacity-50 pointer-events-none' : ''}`}>
+                    <label className={`flex flex-col items-center justify-center aspect-[3/4] border-2 border-dashed border-muted-foreground/25 dark:border-pink-900/30 rounded-xl cursor-pointer hover:bg-muted/50 dark:hover:bg-pink-950/10 transition-all hover:border-primary/50 group active:scale-[0.98] ${isUploading ? 'opacity-50 pointer-events-none' : ''}`}>
                         {isUploading ? (
                             <Loader2 className="h-8 w-8 animate-spin text-primary" />
                         ) : (
@@ -82,10 +83,10 @@ export function StepPhotos({ userId, data, onUpdate, onNext, onPrev }: any) {
 
             <div className="flex flex-col gap-3 mt-8">
                 <div className="flex gap-4">
-                    <Button variant="outline" onClick={onPrev} className="w-1/3 hover:bg-muted dark:hover:bg-pink-950/10 active:scale-[0.98] transition-all border-pink-100 dark:border-pink-900/40">Atrás</Button>
+                    <Button variant="outline" onClick={onPrev} className="w-1/3 hover:bg-muted dark:hover:bg-pink-950/10 border-pink-100 dark:border-pink-900/40">Atrás</Button>
                     <Button
                         onClick={handleNext}
-                        className="w-2/3 hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 shadow-md shadow-pink-100 dark:shadow-pink-950/10"
+                        className="w-2/3 shadow-md shadow-pink-100 dark:shadow-pink-950/10"
                         disabled={isUploading}
                     >
                         {isUploading ? <Loader2 className="h-4 w-4 animate-spin" /> : (photos.length > 0 ? "Continuar" : "Saltar por ahora")}

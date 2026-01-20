@@ -3,6 +3,7 @@
 import { prisma } from '@/lib/prisma';
 import { UserProfile } from '@/lib/domain/types';
 import { getCompatibilityScore } from './compatibility/getCompatibilityScore';
+import { calculateCompleteness } from '@/lib/utils/completeness';
 
 export async function getDynamicFeed(currentUserId: string): Promise<{ profile: UserProfile; score: any }[]> {
     try {
@@ -17,8 +18,7 @@ export async function getDynamicFeed(currentUserId: string): Promise<{ profile: 
         const currentUserProfile: UserProfile = {
             ...currentUser.profile,
             id: currentUser.id,
-            uid: currentUser.id, // Legacy compat
-            email: currentUser.email, // Ensure email is present
+            email: currentUser.email,
             // Ensure all required fields by UserProfile are present (defaulting if nullable in Prisma)
             isVerified: currentUser.profile.isVerified,
             verificationStatus: currentUser.profile.isVerified ? 'verified' : 'unverified',
@@ -74,8 +74,7 @@ export async function getDynamicFeed(currentUserId: string): Promise<{ profile: 
                 const candidate: UserProfile = {
                     ...candidateProfile,
                     id: candidateProfile.userId,
-                    uid: candidateProfile.userId,
-                    email: candidateProfile.user.email, // Use email from included user
+                    email: candidateProfile.user.email,
                     isVerified: candidateProfile.isVerified,
                     verificationStatus: candidateProfile.isVerified ? 'verified' : 'unverified',
                     subscriptionStatus: candidateProfile.subscriptionStatus as any,
@@ -91,28 +90,38 @@ export async function getDynamicFeed(currentUserId: string): Promise<{ profile: 
                     createdAt: candidateProfile.createdAt,
                 };
 
+                const completeness = calculateCompleteness(candidate);
                 const deepScore = await getCompatibilityScore(currentUserId, candidate.id);
-                let totalScore = deepScore.score;
-                const details = deepScore.breakdown;
-                const explanation = deepScore.explanation;
 
-                // Adjustments
+                let totalScore = deepScore.score;
+
+                // v3.8.0 Quality Adjustments
+                if (candidate.isVerified) totalScore += 15;
+                if (completeness >= 90) totalScore += 20;
+                else if (completeness >= 70) totalScore += 10;
+                else if (completeness < 50) totalScore *= 0.5; // Heavy penalty for "empty" profiles
+
                 if (candidate.subscriptionStatus === 'plus') totalScore += 10;
                 if (candidate.trustStatus === 'watchlist') totalScore *= 0.8;
 
                 return {
-                    profile: candidate,
+                    profile: { ...candidate, completenessScore: completeness },
                     score: {
                         total: Math.min(100, Math.round(totalScore)),
-                        details,
-                        explanation
+                        details: deepScore.breakdown,
+                        explanation: deepScore.explanation
                     }
                 };
             })
         );
 
-        // 5. Filter & Sort
-        const visibleCandidates = scoredCandidates.filter(c => c.profile.photos && c.profile.photos.length >= 2);
+        // 5. Filter & Sort - v3.8.0 refined for Quality
+        const visibleCandidates = scoredCandidates.filter(c =>
+            c.profile.photos &&
+            c.profile.photos.length >= 2 &&
+            (c.profile.completenessScore ?? 0) >= 40 // Minimum threshold for Discover
+        );
+
         visibleCandidates.sort((a, b) => b.score.total - a.score.total);
 
         return visibleCandidates;

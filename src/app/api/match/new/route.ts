@@ -48,7 +48,6 @@ export async function GET(request: NextRequest) {
             const p = like.fromUser.profile;
             return {
                 id: like.fromUserId,
-                uid: like.fromUserId,
                 displayName: p?.displayName || 'Someone',
                 photoURL: p?.photos?.[0] || null,
                 type: like.type,

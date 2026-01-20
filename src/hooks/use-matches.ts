@@ -50,7 +50,7 @@ export function useMatches() {
         fetchMatches();
     }, [fetchMatches]);
 
-    const sendLike = async (toUserId: string, type: 'like' | 'superlike' = 'like') => {
+    const sendLike = async (toUserId: string, type: 'like' | 'superlike' | 'pass' = 'like') => {
         if (!user) return;
 
         try {
@@ -76,7 +76,7 @@ export function useMatches() {
                 });
                 // Refresh matches
                 await fetchMatches();
-            } else {
+            } else if (type !== 'pass') {
                 toast({
                     title: type === 'superlike' ? '¡Super Like enviado! ✨' : 'Like enviado ❤️',
                     description: '¡Ojalá hagan match!',

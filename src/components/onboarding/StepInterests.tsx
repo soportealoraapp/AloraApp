@@ -43,12 +43,12 @@ export function StepInterests({ data, onUpdate, onNext, onPrev, userId }: any) {
                         key={interest}
                         initial={{ scale: 0.8, opacity: 0 }}
                         animate={{ scale: 1, opacity: 1 }}
-                        transition={{ delay: idx * 0.05 }}
+                        transition={{ type: "spring", stiffness: 180, damping: 35, delay: idx * 0.03 }}
                     >
                         <Badge
                             variant={selected.includes(interest) ? "default" : "outline"}
                             className={`cursor-pointer px-4 py-2 text-sm transition-all duration-300 ${selected.includes(interest)
-                                ? "bg-primary hover:bg-primary/90 scale-102 text-primary-foreground shadow-sm"
+                                ? "bg-primary hover:bg-primary/90 scale-[1.02] text-primary-foreground shadow-md"
                                 : "hover:bg-accent hover:text-accent-foreground border-input dark:border-pink-900/40 dark:text-gray-200"
                                 }`}
                             onClick={() => toggleInterest(interest)}
@@ -64,9 +64,8 @@ export function StepInterests({ data, onUpdate, onNext, onPrev, userId }: any) {
                 <Button
                     onClick={handleNext}
                     className="w-2/3 hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 shadow-md shadow-pink-100 dark:shadow-pink-950/10"
-                    disabled={selected.length === 0}
                 >
-                    Continuar
+                    {selected.length === 0 ? "Saltar" : "Continuar"}
                 </Button>
             </div>
         </div>

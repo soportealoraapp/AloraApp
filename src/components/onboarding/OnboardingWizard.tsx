@@ -37,7 +37,7 @@ export function OnboardingWizard() {
 
         try {
             try {
-                await updateUserProfile((user as any).id || (user as any).uid || '', {
+                await updateUserProfile(user.id, {
                     ...updatedData,
                     createdAt: undefined, // Don't wipe
                     isCompleted: step === totalSteps // simplified logic

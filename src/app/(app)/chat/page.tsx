@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { useMatches } from "@/hooks/use-matches";
 import { useAuth } from "@/contexts/AuthContext";
 import { Card, CardContent } from "@/components/ui/card";
@@ -24,7 +25,7 @@ export default function ChatPage() {
     const [processingMatch, setProcessingMatch] = useState<string | null>(null);
 
     const filteredMatches = matches.filter((match) => {
-        const otherUserId = match.users.find(uid => uid !== user?.uid);
+        const otherUserId = match.users.find(id => id !== user?.id);
         // TODO: Filter by name when we have profile data
         return true;
     });
@@ -96,57 +97,74 @@ export default function ChatPage() {
                             Conversaciones ({matches.length})
                         </TabsTrigger>
                         <TabsTrigger value="new">
-                            Nuevos Matches ({newMatches.length})
+                            <div className="absolute top-2 right-2">
+                                <Badge className="bg-pink-500 text-white rounded-full h-5 w-5 flex items-center justify-center p-0 text-[10px]">
+                                    {newMatches.length}
+                                </Badge>
+                            </div>
                         </TabsTrigger>
                     </TabsList>
 
-                    <TabsContent value="conversations" className="space-y-2 mt-4">
+                    <TabsContent value="conversations" className="space-y-3 mt-4">
                         {filteredMatches.length === 0 ? (
-                            <Card>
-                                <CardContent className="flex flex-col items-center justify-center py-12">
-                                    <MessageSquare className="h-16 w-16 text-pink-200 mb-6" />
+                            <Card className="rounded-3xl border-none bg-muted/20">
+                                <CardContent className="flex flex-col items-center justify-center py-16 px-8">
+                                    <div className="bg-white p-4 rounded-full shadow-sm mb-6">
+                                        <MessageSquare className="h-10 w-10 text-pink-300" />
+                                    </div>
                                     <p className="text-xl font-bold text-gray-800 text-center mb-2">
                                         {BRAND_VOICE.states.noMatches.title}
                                     </p>
-                                    <p className="text-sm text-muted-foreground text-center max-w-xs">
+                                    <p className="text-sm text-muted-foreground text-center max-w-xs mb-8">
                                         {BRAND_VOICE.states.noMatches.subtitle}
                                     </p>
-                                    <Button asChild className="mt-4">
-                                        <Link href="/discover">Ir a Descubrir</Link>
+                                    <Button asChild className="rounded-full px-8 h-12">
+                                        <Link href="/discover">Explorar perfiles</Link>
                                     </Button>
                                 </CardContent>
                             </Card>
                         ) : (
-                            filteredMatches.map((match) => {
-                                const otherUserId = match.users.find(uid => uid !== user?.uid);
-                                return (
-                                    <Link key={match.id} href={`/chat/${match.id}`}>
-                                        <Card className="hover:shadow-md transition-shadow cursor-pointer">
-                                            <CardContent className="flex items-center gap-4 p-4">
-                                                <div className="relative h-14 w-14 rounded-full overflow-hidden flex-shrink-0">
-                                                    <Image
-                                                        src="/placeholder.jpg"
-                                                        alt="Profile"
-                                                        fill
-                                                        className="object-cover"
-                                                    />
-                                                </div>
-                                                <div className="flex-1 min-w-0">
-                                                    <div className="flex items-center justify-between">
-                                                        <p className="font-semibold truncate">Usuario #{otherUserId?.slice(0, 8)}</p>
-                                                        <Badge variant="secondary" className="text-xs">
-                                                            {match.compatibility}% compatible
-                                                        </Badge>
-                                                    </div>
-                                                    <p className="text-sm text-muted-foreground truncate">
-                                                        Haz click para chatear
-                                                    </p>
-                                                </div>
-                                            </CardContent>
-                                        </Card>
-                                    </Link>
-                                );
-                            })
+                            <div className="space-y-2">
+                                <AnimatePresence>
+                                    {filteredMatches.map((match, idx) => {
+                                        const otherUserId = match.users.find(id => id !== user?.id);
+                                        return (
+                                            <motion.div
+                                                key={match.id}
+                                                initial={{ opacity: 0, y: 10 }}
+                                                animate={{ opacity: 1, y: 0 }}
+                                                transition={{ delay: idx * 0.05, type: "spring", stiffness: 180, damping: 35 }}
+                                            >
+                                                <Link href={`/chat/${match.id}`}>
+                                                    <Card className="rounded-[2rem] border-none shadow-sm hover:shadow-md transition-all cursor-pointer group active:scale-[0.98]">
+                                                        <CardContent className="flex items-center gap-4 p-4">
+                                                            <div className="relative h-16 w-16 rounded-full overflow-hidden flex-shrink-0 border-2 border-pink-50">
+                                                                <Image
+                                                                    src="/placeholder.jpg"
+                                                                    alt="Profile"
+                                                                    fill
+                                                                    className="object-cover"
+                                                                />
+                                                            </div>
+                                                            <div className="flex-1 min-w-0">
+                                                                <div className="flex items-center justify-between mb-1">
+                                                                    <p className="font-bold text-gray-900 truncate">Usuario #{otherUserId?.slice(0, 8)}</p>
+                                                                    <Badge variant="secondary" className="text-[10px] uppercase font-bold tracking-wider bg-pink-50 text-pink-600 border-pink-100">
+                                                                        {match.compatibility}% compatible
+                                                                    </Badge>
+                                                                </div>
+                                                                <p className="text-xs text-muted-foreground truncate italic">
+                                                                    "¡Es un match! {BRAND_VOICE.nudges.newMatch}"
+                                                                </p>
+                                                            </div>
+                                                        </CardContent>
+                                                    </Card>
+                                                </Link>
+                                            </motion.div>
+                                        );
+                                    })}
+                                </AnimatePresence>
+                            </div>
                         )}
                     </TabsContent>
 
