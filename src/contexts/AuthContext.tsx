@@ -61,16 +61,25 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         checkSession();
 
         // Auth state changes
-        const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
+        const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
             const currentUser = session?.user ?? null;
             setUser(currentUser);
 
+            if (event === 'SIGNED_OUT' || !currentUser) {
+                setProfile(null);
+                setUser(null);
+                setLoading(false);
+                return;
+            }
+
             if (currentUser && currentUser.id !== user?.id) {
                 // User changed (e.g. login), fetch profile
-                const userProfile = await profileService.getProfile(currentUser.id);
-                setProfile(userProfile);
-            } else if (!currentUser) {
-                setProfile(null);
+                try {
+                    const userProfile = await profileService.getProfile(currentUser.id);
+                    setProfile(userProfile);
+                } catch (e) {
+                    console.error("Profile fetch on auth change failed", e);
+                }
             }
 
             setLoading(false);

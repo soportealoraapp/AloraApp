@@ -84,6 +84,8 @@ model Profile {
   subscriptionStatus String   @default("free") // free, plus, premium
   trustStatus        String   @default("clean") // clean, watchlist, banned
   reputationScore    Int      @default(100) // v3.9.0 Secret Score
+  isShadowBanned     Boolean  @default(false) // v3.9.1 Shadow Moderation
+  incomplete_media   Boolean  @default(false) // v3.9.2 Signup UX logic
   lastActiveAt       DateTime @default(now())
 
   createdAt DateTime @default(now())

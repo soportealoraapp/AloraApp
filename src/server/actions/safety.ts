@@ -2,6 +2,7 @@
 
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
+import { calculateReputationScore } from "@/lib/utils/reputation";
 
 export async function reportUser(reporterId: string, reportedId: string, reason: string, details?: string) {
     try {
@@ -15,8 +16,9 @@ export async function reportUser(reporterId: string, reportedId: string, reason:
             }
         });
 
-        // Trigger reputation recalculation or flag for review
-        // For now, we just persist.
+        // v3.9.1: Sync rep to DB immediately
+        await calculateReputationScore(reportedId);
+
         revalidatePath('/discover');
         return { success: true };
     } catch (error) {
@@ -35,8 +37,9 @@ export async function blockUser(blockerId: string, blockedId: string, reason?: s
             }
         });
 
-        // If there's a match, deactivate it
+        // Deactivate matches...
         const [u1, u2] = [blockerId, blockedId].sort();
+        // ... (existing updateMany logic)
         await prisma.match.updateMany({
             where: {
                 user1Id: u1,
@@ -49,6 +52,9 @@ export async function blockUser(blockerId: string, blockedId: string, reason?: s
                 deletedAt: new Date()
             }
         });
+
+        // v3.9.1: Sync rep to DB immediately
+        await calculateReputationScore(blockedId);
 
         revalidatePath('/discover');
         revalidatePath('/chat');

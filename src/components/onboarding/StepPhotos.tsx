@@ -43,7 +43,12 @@ export function StepPhotos({ userId, data, onUpdate, onNext, onPrev }: any) {
     };
 
     const handleNext = () => {
-        trackEvent('REGISTRATION_STEP_COMPLETED', { step: 3, userId });
+        const isIncomplete = photos.length === 0;
+        onUpdate({
+            photos,
+            incomplete_media: isIncomplete
+        });
+        trackEvent('REGISTRATION_STEP_COMPLETED', { step: 3, userId, incomplete: isIncomplete });
         onNext();
     };
 
@@ -89,7 +94,7 @@ export function StepPhotos({ userId, data, onUpdate, onNext, onPrev }: any) {
                         className="w-2/3 shadow-md shadow-pink-100 dark:shadow-pink-950/10"
                         disabled={isUploading}
                     >
-                        {isUploading ? <Loader2 className="h-4 w-4 animate-spin" /> : (photos.length > 0 ? "Continuar" : "Saltar por ahora")}
+                        {isUploading ? <Loader2 className="h-4 w-4 animate-spin" /> : (photos.length > 0 ? "Continuar" : "Omitir por ahora")}
                     </Button>
                 </div>
                 {photos.length === 0 && (

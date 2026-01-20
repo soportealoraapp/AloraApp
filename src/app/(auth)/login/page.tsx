@@ -55,7 +55,12 @@ export default function LoginPage() {
       router.push("/discover");
     } catch (error: any) {
       console.error("Login error:", error);
-      setError(error.message || "Error al iniciar sesión. Verifica tus credenciales.");
+      toast({
+        title: "Error de acceso",
+        description: error.message || "Credenciales incorrectas. Por favor, revisa tus datos.",
+        variant: "destructive"
+      });
+      setError(error.message || "Error al iniciar sesión.");
     } finally {
       setLoading(false);
     }

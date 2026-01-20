@@ -3,13 +3,6 @@ import { prisma } from "../prisma";
 /**
  * Calculates a secret reputation score (0-100) for a user.
  * This score is used for Discover prioritization and is never shown to the user.
- * 
- * Factors:
- * - Base Score: 100
- * - Report Penalty: -20 per recent report
- * - Block Penalty: -10 per recent block
- * - Age Bonus: +5 for accounts > 30 days
- * - Activity Bonus: +5 for > 10 successful matches
  */
 export async function calculateReputationScore(userId: string): Promise<number> {
     try {
@@ -17,10 +10,6 @@ export async function calculateReputationScore(userId: string): Promise<number> 
             where: { id: userId },
             include: {
                 profile: true,
-                receivedInteractions: {
-                    where: { type: 'pass' }, // High pass rate might indicate low quality or bot
-                    take: 50
-                },
                 reportsReceived: true,
                 blockedBy: true,
                 _count: {
@@ -52,15 +41,26 @@ export async function calculateReputationScore(userId: string): Promise<number> 
         oneMonthAgo.setDate(oneMonthAgo.getDate() - 30);
         if (user.createdAt < oneMonthAgo) score += 5;
 
-        // 5. Interaction Health (Too many passes relative to likes?)
-        // This is a subtle indicator of "spammy" or "unpopular" behavior
-        // (Placeholder for future ML weighting)
+        const finalScore = Math.max(0, Math.min(100, score));
 
-        // Ensure score is within 0-100 (can go slightly above 100 with bonuses)
-        return Math.max(0, Math.min(100, score));
+        // Sync to DB for performance (v3.9.1 Hardening)
+        await syncReputationToDb(userId, finalScore);
+
+        return finalScore;
 
     } catch (error) {
         console.error("Error calculating reputation score", error);
-        return 100; // Default to safe mid-point on error
+        return 100;
+    }
+}
+
+export async function syncReputationToDb(userId: string, score: number) {
+    try {
+        await prisma.profile.update({
+            where: { userId },
+            data: { reputationScore: score }
+        });
+    } catch (error) {
+        console.error("Failed to sync reputation to DB", error);
     }
 }

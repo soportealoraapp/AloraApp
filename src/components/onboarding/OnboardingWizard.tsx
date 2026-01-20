@@ -62,19 +62,26 @@ export function OnboardingWizard() {
 
     return (
         <div className="max-w-md w-full mx-auto p-4 md:p-6 bg-background rounded-3xl shadow-xl dark:shadow-pink-900/10 min-h-[550px] md:min-h-[600px] flex flex-col border border-border transition-colors duration-500 overflow-hidden">
-            <div className="mb-6 md:mb-8">
-                <Progress value={(step / totalSteps) * 100} className="h-2 bg-pink-100 dark:bg-pink-900/30" />
-                <p className="text-center text-[10px] font-bold uppercase tracking-widest text-pink-400 dark:text-pink-300 mt-2">Paso {step} de {totalSteps}</p>
+            <div className="mb-6 md:mb-10">
+                <Progress value={(step / totalSteps) * 100} className="h-1.5 bg-pink-100 dark:bg-pink-900/20" />
+                <div className="flex justify-between items-center mt-3">
+                    <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-pink-500/80 dark:text-pink-400">
+                        Registro
+                    </p>
+                    <p className="text-[10px] font-black uppercase tracking-widest text-gray-500 dark:text-gray-400">
+                        {step} / {totalSteps}
+                    </p>
+                </div>
             </div>
 
             <div className="flex-1 relative flex flex-col">
                 <AnimatePresence mode="wait">
                     <motion.div
                         key={step}
-                        initial={{ x: 20, opacity: 0 }}
-                        animate={{ x: 0, opacity: 1 }}
-                        exit={{ x: -20, opacity: 0 }}
-                        transition={{ type: "spring", damping: 35, stiffness: 180 }}
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -10 }}
+                        transition={{ duration: 0.3, ease: "easeOut" }}
                         className="flex-1 flex flex-col"
                     >
                         {step === 1 && <StepBasicInfo userId={userId} data={formData} onUpdate={saveProgress} onNext={nextStep} />}

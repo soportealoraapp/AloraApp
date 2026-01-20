@@ -108,9 +108,12 @@ export async function getDynamicFeed(currentUserId: string): Promise<{ profile: 
                 if (candidate.subscriptionStatus === 'plus') totalScore += 10;
                 if (candidate.trustStatus === 'watchlist') totalScore *= 0.8;
 
-                // v3.9.0: Reputation Adjustments
-                const reputation = await calculateReputationScore(candidate.id);
-                if (reputation < 50) totalScore *= 0.6; // Heavy penalty for bad reputation
+                // v3.9.1: Performance Hardened Reputation (from DB)
+                const reputation = (candidateProfile as any).reputationScore ?? 100;
+                const isShadowBanned = (candidateProfile as any).isShadowBanned ?? false;
+
+                if (isShadowBanned) totalScore *= 0.1; // 90% visibility reduction
+                else if (reputation < 50) totalScore *= 0.6; // Heavy penalty for bad reputation
                 else if (reputation < 70) totalScore *= 0.8;
                 else if (reputation > 90) totalScore += 10; // Boost for stellar reputation
 
@@ -125,10 +128,11 @@ export async function getDynamicFeed(currentUserId: string): Promise<{ profile: 
             })
         );
 
-        // 5. Filter & Sort - v3.8.0 refined for Quality
+        // 5. Filter & Sort - v3.9.2: Strict Quality
         const visibleCandidates = scoredCandidates.filter(c =>
             c.profile.photos &&
-            c.profile.photos.length >= 2 &&
+            c.profile.photos.length >= 1 && // Minimum 1 photo
+            !(c.profile as any).incomplete_media && // Check flag
             (c.profile.completenessScore ?? 0) >= 40 // Minimum threshold for Discover
         );
 
