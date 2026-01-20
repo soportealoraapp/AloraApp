@@ -69,9 +69,9 @@ export default function QADashboard() {
     };
 
     return (
-        <div className="flex flex-col h-screen bg-[#FDF7F9] text-[#2D1F24]">
+        <div className="flex flex-col h-screen bg-background text-foreground">
             {/* Header */}
-            <header className="border-b bg-white/80 backdrop-blur-md p-4 flex items-center justify-between sticky top-0 z-50">
+            <header className="border-b bg-background/80 backdrop-blur-md p-4 flex items-center justify-between sticky top-0 z-50">
                 <div className="flex items-center gap-3">
                     <div className="bg-primary/10 p-2 rounded-xl">
                         <Activity className="h-6 w-6 text-primary" />
@@ -95,7 +95,7 @@ export default function QADashboard() {
                 {/* Main Content */}
                 <main className="flex-1 overflow-y-auto p-6 space-y-8">
                     <Tabs defaultValue="onboarding" className="w-full">
-                        <TabsList className="bg-white/50 backdrop-blur-sm border p-1 rounded-2xl h-12 mb-8 inline-flex">
+                        <TabsList className="bg-muted border p-1 rounded-2xl h-12 mb-8 inline-flex">
                             <TabsTrigger value="onboarding" className="rounded-xl data-[state=active]:bg-primary data-[state=active]:text-white transition-all px-6">Onboarding</TabsTrigger>
                             <TabsTrigger value="premium" className="rounded-xl data-[state=active]:bg-primary data-[state=active]:text-white transition-all px-6">Premium Gate</TabsTrigger>
                             <TabsTrigger value="wellbeing" className="rounded-xl data-[state=active]:bg-primary data-[state=active]:text-white transition-all px-6">Wellbeing</TabsTrigger>
@@ -273,7 +273,7 @@ export default function QADashboard() {
                         {/* --- CHAT TAB --- */}
                         <TabsContent value="chat" className="space-y-6">
                             <Card className="rounded-3xl border-none shadow-xl shadow-pink-100/50 overflow-hidden">
-                                <div className="bg-white p-4 h-[400px] flex flex-col">
+                                <div className="bg-card p-4 h-[400px] flex flex-col">
                                     <div className="flex-1 space-y-4 p-4 overflow-y-auto">
                                         <AnimatePresence>
                                             <motion.div
@@ -343,7 +343,7 @@ export default function QADashboard() {
                 </main>
 
                 {/* Sidebar Log Panel */}
-                <aside className="w-80 border-l bg-white flex flex-col">
+                <aside className="w-80 border-l bg-card flex flex-col">
                     <div className="p-4 border-b flex items-center justify-between">
                         <h2 className="font-bold flex items-center gap-2">
                             <Terminal className="h-4 w-4 text-primary" /> Event Explorer

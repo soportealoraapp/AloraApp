@@ -60,7 +60,7 @@ export function StepInterests({ data, onUpdate, onNext, onPrev, userId }: any) {
             </div>
 
             <div className="flex gap-4 mt-8">
-                <Button variant="outline" onClick={onPrev} className="w-1/3 hover:bg-muted dark:hover:bg-pink-950/20 active:scale-[0.98] transition-all border-pink-100 dark:border-pink-900/30">Atrás</Button>
+                <Button variant="outline" onClick={onPrev} className="w-1/3 hover:bg-muted active:scale-[0.98] transition-all border-border">Atrás</Button>
                 <Button
                     onClick={handleNext}
                     className="w-2/3 hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 shadow-md shadow-pink-100 dark:shadow-pink-950/10"

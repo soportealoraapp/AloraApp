@@ -23,11 +23,11 @@ export function OnboardingWizard() {
     const [formData, setFormData] = useState<Partial<UserProfile>>({});
 
     useEffect(() => {
-        if (profile) {
+        if (profile && Object.keys(formData).length === 0) {
             setFormData(profile);
             // logic to resume step could go here
         }
-    }, [profile]);
+    }, [profile, formData]);
 
     const saveProgress = async (newData: Partial<UserProfile>) => {
         if (!user) return;
@@ -60,7 +60,7 @@ export function OnboardingWizard() {
     const userId = user?.id;
 
     return (
-        <div className="max-w-md w-full mx-auto p-4 md:p-6 bg-white dark:bg-card rounded-3xl shadow-xl dark:shadow-pink-900/10 min-h-[550px] md:min-h-[600px] flex flex-col border border-pink-50 dark:border-pink-900/20 transition-colors duration-500 overflow-hidden">
+        <div className="max-w-md w-full mx-auto p-4 md:p-6 bg-background rounded-3xl shadow-xl dark:shadow-pink-900/10 min-h-[550px] md:min-h-[600px] flex flex-col border border-border transition-colors duration-500 overflow-hidden">
             <div className="mb-6 md:mb-8">
                 <Progress value={(step / totalSteps) * 100} className="h-2 bg-pink-100 dark:bg-pink-900/30" />
                 <p className="text-center text-[10px] font-bold uppercase tracking-widest text-pink-400 dark:text-pink-300 mt-2">Paso {step} de {totalSteps}</p>

@@ -20,10 +20,10 @@ export function MissionCenter() {
         { id: 'compatibility', title: 'Curioso', desc: 'Completa un nuevo quiz', reward: 'Badge', progress: 0.5, target: 1, completed: false },
     ];
 
-    const currentStreak = profile?.streaks?.currentCount || 0;
+    const currentStreak = (profile as any)?.streaks?.currentCount || 0;
 
     const handleInvite = () => {
-        const code = profile?.referralCode || 'ALORA-GIFT';
+        const code = (profile as any)?.referralCode || 'ALORA-GIFT';
         const url = `https://alora.app/invite/${code}`;
         navigator.clipboard.writeText(url);
         toast({
@@ -61,7 +61,7 @@ export function MissionCenter() {
                     <Trophy className="h-4 w-4 text-amber-500" /> Misiones Diarias
                 </h4>
                 {missions.map((m) => (
-                    <Card key={m.id} className="rounded-2xl border-none shadow-sm bg-white hover:shadow-md transition-shadow">
+                    <Card key={m.id} className="rounded-2xl border-none shadow-sm bg-card hover:shadow-md transition-shadow">
                         <CardContent className="p-4 flex items-center justify-between">
                             <div className="flex items-center gap-4">
                                 {m.completed ? (
@@ -94,7 +94,7 @@ export function MissionCenter() {
                     <Button
                         variant="ghost"
                         size="sm"
-                        className="w-full bg-white text-pink-600 rounded-xl font-bold"
+                        className="w-full bg-background text-pink-600 dark:text-pink-300 rounded-xl font-bold"
                         onClick={handleInvite}
                     >
                         <Share2 className="h-4 w-4 mr-2" />

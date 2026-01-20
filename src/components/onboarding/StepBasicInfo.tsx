@@ -34,7 +34,7 @@ export function StepBasicInfo({ data, onUpdate, onNext, userId }: any) {
                             value={localData.displayName || ''}
                             onChange={(e) => handleChange('displayName', e.target.value)}
                             placeholder="Tu nombre"
-                            className="bg-white dark:bg-card"
+                            className="bg-card"
                             aria-label="Nombre completo"
                         />
                     </GlowInput>
@@ -49,7 +49,7 @@ export function StepBasicInfo({ data, onUpdate, onNext, userId }: any) {
                                 type="number"
                                 value={localData.age || ''}
                                 onChange={(e) => handleChange('age', parseInt(e.target.value))}
-                                className="bg-white dark:bg-card"
+                                className="bg-card"
                                 aria-label="Edad"
                             />
                         </GlowInput>
@@ -58,7 +58,7 @@ export function StepBasicInfo({ data, onUpdate, onNext, userId }: any) {
                         <Label htmlFor="gender" className="dark:text-pink-300">Género</Label>
                         <GlowInput>
                             <Select onValueChange={(v) => handleChange('gender', v)} defaultValue={localData.gender}>
-                                <SelectTrigger id="gender" className="bg-white dark:bg-card">
+                                <SelectTrigger id="gender" className="bg-card">
                                     <SelectValue placeholder="Selecciona" />
                                 </SelectTrigger>
                                 <SelectContent className="dark:bg-card">
@@ -75,7 +75,7 @@ export function StepBasicInfo({ data, onUpdate, onNext, userId }: any) {
                     <Label htmlFor="seeking" className="dark:text-pink-300">Busco...</Label>
                     <GlowInput>
                         <Select onValueChange={(v) => handleChange('seeking', v)} defaultValue={localData.seeking}>
-                            <SelectTrigger id="seeking" className="bg-white dark:bg-card">
+                            <SelectTrigger id="seeking" className="bg-card">
                                 <SelectValue placeholder="Interés" />
                             </SelectTrigger>
                             <SelectContent className="dark:bg-card">
