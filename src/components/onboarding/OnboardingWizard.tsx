@@ -22,12 +22,13 @@ export function OnboardingWizard() {
     const totalSteps = 4;
     const [formData, setFormData] = useState<Partial<UserProfile>>({});
 
+    const [isInitialized, setIsInitialized] = useState(false);
     useEffect(() => {
-        if (profile && Object.keys(formData).length === 0) {
+        if (profile && !isInitialized) {
             setFormData(profile);
-            // logic to resume step could go here
+            setIsInitialized(true);
         }
-    }, [profile, formData]);
+    }, [profile, isInitialized]);
 
     const saveProgress = async (newData: Partial<UserProfile>) => {
         if (!user) return;
