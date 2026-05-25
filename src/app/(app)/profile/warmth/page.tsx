@@ -14,8 +14,8 @@ export default function WarmthPage() {
 
     useEffect(() => {
         if (!user) return;
-        socialEnergyAI.calculateSocialEnergy(user.uid).then(setEnergy);
-        getStarsReceived(user.uid).then(setStars);
+        socialEnergyAI.calculateSocialEnergy(user.id).then(setEnergy);
+        getStarsReceived(user.id).then(setStars);
     }, [user]);
 
     if (!profile) return <div>Cargando...</div>;

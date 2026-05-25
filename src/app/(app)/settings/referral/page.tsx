@@ -15,7 +15,7 @@ export default function ReferralPage() {
     const handleGenerate = async () => {
         if (!user) return;
         setLoading(true);
-        const url = await generateReferralLink(user.uid);
+        const url = await generateReferralLink(user.id);
         setLink(url);
         setLoading(false);
     };

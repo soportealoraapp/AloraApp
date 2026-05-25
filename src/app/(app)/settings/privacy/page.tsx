@@ -28,7 +28,7 @@ export default function PrivacySettingsPage() {
             if (!user) return;
 
             try {
-                const prefs = await preferencesService.getPreferences(user.uid);
+                const prefs = await preferencesService.getPreferences(user.id);
                 setIncognitoMode(prefs.incognitoMode);
                 setShowMe(prefs.showMe);
                 setVerifiedOnly(prefs.verifiedOnly);
@@ -47,7 +47,7 @@ export default function PrivacySettingsPage() {
 
         setSaving(true);
         try {
-            await preferencesService.toggleIncognito(user.uid);
+            await preferencesService.toggleIncognito(user.id);
             setIncognitoMode(value);
 
             toast({
@@ -74,7 +74,7 @@ export default function PrivacySettingsPage() {
 
         setSaving(true);
         try {
-            await preferencesService.toggleShowMe(user.uid);
+            await preferencesService.toggleShowMe(user.id);
             setShowMe(value);
 
             toast({
@@ -101,7 +101,7 @@ export default function PrivacySettingsPage() {
 
         setSaving(true);
         try {
-            await preferencesService.updatePreferences(user.uid, {
+            await preferencesService.updatePreferences(user.id, {
                 verifiedOnly: value,
             });
             setVerifiedOnly(value);

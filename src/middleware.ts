@@ -16,6 +16,8 @@ export async function middleware(request: NextRequest) {
 
     const isAuthRoute = request.nextUrl.pathname.startsWith('/login') ||
         request.nextUrl.pathname.startsWith('/signup') ||
+        request.nextUrl.pathname.startsWith('/forgot-password') ||
+        request.nextUrl.pathname.startsWith('/password-update') ||
         request.nextUrl.pathname.startsWith('/auth');
 
     if (isAppRoute && !user) {
@@ -27,13 +29,14 @@ export async function middleware(request: NextRequest) {
     }
 
     // 2. Security Headers (CSP)
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL?.replace(/\/$/, '') || 'https://your-project.supabase.co';
     const csp = `
         default-src 'self';
         script-src 'self' 'unsafe-eval' 'unsafe-inline' https://apis.google.com https://js.stripe.com;
         style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
-        img-src 'self' blob: data: https://lh3.googleusercontent.com https://your-project.supabase.co https://placehold.co https://picsum.photos;
+        img-src 'self' blob: data: https://lh3.googleusercontent.com ${supabaseUrl} https://placehold.co https://picsum.photos;
         font-src 'self' data: https://fonts.gstatic.com;
-        connect-src 'self' https://securetoken.googleapis.com https://your-project.supabase.co;
+        connect-src 'self' https://securetoken.googleapis.com ${supabaseUrl};
         worker-src 'self' blob:;
         frame-src 'self' https://js.stripe.com;
         object-src 'none';

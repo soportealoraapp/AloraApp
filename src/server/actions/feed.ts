@@ -6,7 +6,7 @@ import { getCompatibilityScore } from './compatibility/getCompatibilityScore';
 import { calculateCompleteness } from '@/lib/utils/completeness';
 import { calculateReputationScore } from '@/lib/utils/reputation';
 
-export async function getDynamicFeed(currentUserId: string): Promise<{ profile: UserProfile; score: any }[]> {
+export async function getDynamicFeed(currentUserId: string, searchTerm?: string): Promise<{ profile: UserProfile; score: any }[]> {
     try {
         // 1. Fetch Current User
         const currentUser = await prisma.user.findUnique({
@@ -62,11 +62,22 @@ export async function getDynamicFeed(currentUserId: string): Promise<{ profile: 
             ? {}
             : { gender: currentUserProfile.seeking === 'women' ? 'woman' : 'man' };
 
+        const searchFilter = searchTerm
+            ? {
+                OR: [
+                    { displayName: { contains: searchTerm, mode: 'insensitive' as const } },
+                    { interests: { has: searchTerm } },
+                    { bio: { contains: searchTerm, mode: 'insensitive' as const } },
+                ]
+            }
+            : {};
+
         const candidates = await prisma.profile.findMany({
             where: {
                 userId: { notIn: Array.from(excludedIds) },
                 trustStatus: { not: 'banned' },
-                ...genderFilter
+                ...genderFilter,
+                ...searchFilter,
             },
             take: 50,
             include: { user: true } // Need user for ID

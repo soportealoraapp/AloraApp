@@ -26,7 +26,6 @@ export default function ChatPage() {
 
     const filteredMatches = matches.filter((match) => {
         const otherUserId = match.users.find(id => id !== user?.id);
-        // TODO: Filter by name when we have profile data
         return true;
     });
 
@@ -55,7 +54,6 @@ export default function ChatPage() {
             title: "Match rechazado",
             description: "No volverás a ver este perfil",
         });
-        // TODO: Implement reject logic (add to hidden list)
         refresh();
     };
 
@@ -97,11 +95,12 @@ export default function ChatPage() {
                             Conversaciones ({matches.length})
                         </TabsTrigger>
                         <TabsTrigger value="new">
-                            <div className="absolute top-2 right-2">
-                                <Badge className="bg-pink-500 text-white rounded-full h-5 w-5 flex items-center justify-center p-0 text-[10px]">
+                            Nuevos
+                            {newMatches.length > 0 && (
+                                <Badge className="ml-2 bg-pink-500 text-white rounded-full h-5 w-5 flex items-center justify-center p-0 text-[10px]">
                                     {newMatches.length}
                                 </Badge>
-                            </div>
+                            )}
                         </TabsTrigger>
                     </TabsList>
 
@@ -128,6 +127,8 @@ export default function ChatPage() {
                                 <AnimatePresence>
                                     {filteredMatches.map((match, idx) => {
                                         const otherUserId = match.users.find(id => id !== user?.id);
+                                        const partnerName = match.partner?.displayName || `Usuario #${otherUserId?.slice(0, 8)}`;
+                                        const partnerPhoto = match.partner?.photoURL || '/placeholder.jpg';
                                         return (
                                             <motion.div
                                                 key={match.id}
@@ -140,21 +141,21 @@ export default function ChatPage() {
                                                         <CardContent className="flex items-center gap-4 p-4">
                                                             <div className="relative h-16 w-16 rounded-full overflow-hidden flex-shrink-0 border-2 border-pink-50">
                                                                 <Image
-                                                                    src="/placeholder.jpg"
-                                                                    alt="Profile"
+                                                                    src={partnerPhoto}
+                                                                    alt={partnerName}
                                                                     fill
                                                                     className="object-cover"
                                                                 />
                                                             </div>
                                                             <div className="flex-1 min-w-0">
                                                                 <div className="flex items-center justify-between mb-1">
-                                                                    <p className="font-bold text-gray-900 truncate">Usuario #{otherUserId?.slice(0, 8)}</p>
+                                                                    <p className="font-bold text-gray-900 truncate">{partnerName}</p>
                                                                     <Badge variant="secondary" className="text-[10px] uppercase font-bold tracking-wider bg-pink-50 text-pink-600 border-pink-100">
                                                                         {match.compatibility}% compatible
                                                                     </Badge>
                                                                 </div>
                                                                 <p className="text-xs text-muted-foreground truncate italic">
-                                                                    "¡Es un match! {BRAND_VOICE.nudges.newMatch}"
+                                                                    {match.lastMessage?.content || `¡Es un match! ${BRAND_VOICE.nudges.newMatch}`}
                                                                 </p>
                                                             </div>
                                                         </CardContent>
@@ -177,21 +178,21 @@ export default function ChatPage() {
                                 <p className="text-center py-8 text-sm text-muted-foreground">No tienes matches pendientes de respuesta.</p>
                             ) : (
                                 <div className="space-y-2">
-                                    {newMatches.map((like) => (
+                                    {newMatches.map((like: any) => (
                                         <Card key={like.id}>
                                             <CardContent className="flex items-center gap-4 p-4">
-                                                <Link href={`/profile/${like.fromUserId}?source=new-match`} className="flex items-center gap-4 flex-1">
+                                                <Link href={`/profile/${like.fromUserId || like.id}?source=new-match`} className="flex items-center gap-4 flex-1">
                                                     <div className="relative h-14 w-14 rounded-full overflow-hidden flex-shrink-0 border-2 border-pink-100">
                                                         <Image
-                                                            src="/placeholder.jpg"
-                                                            alt="Profile"
+                                                            src={like.photoURL || '/placeholder.jpg'}
+                                                            alt={like.displayName || 'Perfil'}
                                                             fill
                                                             className="object-cover"
                                                         />
                                                     </div>
                                                     <div className="flex-1 min-w-0">
                                                         <div className="flex items-center gap-2">
-                                                            <p className="font-semibold truncate">Usuario #{like.fromUserId.slice(0, 8)}</p>
+                                                            <p className="font-semibold truncate">{like.displayName || `Usuario #${(like.fromUserId || like.id).slice(0, 8)}`}</p>
                                                             {like.type === 'superlike' && (
                                                                 <Badge className="bg-gradient-to-r from-pink-500 to-violet-500 text-white">
                                                                     Super Like

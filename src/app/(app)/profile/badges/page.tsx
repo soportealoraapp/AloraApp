@@ -13,7 +13,7 @@ export default function BadgesPage() {
 
     useEffect(() => {
         if (!user) return;
-        getUserBadges(user.uid).then(setBadges);
+        getUserBadges(user.id).then(setBadges);
     }, [user]);
 
     // Use full list if getUserBadges only returning unlocked, but for now we assume it wraps unlock state

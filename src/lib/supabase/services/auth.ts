@@ -12,11 +12,9 @@ export const authService = {
             throw new Error(error.message)
         }
 
-        // In Supabase, emailVerified is in user.email_confirmed_at or user.confirmed_at
-        // Mapping to legacy interface if needed, but returning user object is standard
         const user = data.user
         return {
-            uid: user.id,
+            id: user.id,
             email: user.email,
             emailVerified: !!user.confirmed_at
         }
@@ -40,9 +38,9 @@ export const authService = {
 
         const user = data.user
         return {
-            uid: user?.id,
+            id: user?.id,
             email: user?.email,
-            emailVerified: false // Supabase usually requires verification
+            emailVerified: false
         }
     },
 

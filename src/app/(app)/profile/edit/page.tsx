@@ -4,7 +4,6 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
 import { useProfile } from "@/hooks/use-profile";
-import { storageService } from "@/lib/firebase/storage-service";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -87,8 +86,12 @@ export default function ProfileEditPage() {
 
         setUploading(true);
         try {
-            const urls = await storageService.uploadProfilePhotos(user.uid, Array.from(files));
-            setPhotos([...photos, ...urls]);
+            const { uploadFiles } = await import('@/utils/uploadthing');
+            const result = await uploadFiles('imageUploader', {
+                files: Array.from(files),
+            });
+            const newUrls = result.map((r: any) => r.url);
+            setPhotos([...photos, ...newUrls]);
 
             toast({
                 title: "Fotos subidas",

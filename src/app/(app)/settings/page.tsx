@@ -1,15 +1,36 @@
-
 "use client";
 
 import { useRouter } from 'next/navigation';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { ArrowLeft, Bell, ChevronRight, FileText, HelpCircle, Palette, Shield, User } from "lucide-react";
+import { ArrowLeft, Bell, ChevronRight, FileText, HelpCircle, Palette, Shield, User, LogOut, Loader2 } from "lucide-react";
 import Link from 'next/link';
 import { ThemeToggle } from '@/components/theme-toggle';
+import { useAuth } from '@/contexts/AuthContext';
+import { useState } from 'react';
+import { useToast } from '@/hooks/use-toast';
 
 export default function SettingsPage() {
     const router = useRouter();
+    const { signOut } = useAuth();
+    const { toast } = useToast();
+    const [loggingOut, setLoggingOut] = useState(false);
+
+    const handleLogout = async () => {
+        setLoggingOut(true);
+        try {
+            await signOut();
+            router.push('/login');
+        } catch (error) {
+            toast({
+                variant: "destructive",
+                title: "Error",
+                description: "No se pudo cerrar la sesión",
+            });
+        } finally {
+            setLoggingOut(false);
+        }
+    };
 
     return (
         <div className="md:pl-60">
@@ -98,7 +119,24 @@ export default function SettingsPage() {
                 </Card>
 
                 <div className="pt-4">
-                    <Button variant="destructive" className="w-full">Cerrar Sesión</Button>
+                    <Button
+                        variant="destructive"
+                        className="w-full"
+                        onClick={handleLogout}
+                        disabled={loggingOut}
+                    >
+                        {loggingOut ? (
+                            <>
+                                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                                Cerrando sesión...
+                            </>
+                        ) : (
+                            <>
+                                <LogOut className="h-4 w-4 mr-2" />
+                                Cerrar Sesión
+                            </>
+                        )}
+                    </Button>
                 </div>
             </main>
         </div>

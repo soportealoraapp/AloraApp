@@ -50,9 +50,14 @@ export interface Match {
     usersData?: Record<UserId, UserProfile | any>;
     createdAt: Date;
     updatedAt?: Date;
-    lastMessage?: Message; // UI helper
+    lastMessage?: Message;
     stage?: string;
-    compatibility?: number; // UI helper
+    compatibility?: number;
+    partner?: {
+        id: string;
+        displayName?: string;
+        photoURL?: string | null;
+    };
 }
 
 export interface Message {

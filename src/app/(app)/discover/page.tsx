@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useRef } from "react";
 import { AnimatePresence } from "framer-motion";
 import { FloatingMatchCard } from "@/components/ui/premium/FloatingMatchCard";
 import { MatchScreen } from "@/components/ui/premium/MatchScreen";
@@ -32,6 +32,9 @@ export default function DiscoverPage() {
   // We show the top card
   const currentProfile = profiles[0]?.profile;
 
+  const profilesRef = useRef(profiles);
+  profilesRef.current = profiles;
+
   const handleSwipe = async (direction: 'left' | 'right') => {
     if (!currentProfile || !currentUserProfile) return;
 
@@ -45,19 +48,16 @@ export default function DiscoverPage() {
     }
 
     const profileToActOn = currentProfile;
+    const previousProfiles = profilesRef.current;
     setSwipeCount(prev => prev + 1);
 
-    // Optimistic removal
     const remainingProfiles = profiles.slice(1);
-    // cast to any to bypass type mismatch if useDiscover returns different types
-    // In discover-service it returns { profile: UserProfile, compatibility: number }
     setProfiles(remainingProfiles as any);
 
     try {
       if (direction === 'right') {
         const result = await sendLike(profileToActOn.id, 'like');
         if (result?.matched) {
-          // Trigger Match Screen
           setMatchedProfile(profileToActOn);
           setShowMatchScreen(true);
         }
@@ -66,8 +66,8 @@ export default function DiscoverPage() {
       }
     } catch (error) {
       console.error("Action failed", error);
-      toast({ title: "Error", description: "No se pudo procesar la acción", variant: "destructive" });
-      // Revert? For now, just log.
+      setProfiles(previousProfiles as any);
+      toast({ title: "Error", description: "No se pudo procesar la acción. Perfil restaurado.", variant: "destructive" });
     }
   };
 

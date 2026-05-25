@@ -26,7 +26,7 @@ export function useDiscover(searchTerm: string = '', limit: number = 20) {
 
         try {
             setLoading(true);
-            const feed = await getDynamicFeed(user.id);
+            const feed = await getDynamicFeed(user.id, searchTerm || undefined);
 
             const mapped = feed.map(item => ({
                 profile: item.profile,

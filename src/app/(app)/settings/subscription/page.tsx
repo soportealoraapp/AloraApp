@@ -21,7 +21,7 @@ export default function SubscriptionPage() {
         try {
             const res = await fetch('/api/stripe/session', {
                 method: 'POST',
-                body: JSON.stringify({ plan, userId: profile.uid })
+                body: JSON.stringify({ plan, userId: profile.id })
             });
             const data = await res.json();
             if (data.url) {

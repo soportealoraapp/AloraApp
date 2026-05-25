@@ -28,7 +28,7 @@ export default function RejectedUsersPage() {
         setLoading(true);
         try {
             // Using ID since user might be Supabase user in Context
-            const users = await getBlockedUsers(user.id || user.uid || '');
+            const users = await getBlockedUsers(user.id || '');
             setBlockedUsers(users);
         } catch (error) {
             console.error(error);
@@ -40,7 +40,7 @@ export default function RejectedUsersPage() {
     const handleUnblock = async (blockedId: string) => {
         if (!user) return;
         try {
-            await unblockUser(user.id || user.uid || '', blockedId);
+            await unblockUser(user.id || '', blockedId);
             setBlockedUsers(prev => prev.filter(u => u.id !== blockedId));
             toast({ title: "Usuario desbloqueado" });
         } catch (error) {

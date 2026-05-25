@@ -1,27 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { requireAuth } from '@/lib/middleware/auth';
+import { EditableProfileSchema, sanitizeProfileUpdates } from '@/lib/schemas/validation';
+import { withRateLimit } from '@/server/utils/api-rate-limit';
 
-// GET /api/profile
-export async function GET(request: NextRequest) {
-    const session = await requireAuth(request);
-    // requireAuth stub currently returns { uid: 'stub' }, but we need real session if possible
-    // Wait, middleware auth stub is still there? 
-    // We switched middleware.ts to use updateSession from supabase.
-    // API routes need real auth check.
-
-    // For now, assuming requireAuth returns { uid: string } correctly from Supabase token?
-    // The previous stub was: return { uid: 'stub-user-id' }
-    // We need to FIX requireAuth to correct verify token from Supabase or header.
-    // BUT for this specific file, let's implement the logic assuming we have UID.
-
-    // Actually, I should use `createClient` from `@/lib/supabase/server` to get user in API route
-    // This is the cleanest way.
-
+async function getUser() {
     const { createClient } = await import('@/lib/supabase/server');
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
+    return user;
+}
 
+export async function GET(request: NextRequest) {
+    const user = await getUser();
     if (!user) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
@@ -42,31 +32,33 @@ export async function GET(request: NextRequest) {
     }
 }
 
-// PUT /api/profile
 export async function PUT(request: NextRequest) {
-    const { createClient } = await import('@/lib/supabase/server');
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-
+    const user = await getUser();
     if (!user) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    try {
-        const updates = await request.json();
+    const rateLimitResponse = await withRateLimit(user.id, 'profileUpdate');
+    if (rateLimitResponse) return rateLimitResponse;
 
-        // Safety cleanup
-        delete updates.userId;
-        delete updates.id;
-        delete updates.createdAt;
-        delete updates.updatedAt;
+    try {
+        const rawBody = await request.json();
+        const allowedUpdates = sanitizeProfileUpdates(rawBody);
+
+        const parsed = EditableProfileSchema.safeParse(allowedUpdates);
+        if (!parsed.success) {
+            return NextResponse.json({
+                error: 'Validation failed',
+                details: parsed.error.flatten().fieldErrors
+            }, { status: 400 });
+        }
 
         const updated = await prisma.profile.upsert({
             where: { userId: user.id },
-            update: updates,
+            update: parsed.data,
             create: {
                 userId: user.id,
-                ...updates
+                ...parsed.data
             }
         });
 

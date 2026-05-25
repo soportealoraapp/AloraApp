@@ -138,6 +138,11 @@ export default function LoginPage() {
               disabled={loading}
             />
           </div>
+          <div className="flex justify-end">
+            <Link href="/forgot-password" className="text-xs text-muted-foreground hover:text-foreground hover:underline">
+              ¿Olvidaste tu contraseña?
+            </Link>
+          </div>
           <Button type="submit" className="w-full font-bold" disabled={loading}>
             {loading ? "Iniciando sesión..." : "Iniciar Sesión"}
           </Button>

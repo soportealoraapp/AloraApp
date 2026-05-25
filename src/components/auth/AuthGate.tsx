@@ -5,7 +5,7 @@ import { useRouter, usePathname } from "next/navigation";
 import { useEffect } from "react";
 import { Loader2 } from "lucide-react";
 
-const PUBLIC_ROUTES = ['/login', '/signup', '/auth/callback', '/'];
+const PUBLIC_ROUTES = ['/login', '/signup', '/auth/callback', '/', '/onboarding'];
 
 export function AuthGate({ children }: { children: React.ReactNode }) {
     const { user, profile, loading } = useAuth();
@@ -18,11 +18,11 @@ export function AuthGate({ children }: { children: React.ReactNode }) {
         const isPublicRoute = PUBLIC_ROUTES.includes(pathname);
 
         if (!user && !isPublicRoute) {
-            router.push('/login');
-        } else if (user && !profile && pathname !== '/onboarding' && !isPublicRoute) {
-            router.push('/onboarding');
-        } else if (user && profile && (pathname === '/login' || pathname === '/signup')) {
-            router.push('/discover');
+            router.replace('/login');
+        } else if (user && !profile && !isPublicRoute) {
+            router.replace('/signup');
+        } else if (user && profile && (pathname === '/login' || pathname === '/signup' || pathname === '/onboarding')) {
+            router.replace('/discover');
         }
     }, [user, profile, loading, pathname, router]);
 
@@ -40,10 +40,9 @@ export function AuthGate({ children }: { children: React.ReactNode }) {
         );
     }
 
-    // Optional: Add a check to prevent "flicker" of forbidden content
     const isPublicRoute = PUBLIC_ROUTES.includes(pathname);
     if (!user && !isPublicRoute) return null;
-    if (user && !profile && pathname !== '/onboarding' && !isPublicRoute) return null;
+    if (user && !profile && !isPublicRoute) return null;
 
     return <>{children}</>;
 }

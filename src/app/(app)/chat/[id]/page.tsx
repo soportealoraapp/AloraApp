@@ -42,11 +42,13 @@ export default function ChatWindowPage() {
     const [showBlockDialog, setShowBlockDialog] = useState(false);
 
     const match = matches.find((m) => m.id === matchId);
-    const otherUserId = match?.users.find((uid) => uid !== user?.uid);
+    const otherUserId = match?.users.find((id) => id !== user?.id);
+    const partner = match?.partner;
+    const partnerName = partner?.displayName || `Usuario #${otherUserId?.slice(0, 8)}`;
+    const partnerPhoto = partner?.photoURL || '/placeholder.jpg';
 
     useEffect(() => {
         if (messages.length > 0) {
-            // Scroll to bottom when messages change
             messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
             markAsRead();
         }
@@ -79,7 +81,7 @@ export default function ChatWindowPage() {
         if (!otherUserId) return;
         await sendMessage(text, otherUserId);
         if (user) {
-            trackEvent('AI_COACH_MESSAGE', { userId: user.uid, matchId });
+            trackEvent('AI_COACH_MESSAGE', { userId: user.id, matchId });
         }
     };
 
@@ -119,7 +121,7 @@ export default function ChatWindowPage() {
                 <Link href={`/profile/${otherUserId}`} className="flex items-center gap-3 flex-1 overflow-hidden">
                     <div className="flex flex-col truncate">
                         <span className="font-semibold truncate">
-                            Usuario #{otherUserId?.slice(0, 8)}
+                            {partnerName}
                         </span>
                         {match && (
                             <span className="text-[10px] text-muted-foreground flex items-center gap-1">
@@ -176,7 +178,7 @@ export default function ChatWindowPage() {
                                 <MessageBubble
                                     key={message.id}
                                     message={message}
-                                    isMe={message.senderId === user?.uid}
+                                    isMe={message.senderId === user?.id}
                                 />
                             ))}
                         </div>
@@ -222,7 +224,7 @@ export default function ChatWindowPage() {
             </main>
 
             <div className="border-t bg-background p-4">
-                {messages.length === 0 && profile?.gender !== 'woman' ? (
+                {messages.length === 0 && (profile?.gender !== 'woman' && profile?.gender !== 'female') ? (
                     <div className="flex flex-col items-center justify-center p-4 bg-muted/50 rounded-lg text-center">
                         <Sparkles className="h-8 w-8 text-primary mb-2" />
                         <p className="font-semibold text-primary">Las mujeres dan el primer paso</p>

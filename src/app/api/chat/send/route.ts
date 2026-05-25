@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { withRateLimit } from '@/server/utils/api-rate-limit';
+import { filterOffensiveMessages } from '@/ai/flows/filter-offensive-messages';
 
 // POST /api/chat/send
 export const dynamic = 'force-dynamic';
@@ -11,6 +13,9 @@ export async function POST(request: NextRequest) {
     if (!user) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
+
+    const rateLimitResponse = await withRateLimit(user.id, 'send');
+    if (rateLimitResponse) return rateLimitResponse;
 
     try {
         const { matchId, text, type } = await request.json();
@@ -29,14 +34,25 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ error: 'Match not found or unauthorized' }, { status: 403 });
         }
 
+        // Moderate message content
+        let content = text;
+        let isFiltered = false;
+        try {
+            const moderationResult = await filterOffensiveMessages({ text });
+            content = moderationResult.filteredText;
+            isFiltered = moderationResult.isOffensive;
+        } catch (moderationError) {
+            console.error('Moderation error:', moderationError);
+        }
+
         // Create Message
         const message = await prisma.message.create({
             data: {
                 matchId,
                 senderId: user.id,
-                content: text,
+                content,
                 type: type || 'text',
-                status: 'sent'
+                status: isFiltered ? 'flagged' : 'sent',
             }
         });
 

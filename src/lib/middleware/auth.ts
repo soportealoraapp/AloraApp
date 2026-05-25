@@ -1,11 +1,23 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-export async function authMiddleware(request: NextRequest) {
-    // Stub for Supabase Auth Middleware (handled in src/middleware.ts usually)
-    // For API routes, we'd use createServerClient and getUser
-    return { uid: 'stub-user-id' };
+export async function getServerUser() {
+    const { createClient } = await import('@/lib/supabase/server');
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    return user;
 }
 
 export async function requireAuth(request: NextRequest) {
-    return { uid: 'stub-user-id' };
+    const { createClient } = await import('@/lib/supabase/server');
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    return user ? { uid: user.id } : null;
+}
+
+export async function requireUser() {
+    const user = await getServerUser();
+    if (!user) {
+        return null;
+    }
+    return user;
 }

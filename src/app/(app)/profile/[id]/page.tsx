@@ -89,7 +89,7 @@ export default function UserProfilePage() {
 
         setProcessing(true);
         try {
-            const result = await sendLike(profile.uid, "like");
+            const result = await sendLike(profile.id, "like");
             setIsLiked(true);
 
             if (result.matched) {
@@ -111,7 +111,7 @@ export default function UserProfilePage() {
 
         setProcessing(true);
         try {
-            const result = await sendLike(profile.uid, "superlike");
+            const result = await sendLike(profile.id, "superlike");
             setIsSuperMatched(true);
             setIsLiked(true);
 
@@ -133,7 +133,7 @@ export default function UserProfilePage() {
     const handleAcceptMatch = async () => {
         setProcessing(true);
         try {
-            const result = await sendLike(profile.uid, "like");
+            const result = await sendLike(profile.id, "like");
 
             toast({
                 title: `¡Nuevo match con ${profile.displayName}! 🎉`,
@@ -157,7 +157,7 @@ export default function UserProfilePage() {
     const handleGiveSecondChance = async () => {
         setProcessing(true);
         try {
-            const result = await sendLike(profile.uid, "like");
+            const result = await sendLike(profile.id, "like");
 
             toast({
                 title: "¡Segunda oportunidad!",
@@ -350,7 +350,7 @@ export default function UserProfilePage() {
                     )}
                 </div>
 
-                {id !== user?.uid && (
+                {id !== user?.id && (
                     <div className="fixed bottom-0 left-0 right-0 z-50 p-4 bg-background/80 backdrop-blur-sm border-t md:relative md:bg-transparent md:border-none md:p-0 md:mt-4 md:px-4">
                         {isFromNewMatch ? (
                             <div className="flex justify-around items-center max-w-md mx-auto gap-2">
