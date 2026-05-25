@@ -12,7 +12,16 @@ import { StepBasicInfo } from "./StepBasicInfo";
 import { StepInterests } from "./StepInterests";
 import { StepPhotos } from "./StepPhotos";
 import { StepVerification } from "./StepVerification";
-import { UserProfile } from "@/lib/domain/types"; // using domain type
+import { UserProfile } from "@/lib/domain/types";
+import { Sparkles, Heart } from "lucide-react";
+
+const STEP_LABELS = ['Tu esencia', 'Tus colores', 'Tu sonrisa', 'Tu seguridad'];
+const STEP_WELCOME = [
+    'Cuéntanos quién eres',
+    '¿Qué te hace vibrar?',
+    'Muéstranos tu mundo',
+    'Protege tu espacio',
+];
 
 export function OnboardingWizard() {
     const { user, profile } = useAuth();
@@ -21,8 +30,8 @@ export function OnboardingWizard() {
     const [step, setStep] = useState(1);
     const totalSteps = 4;
     const [formData, setFormData] = useState<Partial<UserProfile>>({});
-
     const [isInitialized, setIsInitialized] = useState(false);
+
     useEffect(() => {
         if (profile && !isInitialized) {
             setFormData(profile);
@@ -36,15 +45,11 @@ export function OnboardingWizard() {
         setFormData(updatedData);
 
         try {
-            try {
-                await updateUserProfile(user.id, {
-                    ...updatedData,
-                    createdAt: undefined, // Don't wipe
-                    isCompleted: step === totalSteps // simplified logic
-                } as any);
-            } catch (e) {
-                console.error("Auto-save failed", e);
-            }
+            await updateUserProfile(user.id, {
+                ...updatedData,
+                createdAt: undefined,
+                isCompleted: step === totalSteps,
+            } as any);
         } catch (e) {
             console.error("Auto-save failed", e);
         }
@@ -57,18 +62,25 @@ export function OnboardingWizard() {
         }
         setStep(prev => Math.min(prev + 1, totalSteps));
     };
+
     const prevStep = () => setStep(prev => Math.max(prev - 1, 1));
     const userId = user?.id;
 
     return (
-        <div className="max-w-md w-full mx-auto p-4 md:p-6 bg-background rounded-3xl shadow-xl dark:shadow-pink-900/10 min-h-[550px] md:min-h-[600px] flex flex-col border border-border transition-colors duration-500 overflow-hidden">
-            <div className="mb-6 md:mb-10">
-                <Progress value={(step / totalSteps) * 100} className="h-1.5 bg-pink-100 dark:bg-pink-900/20" />
-                <div className="flex justify-between items-center mt-3">
-                    <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-pink-500/80 dark:text-pink-400">
-                        Registro
+        <div className="max-w-md w-full mx-auto p-4 md:p-8 bg-background rounded-3xl shadow-xl min-h-[600px] flex flex-col border border-border/50">
+            <div className="mb-8">
+                <div className="flex items-center gap-2 mb-4">
+                    <Heart className="h-4 w-4 text-pink-400" />
+                    <span className="text-[10px] uppercase tracking-[0.2em] text-pink-400 font-bold">
+                        {STEP_LABELS[step - 1]}
+                    </span>
+                </div>
+                <Progress value={(step / totalSteps) * 100} className="h-1.5 bg-pink-100" />
+                <div className="flex justify-between items-center mt-2">
+                    <p className="text-[10px] font-bold uppercase tracking-widest text-pink-500/60">
+                        {STEP_WELCOME[step - 1]}
                     </p>
-                    <p className="text-[10px] font-black uppercase tracking-widest text-gray-500 dark:text-gray-400">
+                    <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">
                         {step} / {totalSteps}
                     </p>
                 </div>
@@ -78,10 +90,10 @@ export function OnboardingWizard() {
                 <AnimatePresence mode="wait">
                     <motion.div
                         key={step}
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -10 }}
-                        transition={{ duration: 0.3, ease: "easeOut" }}
+                        initial={{ opacity: 0, x: 20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        exit={{ opacity: 0, x: -20 }}
+                        transition={{ duration: 0.25, ease: "easeOut" }}
                         className="flex-1 flex flex-col"
                     >
                         {step === 1 && <StepBasicInfo userId={userId} data={formData} onUpdate={saveProgress} onNext={nextStep} />}

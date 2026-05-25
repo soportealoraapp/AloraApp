@@ -1,9 +1,9 @@
 'use client';
 
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { UserProfile } from '@/lib/domain/types';
-import { getDynamicFeed } from '@/server/actions/feed';
+import { getDynamicFeed, FeedItem } from '@/server/actions/feed';
 
 interface DiscoverProfile {
     profile: UserProfile;
@@ -11,60 +11,84 @@ interface DiscoverProfile {
     score?: any;
 }
 
-export function useDiscover(searchTerm: string = '', limit: number = 20) {
+export function useDiscover(searchTerm: string = '', limit: number = 10) {
     const { user } = useAuth();
     const [profilesData, setProfilesData] = useState<DiscoverProfile[]>([]);
     const [loading, setLoading] = useState(true);
+    const [loadingMore, setLoadingMore] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [retryCount, setRetryCount] = useState(0);
+    const cursorRef = useRef<string | null>(null);
+    const hasMoreRef = useRef(true);
 
-    const fetchProfiles = useCallback(async () => {
+    const fetchProfiles = useCallback(async (isRefresh = false) => {
         if (!user?.id) {
             setLoading(false);
             return;
         }
 
         try {
-            setLoading(true);
-            const feed = await getDynamicFeed(user.id, searchTerm || undefined);
+            if (isRefresh) {
+                setLoading(true);
+                cursorRef.current = null;
+                hasMoreRef.current = true;
+            }
 
-            const mapped = feed.map(item => ({
+            const result = await getDynamicFeed(
+                user.id,
+                searchTerm || undefined,
+                isRefresh ? undefined : cursorRef.current || undefined,
+                limit
+            );
+
+            cursorRef.current = result.nextCursor;
+            hasMoreRef.current = result.hasMore;
+
+            const mapped: DiscoverProfile[] = result.items.map(item => ({
                 profile: item.profile,
                 compatibility: item.score?.details?.quizCompatibility || item.score?.total || 0,
-                score: item.score
+                score: item.score,
+                sharedInterests: item.score?.details?.sharedInterests || [],
             }));
 
-            setProfilesData(mapped);
+            if (isRefresh || !cursorRef.current) {
+                setProfilesData(mapped);
+            } else {
+                setProfilesData(prev => [...prev, ...mapped]);
+            }
+
             setError(null);
         } catch (err) {
             console.error('Discover fetch error:', err);
             setError('No pudimos cargar nuevos perfiles. Verifica tu conexión.');
-            // Silent retry could be implemented here or manual
         } finally {
             setLoading(false);
+            setLoadingMore(false);
         }
-    }, [user?.id]); // Only depend on id
+    }, [user?.id, searchTerm, limit]);
 
     useEffect(() => {
-        fetchProfiles();
+        fetchProfiles(true);
     }, [fetchProfiles, retryCount]);
 
-    const memoizedProfiles = useMemo(() => {
-        if (!searchTerm) return profilesData;
-        return profilesData.filter(p =>
-            (p.profile.displayName || p.profile.name || '').toLowerCase().includes(searchTerm.toLowerCase())
-        );
-    }, [profilesData, searchTerm]);
+    const loadMore = useCallback(() => {
+        if (loadingMore || !hasMoreRef.current) return;
+        setLoadingMore(true);
+        fetchProfiles(false);
+    }, [loadingMore, fetchProfiles]);
 
-    const refresh = () => {
+    const refresh = useCallback(() => {
         setRetryCount(prev => prev + 1);
-    };
+    }, []);
 
     return {
-        profiles: memoizedProfiles,
+        profiles: profilesData,
         setProfiles: setProfilesData,
         loading,
+        loadingMore,
         error,
         refresh,
+        loadMore,
+        hasMore: hasMoreRef.current,
     };
 }

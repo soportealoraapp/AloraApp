@@ -73,6 +73,15 @@ export default function SettingsPage() {
                                 <ChevronRight className="w-5 h-5 text-muted-foreground" />
                             </div>
                         </Link>
+                        <Link href="/settings/safety">
+                            <div className="flex items-center justify-between p-3 rounded-lg hover:bg-secondary -mx-3">
+                                <div className="flex items-center gap-3">
+                                <Shield className="w-5 h-5 text-destructive" />
+                                <span>Centro de Seguridad</span>
+                                </div>
+                                <ChevronRight className="w-5 h-5 text-muted-foreground" />
+                            </div>
+                        </Link>
                     </CardContent>
                 </Card>
 

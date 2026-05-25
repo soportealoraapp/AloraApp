@@ -1,16 +1,28 @@
 'use client';
 
-import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
-import { Badge } from "@/components/ui/badge";
 import { trackEvent } from "@/lib/tracking/client";
 import { motion } from "framer-motion";
+import { Sparkles } from "lucide-react";
 
-const INTERESTS_LIST = [
-    "Viajes", "Música", "Cine", "Libros", "Deporte",
-    "Arte", "Cocina", "Tecnología", "Naturaleza", "Animales",
-    "Fotografía", "Baile", "Moda", "Gaming", "Yoga"
+const INTEREST_CATEGORIES = [
+    {
+        label: 'Arte y Cultura',
+        items: ['Música', 'Cine', 'Libros', 'Arte', 'Fotografía', 'Teatro', 'Museos', 'Baile'],
+    },
+    {
+        label: 'Estilo de Vida',
+        items: ['Viajes', 'Cocina', 'Moda', 'Yoga', 'Meditación', 'Jardinería', 'Mascotas', 'Fitness'],
+    },
+    {
+        label: 'Aventura',
+        items: ['Deporte', 'Naturaleza', 'Senderismo', 'Buceo', 'Escalada', 'Ciclismo', 'Correr', 'Surf'],
+    },
+    {
+        label: 'Entretenimiento',
+        items: ['Gaming', 'Series', 'Anime', 'Comedia', 'Podcasts', 'Tecnología', 'Astronomía', 'Cócteles'],
+    },
 ];
 
 export function StepInterests({ data, onUpdate, onNext, onPrev, userId }: any) {
@@ -33,40 +45,73 @@ export function StepInterests({ data, onUpdate, onNext, onPrev, userId }: any) {
     };
 
     return (
-        <div className="space-y-6">
-            <h2 className="text-2xl font-bold text-center mb-2 dark:text-white">Tus Intereses</h2>
-            <p className="text-center text-muted-foreground dark:text-gray-400 mb-6 font-medium">Selecciona hasta 10 cosas que te gusten</p>
+        <div className="space-y-6 flex-1 flex flex-col">
+            <div className="space-y-1 text-center">
+                <h2 className="text-2xl font-bold text-gray-900">¿Qué te hace vibrar?</h2>
+                <p className="text-sm text-muted-foreground">
+                    Elige hasta 10 cosas que te gusten — así encontramos personas afines
+                </p>
+            </div>
 
-            <div className="flex flex-wrap gap-2 justify-center">
-                {INTERESTS_LIST.map((interest, idx) => (
+            <div className="flex-1 overflow-y-auto space-y-4">
+                {INTEREST_CATEGORIES.map((category, catIdx) => (
                     <motion.div
-                        key={interest}
-                        initial={{ scale: 0.8, opacity: 0 }}
-                        animate={{ scale: 1, opacity: 1 }}
-                        transition={{ type: "spring", stiffness: 180, damping: 35, delay: idx * 0.03 }}
+                        key={category.label}
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: catIdx * 0.08 }}
                     >
-                        <Badge
-                            variant={selected.includes(interest) ? "default" : "outline"}
-                            className={`cursor-pointer px-4 py-2 text-sm transition-all duration-300 ${selected.includes(interest)
-                                ? "bg-primary hover:bg-primary/90 scale-[1.02] text-primary-foreground shadow-md"
-                                : "hover:bg-accent hover:text-accent-foreground border-input dark:border-pink-900/40 dark:text-gray-200"
-                                }`}
-                            onClick={() => toggleInterest(interest)}
-                        >
-                            {interest}
-                        </Badge>
+                        <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-2">
+                            {category.label}
+                        </p>
+                        <div className="flex flex-wrap gap-2">
+                            {category.items.map((item) => {
+                                const isSelected = selected.includes(item);
+                                return (
+                                    <button
+                                        key={item}
+                                        onClick={() => toggleInterest(item)}
+                                        className={`px-4 py-2 text-sm rounded-full border transition-all duration-200 ${
+                                            isSelected
+                                                ? 'bg-primary text-primary-foreground border-primary shadow-md scale-[1.02]'
+                                                : 'bg-background text-muted-foreground border-muted hover:border-primary/30 hover:text-foreground'
+                                        }`}
+                                    >
+                                        {item}
+                                    </button>
+                                );
+                            })}
+                        </div>
                     </motion.div>
                 ))}
             </div>
 
-            <div className="flex gap-4 mt-8">
-                <Button variant="outline" onClick={onPrev} className="w-1/3 hover:bg-muted active:scale-[0.98] transition-all border-border">Atrás</Button>
-                <Button
-                    onClick={handleNext}
-                    className="w-2/3 hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 shadow-md shadow-pink-100 dark:shadow-pink-950/10"
-                >
-                    {selected.length === 0 ? "Saltar" : "Continuar"}
-                </Button>
+            <div className="pt-4 space-y-3">
+                <div className="flex items-center justify-center gap-2">
+                    <div className="flex gap-1">
+                        {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(i => (
+                            <div
+                                key={i}
+                                className={`h-1.5 w-1.5 rounded-full transition-colors ${
+                                    i <= selected.length ? 'bg-primary' : 'bg-muted'
+                                }`}
+                            />
+                        ))}
+                    </div>
+                    <span className="text-[10px] text-muted-foreground">{selected.length}/10</span>
+                </div>
+
+                <div className="flex gap-4">
+                    <Button variant="outline" onClick={onPrev} className="w-1/3 rounded-2xl">
+                        Atrás
+                    </Button>
+                    <Button
+                        onClick={handleNext}
+                        className="w-2/3 rounded-2xl shadow-md"
+                    >
+                        {selected.length === 0 ? 'Saltar por ahora' : `¡${selected.length} intereses! Continuar`}
+                    </Button>
+                </div>
             </div>
         </div>
     );

@@ -1,11 +1,11 @@
 "use client";
 
-import { useState, useMemo, useRef } from "react";
+import { useState, useMemo, useRef, useEffect, useCallback } from "react";
 import { AnimatePresence } from "framer-motion";
 import { FloatingMatchCard } from "@/components/ui/premium/FloatingMatchCard";
 import { MatchScreen } from "@/components/ui/premium/MatchScreen";
 import { Button } from "@/components/ui/button";
-import { Filter, Loader2, RefreshCcw } from "lucide-react";
+import { Filter, Loader2, RefreshCcw, Sparkles } from "lucide-react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { useDiscover } from "@/hooks/use-discover";
 import { useAuth } from "@/contexts/AuthContext";
@@ -14,12 +14,11 @@ import { useToast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
 import { UserProfile } from "@/lib/domain/types";
 import { BRAND_VOICE } from "@/lib/constants/brand-voice";
-
-// ... (keep filters imports if needed, simplified for brevity in this artifact)
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function DiscoverPage() {
   const { profile: currentUserProfile } = useAuth();
-  const { profiles, loading, refresh, setProfiles } = useDiscover("");
+  const { profiles, loading, loadingMore, refresh, loadMore, hasMore, setProfiles } = useDiscover("");
   const { sendLike } = useMatches();
   const { toast } = useToast();
   const router = useRouter();
@@ -28,12 +27,29 @@ export default function DiscoverPage() {
   const [showMatchScreen, setShowMatchScreen] = useState(false);
   const [swipeCount, setSwipeCount] = useState(0);
   const SWIPE_LIMIT = 20;
+  const sentinelRef = useRef<HTMLDivElement>(null);
 
-  // We show the top card
   const currentProfile = profiles[0]?.profile;
-
   const profilesRef = useRef(profiles);
   profilesRef.current = profiles;
+
+  // Infinite scroll observer
+  useEffect(() => {
+    const sentinel = sentinelRef.current;
+    if (!sentinel) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && hasMore && !loadingMore && !loading) {
+          loadMore();
+        }
+      },
+      { threshold: 0.1 }
+    );
+
+    observer.observe(sentinel);
+    return () => observer.disconnect();
+  }, [hasMore, loadingMore, loading, loadMore]);
 
   const handleSwipe = async (direction: 'left' | 'right') => {
     if (!currentProfile || !currentUserProfile) return;
@@ -41,7 +57,7 @@ export default function DiscoverPage() {
     if (swipeCount >= SWIPE_LIMIT) {
       toast({
         title: "¡Tómate un respiro! 🧘",
-        description: "Has dado muchos likes. Vuelve en un momento para asegurar conexiones de calidad.",
+        description: "Has visto muchos perfiles. Vuelve en un momento para asegurar conexiones de calidad.",
         variant: "default"
       });
       return;
@@ -73,9 +89,6 @@ export default function DiscoverPage() {
 
   const handleChat = () => {
     setShowMatchScreen(false);
-    // We need match ID to go to chat. 
-    // matchingService.sendLike returns boolean. Needs update to return matchId or we find it.
-    // For now, redirect to chat list
     router.push('/chat');
   };
 
@@ -94,22 +107,25 @@ export default function DiscoverPage() {
     <div className="md:pl-60 h-screen flex flex-col overflow-hidden bg-gradient-to-br from-pink-50 to-white">
       <header className="flex h-16 items-center justify-between px-4 z-10">
         <h1 className="text-2xl font-black italic text-pink-500">Alora</h1>
-        <Button variant="ghost" size="icon" onClick={() => refresh()}>
-          <RefreshCcw className="h-5 w-5 text-gray-400" />
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button variant="ghost" size="icon" onClick={() => refresh()}>
+            <RefreshCcw className="h-5 w-5 text-gray-400" />
+          </Button>
+        </div>
       </header>
 
       <main className="flex-1 flex flex-col items-center justify-center p-4 relative">
         <AnimatePresence>
-          {loading ? (
-            <div className="flex flex-col items-center text-center px-6">
-              <Loader2 className="h-10 w-10 animate-spin text-pink-500 mb-4" />
-              <p className="text-pink-500 font-semibold">{BRAND_VOICE.states.emptyFeed.title}</p>
-              <p className="text-pink-400 text-sm mt-1">{BRAND_VOICE.states.emptyFeed.subtitle}</p>
+          {loading && profiles.length === 0 ? (
+            <div className="w-full max-w-sm space-y-4">
+              <Skeleton className="h-[500px] w-full rounded-3xl" />
+              <div className="flex justify-center gap-4">
+                <Skeleton className="h-14 w-14 rounded-full" />
+                <Skeleton className="h-14 w-14 rounded-full" />
+              </div>
             </div>
           ) : currentProfile ? (
             <div className="w-full max-w-sm h-[600px] relative">
-              {/* Stack effect */}
               {profiles[1] && (
                 <div className="absolute inset-0 top-4 scale-95 opacity-50 bg-white rounded-3xl shadow-xl z-0 transform translate-y-2" />
               )}
@@ -125,7 +141,7 @@ export default function DiscoverPage() {
           ) : (
             <div className="text-center px-8">
               <div className="bg-pink-50 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6">
-                <RefreshCcw className="h-10 w-10 text-pink-300" />
+                <Sparkles className="h-10 w-10 text-pink-300" />
               </div>
               <p className="text-xl font-bold text-gray-800 mb-2">{BRAND_VOICE.states.noMatches.title}</p>
               <p className="text-gray-500 mb-8 max-w-xs mx-auto">{BRAND_VOICE.states.noMatches.subtitle}</p>
@@ -135,6 +151,16 @@ export default function DiscoverPage() {
             </div>
           )}
         </AnimatePresence>
+
+        {/* Infinite scroll sentinel */}
+        <div ref={sentinelRef} className="h-4 w-full" />
+
+        {loadingMore && (
+          <div className="flex items-center gap-2 py-4 text-sm text-muted-foreground">
+            <Loader2 className="h-4 w-4 animate-spin" />
+            Cargando más perfiles...
+          </div>
+        )}
       </main>
     </div>
   );

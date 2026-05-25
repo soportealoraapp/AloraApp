@@ -6,6 +6,7 @@ import { ThemeProvider } from '@/components/theme-provider';
 import { AuthProvider } from '@/contexts/AuthContext';
 import { AuthGate } from '@/components/auth/AuthGate';
 import { SafetyGuard } from '@/components/safety/SafetyGuard';
+import { OfflineBanner } from '@/components/offline/OfflineBanner';
 
 // ... (skipping metadata/viewport for brevity in diff)
 
@@ -29,6 +30,7 @@ export default function RootLayout({
           <AuthProvider>
             <AuthGate>
               <SafetyGuard>
+                <OfflineBanner />
                 {children}
               </SafetyGuard>
             </AuthGate>
