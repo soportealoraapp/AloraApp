@@ -59,9 +59,16 @@ model User {
   closureArtifacts ClosureArtifact[]
   
   // v3.9.0 Moderation
-  reportsSent     Report[] @relation("UserReporter")
-  reportsReceived Report[] @relation("UserReported")
-  blockedBy       Block[]  @relation("UserBlocked")
+  reportsSent           Report[] @relation("UserReporter")
+  reportsReceived       Report[] @relation("UserReported")
+  blockedBy             Block[]  @relation("UserBlocked")
+
+  // v4.x Push & Device
+  pushTokens            PushToken[]
+  deviceFingerprints    DeviceFingerprint[]
+  verificationSubmissions VerificationSubmission[]
+  userMemory            UserMemory?
+  dateReflections       DateReflection[]
 
   @@map("users")
 }
@@ -138,6 +145,9 @@ model Match {
 
   // AI Context
   copilotContext CopilotContext?
+
+  // v5.x Snapshots
+  relationshipSnapshots RelationshipSnapshot[]
 
   @@unique([user1Id, user2Id])
   @@map("matches")
@@ -558,11 +568,73 @@ model UserMemory {
   conversationTendencies  String?  // Encrypted JSON
   pacingStyle             String?  // Encrypted JSON
   relationshipIntentions  String?  // Encrypted JSON
+  loveLanguage            String?  // Encrypted — inferred love language
+  conflictStyle           String?  // Encrypted — inferred conflict style
+  opennessLevel           String?  // Encrypted — openness to depth
+  toleratedIntensity      String?  // Encrypted — intensity tolerance
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@map("user_memory")
+}
+
+model RelationshipSnapshot {
+  id                String   @id @default(uuid())
+  matchId           String
+  match             Match    @relation(fields: [matchId], references: [id], onDelete: Cascade)
+
+  emotionalDepth    Float
+  reciprocity       Float
+  consistency       Float
+  responseBalance   Float
+  conflictRisk      Float
+  attachmentTrend   Float
+  chemistryScore    Float
+  vulnerabilityScore Float
+  engagementLevel   Float
+
+  generatedAt       DateTime @default(now())
+
+  @@index([matchId, generatedAt])
+  @@map("relationship_snapshots")
+}
+
+model DateReflection {
+  id                String   @id @default(uuid())
+  userId            String
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  targetUserId      String?
+  matchId           String?
+
+  emotionalSafety   Int      // 1-5
+  chemistry         Int      // 1-5
+  authenticity      Int      // 1-5
+  communication     Int      // 1-5
+  wouldSeeAgain     Boolean
+  notes             String?  // Encrypted
+  aiAnalysis        String?  // Encrypted JSON — AI analysis of date
+
+  createdAt         DateTime @default(now())
+
+  @@index([userId])
+  @@map("date_reflections")
+}
+
+model Incident {
+  id        String   @id @default(uuid())
+  type      String   // reconnect_spike, notification_failure, queue_deadlock, realtime_outage, ai_timeout, db_degradation
+  severity  String   // info, warning, critical
+  source    String   // websocket, queue, db, ai, push
+  message   String
+  details   Json?
+  autoResolved Boolean @default(false)
+  resolvedAt DateTime?
+
+  createdAt DateTime @default(now())
+
+  @@index([type, createdAt])
+  @@map("incidents")
 }
 
 model Report {
