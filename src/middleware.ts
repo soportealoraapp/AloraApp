@@ -1,40 +1,45 @@
-import { NextResponse } from 'next/server';
-import type { NextRequest } from 'next/server';
+import { NextResponse, NextRequest } from 'next/server';
 import { updateSession, createClient } from '@/lib/supabase/middleware';
 import { getCSP } from '@/lib/security';
 
 export async function middleware(request: NextRequest) {
-    // 1. Supabase Auth Session Update & Protection
-    const response = await updateSession(request);
-    const { data: { user } } = await (await createClient(request, response)).auth.getUser();
+    // 0. Generate nonce FIRST — needs to be on request headers for Next.js to add to script tags
+    const nonce = Buffer.from(crypto.randomUUID()).toString('base64');
 
-    const isAppRoute = request.nextUrl.pathname.startsWith('/discover') ||
-        request.nextUrl.pathname.startsWith('/profile') ||
-        request.nextUrl.pathname.startsWith('/messages') ||
-        request.nextUrl.pathname.startsWith('/chat') ||
-        request.nextUrl.pathname.startsWith('/settings') ||
-        request.nextUrl.pathname.startsWith('/qa');
+    // Clone request headers and inject nonce so Next.js SSR picks it up for <script> tags
+    const requestHeaders = new Headers(request.headers);
+    requestHeaders.set('x-nonce', nonce);
+    const modifiedRequest = new NextRequest(request, { headers: requestHeaders });
 
-    const isAuthRoute = request.nextUrl.pathname.startsWith('/login') ||
-        request.nextUrl.pathname.startsWith('/signup') ||
-        request.nextUrl.pathname.startsWith('/forgot-password') ||
-        request.nextUrl.pathname.startsWith('/password-update') ||
-        request.nextUrl.pathname.startsWith('/auth');
+    // 1. Supabase Auth Session Update & Protection (uses modified request with nonce)
+    const response = await updateSession(modifiedRequest);
+    const { data: { user } } = await (await createClient(modifiedRequest, response)).auth.getUser();
+
+    const isAppRoute = modifiedRequest.nextUrl.pathname.startsWith('/discover') ||
+        modifiedRequest.nextUrl.pathname.startsWith('/profile') ||
+        modifiedRequest.nextUrl.pathname.startsWith('/messages') ||
+        modifiedRequest.nextUrl.pathname.startsWith('/chat') ||
+        modifiedRequest.nextUrl.pathname.startsWith('/settings') ||
+        modifiedRequest.nextUrl.pathname.startsWith('/qa');
+
+    const isAuthRoute = modifiedRequest.nextUrl.pathname.startsWith('/login') ||
+        modifiedRequest.nextUrl.pathname.startsWith('/signup') ||
+        modifiedRequest.nextUrl.pathname.startsWith('/forgot-password') ||
+        modifiedRequest.nextUrl.pathname.startsWith('/password-update') ||
+        modifiedRequest.nextUrl.pathname.startsWith('/auth');
 
     if (isAppRoute && !user) {
-        return NextResponse.redirect(new URL('/login', request.url));
+        return NextResponse.redirect(new URL('/login', modifiedRequest.url));
     }
 
-    if (isAuthRoute && user && !request.nextUrl.pathname.startsWith('/auth/callback')) {
-        return NextResponse.redirect(new URL('/discover', request.url));
+    if (isAuthRoute && user && !modifiedRequest.nextUrl.pathname.startsWith('/auth/callback')) {
+        return NextResponse.redirect(new URL('/discover', modifiedRequest.url));
     }
 
-    // 2. Security Headers (CSP)
-    const nonce = Buffer.from(crypto.randomUUID()).toString('base64');
+    // 2. Security Headers (CSP) — nonce must match x-nonce in request headers
     const csp = getCSP(nonce);
 
     response.headers.set('Content-Security-Policy', csp);
-    response.headers.set('x-nonce', nonce);
     response.headers.set('X-DNS-Prefetch-Control', 'on');
     response.headers.set('Strict-Transport-Security', 'max-age=63072000; includeSubDomains; preload');
     response.headers.set('X-XSS-Protection', '1; mode=block');
