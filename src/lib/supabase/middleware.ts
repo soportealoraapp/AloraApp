@@ -25,7 +25,9 @@ export async function createClient(request: NextRequest, response: NextResponse)
 
 export async function updateSession(request: NextRequest) {
     let supabaseResponse = NextResponse.next({
-        request,
+        request: {
+            headers: request.headers,
+        },
     })
 
     const supabase = await createClient(request, supabaseResponse);
