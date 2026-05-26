@@ -16,6 +16,7 @@ model User {
   id        String    @id @default(uuid())
   email     String    @unique
   name      String?
+  role      String    @default("user") // user, moderator, admin
   isActive  Boolean   @default(true)
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
@@ -46,6 +47,9 @@ model User {
 
   // Notifications
   notifications Notification[]
+
+  // Analytics
+  analyticsEvents AnalyticsEvent[]
 
   // AI & Wellbeing (v3.x)
   aiCoachSessions  AiCoachSession[]
@@ -389,6 +393,22 @@ model RateLimit {
   @@map("rate_limits")
 }
 
+model IdempotencyKey {
+  id        String   @id @default(uuid())
+  key       String
+  userId    String
+  action    String   // e.g. 'chat_send', 'match_like'
+  responseStatus Int?
+  responseBody   Json?
+
+  createdAt DateTime @default(now())
+
+  @@unique([key, action])
+  @@index([userId])
+  @@index([createdAt])
+  @@map("idempotency_keys")
+}
+
 model Block {
   id        String @id @default(uuid())
   blockerId String
@@ -408,14 +428,92 @@ model Notification {
   userId String
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  type   String // match, message, system
-  title  String
-  body   String
+  type    String // match, message, system
+  title   String
+  body    String
+  data    Json?  // deep link payload
+  channel String @default("default") // notification channel for Android
+
   readAt DateTime?
 
   createdAt DateTime @default(now())
 
+  @@index([userId])
   @@map("notifications")
+}
+
+model PushToken {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  token    String
+  platform String   // android, ios, web
+  deviceId String?
+  lastSeen DateTime @default(now())
+
+  createdAt DateTime @default(now())
+
+  @@unique([token])
+  @@index([userId])
+  @@map("push_tokens")
+}
+
+model AnalyticsEvent {
+  id        String   @id @default(uuid())
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id])
+
+  event     String   // signup, onboarding_complete, first_match, first_message, first_reply, daily_active
+  metadata  Json?
+  sessionId String?
+
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([event])
+  @@index([createdAt])
+  @@map("analytics_events")
+}
+
+model DeviceFingerprint {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  deviceHash String  // SHA256 of device characteristics
+  os         String?
+  browser    String?
+  timezone   String?
+  language   String?
+  screenSize String?
+  ipAddress  String?
+  userAgent  String?
+
+  firstSeen DateTime  @default(now())
+  lastSeen  DateTime  @default(now())
+
+  @@index([userId])
+  @@index([deviceHash])
+  @@map("device_fingerprints")
+}
+
+model VerificationSubmission {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  selfieUrl String
+  status    String   @default("pending") // pending, approved, rejected
+  reason    String?  // rejection reason
+  reviewedBy String? // admin userId who reviewed
+  reviewedAt DateTime?
+
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([status])
+  @@map("verification_submissions")
 }
 
 model Report {

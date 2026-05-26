@@ -17,12 +17,47 @@ export const ourFileRouter = {
                 throw new Error("Unauthorized: You must be logged in to upload files");
             }
 
-            return { userId: user.id };
+            return { userId: user.id, type: 'profile' };
         })
         .onUploadComplete(async ({ metadata, file }) => {
-            console.log("Upload complete for userId:", metadata.userId);
-            console.log("file url", file.url);
+            console.log("Profile upload complete for userId:", metadata.userId);
             return { uploadedBy: metadata.userId };
+        }),
+
+    chatImageUploader: f({ image: { maxFileSize: "4MB", maxFileCount: 4 } })
+        .middleware(async () => {
+            const supabase = await createClient();
+            const { data: { user } } = await supabase.auth.getUser();
+
+            if (!user) {
+                throw new Error("Unauthorized");
+            }
+
+            return { userId: user.id, type: 'chat' };
+        })
+        .onUploadComplete(async ({ metadata, file }) => {
+            console.log("Chat image upload complete for userId:", metadata.userId);
+            return {
+                uploadedBy: metadata.userId,
+                url: file.url,
+                type: 'image',
+            };
+        }),
+
+    verificationUploader: f({ image: { maxFileSize: "8MB", maxFileCount: 1 } })
+        .middleware(async () => {
+            const supabase = await createClient();
+            const { data: { user } } = await supabase.auth.getUser();
+
+            if (!user) {
+                throw new Error("Unauthorized");
+            }
+
+            return { userId: user.id, type: 'verification' };
+        })
+        .onUploadComplete(async ({ metadata, file }) => {
+            console.log("Verification upload complete for userId:", metadata.userId);
+            return { uploadedBy: metadata.userId, url: file.url };
         }),
 } satisfies FileRouter;
 

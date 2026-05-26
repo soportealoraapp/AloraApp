@@ -1,5 +1,66 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
+import { prisma } from '@/lib/prisma';
 
-export async function POST() {
-    return NextResponse.json({ error: 'Endpoint deprecated or not implemented' }, { status: 501 });
+export async function POST(request: NextRequest) {
+    const { createClient } = await import('@/lib/supabase/server');
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+
+    if (!user) {
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    try {
+        const { token, platform, deviceId } = await request.json();
+
+        if (!token || !platform) {
+            return NextResponse.json({ error: 'Missing token or platform' }, { status: 400 });
+        }
+
+        await prisma.pushToken.upsert({
+            where: { token },
+            update: {
+                userId: user.id,
+                platform,
+                deviceId: deviceId || null,
+                lastSeen: new Date(),
+            },
+            create: {
+                token,
+                userId: user.id,
+                platform,
+                deviceId: deviceId || null,
+            }
+        });
+
+        return NextResponse.json({ success: true });
+    } catch (error) {
+        console.error('Error registering push token:', error);
+        return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    }
+}
+
+export async function DELETE(request: NextRequest) {
+    const { createClient } = await import('@/lib/supabase/server');
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+
+    if (!user) {
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    try {
+        const { token } = await request.json();
+
+        if (!token) {
+            return NextResponse.json({ error: 'Missing token' }, { status: 400 });
+        }
+
+        await prisma.pushToken.deleteMany({ where: { token, userId: user.id } });
+
+        return NextResponse.json({ success: true });
+    } catch (error) {
+        console.error('Error removing push token:', error);
+        return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    }
 }

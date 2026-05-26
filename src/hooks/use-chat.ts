@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Message } from '@/lib/domain/types';
 import { chatService } from '@/lib/supabase/services/chat';
+import { addToQueue, processQueue } from '@/lib/offline-queue';
 
 interface TypingUser {
     userId: string;
@@ -128,6 +129,19 @@ export function useChat(matchId: string) {
         setSending(true);
 
         try {
+            // If offline, queue for later
+            if (typeof navigator !== 'undefined' && !navigator.onLine) {
+                addToQueue('message', {
+                    matchId,
+                    receiverId,
+                    text: text.trim(),
+                    type: 'text',
+                });
+                // Keep optimistic message as pending
+                setMessages(prev => prev.filter(m => m.id !== optimisticId));
+                return;
+            }
+
             const response = await fetch('/api/chat/send', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -149,6 +163,18 @@ export function useChat(matchId: string) {
             setMessages(prev => prev.filter(m => m.id !== optimisticId));
 
         } catch (err) {
+            // Queue for retry when offline
+            if (typeof navigator !== 'undefined' && !navigator.onLine) {
+                addToQueue('message', {
+                    matchId,
+                    receiverId,
+                    text: text.trim(),
+                    type: 'text',
+                });
+                setMessages(prev => prev.filter(m => m.id !== optimisticId));
+                return;
+            }
+
             // Mark optimistic message as failed
             setMessages(prev =>
                 prev.map(m =>

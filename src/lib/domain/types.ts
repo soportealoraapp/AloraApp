@@ -42,6 +42,13 @@ export interface UserProfile extends User {
     experimentalGroup?: 'A' | 'B';
     compatibility?: number; // UI helper
     completenessScore?: number; // v3.8.0
+
+    // Discover V3 retention signals
+    activeNow?: boolean;
+    highResponseRate?: boolean;
+    sharedInterests?: number;
+    messageResponseRate?: number | null;
+    lastActiveHours?: number | null;
 }
 
 export interface Match {

@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { updateSession, createClient } from '@/lib/supabase/middleware';
+import { getCSP } from '@/lib/security';
 
 export async function middleware(request: NextRequest) {
     // 1. Supabase Auth Session Update & Protection
@@ -29,26 +30,19 @@ export async function middleware(request: NextRequest) {
     }
 
     // 2. Security Headers (CSP)
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL?.replace(/\/$/, '') || 'https://your-project.supabase.co';
-    const csp = `
-        default-src 'self';
-        script-src 'self' 'unsafe-eval' 'unsafe-inline' https://apis.google.com https://js.stripe.com;
-        style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
-        img-src 'self' blob: data: https://lh3.googleusercontent.com ${supabaseUrl} https://placehold.co https://picsum.photos;
-        font-src 'self' data: https://fonts.gstatic.com;
-        connect-src 'self' https://securetoken.googleapis.com ${supabaseUrl};
-        worker-src 'self' blob:;
-        frame-src 'self' https://js.stripe.com;
-        object-src 'none';
-    `.replace(/\s{2,}/g, ' ').trim();
+    const nonce = Buffer.from(crypto.randomUUID()).toString('base64');
+    const csp = getCSP(nonce);
 
     response.headers.set('Content-Security-Policy', csp);
     response.headers.set('X-DNS-Prefetch-Control', 'on');
     response.headers.set('Strict-Transport-Security', 'max-age=63072000; includeSubDomains; preload');
     response.headers.set('X-XSS-Protection', '1; mode=block');
-    response.headers.set('X-Frame-Options', 'SAMEORIGIN');
+    response.headers.set('X-Frame-Options', 'DENY');
     response.headers.set('X-Content-Type-Options', 'nosniff');
-    response.headers.set('Referrer-Policy', 'origin-when-cross-origin');
+    response.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin');
+    response.headers.set('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
+    response.headers.set('Cross-Origin-Opener-Policy', 'same-origin');
+    response.headers.set('Cross-Origin-Resource-Policy', 'same-origin');
 
     // Feature Flags (Soft)
     response.headers.set('x-feature-flags', JSON.stringify({

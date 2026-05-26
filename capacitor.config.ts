@@ -5,8 +5,39 @@ const config: CapacitorConfig = {
     appName: 'Alora',
     webDir: 'out',
     server: {
-        androidScheme: 'https'
-    }
+        androidScheme: 'https',
+    },
+    android: {
+        backgroundColor: '#ffffff',
+        allowMixedContent: false,
+        captureInput: true,
+        webContentsDebuggingEnabled: process.env.NODE_ENV === 'development',
+    },
+    plugins: {
+        PushNotifications: {
+            presentationOptions: ['badge', 'sound', 'alert'],
+        },
+        SplashScreen: {
+            launchShowDuration: 1000,
+            backgroundColor: '#ffffff',
+            androidSplashResourceName: 'splash',
+            showSpinner: false,
+        },
+        StatusBar: {
+            overlaysWebView: false,
+            style: 'DARK',
+            backgroundColor: '#ffffff',
+        },
+        Keyboard: {
+            resize: 'body',
+            style: 'DARK',
+            resizeOnFullScreen: true,
+        },
+        Haptics: {
+            notificationDuration: 300,
+            clickDuration: 50,
+        },
+    },
 };
 
 export default config;

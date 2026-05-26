@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { withRateLimit } from '@/server/utils/api-rate-limit';
+import { notifyNewMatch } from '@/server/services/push';
+import { trackEvent } from '@/server/services/analytics';
 
 // POST /api/match/like
 export async function POST(request: NextRequest) {
@@ -80,6 +82,19 @@ export async function POST(request: NextRequest) {
                     }
                 });
                 matchId = match.id;
+
+                // Send push notifications to both users
+                const [partner1, partner2] = await Promise.all([
+                    prisma.profile.findUnique({ where: { userId: u1 }, select: { displayName: true } }),
+                    prisma.profile.findUnique({ where: { userId: u2 }, select: { displayName: true } }),
+                ]);
+
+                Promise.allSettled([
+                    notifyNewMatch(u1, partner2?.displayName || 'Alguien', match.id),
+                    notifyNewMatch(u2, partner1?.displayName || 'Alguien', match.id),
+                    trackEvent(u1, 'first_match', { matchId: match.id }),
+                    trackEvent(u2, 'first_match', { matchId: match.id }),
+                ]);
             } catch (matchError: any) {
                 if (matchError.code === 'P2002') {
                     const existing = await prisma.match.findFirst({

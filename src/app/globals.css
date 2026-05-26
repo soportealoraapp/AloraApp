@@ -12,6 +12,19 @@ html {
   height: -webkit-fill-available;
 }
 
+/* Reduced motion: disable smooth scrolling */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
 @layer base {
   :root {
     /* Alora Pink Palette */
@@ -104,6 +117,30 @@ html {
     -webkit-tap-highlight-color: transparent;
   }
 
+  /* WCAG AA focus styles */
+  *:focus-visible {
+    @apply outline-2 outline-offset-2 outline-primary/70;
+    outline-style: solid;
+  }
+
+  /* Large touch targets for mobile (44x44 minimum) */
+  button, a, [role="button"], input, select, textarea {
+    @apply min-h-[44px] min-w-[44px];
+  }
+
+  /* But smaller padding elements within */
+  button.btn-sm, a.btn-sm, .btn-sm {
+    @apply min-h-0 min-w-0;
+  }
+
+  /* Skip to content link for keyboard users */
+  .skip-to-content {
+    @apply absolute -top-10 left-4 z-[100] bg-primary text-primary-foreground px-4 py-2 rounded-b-lg transition-all;
+  }
+  .skip-to-content:focus {
+    @apply top-0;
+  }
+
   body {
     @apply bg-background text-foreground antialiased selection:bg-primary/20;
     min-height: 100vh;
@@ -114,6 +151,23 @@ html {
 @layer utilities {
   .glass {
     @apply bg-white/70 backdrop-blur-md border border-white/20 shadow-xl;
+  }
+
+  /* Screen-reader only utility */
+  .sr-only {
+    @apply absolute w-px h-px p-0 -m-px overflow-hidden whitespace-nowrap border-0;
+    clip: rect(0, 0, 0, 0);
+    clip-path: inset(50%);
+  }
+
+  /* Touch target size helpers */
+  .touch-target {
+    @apply min-h-[44px] min-w-[44px] flex items-center justify-center;
+  }
+
+  /* Consistent focus ring */
+  .focus-ring {
+    @apply focus-visible:ring-2 focus-visible:ring-primary/70 focus-visible:ring-offset-2 focus-visible:outline-none;
   }
 
   .animate-confetti {

@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { withRateLimit } from '@/server/utils/api-rate-limit';
 import { filterOffensiveMessages } from '@/ai/flows/filter-offensive-messages';
+import { notifyNewMessage } from '@/server/services/push';
+import { trackEvent } from '@/server/services/analytics';
 
 // POST /api/chat/send
 export const dynamic = 'force-dynamic';
@@ -61,6 +63,30 @@ export async function POST(request: NextRequest) {
             where: { id: matchId },
             data: { updatedAt: new Date() }
         });
+
+        // Send push notification to the other user
+        const receiverId = match.user1Id === user.id ? match.user2Id : match.user1Id;
+        const senderProfile = await prisma.profile.findUnique({
+            where: { userId: user.id },
+            select: { displayName: true }
+        });
+        notifyNewMessage(receiverId, senderProfile?.displayName || 'Alguien', matchId, content).catch(() => {});
+
+        // Analytics: track first_message and first_reply
+        const prevMessageCount = await prisma.message.count({ where: { matchId } });
+        if (prevMessageCount === 1) {
+            // This is the first message in the match
+            trackEvent(user.id, 'first_message', { matchId }).catch(() => {});
+        } else if (prevMessageCount > 1) {
+            // Check if the receiver has already messaged (reply)
+            const repliesFromReceiver = await prisma.message.count({
+                where: { matchId, senderId: receiverId },
+            });
+            if (repliesFromReceiver === 1) {
+                // This is the first reply from the receiver
+                trackEvent(receiverId, 'first_reply', { matchId }).catch(() => {});
+            }
+        }
 
         return NextResponse.json(message);
 

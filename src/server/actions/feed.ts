@@ -12,6 +12,13 @@ export interface FeedItem {
         details: Record<string, number>;
         explanation: string[];
     };
+    signals: {
+        activeNow: boolean;
+        highResponseRate: boolean;
+        sharedInterests: number;
+        messageResponseRate: number | null;
+        lastActiveHours: number | null;
+    };
 }
 
 export interface FeedPage {
@@ -36,7 +43,6 @@ export async function getDynamicFeed(
             return { items: [], nextCursor: null, hasMore: false };
         }
 
-        // Build exclusions
         const [blocks1, blocks2, interactions, matches1, matches2, reportsByMe, reportsOnMe] = await Promise.all([
             prisma.block.findMany({ where: { blockerId: currentUserId }, select: { blockedId: true } }),
             prisma.block.findMany({ where: { blockedId: currentUserId }, select: { blockerId: true } }),
@@ -90,6 +96,37 @@ export async function getDynamicFeed(
         const results = hasMore ? candidates.slice(0, limit) : candidates;
         const nextCursor = hasMore ? results[results.length - 1]?.userId ?? null : null;
 
+        // Calculate response rates for all candidates in batch
+        const candidateIds = results.map(c => c.userId);
+        const recentMessages = candidateIds.length > 0 ? await prisma.message.groupBy({
+            by: ['senderId', 'receiverId'],
+            where: {
+                OR: [
+                    { senderId: { in: candidateIds } },
+                    { receiverId: { in: candidateIds } },
+                ],
+                createdAt: { gte: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000) },
+            },
+            _count: true,
+        }) : [];
+
+        // Build a map of total messages sent and received per candidate
+        const messagesSentMap = new Map<string, number>();
+        const messagesReceivedMap = new Map<string, number>();
+        for (const m of recentMessages) {
+            if (candidateIds.includes(m.senderId)) {
+                messagesSentMap.set(m.senderId, (messagesSentMap.get(m.senderId) || 0) + m._count);
+            }
+            if (candidateIds.includes(m.receiverId)) {
+                messagesReceivedMap.set(m.receiverId, (messagesReceivedMap.get(m.receiverId) || 0) + m._count);
+            }
+        }
+
+        const currentUserInterests = currentUser.profile.interests || [];
+        const now = new Date();
+        const oneHourAgo = new Date(now.getTime() - 60 * 60 * 1000);
+        const oneDayAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+
         const scoredItems = await Promise.all(
             results.map(async (cp) => {
                 const profile: UserProfile = {
@@ -111,11 +148,29 @@ export async function getDynamicFeed(
                     createdAt: cp.createdAt,
                 };
 
+                // --- RETENTION SIGNALS ---
+                const lastActive = cp.lastActiveAt as Date | null;
+                const activeNow = lastActive ? lastActive > oneHourAgo : false;
+                const activeToday = lastActive ? lastActive > oneDayAgo : false;
+
+                // Shared interests count
+                const candidateInterests = cp.interests || [];
+                const sharedInterests = currentUserInterests.filter(i =>
+                    candidateInterests.some(ci => ci.toLowerCase() === i.toLowerCase())
+                ).length;
+
+                // Response rate (sent vs received ratio)
+                const sent = messagesSentMap.get(cp.userId) || 0;
+                const received = messagesReceivedMap.get(cp.userId) || 0;
+                const messageResponseRate = sent > 0 ? Math.min(1, received / sent) : null;
+                const highResponseRate = messageResponseRate !== null && messageResponseRate >= 0.5;
+
                 const completeness = calculateCompleteness(profile);
                 const deepScore = await getCompatibilityScore(currentUserId, profile.id);
 
                 let totalScore = deepScore.score;
 
+                // --- SCORING WITH RETENTION BOOSTS ---
                 if (cp.isVerified) totalScore += 15;
                 if (completeness >= 90) totalScore += 20;
                 else if (completeness >= 70) totalScore += 10;
@@ -132,12 +187,30 @@ export async function getDynamicFeed(
                 else if (reputation < 70) totalScore *= 0.8;
                 else if (reputation > 90) totalScore += 10;
 
+                // Retention boosts
+                if (activeNow) totalScore += 25;
+                else if (activeToday) totalScore += 10;
+
+                if (highResponseRate) totalScore += 15;
+
+                totalScore += sharedInterests * 5;
+
+                // Boost users with complete profile and recent activity
+                if (completeness >= 80 && activeToday) totalScore += 10;
+
                 return {
                     profile: { ...profile, completenessScore: completeness },
                     score: {
                         total: Math.min(100, Math.round(totalScore)),
                         details: deepScore.breakdown,
                         explanation: deepScore.explanation,
+                    },
+                    signals: {
+                        activeNow,
+                        highResponseRate,
+                        sharedInterests,
+                        messageResponseRate,
+                        lastActiveHours: lastActive ? Math.round((now.getTime() - lastActive.getTime()) / (1000 * 60 * 60)) : null,
                     },
                 };
             })
