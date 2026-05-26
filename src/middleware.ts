@@ -5,10 +5,12 @@ import { getCSP } from '@/lib/security';
 export async function middleware(request: NextRequest) {
     // 0. Generate nonce FIRST — needs to be on request headers for Next.js to add to script tags
     const nonce = Buffer.from(crypto.randomUUID()).toString('base64');
+    const csp = getCSP(nonce);
 
     // Clone request headers and inject nonce so Next.js SSR picks it up for <script> tags
     const requestHeaders = new Headers(request.headers);
     requestHeaders.set('x-nonce', nonce);
+    requestHeaders.set('Content-Security-Policy', csp);
     const modifiedRequest = new NextRequest(request, { headers: requestHeaders });
 
     // 1. Supabase Auth Session Update & Protection (uses modified request with nonce)
@@ -37,7 +39,6 @@ export async function middleware(request: NextRequest) {
     }
 
     // 2. Security Headers (CSP) — nonce must match x-nonce in request headers
-    const csp = getCSP(nonce);
 
     response.headers.set('Content-Security-Policy', csp);
     response.headers.set('X-DNS-Prefetch-Control', 'on');
