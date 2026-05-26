@@ -4,7 +4,10 @@
 -- ============================================================================
 
 -- 1. HELPER FUNCTIONS (idempotent via CREATE OR REPLACE)
-CREATE OR REPLACE FUNCTION public.is_admin()
+-- Helper functions live in private schema — not exposed via PostgREST /rest/v1/rpc/
+CREATE SCHEMA IF NOT EXISTS private;
+
+CREATE OR REPLACE FUNCTION private.is_admin()
 RETURNS BOOLEAN
 LANGUAGE sql STABLE SECURITY DEFINER SET search_path = ''
 AS $$
@@ -13,7 +16,7 @@ AS $$
   );
 $$;
 
-CREATE OR REPLACE FUNCTION public.is_match_participant(match_id TEXT)
+CREATE OR REPLACE FUNCTION private.is_match_participant(match_id TEXT)
 RETURNS BOOLEAN
 LANGUAGE sql STABLE SECURITY DEFINER SET search_path = ''
 AS $$
@@ -23,8 +26,8 @@ AS $$
   );
 $$;
 
-REVOKE EXECUTE ON FUNCTION public.is_admin() FROM anon, authenticated;
-REVOKE EXECUTE ON FUNCTION public.is_match_participant(TEXT) FROM anon, authenticated;
+-- Grant USAGE so anon/authenticated can call these from RLS policy evaluation
+GRANT USAGE ON SCHEMA private TO anon, authenticated;
 
 -- ============================================================================
 -- ENABLE RLS ON ALL TABLES (idempotent — no-op if already enabled)
@@ -46,7 +49,7 @@ END $$;
 -- ============================================================================
 DROP POLICY IF EXISTS "users_select_own" ON public.users;
 CREATE POLICY "users_select_own" ON public.users
-  FOR SELECT USING (id = auth.uid()::text OR public.is_admin());
+  FOR SELECT USING (id = auth.uid()::text OR private.is_admin());
 
 DROP POLICY IF EXISTS "users_update_own" ON public.users;
 CREATE POLICY "users_update_own" ON public.users
@@ -72,7 +75,7 @@ CREATE POLICY "profiles_update_own" ON public.profiles
 -- ============================================================================
 DROP POLICY IF EXISTS "sessions_select_own" ON public.sessions;
 CREATE POLICY "sessions_select_own" ON public.sessions
-  FOR SELECT USING ("userId" = auth.uid()::text OR public.is_admin());
+  FOR SELECT USING ("userId" = auth.uid()::text OR private.is_admin());
 
 DROP POLICY IF EXISTS "sessions_delete_own" ON public.sessions;
 CREATE POLICY "sessions_delete_own" ON public.sessions
@@ -83,7 +86,7 @@ CREATE POLICY "sessions_delete_own" ON public.sessions
 -- ============================================================================
 DROP POLICY IF EXISTS "matches_select_participant" ON public.matches;
 CREATE POLICY "matches_select_participant" ON public.matches
-  FOR SELECT USING ("user1Id" = auth.uid()::text OR "user2Id" = auth.uid()::text OR public.is_admin());
+  FOR SELECT USING ("user1Id" = auth.uid()::text OR "user2Id" = auth.uid()::text OR private.is_admin());
 
 DROP POLICY IF EXISTS "matches_insert" ON public.matches;
 CREATE POLICY "matches_insert" ON public.matches
@@ -98,11 +101,11 @@ CREATE POLICY "matches_update_participant" ON public.matches
 -- ============================================================================
 DROP POLICY IF EXISTS "messages_select_participant" ON public.messages;
 CREATE POLICY "messages_select_participant" ON public.messages
-  FOR SELECT USING (public.is_match_participant("matchId") OR public.is_admin());
+  FOR SELECT USING (private.is_match_participant("matchId") OR private.is_admin());
 
 DROP POLICY IF EXISTS "messages_insert_own" ON public.messages;
 CREATE POLICY "messages_insert_own" ON public.messages
-  FOR INSERT WITH CHECK ("senderId" = auth.uid()::text AND public.is_match_participant("matchId"));
+  FOR INSERT WITH CHECK ("senderId" = auth.uid()::text AND private.is_match_participant("matchId"));
 
 DROP POLICY IF EXISTS "messages_update_own" ON public.messages;
 CREATE POLICY "messages_update_own" ON public.messages
@@ -124,7 +127,7 @@ CREATE POLICY "interactions_insert_own" ON public.interactions
 -- ============================================================================
 DROP POLICY IF EXISTS "copilot_context_select" ON public.copilot_context;
 CREATE POLICY "copilot_context_select" ON public.copilot_context
-  FOR SELECT USING (public.is_match_participant("matchId") OR public.is_admin());
+  FOR SELECT USING (private.is_match_participant("matchId") OR private.is_admin());
 
 -- ============================================================================
 -- COPILOT EVENTS
@@ -134,7 +137,7 @@ CREATE POLICY "copilot_events_select" ON public.copilot_events
   FOR SELECT USING (
     EXISTS (
       SELECT 1 FROM public.copilot_context cc
-      WHERE cc.id = "copilotContextId" AND (public.is_match_participant(cc."matchId") OR public.is_admin())
+      WHERE cc.id = "copilotContextId" AND (private.is_match_participant(cc."matchId") OR private.is_admin())
     )
   );
 
@@ -306,7 +309,7 @@ CREATE POLICY "device_fingerprints_insert_own" ON public.device_fingerprints
 -- ============================================================================
 DROP POLICY IF EXISTS "verification_submissions_select_own" ON public.verification_submissions;
 CREATE POLICY "verification_submissions_select_own" ON public.verification_submissions
-  FOR SELECT USING ("userId" = auth.uid()::text OR public.is_admin());
+  FOR SELECT USING ("userId" = auth.uid()::text OR private.is_admin());
 
 DROP POLICY IF EXISTS "verification_submissions_insert_own" ON public.verification_submissions;
 CREATE POLICY "verification_submissions_insert_own" ON public.verification_submissions
@@ -359,42 +362,42 @@ CREATE POLICY "reports_insert_own" ON public.reports
 
 DROP POLICY IF EXISTS "reports_select_admin" ON public.reports;
 CREATE POLICY "reports_select_admin" ON public.reports
-  FOR SELECT USING (public.is_admin());
+  FOR SELECT USING (private.is_admin());
 
 DROP POLICY IF EXISTS "reports_update_admin" ON public.reports;
 CREATE POLICY "reports_update_admin" ON public.reports
-  FOR UPDATE USING (public.is_admin());
+  FOR UPDATE USING (private.is_admin());
 
 -- ============================================================================
 -- ADMIN-ONLY TABLES
 -- ============================================================================
 DROP POLICY IF EXISTS "audit_logs_admin_only" ON public.audit_logs;
 CREATE POLICY "audit_logs_admin_only" ON public.audit_logs
-  FOR ALL USING (public.is_admin());
+  FOR ALL USING (private.is_admin());
 
 DROP POLICY IF EXISTS "incidents_admin_only" ON public.incidents;
 CREATE POLICY "incidents_admin_only" ON public.incidents
-  FOR ALL USING (public.is_admin());
+  FOR ALL USING (private.is_admin());
 
 DROP POLICY IF EXISTS "jobs_admin_only" ON public.jobs;
 CREATE POLICY "jobs_admin_only" ON public.jobs
-  FOR ALL USING (public.is_admin());
+  FOR ALL USING (private.is_admin());
 
 DROP POLICY IF EXISTS "locks_admin_only" ON public.locks;
 CREATE POLICY "locks_admin_only" ON public.locks
-  FOR ALL USING (public.is_admin());
+  FOR ALL USING (private.is_admin());
 
 DROP POLICY IF EXISTS "analytics_events_admin_only" ON public.analytics_events;
 CREATE POLICY "analytics_events_admin_only" ON public.analytics_events
-  FOR ALL USING (public.is_admin());
+  FOR ALL USING (private.is_admin());
 
 DROP POLICY IF EXISTS "rate_limits_admin_only" ON public.rate_limits;
 CREATE POLICY "rate_limits_admin_only" ON public.rate_limits
-  FOR ALL USING (public.is_admin());
+  FOR ALL USING (private.is_admin());
 
 DROP POLICY IF EXISTS "idempotency_keys_admin_only" ON public.idempotency_keys;
 CREATE POLICY "idempotency_keys_admin_only" ON public.idempotency_keys
-  FOR ALL USING (public.is_admin());
+  FOR ALL USING (private.is_admin());
 
 -- ============================================================================
 -- _PRISMA_MIGRATIONS — block all direct API access
