@@ -34,6 +34,7 @@ export async function middleware(request: NextRequest) {
     const csp = getCSP(nonce);
 
     response.headers.set('Content-Security-Policy', csp);
+    response.headers.set('x-nonce', nonce);
     response.headers.set('X-DNS-Prefetch-Control', 'on');
     response.headers.set('Strict-Transport-Security', 'max-age=63072000; includeSubDomains; preload');
     response.headers.set('X-XSS-Protection', '1; mode=block');
