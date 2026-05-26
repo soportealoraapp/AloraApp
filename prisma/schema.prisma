@@ -516,6 +516,55 @@ model VerificationSubmission {
   @@map("verification_submissions")
 }
 
+model Job {
+  id          String   @id @default(uuid())
+  type        String
+  payload     Json?
+  priority    Int      @default(3)
+  status      String   @default("pending") // pending, processing, completed, failed, retrying
+  retries     Int      @default(0)
+  maxRetries  Int      @default(3)
+  error       String?
+  workerId    String?
+  result      Json?
+  scheduledAt DateTime @default(now())
+  startedAt   DateTime?
+  completedAt DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([status, priority, scheduledAt])
+  @@index([type, status])
+  @@index([createdAt])
+  @@map("jobs")
+}
+
+model Lock {
+  id         String   @id @default(uuid())
+  name       String   @unique
+  owner      String
+  acquiredAt DateTime @default(now())
+
+  @@map("locks")
+}
+
+model UserMemory {
+  id                      String   @id @default(uuid())
+  userId                  String   @unique
+  user                    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  enabled                 Boolean  @default(false)
+  communicationPrefs      String?  // Encrypted JSON
+  emotionalPatterns       String?  // Encrypted JSON
+  conversationTendencies  String?  // Encrypted JSON
+  pacingStyle             String?  // Encrypted JSON
+  relationshipIntentions  String?  // Encrypted JSON
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("user_memory")
+}
+
 model Report {
   id         String   @id @default(uuid())
   reporterId String
