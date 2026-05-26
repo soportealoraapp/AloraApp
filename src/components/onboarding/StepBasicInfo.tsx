@@ -3,7 +3,7 @@
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { useState } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { trackEvent } from "@/lib/tracking/client";
 import { Sparkles } from "lucide-react";
 import { motion } from "framer-motion";
@@ -16,10 +16,17 @@ const BIO_EXAMPLES = [
 
 export function StepBasicInfo({ data, onUpdate, onNext, userId }: any) {
     const [localData, setLocalData] = useState(data);
-    const [bioExample, setBioExample] = useState(BIO_EXAMPLES[Math.floor(Math.random() * BIO_EXAMPLES.length)]);
+    const [bioExample] = useState(BIO_EXAMPLES[Math.floor(Math.random() * BIO_EXAMPLES.length)]);
+
+    // Sync from parent data when it loads (e.g. profile fetched) but don't overwrite user input
+    useEffect(() => {
+        if (data && Object.keys(data).length > 0 && Object.keys(localData).length === 0) {
+            setLocalData(data);
+        }
+    }, [data]);
 
     const handleChange = (field: string, value: any) => {
-        setLocalData({ ...localData, [field]: value });
+        setLocalData(prev => ({ ...prev, [field]: value }));
     };
 
     const handleNext = () => {
@@ -28,7 +35,12 @@ export function StepBasicInfo({ data, onUpdate, onNext, userId }: any) {
         onNext();
     };
 
-    const isValid = localData.displayName && localData.age && localData.gender;
+    const isValid = useMemo(() =>
+        Boolean(localData.displayName?.trim()) &&
+        Boolean(localData.age) &&
+        Boolean(localData.gender),
+        [localData.displayName, localData.age, localData.gender]
+    );
 
     return (
         <div className="space-y-6 flex-1 flex flex-col">
@@ -67,9 +79,14 @@ export function StepBasicInfo({ data, onUpdate, onNext, userId }: any) {
                         <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Edad</Label>
                         <Input
                             type="number"
+                            min={18}
+                            max={120}
                             placeholder="24"
-                            value={localData.age || ''}
-                            onChange={(e) => handleChange('age', parseInt(e.target.value))}
+                            value={localData.age ?? ''}
+                            onChange={(e) => {
+                                const v = parseInt(e.target.value);
+                                handleChange('age', isNaN(v) ? undefined : v);
+                            }}
                             className="rounded-2xl h-12 border-muted focus-visible:ring-primary/20 bg-background/50"
                         />
                     </div>
@@ -120,7 +137,7 @@ export function StepBasicInfo({ data, onUpdate, onNext, userId }: any) {
                     {isValid ? 'Sigue, vamos bien ✨' : 'Completa los campos para continuar'}
                 </Button>
                 {!isValid && (
-                    <p className="text-[10px] text-center text-muted-foreground mt-2">
+                    <p className="text-xs text-amber-600 text-center mt-2">
                         Nombre, edad y género son necesarios para encontrar tu mejor match
                     </p>
                 )}

@@ -67,7 +67,7 @@ export function OnboardingWizard() {
     const userId = user?.id;
 
     return (
-        <div className="max-w-md w-full mx-auto p-4 md:p-8 bg-background rounded-3xl shadow-xl min-h-[600px] flex flex-col border border-border/50">
+        <div className="w-full min-h-dvh md:min-h-0 md:max-w-md md:mx-auto p-4 md:p-8 bg-background md:rounded-3xl md:shadow-xl md:border md:border-border/50 flex flex-col">
             <div className="mb-8">
                 <div className="flex items-center gap-2 mb-4">
                     <Heart className="h-4 w-4 text-pink-400" />

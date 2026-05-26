@@ -39,8 +39,8 @@ export function AgeGate() {
                         <Heart className="h-8 w-8 text-pink-500 fill-pink-500" />
                     </div>
 
-                    <h2 className="text-2xl font-bold mb-2">Bienvenido a Alora</h2>
-                    <p className="text-muted-foreground mb-8">
+                    <h2 className="text-2xl font-bold mb-2 text-gray-900">Bienvenido a Alora</h2>
+                    <p className="text-gray-600 mb-8">
                         Al entrar, confirmas que eres mayor de edad (18+) y que respetas nuestras normas de comunidad.
                     </p>
 
@@ -57,14 +57,14 @@ export function AgeGate() {
                         </Button>
                         <Button
                             variant="ghost"
-                            className="text-muted-foreground"
+                            className="text-gray-500 hover:text-gray-700"
                             onClick={() => setDenied(true)}
                         >
                             Soy menor de edad
                         </Button>
                     </div>
 
-                    <p className="mt-6 text-[10px] text-muted-foreground uppercase tracking-widest font-medium">
+                    <p className="mt-6 text-[10px] text-gray-500 uppercase tracking-widest font-medium">
                         Safety First • Community Driven
                     </p>
                 </Card>
