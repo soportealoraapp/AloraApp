@@ -8,7 +8,7 @@
 -- 1. HELPER: Check if user is admin/moderator
 CREATE OR REPLACE FUNCTION public.is_admin()
 RETURNS BOOLEAN
-LANGUAGE sql STABLE SECURITY DEFINER
+LANGUAGE sql STABLE SECURITY DEFINER SET search_path = ''
 AS $$
   SELECT EXISTS (
     SELECT 1 FROM public.users WHERE id = auth.uid()::text AND "role" IN ('admin', 'moderator')
@@ -18,13 +18,17 @@ $$;
 -- 2. HELPER: Check if user is participant in a match
 CREATE OR REPLACE FUNCTION public.is_match_participant(match_id TEXT)
 RETURNS BOOLEAN
-LANGUAGE sql STABLE SECURITY DEFINER
+LANGUAGE sql STABLE SECURITY DEFINER SET search_path = ''
 AS $$
   SELECT EXISTS (
     SELECT 1 FROM public.matches
     WHERE id = match_id AND ("user1Id" = auth.uid()::text OR "user2Id" = auth.uid()::text)
   );
 $$;
+
+-- 3. REVOKE direct RPC execution — these functions are for RLS policies only, not public API
+REVOKE EXECUTE ON FUNCTION public.is_admin() FROM anon, authenticated;
+REVOKE EXECUTE ON FUNCTION public.is_match_participant(TEXT) FROM anon, authenticated;
 
 -- ============================================================================
 -- ENABLE RLS ON ALL USER-FACING TABLES
