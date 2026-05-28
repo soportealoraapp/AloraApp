@@ -321,7 +321,7 @@ export default function ChatWindowPage() {
                                                 handleSendMessage(text);
                                                 setShowIcebreakers(false);
                                             }}
-                                            className="w-full text-left p-3 text-sm rounded-2xl bg-pink-50 hover:bg-pink-100 transition-colors text-gray-700 border border-pink-100"
+                                            className="w-full text-left p-3 text-sm rounded-2xl bg-muted/50 hover:bg-muted transition-colors text-foreground border border-border"
                                         >
                                             {text}
                                         </button>

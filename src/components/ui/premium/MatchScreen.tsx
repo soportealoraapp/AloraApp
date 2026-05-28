@@ -54,7 +54,7 @@ export function MatchScreen({ userProfile, matchedProfile, onChat, onKeepSwiping
                 transition={EMOTIONAL_MOTION.matchReveal.transition as any}
                 className="z-10 text-center mb-10"
             >
-                <h1 className="text-6xl font-black italic bg-clip-text text-transparent bg-gradient-to-r from-pink-400 to-purple-400 drop-shadow-lg">
+                <h1 className="text-6xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-accent drop-shadow-lg">
                     {BRAND_VOICE.nudges.newMatch}
                 </h1>
                 <p className="mt-2 text-xl text-white/80">Todo gran vínculo comienza con una conexión especial.</p>

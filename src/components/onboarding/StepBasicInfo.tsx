@@ -2,7 +2,9 @@
 
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useState, useEffect, useMemo } from "react";
 import { trackEvent } from "@/lib/tracking/client";
 import { Sparkles } from "lucide-react";
@@ -26,7 +28,7 @@ export function StepBasicInfo({ data, onUpdate, onNext, userId }: any) {
     }, [data]);
 
     const handleChange = (field: string, value: any) => {
-        setLocalData(prev => ({ ...prev, [field]: value }));
+        setLocalData((prev: any) => ({ ...prev, [field]: value }));
     };
 
     const handleNext = () => {
@@ -45,7 +47,7 @@ export function StepBasicInfo({ data, onUpdate, onNext, userId }: any) {
     return (
         <div className="space-y-6 flex-1 flex flex-col">
             <div className="space-y-1 text-center">
-                <h2 className="text-2xl font-bold text-gray-900">Cuéntanos sobre ti</h2>
+                <h2 className="text-2xl font-bold text-foreground">Cuéntanos sobre ti</h2>
                 <p className="text-sm text-muted-foreground">
                     Lo básico para que puedan conocerte
                 </p>
@@ -92,16 +94,19 @@ export function StepBasicInfo({ data, onUpdate, onNext, userId }: any) {
                     </div>
                     <div className="space-y-2">
                         <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Género</Label>
-                        <select
+                        <Select
                             value={localData.gender || ''}
-                            onChange={(e) => handleChange('gender', e.target.value)}
-                            className="w-full flex h-12 rounded-2xl border border-muted bg-background/50 px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/20"
+                            onValueChange={(value) => handleChange('gender', value)}
                         >
-                            <option value="">Seleccionar</option>
-                            <option value="woman">Mujer</option>
-                            <option value="man">Hombre</option>
-                            <option value="non-binary">No binario</option>
-                        </select>
+                            <SelectTrigger className="h-12 rounded-2xl border-muted bg-background/50">
+                                <SelectValue placeholder="Seleccionar" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="woman">Mujer</SelectItem>
+                                <SelectItem value="man">Hombre</SelectItem>
+                                <SelectItem value="non-binary">No binario</SelectItem>
+                            </SelectContent>
+                        </Select>
                     </div>
                 </motion.div>
 
@@ -112,14 +117,14 @@ export function StepBasicInfo({ data, onUpdate, onNext, userId }: any) {
                     className="space-y-2"
                 >
                     <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1">
-                        <Sparkles className="h-3 w-3 text-pink-400" />
+                        <Sparkles className="h-3 w-3 text-muted-foreground" />
                         Tu esencia
                     </Label>
-                    <textarea
+                    <Textarea
                         placeholder={bioExample}
                         value={localData.bio || ''}
                         onChange={(e) => handleChange('bio', e.target.value)}
-                        className="w-full flex min-h-[100px] rounded-2xl border border-muted bg-background/50 px-3 py-3 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/20 resize-none"
+                        className="min-h-[100px] rounded-2xl resize-none"
                         maxLength={500}
                     />
                     <p className="text-[10px] text-right text-muted-foreground">

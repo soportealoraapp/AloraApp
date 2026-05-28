@@ -167,9 +167,9 @@ export function VerificationUpload({ onComplete }: VerificationUploadProps) {
                 <button
                     onClick={handleSkip}
                     disabled={uploading}
-                    className="w-full text-center text-sm text-muted-foreground hover:text-primary transition-colors underline decoration-dotted"
+                    className="w-full text-center text-sm text-muted-foreground hover:text-primary transition-colors"
                 >
-                    Lo haré más tarde
+                    Omitir verificación por ahora
                 </button>
             </div>
         </div>

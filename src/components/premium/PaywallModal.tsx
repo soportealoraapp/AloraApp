@@ -10,6 +10,7 @@ import {
     DialogFooter
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import { Check, Sparkles, Heart, Zap, ShieldCheck, Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
@@ -88,7 +89,7 @@ export function PaywallModal({ isOpen, onClose }: PaywallModalProps) {
                             <span className="text-xs font-bold text-pink-600 uppercase tracking-wider">Plan Mensual</span>
                             <div className="text-2xl font-bold text-gray-900">9.99€ <span className="text-sm font-normal text-muted-foreground">/ mes</span></div>
                         </div>
-                        <Badge className="bg-pink-200 text-pink-700 hover:bg-pink-200 font-bold">-20% Hoy</Badge>
+                        <Badge variant="secondary" className="bg-muted text-muted-foreground font-bold">-20% Hoy</Badge>
                     </div>
 
                     <Button
@@ -107,8 +108,4 @@ export function PaywallModal({ isOpen, onClose }: PaywallModalProps) {
             </DialogContent>
         </Dialog>
     );
-}
-
-function Badge({ children, className }: { children: React.ReactNode, className?: string }) {
-    return <span className={`px-2 py-1 rounded-full text-[10px] ${className}`}>{children}</span>;
 }

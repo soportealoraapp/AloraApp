@@ -63,8 +63,8 @@ export default function ProfilePage() {
 
   return (
     <div className="md:pl-60">
-      <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b bg-background/90 px-4 backdrop-blur-md sm:px-6">
-        <h1 className="text-xl font-bold md:text-2xl italic text-primary">Alora</h1>
+        <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b bg-background/90 px-4 backdrop-blur-md sm:px-6">
+        <h1 className="text-xl font-bold md:text-2xl text-foreground">Alora</h1>
         <div className="ml-auto flex items-center gap-2">
           <Button size="icon" variant="ghost" asChild>
             <Link href="/settings">
@@ -103,47 +103,10 @@ export default function ProfilePage() {
                 {profile.subscriptionStatus === 'plus' && <TrustBadge type="premium" />}
               </div>
               <p className="text-muted-foreground flex items-center gap-1 text-sm font-medium">
-                Alora Member since {new Date(profile.createdAt).getFullYear()}
+                Miembro desde {new Date(profile.createdAt).getFullYear()}
               </p>
             </div>
           </div>
-
-          {completenessScore < 100 && (
-            <Card className="rounded-3xl border-none shadow-sm bg-gradient-to-r from-pink-50 to-orange-50 dark:from-pink-950/20 dark:to-orange-950/10">
-              <CardContent className="p-5">
-                <div className="flex items-center justify-between mb-3">
-                  <div className="flex items-center gap-2">
-                    <Sparkles className="h-4 w-4 text-pink-500" />
-                    <span className="font-bold text-sm text-gray-800 dark:text-gray-200">Completa tu perfil</span>
-                  </div>
-                  <span className="text-xs font-bold text-pink-600 dark:text-pink-400">{completenessScore}%</span>
-                </div>
-                <Progress value={completenessScore} className="h-2 bg-white/50 dark:bg-white/10" />
-                <p className="mt-3 text-[11px] text-muted-foreground leading-snug">
-                  Los perfiles completos reciben hasta un <strong>4x más de matches</strong> y tienen prioridad en Discover.
-                </p>
-                <Button variant="link" asChild className="p-0 h-auto text-xs font-bold text-primary mt-2">
-                  <Link href="/profile/edit">Terminar de completar →</Link>
-                </Button>
-              </CardContent>
-            </Card>
-          )}
-
-          <BoostActivation />
-
-          <Card className="bg-gradient-to-r from-pink-500/10 to-rose-400/10 border-pink-200 rounded-3xl">
-            <CardContent className="p-4 flex items-center justify-between">
-              <div>
-                <h4 className="font-bold text-pink-700">Pásate a Alora Plus</h4>
-                <p className="text-xs text-pink-600">Likes ilimitados y mucho más.</p>
-              </div>
-              <Button size="sm" className="bg-pink-500 text-white rounded-full" onClick={() => setShowPaywall(true)}>
-                Mejorar
-              </Button>
-            </CardContent>
-          </Card>
-
-          <MissionCenter />
 
           {profile.bio && (
             <Card className="rounded-3xl border-none shadow-sm bg-muted/30">
@@ -154,13 +117,13 @@ export default function ProfilePage() {
           )}
 
           {profile.personalGuide && profile.personalGuide.length > 0 && (
-            <Card className="rounded-3xl border-none shadow-sm bg-pink-50/50 dark:bg-pink-900/10">
+            <Card className="rounded-3xl border shadow-sm">
               <CardContent className="p-6 space-y-3">
                 <h3 className="font-bold text-lg text-primary">Guía Personal</h3>
                 <div className="space-y-2">
                   {profile.personalGuide.map((guide, index) => (
-                    <div key={index} className="p-4 rounded-2xl bg-white/80 dark:bg-card/80 shadow-sm border border-pink-100 dark:border-pink-900/30">
-                      <p className="font-bold text-sm text-pink-600 dark:text-pink-400">{guide.title}</p>
+                    <div key={index} className="p-4 rounded-2xl bg-card shadow-sm border">
+                      <p className="font-bold text-sm text-foreground">{guide.title}</p>
                       <p className="text-xs text-muted-foreground leading-snug">{guide.description}</p>
                     </div>
                   ))}
@@ -257,6 +220,43 @@ export default function ProfilePage() {
               </CardContent>
             </Card>
           )}
+
+          {completenessScore < 100 && (
+            <Card className="rounded-3xl border shadow-sm">
+              <CardContent className="p-5">
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center gap-2">
+                    <Sparkles className="h-4 w-4 text-primary" />
+                    <span className="font-bold text-sm text-foreground">Completa tu perfil</span>
+                  </div>
+                  <span className="text-xs font-bold text-muted-foreground">{completenessScore}%</span>
+                </div>
+                <Progress value={completenessScore} className="h-2" />
+                <p className="mt-3 text-xs text-muted-foreground leading-snug">
+                  Los perfiles completos reciben hasta un <strong>4x más de matches</strong> y tienen prioridad en Discover.
+                </p>
+                <Button variant="link" asChild className="p-0 h-auto text-xs font-bold text-primary mt-2">
+                  <Link href="/profile/edit">Terminar de completar →</Link>
+                </Button>
+              </CardContent>
+            </Card>
+          )}
+
+          <BoostActivation />
+
+          <Card className="rounded-3xl border">
+            <CardContent className="p-4 flex items-center justify-between">
+              <div>
+                <h4 className="font-bold text-foreground">Pásate a Alora Plus</h4>
+                <p className="text-xs text-muted-foreground">Likes ilimitados y mucho más.</p>
+              </div>
+              <Button size="sm" variant="default" onClick={() => setShowPaywall(true)}>
+                Mejorar
+              </Button>
+            </CardContent>
+          </Card>
+
+          <MissionCenter />
         </div>
       </main>
 

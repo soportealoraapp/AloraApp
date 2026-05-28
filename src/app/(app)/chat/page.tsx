@@ -25,8 +25,9 @@ export default function ChatPage() {
     const [processingMatch, setProcessingMatch] = useState<string | null>(null);
 
     const filteredMatches = matches.filter((match) => {
-        const otherUserId = match.users.find(id => id !== user?.id);
-        return true;
+        if (!searchTerm.trim()) return true;
+        const partnerName = match.partner?.displayName || '';
+        return partnerName.toLowerCase().includes(searchTerm.toLowerCase());
     });
 
     const handleAcceptMatch = async (like: any) => {
@@ -97,7 +98,7 @@ export default function ChatPage() {
                         <TabsTrigger value="new">
                             Nuevos
                             {newMatches.length > 0 && (
-                                <Badge className="ml-2 bg-pink-500 text-white rounded-full h-5 w-5 flex items-center justify-center p-0 text-[10px]">
+                                <Badge variant="default" className="ml-2 rounded-full h-5 w-5 flex items-center justify-center p-0 text-[10px]">
                                     {newMatches.length}
                                 </Badge>
                             )}
@@ -106,12 +107,12 @@ export default function ChatPage() {
 
                     <TabsContent value="conversations" className="space-y-3 mt-4">
                         {filteredMatches.length === 0 ? (
-                            <Card className="rounded-3xl border-none bg-muted/20">
+                            <Card className="rounded-3xl border bg-muted/20">
                                 <CardContent className="flex flex-col items-center justify-center py-16 px-8">
-                                    <div className="bg-white p-4 rounded-full shadow-sm mb-6">
-                                        <MessageSquare className="h-10 w-10 text-pink-300" />
+                                    <div className="bg-card p-4 rounded-full shadow-sm mb-6">
+                                        <MessageSquare className="h-10 w-10 text-muted-foreground" />
                                     </div>
-                                    <p className="text-xl font-bold text-gray-800 text-center mb-2">
+                                    <p className="text-xl font-bold text-foreground text-center mb-2">
                                         {BRAND_VOICE.states.noMatches.title}
                                     </p>
                                     <p className="text-sm text-muted-foreground text-center max-w-xs mb-8">
@@ -137,9 +138,9 @@ export default function ChatPage() {
                                                 transition={{ delay: idx * 0.05, type: "spring", stiffness: 180, damping: 35 }}
                                             >
                                                 <Link href={`/chat/${match.id}`}>
-                                                    <Card className="rounded-[2rem] border-none shadow-sm hover:shadow-md transition-all cursor-pointer group active:scale-[0.98]">
+                                                    <Card className="rounded-2xl border shadow-sm hover:shadow-md transition-all cursor-pointer group active:scale-[0.98]">
                                                         <CardContent className="flex items-center gap-4 p-4">
-                                                            <div className="relative h-16 w-16 rounded-full overflow-hidden flex-shrink-0 border-2 border-pink-50">
+                                                            <div className="relative h-16 w-16 rounded-full overflow-hidden flex-shrink-0 border-2 border-muted">
                                                                 <Image
                                                                     src={partnerPhoto}
                                                                     alt={partnerName}
@@ -149,8 +150,8 @@ export default function ChatPage() {
                                                             </div>
                                                             <div className="flex-1 min-w-0">
                                                                 <div className="flex items-center justify-between mb-1">
-                                                                    <p className="font-bold text-gray-900 truncate">{partnerName}</p>
-                                                                    <Badge variant="secondary" className="text-[10px] uppercase font-bold tracking-wider bg-pink-50 text-pink-600 border-pink-100">
+                                                                    <p className="font-bold text-foreground truncate">{partnerName}</p>
+                                                                    <Badge variant="secondary" className="text-[10px] uppercase font-bold tracking-wider">
                                                                         {match.compatibility}% compatible
                                                                     </Badge>
                                                                 </div>
@@ -182,7 +183,7 @@ export default function ChatPage() {
                                         <Card key={like.id}>
                                             <CardContent className="flex items-center gap-4 p-4">
                                                 <Link href={`/profile/${like.fromUserId || like.id}?source=new-match`} className="flex items-center gap-4 flex-1">
-                                                    <div className="relative h-14 w-14 rounded-full overflow-hidden flex-shrink-0 border-2 border-pink-100">
+                                                    <div className="relative h-14 w-14 rounded-full overflow-hidden flex-shrink-0 border-2 border-muted">
                                                         <Image
                                                             src={like.photoURL || '/placeholder.jpg'}
                                                             alt={like.displayName || 'Perfil'}

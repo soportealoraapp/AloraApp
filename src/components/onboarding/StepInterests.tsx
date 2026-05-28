@@ -47,7 +47,7 @@ export function StepInterests({ data, onUpdate, onNext, onPrev, userId }: any) {
     return (
         <div className="space-y-6 flex-1 flex flex-col">
             <div className="space-y-1 text-center">
-                <h2 className="text-2xl font-bold text-gray-900">¿Qué te hace vibrar?</h2>
+                <h2 className="text-2xl font-bold text-foreground">¿Qué te hace vibrar?</h2>
                 <p className="text-sm text-muted-foreground">
                     Elige hasta 10 cosas que te gusten — así encontramos personas afines
                 </p>

@@ -70,17 +70,17 @@ export function OnboardingWizard() {
         <div className="w-full min-h-dvh md:min-h-0 md:max-w-md md:mx-auto p-4 md:p-8 bg-background md:rounded-3xl md:shadow-xl md:border md:border-border/50 flex flex-col">
             <div className="mb-8">
                 <div className="flex items-center gap-2 mb-4">
-                    <Heart className="h-4 w-4 text-pink-400" />
-                    <span className="text-[10px] uppercase tracking-[0.2em] text-pink-400 font-bold">
+                    <Heart className="h-4 w-4 text-primary" />
+                    <span className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground font-bold">
                         {STEP_LABELS[step - 1]}
                     </span>
                 </div>
-                <Progress value={(step / totalSteps) * 100} className="h-1.5 bg-pink-100" />
+                <Progress value={(step / totalSteps) * 100} className="h-1.5" />
                 <div className="flex justify-between items-center mt-2">
-                    <p className="text-[10px] font-bold uppercase tracking-widest text-pink-500/60">
+                    <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
                         {STEP_WELCOME[step - 1]}
                     </p>
-                    <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">
+                    <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
                         {step} / {totalSteps}
                     </p>
                 </div>

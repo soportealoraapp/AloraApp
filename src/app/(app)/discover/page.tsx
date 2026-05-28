@@ -104,12 +104,12 @@ export default function DiscoverPage() {
   }
 
   return (
-    <div className="md:pl-60 h-screen flex flex-col overflow-hidden bg-gradient-to-br from-pink-50 to-white">
+    <div className="md:pl-60 h-screen flex flex-col overflow-hidden bg-gradient-to-br from-background to-muted/30">
       <header className="flex h-16 items-center justify-between px-4 z-10">
-        <h1 className="text-2xl font-black italic text-pink-500">Alora</h1>
+        <h1 className="text-2xl font-bold tracking-tight text-foreground">Alora</h1>
         <div className="flex items-center gap-2">
           <Button variant="ghost" size="icon" onClick={() => refresh()}>
-            <RefreshCcw className="h-5 w-5 text-gray-400" />
+            <RefreshCcw className="h-5 w-5 text-muted-foreground" />
           </Button>
         </div>
       </header>
@@ -140,12 +140,12 @@ export default function DiscoverPage() {
             </div>
           ) : (
             <div className="text-center px-8">
-              <div className="bg-pink-50 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6">
-                <Sparkles className="h-10 w-10 text-pink-300" />
+              <div className="bg-muted/50 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6">
+                <Sparkles className="h-10 w-10 text-muted-foreground" />
               </div>
-              <p className="text-xl font-bold text-gray-800 mb-2">{BRAND_VOICE.states.noMatches.title}</p>
-              <p className="text-gray-500 mb-8 max-w-xs mx-auto">{BRAND_VOICE.states.noMatches.subtitle}</p>
-              <Button onClick={() => refresh()} className="bg-gradient-to-r from-pink-500 to-rose-500 text-white px-8 py-6 rounded-2xl shadow-lg hover:shadow-xl transition-all">
+              <p className="text-xl font-bold text-foreground mb-2">{BRAND_VOICE.states.noMatches.title}</p>
+              <p className="text-muted-foreground mb-8 max-w-xs mx-auto">{BRAND_VOICE.states.noMatches.subtitle}</p>
+              <Button onClick={() => refresh()} className="px-8 py-6 rounded-2xl shadow-lg hover:shadow-xl transition-all">
                 Explorar de nuevo
               </Button>
             </div>

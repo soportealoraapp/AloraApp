@@ -101,29 +101,25 @@ export default function SettingsPage() {
                 </Card>
 
 
-                 <Card>
+                         <Card>
                     <CardHeader>
                         <CardTitle>Soporte y Legal</CardTitle>
                     </CardHeader>
                     <CardContent className="divide-y">
-                        <Link href="#">
-                            <div className="flex items-center justify-between p-3 rounded-lg hover:bg-secondary -mx-3">
-                                <div className="flex items-center gap-3">
-                                <HelpCircle className="w-5 h-5 text-muted-foreground" />
-                                <span>Ayuda y Soporte</span>
-                                </div>
-                                <ChevronRight className="w-5 h-5 text-muted-foreground" />
+                        <div className="flex items-center justify-between p-3 rounded-lg -mx-3 opacity-70">
+                            <div className="flex items-center gap-3">
+                            <HelpCircle className="w-5 h-5 text-muted-foreground" />
+                            <span>Ayuda y Soporte</span>
                             </div>
-                        </Link>
-                        <Link href="#">
-                            <div className="flex items-center justify-between p-3 rounded-lg hover:bg-secondary -mx-3">
-                                <div className="flex items-center gap-3">
-                                <FileText className="w-5 h-5 text-muted-foreground" />
-                                <span>Términos y Condiciones</span>
-                                </div>
-                                <ChevronRight className="w-5 h-5 text-muted-foreground" />
+                            <span className="text-[10px] text-muted-foreground uppercase tracking-wider">Próximamente</span>
+                        </div>
+                        <div className="flex items-center justify-between p-3 rounded-lg -mx-3 opacity-70">
+                            <div className="flex items-center gap-3">
+                            <FileText className="w-5 h-5 text-muted-foreground" />
+                            <span>Términos y Condiciones</span>
                             </div>
-                        </Link>
+                            <span className="text-[10px] text-muted-foreground uppercase tracking-wider">Próximamente</span>
+                        </div>
                     </CardContent>
                 </Card>
 
