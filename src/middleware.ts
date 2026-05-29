@@ -3,11 +3,9 @@ import { updateSession, createClient } from '@/lib/supabase/middleware';
 import { getCSP, SECURITY_HEADERS } from '@/lib/security';
 
 export async function middleware(request: NextRequest) {
-    const nonce = Buffer.from(crypto.randomUUID()).toString('base64');
-    const csp = getCSP(nonce);
+    const csp = getCSP();
 
     const requestHeaders = new Headers(request.headers);
-    requestHeaders.set('x-nonce', nonce);
     const modifiedRequest = new NextRequest(request, { headers: requestHeaders });
 
     const response = await updateSession(modifiedRequest);
