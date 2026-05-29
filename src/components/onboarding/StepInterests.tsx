@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { trackEvent } from "@/lib/tracking/client";
 import { motion } from "framer-motion";
-import { Sparkles } from "lucide-react";
+import { UserProfile } from "@/lib/domain/types";
 
 const INTEREST_CATEGORIES = [
     {
@@ -25,7 +25,15 @@ const INTEREST_CATEGORIES = [
     },
 ];
 
-export function StepInterests({ data, onUpdate, onNext, onPrev, userId }: any) {
+interface StepInterestsProps {
+    userId?: string;
+    data: Partial<UserProfile>;
+    onUpdate: (data: Partial<UserProfile>) => void;
+    onNext: () => void;
+    onPrev: () => void;
+}
+
+export function StepInterests({ data, onUpdate, onNext, onPrev, userId }: StepInterestsProps) {
     const [selected, setSelected] = useState<string[]>(data.interests || []);
 
     const toggleInterest = (interest: string) => {

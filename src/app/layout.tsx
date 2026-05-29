@@ -7,6 +7,7 @@ import { AuthProvider } from '@/contexts/AuthContext';
 import { AuthGate } from '@/components/auth/AuthGate';
 import { SafetyGuard } from '@/components/safety/SafetyGuard';
 import { OfflineBanner } from '@/components/offline/OfflineBanner';
+import { AgeGate } from '@/components/auth/AgeGate';
 
 import { headers } from 'next/headers';
 
@@ -34,6 +35,7 @@ export default async function RootLayout({
           disableTransitionOnChange
         >
           <AuthProvider>
+            <AgeGate />
             <AuthGate>
               <SafetyGuard>
                 <OfflineBanner />

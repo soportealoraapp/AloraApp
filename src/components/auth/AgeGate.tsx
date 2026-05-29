@@ -4,10 +4,36 @@ import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { ShieldAlert, Heart } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+
+const AGE_GATE_KEY = 'alora_age_gate';
+
+function getAgeGateAccepted(): boolean {
+    if (typeof window === 'undefined') return false;
+    try {
+        const stored = localStorage.getItem(AGE_GATE_KEY);
+        if (!stored) return false;
+        const { timestamp } = JSON.parse(stored);
+        return Date.now() - timestamp < 86400000; // 24h expiry
+    } catch {
+        return false;
+    }
+}
+
+function setAgeGateAccepted() {
+    try {
+        localStorage.setItem(AGE_GATE_KEY, JSON.stringify({ timestamp: Date.now() }));
+    } catch {}
+}
 
 export function AgeGate() {
+    const [accepted, setAccepted] = useState(getAgeGateAccepted);
     const [denied, setDenied] = useState(false);
+
+    const handleAccept = () => {
+        setAgeGateAccepted();
+        setAccepted(true);
+    };
 
     if (denied) {
         return (
@@ -28,6 +54,8 @@ export function AgeGate() {
         );
     }
 
+    if (accepted) return null;
+
     return (
         <div className="fixed inset-0 z-[100] bg-black/60 backdrop-blur-md flex items-center justify-center p-6">
             <motion.div
@@ -47,11 +75,7 @@ export function AgeGate() {
                     <div className="flex flex-col gap-3">
                         <Button
                             className="bg-gradient-to-r from-pink-500 to-rose-400 text-white rounded-full py-6 text-lg font-bold"
-                            onClick={() => {
-                                // In a real app, we'd persist this in local storage or session
-                                (window as any).hasAcceptedAgeGate = true;
-                                window.dispatchEvent(new Event('ageGateAccepted'));
-                            }}
+                            onClick={handleAccept}
                         >
                             Soy mayor de 18 años
                         </Button>

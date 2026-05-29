@@ -17,21 +17,29 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ error: 'Missing selfie URL' }, { status: 400 });
         }
 
-        // Store the verification submission
-        await prisma.report.create({
-            data: {
-                reporterId: user.id,
-                reportedId: user.id,
-                reason: 'verification_request',
-                details: JSON.stringify({
-                    type: 'verification',
+        const existing = await prisma.verificationSubmission.findUnique({
+            where: { userId: user.id }
+        });
+
+        if (existing) {
+            await prisma.verificationSubmission.update({
+                where: { userId: user.id },
+                data: {
                     selfieUrl,
                     status: 'pending',
-                    submittedAt: new Date().toISOString(),
-                }),
-                status: 'pending',
-            }
-        });
+                    reason: null,
+                    reviewedAt: null,
+                }
+            });
+        } else {
+            await prisma.verificationSubmission.create({
+                data: {
+                    userId: user.id,
+                    selfieUrl,
+                    status: 'pending',
+                }
+            });
+        }
 
         return NextResponse.json({
             status: 'pending',

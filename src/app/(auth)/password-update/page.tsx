@@ -8,7 +8,8 @@ import { Input } from '@/components/ui/input';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Lock, CheckCircle } from 'lucide-react';
+import { Lock, CheckCircle, Eye, EyeOff } from 'lucide-react';
+import { FormSkeleton } from '@/components/ui/skeleton';
 
 export default function PasswordUpdatePage() {
     const [password, setPassword] = useState('');
@@ -17,6 +18,8 @@ export default function PasswordUpdatePage() {
     const [error, setError] = useState<string | null>(null);
     const [success, setSuccess] = useState(false);
     const [checkingSession, setCheckingSession] = useState(true);
+    const [showPassword, setShowPassword] = useState(false);
+    const [showConfirm, setShowConfirm] = useState(false);
     const router = useRouter();
 
     useEffect(() => {
@@ -62,8 +65,8 @@ export default function PasswordUpdatePage() {
     if (checkingSession) {
         return (
             <Card className="w-full">
-                <CardContent className="py-8 text-center text-muted-foreground">
-                    Verificando sesión...
+                <CardContent className="py-8">
+                    <FormSkeleton />
                 </CardContent>
             </Card>
         );
@@ -103,30 +106,52 @@ export default function PasswordUpdatePage() {
                     <div className="space-y-2">
                         <Label htmlFor="password">Nueva contraseña</Label>
                         <div className="relative">
-                            <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                            <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                             <Input
                                 id="password"
-                                type="password"
+                                type={showPassword ? "text" : "password"}
                                 placeholder="Mínimo 6 caracteres"
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
-                                className="pl-10"
+                                className="pl-10 pr-10"
                                 minLength={6}
                                 required
                             />
+                            <button
+                                type="button"
+                                onClick={() => setShowPassword(!showPassword)}
+                                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                                tabIndex={-1}
+                                aria-label={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
+                            >
+                                {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                            </button>
                         </div>
                     </div>
                     <div className="space-y-2">
                         <Label htmlFor="confirmPassword">Confirmar contraseña</Label>
-                        <Input
-                            id="confirmPassword"
-                            type="password"
-                            placeholder="Repite la contraseña"
-                            value={confirmPassword}
-                            onChange={(e) => setConfirmPassword(e.target.value)}
-                            minLength={6}
-                            required
-                        />
+                        <div className="relative">
+                            <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                            <Input
+                                id="confirmPassword"
+                                type={showConfirm ? "text" : "password"}
+                                placeholder="Repite la contraseña"
+                                value={confirmPassword}
+                                onChange={(e) => setConfirmPassword(e.target.value)}
+                                className="pl-10 pr-10"
+                                minLength={6}
+                                required
+                            />
+                            <button
+                                type="button"
+                                onClick={() => setShowConfirm(!showConfirm)}
+                                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                                tabIndex={-1}
+                                aria-label={showConfirm ? "Ocultar contraseña" : "Mostrar contraseña"}
+                            >
+                                {showConfirm ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                            </button>
+                        </div>
                     </div>
                 </CardContent>
                 <CardFooter>

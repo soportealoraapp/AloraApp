@@ -9,6 +9,7 @@ import { useState, useEffect, useMemo } from "react";
 import { trackEvent } from "@/lib/tracking/client";
 import { Sparkles } from "lucide-react";
 import { motion } from "framer-motion";
+import { UserProfile } from "@/lib/domain/types";
 
 const BIO_EXAMPLES = [
     "Una amante del café y los atardeceres...",
@@ -16,19 +17,25 @@ const BIO_EXAMPLES = [
     "Soy de esas personas que se pierden en librerías",
 ];
 
-export function StepBasicInfo({ data, onUpdate, onNext, userId }: any) {
-    const [localData, setLocalData] = useState(data);
+interface StepBasicInfoProps {
+    userId?: string;
+    data: Partial<UserProfile>;
+    onUpdate: (data: Partial<UserProfile>) => void;
+    onNext: () => void;
+}
+
+export function StepBasicInfo({ data, onUpdate, onNext, userId }: StepBasicInfoProps) {
+    const [localData, setLocalData] = useState<Partial<UserProfile>>(data);
     const [bioExample] = useState(BIO_EXAMPLES[Math.floor(Math.random() * BIO_EXAMPLES.length)]);
 
-    // Sync from parent data when it loads (e.g. profile fetched) but don't overwrite user input
     useEffect(() => {
         if (data && Object.keys(data).length > 0 && Object.keys(localData).length === 0) {
             setLocalData(data);
         }
-    }, [data]);
+    }, [data, localData]);
 
-    const handleChange = (field: string, value: any) => {
-        setLocalData((prev: any) => ({ ...prev, [field]: value }));
+    const handleChange = (field: keyof UserProfile, value: unknown) => {
+        setLocalData((prev) => ({ ...prev, [field]: value }));
     };
 
     const handleNext = () => {
