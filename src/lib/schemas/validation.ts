@@ -15,7 +15,7 @@ const MAX_AGE = 120;
 export const EditableProfileSchema = z.object({
     displayName: z.string().min(1, 'Display name is required').max(MAX_DISPLAY_NAME_LENGTH).trim(),
     bio: z.string().max(MAX_BIO_LENGTH, `Bio must be ${MAX_BIO_LENGTH} characters or less`).trim().optional().default(''),
-    age: z.number().int().min(MIN_AGE, `Must be at least ${MIN_AGE}`).max(MAX_AGE, `Must be at most ${MAX_AGE}`),
+    age: z.number().int().min(MIN_AGE, `Must be at least ${MIN_AGE}`).max(MAX_AGE, `Must be at most ${MAX_AGE}`).optional(),
     gender: z.string().min(1).optional(),
     photos: z.array(z.string().url('Each photo must be a valid URL')).max(MAX_PHOTOS, `Maximum ${MAX_PHOTOS} photos`).optional().default([]),
     interests: z.array(z.string()).max(MAX_INTERESTS).optional().default([]),
