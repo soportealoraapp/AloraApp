@@ -19,8 +19,6 @@ export function AuthGate({ children }: { children: React.ReactNode }) {
 
         if (!user && !isPublicRoute) {
             router.replace('/login');
-        } else if (user && !profile && !isPublicRoute) {
-            router.replace('/signup');
         } else if (user && profile && (pathname === '/login' || pathname === '/signup' || pathname === '/onboarding')) {
             router.replace('/discover');
         }
@@ -42,7 +40,6 @@ export function AuthGate({ children }: { children: React.ReactNode }) {
 
     const isPublicRoute = PUBLIC_ROUTES.includes(pathname);
     if (!user && !isPublicRoute) return null;
-    if (user && !profile && !isPublicRoute) return null;
 
     return <>{children}</>;
 }

@@ -16,27 +16,37 @@ interface VerificationUploadProps {
 
 function compressImage(file: File, maxWidth = 720, quality = 0.8): Promise<Blob> {
     return new Promise((resolve, reject) => {
-        const img = new Image();
-        img.onload = () => {
-            const canvas = document.createElement('canvas');
-            let width = img.width;
-            let height = img.height;
-            if (width > maxWidth) {
-                height = (height * maxWidth) / width;
-                width = maxWidth;
-            }
-            canvas.width = width;
-            canvas.height = height;
-            const ctx = canvas.getContext('2d');
-            if (!ctx) { reject(new Error('Could not get canvas context')); return; }
-            ctx.drawImage(img, 0, 0, width, height);
-            canvas.toBlob((blob) => {
-                if (blob) resolve(blob);
-                else reject(new Error('Compression failed'));
-            }, 'image/jpeg', quality);
+        const reader = new FileReader();
+        reader.onerror = () => reject(new Error('Failed to read file'));
+        reader.onload = () => {
+            const img = new Image();
+            img.onerror = () => reject(new Error('Failed to load image'));
+            img.onload = () => {
+                const canvas = document.createElement('canvas');
+                let width = img.width;
+                let height = img.height;
+                if (width > maxWidth) {
+                    height = (height * maxWidth) / width;
+                    width = maxWidth;
+                }
+                canvas.width = width;
+                canvas.height = height;
+                const ctx = canvas.getContext('2d');
+                if (!ctx) { reject(new Error('Could not get canvas context')); return; }
+                ctx.drawImage(img, 0, 0, width, height);
+                canvas.toBlob((blob) => {
+                    if (blob) resolve(blob);
+                    else {
+                        canvas.toBlob((b) => {
+                            if (b) resolve(b);
+                            else reject(new Error('Compression failed'));
+                        }, 'image/png');
+                    }
+                }, 'image/jpeg', quality);
+            };
+            img.src = reader.result as string;
         };
-        img.onerror = () => reject(new Error('Failed to load image'));
-        img.src = URL.createObjectURL(file);
+        reader.readAsDataURL(file);
     });
 }
 

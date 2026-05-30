@@ -7,8 +7,8 @@ export const profileService = {
         const { data, error } = await supabase
             .from('profiles')
             .select('*')
-            .eq('id', userId)
-            .single()
+            .eq('userId', userId)
+            .maybeSingle()
 
         if (error) {
             console.error('Error fetching profile:', error)
@@ -23,6 +23,6 @@ export const profileService = {
         await supabase
             .from('profiles')
             .update({ last_active_at: new Date().toISOString() })
-            .eq('id', userId)
+            .eq('userId', userId)
     }
 }
