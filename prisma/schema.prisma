@@ -72,6 +72,7 @@ model User {
   quizResults             QuizResult[]
   profileVisitsGiven      ProfileVisit[] @relation("ProfileVisitVisitor")
   profileVisitsReceived   ProfileVisit[] @relation("ProfileVisitVisited")
+  waitlistEntries         WaitlistEntry[]
 
   @@map("users")
 }
@@ -509,6 +510,21 @@ model ProfileVisit {
   @@index([visitorId, createdAt])
   @@index([visitedId, createdAt])
   @@map("profile_visits")
+}
+
+model WaitlistEntry {
+  id          String    @id @default(uuid())
+  userId      String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  region      String
+  status      String    @default("waiting") // waiting, approved, expired
+  priority    Int       @default(0)
+  createdAt   DateTime  @default(now())
+  processedAt DateTime?
+
+  @@unique([userId, region])
+  @@index([region, status])
+  @@map("waitlist_entries")
 }
 
 model AnalyticsEvent {

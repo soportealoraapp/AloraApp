@@ -1,0 +1,207 @@
+'use client';
+
+import { useEffect, useState } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Loader2, Users, MessageCircle, Heart, AlertTriangle, TrendingUp, Shield, MapPin } from 'lucide-react';
+import { SectionTitle } from '@/components/ui/custom/SectionTitle';
+
+interface CommandCenterData {
+    marketplace: any;
+    retention: any;
+    activation: any;
+    alerts: any[];
+}
+
+export default function MarketplaceCommandPage() {
+    const [data, setData] = useState<CommandCenterData | null>(null);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        Promise.all([
+            fetch('/api/admin/marketplace-health').then(r => r.json()),
+            fetch('/api/admin/female-retention').then(r => r.json()),
+            fetch('/api/admin/activation-funnel').then(r => r.json()),
+        ]).then(([marketplace, retention, activation]) => {
+            setData({
+                marketplace,
+                retention,
+                activation,
+                alerts: [],
+            });
+            setLoading(false);
+        }).catch(() => setLoading(false));
+    }, []);
+
+    if (loading) {
+        return <div className="md:pl-60 p-6 flex items-center justify-center"><Loader2 className="h-8 w-8 animate-spin" /></div>;
+    }
+
+    if (!data) {
+        return <div className="md:pl-60 p-6">No se pudieron cargar los datos</div>;
+    }
+
+    const { marketplace, retention } = data;
+
+    return (
+        <div className="md:pl-60 p-6 space-y-6">
+            <SectionTitle title="Marketplace Command Center" subtitle="Vista unificada del estado del marketplace" />
+
+            {/* Health Status */}
+            <Card className={`${marketplace.genderAlert === 'healthy' ? 'border-green-200 bg-green-50' : marketplace.genderAlert === 'moderate_imbalance' ? 'border-yellow-200 bg-yellow-50' : 'border-red-200 bg-red-50'}`}>
+                <CardContent className="p-4">
+                    <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                            <Shield className="h-6 w-6" />
+                            <div>
+                                <h3 className="font-bold">Estado del Marketplace</h3>
+                                <p className="text-sm">
+                                    {marketplace.genderAlert === 'healthy' ? 'La comunidad está sana' :
+                                     marketplace.genderAlert === 'moderate_imbalance' ? 'Desequilibrio moderado detectado' :
+                                     'Desequilibrio crítico — acción requerida'}
+                                </p>
+                            </div>
+                        </div>
+                        <Badge className={
+                            marketplace.genderAlert === 'healthy' ? 'bg-green-100 text-green-700' :
+                            marketplace.genderAlert === 'moderate_imbalance' ? 'bg-yellow-100 text-yellow-700' :
+                            'bg-red-100 text-red-700'
+                        }>
+                            {marketplace.genderRatio}:1
+                        </Badge>
+                    </div>
+                </CardContent>
+            </Card>
+
+            {/* Key Metrics */}
+            <div className="grid gap-4 md:grid-cols-4">
+                <Card>
+                    <CardHeader className="pb-2">
+                        <CardTitle className="text-sm flex items-center gap-2">
+                            <Users className="h-4 w-4 text-blue-500" /> Hombres
+                        </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <p className="text-2xl font-bold">{marketplace.maleUsers}</p>
+                        <p className="text-xs text-muted-foreground">{marketplace.activeUsers} activos</p>
+                    </CardContent>
+                </Card>
+                <Card>
+                    <CardHeader className="pb-2">
+                        <CardTitle className="text-sm flex items-center gap-2">
+                            <Users className="h-4 w-4 text-pink-500" /> Mujeres
+                        </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <p className="text-2xl font-bold">{marketplace.femaleUsers}</p>
+                        <p className="text-xs text-muted-foreground">{retention.activeFemaleD7} activas D7</p>
+                    </CardContent>
+                </Card>
+                <Card>
+                    <CardHeader className="pb-2">
+                        <CardTitle className="text-sm flex items-center gap-2">
+                            <MessageCircle className="h-4 w-4 text-green-500" /> Conversaciones
+                        </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <p className="text-2xl font-bold">{marketplace.conversationRate}%</p>
+                        <p className="text-xs text-muted-foreground">tasa de conversación</p>
+                    </CardContent>
+                </Card>
+                <Card>
+                    <CardHeader className="pb-2">
+                        <CardTitle className="text-sm flex items-center gap-2">
+                            <Heart className="h-4 w-4 text-red-500" /> Respuesta
+                        </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <p className="text-2xl font-bold">{marketplace.responseRate}%</p>
+                        <p className="text-xs text-muted-foreground">tasa de respuesta</p>
+                    </CardContent>
+                </Card>
+            </div>
+
+            {/* Retention Comparison */}
+            <div className="grid gap-4 md:grid-cols-2">
+                <Card>
+                    <CardHeader>
+                        <CardTitle className="text-sm">Retención Femenina vs Masculina</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <div className="space-y-3">
+                            <div className="flex justify-between items-center">
+                                <span className="text-sm">D1 Mujeres</span>
+                                <span className="font-bold">{retention.retentionD1}%</span>
+                            </div>
+                            <div className="flex justify-between items-center">
+                                <span className="text-sm">D1 Hombres</span>
+                                <span className="font-bold">{retention.vsMale.d1}%</span>
+                            </div>
+                            <div className="flex justify-between items-center">
+                                <span className="text-sm">D7 Mujeres</span>
+                                <span className="font-bold">{retention.retentionD7}%</span>
+                            </div>
+                            <div className="flex justify-between items-center">
+                                <span className="text-sm">D7 Hombres</span>
+                                <span className="font-bold">{retention.vsMale.d7}%</span>
+                            </div>
+                            <div className="flex justify-between items-center">
+                                <span className="text-sm">D30 Mujeres</span>
+                                <span className="font-bold">{retention.retentionD30}%</span>
+                            </div>
+                            <div className="flex justify-between items-center">
+                                <span className="text-sm">D30 Hombres</span>
+                                <span className="font-bold">{retention.vsMale.d30}%</span>
+                            </div>
+                        </div>
+                    </CardContent>
+                </Card>
+
+                <Card>
+                    <CardHeader>
+                        <CardTitle className="text-sm">Verificación</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <div className="space-y-3">
+                            <div className="flex justify-between items-center">
+                                <span className="text-sm">Mujeres verificadas</span>
+                                <span className="font-bold">{retention.verificationRate}%</span>
+                            </div>
+                            <div className="flex justify-between items-center">
+                                <span className="text-sm">Usuarios premium</span>
+                                <span className="font-bold">{marketplace.premiumUsers}</span>
+                            </div>
+                            <div className="flex justify-between items-center">
+                                <span className="text-sm">Ghosting rate</span>
+                                <span className="font-bold">{marketplace.ghostingRate}%</span>
+                            </div>
+                        </div>
+                    </CardContent>
+                </Card>
+            </div>
+
+            {/* Alerts */}
+            {data.alerts.length > 0 && (
+                <Card className="border-red-200">
+                    <CardHeader>
+                        <CardTitle className="text-sm flex items-center gap-2 text-red-600">
+                            <AlertTriangle className="h-4 w-4" /> Alertas Activas
+                        </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <ul className="space-y-2">
+                            {data.alerts.map((alert: any, i: number) => (
+                                <li key={i} className="text-sm flex items-start gap-2">
+                                    <Badge variant={alert.severity === 'high' ? 'destructive' : 'outline'}>
+                                        {alert.severity}
+                                    </Badge>
+                                    {alert.message}
+                                </li>
+                            ))}
+                        </ul>
+                    </CardContent>
+                </Card>
+            )}
+        </div>
+    );
+}
