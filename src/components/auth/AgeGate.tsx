@@ -14,7 +14,7 @@ function getAgeGateAccepted(): boolean {
         const stored = localStorage.getItem(AGE_GATE_KEY);
         if (!stored) return false;
         const { timestamp } = JSON.parse(stored);
-        return Date.now() - timestamp < 86400000; // 24h expiry
+        return Date.now() - timestamp < 86400000;
     } catch {
         return false;
     }
@@ -27,8 +27,14 @@ function setAgeGateAccepted() {
 }
 
 export function AgeGate() {
-    const [accepted, setAccepted] = useState(getAgeGateAccepted);
+    const [accepted, setAccepted] = useState(false);
     const [denied, setDenied] = useState(false);
+    const [mounted, setMounted] = useState(false);
+
+    useEffect(() => {
+        setMounted(true);
+        setAccepted(getAgeGateAccepted());
+    }, []);
 
     const handleAccept = () => {
         setAgeGateAccepted();
@@ -37,6 +43,8 @@ export function AgeGate() {
             window.dispatchEvent(new Event('ageGateAccepted'));
         }
     };
+
+    if (!mounted || accepted) return null;
 
     if (denied) {
         return (
@@ -56,8 +64,6 @@ export function AgeGate() {
             </div>
         );
     }
-
-    if (accepted) return null;
 
     return (
         <div className="fixed inset-0 z-[100] bg-black/60 backdrop-blur-md flex items-center justify-center p-6">

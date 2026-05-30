@@ -1,18 +1,18 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { AgeGate } from '@/components/auth/AgeGate';
 import { LegalConsent } from '@/components/legal/LegalConsent';
 import { useAuth } from '@/contexts/AuthContext';
+
+const AGE_GATE_KEY = 'alora_age_gate';
 
 export function SafetyGuard({ children }: { children: React.ReactNode }) {
     const { user, profile } = useAuth();
     const [ageGateAccepted, setAgeGateAccepted] = useState(false);
+    const [mounted, setMounted] = useState(false);
 
     useEffect(() => {
-        if (typeof window === 'undefined') return;
-
-        const AGE_GATE_KEY = 'alora_age_gate';
+        setMounted(true);
 
         const checkAgeGate = () => {
             try {
@@ -28,17 +28,12 @@ export function SafetyGuard({ children }: { children: React.ReactNode }) {
 
         checkAgeGate();
 
-        const handleAccepted = () => checkAgeGate();
-        window.addEventListener('ageGateAccepted', handleAccepted);
-        return () => window.removeEventListener('ageGateAccepted', handleAccepted);
+        window.addEventListener('ageGateAccepted', checkAgeGate);
+        return () => window.removeEventListener('ageGateAccepted', checkAgeGate);
     }, []);
 
-    // 1. Age Gate (Mandatory before anything)
-    if (!ageGateAccepted) {
-        return <AgeGate />;
-    }
+    if (!mounted || !ageGateAccepted) return null;
 
-    // 2. Wrap everything with Legal Consent (Displays conditionally)
     return (
         <>
             {children}
