@@ -198,11 +198,11 @@ export async function getDynamicFeed(
         const nextCursor = hasMore ? results[results.length - 1]?.userId ?? null : null;
 
         // Calculate response rates for all candidates in batch
-        const candidateIds = results.map(c => c.userId);
-        const recentMessages = candidateIds.length > 0 ? await prisma.message.groupBy({
+        const resultCandidateIds = results.map(c => c.userId);
+        const recentMessages = resultCandidateIds.length > 0 ? await prisma.message.groupBy({
             by: ['senderId'],
             where: {
-                senderId: { in: candidateIds },
+                senderId: { in: resultCandidateIds },
                 createdAt: { gte: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000) },
             },
             _count: true,
@@ -211,7 +211,7 @@ export async function getDynamicFeed(
         // Build a map of total messages sent per candidate
         const messagesSentMap = new Map<string, number>();
         for (const m of recentMessages) {
-            if (candidateIds.includes(m.senderId)) {
+            if (resultCandidateIds.includes(m.senderId)) {
                 messagesSentMap.set(m.senderId, (messagesSentMap.get(m.senderId) || 0) + (m._count || 0));
             }
         }
