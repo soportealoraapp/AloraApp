@@ -48,7 +48,7 @@ export default function ChatWindowPage() {
     const otherUserId = match?.users.find((id) => id !== user?.id);
     const partner = match?.partner;
     const partnerName = partner?.displayName || `Usuario #${otherUserId?.slice(0, 8)}`;
-    const partnerPhoto = partner?.photoURL || '/placeholder.jpg';
+    const partnerPhoto = partner?.photoURL || '/placeholder.svg';
 
     // Auto-scroll to bottom on new messages (if user is near bottom)
     useEffect(() => {

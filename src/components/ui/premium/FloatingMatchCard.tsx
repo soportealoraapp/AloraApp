@@ -54,7 +54,7 @@ export function FloatingMatchCard({ profile, onSwipe, compatibility }: FloatingM
         >
             <SoftCard className="h-[600px] overflow-hidden relative border-none shadow-xl rounded-[2.5rem] bg-card">
                 <Image
-                    src={profile.photos?.[0] || '/placeholder.jpg'}
+                    src={profile.photos?.[0] || '/placeholder.svg'}
                     alt={profile.displayName}
                     fill
                     className="object-cover pointer-events-none"

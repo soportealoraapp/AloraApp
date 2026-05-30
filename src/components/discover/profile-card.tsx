@@ -65,7 +65,7 @@ export function ProfileCard({ profile, compatibility, onRefresh }: ProfileCardPr
       <Link href={`/profile/${profile.id}`}>
         <div className="relative aspect-[3/4]">
           <Image
-            src={profile.photos?.[0] || '/placeholder.jpg'}
+            src={profile.photos?.[0] || '/placeholder.svg'}
             alt={profile.displayName}
             fill
             className="object-cover"

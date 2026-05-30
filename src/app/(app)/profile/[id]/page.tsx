@@ -71,7 +71,7 @@ export default function UserProfilePage() {
         );
     }
 
-    const mainPhoto = profile.photos?.[0] || "/placeholder.jpg";
+    const mainPhoto = profile.photos?.[0] || "/placeholder.svg";
     const photoGallery = profile.photos?.slice(1) || [];
 
     const details = [

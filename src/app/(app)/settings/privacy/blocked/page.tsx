@@ -53,7 +53,7 @@ export default function BlockedUsersPage() {
                             <CardContent className="flex items-center gap-4 p-4">
                                 <div className="relative h-14 w-14 rounded-full overflow-hidden flex-shrink-0">
                                     <Image
-                                        src="/placeholder.jpg"
+                                        src="/placeholder.svg"
                                         alt="Profile"
                                         fill
                                         className="object-cover"

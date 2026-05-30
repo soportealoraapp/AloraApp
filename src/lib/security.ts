@@ -34,7 +34,7 @@ export function getCSP(): string {
         `style-src 'self' 'unsafe-inline' https://fonts.googleapis.com`,
         `img-src 'self' blob: data: https://*.uploadthing.com https://*.supabase.co https://lh3.googleusercontent.com https://placehold.co https://picsum.photos`,
         `font-src 'self' data: https://fonts.gstatic.com`,
-        `connect-src 'self' https://*.supabase.co wss://*.supabase.co https://uploadthing.com https://securetoken.googleapis.com`,
+        `connect-src 'self' https://*.supabase.co wss://*.supabase.co https://*.uploadthing.com https://uploadthing.com https://utfs.io https://securetoken.googleapis.com`,
         `media-src 'self' blob:`,
         `frame-src 'none'`,
         `object-src 'none'`,

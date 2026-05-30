@@ -129,7 +129,7 @@ export default function ChatPage() {
                                     {filteredMatches.map((match, idx) => {
                                         const otherUserId = match.users.find(id => id !== user?.id);
                                         const partnerName = match.partner?.displayName || `Usuario #${otherUserId?.slice(0, 8)}`;
-                                        const partnerPhoto = match.partner?.photoURL || '/placeholder.jpg';
+                                        const partnerPhoto = match.partner?.photoURL || '/placeholder.svg';
                                         return (
                                             <motion.div
                                                 key={match.id}
@@ -185,7 +185,7 @@ export default function ChatPage() {
                                                 <Link href={`/profile/${like.fromUserId || like.id}?source=new-match`} className="flex items-center gap-4 flex-1">
                                                     <div className="relative h-14 w-14 rounded-full overflow-hidden flex-shrink-0 border-2 border-muted">
                                                         <Image
-                                                            src={like.photoURL || '/placeholder.jpg'}
+                                                            src={like.photoURL || '/placeholder.svg'}
                                                             alt={like.displayName || 'Perfil'}
                                                             fill
                                                             className="object-cover"

@@ -111,7 +111,7 @@ export function LikesReceivedList() {
                                 <Card className="rounded-3xl overflow-hidden hover:shadow-xl transition-all cursor-pointer group border-none shadow-sm active:scale-[0.98]">
                                     <div className="aspect-[4/5] relative">
                                         <Image
-                                            src={liker.photos?.[0] || '/placeholder.jpg'}
+                                            src={liker.photos?.[0] || '/placeholder.svg'}
                                             alt={liker.displayName}
                                             fill
                                             className="object-cover transition-transform duration-700 group-hover:scale-110"

@@ -83,7 +83,7 @@ export default function ProfilePage() {
       <main className="pb-24 md:pb-4">
         <div className="w-full relative">
           <Image
-            src={profile.photos?.[0] || '/placeholder.jpg'}
+            src={profile.photos?.[0] || '/placeholder.svg'}
             alt={profile.displayName}
             width={600}
             height={800}
