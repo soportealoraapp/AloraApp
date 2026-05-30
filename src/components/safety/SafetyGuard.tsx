@@ -10,14 +10,27 @@ export function SafetyGuard({ children }: { children: React.ReactNode }) {
     const [ageGateAccepted, setAgeGateAccepted] = useState(false);
 
     useEffect(() => {
-        // Check local session state for age gate
-        if (typeof window !== 'undefined') {
-            setAgeGateAccepted(!!(window as any).hasAcceptedAgeGate);
+        if (typeof window === 'undefined') return;
 
-            const handleAccepted = () => setAgeGateAccepted(true);
-            window.addEventListener('ageGateAccepted', handleAccepted);
-            return () => window.removeEventListener('ageGateAccepted', handleAccepted);
-        }
+        const AGE_GATE_KEY = 'alora_age_gate';
+
+        const checkAgeGate = () => {
+            try {
+                const stored = localStorage.getItem(AGE_GATE_KEY);
+                if (stored) {
+                    const { timestamp } = JSON.parse(stored);
+                    setAgeGateAccepted(Date.now() - timestamp < 86400000);
+                    return;
+                }
+            } catch {}
+            setAgeGateAccepted(false);
+        };
+
+        checkAgeGate();
+
+        const handleAccepted = () => checkAgeGate();
+        window.addEventListener('ageGateAccepted', handleAccepted);
+        return () => window.removeEventListener('ageGateAccepted', handleAccepted);
     }, []);
 
     // 1. Age Gate (Mandatory before anything)

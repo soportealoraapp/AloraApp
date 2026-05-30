@@ -33,6 +33,9 @@ export function AgeGate() {
     const handleAccept = () => {
         setAgeGateAccepted();
         setAccepted(true);
+        if (typeof window !== 'undefined') {
+            window.dispatchEvent(new Event('ageGateAccepted'));
+        }
     };
 
     if (denied) {
