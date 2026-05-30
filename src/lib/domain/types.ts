@@ -34,6 +34,16 @@ export interface UserProfile extends User {
     musicGenres?: string[];
     status?: string;
 
+    // Location (structured)
+    cityId?: string;
+    countryCode?: string;
+    stateCode?: string;
+    latitude?: number;
+    longitude?: number;
+
+    // Relationship goals
+    lookingFor?: string;
+
     // Status
     subscriptionStatus?: 'free' | 'plus' | 'premium';
     verificationStatus?: 'verified' | 'unverified'; // UI helper

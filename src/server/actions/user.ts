@@ -48,6 +48,12 @@ export const getUserProfile = unstable_cache(
                 religion: profile.religion || '',
                 musicGenres: profile.musicGenres || [],
                 status: profile.status || '',
+                cityId: (profile as any).cityId || '',
+                countryCode: (profile as any).countryCode || '',
+                stateCode: (profile as any).stateCode || '',
+                latitude: (profile as any).latitude || null,
+                longitude: (profile as any).longitude || null,
+                lookingFor: (profile as any).lookingFor || '',
 
                 subscriptionStatus: profile.subscriptionStatus as any,
                 trustStatus: profile.trustStatus as any

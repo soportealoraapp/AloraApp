@@ -15,6 +15,8 @@ import { ArrowLeft, Upload, X, Loader2, GripVertical } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import Image from "next/image";
 import { Skeleton } from "@/components/ui/skeleton";
+import { CityAutocomplete } from "@/components/ui/city-autocomplete";
+import type { LocationResult } from "@/lib/location";
 
 const lifestyleOptions = {
     smoking: ["No fumo", "Ocasionalmente", "Sí, fumo"],
@@ -51,6 +53,12 @@ export default function ProfileEditPage() {
     const [interests, setInterests] = useState<string[]>([]);
     const [values, setValues] = useState<string[]>([]);
     const [musicGenres, setMusicGenres] = useState<string[]>([]);
+    const [cityId, setCityId] = useState("");
+    const [countryCode, setCountryCode] = useState("");
+    const [stateCode, setStateCode] = useState("");
+    const [latitude, setLatitude] = useState<number | null>(null);
+    const [longitude, setLongitude] = useState<number | null>(null);
+    const [lookingFor, setLookingFor] = useState("");
 
     useEffect(() => {
         if (currentProfile) {
@@ -68,6 +76,12 @@ export default function ProfileEditPage() {
             setInterests(currentProfile.interests || []);
             setValues(currentProfile.values || []);
             setMusicGenres(currentProfile.musicGenres || []);
+            setCityId((currentProfile as any).cityId || "");
+            setCountryCode((currentProfile as any).countryCode || "");
+            setStateCode((currentProfile as any).stateCode || "");
+            setLatitude((currentProfile as any).latitude || null);
+            setLongitude((currentProfile as any).longitude || null);
+            setLookingFor((currentProfile as any).lookingFor || "");
         }
     }, [currentProfile]);
 
@@ -170,6 +184,12 @@ export default function ProfileEditPage() {
                 interests,
                 values,
                 musicGenres,
+                cityId,
+                countryCode,
+                stateCode,
+                latitude,
+                longitude,
+                lookingFor,
             });
 
             await refreshProfile();
@@ -301,12 +321,33 @@ export default function ProfileEditPage() {
 
                         <div className="space-y-2">
                             <Label htmlFor="city">Ciudad</Label>
-                            <Input
-                                id="city"
+                            <CityAutocomplete
                                 value={city}
-                                onChange={(e) => setCity(e.target.value)}
-                                placeholder="Madrid, España"
+                                onSelect={(location: LocationResult) => {
+                                    setCity(location.city.name);
+                                    setCityId(location.city.id);
+                                    setCountryCode(location.country.code);
+                                    setStateCode(location.city.stateCode);
+                                    setLatitude(location.city.lat);
+                                    setLongitude(location.city.lng);
+                                }}
+                                placeholder="Buscar tu ciudad..."
                             />
+                        </div>
+
+                        <div className="space-y-2">
+                            <Label htmlFor="lookingFor">¿Qué buscas?</Label>
+                            <Select value={lookingFor} onValueChange={setLookingFor}>
+                                <SelectTrigger>
+                                    <SelectValue placeholder="Selecciona..." />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="serious">Algo serio</SelectItem>
+                                    <SelectItem value="casual">Algo casual</SelectItem>
+                                    <SelectItem value="friendship">Amistad</SelectItem>
+                                    <SelectItem value="open">Abierto a ver qué pasa</SelectItem>
+                                </SelectContent>
+                            </Select>
                         </div>
 
                         <div className="space-y-2">

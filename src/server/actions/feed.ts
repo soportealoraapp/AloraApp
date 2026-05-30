@@ -4,6 +4,7 @@ import { prisma } from '@/lib/prisma';
 import { UserProfile } from '@/lib/domain/types';
 import { getCompatibilityScore } from './compatibility/getCompatibilityScore';
 import { calculateCompleteness } from '@/lib/utils/completeness';
+import { getDistance } from '@/lib/location';
 
 export interface FeedItem {
     profile: UserProfile;
@@ -39,6 +40,9 @@ export interface FeedFilters {
     education?: string;
     religion?: string;
     musicGenres?: string[];
+    distance?: number; // km
+    userLat?: number;
+    userLng?: number;
 }
 
 export async function getDynamicFeed(
@@ -144,6 +148,34 @@ export async function getDynamicFeed(
             dynamicFilters.religion = filters.religion;
         }
 
+        // Distance filtering (using Haversine via Prisma raw query if coordinates available)
+        let candidateIds: string[] | null = null;
+        if (filters?.distance && filters?.userLat && filters?.userLng) {
+            // Get all profiles with coordinates and filter by distance in-memory
+            const allWithCoords = await prisma.profile.findMany({
+                where: {
+                    latitude: { not: null },
+                    longitude: { not: null },
+                    userId: { notIn: Array.from(excludedIds) },
+                    trustStatus: { not: 'banned' },
+                    incognitoMode: false,
+                    showMeInDiscover: true,
+                },
+                select: { userId: true, latitude: true, longitude: true }
+            });
+
+            candidateIds = allWithCoords
+                .filter(p => {
+                    const dist = getDistance(filters.userLat!, filters.userLng!, p.latitude!, p.longitude!);
+                    return dist <= filters.distance!;
+                })
+                .map(p => p.userId);
+
+            if (candidateIds.length === 0) {
+                return { items: [], nextCursor: null, hasMore: false };
+            }
+        }
+
         const candidates = await prisma.profile.findMany({
             where: {
                 userId: { notIn: Array.from(excludedIds) },
@@ -153,6 +185,7 @@ export async function getDynamicFeed(
                 ...genderFilter,
                 ...searchFilter,
                 ...dynamicFilters,
+                ...(candidateIds ? { userId: { in: candidateIds } } : {}),
                 ...(cursor ? { userId: { gt: cursor } } : {}),
             },
             take: limit + 1,

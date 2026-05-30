@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { recordProfileVisit } from '@/server/services/visit-tracker';
 
 // GET /api/profile/[userId]
 export async function GET(
@@ -26,8 +27,14 @@ export async function GET(
             return NextResponse.json({ error: 'Profile not found' }, { status: 404 });
         }
 
-        // Hide private fields if needed, but for now return full profile
-        return NextResponse.json(profile);
+        // Record visit (async, don't block response)
+        recordProfileVisit(user.id, targetUserId).catch(err => {
+            console.error('Error recording visit:', err);
+        });
+
+        // Hide private fields
+        const { incognitoMode, showMeInDiscover, ...safeProfile } = profile as any;
+        return NextResponse.json(safeProfile);
     } catch (error) {
         console.error('Error getting profile:', error);
         return NextResponse.json({ error: 'Internal server error' }, { status: 500 });

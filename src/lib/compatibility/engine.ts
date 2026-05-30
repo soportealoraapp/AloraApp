@@ -1,0 +1,277 @@
+import { prisma } from '@/lib/prisma';
+import { scoreRelationshipGoals } from './scores';
+import { generateExplanations } from './explanations';
+
+export interface CompatibilityResult {
+    totalScore: number;
+    dimensions: {
+        values: number;
+        relationshipGoals: number;
+        personality: number;
+        quizzes: number;
+        interests: number;
+        lifestyle: number;
+    };
+    explanations: string[];
+}
+
+/**
+ * Jaccard similarity between two string arrays.
+ */
+function jaccardSimilarity(a: string[], b: string[]): number {
+    if (a.length === 0 && b.length === 0) return 0;
+    const setA = new Set(a.map(s => s.toLowerCase()));
+    const setB = new Set(b.map(s => s.toLowerCase()));
+    const intersection = [...setA].filter(x => setB.has(x)).length;
+    const union = new Set([...setA, ...setB]).size;
+    return union > 0 ? (intersection / union) * 100 : 0;
+}
+
+/**
+ * Score values compatibility (30% weight).
+ */
+function scoreValues(valuesA: string[], valuesB: string[]): number {
+    return jaccardSimilarity(valuesA, valuesB);
+}
+
+/**
+ * Score interests compatibility (10% weight).
+ * Includes niche bonus for uncommon shared interests.
+ */
+function scoreInterests(interestsA: string[], interestsB: string[]): number {
+    const base = jaccardSimilarity(interestsA, interestsB);
+
+    // Niche bonus: shared interests NOT in common list get extra points
+    const commonInterests = ['música', 'cine', 'viajes', 'comida', 'deporte', 'leer'];
+    const setA = new Set(interestsA.map(s => s.toLowerCase()));
+    const setB = new Set(interestsB.map(s => s.toLowerCase()));
+    const shared = [...setA].filter(x => setB.has(x));
+    const nicheShared = shared.filter(i => !commonInterests.includes(i));
+    const nicheBonus = Math.min(20, nicheShared.length * 5);
+
+    return Math.min(100, base + nicheBonus);
+}
+
+/**
+ * Score personality compatibility (15% weight).
+ * Infers from bio text keywords.
+ */
+function scorePersonality(bioA: string, bioB: string, interestsA: string[], interestsB: string[]): number {
+    const a = (bioA || '').toLowerCase();
+    const b = (bioB || '').toLowerCase();
+
+    let score = 50; // baseline
+
+    // Communication style signals
+    const expressiveSignals = ['hablar', 'conversar', 'compartir', 'expresar', 'emociones'];
+    const reservedSignals = ['tranquilo', 'silencio', 'paz', 'calma', 'soledad'];
+
+    const aExpressive = expressiveSignals.filter(s => a.includes(s)).length;
+    const bExpressive = expressiveSignals.filter(s => b.includes(s)).length;
+    const aReserved = reservedSignals.filter(s => a.includes(s)).length;
+    const bReserved = reservedSignals.filter(s => b.includes(s)).length;
+
+    // Complementary styles score higher
+    if (aExpressive > 0 && bExpressive > 0) score += 10;
+    if (aReserved > 0 && bReserved > 0) score += 10;
+    if (aExpressive > 0 && bReserved > 0) score += 5; // complementary
+    if (aReserved > 0 && bExpressive > 0) score += 5; // complementary
+
+    // Energy signals
+    const activeSignals = ['aventura', 'deporte', 'actividad', 'energía', 'viajar'];
+    const calmSignals = ['leer', 'casa', 'peliculas', 'series', 'cocinar'];
+
+    const aActive = activeSignals.filter(s => a.includes(s) || interestsA.some(i => i.toLowerCase().includes(s))).length;
+    const bActive = activeSignals.filter(s => b.includes(s) || interestsB.some(i => i.toLowerCase().includes(s))).length;
+    const aCalm = calmSignals.filter(s => a.includes(s) || interestsA.some(i => i.toLowerCase().includes(s))).length;
+    const bCalm = calmSignals.filter(s => b.includes(s) || interestsB.some(i => i.toLowerCase().includes(s))).length;
+
+    if (aActive > 0 && bActive > 0) score += 10;
+    if (aCalm > 0 && bCalm > 0) score += 10;
+    if (aActive > 0 && bCalm > 0) score += 5;
+    if (aCalm > 0 && bActive > 0) score += 5;
+
+    // Bio depth (longer bios = more thoughtful)
+    if (a.length > 100) score += 5;
+    if (b.length > 100) score += 5;
+
+    return Math.max(0, Math.min(100, score));
+}
+
+/**
+ * Score quiz compatibility (15% weight).
+ * Reads from quiz_results table.
+ */
+async function scoreQuizzes(userIdA: string, userIdB: string): Promise<number> {
+    const [quizzesA, quizzesB] = await Promise.all([
+        prisma.quizResult.findMany({ where: { userId: userIdA } }),
+        prisma.quizResult.findMany({ where: { userId: userIdB } }),
+    ]);
+
+    if (quizzesA.length === 0 || quizzesB.length === 0) return 50; // neutral if no quizzes
+
+    // Find shared quizzes
+    const quizIdsA = new Set(quizzesA.map(q => q.quizId));
+    const sharedQuizzes = quizzesB.filter(q => quizIdsA.has(q.quizId));
+
+    if (sharedQuizzes.length === 0) return 50;
+
+    let totalSimilarity = 0;
+    for (const quizB of sharedQuizzes) {
+        const quizA = quizzesA.find(q => q.quizId === quizB.quizId);
+        if (!quizA) continue;
+
+        // Compare answers
+        const answersA = quizA.answers as Record<string, string>;
+        const answersB = quizB.answers as Record<string, string>;
+        const allKeys = new Set([...Object.keys(answersA), ...Object.keys(answersB)]);
+        let matches = 0;
+        for (const key of allKeys) {
+            if (answersA[key] === answersB[key]) matches++;
+        }
+        totalSimilarity += allKeys.size > 0 ? (matches / allKeys.size) * 100 : 0;
+    }
+
+    return totalSimilarity / sharedQuizzes.length;
+}
+
+/**
+ * Score lifestyle compatibility (10% weight).
+ */
+function scoreLifestyle(profileA: any, profileB: any): number {
+    let score = 50;
+    let factors = 0;
+
+    if (profileA.smoking && profileB.smoking) {
+        factors++;
+        if (profileA.smoking === profileB.smoking) score += 20;
+        else if (
+            (profileA.smoking === 'no' && profileB.smoking !== 'no') ||
+            (profileA.smoking !== 'no' && profileB.smoking === 'no')
+        ) score -= 5;
+    }
+
+    if (profileA.drinking && profileB.drinking) {
+        factors++;
+        if (profileA.drinking === profileB.drinking) score += 20;
+        else score -= 5;
+    }
+
+    if (profileA.children && profileB.children) {
+        factors++;
+        if (profileA.children === profileB.children) score += 20;
+        else score -= 10;
+    }
+
+    if (profileA.education && profileB.education) {
+        factors++;
+        const eduLevels = ['secundaria', 'preparatoria', 'universidad', 'maestría', 'doctorado'];
+        const levelA = eduLevels.findIndex(e => profileA.education.toLowerCase().includes(e));
+        const levelB = eduLevels.findIndex(e => profileB.education.toLowerCase().includes(e));
+        if (levelA >= 0 && levelB >= 0) {
+            const diff = Math.abs(levelA - levelB);
+            score += diff <= 1 ? 15 : diff <= 2 ? 5 : -5;
+        }
+    }
+
+    if (profileA.religion && profileB.religion) {
+        factors++;
+        if (profileA.religion === profileB.religion) score += 15;
+        else if (profileA.religion === 'ninguna' || profileB.religion === 'ninguna') score += 5;
+        else score -= 5;
+    }
+
+    return Math.max(0, Math.min(100, score));
+}
+
+/**
+ * Main compatibility calculation.
+ * Returns a 0-100 score with 6 dimension breakdown and explanations.
+ */
+export async function calculateCompatibility(
+    userIdA: string,
+    userIdB: string
+): Promise<CompatibilityResult> {
+    // Fetch both profiles in parallel
+    const [profileA, profileB] = await Promise.all([
+        prisma.profile.findUnique({
+            where: { userId: userIdA },
+            select: {
+                values: true, interests: true, musicGenres: true,
+                smoking: true, drinking: true, children: true,
+                education: true, religion: true, bio: true,
+                seeking: true, city: true, zodiacSign: true,
+            }
+        }),
+        prisma.profile.findUnique({
+            where: { userId: userIdB },
+            select: {
+                values: true, interests: true, musicGenres: true,
+                smoking: true, drinking: true, children: true,
+                education: true, religion: true, bio: true,
+                seeking: true, city: true, zodiacSign: true,
+            }
+        }),
+    ]);
+
+    if (!profileA || !profileB) {
+        return {
+            totalScore: 50,
+            dimensions: { values: 50, relationshipGoals: 50, personality: 50, quizzes: 50, interests: 50, lifestyle: 50 },
+            explanations: ['Perfiles incompletos — no se puede calcular compatibilidad'],
+        };
+    }
+
+    // Calculate all dimensions
+    const [quizScore, goalsScore] = await Promise.all([
+        scoreQuizzes(userIdA, userIdB),
+        scoreRelationshipGoals(userIdA, userIdB),
+    ]);
+
+    const valuesScore = scoreValues(profileA.values || [], profileB.values || []);
+    const interestsScore = scoreInterests(profileA.interests || [], profileB.interests || []);
+    const personalityScore = scorePersonality(
+        profileA.bio || '', profileB.bio || '',
+        profileA.interests || [], profileB.interests || []
+    );
+    const lifestyleScore = scoreLifestyle(profileA, profileB);
+
+    // Weighted total
+    const totalScore = Math.round(
+        valuesScore * 0.30 +
+        goalsScore * 0.20 +
+        personalityScore * 0.15 +
+        quizScore * 0.15 +
+        interestsScore * 0.10 +
+        lifestyleScore * 0.10
+    );
+
+    const dimensions = {
+        values: Math.round(valuesScore),
+        relationshipGoals: Math.round(goalsScore),
+        personality: Math.round(personalityScore),
+        quizzes: Math.round(quizScore),
+        interests: Math.round(interestsScore),
+        lifestyle: Math.round(lifestyleScore),
+    };
+
+    // Generate explanations
+    const explanations = generateExplanations(dimensions, {
+        valuesA: profileA.values || [],
+        valuesB: profileB.values || [],
+        interestsA: profileA.interests || [],
+        interestsB: profileB.interests || [],
+        musicGenresA: profileA.musicGenres || [],
+        musicGenresB: profileB.musicGenres || [],
+        smokingA: profileA.smoking || '',
+        smokingB: profileB.smoking || '',
+        drinkingA: profileA.drinking || '',
+        drinkingB: profileB.drinking || '',
+        childrenA: profileA.children || '',
+        childrenB: profileB.children || '',
+        educationA: profileA.education || '',
+        educationB: profileB.education || '',
+    });
+
+    return { totalScore, dimensions, explanations };
+}

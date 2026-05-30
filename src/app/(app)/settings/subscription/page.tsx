@@ -19,15 +19,14 @@ export default function SubscriptionPage() {
         if (!profile) return;
         setLoading(plan);
         try {
-            const res = await fetch('/api/stripe/session', {
+            const res = await fetch('/api/lemonsqueezy/checkout', {
                 method: 'POST',
-                body: JSON.stringify({ plan, userId: profile.id })
             });
             const data = await res.json();
             if (data.url) {
                 window.location.href = data.url;
             } else {
-                throw new Error(data.error);
+                throw new Error(data.error || 'Error creating checkout');
             }
         } catch (e) {
             toast({ title: 'Error', description: 'No se pudo iniciar el pago', variant: 'destructive' });

@@ -1,0 +1,105 @@
+'use client';
+
+import { useEffect, useState } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { SectionTitle } from '@/components/ui/custom/SectionTitle';
+import { Loader2, MessageSquare, Heart, Users, BarChart3, TrendingUp, Activity } from 'lucide-react';
+
+interface Metrics {
+    totalMatches: number;
+    activeConversations: number;
+    engagementRate: number;
+    avgMessagesPerConversation: number;
+    responseRate: number;
+    compatibilityCorrelation: number;
+}
+
+export default function MatchQualityPage() {
+    const [metrics, setMetrics] = useState<Metrics | null>(null);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        fetch('/api/admin/match-quality')
+            .then(r => r.json())
+            .then(setMetrics)
+            .catch(console.error)
+            .finally(() => setLoading(false));
+    }, []);
+
+    if (loading) {
+        return (
+            <div className="md:pl-60 p-6 flex items-center justify-center">
+                <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+            </div>
+        );
+    }
+
+    if (!metrics) {
+        return (
+            <div className="md:pl-60 p-6">
+                <p className="text-muted-foreground">No se pudieron cargar las métricas</p>
+            </div>
+        );
+    }
+
+    const cards = [
+        { title: 'Matches Totales', value: metrics.totalMatches, icon: Heart, color: 'text-pink-500' },
+        { title: 'Conversaciones Activas', value: metrics.activeConversations, icon: MessageSquare, color: 'text-blue-500' },
+        { title: 'Tasa de Engagement', value: `${metrics.engagementRate}%`, icon: TrendingUp, color: 'text-green-500' },
+        { title: 'Mensajes/Conversación', value: metrics.avgMessagesPerConversation, icon: BarChart3, color: 'text-purple-500' },
+        { title: 'Tasa de Respuesta', value: `${metrics.responseRate}%`, icon: Activity, color: 'text-orange-500' },
+        { title: 'Compatibilidad Promedio', value: `${metrics.compatibilityCorrelation}%`, icon: Users, color: 'text-cyan-500' },
+    ];
+
+    return (
+        <div className="md:pl-60 p-6 space-y-6">
+            <SectionTitle title="Match Quality Analytics" subtitle="Métricas de calidad de conexiones" />
+
+            <div className="grid gap-4 md:grid-cols-3">
+                {cards.map((card) => (
+                    <Card key={card.title}>
+                        <CardHeader className="flex flex-row items-center justify-between pb-2">
+                            <CardTitle className="text-sm font-medium text-muted-foreground">
+                                {card.title}
+                            </CardTitle>
+                            <card.icon className={`h-4 w-4 ${card.color}`} />
+                        </CardHeader>
+                        <CardContent>
+                            <div className="text-2xl font-bold">{card.value}</div>
+                        </CardContent>
+                    </Card>
+                ))}
+            </div>
+
+            <Card>
+                <CardHeader>
+                    <CardTitle>Análisis de Calidad</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                    <div className="grid gap-4 md:grid-cols-2">
+                        <div className="p-4 bg-muted/50 rounded-lg">
+                            <h4 className="font-medium mb-2">Engagement Rate</h4>
+                            <p className="text-sm text-muted-foreground">
+                                {metrics.engagementRate >= 60
+                                    ? 'Excelente — la mayoría de los matches generan conversación'
+                                    : metrics.engagementRate >= 40
+                                    ? 'Bueno — hay espacio para mejorar la calidad de matches'
+                                    : 'Necesita atención — muchos matches no generan conversación'}
+                            </p>
+                        </div>
+                        <div className="p-4 bg-muted/50 rounded-lg">
+                            <h4 className="font-medium mb-2">Response Rate</h4>
+                            <p className="text-sm text-muted-foreground">
+                                {metrics.responseRate >= 70
+                                    ? 'Los usuarios responden consistentemente'
+                                    : metrics.responseRate >= 50
+                                    ? 'Respuestas moderadas — considerar mejorar icebreakers'
+                                    : 'Baja tasa de respuesta — revisar calidad de mensajes'}
+                            </p>
+                        </div>
+                    </div>
+                </CardContent>
+            </Card>
+        </div>
+    );
+}

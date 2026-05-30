@@ -29,6 +29,12 @@ export const EditableProfileSchema = z.object({
     religion: z.string().optional().default(''),
     musicGenres: z.array(z.string()).max(MAX_MUSIC_GENRES).optional().default([]),
     status: z.string().max(50).optional().default(''),
+    cityId: z.string().optional().default(''),
+    countryCode: z.string().optional().default(''),
+    stateCode: z.string().optional().default(''),
+    latitude: z.number().optional().nullable(),
+    longitude: z.number().optional().nullable(),
+    lookingFor: z.string().optional().default(''),
 }).strict('Unexpected fields are not allowed');
 
 export type EditableProfile = z.infer<typeof EditableProfileSchema>;

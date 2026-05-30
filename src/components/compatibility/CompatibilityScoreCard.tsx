@@ -1,26 +1,58 @@
 'use client';
 
-import { Card } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Sparkles } from 'lucide-react';
 
-export function CompatibilityScoreCard({ score, explanation }: { score: number, explanation: string[] }) {
+interface CompatibilityScoreCardProps {
+    score: number;
+    explanation: string[];
+    dimensions?: Record<string, number>;
+}
+
+const dimensionLabels: Record<string, string> = {
+    values: 'Valores',
+    relationshipGoals: 'Objetivos',
+    personality: 'Personalidad',
+    quizzes: 'Quizzes',
+    interests: 'Intereses',
+    lifestyle: 'Estilo de vida',
+};
+
+export function CompatibilityScoreCard({ score, explanation, dimensions }: CompatibilityScoreCardProps) {
     return (
-        <Card className="p-4 bg-gradient-to-r from-pink-50 to-purple-50 border-pink-100">
-            <div className="flex justify-between items-center mb-2">
-                <h3 className="text-sm font-bold text-gray-700 flex items-center gap-2">
-                    <Sparkles className="w-4 h-4 text-pink-500" /> Deep Chemistry
-                </h3>
-                <span className="text-xl font-black text-pink-600">{score}%</span>
+        <Card className="overflow-hidden border-none shadow-lg">
+            <div className="bg-gradient-to-br from-pink-500 via-rose-500 to-purple-600 p-6 text-white text-center">
+                <Sparkles className="h-8 w-8 mx-auto mb-2 fill-white" />
+                <h3 className="text-lg font-bold mb-1">Deep Chemistry</h3>
+                <div className="text-5xl font-bold">{score}%</div>
+                <Progress value={score} className="mt-3 h-2 bg-white/30" />
             </div>
-
-            <Progress value={score} className="h-2 mb-4" />
-
-            <div className="space-y-1">
-                {explanation.slice(0, 3).map((line, i) => (
-                    <p key={i} className="text-xs text-gray-600">{line}</p>
-                ))}
-            </div>
+            <CardContent className="p-6 space-y-4">
+                {dimensions && (
+                    <div className="grid grid-cols-2 gap-2 mb-4">
+                        {Object.entries(dimensions).map(([key, val]) => (
+                            <div key={key} className="text-center p-2 rounded-lg bg-muted/50">
+                                <div className="text-xs text-muted-foreground">{dimensionLabels[key] || key}</div>
+                                <div className="font-bold text-sm">{val}%</div>
+                            </div>
+                        ))}
+                    </div>
+                )}
+                {explanation.length > 0 && (
+                    <div className="space-y-2">
+                        <h4 className="font-semibold text-sm text-muted-foreground">Por qué conectan</h4>
+                        <ul className="space-y-1">
+                            {explanation.map((line, i) => (
+                                <li key={i} className="text-sm flex items-start gap-2">
+                                    <span className="text-green-500 mt-0.5">✓</span>
+                                    <span>{line}</span>
+                                </li>
+                            ))}
+                        </ul>
+                    </div>
+                )}
+            </CardContent>
         </Card>
     );
 }

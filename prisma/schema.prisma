@@ -70,6 +70,8 @@ model User {
   userMemory              UserMemory?
   dateReflections         DateReflection[]
   quizResults             QuizResult[]
+  profileVisitsGiven      ProfileVisit[] @relation("ProfileVisitVisitor")
+  profileVisitsReceived   ProfileVisit[] @relation("ProfileVisitVisited")
 
   @@map("users")
 }
@@ -103,9 +105,19 @@ model Profile {
   status        String?
   personalGuide Json?
 
+  // Relationship goals
+  lookingFor String? // casual, serious, friendship, networking
+
   // Privacy settings
   incognitoMode    Boolean @default(false)
   showMeInDiscover Boolean @default(true)
+
+  // Location (structured)
+  cityId      String?
+  countryCode String?
+  stateCode   String?
+  latitude    Float?
+  longitude   Float?
 
   // Status
   isVerified         Boolean  @default(false)
@@ -484,6 +496,19 @@ model PushToken {
   @@unique([token])
   @@index([userId])
   @@map("push_tokens")
+}
+
+model ProfileVisit {
+  id        String   @id @default(uuid())
+  visitorId String
+  visitor   User     @relation("ProfileVisitVisitor", fields: [visitorId], references: [id], onDelete: Cascade)
+  visitedId String
+  visited   User     @relation("ProfileVisitVisited", fields: [visitedId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@index([visitorId, createdAt])
+  @@index([visitedId, createdAt])
+  @@map("profile_visits")
 }
 
 model AnalyticsEvent {

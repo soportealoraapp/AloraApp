@@ -11,7 +11,8 @@
     "lint": "next lint",
     "typecheck": "tsc --noEmit",
     "test": "vitest",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "audit:alora": "npx tsx scripts/audit-alora.ts"
   },
   "dependencies": {
     "@capacitor/android": "^8.0.0",
