@@ -21,7 +21,6 @@ const GoogleIcon = (props: React.SVGProps<SVGSVGElement>) => (
 
 export default function LoginPage() {
     const router = useRouter();
-    const searchParams = useSearchParams();
     const { toast } = useToast();
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
