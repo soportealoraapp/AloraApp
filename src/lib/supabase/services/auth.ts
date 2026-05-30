@@ -28,7 +28,8 @@ export const authService = {
             options: {
                 data: {
                     name,
-                }
+                },
+                emailRedirectTo: `${window.location.origin}/auth/callback`,
             }
         })
 
