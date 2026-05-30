@@ -32,6 +32,7 @@ export interface UserProfile extends User {
     religion?: string;
     personalGuide?: { title: string; description: string }[];
     musicGenres?: string[];
+    status?: string;
 
     // Status
     subscriptionStatus?: 'free' | 'plus' | 'premium';

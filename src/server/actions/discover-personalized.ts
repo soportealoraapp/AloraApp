@@ -66,6 +66,8 @@ export async function getPersonalizedFeed(
             userId: { notIn: Array.from(excludedIds) },
             trustStatus: { not: 'banned' },
             photos: { isEmpty: false },
+            incognitoMode: false,
+            showMeInDiscover: true,
             ...(cursor ? { userId: { gt: cursor } } : {}),
         },
         take: limit * 4,

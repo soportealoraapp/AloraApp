@@ -39,7 +39,15 @@ export const getUserProfile = unstable_cache(
                 photos: profile.photos,
                 interests: profile.interests,
                 values: profile.values,
-                city: 'Unknown',
+                city: profile.city || '',
+                zodiacSign: profile.zodiacSign || '',
+                education: profile.education || '',
+                smoking: profile.smoking || '',
+                drinking: profile.drinking || '',
+                children: profile.children || '',
+                religion: profile.religion || '',
+                musicGenres: profile.musicGenres || [],
+                status: profile.status || '',
 
                 subscriptionStatus: profile.subscriptionStatus as any,
                 trustStatus: profile.trustStatus as any

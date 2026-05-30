@@ -21,23 +21,62 @@ export interface Payment {
     metadata?: any;
 }
 
-export const PLANS = {
+export interface Plan {
+    id: string;
+    name: string;
+    price: number;
+    currency: string;
+    interval: string;
+    features: string[];
+}
+
+export const PLANS: Record<PlanTier, Plan> = {
     free: {
         id: 'price_free',
-        name: 'Alora Free',
+        name: 'Gratis',
         price: 0,
-        features: ['Matches ilimitados', 'Mensajes ilimitados', 'Basic Analytics']
+        currency: 'MXN',
+        interval: 'month',
+        features: [
+            '50 likes diarios',
+            'Filtros básicos',
+            'Chat ilimitado',
+            'Compatibilidad básica',
+            '1 boost cada 5 días de racha'
+        ]
     },
     plus: {
-        id: 'price_plus_test', // Replace with real Stripe Price ID
-        name: 'Alora +',
-        price: 4.99,
-        features: ['Filtros Avanzados', '1 IA Boost diario', 'Visibility +5%', 'Analytics Plus']
+        id: 'price_plus_monthly',
+        name: 'Alora+',
+        price: 99,
+        currency: 'MXN',
+        interval: 'month',
+        features: [
+            'Likes ilimitados',
+            'Filtros avanzados',
+            'Mayor visibilidad',
+            'Matches internacionales',
+            'Ver quién te gusta',
+            'Read receipts',
+            'Boosts más frecuentes',
+            'Rewind ilimitado',
+            'Modo incógnito'
+        ]
     },
     premium: {
-        id: 'price_premium_test', // Replace with real Stripe Price ID
+        id: 'price_premium_monthly',
         name: 'Alora Premium',
-        price: 12.99,
-        features: ['IA Wingman', 'Viaje Ilimitado', 'Visibility +12%', 'Predictive Rank']
+        price: 199,
+        currency: 'MXN',
+        interval: 'month',
+        features: [
+            'Todo de Alora+',
+            'AI Wingman ilimitado',
+            'Compatibility deep dive',
+            'Priority ranking',
+            'Profile analytics',
+            'Weekly boost',
+            'Travel mode'
+        ]
     }
 };

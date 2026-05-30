@@ -4,20 +4,27 @@ export type SubscriptionTier = 'free' | 'plus' | 'premium';
 
 export const PERMISSIONS = {
     AI_COACHING: ['plus', 'premium'],
-    RELATIONSHIP_INSIGHTS: ['premium'],
+    RELATIONSHIP_INSIGHTS: ['plus', 'premium'],
     UNLIMITED_LIKES: ['plus', 'premium'],
-    ADVANCED_FILTERS: ['premium'],
-    WELLBEING_TOOLS: ['free', 'plus', 'premium'], // core feature
+    ADVANCED_FILTERS: ['plus', 'premium'],
+    WELLBEING_TOOLS: ['free', 'plus', 'premium'],
+    INCognito_MODE: ['plus', 'premium'],
+    BOOST_WEEKLY: ['plus', 'premium'],
+    REWIND: ['plus', 'premium'],
+    SEE_WHO_LIKED_YOU: ['plus', 'premium'],
+    READ_RECEIPTS: ['plus', 'premium'],
+    TRAVEL_MODE: ['premium'],
+    PRIORITY_RANKING: ['plus', 'premium'],
+    PROFILE_ANALYTICS: ['plus', 'premium'],
 };
 
 export function hasAccess(tier: string = 'free', feature: keyof typeof PERMISSIONS): boolean {
     const allowedTiers = PERMISSIONS[feature] || [];
-    return allowedTiers.includes(tier);
+    return allowedTiers.includes(tier as SubscriptionTier);
 }
 
 export function assertSubscription(profile: UserProfile | null, feature: keyof typeof PERMISSIONS) {
     if (!profile) throw new Error("Unauthorized: No profile found");
-    // Ensure subscriptionStatus matches the literal type, fallback to free
     const tier = (profile.subscriptionStatus as SubscriptionTier) || 'free';
 
     if (!hasAccess(tier, feature)) {

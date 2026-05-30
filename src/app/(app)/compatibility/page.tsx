@@ -5,8 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
-import { COMPATIBILITY_QUIZZES } from '@/lib/compatibility/quizzes';
-import { Quiz, QuizQuestion } from '@/lib/firebase/types';
+import { COMPATIBILITY_QUIZZES, Quiz, QuizQuestion } from '@/lib/compatibility/quizzes';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from '@/components/ui/use-toast';
 import { Loader2, CheckCircle2, Heart, MessageCircle, Zap, Target, ArrowRight, ArrowLeft } from 'lucide-react';
@@ -85,7 +84,7 @@ export default function CompatibilityPage() {
         className="space-y-6"
       >
         <h3 className="text-xl font-medium text-pink-700 leading-tight">
-          {question.text}
+          {question.text || question.question}
         </h3>
 
         {question.type === 'scale' && (
@@ -111,18 +110,18 @@ export default function CompatibilityPage() {
           </div>
         )}
 
-        {question.type === 'choice' && question.options && (
+        {(question.type === 'choice' || !question.type) && question.options && (
           <div className="grid grid-cols-1 gap-3">
-            {question.options.map(opt => (
+            {question.options.map((opt: any) => (
               <button
-                key={String(opt.value)}
-                onClick={() => handleAnswer(question.id, opt.value)}
-                className={`p-4 text-left rounded-2xl border-2 transition-all ${answers[question.id] === opt.value
+                key={String(opt.value || opt.id)}
+                onClick={() => handleAnswer(question.id, opt.value || opt.id)}
+                className={`p-4 text-left rounded-2xl border-2 transition-all ${answers[question.id] === (opt.value || opt.id)
                     ? 'bg-pink-100 border-pink-500 shadow-md text-pink-700'
                     : 'bg-white border-pink-50 text-gray-600 hover:border-pink-100'
                   }`}
               >
-                {opt.label}
+                {opt.label || opt.text}
               </button>
             ))}
           </div>

@@ -35,7 +35,7 @@ export default function SubscriptionPage() {
         }
     };
 
-    const currentPlan = profile?.plan || 'free';
+    const currentPlan = (profile as any)?.subscriptionStatus || (profile as any)?.plan || 'free';
 
     return (
         <div className="md:pl-60 p-6 space-y-8 bg-gray-50 min-h-screen">

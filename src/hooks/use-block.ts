@@ -1,32 +1,54 @@
 'use client';
 
+import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
-import { blockUser, unblockUser } from '@/server/actions/block';
+import { blockUser as blockAction, unblockUser as unblockAction, getBlockedUsers } from '@/server/actions/block';
 
 export function useBlock() {
     const { user } = useAuth();
+    const [blockedUsers, setBlockedUsers] = useState<any[]>([]);
+    const [loading, setLoading] = useState(true);
 
-    const handleBlock = async (blockedId: string, reason?: string) => {
+    const fetchBlocked = useCallback(async () => {
+        if (!user) {
+            setLoading(false);
+            return;
+        }
+        try {
+            const users = await getBlockedUsers(user.id);
+            setBlockedUsers(users);
+        } catch (e) {
+            console.error('Error fetching blocked users', e);
+        } finally {
+            setLoading(false);
+        }
+    }, [user?.id]);
+
+    useEffect(() => {
+        fetchBlocked();
+    }, [fetchBlocked]);
+
+    const blockUser = async (blockedId: string, reason?: string) => {
         if (!user) return;
-        await blockUser(user.id, blockedId, reason);
+        await blockAction(user.id, blockedId, reason);
+        await fetchBlocked();
     };
 
-    const handleUnblock = async (blockedId: string) => {
+    const unblockUser = async (blockedId: string) => {
         if (!user) return;
-        await unblockUser(user.id, blockedId);
+        await unblockAction(user.id, blockedId);
+        await fetchBlocked();
     };
 
-    // For "isBlocked", usually we would have a loaded list of blocked IDs in context or SWR
-    // For now, simpler implementation:
     const isBlocked = (id: string) => {
-        // This requires active state which we don't have deeply integrated in this hook yet
-        // In a real app, we'd pass the blocked list from a provider.
-        return false;
+        return blockedUsers.some(b => b.blockedId === id);
     };
 
     return {
-        blockUser: handleBlock,
-        unblockUser: handleUnblock,
-        isBlocked // Minimal implementation
+        blockedUsers,
+        loading,
+        blockUser,
+        unblockUser,
+        isBlocked
     };
 }

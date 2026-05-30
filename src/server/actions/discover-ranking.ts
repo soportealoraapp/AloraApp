@@ -69,6 +69,8 @@ export async function getAdvancedFeed(
             userId: { notIn: Array.from(excludedIds) },
             trustStatus: { not: 'banned' },
             photos: { isEmpty: false },
+            incognitoMode: false,
+            showMeInDiscover: true,
             ...(cursor ? { userId: { gt: cursor } } : {}),
         },
         take: limit * 3, // Fetch extra for diversity sampling
@@ -82,6 +84,50 @@ export async function getAdvancedFeed(
 
     const currentInterests = new Set((currentUser.profile.interests || []).map(i => i.toLowerCase()));
     const interactedUserIds = new Set(interactions.map(i => i.toUserId));
+
+    // BATCH QUERIES: Pre-fetch all candidate data to avoid N+1
+    const candidateIds = candidates.map(c => c.userId);
+    const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+
+    // Batch 1: Message counts per candidate (last 24h for response rate)
+    const recentMessageCounts = candidateIds.length > 0 ? await prisma.message.groupBy({
+        by: ['senderId'],
+        where: {
+            senderId: { in: candidateIds },
+            createdAt: { gte: oneDayAgo }
+        },
+        _count: true
+    }) : [];
+    const recentMsgCountMap = new Map(recentMessageCounts.map(m => [m.senderId, m._count]));
+
+    // Batch 2: Matches per candidate (with messages)
+    const candidateMatches = candidateIds.length > 0 ? await prisma.match.findMany({
+        where: {
+            OR: candidateIds.map(id => ({ user1Id: id })),
+            messages: { some: {} }
+        },
+        select: { id: true, user1Id: true }
+    }) : [];
+    const matchCountMap = new Map<string, number>();
+    candidateMatches.forEach(m => {
+        matchCountMap.set(m.user1Id, (matchCountMap.get(m.user1Id) || 0) + 1);
+    });
+
+    // Batch 3: Message counts per match (for conversation quality)
+    const matchIds = candidateMatches.map(m => m.id);
+    const matchMessageCounts = matchIds.length > 0 ? await prisma.message.groupBy({
+        by: ['matchId'],
+        where: { matchId: { in: matchIds } },
+        _count: true
+    }) : [];
+    const matchMsgMap = new Map(matchMessageCounts.map(m => [m.matchId, m._count]));
+
+    // Calculate total messages per candidate from match data
+    const totalMsgMap = new Map<string, number>();
+    candidateMatches.forEach(m => {
+        const msgCount = matchMsgMap.get(m.id) || 0;
+        totalMsgMap.set(m.user1Id, (totalMsgMap.get(m.user1Id) || 0) + msgCount);
+    });
 
     const scoredCandidates: RankingProfile[] = [];
     let processedCount = 0;
@@ -141,27 +187,16 @@ export async function getAdvancedFeed(
         const sharedValues = [...currentValues].filter(v => candidateValues.has(v)).length;
         const behavioralCompatibility = Math.min(100, sharedValues * 20);
 
-        // 6. Response rate proxy (from message patterns)
-        const recentMessages = await prisma.message.count({
-            where: { senderId: cp.userId, createdAt: { gte: oneDayAgo } },
-        });
+        // 6. Response rate proxy (from batch data)
+        const recentMessages = recentMsgCountMap.get(cp.userId) || 0;
         const responseRate = Math.min(100, (recentMessages > 0 ? 50 : 20) + (lastActive > oneHourAgo ? 30 : 0));
 
-        // 7. Conversation quality proxy
-        const matchesWithUser = await prisma.match.findMany({
-            where: {
-                OR: [{ user1Id: cp.userId }, { user2Id: cp.userId }],
-                messages: { some: {} },
-            },
-            select: { id: true },
-            take: 5,
-        });
+        // 7. Conversation quality proxy (from batch data)
+        const matchCount = matchCountMap.get(cp.userId) || 0;
+        const totalMessages = totalMsgMap.get(cp.userId) || 0;
         let conversationQuality = 30; // baseline
-        if (matchesWithUser.length > 0) {
-            const msgCount = await prisma.message.count({
-                where: { matchId: { in: matchesWithUser.map(m => m.id) } },
-            });
-            conversationQuality = Math.min(100, 30 + msgCount * 2);
+        if (matchCount > 0) {
+            conversationQuality = Math.min(100, 30 + totalMessages * 2);
         }
 
         // 8. Shared activity patterns (active hours)

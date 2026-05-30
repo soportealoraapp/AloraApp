@@ -3,7 +3,10 @@
 import { prisma } from '@/lib/prisma';
 import crypto from 'crypto';
 
-const ENCRYPTION_KEY = process.env.MEMORY_ENCRYPTION_KEY || 'dev-encryption-key-32chars!!';
+if (!process.env.MEMORY_ENCRYPTION_KEY) {
+    throw new Error('MEMORY_ENCRYPTION_KEY is required for AES-256-GCM encryption');
+}
+const ENCRYPTION_KEY = process.env.MEMORY_ENCRYPTION_KEY;
 
 function encrypt(text: string): string {
     const iv = crypto.randomBytes(16);

@@ -1,9 +1,9 @@
 'use client';
 
-import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { UserProfile } from '@/lib/domain/types';
-import { getDynamicFeed, FeedItem } from '@/server/actions/feed';
+import { getDynamicFeed, FeedItem, FeedFilters } from '@/server/actions/feed';
 
 interface DiscoverProfile {
     profile: UserProfile;
@@ -11,7 +11,7 @@ interface DiscoverProfile {
     score?: any;
 }
 
-export function useDiscover(searchTerm: string = '', limit: number = 10) {
+export function useDiscover(searchTerm: string = '', filters?: FeedFilters, limit: number = 10) {
     const { user } = useAuth();
     const [profilesData, setProfilesData] = useState<DiscoverProfile[]>([]);
     const [loading, setLoading] = useState(true);
@@ -38,7 +38,8 @@ export function useDiscover(searchTerm: string = '', limit: number = 10) {
                 user.id,
                 searchTerm || undefined,
                 isRefresh ? undefined : cursorRef.current || undefined,
-                limit
+                limit,
+                filters
             );
 
             cursorRef.current = result.nextCursor;
@@ -71,7 +72,7 @@ export function useDiscover(searchTerm: string = '', limit: number = 10) {
             setLoading(false);
             setLoadingMore(false);
         }
-    }, [user?.id, searchTerm, limit]);
+    }, [user?.id, searchTerm, limit, filters]);
 
     useEffect(() => {
         fetchProfiles(true);

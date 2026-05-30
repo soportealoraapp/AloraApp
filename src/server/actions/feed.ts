@@ -27,11 +27,26 @@ export interface FeedPage {
     hasMore: boolean;
 }
 
+export interface FeedFilters {
+    ageRange?: [number, number];
+    seeking?: string;
+    verifiedOnly?: boolean;
+    interests?: string[];
+    values?: string[];
+    smoking?: string;
+    drinking?: string;
+    children?: string;
+    education?: string;
+    religion?: string;
+    musicGenres?: string[];
+}
+
 export async function getDynamicFeed(
     currentUserId: string,
     searchTerm?: string,
     cursor?: string,
-    limit: number = 10
+    limit: number = 10,
+    filters?: FeedFilters
 ): Promise<FeedPage> {
     try {
         const currentUser = await prisma.user.findUnique({
@@ -79,12 +94,65 @@ export async function getDynamicFeed(
             }
             : {};
 
+        // Build dynamic filter conditions from FeedFilters
+        const dynamicFilters: Record<string, any> = {};
+
+        if (filters?.ageRange) {
+            dynamicFilters.age = {
+                gte: filters.ageRange[0],
+                lte: filters.ageRange[1]
+            };
+        }
+
+        if (filters?.seeking && filters.seeking !== 'all') {
+            dynamicFilters.gender = filters.seeking === 'women' ? 'woman' : 'man';
+        }
+
+        if (filters?.verifiedOnly) {
+            dynamicFilters.isVerified = true;
+        }
+
+        if (filters?.interests && filters.interests.length > 0) {
+            dynamicFilters.interests = { hasSome: filters.interests };
+        }
+
+        if (filters?.values && filters.values.length > 0) {
+            dynamicFilters.values = { hasSome: filters.values };
+        }
+
+        if (filters?.musicGenres && filters.musicGenres.length > 0) {
+            dynamicFilters.musicGenres = { hasSome: filters.musicGenres };
+        }
+
+        if (filters?.smoking) {
+            dynamicFilters.smoking = filters.smoking;
+        }
+
+        if (filters?.drinking) {
+            dynamicFilters.drinking = filters.drinking;
+        }
+
+        if (filters?.children) {
+            dynamicFilters.children = filters.children;
+        }
+
+        if (filters?.education) {
+            dynamicFilters.education = filters.education;
+        }
+
+        if (filters?.religion) {
+            dynamicFilters.religion = filters.religion;
+        }
+
         const candidates = await prisma.profile.findMany({
             where: {
                 userId: { notIn: Array.from(excludedIds) },
                 trustStatus: { not: 'banned' },
+                incognitoMode: false,
+                showMeInDiscover: true,
                 ...genderFilter,
                 ...searchFilter,
+                ...dynamicFilters,
                 ...(cursor ? { userId: { gt: cursor } } : {}),
             },
             take: limit + 1,
@@ -99,26 +167,19 @@ export async function getDynamicFeed(
         // Calculate response rates for all candidates in batch
         const candidateIds = results.map(c => c.userId);
         const recentMessages = candidateIds.length > 0 ? await prisma.message.groupBy({
-            by: ['senderId', 'receiverId'],
+            by: ['senderId'],
             where: {
-                OR: [
-                    { senderId: { in: candidateIds } },
-                    { receiverId: { in: candidateIds } },
-                ],
+                senderId: { in: candidateIds },
                 createdAt: { gte: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000) },
             },
             _count: true,
         }) : [];
 
-        // Build a map of total messages sent and received per candidate
+        // Build a map of total messages sent per candidate
         const messagesSentMap = new Map<string, number>();
-        const messagesReceivedMap = new Map<string, number>();
         for (const m of recentMessages) {
             if (candidateIds.includes(m.senderId)) {
-                messagesSentMap.set(m.senderId, (messagesSentMap.get(m.senderId) || 0) + m._count);
-            }
-            if (candidateIds.includes(m.receiverId)) {
-                messagesReceivedMap.set(m.receiverId, (messagesReceivedMap.get(m.receiverId) || 0) + m._count);
+                messagesSentMap.set(m.senderId, (messagesSentMap.get(m.senderId) || 0) + (m._count || 0));
             }
         }
 
@@ -130,7 +191,6 @@ export async function getDynamicFeed(
         const scoredItems = await Promise.all(
             results.map(async (cp) => {
                 const profile: UserProfile = {
-                    ...cp,
                     id: cp.userId,
                     email: cp.user.email,
                     isVerified: cp.isVerified,
@@ -140,6 +200,14 @@ export async function getDynamicFeed(
                     photos: cp.photos,
                     interests: cp.interests,
                     values: cp.values,
+                    city: cp.city || '',
+                    zodiacSign: cp.zodiacSign || '',
+                    education: cp.education || '',
+                    smoking: cp.smoking || '',
+                    drinking: cp.drinking || '',
+                    children: cp.children || '',
+                    religion: cp.religion || '',
+                    musicGenres: cp.musicGenres || [],
                     age: cp.age || 18,
                     gender: (cp.gender as any) || 'other',
                     seeking: (cp.seeking as any) || 'everyone',
@@ -159,11 +227,10 @@ export async function getDynamicFeed(
                     candidateInterests.some(ci => ci.toLowerCase() === i.toLowerCase())
                 ).length;
 
-                // Response rate (sent vs received ratio)
+                // Response rate (based on sent messages in last 7 days)
                 const sent = messagesSentMap.get(cp.userId) || 0;
-                const received = messagesReceivedMap.get(cp.userId) || 0;
-                const messageResponseRate = sent > 0 ? Math.min(1, received / sent) : null;
-                const highResponseRate = messageResponseRate !== null && messageResponseRate >= 0.5;
+                const messageResponseRate = sent > 0 ? Math.min(1, sent / 10) : null;
+                const highResponseRate = sent >= 5;
 
                 const completeness = calculateCompleteness(profile);
                 const deepScore = await getCompatibilityScore(currentUserId, profile.id);

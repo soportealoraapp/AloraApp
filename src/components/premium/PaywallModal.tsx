@@ -29,20 +29,25 @@ export function PaywallModal({ isOpen, onClose }: PaywallModalProps) {
     const handleSubscribe = async () => {
         setIsSubmitting(true);
         try {
-            const response = await fetch('/api/monetization/checkout', {
+            const response = await fetch('/api/stripe/session', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ planId: 'alora_plus_monthly' })
+                body: JSON.stringify({ plan: 'plus', userId: user?.id })
             });
 
             if (!response.ok) throw new Error('Error en la suscripción');
 
-            toast({
-                title: "¡Bienvenido a Alora Plus!",
-                description: "Tus beneficios premium ya están activos.",
-            });
-            await refreshProfile();
-            onClose();
+            const data = await response.json();
+            if (data.url) {
+                window.location.href = data.url;
+            } else {
+                toast({
+                    title: "¡Bienvenido a Alora+!",
+                    description: "Tus beneficios premium ya están activos.",
+                });
+                await refreshProfile();
+                onClose();
+            }
         } catch (error: any) {
             toast({
                 title: "Error",

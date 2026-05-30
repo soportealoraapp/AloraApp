@@ -57,18 +57,19 @@ model User {
   postDatingEvents PostDatingEvent[]
   cooldownState    CooldownState?
   closureArtifacts ClosureArtifact[]
-  
+
   // v3.9.0 Moderation
-  reportsSent           Report[] @relation("UserReporter")
-  reportsReceived       Report[] @relation("UserReported")
-  blockedBy             Block[]  @relation("UserBlocked")
+  reportsSent     Report[] @relation("UserReporter")
+  reportsReceived Report[] @relation("UserReported")
+  blockedBy       Block[]  @relation("UserBlocked")
 
   // v4.x Push & Device
-  pushTokens            PushToken[]
-  deviceFingerprints    DeviceFingerprint[]
+  pushTokens              PushToken[]
+  deviceFingerprints      DeviceFingerprint[]
   verificationSubmissions VerificationSubmission[]
-  userMemory            UserMemory?
-  dateReflections       DateReflection[]
+  userMemory              UserMemory?
+  dateReflections         DateReflection[]
+  quizResults             QuizResult[]
 
   @@map("users")
 }
@@ -89,6 +90,22 @@ model Profile {
   seeking   String?
   interests String[]
   values    String[]
+
+  // Rich Profile Fields (user-editable)
+  city          String?
+  zodiacSign    String?
+  education     String?
+  smoking       String?
+  drinking      String?
+  children      String?
+  religion      String?
+  musicGenres   String[]
+  status        String?
+  personalGuide Json?
+
+  // Privacy settings
+  incognitoMode    Boolean @default(false)
+  showMeInDiscover Boolean @default(true)
 
   // Status
   isVerified         Boolean  @default(false)
@@ -404,10 +421,10 @@ model RateLimit {
 }
 
 model IdempotencyKey {
-  id        String   @id @default(uuid())
-  key       String
-  userId    String
-  action    String   // e.g. 'chat_send', 'match_like'
+  id             String @id @default(uuid())
+  key            String
+  userId         String
+  action         String // e.g. 'chat_send', 'match_like'
   responseStatus Int?
   responseBody   Json?
 
@@ -441,7 +458,7 @@ model Notification {
   type    String // match, message, system
   title   String
   body    String
-  data    Json?  // deep link payload
+  data    Json? // deep link payload
   channel String @default("default") // notification channel for Android
 
   readAt DateTime?
@@ -453,12 +470,12 @@ model Notification {
 }
 
 model PushToken {
-  id        String   @id @default(uuid())
-  userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id     String @id @default(uuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   token    String
-  platform String   // android, ios, web
+  platform String // android, ios, web
   deviceId String?
   lastSeen DateTime @default(now())
 
@@ -470,11 +487,11 @@ model PushToken {
 }
 
 model AnalyticsEvent {
-  id        String   @id @default(uuid())
-  userId    String?
-  user      User?    @relation(fields: [userId], references: [id])
+  id     String  @id @default(uuid())
+  userId String?
+  user   User?   @relation(fields: [userId], references: [id])
 
-  event     String   // signup, onboarding_complete, first_match, first_message, first_reply, daily_active
+  event     String // signup, onboarding_complete, first_match, first_message, first_reply, daily_active
   metadata  Json?
   sessionId String?
 
@@ -487,11 +504,11 @@ model AnalyticsEvent {
 }
 
 model DeviceFingerprint {
-  id        String   @id @default(uuid())
-  userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id     String @id @default(uuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  deviceHash String  // SHA256 of device characteristics
+  deviceHash String // SHA256 of device characteristics
   os         String?
   browser    String?
   timezone   String?
@@ -500,8 +517,8 @@ model DeviceFingerprint {
   ipAddress  String?
   userAgent  String?
 
-  firstSeen DateTime  @default(now())
-  lastSeen  DateTime  @default(now())
+  firstSeen DateTime @default(now())
+  lastSeen  DateTime @default(now())
 
   @@index([userId])
   @@index([deviceHash])
@@ -509,13 +526,13 @@ model DeviceFingerprint {
 }
 
 model VerificationSubmission {
-  id        String   @id @default(uuid())
-  userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id     String @id @default(uuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  selfieUrl String
-  status    String   @default("pending") // pending, approved, rejected
-  reason    String?  // rejection reason
+  selfieUrl  String
+  status     String    @default("pending") // pending, approved, rejected
+  reason     String? // rejection reason
   reviewedBy String? // admin userId who reviewed
   reviewedAt DateTime?
 
@@ -527,21 +544,21 @@ model VerificationSubmission {
 }
 
 model Job {
-  id          String   @id @default(uuid())
+  id          String    @id @default(uuid())
   type        String
   payload     Json?
-  priority    Int      @default(3)
-  status      String   @default("pending") // pending, processing, completed, failed, retrying
-  retries     Int      @default(0)
-  maxRetries  Int      @default(3)
+  priority    Int       @default(3)
+  status      String    @default("pending") // pending, processing, completed, failed, retrying
+  retries     Int       @default(0)
+  maxRetries  Int       @default(3)
   error       String?
   workerId    String?
   result      Json?
-  scheduledAt DateTime @default(now())
+  scheduledAt DateTime  @default(now())
   startedAt   DateTime?
   completedAt DateTime?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
 
   @@index([status, priority, scheduledAt])
   @@index([type, status])
@@ -559,19 +576,19 @@ model Lock {
 }
 
 model UserMemory {
-  id                      String   @id @default(uuid())
-  userId                  String   @unique
-  user                    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  enabled                 Boolean  @default(false)
-  communicationPrefs      String?  // Encrypted JSON
-  emotionalPatterns       String?  // Encrypted JSON
-  conversationTendencies  String?  // Encrypted JSON
-  pacingStyle             String?  // Encrypted JSON
-  relationshipIntentions  String?  // Encrypted JSON
-  loveLanguage            String?  // Encrypted — inferred love language
-  conflictStyle           String?  // Encrypted — inferred conflict style
-  opennessLevel           String?  // Encrypted — openness to depth
-  toleratedIntensity      String?  // Encrypted — intensity tolerance
+  id                     String  @id @default(uuid())
+  userId                 String  @unique
+  user                   User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  enabled                Boolean @default(false)
+  communicationPrefs     String? // Encrypted JSON
+  emotionalPatterns      String? // Encrypted JSON
+  conversationTendencies String? // Encrypted JSON
+  pacingStyle            String? // Encrypted JSON
+  relationshipIntentions String? // Encrypted JSON
+  loveLanguage           String? // Encrypted — inferred love language
+  conflictStyle          String? // Encrypted — inferred conflict style
+  opennessLevel          String? // Encrypted — openness to depth
+  toleratedIntensity     String? // Encrypted — intensity tolerance
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -580,56 +597,70 @@ model UserMemory {
 }
 
 model RelationshipSnapshot {
-  id                String   @id @default(uuid())
-  matchId           String
-  match             Match    @relation(fields: [matchId], references: [id], onDelete: Cascade)
+  id      String @id @default(uuid())
+  matchId String
+  match   Match  @relation(fields: [matchId], references: [id], onDelete: Cascade)
 
-  emotionalDepth    Float
-  reciprocity       Float
-  consistency       Float
-  responseBalance   Float
-  conflictRisk      Float
-  attachmentTrend   Float
-  chemistryScore    Float
+  emotionalDepth     Float
+  reciprocity        Float
+  consistency        Float
+  responseBalance    Float
+  conflictRisk       Float
+  attachmentTrend    Float
+  chemistryScore     Float
   vulnerabilityScore Float
-  engagementLevel   Float
+  engagementLevel    Float
 
-  generatedAt       DateTime @default(now())
+  generatedAt DateTime @default(now())
 
   @@index([matchId, generatedAt])
   @@map("relationship_snapshots")
 }
 
 model DateReflection {
-  id                String   @id @default(uuid())
-  userId            String
-  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  targetUserId      String?
-  matchId           String?
+  id           String  @id @default(uuid())
+  userId       String
+  user         User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  targetUserId String?
+  matchId      String?
 
-  emotionalSafety   Int      // 1-5
-  chemistry         Int      // 1-5
-  authenticity      Int      // 1-5
-  communication     Int      // 1-5
-  wouldSeeAgain     Boolean
-  notes             String?  // Encrypted
-  aiAnalysis        String?  // Encrypted JSON — AI analysis of date
+  emotionalSafety Int // 1-5
+  chemistry       Int // 1-5
+  authenticity    Int // 1-5
+  communication   Int // 1-5
+  wouldSeeAgain   Boolean
+  notes           String? // Encrypted
+  aiAnalysis      String? // Encrypted JSON — AI analysis of date
 
-  createdAt         DateTime @default(now())
+  createdAt DateTime @default(now())
 
   @@index([userId])
   @@map("date_reflections")
 }
 
-model Incident {
+model QuizResult {
   id        String   @id @default(uuid())
-  type      String   // reconnect_spike, notification_failure, queue_deadlock, realtime_outage, ai_timeout, db_degradation
-  severity  String   // info, warning, critical
-  source    String   // websocket, queue, db, ai, push
-  message   String
-  details   Json?
-  autoResolved Boolean @default(false)
-  resolvedAt DateTime?
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  quizId    String
+  answers   Json
+  score     Int?
+  archetype String?
+  createdAt DateTime @default(now())
+
+  @@unique([userId, quizId])
+  @@map("quiz_results")
+}
+
+model Incident {
+  id           String    @id @default(uuid())
+  type         String // reconnect_spike, notification_failure, queue_deadlock, realtime_outage, ai_timeout, db_degradation
+  severity     String // info, warning, critical
+  source       String // websocket, queue, db, ai, push
+  message      String
+  details      Json?
+  autoResolved Boolean   @default(false)
+  resolvedAt   DateTime?
 
   createdAt DateTime @default(now())
 
@@ -638,16 +669,16 @@ model Incident {
 }
 
 model Report {
-  id         String   @id @default(uuid())
+  id         String @id @default(uuid())
   reporterId String
-  reporter   User     @relation("UserReporter", fields: [reporterId], references: [id])
+  reporter   User   @relation("UserReporter", fields: [reporterId], references: [id])
   reportedId String
-  reported   User     @relation("UserReported", fields: [reportedId], references: [id])
-  
-  reason     String
-  details    String?
-  status     String   @default("pending") // pending, reviewed, dismissed, resolved
-  createdAt  DateTime @default(now())
+  reported   User   @relation("UserReported", fields: [reportedId], references: [id])
+
+  reason    String
+  details   String?
+  status    String   @default("pending") // pending, reviewed, dismissed, resolved
+  createdAt DateTime @default(now())
 
   @@index([reportedId])
   @@map("reports")

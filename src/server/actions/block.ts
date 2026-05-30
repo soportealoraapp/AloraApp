@@ -5,14 +5,42 @@ import { revalidatePath } from 'next/cache';
 
 export async function blockUser(blockerId: string, blockedId: string, reason?: string) {
     try {
-        await prisma.block.create({
+        // Create or update block record
+        await prisma.block.upsert({
+            where: {
+                blockerId_blockedId: { blockerId, blockedId }
+            },
+            create: { blockerId, blockedId, reason },
+            update: { reason }
+        });
+
+        // Deactivate any active match between the two users
+        await prisma.match.updateMany({
+            where: {
+                OR: [
+                    { user1Id: blockerId, user2Id: blockedId },
+                    { user1Id: blockedId, user2Id: blockerId }
+                ],
+                isActive: true
+            },
             data: {
-                blockerId,
-                blockedId,
-                reason
+                isActive: false,
+                stage: 'unmatched',
+                deletedAt: new Date()
             }
         });
-        revalidatePath('/app'); // Revalidate all potentially to hide user
+
+        // Delete notifications between the two users
+        await prisma.notification.deleteMany({
+            where: {
+                userId: blockerId,
+                data: { path: ['userId'], equals: blockedId }
+            }
+        });
+
+        revalidatePath('/discover');
+        revalidatePath('/chat');
+        revalidatePath('/settings/privacy/blocked');
         return { success: true };
     } catch (error) {
         console.error('Error blocking user:', error);
@@ -22,15 +50,14 @@ export async function blockUser(blockerId: string, blockedId: string, reason?: s
 
 export async function unblockUser(blockerId: string, blockedId: string) {
     try {
-        // Unique constraint on blockerId_blockedId allows simple delete (if we had the block ID)
-        // But we might need to find it first or use deleteMany
         await prisma.block.deleteMany({
             where: {
                 blockerId,
                 blockedId
             }
         });
-        revalidatePath('/settings');
+        revalidatePath('/discover');
+        revalidatePath('/settings/privacy/blocked');
         return { success: true };
     } catch (error) {
         console.error('Error unblocking user:', error);
@@ -41,21 +68,12 @@ export async function unblockUser(blockerId: string, blockedId: string) {
 export async function getBlockedUsers(userId: string) {
     try {
         const blocks = await prisma.block.findMany({
-            where: { blockerId: userId },
-            include: {
-                // Determine which user is the blocked one. Since blockerId=me, blockedId is the target.
-                // But we don't have relation "blocked" in Block model to User (I defined it in line 332 as String, no relation).
-                // Wait, Schema: blockedId String. No relation to User?
-                // Step 1678 schema: blockedId String. 
-                // I need to add relation to Schema if I want to include it, OR fetch manually.
-                // Fetching manually is easier than migrating schema again if I want to minimize risk.
-                // But efficient query needs relation.
-                // I will fetch manually for now or use my schema knowledge.
-                // Actually, I can't use include if relation doesn't exist.
-            }
+            where: { blockerId: userId }
         });
 
         const blockedIds = blocks.map(b => b.blockedId);
+
+        if (blockedIds.length === 0) return [];
 
         const blockedUsers = await prisma.profile.findMany({
             where: { userId: { in: blockedIds } },
@@ -64,9 +82,11 @@ export async function getBlockedUsers(userId: string) {
 
         return blockedUsers.map(p => ({
             id: p.userId,
+            blockedId: p.userId,
             displayName: p.displayName,
             photoUrl: p.photos[0] || null,
-            blockedAt: blocks.find(b => b.blockedId === p.userId)?.createdAt
+            reason: blocks.find(b => b.blockedId === p.userId)?.reason,
+            createdAt: blocks.find(b => b.blockedId === p.userId)?.createdAt
         }));
 
     } catch (error) {

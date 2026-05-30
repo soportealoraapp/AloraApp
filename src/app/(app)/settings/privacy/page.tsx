@@ -29,9 +29,9 @@ export default function PrivacySettingsPage() {
 
             try {
                 const prefs = await preferencesService.getPreferences(user.id);
-                setIncognitoMode(prefs.incognitoMode);
+                setIncognitoMode(prefs.incognito);
                 setShowMe(prefs.showMe);
-                setVerifiedOnly(prefs.verifiedOnly);
+                setVerifiedOnly(false); // verifiedOnly is not stored in preferences
             } catch (error) {
                 console.error("Error loading preferences:", error);
             } finally {
@@ -101,9 +101,7 @@ export default function PrivacySettingsPage() {
 
         setSaving(true);
         try {
-            await preferencesService.updatePreferences(user.id, {
-                verifiedOnly: value,
-            });
+            // verifiedOnly is handled by DiscoverFilters, not stored in backend preferences
             setVerifiedOnly(value);
 
             toast({

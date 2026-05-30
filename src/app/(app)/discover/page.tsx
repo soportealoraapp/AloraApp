@@ -1,12 +1,12 @@
 "use client";
 
-import { useState, useMemo, useRef, useEffect, useCallback } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { AnimatePresence } from "framer-motion";
 import { FloatingMatchCard } from "@/components/ui/premium/FloatingMatchCard";
 import { MatchScreen } from "@/components/ui/premium/MatchScreen";
 import { Button } from "@/components/ui/button";
-import { Filter, Loader2, RefreshCcw, Sparkles } from "lucide-react";
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import { Filter, Loader2, RefreshCcw, Sparkles, SlidersHorizontal } from "lucide-react";
+import { DiscoverFilters, Filters } from "@/components/discover/discover-filters";
 import { useDiscover } from "@/hooks/use-discover";
 import { useAuth } from "@/contexts/AuthContext";
 import { useMatches } from "@/hooks/use-matches";
@@ -16,9 +16,20 @@ import { UserProfile } from "@/lib/domain/types";
 import { BRAND_VOICE } from "@/lib/constants/brand-voice";
 import { Skeleton } from "@/components/ui/skeleton";
 
+const DEFAULT_FILTERS: Filters = {
+  ageRange: [18, 60],
+  distance: 100,
+  seeking: 'all',
+  verifiedOnly: true,
+  interests: [],
+  values: []
+};
+
 export default function DiscoverPage() {
   const { profile: currentUserProfile } = useAuth();
-  const { profiles, loading, loadingMore, refresh, loadMore, hasMore, setProfiles } = useDiscover("");
+  const [filters, setFilters] = useState<Filters>(DEFAULT_FILTERS);
+  const [filterOpen, setFilterOpen] = useState(false);
+  const { profiles, loading, loadingMore, refresh, loadMore, hasMore, setProfiles } = useDiscover("", filters);
   const { sendLike } = useMatches();
   const { toast } = useToast();
   const router = useRouter();
@@ -87,6 +98,12 @@ export default function DiscoverPage() {
     }
   };
 
+  const handleApplyFilters = (newFilters: Filters) => {
+    setFilters(newFilters);
+    setFilterOpen(false);
+    refresh();
+  };
+
   const handleChat = () => {
     setShowMatchScreen(false);
     router.push('/chat');
@@ -108,6 +125,9 @@ export default function DiscoverPage() {
       <header className="flex h-16 items-center justify-between px-4 z-10">
         <h1 className="text-2xl font-bold tracking-tight text-foreground">Alora</h1>
         <div className="flex items-center gap-2">
+          <Button variant="ghost" size="icon" onClick={() => setFilterOpen(true)}>
+            <SlidersHorizontal className="h-5 w-5 text-muted-foreground" />
+          </Button>
           <Button variant="ghost" size="icon" onClick={() => refresh()}>
             <RefreshCcw className="h-5 w-5 text-muted-foreground" />
           </Button>
@@ -162,6 +182,13 @@ export default function DiscoverPage() {
           </div>
         )}
       </main>
+
+      <DiscoverFilters
+        open={filterOpen}
+        onOpenChange={setFilterOpen}
+        onApplyFilters={handleApplyFilters}
+        initialFilters={filters}
+      />
     </div>
   );
 }
