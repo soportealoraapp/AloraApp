@@ -1,6 +1,7 @@
 'use client';
 
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
+import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import { AnimatePresence, motion } from "framer-motion";
 
 interface SoftModalProps {
@@ -16,7 +17,11 @@ export function SoftModal({ isOpen, onClose, title, children }: SoftModalProps) 
             <AnimatePresence>
                 {isOpen && (
                     <DialogContent className="bg-white/90 backdrop-blur-xl border-none shadow-2xl rounded-3xl max-w-md">
-                        {title && <DialogTitle className="text-center text-xl font-bold text-pink-500 mb-4">{title}</DialogTitle>}
+                        {title ? (
+                            <DialogTitle className="text-center text-xl font-bold text-pink-500 mb-4">{title}</DialogTitle>
+                        ) : (
+                            <VisuallyHidden><DialogTitle>Modal</DialogTitle></VisuallyHidden>
+                        )}
                         <motion.div
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}

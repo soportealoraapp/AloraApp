@@ -9,6 +9,7 @@ import {
     DialogDescription,
     DialogFooter
 } from '@/components/ui/dialog';
+import { VisuallyHidden } from '@radix-ui/react-visually-hidden';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Check, Sparkles, Heart, Zap, ShieldCheck, Loader2 } from 'lucide-react';
@@ -63,6 +64,12 @@ export function PaywallModal({ isOpen, onClose }: PaywallModalProps) {
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>
             <DialogContent className="sm:max-w-[450px] p-0 overflow-hidden border-none rounded-3xl shadow-2xl">
+                <VisuallyHidden>
+                    <DialogHeader>
+                        <DialogTitle>Alora Plus</DialogTitle>
+                        <DialogDescription>Suscripción premium para desbloquear beneficios</DialogDescription>
+                    </DialogHeader>
+                </VisuallyHidden>
                 <div className="bg-gradient-to-br from-pink-600 via-rose-500 to-orange-400 p-8 text-white text-center">
                     <div className="bg-white/20 w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4 backdrop-blur-md">
                         <Sparkles className="h-10 w-10 text-white fill-white" />
@@ -87,7 +94,7 @@ export function PaywallModal({ isOpen, onClose }: PaywallModalProps) {
                     <div className="bg-pink-50 rounded-2xl p-4 border border-pink-100 flex justify-between items-center">
                         <div>
                             <span className="text-xs font-bold text-pink-600 uppercase tracking-wider">Plan Mensual</span>
-                            <div className="text-2xl font-bold text-gray-900">9.99€ <span className="text-sm font-normal text-muted-foreground">/ mes</span></div>
+                            <div className="text-2xl font-bold text-gray-900">$99 <span className="text-sm font-normal text-muted-foreground">MXN / mes</span></div>
                         </div>
                         <Badge variant="secondary" className="bg-muted text-muted-foreground font-bold">-20% Hoy</Badge>
                     </div>
