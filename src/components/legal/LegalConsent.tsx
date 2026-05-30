@@ -16,33 +16,48 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { Heart, Scale, Loader2 } from 'lucide-react';
 
+const CONSENT_KEY = 'alora_consent_version';
+const CURRENT_VERSION = '1.7';
+
+function getConsentVersion(): string | null {
+    if (typeof window === 'undefined') return null;
+    try {
+        return localStorage.getItem(CONSENT_KEY);
+    } catch {
+        return null;
+    }
+}
+
 export function LegalConsent() {
-    const { profile, user } = useAuth();
+    const { user } = useAuth();
     const [isOpen, setIsOpen] = useState(false);
     const [accepted, setAccepted] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [mounted, setMounted] = useState(false);
     const { toast } = useToast();
 
-    const CURRENT_VERSION = '1.7';
-
     useEffect(() => {
-        if (profile && profile.consentVersion !== CURRENT_VERSION) {
+        setMounted(true);
+        const storedVersion = getConsentVersion();
+        if (storedVersion !== CURRENT_VERSION) {
             setIsOpen(true);
         }
-    }, [profile]);
+    }, []);
 
     const handleAccept = async () => {
         if (!accepted || !user) return;
 
         setIsSubmitting(true);
         try {
-            const response = await fetch('/api/user/consent', {
+            await fetch('/api/user/consent', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ version: CURRENT_VERSION })
             });
 
-            if (!response.ok) throw new Error('Error al guardar el consentimiento');
+            try {
+                localStorage.setItem(CONSENT_KEY, CURRENT_VERSION);
+            } catch {}
 
             toast({
                 title: "Términos aceptados",
@@ -52,7 +67,7 @@ export function LegalConsent() {
         } catch (error: any) {
             toast({
                 title: "Error",
-                description: error.message,
+                description: error.message || "Error al guardar el consentimiento",
                 variant: "destructive"
             });
         } finally {
@@ -60,14 +75,14 @@ export function LegalConsent() {
         }
     };
 
-    if (!isOpen) return null;
+    if (!mounted || !isOpen) return null;
 
     return (
         <Dialog open={isOpen} onOpenChange={() => { }}>
             <DialogContent className="sm:max-w-[500px] border-none shadow-2xl rounded-3xl p-8" onPointerDownOutside={(e) => e.preventDefault()}>
                 <DialogHeader className="text-center">
-                    <div className="bg-pink-100 h-16 w-16 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <Scale className="h-8 w-8 text-pink-500" />
+                    <div className="bg-primary/10 h-16 w-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <Scale className="h-8 w-8 text-primary" />
                     </div>
                     <DialogTitle className="text-2xl font-bold">Actualización Legal (v1.7)</DialogTitle>
                     <DialogDescription className="text-base pt-2">
@@ -98,7 +113,7 @@ export function LegalConsent() {
 
                 <DialogFooter>
                     <Button
-                        className="w-full bg-gradient-to-r from-pink-500 to-rose-400 text-white rounded-full py-6 text-lg font-bold"
+                        className="w-full bg-gradient-to-r from-pink-500 to-rose-400 text-white dark:from-pink-600 dark:to-rose-500 rounded-full py-6 text-lg font-bold"
                         disabled={!accepted || isSubmitting}
                         onClick={handleAccept}
                     >
