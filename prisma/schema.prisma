@@ -18,6 +18,8 @@ model User {
   name      String?
   role      String    @default("user") // user, moderator, admin
   isActive  Boolean   @default(true)
+  isBetaUser Boolean  @default(false)
+  betaInvitedBy String?
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
   deletedAt DateTime? // Soft delete
@@ -525,6 +527,22 @@ model WaitlistEntry {
   @@unique([userId, region])
   @@index([region, status])
   @@map("waitlist_entries")
+}
+
+model BetaCode {
+  id        String    @id @default(uuid())
+  code      String    @unique
+  createdBy String
+  maxUses   Int       @default(1)
+  usedCount Int       @default(0)
+  region    String?
+  active    Boolean   @default(true)
+  expiresAt DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([code])
+  @@index([active])
+  @@map("beta_codes")
 }
 
 model AnalyticsEvent {
