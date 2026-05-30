@@ -12,7 +12,9 @@ import { motion } from "framer-motion";
 function compressImage(file: File, maxWidth = 1080, quality = 0.8): Promise<Blob> {
     return new Promise((resolve, reject) => {
         const img = new Image();
+        const objectUrl = URL.createObjectURL(file);
         img.onload = () => {
+            URL.revokeObjectURL(objectUrl);
             const canvas = document.createElement('canvas');
             let width = img.width;
             let height = img.height;
@@ -30,8 +32,11 @@ function compressImage(file: File, maxWidth = 1080, quality = 0.8): Promise<Blob
                 else reject(new Error('Compression failed'));
             }, 'image/jpeg', quality);
         };
-        img.onerror = () => reject(new Error('Failed to load image'));
-        img.src = URL.createObjectURL(file);
+        img.onerror = () => {
+            URL.revokeObjectURL(objectUrl);
+            reject(new Error('Failed to load image'));
+        };
+        img.src = objectUrl;
     });
 }
 

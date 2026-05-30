@@ -12,10 +12,17 @@ export const getUserProfile = unstable_cache(
                 include: { profile: true }
             });
 
-            if (!user || !user.profile) return null;
+            if (!user) {
+                await prisma.user.upsert({
+                    where: { id: userId },
+                    create: { id: userId, email: `${userId}@pending.local` },
+                    update: {},
+                });
+                return null;
+            }
 
-            // Map to UserProfile domain type
-            // Note: In real app, consider using Zod or a mapper function centrally
+            if (!user.profile) return null;
+
             const profile = user.profile;
             return {
                 id: user.id,
@@ -24,7 +31,6 @@ export const getUserProfile = unstable_cache(
                 isVerified: profile.isVerified,
                 createdAt: user.createdAt,
 
-                // Profile fields
                 displayName: profile.displayName || '',
                 bio: profile.bio || '',
                 age: profile.age || 18,
@@ -33,7 +39,7 @@ export const getUserProfile = unstable_cache(
                 photos: profile.photos,
                 interests: profile.interests,
                 values: profile.values,
-                city: 'Unknown', // Not in schema yet, default
+                city: 'Unknown',
 
                 subscriptionStatus: profile.subscriptionStatus as any,
                 trustStatus: profile.trustStatus as any
@@ -49,14 +55,27 @@ export const getUserProfile = unstable_cache(
 
 export async function updateUserProfile(userId: string, data: Partial<UserProfile>) {
     try {
-        // Strip non-profile fields or use safe update
-        // Here assuming data keys match Profile model roughly or ignored
-        // This is a simplification for robustness
-        const { id, email, isVerified, createdAt, subscriptionStatus, trustStatus, ...profileUpdates } = data;
+        const { id, email, isVerified, createdAt, subscriptionStatus, trustStatus, isCompleted, ...profileUpdates } = data;
 
-        await prisma.profile.update({
+        await prisma.user.upsert({
+            where: { id: userId },
+            create: {
+                id: userId,
+                email: email || `${userId}@placeholder.local`,
+                name: data.name || data.displayName || '',
+            },
+            update: {
+                name: data.name || data.displayName || undefined,
+            },
+        });
+
+        await prisma.profile.upsert({
             where: { userId },
-            data: profileUpdates
+            update: profileUpdates,
+            create: {
+                userId,
+                ...profileUpdates,
+            },
         });
         return { success: true };
     } catch (e) {

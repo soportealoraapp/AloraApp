@@ -8,6 +8,15 @@ export async function logAuditAction(
     details?: any
 ) {
     try {
+        const userExists = await prisma.user.findUnique({ where: { id: userId }, select: { id: true } });
+        if (!userExists) {
+            await prisma.user.upsert({
+                where: { id: userId },
+                create: { id: userId, email: `${userId}@pending.local` },
+                update: {},
+            });
+        }
+
         await prisma.auditLog.create({
             data: {
                 userId,
@@ -17,6 +26,5 @@ export async function logAuditAction(
         });
     } catch (error) {
         console.error('Failed to log audit action', error);
-        // Fail silently
     }
 }
