@@ -17,7 +17,50 @@ export interface DailyCompatibilityResult {
 }
 
 export async function getDailyCompatibility(userId: string): Promise<DailyCompatibilityResult | null> {
-    // Get user's profile
+    // Check if we already have a daily compatibility for today
+    const today = new Date().toISOString().split('T')[0];
+    const existing = await prisma.analyticsEvent.findFirst({
+        where: {
+            userId,
+            event: 'daily_compatibility_shown',
+            metadata: { path: ['date'], equals: today }
+        },
+        select: { metadata: true }
+    });
+
+    if (existing) {
+        const meta = existing.metadata as Record<string, unknown>;
+        const candidateId = meta.candidateId as string;
+        const score = meta.score as number;
+
+        // Fetch the candidate profile
+        const candidateProfile = await prisma.profile.findUnique({
+            where: { userId: candidateId },
+            select: {
+                userId: true,
+                displayName: true,
+                photos: true,
+                age: true,
+                city: true,
+                bio: true,
+                values: true,
+                interests: true,
+            }
+        });
+
+        if (candidateProfile) {
+            const userProfile = await prisma.profile.findUnique({
+                where: { userId },
+                select: { values: true, interests: true }
+            });
+
+            if (userProfile) {
+                return buildResult(candidateProfile, score, userProfile.values || [], userProfile.interests || []);
+            }
+        }
+    }
+
+    // No existing daily compatibility — calculate one
     const user = await prisma.user.findUnique({
         where: { id: userId },
         include: { profile: true }
@@ -25,33 +68,45 @@ export async function getDailyCompatibility(userId: string): Promise<DailyCompat
 
     if (!user?.profile) return null;
 
-    // Get users who liked the current user (potential matches)
-    const incomingLikes = await prisma.interaction.findMany({
-        where: {
-            toUserId: userId,
-            type: { in: ['like', 'superlike'] },
-            deletedAt: null
-        },
-        include: {
-            fromUser: {
-                include: { profile: true }
-            }
-        },
-        orderBy: { createdAt: 'desc' },
-        take: 20
-    });
+    // Get candidates: incoming likes + recent profiles not interacted with
+    const [incomingLikes, interactedIds] = await Promise.all([
+        prisma.interaction.findMany({
+            where: {
+                toUserId: userId,
+                type: { in: ['like', 'superlike'] },
+                deletedAt: null
+            },
+            include: { fromUser: { include: { profile: true } } },
+            orderBy: { createdAt: 'desc' },
+            take: 20
+        }),
+        prisma.interaction.findMany({
+            where: { fromUserId: userId, deletedAt: null },
+            select: { toUserId: true }
+        })
+    ]);
 
-    // Also get some recent profiles from discover (not interacted with)
-    const interactedIds = await prisma.interaction.findMany({
-        where: { fromUserId: userId, deletedAt: null },
-        select: { toUserId: true }
-    });
     const interactedSet = new Set(interactedIds.map(i => i.toUserId));
     interactedSet.add(userId);
 
+    // Exclude recently shown candidates (last 7 days)
+    const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+    const recentShown = await prisma.analyticsEvent.findMany({
+        where: {
+            userId,
+            event: 'daily_compatibility_shown',
+            createdAt: { gte: sevenDaysAgo }
+        },
+        select: { metadata: true }
+    });
+
+    const recentCandidateIds = new Set(
+        recentShown.map(e => (e.metadata as Record<string, unknown>)?.candidateId as string).filter(Boolean)
+    );
+
     const recentProfiles = await prisma.profile.findMany({
         where: {
-            userId: { notIn: Array.from(interactedSet) },
+            userId: { notIn: Array.from([...interactedSet, ...recentCandidateIds]) },
             photos: { isEmpty: false },
             trustStatus: { not: 'banned' },
             incognitoMode: false,
@@ -59,72 +114,90 @@ export async function getDailyCompatibility(userId: string): Promise<DailyCompat
         },
         include: { user: true },
         orderBy: { lastActiveAt: 'desc' },
-        take: 20
+        take: 30
     });
 
-    // Combine candidates
-    const candidates = [
-        ...incomingLikes
-            .filter(like => like.fromUser.profile)
-            .map(like => like.fromUser.profile!),
-        ...recentProfiles
-    ];
+    // Combine and deduplicate candidates
+    const candidateProfiles = new Map<string, any>();
 
-    if (candidates.length === 0) return null;
-
-    // Calculate compatibility for top candidates and pick the best
-    let bestResult: DailyCompatibilityResult | null = null;
-    let bestScore = -1;
-
-    const userValues = user.profile.values || [];
-    const userInterests = user.profile.interests || [];
-
-    // Check if we already have a daily compatibility cached (use day of year)
-    const now = new Date();
-    const start = new Date(now.getFullYear(), 0, 0);
-    const diff = now.getTime() - start.getTime();
-    const oneDay = 1000 * 60 * 60 * 24;
-    const dayOfYear = Math.floor(diff / oneDay);
-
-    // Pick candidate based on day (consistent per day)
-    const candidateIndex = dayOfYear % candidates.length;
-    const candidate = candidates[candidateIndex];
-
-    if (!candidate?.userId) return null;
-
-    try {
-        const compat = await calculateCompatibility(userId, candidate.userId);
-
-        const candidateValues = candidate.values || [];
-        const candidateInterests = candidate.interests || [];
-
-        const sharedValues = userValues.filter(v => candidateValues.includes(v));
-        const sharedInterests = userInterests.filter(i => candidateInterests.includes(i));
-
-        // Find interesting differences
-        const allValues = [...new Set([...userValues, ...candidateValues])];
-        const differences = allValues
-            .filter(v => !sharedValues.includes(v))
-            .slice(0, 2);
-
-        bestResult = {
-            profile: {
-                id: candidate.userId,
-                displayName: candidate.displayName || 'Alguien',
-                photos: candidate.photos || [],
-                age: candidate.age,
-                city: candidate.city,
-                bio: candidate.bio,
-            },
-            score: compat.totalScore,
-            sharedValues,
-            sharedInterests,
-            differences
-        };
-    } catch (error) {
-        console.error('Error calculating daily compatibility:', error);
-        return null;
+    for (const like of incomingLikes) {
+        if (like.fromUser.profile && !recentCandidateIds.has(like.fromUserId)) {
+            candidateProfiles.set(like.fromUserId, like.fromUser.profile);
+        }
     }
 
-    return bestResult;
+    for (const profile of recentProfiles) {
+        if (profile.userId && !recentCandidateIds.has(profile.userId)) {
+            candidateProfiles.set(profile.userId, profile);
+        }
+    }
+
+    const candidates = Array.from(candidateProfiles.values());
+    if (candidates.length === 0) return null;
+
+    // Score top 10 candidates
+    const scored = await Promise.all(
+        candidates.slice(0, 10).map(async (candidate) => {
+            try {
+                const compat = await calculateCompatibility(userId, candidate.userId);
+                return { candidate, score: compat.totalScore };
+            } catch {
+                return { candidate, score: 50 };
+            }
+        })
+    );
+
+    // Sort by score descending
+    scored.sort((a, b) => b.score - a.score);
+
+    const best = scored[0];
+    if (!best) return null;
+
+    // Save daily result
+    await prisma.analyticsEvent.create({
+        data: {
+            userId,
+            event: 'daily_compatibility_shown',
+            metadata: {
+                candidateId: best.candidate.userId,
+                score: best.score,
+                date: today,
+                alternativesCount: scored.length
+            }
+        }
+    }).catch(() => {});
+
+    const userProfile = user.profile;
+    return buildResult(best.candidate, best.score, userProfile.values || [], userProfile.interests || []);
+}
+
+function buildResult(
+    candidate: any,
+    score: number,
+    userValues: string[],
+    userInterests: string[]
+): DailyCompatibilityResult {
+    const candidateValues = candidate.values || [];
+    const candidateInterests = candidate.interests || [];
+
+    const sharedValues = userValues.filter(v => candidateValues.includes(v));
+    const sharedInterests = userInterests.filter(i => candidateInterests.includes(i));
+
+    const allValues = [...new Set([...userValues, ...candidateValues])];
+    const differences = allValues.filter(v => !sharedValues.includes(v)).slice(0, 2);
+
+    return {
+        profile: {
+            id: candidate.userId,
+            displayName: candidate.displayName || 'Alguien',
+            photos: candidate.photos || [],
+            age: candidate.age,
+            city: candidate.city,
+            bio: candidate.bio,
+        },
+        score,
+        sharedValues,
+        sharedInterests,
+        differences
+    };
 }

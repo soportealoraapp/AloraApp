@@ -18,13 +18,13 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useToast } from "@/hooks/use-toast";
 import { motion, AnimatePresence } from "framer-motion";
+import { useAnalytics, AnalyticsEvents } from "@/hooks/use-analytics";
 import Link from "next/link";
 import { Skeleton } from "@/components/ui/skeleton";
 
 import { MessageBubble } from "@/components/chat/message-bubble";
 import { ReportDialog } from "@/components/safety/ReportDialog";
 import { BlockDialog } from "@/components/safety/BlockDialog";
-import { trackEvent } from "@/lib/tracking/client";
 import Image from "next/image";
 
 export default function ChatWindowPage() {
@@ -43,6 +43,8 @@ export default function ChatWindowPage() {
     const [showReportDialog, setShowReportDialog] = useState(false);
     const [showBlockDialog, setShowBlockDialog] = useState(false);
     const [autoScroll, setAutoScroll] = useState(true);
+    const { track } = useAnalytics();
+    const messageCountRef = useRef(0);
 
     const match = matches.find((m) => m.id === matchId);
     const otherUserId = match?.users.find((id) => id !== user?.id);
@@ -135,9 +137,16 @@ export default function ChatWindowPage() {
 
     const handleSendMessage = async (text: string) => {
         if (!otherUserId) return;
+        const isFirstMessage = messages.length === 0;
         await sendMessage(text, otherUserId);
-        if (user) {
-            trackEvent('CHAT_MESSAGE_SENT', { userId: user.id, matchId });
+
+        track(AnalyticsEvents.FIRST_MESSAGE_SENT, { matchId, partnerId: otherUserId });
+
+        // Track conversation milestones
+        const newCount = messageCountRef.current + 1;
+        messageCountRef.current = newCount;
+        if (newCount === 10 || newCount === 25 || newCount === 50) {
+            track(AnalyticsEvents.CONVERSATION_MILESTONE, { matchId, count: newCount });
         }
     };
 

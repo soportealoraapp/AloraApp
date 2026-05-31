@@ -17,6 +17,7 @@ import { BRAND_VOICE } from "@/lib/constants/brand-voice";
 import { Skeleton } from "@/components/ui/skeleton";
 import { DailyQuestionCard } from "@/components/daily-question/DailyQuestionCard";
 import { DailyCompatibilityCard } from "@/components/compatibility/DailyCompatibilityCard";
+import { useAnalytics, AnalyticsEvents } from "@/hooks/use-analytics";
 
 const DEFAULT_FILTERS: Filters = {
   ageRange: [18, 60],
@@ -35,6 +36,7 @@ export default function DiscoverPage() {
   const { sendLike } = useMatches();
   const { toast } = useToast();
   const router = useRouter();
+  const { track } = useAnalytics();
 
   const [matchedProfile, setMatchedProfile] = useState<UserProfile | null>(null);
   const [showMatchScreen, setShowMatchScreen] = useState(false);
@@ -102,12 +104,15 @@ export default function DiscoverPage() {
 
     try {
       if (direction === 'right') {
+        track(AnalyticsEvents.LIKE_SENT, { targetUserId: profileToActOn.id });
         const result = await sendLike(profileToActOn.id, 'like');
         if (result?.matched) {
+          track(AnalyticsEvents.MATCH_CREATED, { partnerId: profileToActOn.id });
           setMatchedProfile(profileToActOn);
           setShowMatchScreen(true);
         }
       } else {
+        track(AnalyticsEvents.PASS_SENT, { targetUserId: profileToActOn.id });
         await sendLike(profileToActOn.id, 'pass');
       }
     } catch (error) {

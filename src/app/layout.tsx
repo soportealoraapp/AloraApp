@@ -8,6 +8,7 @@ import { AuthGate } from '@/components/auth/AuthGate';
 import { SafetyGuard } from '@/components/safety/SafetyGuard';
 import { OfflineBanner } from '@/components/offline/OfflineBanner';
 import { AgeGate } from '@/components/auth/AgeGate';
+import { AnalyticsProvider } from '@/components/analytics/AnalyticsProvider';
 
 export default async function RootLayout({
   children,
@@ -27,13 +28,15 @@ export default async function RootLayout({
           disableTransitionOnChange
         >
           <AuthProvider>
-            <AgeGate />
-            <AuthGate>
-              <SafetyGuard>
-                <OfflineBanner />
-                {children}
-              </SafetyGuard>
-            </AuthGate>
+            <AnalyticsProvider>
+              <AgeGate />
+              <AuthGate>
+                <SafetyGuard>
+                  <OfflineBanner />
+                  {children}
+                </SafetyGuard>
+              </AuthGate>
+            </AnalyticsProvider>
             <Toaster />
           </AuthProvider>
         </ThemeProvider>

@@ -1,16 +1,31 @@
 'use client';
 
-import { logAuditAction } from "@/server/actions/audit";
+const eventCache: Array<{ event: string; metadata?: Record<string, any> }> = [];
+let flushTimer: ReturnType<typeof setTimeout> | null = null;
+let sessionId: string | null = null;
 
-const eventCache: string[] = [];
-let flushTimer: NodeJS.Timeout | null = null;
+if (typeof window !== 'undefined') {
+    sessionId = sessionStorage.getItem('analytics_session_id');
+    if (!sessionId) {
+        sessionId = `sess_${Date.now().toString(36)}_${Math.random().toString(36).substr(2, 9)}`;
+        sessionStorage.setItem('analytics_session_id', sessionId);
+    }
+}
 
-function flush() {
+async function flush() {
     if (eventCache.length === 0) return;
     const events = [...eventCache];
     eventCache.length = 0;
-    // Could send to analytics endpoint here
-    console.debug('[Analytics]', events);
+
+    try {
+        await fetch('/api/analytics/track', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ events, sessionId }),
+        });
+    } catch {
+        // Silently fail — events are lost but app continues
+    }
 }
 
 function debouncedFlush() {
@@ -18,27 +33,31 @@ function debouncedFlush() {
     flushTimer = setTimeout(flush, 2000);
 }
 
-export async function trackEvent(
-    action: string,
-    details?: Record<string, any>
-) {
+export function trackEvent(event: string, metadata?: Record<string, any>) {
     try {
-        eventCache.push(action);
+        eventCache.push({ event, metadata: { ...metadata, timestamp: new Date().toISOString() } });
         debouncedFlush();
-
-        const userId = details?.userId;
-        if (userId) {
-            await logAuditAction(userId, action, details).catch(() => {});
-        }
-    } catch (e) {
+    } catch {
         // Silently fail
     }
 }
 
-export function trackPageView(page: string, userId?: string) {
-    trackEvent('page_view', { page, userId, timestamp: new Date().toISOString() });
+export function trackPageView(page: string) {
+    trackEvent('page_view', { page });
 }
 
 export function trackEngagement(action: string, metadata?: Record<string, any>) {
-    trackEvent(action, { ...metadata, timestamp: new Date().toISOString() });
+    trackEvent(action, metadata);
+}
+
+// Flush on page unload
+if (typeof window !== 'undefined') {
+    window.addEventListener('beforeunload', () => {
+        if (eventCache.length > 0) {
+            navigator.sendBeacon('/api/analytics/track', JSON.stringify({
+                events: eventCache,
+                sessionId
+            }));
+        }
+    });
 }

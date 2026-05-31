@@ -2,13 +2,38 @@ import { prisma } from '@/lib/prisma';
 
 export type AnalyticsEventType =
     | 'signup'
-    | 'onboarding_complete'
-    | 'first_match'
+    | 'onboarding_started'
+    | 'onboarding_step_completed'
+    | 'onboarding_completed'
+    | 'onboarding_abandoned'
+    | 'profile_viewed'
+    | 'profile_edited'
+    | 'profile_photo_added'
+    | 'like_sent'
+    | 'pass_sent'
+    | 'superlike_sent'
+    | 'rewind_used'
+    | 'match_created'
     | 'first_message'
     | 'first_reply'
+    | 'conversation_started'
+    | 'conversation_milestone'
     | 'daily_active'
     | 'weekly_active'
-    | 'monthly_active';
+    | 'monthly_active'
+    | 'paywall_viewed'
+    | 'plus_started'
+    | 'plus_cancelled'
+    | 'boost_activated'
+    | 'streak_checkin'
+    | 'daily_question_answered'
+    | 'daily_compatibility_viewed'
+    | 'user_reported'
+    | 'user_blocked'
+    | 'feedback_submitted'
+    | 'travel_mode_activated'
+    | 'travel_mode_deactivated'
+    | string;
 
 export async function trackEvent(
     userId: string,

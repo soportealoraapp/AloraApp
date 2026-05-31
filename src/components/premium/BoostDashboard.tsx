@@ -20,6 +20,11 @@ interface BoostStats {
         likesReceived7d: number;
         matchesCreated7d: number;
     };
+    boostComparison: {
+        before: { likes: number; matches: number };
+        during: { likes: number; matches: number };
+        after: { likes: number; matches: number };
+    } | null;
     history: Array<{
         activatedAt: string;
         totalBoosts: number;
@@ -184,6 +189,35 @@ export function BoostDashboard() {
                         <p className="text-[10px] text-muted-foreground">Total boosts</p>
                     </div>
                 </div>
+
+                {/* Boost Comparison */}
+                {stats.boostComparison && (
+                    <div className="space-y-2">
+                        <p className="text-xs font-medium text-muted-foreground">Impacto del ultimo boost</p>
+                        <div className="grid grid-cols-3 gap-2 text-center">
+                            <div className="p-2 bg-muted/30 rounded-lg">
+                                <p className="text-[10px] text-muted-foreground mb-1">Antes</p>
+                                <p className="text-sm font-bold">{stats.boostComparison.before.likes} likes</p>
+                                <p className="text-[10px] text-muted-foreground">{stats.boostComparison.before.matches} matches</p>
+                            </div>
+                            <div className="p-2 bg-blue-50 rounded-lg">
+                                <p className="text-[10px] text-blue-600 mb-1 font-medium">Durante</p>
+                                <p className="text-sm font-bold text-blue-700">{stats.boostComparison.during.likes} likes</p>
+                                <p className="text-[10px] text-blue-600">{stats.boostComparison.during.matches} matches</p>
+                            </div>
+                            <div className="p-2 bg-muted/30 rounded-lg">
+                                <p className="text-[10px] text-muted-foreground mb-1">Despues</p>
+                                <p className="text-sm font-bold">{stats.boostComparison.after.likes} likes</p>
+                                <p className="text-[10px] text-muted-foreground">{stats.boostComparison.after.matches} matches</p>
+                            </div>
+                        </div>
+                        {stats.boostComparison.before.likes > 0 && (
+                            <p className="text-[10px] text-center text-green-600">
+                                +{Math.round(((stats.boostComparison.during.likes - stats.boostComparison.before.likes) / stats.boostComparison.before.likes) * 100)}% likes durante boost
+                            </p>
+                        )}
+                    </div>
+                )}
 
                 {/* History */}
                 {stats.history.length > 0 && (

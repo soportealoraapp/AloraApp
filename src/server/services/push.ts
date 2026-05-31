@@ -1,4 +1,5 @@
 import { prisma } from '@/lib/prisma';
+import { sendFCMMessage } from './push-fcm';
 
 interface PushPayload {
     title: string;
@@ -11,17 +12,12 @@ interface PushPayload {
 
 export async function sendPushToUser(userId: string, payload: PushPayload) {
     try {
-        const tokens = await prisma.pushToken.findMany({
-            where: { userId },
-            orderBy: { lastSeen: 'desc' },
+        // Check notification preferences
+        const prefs = await prisma.notificationPreference.findUnique({
+            where: { userId }
         });
 
-        if (tokens.length === 0) {
-            console.warn(`No push tokens for user ${userId}`);
-            return;
-        }
-
-        // Store in-app notification
+        // Store in-app notification (always, regardless of prefs)
         await prisma.notification.create({
             data: {
                 userId,
@@ -31,45 +27,46 @@ export async function sendPushToUser(userId: string, payload: PushPayload) {
                 data: payload.data || {},
                 channel: payload.channel || 'default',
             }
+        }).catch(() => {});
+
+        // Get push tokens
+        const tokens = await prisma.pushToken.findMany({
+            where: { userId },
+            orderBy: { lastSeen: 'desc' },
         });
 
-        // For each token, attempt to send push
-        // In production, this would use Firebase Admin SDK or another push service
+        if (tokens.length === 0) return { succeeded: 0, failed: 0 };
+
+        // Send push to all tokens
+        let succeeded = 0;
+        let failed = 0;
+
         const results = await Promise.allSettled(
             tokens.map(async (tokenRecord) => {
-                try {
-                    // Placeholder for actual push service integration
-                    // Example: await admin.messaging().send({
-                    //     token: tokenRecord.token,
-                    //     notification: { title: payload.title, body: payload.body },
-                    //     data: payload.data,
-                    //     android: { notification: { channelId: payload.channel || 'default' } }
-                    // });
-                    console.log(`[Push] Sending to ${tokenRecord.platform}:${tokenRecord.token.slice(0, 20)}...`);
-                    console.log(`[Push] Title: ${payload.title}, Body: ${payload.body}`);
-                    return { success: true, token: tokenRecord.token };
-                } catch (error) {
-                    // Token might be expired, remove it
-                    if ((error as any)?.code === 'messaging/invalid-registration-token' ||
-                        (error as any)?.code === 'messaging/registration-token-not-registered') {
+                const result = await sendFCMMessage(
+                    tokenRecord.token,
+                    { title: payload.title, body: payload.body },
+                    payload.data
+                );
+
+                if (result.success) {
+                    succeeded++;
+                } else {
+                    failed++;
+                    // Remove invalid tokens
+                    if (result.error === 'invalid_token') {
                         await prisma.pushToken.delete({ where: { id: tokenRecord.id } }).catch(() => {});
                     }
-                    throw error;
                 }
+
+                return result;
             })
         );
 
-        const succeeded = results.filter(r => r.status === 'fulfilled').length;
-        const failed = results.filter(r => r.status === 'rejected').length;
-
-        if (failed > 0) {
-            console.warn(`Push: ${succeeded} sent, ${failed} failed for user ${userId}`);
-        }
-
         return { succeeded, failed };
     } catch (error) {
-        console.error('Error sending push notification:', error);
-        return { succeeded: 0, failed: 1 };
+        console.error('Push notification error:', error);
+        return { succeeded: 0, failed: 0 };
     }
 }
 
@@ -77,56 +74,51 @@ export async function sendPushToMultipleUsers(userIds: string[], payload: PushPa
     const results = await Promise.allSettled(
         userIds.map(userId => sendPushToUser(userId, payload))
     );
-
-    return {
-        total: userIds.length,
-        succeeded: results.filter(r => r.status === 'fulfilled').length,
-    };
+    return results;
 }
 
-// Event-driven notification triggers
+// Helper functions for common notification types
 export async function notifyNewMatch(userId: string, partnerName: string, matchId: string) {
     return sendPushToUser(userId, {
-        title: '¡Nuevo match! 🎉',
-        body: `Has hecho match con ${partnerName}`,
-        data: { type: 'match', screen: `/chat/${matchId}`, matchId },
+        title: 'Nuevo match!',
+        body: `${partnerName} y tu se gustaron mutuamente`,
+        data: { type: 'match', matchId },
         channel: 'matches',
     });
 }
 
-export async function notifyNewMessage(userId: string, senderName: string, matchId: string, messagePreview: string) {
+export async function notifyNewMessage(userId: string, senderName: string, matchId: string, preview: string) {
     return sendPushToUser(userId, {
         title: senderName,
-        body: messagePreview.length > 100 ? messagePreview.slice(0, 100) + '...' : messagePreview,
-        data: { type: 'message', screen: `/chat/${matchId}`, matchId },
+        body: preview.length > 100 ? preview.substring(0, 100) + '...' : preview,
+        data: { type: 'message', matchId },
         channel: 'messages',
-        sound: 'message_sound',
     });
 }
 
 export async function notifyVerificationApproved(userId: string) {
     return sendPushToUser(userId, {
-        title: '¡Identidad verificada!',
-        body: 'Tu verificación ha sido aprobada. Ahora tienes el badge azul.',
-        data: { type: 'verification', screen: '/settings/verification' },
+        title: 'Identidad verificada',
+        body: 'Tu identidad ha sido verificada exitosamente',
+        data: { type: 'verification' },
         channel: 'verification',
     });
 }
 
-export async function notifyVerificationRejected(userId: string, reason?: string) {
+export async function notifyVerificationRejected(userId: string, reason: string) {
     return sendPushToUser(userId, {
-        title: 'Verificación rechazada',
-        body: reason || 'No pudimos verificar tu identidad. Intenta de nuevo.',
-        data: { type: 'verification', screen: '/settings/verification' },
+        title: 'Verificacion requerida',
+        body: reason || 'Tu verificacion necesitaRevision',
+        data: { type: 'verification' },
         channel: 'verification',
     });
 }
 
 export async function notifyReportResolved(userId: string) {
     return sendPushToUser(userId, {
-        title: 'Reporte revisado',
-        body: 'Hemos revisado tu reporte. Gracias por ayudarnos a mantener Alora segura.',
-        data: { type: 'report', screen: '/settings/safety' },
+        title: 'Reporte resuelto',
+        body: 'Tu reporte ha sido revisado',
+        data: { type: 'safety' },
         channel: 'safety',
     });
 }

@@ -133,6 +133,43 @@ export async function registerPushNotifications() {
         if (permResult.receive !== 'granted') return null;
 
         await PushNotifications.register();
+
+        // Listen for registration token
+        PushNotifications.addListener('registration', async (token: { value: string }) => {
+            if (token.value) {
+                try {
+                    await fetch('/api/notifications/register', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            token: token.value,
+                            platform: 'android',
+                        })
+                    });
+                } catch (error) {
+                    console.error('Failed to register push token:', error);
+                }
+            }
+        });
+
+        // Listen for token refresh
+        PushNotifications.addListener('token', async (token: { value: string }) => {
+            if (token.value) {
+                try {
+                    await fetch('/api/notifications/register', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            token: token.value,
+                            platform: 'android',
+                        })
+                    });
+                } catch (error) {
+                    console.error('Failed to refresh push token:', error);
+                }
+            }
+        });
+
         return PushNotifications;
     } catch {
         return null;

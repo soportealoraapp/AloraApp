@@ -2,48 +2,59 @@ export const AnalyticsEvents = {
     // Onboarding
     ONBOARDING_STARTED: 'onboarding_started',
     ONBOARDING_STEP_COMPLETED: 'onboarding_step_completed',
-    ONBOARDING_DROPOFF: 'onboarding_dropoff',
     ONBOARDING_COMPLETED: 'onboarding_completed',
+    ONBOARDING_ABANDONED: 'onboarding_abandoned',
 
     // Profile
-    PROFILE_COMPLETION_UPDATED: 'profile_completion_updated',
-    PROFILE_PHOTO_ADDED: 'profile_photo_added',
-    PROFILE_PHOTO_REMOVED: 'profile_photo_removed',
+    PROFILE_VIEWED: 'profile_viewed',
     PROFILE_EDITED: 'profile_edited',
+    PROFILE_PHOTO_ADDED: 'profile_photo_added',
 
     // Discovery
-    DISCOVER_FEED_LOADED: 'discover_feed_loaded',
-    DISCOVER_FEED_EXHAUSTED: 'discover_feed_exhausted',
-    DISCOVER_SWIPE_LEFT: 'discover_swipe_left',
-    DISCOVER_SWIPE_RIGHT: 'discover_swipe_right',
-
-    // Likes & Matches
     LIKE_SENT: 'like_sent',
-    SUPERLIKE_SENT: 'superlike_sent',
     PASS_SENT: 'pass_sent',
-    MATCH_CREATED: 'match_created',
+    SUPERLIKE_SENT: 'superlike_sent',
+    REWIND_USED: 'rewind_used',
 
-    // Chat
-    CHAT_MESSAGE_SENT: 'chat_message_sent',
-    CHAT_FIRST_MESSAGE: 'chat_first_message',
-    CHAT_REPLY_RECEIVED: 'chat_reply_received',
+    // Matching
+    MATCH_CREATED: 'match_created',
+    FIRST_MESSAGE_SENT: 'first_message_sent',
+    FIRST_REPLY_RECEIVED: 'first_reply_received',
+
+    // Conversations
+    CONVERSATION_STARTED: 'conversation_started',
+    CONVERSATION_MILESTONE: 'conversation_milestone',
+
+    // Retention
+    DAILY_ACTIVE: 'daily_active',
+    WEEKLY_ACTIVE: 'weekly_active',
+    MONTHLY_ACTIVE: 'monthly_active',
+
+    // Premium
+    PAYWALL_VIEWED: 'paywall_viewed',
+    PLUS_STARTED: 'plus_started',
+    PLUS_CANCELLED: 'plus_cancelled',
+
+    // Boost
+    BOOST_ACTIVATED: 'boost_activated',
+
+    // Streak
+    STREAK_CHECKIN: 'streak_checkin',
+
+    // Daily
+    DAILY_QUESTION_ANSWERED: 'daily_question_answered',
+    DAILY_COMPATIBILITY_VIEWED: 'daily_compatibility_viewed',
 
     // Safety
     USER_REPORTED: 'user_reported',
     USER_BLOCKED: 'user_blocked',
-    USER_MUTED: 'user_muted',
-    USER_HIDDEN: 'user_hidden',
 
-    // Verification
-    VERIFICATION_SUBMITTED: 'verification_submitted',
-    VERIFICATION_APPROVED: 'verification_approved',
-    VERIFICATION_REJECTED: 'verification_rejected',
+    // Feedback
+    FEEDBACK_SUBMITTED: 'feedback_submitted',
 
-    // Engagement
-    SESSION_STARTED: 'session_started',
-    SESSION_ENDED: 'session_ended',
-    APP_BACKGROUNDED: 'app_backgrounded',
-    APP_FOREGROUNDED: 'app_foregrounded',
+    // Travel
+    TRAVEL_MODE_ACTIVATED: 'travel_mode_activated',
+    TRAVEL_MODE_DEACTIVATED: 'travel_mode_deactivated',
 } as const;
 
 export type AnalyticsEvent = typeof AnalyticsEvents[keyof typeof AnalyticsEvents];

@@ -4,6 +4,16 @@ import { prisma } from '@/lib/prisma';
 const FREE_STREAK_BOOST_DAYS = 5;
 const PLUS_STREAK_BOOST_DAYS = 3;
 
+// Valid actions that count toward streak
+const VALID_STREAK_ACTIONS = [
+    'daily_question_answered',
+    'chat_message_sent',
+    'like_sent',
+    'quiz_completed',
+    'profile_edited',
+    'streak_checkin',
+];
+
 // POST /api/streak/checkin — Daily streak check-in
 export async function POST() {
     const { createClient } = await import('@/lib/supabase/server');
@@ -32,6 +42,7 @@ export async function POST() {
 
         const now = new Date();
         const today = now.toDateString();
+        const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate());
 
         // Check if already checked in today
         if (profile.lastCheckInAt) {
@@ -47,6 +58,23 @@ export async function POST() {
             }
         }
 
+        // Verify real activity today (not just app open)
+        const todayActions = await prisma.analyticsEvent.count({
+            where: {
+                userId: user.id,
+                event: { in: VALID_STREAK_ACTIONS },
+                createdAt: { gte: startOfDay }
+            }
+        });
+
+        if (todayActions === 0) {
+            return NextResponse.json({
+                success: false,
+                error: 'No hay actividad real hoy',
+                message: 'Haz algo hoy para mantener tu racha: responde la pregunta diaria, envia un mensaje, o da un like.'
+            }, { status: 400 });
+        }
+
         // Calculate if streak continues or resets
         let newStreak = 1;
         if (profile.lastCheckInAt) {
@@ -54,10 +82,8 @@ export async function POST() {
             const diffDays = Math.floor((now.getTime() - lastCheckIn.getTime()) / (1000 * 60 * 60 * 24));
 
             if (diffDays === 1) {
-                // Consecutive day - continue streak
                 newStreak = profile.currentStreak + 1;
             }
-            // If diffDays > 1, streak is broken, reset to 1
         }
 
         const newLongestStreak = Math.max(newStreak, profile.longestStreak);
@@ -67,34 +93,28 @@ export async function POST() {
         const streakRewardsClaimed = profile.streakRewardsClaimed || [];
         const newRewards: string[] = [];
 
-        // Free reward: boost every 5 days
         if (newStreak >= FREE_STREAK_BOOST_DAYS && newStreak % FREE_STREAK_BOOST_DAYS === 0) {
             const rewardKey = `boost_streak_${newStreak}`;
             if (!streakRewardsClaimed.includes(rewardKey)) {
                 newRewards.push(rewardKey);
-                // Grant boost
-                const boostExpiresAt = new Date(now.getTime() + 30 * 60 * 1000);
                 await prisma.profile.update({
                     where: { userId: user.id },
                     data: {
-                        boostExpiresAt,
+                        boostExpiresAt: new Date(now.getTime() + 30 * 60 * 1000),
                         totalBoosts: { increment: 1 },
                     }
                 });
             }
         }
 
-        // Plus reward: boost every 3 days
         if (isPlus && newStreak >= PLUS_STREAK_BOOST_DAYS && newStreak % PLUS_STREAK_BOOST_DAYS === 0) {
             const rewardKey = `plus_boost_streak_${newStreak}`;
             if (!streakRewardsClaimed.includes(rewardKey)) {
                 newRewards.push(rewardKey);
-                // Grant additional boost
-                const boostExpiresAt = new Date(now.getTime() + 30 * 60 * 1000);
                 await prisma.profile.update({
                     where: { userId: user.id },
                     data: {
-                        boostExpiresAt,
+                        boostExpiresAt: new Date(now.getTime() + 30 * 60 * 1000),
                         totalBoosts: { increment: 1 },
                     }
                 });
@@ -120,18 +140,14 @@ export async function POST() {
                 metadata: {
                     streak: newStreak,
                     isNewRecord: newStreak >= profile.longestStreak,
-                    rewardsEarned: newRewards
+                    rewardsEarned: newRewards,
+                    actionsToday: todayActions
                 }
             }
         }).catch(() => {});
 
-        // Build 7-day history
-        const history: boolean[] = [];
-        for (let i = 6; i >= 0; i--) {
-            const date = new Date(now);
-            date.setDate(date.getDate() - i);
-            history.push(date.toDateString() === today);
-        }
+        // Build real 7-day history
+        const history = await buildWeekHistory(user.id, now);
 
         return NextResponse.json({
             success: true,
@@ -182,24 +198,8 @@ export async function GET() {
             ? new Date(profile.lastCheckInAt).toDateString() === today
             : false;
 
-        // Build 7-day history
-        const history: boolean[] = [];
-        for (let i = 6; i >= 0; i--) {
-            const date = new Date(now);
-            date.setDate(date.getDate() - i);
-            const hasCheckIn = await prisma.analyticsEvent.findFirst({
-                where: {
-                    userId: user.id,
-                    event: 'streak_checkin',
-                    createdAt: {
-                        gte: new Date(date.setHours(0, 0, 0, 0)),
-                        lt: new Date(date.setHours(23, 59, 59, 999))
-                    }
-                },
-                select: { id: true }
-            });
-            history.push(!!hasCheckIn);
-        }
+        // Build real 7-day history
+        const history = await buildWeekHistory(user.id, now);
 
         // Calculate next reward
         const isPlus = profile.subscriptionStatus === 'plus';
@@ -222,4 +222,27 @@ export async function GET() {
         console.error('Error getting streak status:', error);
         return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
     }
+}
+
+async function buildWeekHistory(userId: string, now: Date): Promise<boolean[]> {
+    const history: boolean[] = [];
+
+    for (let i = 6; i >= 0; i--) {
+        const date = new Date(now);
+        date.setDate(date.getDate() - i);
+        const dayStart = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+        const dayEnd = new Date(date.getFullYear(), date.getMonth(), date.getDate(), 23, 59, 59, 999);
+
+        const hasActivity = await prisma.analyticsEvent.findFirst({
+            where: {
+                userId,
+                event: { in: VALID_STREAK_ACTIONS },
+                createdAt: { gte: dayStart, lte: dayEnd }
+            },
+            select: { id: true }
+        });
+        history.push(!!hasActivity);
+    }
+
+    return history;
 }

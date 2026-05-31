@@ -12,13 +12,22 @@ export async function POST(request: NextRequest) {
 
     try {
         const body = await request.json();
-        await trackEvent(
-            user.id,
-            body.event,
-            body.metadata,
-            body.sessionId,
-        );
-        return NextResponse.json({ success: true });
+
+        // Handle batch events (from client flush)
+        if (body.events && Array.isArray(body.events)) {
+            for (const evt of body.events) {
+                await trackEvent(user.id, evt.event, evt.metadata, body.sessionId).catch(() => {});
+            }
+            return NextResponse.json({ success: true, processed: body.events.length });
+        }
+
+        // Handle single event
+        if (body.event) {
+            await trackEvent(user.id, body.event, body.metadata, body.sessionId);
+            return NextResponse.json({ success: true });
+        }
+
+        return NextResponse.json({ error: 'No event provided' }, { status: 400 });
     } catch (error) {
         console.error('Analytics track error:', error);
         return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
