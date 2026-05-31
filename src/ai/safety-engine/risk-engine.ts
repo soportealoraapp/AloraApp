@@ -170,22 +170,22 @@ export async function analyzeMessageSafety(
     // Cross-user patterns: check if this sender repeats the same message
     const crossUserPatterns: CrossUserPattern[] = [];
     if (cps.length > 0 || loveBomb.length > 0) {
-        // Check if similar messages were sent to other users
-        const similarRecentMessages = await prisma.message.findMany({
+        // Check if similar messages were sent to other users via matches
+        const similarMessages = await prisma.message.findMany({
             where: {
                 senderId,
                 content: { contains: content.substring(0, 30) },
                 createdAt: { gte: new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000) },
             },
-            select: { receiverId: true },
-            distinct: ['receiverId'],
+            select: { matchId: true },
+            distinct: ['matchId'],
         });
 
-        if (similarRecentMessages.length >= 3) {
+        if (similarMessages.length >= 3) {
             crossUserPatterns.push({
                 pattern: 'Copy-paste opener sent to multiple users',
-                usersInvolved: similarRecentMessages.length,
-                details: `Same message sent to ${similarRecentMessages.length} different users`,
+                usersInvolved: similarMessages.length,
+                details: `Same message sent to ${similarMessages.length} different conversations`,
                 riskContribution: 0.3,
             });
         }
@@ -238,12 +238,19 @@ export async function analyzeMessageSafety(
     }
 
     // Calculate unsafe escalation: progression of risk over conversations
-    const previousMessages = await prisma.message.findMany({
-        where: { senderId, receiverId },
+    // Find the match between sender and receiver to get conversation history
+    const [u1, u2] = [senderId, receiverId].sort();
+    const match = await prisma.match.findUnique({
+        where: { user1Id_user2Id: { user1Id: u1, user2Id: u2 } },
+        select: { id: true }
+    });
+
+    const previousMessages = match ? await prisma.message.findMany({
+        where: { matchId: match.id, senderId },
         orderBy: { createdAt: 'desc' },
         take: 20,
         select: { content: true, createdAt: true },
-    });
+    }) : [];
     const escalationScore = calculateEscalation(previousMessages, { loveBombingRisk, manipulationRisk, coercionRisk, harassmentRisk });
 
     // Build signals
@@ -335,17 +342,25 @@ export async function analyzeMessageSafety(
 
     // Log audit
     if (adjustedRisk >= 0.3) {
+        const auditDetails: Record<string, unknown> = {
+            riskLevel,
+            overallRisk: adjustedRisk,
+            dimensions,
+            messagePreview: content.substring(0, 100),
+        };
+        if (crossUserPatterns.length > 0) {
+            auditDetails.crossUserPatterns = crossUserPatterns.map(p => ({
+                pattern: p.pattern,
+                usersInvolved: p.usersInvolved,
+                details: p.details,
+                riskContribution: p.riskContribution,
+            }));
+        }
         await prisma.auditLog.create({
             data: {
                 userId: senderId,
                 action: 'safety_risk_detected',
-                details: {
-                    riskLevel,
-                    overallRisk: adjustedRisk,
-                    dimensions,
-                    messagePreview: content.substring(0, 100),
-                    crossUserPatterns,
-                },
+                details: auditDetails as any,
             },
         });
     }
@@ -409,13 +424,13 @@ export async function getSenderHistory(senderId: string): Promise<{
         prisma.block.count({ where: { blockedId: senderId } }),
         prisma.message.findMany({
             where: { senderId },
-            select: { receiverId: true, content: true, createdAt: true },
+            select: { matchId: true, content: true, createdAt: true },
             orderBy: { createdAt: 'desc' },
             take: 100,
         }),
     ]);
 
-    const uniquePartners = new Set(messages.map(m => m.receiverId)).size;
+    const uniquePartners = new Set(messages.map(m => m.matchId)).size;
 
     // Check for repeated openers
     const recentMessages = messages.slice(0, 20);

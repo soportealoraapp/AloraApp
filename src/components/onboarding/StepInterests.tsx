@@ -5,25 +5,7 @@ import { useState } from "react";
 import { trackEvent } from "@/lib/tracking/client";
 import { motion } from "framer-motion";
 import { UserProfile } from "@/lib/domain/types";
-
-const INTEREST_CATEGORIES = [
-    {
-        label: 'Arte y Cultura',
-        items: ['Música', 'Cine', 'Libros', 'Arte', 'Fotografía', 'Teatro', 'Museos', 'Baile'],
-    },
-    {
-        label: 'Estilo de Vida',
-        items: ['Viajes', 'Cocina', 'Moda', 'Yoga', 'Meditación', 'Jardinería', 'Mascotas', 'Fitness'],
-    },
-    {
-        label: 'Aventura',
-        items: ['Deporte', 'Naturaleza', 'Senderismo', 'Buceo', 'Escalada', 'Ciclismo', 'Correr', 'Surf'],
-    },
-    {
-        label: 'Entretenimiento',
-        items: ['Gaming', 'Series', 'Anime', 'Comedia', 'Podcasts', 'Tecnología', 'Astronomía', 'Cócteles'],
-    },
-];
+import { INTEREST_CATEGORIES, MAX_INTERESTS } from "@/lib/constants/preferences";
 
 interface StepInterestsProps {
     userId?: string;
@@ -40,7 +22,7 @@ export function StepInterests({ data, onUpdate, onNext, onPrev, userId }: StepIn
         if (selected.includes(interest)) {
             setSelected(selected.filter(i => i !== interest));
         } else {
-            if (selected.length < 10) {
+            if (selected.length < MAX_INTERESTS) {
                 setSelected([...selected, interest]);
             }
         }
@@ -64,13 +46,13 @@ export function StepInterests({ data, onUpdate, onNext, onPrev, userId }: StepIn
             <div className="flex-1 overflow-y-auto space-y-4">
                 {INTEREST_CATEGORIES.map((category, catIdx) => (
                     <motion.div
-                        key={category.label}
+                        key={category.name}
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: catIdx * 0.08 }}
                     >
                         <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-2">
-                            {category.label}
+                            {category.name}
                         </p>
                         <div className="flex flex-wrap gap-2">
                             {category.items.map((item) => {
@@ -97,7 +79,7 @@ export function StepInterests({ data, onUpdate, onNext, onPrev, userId }: StepIn
             <div className="pt-4 space-y-3">
                 <div className="flex items-center justify-center gap-2">
                     <div className="flex gap-1">
-                        {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(i => (
+                        {Array.from({ length: MAX_INTERESTS }, (_, i) => i + 1).map(i => (
                             <div
                                 key={i}
                                 className={`h-1.5 w-1.5 rounded-full transition-colors ${
@@ -106,7 +88,7 @@ export function StepInterests({ data, onUpdate, onNext, onPrev, userId }: StepIn
                             />
                         ))}
                     </div>
-                    <span className="text-[10px] text-muted-foreground">{selected.length}/10</span>
+                    <span className="text-[10px] text-muted-foreground">{selected.length}/{MAX_INTERESTS}</span>
                 </div>
 
                 <div className="flex gap-4">

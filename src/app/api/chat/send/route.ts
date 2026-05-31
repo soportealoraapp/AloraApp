@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { withRateLimit } from '@/server/utils/api-rate-limit';
 import { filterOffensiveMessages } from '@/ai/flows/filter-offensive-messages';
+import { analyzeMessageSafety } from '@/ai/safety-engine/risk-engine';
 import { notifyNewMessage } from '@/server/services/push';
 import { trackEvent } from '@/server/services/analytics';
 
@@ -36,6 +37,21 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ error: 'Match not found or unauthorized' }, { status: 403 });
         }
 
+        // Block check: ensure neither user has blocked the other
+        const receiverId = match.user1Id === user.id ? match.user2Id : match.user1Id;
+        const blockExists = await prisma.block.findFirst({
+            where: {
+                OR: [
+                    { blockerId: user.id, blockedId: receiverId },
+                    { blockerId: receiverId, blockedId: user.id }
+                ]
+            }
+        });
+
+        if (blockExists) {
+            return NextResponse.json({ error: 'Interaction not available' }, { status: 403 });
+        }
+
         // Moderate message content
         let content = text;
         let isFiltered = false;
@@ -45,6 +61,31 @@ export async function POST(request: NextRequest) {
             isFiltered = moderationResult.isOffensive;
         } catch (moderationError) {
             console.error('Moderation error:', moderationError);
+        }
+
+        // Risk engine analysis (love bombing, manipulation, scam detection)
+        let isHighRisk = false;
+        try {
+            const prevMessageCount = await prisma.message.count({ where: { matchId } });
+            const riskAssessment = await analyzeMessageSafety(
+                matchId,
+                user.id,
+                receiverId,
+                content,
+                prevMessageCount
+            );
+
+            if (riskAssessment.assessment.riskLevel === 'critical' || riskAssessment.assessment.riskLevel === 'high') {
+                // Flag message for review and reduce sender reputation
+                isFiltered = true;
+                isHighRisk = true;
+                await prisma.profile.update({
+                    where: { userId: user.id },
+                    data: { reputationScore: { decrement: riskAssessment.assessment.riskLevel === 'critical' ? 10 : 5 } }
+                }).catch(() => {});
+            }
+        } catch (riskError) {
+            console.error('Risk engine error:', riskError);
         }
 
         // Create Message
@@ -65,7 +106,6 @@ export async function POST(request: NextRequest) {
         });
 
         // Send push notification to the other user
-        const receiverId = match.user1Id === user.id ? match.user2Id : match.user1Id;
         const senderProfile = await prisma.profile.findUnique({
             where: { userId: user.id },
             select: { displayName: true }

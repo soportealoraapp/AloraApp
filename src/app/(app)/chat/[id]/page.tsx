@@ -334,7 +334,7 @@ export default function ChatWindowPage() {
             </main>
 
             {/* Chat input area */}
-            <div className="border-t bg-background p-4">
+            <div className="border-t bg-background p-4 pb-safe">
                 {messages.length === 0 && (profile?.gender !== 'woman' && profile?.gender !== 'female') ? (
                     <div className="flex flex-col items-center justify-center p-4 bg-muted/50 rounded-2xl text-center">
                         <Sparkles className="h-8 w-8 text-primary mb-2" />

@@ -45,9 +45,18 @@ export interface UserProfile extends User {
     lookingFor?: string;
 
     // Status
-    subscriptionStatus?: 'free' | 'plus' | 'premium';
+    subscriptionStatus?: 'free' | 'plus';
     verificationStatus?: 'verified' | 'unverified'; // UI helper
     trustStatus?: 'clean' | 'watchlist' | 'restricted' | 'banned';
+
+    // Daily likes tracking
+    dailyLikesUsed?: number;
+    dailyLikesResetAt?: Date;
+
+    // Boost tracking
+    boostExpiresAt?: Date | string | null;
+    lastBoostAt?: Date | string | null;
+    totalBoosts?: number;
 
     // v3.x
     experimentalGroup?: 'A' | 'B';

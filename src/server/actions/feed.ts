@@ -298,6 +298,12 @@ export async function getDynamicFeed(
                 // Boost users with complete profile and recent activity
                 if (completeness >= 80 && activeToday) totalScore += 10;
 
+                // Active profile boost (30-minute visibility boost)
+                const boostExpires = (cp as any).boostExpiresAt;
+                if (boostExpires && new Date(boostExpires) > now) {
+                    totalScore += 50;
+                }
+
                 return {
                     profile: { ...profile, completenessScore: completeness },
                     score: {

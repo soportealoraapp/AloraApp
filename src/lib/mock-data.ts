@@ -1,20 +1,11 @@
-// Mock data stubs - these should be replaced with real data from Firebase
-// This file exists only to prevent build errors from legacy imports
+import { INTERESTS, VALUES, LIFESTYLE_OPTIONS } from '@/lib/constants/preferences';
 
-export const allInterests = [
-    'Travel', 'Music', 'Movies', 'Sports', 'Reading', 'Cooking', 'Gaming',
-    'Photography', 'Art', 'Technology', 'Fitness', 'Nature', 'Fashion'
-];
-
-export const allValues = [
-    'Honesty', 'Loyalty', 'Family', 'Career', 'Adventure', 'Stability',
-    'Creativity', 'Independence', 'Compassion', 'Ambition'
-];
-
+export const allInterests = [...INTERESTS];
+export const allValues = [...VALUES];
 export const lifestyleOptions = {
-    smoking: ['Never', 'Sometimes', 'Often'],
-    drinking: ['Never', 'Social', 'Regular'],
-    children: ['Want', 'Have', 'Don\'t want', 'Open to it']
+  smoking: [...LIFESTYLE_OPTIONS.smoking],
+  drinking: [...LIFESTYLE_OPTIONS.drinking],
+  children: [...LIFESTYLE_OPTIONS.children]
 };
 
 export interface UserProfile {

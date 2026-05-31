@@ -4,6 +4,8 @@ import { withRateLimit } from '@/server/utils/api-rate-limit';
 import { notifyNewMatch } from '@/server/services/push';
 import { trackEvent } from '@/server/services/analytics';
 
+const FREE_DAILY_LIKES_LIMIT = 50;
+
 // POST /api/match/like
 export async function POST(request: NextRequest) {
     const { createClient } = await import('@/lib/supabase/server');
@@ -26,6 +28,55 @@ export async function POST(request: NextRequest) {
 
         const interactionType = type || 'like';
 
+        // Daily likes limit for free users (skip for passes)
+        if (interactionType !== 'pass') {
+            const profile = await prisma.profile.findUnique({
+                where: { userId: user.id },
+                select: { subscriptionStatus: true, dailyLikesUsed: true, dailyLikesResetAt: true }
+            });
+
+            if (profile && profile.subscriptionStatus === 'free') {
+                const now = new Date();
+                const lastReset = profile.dailyLikesResetAt;
+                const isNewDay = now.toDateString() !== lastReset.toDateString();
+
+                if (isNewDay) {
+                    await prisma.profile.update({
+                        where: { userId: user.id },
+                        data: { dailyLikesUsed: 0, dailyLikesResetAt: now }
+                    });
+                } else if (profile.dailyLikesUsed >= FREE_DAILY_LIKES_LIMIT) {
+                    const tomorrow = new Date(now);
+                    tomorrow.setDate(tomorrow.getDate() + 1);
+                    tomorrow.setHours(0, 0, 0, 0);
+                    const retryAfter = Math.ceil((tomorrow.getTime() - now.getTime()) / 1000);
+
+                    return NextResponse.json(
+                        {
+                            error: 'Daily like limit reached',
+                            retryAfter,
+                            message: `Has alcanzado el limite de ${FREE_DAILY_LIKES_LIMIT} likes diarios. Tus likes se reinician manana.`
+                        },
+                        { status: 429 }
+                    );
+                }
+            }
+        }
+
+        // Block check: prevent interaction with blocked users
+        const blockExists = await prisma.block.findFirst({
+            where: {
+                OR: [
+                    { blockerId: user.id, blockedId: toUserId },
+                    { blockerId: toUserId, blockedId: user.id }
+                ]
+            }
+        });
+
+        if (blockExists) {
+            return NextResponse.json({ error: 'Interaction not available' }, { status: 403 });
+        }
+
         // 1. Create/Update Interaction
         await prisma.interaction.upsert({
             where: {
@@ -41,6 +92,14 @@ export async function POST(request: NextRequest) {
                 type: interactionType
             }
         });
+
+        // Increment daily likes counter for free users
+        if (interactionType !== 'pass') {
+            await prisma.profile.update({
+                where: { userId: user.id },
+                data: { dailyLikesUsed: { increment: 1 } }
+            }).catch(() => {}); // Ignore errors on counter increment
+        }
 
         if (interactionType === 'pass') {
             return NextResponse.json({ matched: false });

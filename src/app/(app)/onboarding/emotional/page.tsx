@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { ArrowLeft, ArrowRight, Sparkles, Heart, Shield, Target, Users, X } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { VALUES } from '@/lib/constants/preferences';
 
 const STEPS = [
     { id: 'goals', title: '¿Qué buscas?', icon: Target },
@@ -17,7 +18,6 @@ const STEPS = [
 ];
 
 const GOALS = ['Relación seria', 'Conocer gente nueva', 'Amistad', 'Ver qué pasa', 'Compañía'];
-const VALUES = ['Honestidad', 'Respeto', 'Lealtad', 'Humor', 'Aventura', 'Familia', 'Crecimiento', 'Independencia', 'Creatividad', 'Empatía'];
 const PERSONALITY = ['Introvertido/a', 'Extrovertido/a', 'Ambivertido/a', 'Tranquilo/a', 'Energético/a', 'Analítico/a', 'Espontáneo/a'];
 const LOOKING_FOR = ['Alguien que me escuche', 'Alguien aventurero/a', 'Alguien tranquilo/a', 'Alguien que me reta', 'Alguien con mismos valores'];
 const AVOID = ['Mentiras', 'Juegos mentales', 'Ghosting', 'Falta de respeto', 'Manipulación', 'Superficialidad', 'Celos extremos'];

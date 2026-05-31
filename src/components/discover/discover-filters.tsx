@@ -33,6 +33,8 @@ export interface Filters {
   smoking?: string;
   drinking?: string;
   children?: string;
+  userLat?: number;
+  userLng?: number;
 }
 
 
@@ -80,6 +82,8 @@ export function DiscoverFilters({ open, onOpenChange, onApplyFilters, initialFil
       smoking: selectedSmoking,
       drinking: selectedDrinking,
       children: selectedChildren,
+      userLat: initialFilters.userLat,
+      userLng: initialFilters.userLng,
     });
     onOpenChange(false);
   }

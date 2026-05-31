@@ -60,10 +60,10 @@ export function PaywallModal({ isOpen, onClose }: PaywallModalProps) {
     };
 
     const features = [
-        { icon: <Heart className="text-pink-500 h-5 w-5" />, title: "Likes ilimitados", subtitle: "Sin límites diarios para conectar" },
-        { icon: <Sparkles className="text-amber-500 h-5 w-5" />, title: "Ver quién te dio like", subtitle: "Desbloquea tu lista de admiradores" },
-        { icon: <Zap className="text-blue-500 h-5 w-5" />, title: "1 Boost Semanal", subtitle: "Destaque prioritario por 30 min" },
-        { icon: <ShieldCheck className="text-green-500 h-5 w-5" />, title: "Filtros Avanzados", subtitle: "Busca por valores y estilo de vida" },
+        { icon: <Heart className="text-pink-500 h-5 w-5" />, title: "Likes ilimitados", subtitle: "Sin limites diarios para conectar" },
+        { icon: <Zap className="text-blue-500 h-5 w-5" />, title: "Boosts semanales", subtitle: "Destaque prioritario por 30 min" },
+        { icon: <Sparkles className="text-amber-500 h-5 w-5" />, title: "Mayor visibilidad", subtitle: "Aparece primero en descubrimiento" },
+        { icon: <ShieldCheck className="text-green-500 h-5 w-5" />, title: "Modo incognito", subtitle: "Controla quien te ve" },
     ];
 
     return (

@@ -40,6 +40,23 @@ export default function DiscoverPage() {
   const SWIPE_LIMIT = 20;
   const sentinelRef = useRef<HTMLDivElement>(null);
 
+  // Request geolocation for distance filter
+  useEffect(() => {
+    if ('geolocation' in navigator) {
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          setFilters(prev => ({
+            ...prev,
+            userLat: pos.coords.latitude,
+            userLng: pos.coords.longitude
+          }));
+        },
+        () => { /* User denied geolocation — distance filter won't work */ },
+        { enableHighAccuracy: false, timeout: 10000 }
+      );
+    }
+  }, []);
+
   const currentProfile = profiles[0]?.profile;
   const profilesRef = useRef(profiles);
   profilesRef.current = profiles;

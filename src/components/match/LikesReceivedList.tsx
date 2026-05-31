@@ -2,32 +2,18 @@
 
 import { useState, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Sparkles, Heart, Loader2, Lock } from 'lucide-react';
+import { Heart, Loader2 } from 'lucide-react';
 import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useAuth } from '@/contexts/AuthContext';
-import { useToast } from '@/hooks/use-toast';
-import { PaywallModal } from '../premium/PaywallModal';
 import { TrustBadge } from '../ui/premium/TrustBadge';
 
 export function LikesReceivedList() {
-    const { profile } = useAuth();
     const [likers, setLikers] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
-    const [showPaywall, setShowPaywall] = useState(false);
-    const { toast } = useToast();
-
-    const isPlus = profile?.subscriptionStatus === 'plus';
 
     useEffect(() => {
-        if (isPlus) {
-            fetchLikers();
-        } else {
-            setLoading(false);
-        }
-    }, [isPlus]);
+        fetchLikers();
+    }, []);
 
     const fetchLikers = async () => {
         try {
@@ -43,43 +29,6 @@ export function LikesReceivedList() {
         }
     };
 
-    if (!isPlus) {
-        return (
-            <Card className="bg-gradient-to-br from-pink-50 to-orange-50 border-pink-100 overflow-hidden relative">
-                <div className="absolute inset-0 bg-white/40 backdrop-blur-[2px] z-10 flex flex-col items-center justify-center p-6 text-center">
-                    <div className="bg-white p-3 rounded-2xl shadow-xl mb-4">
-                        <Lock className="h-8 w-8 text-pink-500" />
-                    </div>
-                    <h4 className="font-bold text-gray-900 mb-2">¿Quién te ha dado like?</h4>
-                    <p className="text-sm text-gray-600 mb-6 max-w-[250px]">
-                        Actualiza a Alora Plus para descubrir quién está esperando para hablar contigo.
-                    </p>
-                    <Button
-                        onClick={() => setShowPaywall(true)}
-                        className="bg-gradient-to-r from-pink-500 to-rose-400 text-white rounded-full font-bold px-8"
-                    >
-                        <Sparkles className="h-4 w-4 mr-2" />
-                        Ver Admiradores
-                    </Button>
-                </div>
-
-                {/* Blurred mockup items */}
-                <CardContent className="p-4 space-y-3 opacity-20 filter blur-[4px]">
-                    {[1, 2, 3].map(i => (
-                        <div key={i} className="flex items-center gap-4">
-                            <div className="h-12 w-12 rounded-full bg-gray-200" />
-                            <div className="space-y-2 flex-1">
-                                <div className="h-4 w-24 bg-gray-200 rounded" />
-                                <div className="h-3 w-40 bg-gray-200 rounded" />
-                            </div>
-                        </div>
-                    ))}
-                </CardContent>
-                <PaywallModal isOpen={showPaywall} onClose={() => setShowPaywall(false)} />
-            </Card>
-        );
-    }
-
     if (loading) return <div className="flex justify-center py-12"><Loader2 className="animate-spin text-pink-500 h-8 w-8" /></div>;
 
     return (
@@ -94,7 +43,7 @@ export function LikesReceivedList() {
             {likers.length === 0 ? (
                 <Card className="rounded-3xl border-dashed bg-muted/20">
                     <CardContent className="py-12 text-center text-muted-foreground text-sm">
-                        Aún no tienes nuevos admiradores. ¡Sigue explorando!
+                        Aun no tienes nuevos admiradores. Sigue explorando!
                     </CardContent>
                 </Card>
             ) : (

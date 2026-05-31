@@ -30,6 +30,21 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ error: 'Match not found or unauthorized' }, { status: 403 });
         }
 
+        // Block check
+        const receiverId = match.user1Id === user.id ? match.user2Id : match.user1Id;
+        const blockExists = await prisma.block.findFirst({
+            where: {
+                OR: [
+                    { blockerId: user.id, blockedId: receiverId },
+                    { blockerId: receiverId, blockedId: user.id }
+                ]
+            }
+        });
+
+        if (blockExists) {
+            return NextResponse.json({ error: 'Interaction not available' }, { status: 403 });
+        }
+
         const message = await prisma.message.create({
             data: {
                 matchId,

@@ -1,4 +1,4 @@
-export type PlanTier = 'free' | 'plus' | 'premium';
+export type PlanTier = 'free' | 'plus';
 
 export interface Subscription {
     id: string;
@@ -16,9 +16,9 @@ export interface Payment {
     userId: string;
     amount: number;
     currency: string;
-    provider: 'stripe';
+    provider: 'stripe' | 'lemonsqueezy';
     timestamp: Date;
-    metadata?: any;
+    metadata?: Record<string, unknown>;
 }
 
 export interface Plan {
@@ -39,9 +39,12 @@ export const PLANS: Record<PlanTier, Plan> = {
         interval: 'month',
         features: [
             '50 likes diarios',
-            'Filtros básicos',
+            'Ver quién te gusta',
+            'Filtros de búsqueda',
             'Chat ilimitado',
             'Compatibilidad básica',
+            'IA y quizzes',
+            'Seguridad y bloqueo',
             '1 boost cada 5 días de racha'
         ]
     },
@@ -53,30 +56,11 @@ export const PLANS: Record<PlanTier, Plan> = {
         interval: 'month',
         features: [
             'Likes ilimitados',
-            'Filtros avanzados',
-            'Mayor visibilidad',
-            'Matches internacionales',
-            'Ver quién te gusta',
-            'Read receipts',
-            'Boosts más frecuentes',
-            'Rewind ilimitado',
-            'Modo incógnito'
-        ]
-    },
-    premium: {
-        id: 'price_premium_monthly',
-        name: 'Alora Premium',
-        price: 199,
-        currency: 'MXN',
-        interval: 'month',
-        features: [
-            'Todo de Alora+',
-            'AI Wingman ilimitado',
-            'Compatibility deep dive',
-            'Priority ranking',
-            'Profile analytics',
-            'Weekly boost',
-            'Travel mode'
+            'Mayor visibilidad en descubrimiento',
+            'Boosts más frecuentes (semanales)',
+            'Matching internacional',
+            'Modo incógnito',
+            'Rewind (deshacer swipe)'
         ]
     }
 };

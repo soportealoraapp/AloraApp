@@ -17,19 +17,20 @@ import Image from "next/image";
 import { Skeleton } from "@/components/ui/skeleton";
 import { CityAutocomplete } from "@/components/ui/city-autocomplete";
 import type { LocationResult } from "@/lib/location";
+import { INTERESTS, VALUES, MUSIC_GENRES, LIFESTYLE_OPTIONS } from "@/lib/constants/preferences";
 
 const lifestyleOptions = {
-    smoking: ["No fumo", "Ocasionalmente", "Sí, fumo"],
-    drinking: ["No bebo", "Socialmente", "Regularmente"],
-    children: ["No tengo", "Tengo hijos", "Quiero tener"],
+    smoking: [...LIFESTYLE_OPTIONS.smoking],
+    drinking: [...LIFESTYLE_OPTIONS.drinking],
+    children: [...LIFESTYLE_OPTIONS.children],
     religion: ["Ninguna", "Cristiana", "Católica", "Musulmana", "Judía", "Budista", "Otra"],
 };
 
 const zodiacSigns = ["Aries", "Tauro", "Géminis", "Cáncer", "Leo", "Virgo", "Libra", "Escorpio", "Sagitario", "Capricornio", "Acuario", "Piscis"];
 const educationLevels = ["Secundaria", "Preparatoria", "Universidad", "Licenciatura", "Maestría", "Doctorado"];
-const allInterests = ['Viajar', 'Yoga', 'Arte', 'Música', 'Cocinar', 'Leer', 'Deportes', 'Cine', 'Fotografía', 'Bailar', 'Tecnología', 'Naturaleza', 'Moda', 'Escritura', 'Gaming'];
-const allValues = ['Honestidad', 'Amabilidad', 'Crecimiento', 'Lealtad', 'Humor', 'Aventura', 'Respeto', 'Creatividad', 'Empatía', 'Autenticidad'];
-const allMusicGenres = ['Pop', 'Rock', 'Jazz', 'Clásica', 'Electrónica', 'Hip-Hop', 'Reggaeton', 'Salsa', 'Country', 'Indie', 'R&B', 'Folk'];
+const allInterests = [...INTERESTS];
+const allValues = [...VALUES];
+const allMusicGenres = [...MUSIC_GENRES];
 
 export default function ProfileEditPage() {
     const router = useRouter();
@@ -187,8 +188,8 @@ export default function ProfileEditPage() {
                 cityId,
                 countryCode,
                 stateCode,
-                latitude,
-                longitude,
+                latitude: latitude ?? undefined,
+                longitude: longitude ?? undefined,
                 lookingFor,
             });
 
@@ -254,7 +255,7 @@ export default function ProfileEditPage() {
                             {photos.map((photo, index) => (
                                 <div key={index} className="relative aspect-square rounded-lg overflow-hidden group">
                                     <Image src={photo} alt={`Foto ${index + 1}`} fill className="object-cover" />
-                                    <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                                    <div className="absolute inset-0 bg-black/50 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
                                         {index > 0 && (
                                             <Button size="sm" variant="secondary" onClick={() => movePhoto(index, index - 1)}>
                                                 ←
