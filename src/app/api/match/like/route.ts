@@ -78,7 +78,7 @@ export async function POST(request: NextRequest) {
         }
 
         // 1. Create/Update Interaction
-        await prisma.interaction.upsert({
+        const interaction = await prisma.interaction.upsert({
             where: {
                 fromUserId_toUserId: {
                     fromUserId: user.id,
@@ -92,6 +92,15 @@ export async function POST(request: NextRequest) {
                 type: interactionType
             }
         });
+
+        // Track last swipe for rewind feature
+        await prisma.profile.update({
+            where: { userId: user.id },
+            data: {
+                lastSwipeId: interaction.id,
+                lastSwipeAt: new Date(),
+            }
+        }).catch(() => {});
 
         // Increment daily likes counter for free users
         if (interactionType !== 'pass') {

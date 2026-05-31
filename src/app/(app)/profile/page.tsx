@@ -12,8 +12,9 @@ import { Settings, Edit, MapPin, Briefcase, Cigarette, GlassWater, Baby, Star, B
 import Image from "next/image";
 import Link from "next/link";
 import { Skeleton } from "@/components/ui/skeleton";
-import { BoostActivation } from "@/components/premium/BoostActivation";
+import { BoostDashboard } from "@/components/premium/BoostDashboard";
 import { MissionCenter } from "@/components/retention/MissionCenter";
+import { StreakCard } from "@/components/gamification/StreakCard";
 import { PaywallModal } from "@/components/premium/PaywallModal";
 import { useState } from "react";
 
@@ -242,7 +243,7 @@ export default function ProfilePage() {
             </Card>
           )}
 
-          <BoostActivation />
+          <BoostDashboard />
 
           <Card className="rounded-3xl border">
             <CardContent className="p-4 flex items-center justify-between">
@@ -255,6 +256,8 @@ export default function ProfilePage() {
               </Button>
             </CardContent>
           </Card>
+
+          <StreakCard />
 
           <MissionCenter />
         </div>

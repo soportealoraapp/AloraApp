@@ -49,6 +49,7 @@ model User {
 
   // Notifications
   notifications Notification[]
+  dailyAnswers  DailyAnswer[]
 
   // Analytics
   analyticsEvents AnalyticsEvent[]
@@ -140,6 +141,26 @@ model Profile {
   lastBoostAt    DateTime?
   totalBoosts    Int      @default(0)
 
+  // Travel mode
+  travelModeEnabled Boolean @default(false)
+  travelCity        String?
+  travelCountryCode String?
+  travelLatitude    Float?
+  travelLongitude   Float?
+  travelStartedAt   DateTime?
+
+  // Rewind
+  lastSwipeId    String?
+  lastSwipeAt    DateTime?
+  rewindsUsed    Int      @default(0)
+  rewindsResetAt DateTime @default(now())
+
+  // Streaks
+  currentStreak       Int      @default(0)
+  longestStreak       Int      @default(0)
+  lastCheckInAt       DateTime?
+  streakRewardsClaimed String[] @default([])
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -227,7 +248,8 @@ model Interaction {
 
   type String // like, superlike, pass
 
-  createdAt DateTime @default(now())
+  createdAt DateTime  @default(now())
+  deletedAt DateTime?
 
   @@unique([fromUserId, toUserId])
   @@map("interactions")
@@ -433,6 +455,43 @@ model AuditLog {
   timestamp DateTime @default(now())
 
   @@map("audit_logs")
+}
+
+model DailyQuestion {
+  id        String   @id @default(uuid())
+  question  String
+  category  String
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  answers   DailyAnswer[]
+
+  @@map("daily_questions")
+}
+
+model DailyAnswer {
+  id         String   @id @default(uuid())
+  userId     String
+  user       User     @relation(fields: [userId], references: [id])
+  questionId String
+  question   DailyQuestion @relation(fields: [questionId], references: [id])
+  answer     String
+  createdAt  DateTime @default(now())
+
+  @@unique([userId, questionId])
+  @@map("daily_answers")
+}
+
+model NotificationPreference {
+  id              String  @id @default(uuid())
+  userId          String  @unique
+  matches         Boolean @default(true)
+  messages        Boolean @default(true)
+  profileViews    Boolean @default(true)
+  promotions      Boolean @default(false)
+  dailyQuestion   Boolean @default(true)
+  streakReminder  Boolean @default(true)
+
+  @@map("notification_preferences")
 }
 
 model RateLimit {

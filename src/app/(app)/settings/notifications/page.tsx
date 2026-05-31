@@ -1,20 +1,81 @@
-
 "use client";
 
 import { useRouter } from 'next/navigation';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Loader2 } from "lucide-react";
+import { useState, useEffect } from 'react';
+import { useToast } from '@/hooks/use-toast';
+
+interface NotificationPrefs {
+    matches: boolean;
+    messages: boolean;
+    profileViews: boolean;
+    promotions: boolean;
+    dailyQuestion: boolean;
+    streakReminder: boolean;
+}
 
 export default function NotificationsPage() {
     const router = useRouter();
+    const { toast } = useToast();
+    const [prefs, setPrefs] = useState<NotificationPrefs | null>(null);
+    const [loading, setLoading] = useState(true);
+    const [updating, setUpdating] = useState<string | null>(null);
 
-    const notificationSettings = [
-        { id: "new-match", label: "Nuevos 'matches'", description: "Cuando alguien nuevo hace 'match' contigo." },
-        { id: "new-message", label: "Nuevos mensajes", description: "Cuando recibes un nuevo mensaje." },
-        { id: "profile-view", label: "Visitas a tu perfil", description: "Cuando alguien visita tu perfil." },
-        { id: "promotions", label: "Promociones y noticias", description: "Recibe noticias y ofertas de Alora." },
+    useEffect(() => {
+        fetchPrefs();
+    }, []);
+
+    const fetchPrefs = async () => {
+        try {
+            const res = await fetch('/api/notifications/preferences');
+            const data = await res.json();
+            setPrefs(data);
+        } catch (error) {
+            console.error('Error fetching preferences:', error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const togglePref = async (field: keyof NotificationPrefs, value: boolean) => {
+        if (!prefs) return;
+        setUpdating(field);
+        try {
+            const res = await fetch('/api/notifications/preferences', {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ [field]: value })
+            });
+
+            if (!res.ok) throw new Error('Error updating');
+
+            setPrefs({ ...prefs, [field]: value });
+            toast({ title: 'Preferencia actualizada' });
+        } catch (error: any) {
+            toast({ title: 'Error', description: error.message, variant: 'destructive' });
+        } finally {
+            setUpdating(null);
+        }
+    };
+
+    if (loading) {
+        return (
+            <div className="md:pl-60 p-6 flex justify-center py-20">
+                <Loader2 className="animate-spin text-pink-500 h-8 w-8" />
+            </div>
+        );
+    }
+
+    const settings = [
+        { key: 'matches' as const, label: "Nuevos matches", description: "Cuando alguien hace match contigo." },
+        { key: 'messages' as const, label: "Nuevos mensajes", description: "Cuando recibes un nuevo mensaje." },
+        { key: 'profileViews' as const, label: "Visitas a tu perfil", description: "Cuando alguien visita tu perfil." },
+        { key: 'dailyQuestion' as const, label: "Pregunta del dia", description: "Recordatorio de la pregunta diaria." },
+        { key: 'streakReminder' as const, label: "Recordatorio de racha", description: "No pierdas tu racha diaria." },
+        { key: 'promotions' as const, label: "Promociones", description: "Noticias y ofertas de Alora." },
     ];
 
     return (
@@ -29,16 +90,20 @@ export default function NotificationsPage() {
                 <Card>
                     <CardHeader>
                         <CardTitle>Notificaciones Push</CardTitle>
-                        <CardDescription>Elige cómo quieres que te notifiquemos.</CardDescription>
+                        <CardDescription>Elige como quieres que te notifiquemos.</CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-4 divide-y">
-                        {notificationSettings.map(setting => (
-                            <div key={setting.id} className="flex items-center justify-between pt-4 first:pt-0">
+                        {settings.map(setting => (
+                            <div key={setting.key} className="flex items-center justify-between pt-4 first:pt-0">
                                 <div className="flex-grow">
                                     <p className="font-medium">{setting.label}</p>
                                     <p className="text-sm text-muted-foreground">{setting.description}</p>
                                 </div>
-                                <Switch id={setting.id} defaultChecked={setting.id !== 'promotions'} />
+                                <Switch
+                                    checked={prefs?.[setting.key] ?? false}
+                                    onCheckedChange={(v) => togglePref(setting.key, v)}
+                                    disabled={updating === setting.key}
+                                />
                             </div>
                         ))}
                     </CardContent>

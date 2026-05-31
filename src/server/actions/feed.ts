@@ -65,7 +65,7 @@ export async function getDynamicFeed(
         const [blocks1, blocks2, interactions, matches1, matches2, reportsByMe, reportsOnMe] = await Promise.all([
             prisma.block.findMany({ where: { blockerId: currentUserId }, select: { blockedId: true } }),
             prisma.block.findMany({ where: { blockedId: currentUserId }, select: { blockerId: true } }),
-            prisma.interaction.findMany({ where: { fromUserId: currentUserId }, select: { toUserId: true } }),
+            prisma.interaction.findMany({ where: { fromUserId: currentUserId, deletedAt: null }, select: { toUserId: true } }),
             prisma.match.findMany({ where: { user1Id: currentUserId }, select: { user2Id: true } }),
             prisma.match.findMany({ where: { user2Id: currentUserId }, select: { user1Id: true } }),
             prisma.report.findMany({ where: { reporterId: currentUserId }, select: { reportedId: true } }),
@@ -149,8 +149,18 @@ export async function getDynamicFeed(
         }
 
         // Distance filtering (using Haversine via Prisma raw query if coordinates available)
+        // If travel mode is enabled, use travel coordinates instead of filter coordinates
+        let effectiveLat = filters?.userLat;
+        let effectiveLng = filters?.userLng;
+
+        const profile = currentUser.profile;
+        if (profile.travelModeEnabled && profile.travelLatitude && profile.travelLongitude) {
+            effectiveLat = profile.travelLatitude;
+            effectiveLng = profile.travelLongitude;
+        }
+
         let candidateIds: string[] | null = null;
-        if (filters?.distance && filters?.userLat && filters?.userLng) {
+        if (filters?.distance && effectiveLat && effectiveLng) {
             // Get all profiles with coordinates and filter by distance in-memory
             const allWithCoords = await prisma.profile.findMany({
                 where: {
@@ -166,7 +176,7 @@ export async function getDynamicFeed(
 
             candidateIds = allWithCoords
                 .filter(p => {
-                    const dist = getDistance(filters.userLat!, filters.userLng!, p.latitude!, p.longitude!);
+                    const dist = getDistance(effectiveLat!, effectiveLng!, p.latitude!, p.longitude!);
                     return dist <= filters.distance!;
                 })
                 .map(p => p.userId);
@@ -302,6 +312,11 @@ export async function getDynamicFeed(
                 const boostExpires = (cp as any).boostExpiresAt;
                 if (boostExpires && new Date(boostExpires) > now) {
                     totalScore += 50;
+                }
+
+                // Plus priority: higher visibility in discover
+                if (cp.subscriptionStatus === 'plus') {
+                    totalScore += 25;
                 }
 
                 return {

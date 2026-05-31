@@ -3,8 +3,12 @@
 import { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Shield, ShieldCheck, ShieldAlert, Lock, Eye, UserX, FileText, AlertTriangle } from 'lucide-react';
-import { SectionTitle } from '@/components/ui/custom/SectionTitle';
+import { Switch } from '@/components/ui/switch';
+import { Button } from '@/components/ui/button';
+import { Shield, ShieldCheck, ShieldAlert, Lock, Eye, UserX, FileText, AlertTriangle, Loader2, ArrowLeft, BarChart3 } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface SafetyData {
     overallProtection: 'high' | 'medium' | 'low';
@@ -16,17 +20,64 @@ interface SafetyData {
 }
 
 export default function SafetyCenterPage() {
+    const router = useRouter();
+    const { toast } = useToast();
+    const { refreshProfile } = useAuth();
     const [data, setData] = useState<SafetyData | null>(null);
+    const [updating, setUpdating] = useState<string | null>(null);
 
     useEffect(() => {
-        fetch('/api/safety/status').then(r => r.json()).then(setData).catch(console.error);
+        fetchData();
     }, []);
 
-    if (!data) return <div className="md:pl-60 p-6">Cargando...</div>;
+    const fetchData = async () => {
+        try {
+            const res = await fetch('/api/safety/status');
+            const result = await res.json();
+            setData(result);
+        } catch (error) {
+            console.error('Error fetching safety status:', error);
+        }
+    };
+
+    const togglePrivacy = async (field: 'incognito' | 'showMeInDiscover', value: boolean) => {
+        if (!data) return;
+        setUpdating(field);
+        try {
+            const res = await fetch('/api/profile', {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ [field]: value })
+            });
+
+            if (!res.ok) throw new Error('Error updating');
+
+            setData({
+                ...data,
+                privacySettings: { ...data.privacySettings, [field]: value }
+            });
+
+            await refreshProfile();
+
+            toast({ title: 'Actualizado', description: `${field === 'incognito' ? 'Modo incognito' : 'Visibilidad'} actualizado` });
+        } catch (error: any) {
+            toast({ title: 'Error', description: error.message, variant: 'destructive' });
+        } finally {
+            setUpdating(null);
+        }
+    };
+
+    if (!data) {
+        return (
+            <div className="md:pl-60 p-6 flex justify-center py-20">
+                <Loader2 className="animate-spin text-pink-500 h-8 w-8" />
+            </div>
+        );
+    }
 
     const protectionConfig = {
-        high: { icon: ShieldCheck, label: 'Tu perfil está protegido', color: 'text-green-600', bg: 'bg-green-50' },
-        medium: { icon: Shield, label: 'Protección parcial', color: 'text-yellow-600', bg: 'bg-yellow-50' },
+        high: { icon: ShieldCheck, label: 'Tu perfil esta protegido', color: 'text-green-600', bg: 'bg-green-50' },
+        medium: { icon: Shield, label: 'Proteccion parcial', color: 'text-yellow-600', bg: 'bg-yellow-50' },
         low: { icon: ShieldAlert, label: 'Recomendamos activar estas medidas', color: 'text-orange-600', bg: 'bg-orange-50' },
     };
 
@@ -35,7 +86,15 @@ export default function SafetyCenterPage() {
 
     return (
         <div className="md:pl-60 p-6 space-y-6">
-            <SectionTitle title="Centro de Seguridad" subtitle="Tu seguridad es nuestra prioridad" />
+            <div className="flex items-center gap-4">
+                <Button variant="ghost" size="icon" onClick={() => router.back()}>
+                    <ArrowLeft className="h-5 w-5" />
+                </Button>
+                <div>
+                    <h1 className="text-2xl font-bold">Centro de Seguridad</h1>
+                    <p className="text-sm text-muted-foreground">Tu seguridad es nuestra prioridad</p>
+                </div>
+            </div>
 
             <Card className={`${config.bg} border-none`}>
                 <CardContent className="p-6 flex items-center gap-4">
@@ -43,7 +102,7 @@ export default function SafetyCenterPage() {
                     <div>
                         <h2 className={`text-lg font-bold ${config.color}`}>{config.label}</h2>
                         <p className="text-sm text-muted-foreground">
-                            Nivel de protección: {data.overallProtection === 'high' ? 'Alto' : data.overallProtection === 'medium' ? 'Medio' : 'Bajo'}
+                            Nivel de proteccion: {data.overallProtection === 'high' ? 'Alto' : data.overallProtection === 'medium' ? 'Medio' : 'Bajo'}
                         </p>
                     </div>
                 </CardContent>
@@ -56,18 +115,28 @@ export default function SafetyCenterPage() {
                             <Lock className="h-4 w-4" /> Privacidad
                         </CardTitle>
                     </CardHeader>
-                    <CardContent className="space-y-2">
-                        <div className="flex justify-between text-sm">
-                            <span>Modo incógnito</span>
-                            <Badge variant={data.privacySettings.incognito ? 'default' : 'outline'}>
-                                {data.privacySettings.incognito ? 'Activo' : 'Inactivo'}
-                            </Badge>
+                    <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between">
+                            <div>
+                                <p className="text-sm font-medium">Modo incognito</p>
+                                <p className="text-xs text-muted-foreground">Oculta tu perfil del descubrimiento</p>
+                            </div>
+                            <Switch
+                                checked={data.privacySettings.incognito}
+                                onCheckedChange={(v) => togglePrivacy('incognito', v)}
+                                disabled={updating === 'incognito'}
+                            />
                         </div>
-                        <div className="flex justify-between text-sm">
-                            <span>Visible en descubrir</span>
-                            <Badge variant={data.privacySettings.showMeInDiscover ? 'default' : 'outline'}>
-                                {data.privacySettings.showMeInDiscover ? 'Sí' : 'No'}
-                            </Badge>
+                        <div className="flex items-center justify-between">
+                            <div>
+                                <p className="text-sm font-medium">Visible en descubrir</p>
+                                <p className="text-xs text-muted-foreground">Aparecer en el feed de descubrimiento</p>
+                            </div>
+                            <Switch
+                                checked={data.privacySettings.showMeInDiscover}
+                                onCheckedChange={(v) => togglePrivacy('showMeInDiscover', v)}
+                                disabled={updating === 'showMeInDiscover'}
+                            />
                         </div>
                     </CardContent>
                 </Card>
@@ -75,13 +144,21 @@ export default function SafetyCenterPage() {
                 <Card>
                     <CardHeader className="pb-3">
                         <CardTitle className="text-sm flex items-center gap-2">
-                            <ShieldCheck className="h-4 w-4" /> Verificación
+                            <ShieldCheck className="h-4 w-4" /> Verificacion
                         </CardTitle>
                     </CardHeader>
                     <CardContent>
                         <Badge className={data.verificationStatus === 'Verificado' ? 'bg-blue-100 text-blue-700' : 'bg-gray-100'}>
                             {data.verificationStatus}
                         </Badge>
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            className="mt-3"
+                            onClick={() => router.push('/settings/verification')}
+                        >
+                            {data.verificationStatus === 'Verificado' ? 'Ver detalles' : 'Verificar identidad'}
+                        </Button>
                     </CardContent>
                 </Card>
 
@@ -93,7 +170,10 @@ export default function SafetyCenterPage() {
                     </CardHeader>
                     <CardContent>
                         <p className="text-2xl font-bold">{data.blockedCount}</p>
-                        <p className="text-xs text-muted-foreground">usuarios bloqueados</p>
+                        <p className="text-xs text-muted-foreground mb-3">usuarios bloqueados</p>
+                        <Button variant="outline" size="sm" onClick={() => router.push('/settings/privacy/blocked')}>
+                            Ver lista
+                        </Button>
                     </CardContent>
                 </Card>
 
@@ -128,6 +208,18 @@ export default function SafetyCenterPage() {
                     </CardContent>
                 </Card>
             )}
+
+            <Card className="cursor-pointer hover:bg-muted/50 transition-colors" onClick={() => router.push('/settings/safety/experience')}>
+                <CardContent className="p-4 flex items-center gap-3">
+                    <div className="p-2 bg-gradient-to-r from-pink-100 to-purple-100 rounded-xl">
+                        <BarChart3 className="h-5 w-5 text-pink-600" />
+                    </div>
+                    <div className="flex-1">
+                        <p className="font-medium text-sm">Tu experiencia en Alora</p>
+                        <p className="text-xs text-muted-foreground">Metricas de calidad, respeto y conversaciones</p>
+                    </div>
+                </CardContent>
+            </Card>
         </div>
     );
 }

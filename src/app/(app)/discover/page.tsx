@@ -15,6 +15,8 @@ import { useRouter } from "next/navigation";
 import { UserProfile } from "@/lib/domain/types";
 import { BRAND_VOICE } from "@/lib/constants/brand-voice";
 import { Skeleton } from "@/components/ui/skeleton";
+import { DailyQuestionCard } from "@/components/daily-question/DailyQuestionCard";
+import { DailyCompatibilityCard } from "@/components/compatibility/DailyCompatibilityCard";
 
 const DEFAULT_FILTERS: Filters = {
   ageRange: [18, 60],
@@ -140,7 +142,14 @@ export default function DiscoverPage() {
   return (
     <div className="md:pl-60 h-screen flex flex-col overflow-hidden bg-gradient-to-br from-background to-muted/30">
       <header className="flex h-16 items-center justify-between px-4 z-10">
-        <h1 className="text-2xl font-bold tracking-tight text-foreground">Alora</h1>
+        <div className="flex items-center gap-2">
+          <h1 className="text-2xl font-bold tracking-tight text-foreground">Alora</h1>
+          {(currentUserProfile as any)?.travelModeEnabled && (
+            <span className="text-[10px] bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full font-medium flex items-center gap-1">
+              ✈️ Explorando: {(currentUserProfile as any).travelCity}
+            </span>
+          )}
+        </div>
         <div className="flex items-center gap-2">
           <Button variant="ghost" size="icon" onClick={() => setFilterOpen(true)}>
             <SlidersHorizontal className="h-5 w-5 text-muted-foreground" />
@@ -199,6 +208,12 @@ export default function DiscoverPage() {
           </div>
         )}
       </main>
+
+      {/* Daily Question and Compatibility - shown below the feed */}
+      <div className="px-4 pb-4 max-w-sm mx-auto w-full space-y-3">
+        <DailyCompatibilityCard />
+        <DailyQuestionCard />
+      </div>
 
       <DiscoverFilters
         open={filterOpen}

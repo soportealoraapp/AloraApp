@@ -3,7 +3,8 @@
 import { useRouter } from 'next/navigation';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { ArrowLeft, Bell, ChevronRight, FileText, HelpCircle, Palette, Shield, User, LogOut, Loader2 } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { ArrowLeft, Bell, ChevronRight, FileText, HelpCircle, Palette, Shield, User, LogOut, Loader2, Plane } from "lucide-react";
 import Link from 'next/link';
 import { ThemeToggle } from '@/components/theme-toggle';
 import { useAuth } from '@/contexts/AuthContext';
@@ -80,6 +81,15 @@ export default function SettingsPage() {
                                 <span>Centro de Seguridad</span>
                                 </div>
                                 <ChevronRight className="w-5 h-5 text-muted-foreground" />
+                            </div>
+                        </Link>
+                        <Link href="/settings/travel">
+                            <div className="flex items-center justify-between p-3 rounded-lg hover:bg-secondary -mx-3">
+                                <div className="flex items-center gap-3">
+                                <Plane className="w-5 h-5 text-blue-500" />
+                                <span>Modo Viaje</span>
+                                </div>
+                                <Badge variant="secondary" className="text-[10px]">Plus</Badge>
                             </div>
                         </Link>
                     </CardContent>

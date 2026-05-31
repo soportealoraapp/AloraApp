@@ -58,6 +58,26 @@ export interface UserProfile extends User {
     lastBoostAt?: Date | string | null;
     totalBoosts?: number;
 
+    // Travel mode
+    travelModeEnabled?: boolean;
+    travelCity?: string;
+    travelCountryCode?: string;
+    travelLatitude?: number;
+    travelLongitude?: number;
+    travelStartedAt?: Date | string | null;
+
+    // Rewind
+    lastSwipeId?: string;
+    lastSwipeAt?: Date | string | null;
+    rewindsUsed?: number;
+    rewindsResetAt?: Date;
+
+    // Streaks
+    currentStreak?: number;
+    longestStreak?: number;
+    lastCheckInAt?: Date | string | null;
+    streakRewardsClaimed?: string[];
+
     // v3.x
     experimentalGroup?: 'A' | 'B';
     compatibility?: number; // UI helper

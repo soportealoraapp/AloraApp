@@ -62,7 +62,7 @@ export function PaywallModal({ isOpen, onClose }: PaywallModalProps) {
     const features = [
         { icon: <Heart className="text-pink-500 h-5 w-5" />, title: "Likes ilimitados", subtitle: "Sin limites diarios para conectar" },
         { icon: <Zap className="text-blue-500 h-5 w-5" />, title: "Boosts semanales", subtitle: "Destaque prioritario por 30 min" },
-        { icon: <Sparkles className="text-amber-500 h-5 w-5" />, title: "Mayor visibilidad", subtitle: "Aparece primero en descubrimiento" },
+        { icon: <Sparkles className="text-amber-500 h-5 w-5" />, title: "Likes prioritarios", subtitle: "Tus likes aparecen primero" },
         { icon: <ShieldCheck className="text-green-500 h-5 w-5" />, title: "Modo incognito", subtitle: "Controla quien te ve" },
     ];
 

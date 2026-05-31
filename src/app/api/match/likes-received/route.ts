@@ -77,8 +77,15 @@ export async function GET(request: NextRequest) {
                     age: p.age,
                     city: p.city,
                     isVerified: p.isVerified,
+                    isPlus: p.subscriptionStatus === 'plus',
                     createdAt: like.createdAt
                 };
+            })
+            // Priority Likes: Plus users appear first
+            .sort((a, b) => {
+                if (a.isPlus && !b.isPlus) return -1;
+                if (!a.isPlus && b.isPlus) return 1;
+                return 0;
             });
 
         return NextResponse.json({
