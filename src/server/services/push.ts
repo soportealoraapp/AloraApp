@@ -10,18 +10,72 @@ interface PushPayload {
     badge?: number;
 }
 
+const DEDUP_WINDOW_MINUTES = 5;
+const RATE_LIMIT_PER_HOUR = 10;
+const MAX_RETRY_ATTEMPTS = 1;
+
+const deduplicationCache = new Map<string, number>();
+const rateLimitCache = new Map<string, { count: number; resetAt: number }>();
+
+function getDeduplicationKey(userId: string, type: string): string {
+    return `${userId}:${type}`;
+}
+
+function isDeduplicated(userId: string, type: string): boolean {
+    const key = getDeduplicationKey(userId, type);
+    const lastSent = deduplicationCache.get(key);
+    if (!lastSent) return false;
+    return (Date.now() - lastSent) < DEDUP_WINDOW_MINUTES * 60 * 1000;
+}
+
+function markSent(userId: string, type: string): void {
+    const key = getDeduplicationKey(userId, type);
+    deduplicationCache.set(key, Date.now());
+    if (deduplicationCache.size > 1000) {
+        const firstKey = deduplicationCache.keys().next().value;
+        if (firstKey) deduplicationCache.delete(firstKey);
+    }
+}
+
+function isRateLimited(userId: string): boolean {
+    const entry = rateLimitCache.get(userId);
+    if (!entry) return false;
+    if (Date.now() > entry.resetAt) {
+        rateLimitCache.delete(userId);
+        return false;
+    }
+    return entry.count >= RATE_LIMIT_PER_HOUR;
+}
+
+function incrementRateLimit(userId: string): void {
+    const entry = rateLimitCache.get(userId);
+    if (!entry || Date.now() > entry.resetAt) {
+        rateLimitCache.set(userId, { count: 1, resetAt: Date.now() + 60 * 60 * 1000 });
+    } else {
+        entry.count++;
+    }
+}
+
 export async function sendPushToUser(userId: string, payload: PushPayload) {
     try {
-        // Check notification preferences
+        const notifType = payload.data?.type || 'system';
+
+        if (isDeduplicated(userId, notifType)) {
+            return { succeeded: 0, failed: 0, deduplicated: true };
+        }
+
+        if (isRateLimited(userId)) {
+            return { succeeded: 0, failed: 0, rateLimited: true };
+        }
+
         const prefs = await prisma.notificationPreference.findUnique({
             where: { userId }
         });
 
-        // Store in-app notification (always, regardless of prefs)
         await prisma.notification.create({
             data: {
                 userId,
-                type: payload.data?.type || 'system',
+                type: notifType,
                 title: payload.title,
                 body: payload.body,
                 data: payload.data || {},
@@ -29,7 +83,6 @@ export async function sendPushToUser(userId: string, payload: PushPayload) {
             }
         }).catch(() => {});
 
-        // Get push tokens
         const tokens = await prisma.pushToken.findMany({
             where: { userId },
             orderBy: { lastSeen: 'desc' },
@@ -37,31 +90,47 @@ export async function sendPushToUser(userId: string, payload: PushPayload) {
 
         if (tokens.length === 0) return { succeeded: 0, failed: 0 };
 
-        // Send push to all tokens
         let succeeded = 0;
         let failed = 0;
 
-        const results = await Promise.allSettled(
-            tokens.map(async (tokenRecord) => {
-                const result = await sendFCMMessage(
+        const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+        const staleTokens = tokens.filter(t => t.lastSeen < thirtyDaysAgo);
+        if (staleTokens.length > 0) {
+            await prisma.pushToken.deleteMany({
+                where: { id: { in: staleTokens.map(t => t.id) } },
+            }).catch(() => {});
+        }
+
+        const activeTokens = tokens.filter(t => t.lastSeen >= thirtyDaysAgo);
+
+        for (const tokenRecord of activeTokens) {
+            let result = await sendFCMMessage(
+                tokenRecord.token,
+                { title: payload.title, body: payload.body },
+                payload.data
+            );
+
+            if (!result.success && result.error !== 'invalid_token') {
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                result = await sendFCMMessage(
                     tokenRecord.token,
                     { title: payload.title, body: payload.body },
                     payload.data
                 );
+            }
 
-                if (result.success) {
-                    succeeded++;
-                } else {
-                    failed++;
-                    // Remove invalid tokens
-                    if (result.error === 'invalid_token') {
-                        await prisma.pushToken.delete({ where: { id: tokenRecord.id } }).catch(() => {});
-                    }
+            if (result.success) {
+                succeeded++;
+            } else {
+                failed++;
+                if (result.error === 'invalid_token') {
+                    await prisma.pushToken.delete({ where: { id: tokenRecord.id } }).catch(() => {});
                 }
+            }
+        }
 
-                return result;
-            })
-        );
+        markSent(userId, notifType);
+        incrementRateLimit(userId);
 
         return { succeeded, failed };
     } catch (error) {
@@ -77,7 +146,6 @@ export async function sendPushToMultipleUsers(userIds: string[], payload: PushPa
     return results;
 }
 
-// Helper functions for common notification types
 export async function notifyNewMatch(userId: string, partnerName: string, matchId: string) {
     return sendPushToUser(userId, {
         title: 'Nuevo match!',
@@ -107,8 +175,8 @@ export async function notifyVerificationApproved(userId: string) {
 
 export async function notifyVerificationRejected(userId: string, reason: string) {
     return sendPushToUser(userId, {
-        title: 'Verificacion requerida',
-        body: reason || 'Tu verificacion necesitaRevision',
+        title: 'Verificación requerida',
+        body: reason || 'Tu verificación necesita revisión',
         data: { type: 'verification' },
         channel: 'verification',
     });

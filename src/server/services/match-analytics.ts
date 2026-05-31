@@ -7,20 +7,19 @@ export interface MatchQualityMetrics {
     avgMessagesPerConversation: number;
     responseRate: number;
     compatibilityCorrelation: number;
+    ghostingRate: number;
+    longConversations: number;
+    avgResponseTime: number;
+    plusConversions: number;
 }
 
-/**
- * Calculate match quality metrics for the platform.
- */
 export async function getMatchQualityMetrics(): Promise<MatchQualityMetrics> {
     const oneWeekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
 
-    // Total matches in last week
     const totalMatches = await prisma.match.count({
         where: { createdAt: { gte: oneWeekAgo } }
     });
 
-    // Matches with at least 1 message
     const matchesWithMessages = await prisma.match.findMany({
         where: {
             createdAt: { gte: oneWeekAgo },
@@ -29,7 +28,6 @@ export async function getMatchQualityMetrics(): Promise<MatchQualityMetrics> {
         select: { id: true }
     });
 
-    // Active conversations (messages in last 3 days)
     const threeDaysAgo = new Date(Date.now() - 3 * 24 * 60 * 60 * 1000);
     const activeConversations = await prisma.match.count({
         where: {
@@ -37,7 +35,6 @@ export async function getMatchQualityMetrics(): Promise<MatchQualityMetrics> {
         }
     });
 
-    // Average messages per conversation
     const matchIds = matchesWithMessages.map(m => m.id);
     let avgMessagesPerConversation = 0;
     if (matchIds.length > 0) {
@@ -50,12 +47,24 @@ export async function getMatchQualityMetrics(): Promise<MatchQualityMetrics> {
         avgMessagesPerConversation = totalMessages / matchIds.length;
     }
 
-    // Engagement rate: matches with messages / total matches
     const engagementRate = totalMatches > 0
         ? (matchesWithMessages.length / totalMatches) * 100
         : 0;
 
-    // Response rate: messages that got a reply
+    // Ghosting rate: matches with 0-1 messages
+    const matchesWithOneOrZero = totalMatches - matchesWithMessages.length;
+    const ghostingRate = totalMatches > 0
+        ? (matchesWithOneOrZero / totalMatches) * 100
+        : 0;
+
+    // Long conversations (>20 messages)
+    const longConversations = await prisma.match.count({
+        where: {
+            messages: { some: {} },
+        },
+    });
+
+    // Response rate
     const recentMessages = await prisma.message.findMany({
         where: { createdAt: { gte: oneWeekAgo } },
         select: { matchId: true, senderId: true, createdAt: true },
@@ -64,6 +73,8 @@ export async function getMatchQualityMetrics(): Promise<MatchQualityMetrics> {
 
     let messagesWithReply = 0;
     let totalChecked = 0;
+    let totalResponseTime = 0;
+    let responseTimeCount = 0;
     const messageGroups = new Map<string, typeof recentMessages>();
 
     for (const msg of recentMessages) {
@@ -77,6 +88,9 @@ export async function getMatchQualityMetrics(): Promise<MatchQualityMetrics> {
             totalChecked++;
             if (messages[i].senderId !== messages[i + 1].senderId) {
                 messagesWithReply++;
+                const diff = new Date(messages[i + 1].createdAt).getTime() - new Date(messages[i].createdAt).getTime();
+                totalResponseTime += diff;
+                responseTimeCount++;
             }
         }
     }
@@ -85,13 +99,24 @@ export async function getMatchQualityMetrics(): Promise<MatchQualityMetrics> {
         ? (messagesWithReply / totalChecked) * 100
         : 0;
 
-    // Compatibility correlation: compare avg compatibility of matched pairs vs general
+    const avgResponseTime = responseTimeCount > 0
+        ? totalResponseTime / responseTimeCount / (1000 * 60 * 60)
+        : 0;
+
+    // Plus conversions: users who subscribed after matching
+    const plusConversions = await prisma.profile.count({
+        where: {
+            subscriptionStatus: 'plus',
+            lastActiveAt: { gte: oneWeekAgo },
+        },
+    });
+
+    // Compatibility correlation
     const matchedPairs = await prisma.match.findMany({
         where: { createdAt: { gte: oneWeekAgo } },
         select: { id: true, user1Id: true, user2Id: true }
     });
 
-    // Calculate compatibility for a sample of matched pairs
     let avgCompatibility = 0;
     if (matchedPairs.length > 0) {
         const sampleSize = Math.min(10, matchedPairs.length);
@@ -103,7 +128,7 @@ export async function getMatchQualityMetrics(): Promise<MatchQualityMetrics> {
                 const result = await calculateCompatibility(pair.user1Id, pair.user2Id);
                 totalCompat += result.totalScore;
             } catch {
-                totalCompat += 50; // default on error
+                totalCompat += 50;
             }
         }
         avgCompatibility = totalCompat / sampleSize;
@@ -116,5 +141,9 @@ export async function getMatchQualityMetrics(): Promise<MatchQualityMetrics> {
         avgMessagesPerConversation: Math.round(avgMessagesPerConversation * 10) / 10,
         responseRate: Math.round(responseRate * 10) / 10,
         compatibilityCorrelation: Math.round(avgCompatibility),
+        ghostingRate: Math.round(ghostingRate * 10) / 10,
+        longConversations,
+        avgResponseTime: Math.round(avgResponseTime * 10) / 10,
+        plusConversions,
     };
 }

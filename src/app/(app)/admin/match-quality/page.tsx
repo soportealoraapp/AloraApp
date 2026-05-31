@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { SectionTitle } from '@/components/ui/custom/SectionTitle';
-import { Loader2, MessageSquare, Heart, Users, BarChart3, TrendingUp, Activity } from 'lucide-react';
+import { Loader2, MessageSquare, Heart, Users, BarChart3, TrendingUp, Activity, Ghost, Clock, ArrowUpRight } from 'lucide-react';
 
 interface Metrics {
     totalMatches: number;
@@ -12,6 +12,10 @@ interface Metrics {
     avgMessagesPerConversation: number;
     responseRate: number;
     compatibilityCorrelation: number;
+    ghostingRate: number;
+    longConversations: number;
+    avgResponseTime: number;
+    plusConversions: number;
 }
 
 export default function MatchQualityPage() {
@@ -49,19 +53,20 @@ export default function MatchQualityPage() {
         { title: 'Mensajes/Conversación', value: metrics.avgMessagesPerConversation, icon: BarChart3, color: 'text-purple-500' },
         { title: 'Tasa de Respuesta', value: `${metrics.responseRate}%`, icon: Activity, color: 'text-orange-500' },
         { title: 'Compatibilidad Promedio', value: `${metrics.compatibilityCorrelation}%`, icon: Users, color: 'text-cyan-500' },
+        { title: 'Tasa de Ghosting', value: `${metrics.ghostingRate}%`, icon: Ghost, color: 'text-red-500' },
+        { title: 'Conversaciones Largas', value: metrics.longConversations, icon: MessageSquare, color: 'text-indigo-500' },
+        { title: 'Tiempo Respuesta Prom.', value: `${metrics.avgResponseTime}h`, icon: Clock, color: 'text-yellow-500' },
+        { title: 'Conversiones Plus', value: metrics.plusConversions, icon: ArrowUpRight, color: 'text-emerald-500' },
     ];
 
     return (
         <div className="md:pl-60 p-6 space-y-6">
             <SectionTitle title="Match Quality Analytics" subtitle="Métricas de calidad de conexiones" />
-
-            <div className="grid gap-4 md:grid-cols-3">
+            <div className="grid gap-4 md:grid-cols-3 lg:grid-cols-5">
                 {cards.map((card) => (
                     <Card key={card.title}>
                         <CardHeader className="flex flex-row items-center justify-between pb-2">
-                            <CardTitle className="text-sm font-medium text-muted-foreground">
-                                {card.title}
-                            </CardTitle>
+                            <CardTitle className="text-sm font-medium text-muted-foreground">{card.title}</CardTitle>
                             <card.icon className={`h-4 w-4 ${card.color}`} />
                         </CardHeader>
                         <CardContent>
@@ -70,7 +75,6 @@ export default function MatchQualityPage() {
                     </Card>
                 ))}
             </div>
-
             <Card>
                 <CardHeader>
                     <CardTitle>Análisis de Calidad</CardTitle>
@@ -88,6 +92,16 @@ export default function MatchQualityPage() {
                             </p>
                         </div>
                         <div className="p-4 bg-muted/50 rounded-lg">
+                            <h4 className="font-medium mb-2">Ghosting Rate</h4>
+                            <p className="text-sm text-muted-foreground">
+                                {metrics.ghostingRate <= 30
+                                    ? 'Bajo ghosting — buena retención de matches'
+                                    : metrics.ghostingRate <= 50
+                                    ? 'Ghosting moderado — mejorar icebreakers'
+                                    : 'Alto ghosting — revisar calidad de matching'}
+                            </p>
+                        </div>
+                        <div className="p-4 bg-muted/50 rounded-lg">
                             <h4 className="font-medium mb-2">Response Rate</h4>
                             <p className="text-sm text-muted-foreground">
                                 {metrics.responseRate >= 70
@@ -95,6 +109,14 @@ export default function MatchQualityPage() {
                                     : metrics.responseRate >= 50
                                     ? 'Respuestas moderadas — considerar mejorar icebreakers'
                                     : 'Baja tasa de respuesta — revisar calidad de mensajes'}
+                            </p>
+                        </div>
+                        <div className="p-4 bg-muted/50 rounded-lg">
+                            <h4 className="font-medium mb-2">Conversiones Plus</h4>
+                            <p className="text-sm text-muted-foreground">
+                                {metrics.plusConversions > 0
+                                    ? `${metrics.plusConversions} usuarios activos en Plus esta semana`
+                                    : 'Sin conversiones Plus esta semana'}
                             </p>
                         </div>
                     </div>

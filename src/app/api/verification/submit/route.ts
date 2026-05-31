@@ -11,11 +11,14 @@ export async function POST(request: NextRequest) {
     }
 
     try {
-        const { selfieUrl } = await request.json();
+        const { selfieUrl, gesture } = await request.json();
 
         if (!selfieUrl) {
             return NextResponse.json({ error: 'Missing selfie URL' }, { status: 400 });
         }
+
+        const validGestures = ['smile', 'v_sign', 'thumbs_up', 'open_palm'];
+        const gestureValue = validGestures.includes(gesture) ? gesture : null;
 
         const existing = await prisma.verificationSubmission.findUnique({
             where: { userId: user.id }
@@ -26,6 +29,7 @@ export async function POST(request: NextRequest) {
                 where: { userId: user.id },
                 data: {
                     selfieUrl,
+                    gesture: gestureValue,
                     status: 'pending',
                     reason: null,
                     reviewedAt: null,
@@ -36,6 +40,7 @@ export async function POST(request: NextRequest) {
                 data: {
                     userId: user.id,
                     selfieUrl,
+                    gesture: gestureValue,
                     status: 'pending',
                 }
             });

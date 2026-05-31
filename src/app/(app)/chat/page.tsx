@@ -197,6 +197,17 @@ export default function ChatPage() {
                                                                     <p className="text-xs text-muted-foreground truncate italic">
                                                                         {match.lastMessage?.content || `¡Es un match! ${BRAND_VOICE.nudges.newMatch}`}
                                                                     </p>
+                                                                    {match.lastMessage?.createdAt && (() => {
+                                                                        const hours = (Date.now() - new Date(match.lastMessage.createdAt).getTime()) / (1000 * 60 * 60);
+                                                                        if (hours > 72) {
+                                                                            return (
+                                                                                <p className="text-[10px] text-orange-500 mt-1">
+                                                                                    ❄️ Sin respuesta por {Math.round(hours / 24)} día(s)
+                                                                                </p>
+                                                                            );
+                                                                        }
+                                                                        return null;
+                                                                    })()}
                                                                 </div>
                                                             </CardContent>
                                                         </Card>

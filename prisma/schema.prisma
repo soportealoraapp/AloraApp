@@ -161,6 +161,13 @@ model Profile {
   lastCheckInAt       DateTime?
   streakRewardsClaimed String[] @default([])
 
+  // Gamification
+  badges Json @default("[]") // [{key, unlockedAt}]
+
+  // Voice intro
+  voiceIntro         String?
+  voiceIntroDuration Int?
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -199,6 +206,14 @@ model Match {
   // State
   stage String @default("talking") // talking, dating, relationship, unmatched
 
+  // Trust & Safety
+  mutedUntil DateTime?
+  hiddenBy   String[] @default([])
+
+  // Match Health
+  healthScore    Int?
+  healthUpdatedAt DateTime?
+
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
   deletedAt DateTime? // Soft delete (Unmatch)
@@ -224,8 +239,10 @@ model Message {
   sender   User   @relation("SentMessages", fields: [senderId], references: [id])
 
   content String
-  type    String @default("text") // text, image, icebreaker
+  type    String @default("text") // text, image, icebreaker, voice
   status  String @default("sent") // sent, delivered, read, flagged
+
+  reactions Json @default("{}") // {userId: emoji}
 
   readAt DateTime?
 
@@ -658,6 +675,7 @@ model VerificationSubmission {
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   selfieUrl  String
+  gesture    String? // smile, v_sign, thumbs_up, open_palm
   status     String    @default("pending") // pending, approved, rejected
   reason     String? // rejection reason
   reviewedBy String? // admin userId who reviewed

@@ -19,6 +19,7 @@ import type { LocationResult } from "@/lib/location";
 import { INTERESTS, VALUES, MUSIC_GENRES, LIFESTYLE_OPTIONS } from "@/lib/constants/preferences";
 import { PhotoGrid } from "@/components/photos/PhotoGrid";
 import { PhotoCrop } from "@/components/photos/PhotoCrop";
+import { VoiceIntro } from "@/components/audio/VoiceIntro";
 
 const lifestyleOptions = {
     smoking: [...LIFESTYLE_OPTIONS.smoking],
@@ -63,6 +64,8 @@ export default function ProfileEditPage() {
     const [lookingFor, setLookingFor] = useState("");
     const [cropIndex, setCropIndex] = useState<number | null>(null);
     const [cropImageSrc, setCropImageSrc] = useState<string | null>(null);
+    const [voiceIntroUrl, setVoiceIntroUrl] = useState<string | null>(null);
+    const [voiceIntroDuration, setVoiceIntroDuration] = useState<number | null>(null);
 
     useEffect(() => {
         if (currentProfile) {
@@ -202,6 +205,8 @@ export default function ProfileEditPage() {
                 latitude: latitude ?? undefined,
                 longitude: longitude ?? undefined,
                 lookingFor,
+                ...(voiceIntroUrl !== null ? { voiceIntro: voiceIntroUrl } : {}),
+                ...(voiceIntroDuration !== null ? { voiceIntroDuration } : {}),
             });
 
             await refreshProfile();
@@ -534,6 +539,29 @@ export default function ProfileEditPage() {
                         <p className="text-xs text-muted-foreground mt-2">
                             {musicGenres.length}/5 seleccionados
                         </p>
+                    </CardContent>
+                </Card>
+
+                <Card>
+                    <CardHeader>
+                        <CardTitle>Presentación de voz</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <p className="text-xs text-muted-foreground mb-3">
+                            Graba una presentación de máximo 30 segundos para que otros te conozcan
+                        </p>
+                        <VoiceIntro
+                            audioUrl={(profile as any)?.voiceIntro}
+                            duration={(profile as any)?.voiceIntroDuration}
+                            onSave={(url, dur) => {
+                                setVoiceIntroUrl(url);
+                                setVoiceIntroDuration(dur);
+                            }}
+                            onDelete={() => {
+                                setVoiceIntroUrl(null);
+                                setVoiceIntroDuration(null);
+                            }}
+                        />
                     </CardContent>
                 </Card>
             </main>

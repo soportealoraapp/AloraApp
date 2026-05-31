@@ -3,38 +3,67 @@
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { ArrowLeft, Shield, ShieldCheck, ShieldAlert, AlertTriangle, Info, ExternalLink, CheckCircle } from 'lucide-react';
+import { ArrowLeft, Shield, ShieldCheck, ShieldAlert, AlertTriangle, Info, Phone, ExternalLink, CheckCircle, Users, FileText } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
-import { Badge } from '@/components/ui/badge';
 import Link from 'next/link';
-import { BRAND_VOICE } from '@/lib/constants/brand-voice';
+
+interface BlockedUser {
+    id: string;
+    displayName: string;
+    photos: string[];
+}
+
+interface Report {
+    id: string;
+    reason: string;
+    status: string;
+    createdAt: string;
+}
 
 export default function SafetyCenterPage() {
     const router = useRouter();
     const { user, profile } = useAuth();
+    const [blockedUsers, setBlockedUsers] = useState<BlockedUser[]>([]);
+    const [reports, setReports] = useState<Report[]>([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        Promise.all([
+            fetch('/api/safety/status').then(r => r.json()).catch(() => ({})),
+        ]).then(([status]) => {
+            setBlockedUsers(status.blockedUsers || []);
+            setReports(status.reports || []);
+        }).finally(() => setLoading(false));
+    }, []);
 
     const tips = [
         {
             icon: Shield,
-            title: 'Nunca compartas información financiera',
-            description: 'Alora nunca te pedirá tu número de tarjeta, contraseñas o datos bancarios fuera de nuestros canales oficiales de pago.',
-        },
-        {
-            icon: Info,
-            title: 'Conócete en un lugar público',
-            description: 'Para tu primera cita, elige un lugar concurrido. Informa a una amiga o familiar de dónde vas.',
-        },
-        {
-            icon: ShieldCheck,
-            title: 'Confía en tu intuición',
-            description: 'Si algo no se siente bien, no lo dudes: puedes bloquear y reportar en cualquier momento.',
+            title: 'Primer encuentro seguro',
+            description: 'Elige un lugar público y concurrido. Informa a una amiga o familiar de dónde vas y con quién.',
         },
         {
             icon: AlertTriangle,
-            title: 'Verifica antes de confiar',
-            description: 'Los perfiles verificados tienen un badge azul. Busca la verificación como señal de autenticidad.',
+            title: 'Detecta estafas',
+            description: 'Nunca envíes dinero a alguien que no conoces. Las estafas románticas son comunes — desconfía de historias trágicas urgentes.',
         },
+        {
+            icon: Info,
+            title: 'Reconoce el catfishing',
+            description: 'Si las fotos parecen profesionales o la persona evita videollamadas, podría no ser quien dice ser. Pide verificación.',
+        },
+        {
+            icon: ShieldCheck,
+            title: 'Comparte ubicación',
+            description: 'Comparte tu ubicación en tiempo real con una amiga durante la cita. Muchos teléfonos tienen esta función integrada.',
+        },
+    ];
+
+    const emergencyContacts = [
+        { name: 'Emergencias México', number: '911' },
+        { name: 'Línea de la Vida', number: '800-911-2000' },
+        { name: 'LOCATEL', number: '55-5658-1111' },
     ];
 
     return (
@@ -57,32 +86,29 @@ export default function SafetyCenterPage() {
                             <div>
                                 <p className="font-bold text-green-800">Tu cuenta está segura</p>
                                 <p className="text-sm text-green-600">
-                                    {profile.verificationStatus === 'verified'
-                                        ? 'Identidad verificada'
-                                        : 'Verificación pendiente — recomendamos verificar tu perfil'}
+                                    {(profile as any).isVerified
+                                        ? '✓ Identidad verificada'
+                                        : 'Verifica tu identidad para mayor confianza'}
                                 </p>
                             </div>
                         </CardContent>
                     </Card>
                 )}
 
-                {/* Actions */}
+                {/* Quick Actions */}
                 <Card>
                     <CardHeader>
                         <CardTitle className="flex items-center gap-2">
                             <ShieldAlert className="h-5 w-5 text-destructive" />
-                            Acciones de seguridad
+                            Herramientas de seguridad
                         </CardTitle>
-                        <CardDescription>
-                            Herramientas para proteger tu espacio en Alora
-                        </CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-3">
-                        <Link href="/settings/privacy/rejected">
+                        <Link href="/settings/privacy/blocked">
                             <Button variant="outline" className="w-full justify-start h-auto py-4 gap-3">
-                                <Shield className="h-5 w-5 text-muted-foreground" />
+                                <Users className="h-5 w-5 text-muted-foreground" />
                                 <div className="text-left">
-                                    <p className="font-medium">Usuarios bloqueados</p>
+                                    <p className="font-medium">Bloqueados ({blockedUsers.length})</p>
                                     <p className="text-xs text-muted-foreground">Gestiona tu lista de bloqueados</p>
                                 </div>
                             </Button>
@@ -91,11 +117,59 @@ export default function SafetyCenterPage() {
                             <Button variant="outline" className="w-full justify-start h-auto py-4 gap-3">
                                 <CheckCircle className="h-5 w-5 text-blue-500" />
                                 <div className="text-left">
-                                    <p className="font-medium">Verificar mi identidad</p>
+                                    <p className="font-medium">Verificar identidad</p>
                                     <p className="text-xs text-muted-foreground">Obtén tu badge de verificación</p>
                                 </div>
                             </Button>
                         </Link>
+                        <Link href="/settings/privacy">
+                            <Button variant="outline" className="w-full justify-start h-auto py-4 gap-3">
+                                <Shield className="h-5 w-5 text-muted-foreground" />
+                                <div className="text-left">
+                                    <p className="font-medium">Configuración de privacidad</p>
+                                    <p className="text-xs text-muted-foreground">Controla tu visibilidad</p>
+                                </div>
+                            </Button>
+                        </Link>
+                    </CardContent>
+                </Card>
+
+                {/* Reports */}
+                <Card>
+                    <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                            <FileText className="h-5 w-5 text-muted-foreground" />
+                            Mis reportes
+                        </CardTitle>
+                        <CardDescription>Historial de reportes enviados</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                        {reports.length === 0 ? (
+                            <p className="text-sm text-muted-foreground text-center py-4">
+                                No has enviado ningún reporte. ¡Es bueno que no lo necesites!
+                            </p>
+                        ) : (
+                            <div className="space-y-2">
+                                {reports.map(report => (
+                                    <div key={report.id} className="flex items-center justify-between p-3 rounded-lg bg-muted/30">
+                                        <div>
+                                            <p className="text-sm font-medium">{report.reason}</p>
+                                            <p className="text-xs text-muted-foreground">
+                                                {new Date(report.createdAt).toLocaleDateString('es-MX')}
+                                            </p>
+                                        </div>
+                                        <span className={`text-xs px-2 py-1 rounded-full ${
+                                            report.status === 'reviewed' ? 'bg-green-100 text-green-700' :
+                                            report.status === 'pending' ? 'bg-yellow-100 text-yellow-700' :
+                                            'bg-gray-100 text-gray-700'
+                                        }`}>
+                                            {report.status === 'reviewed' ? 'Revisado' :
+                                             report.status === 'pending' ? 'Pendiente' : report.status}
+                                        </span>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
                     </CardContent>
                 </Card>
 
@@ -106,9 +180,6 @@ export default function SafetyCenterPage() {
                             <Info className="h-5 w-5 text-primary" />
                             Consejos de seguridad
                         </CardTitle>
-                        <CardDescription>
-                            Recomendaciones para una experiencia segura
-                        </CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-4">
                         {tips.map((tip, i) => (
@@ -125,25 +196,36 @@ export default function SafetyCenterPage() {
                     </CardContent>
                 </Card>
 
-                {/* Report History */}
-                <Card>
+                {/* Emergency Resources */}
+                <Card className="border-red-100">
                     <CardHeader>
-                        <CardTitle>Reportes</CardTitle>
+                        <CardTitle className="flex items-center gap-2 text-red-600">
+                            <Phone className="h-5 w-5" />
+                            Recursos de emergencia
+                        </CardTitle>
                         <CardDescription>
-                            Tus reportes se revisan en un plazo de 24-48 horas
+                            Si estás en peligro inmediato, contacta a las autoridades
                         </CardDescription>
                     </CardHeader>
-                    <CardContent>
-                        <p className="text-sm text-muted-foreground text-center py-4">
-                            {BRAND_VOICE.safety.reportThankYou}
+                    <CardContent className="space-y-3">
+                        {emergencyContacts.map((contact, i) => (
+                            <a
+                                key={i}
+                                href={`tel:${contact.number}`}
+                                className="flex items-center justify-between p-3 rounded-lg bg-red-50 hover:bg-red-100 transition-colors"
+                            >
+                                <div>
+                                    <p className="font-medium text-sm">{contact.name}</p>
+                                    <p className="text-xs text-muted-foreground">{contact.number}</p>
+                                </div>
+                                <Phone className="h-4 w-4 text-red-500" />
+                            </a>
+                        ))}
+                        <p className="text-[10px] text-center text-muted-foreground pt-2">
+                            Alora no es un servicio de emergencia. Para emergencias, contacta siempre a las autoridades locales.
                         </p>
                     </CardContent>
                 </Card>
-
-                <p className="text-xs text-center text-muted-foreground pb-8">
-                    Si estás en peligro inmediato, contacta a las autoridades locales.
-                    Alora no es un servicio de emergencia.
-                </p>
             </main>
         </div>
     );

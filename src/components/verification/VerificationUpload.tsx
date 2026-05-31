@@ -11,6 +11,7 @@ import Image from 'next/image';
 import { CameraCapture } from './CameraCapture';
 
 interface VerificationUploadProps {
+    gesture: string;
     onComplete: () => void;
 }
 
@@ -50,7 +51,7 @@ function compressImage(file: File, maxWidth = 720, quality = 0.8): Promise<Blob>
     });
 }
 
-export function VerificationUpload({ onComplete }: VerificationUploadProps) {
+export function VerificationUpload({ gesture, onComplete }: VerificationUploadProps) {
     const { user } = useAuth();
     const { toast } = useToast();
     const [selfieFile, setSelfieFile] = useState<File | null>(null);
@@ -70,7 +71,7 @@ export function VerificationUpload({ onComplete }: VerificationUploadProps) {
                     const response = await fetch('/api/verification/submit', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ selfieUrl }),
+                        body: JSON.stringify({ selfieUrl, gesture }),
                     });
 
                     if (!response.ok) throw new Error('Failed to submit verification');

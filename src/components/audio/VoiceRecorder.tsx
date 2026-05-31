@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Mic, Square, Trash2, Send, Loader2 } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 
-export function VoiceRecorder({ onStop }: { onStop: (blob: Blob, duration: number) => void }) {
+export function VoiceRecorder({ onStop, onCancel }: { onStop: (blob: Blob, duration: number) => void; onCancel?: () => void }) {
     const [recording, setRecording] = useState(false);
     const [duration, setDuration] = useState(0);
     const mediaRecorder = useRef<MediaRecorder | null>(null);
@@ -62,9 +62,16 @@ export function VoiceRecorder({ onStop }: { onStop: (blob: Blob, duration: numbe
                         <div className="w-3 h-3 bg-red-500 rounded-full"></div>
                         Rec {formatTime(duration)}
                     </div>
-                    <Button variant="ghost" size="icon" onClick={stopRecording} className="bg-red-100 text-red-600 hover:bg-red-200">
-                        <Square className="w-5 h-5 fill-current" />
-                    </Button>
+                    <div className="flex gap-2">
+                        {onCancel && (
+                            <Button variant="ghost" size="icon" onClick={() => { stopRecording(); onCancel(); }} className="text-gray-500 hover:text-red-600">
+                                <Trash2 className="w-5 h-5" />
+                            </Button>
+                        )}
+                        <Button variant="ghost" size="icon" onClick={stopRecording} className="bg-red-100 text-red-600 hover:bg-red-200">
+                            <Square className="w-5 h-5 fill-current" />
+                        </Button>
+                    </div>
                 </div>
             ) : (
                 <Button variant="ghost" className="text-gray-500 hover:text-pink-500 hover:bg-pink-50 w-full justify-start gap-2" onClick={startRecording}>

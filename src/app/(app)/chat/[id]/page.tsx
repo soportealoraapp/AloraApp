@@ -46,6 +46,15 @@ export default function ChatWindowPage() {
     const [showReportDialog, setShowReportDialog] = useState(false);
     const [showBlockDialog, setShowBlockDialog] = useState(false);
     const [showMuteDialog, setShowMuteDialog] = useState(false);
+    const [matchHealth, setMatchHealth] = useState(0);
+
+    useEffect(() => {
+        if (!matchId) return;
+        fetch(`/api/chat/health?matchId=${matchId}`)
+            .then(r => r.json())
+            .then(data => setMatchHealth(data.score || 0))
+            .catch(() => {});
+    }, [matchId]);
     const [autoScroll, setAutoScroll] = useState(true);
     const { track } = useAnalytics();
     const messageCountRef = useRef(0);
@@ -310,6 +319,20 @@ export default function ChatWindowPage() {
                                 )}
                                 {match?.compatibility && !isPartnerOnline && (
                                     <>{match.compatibility}% compatible</>
+                                )}
+                                {matchHealth > 0 && (
+                                    <span className={cn(
+                                        "ml-1",
+                                        matchHealth >= 80 ? "text-green-500" :
+                                        matchHealth >= 60 ? "text-yellow-500" :
+                                        matchHealth >= 40 ? "text-orange-500" :
+                                        "text-red-500"
+                                    )}>
+                                        {matchHealth >= 80 ? "🟢 Excelente" :
+                                         matchHealth >= 60 ? "🟡 Buena" :
+                                         matchHealth >= 40 ? "🟠 Temprana" :
+                                         "🔴 Necesita interacción"}
+                                    </span>
                                 )}
                             </span>
                         )}

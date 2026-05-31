@@ -8,7 +8,7 @@ import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Settings, Edit, MapPin, Briefcase, Cigarette, GlassWater, Baby, Star, BookOpen, Music, CheckCircle, AlertCircle, ShieldCheck, Sparkles, Eye, ChevronRight } from "lucide-react";
+import { Settings, Edit, MapPin, Briefcase, Cigarette, GlassWater, Baby, Star, BookOpen, Music, CheckCircle, AlertCircle, ShieldCheck, Shield, Sparkles, Eye, ChevronRight } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -17,6 +17,7 @@ import { MissionCenter } from "@/components/retention/MissionCenter";
 import { StreakCard } from "@/components/gamification/StreakCard";
 import { PaywallModal } from "@/components/premium/PaywallModal";
 import { LikesCounter } from "@/components/discover/LikesCounter";
+import { VoiceIntro } from "@/components/audio/VoiceIntro";
 import { useState } from "react";
 
 export default function ProfilePage() {
@@ -202,6 +203,16 @@ export default function ProfilePage() {
             </Card>
           )}
 
+          {(profile as any).voiceIntro && (
+            <VoiceIntro
+              audioUrl={(profile as any).voiceIntro}
+              duration={(profile as any).voiceIntroDuration}
+              onSave={() => {}}
+              onDelete={() => {}}
+              isOwn={false}
+            />
+          )}
+
           {profile.photos && profile.photos.length > 1 && (
             <Card className="rounded-3xl">
               <CardContent className="p-6">
@@ -233,13 +244,45 @@ export default function ProfilePage() {
                   </div>
                   <span className="text-xs font-bold text-muted-foreground">{completenessScore}%</span>
                 </div>
-                <Progress value={completenessScore} className="h-2" />
-                <p className="mt-3 text-xs text-muted-foreground leading-snug">
-                  Los perfiles completos reciben hasta un <strong>4x más de matches</strong> y tienen prioridad en Discover.
-                </p>
-                <Button variant="link" asChild className="p-0 h-auto text-xs font-bold text-primary mt-2">
-                  <Link href="/profile/edit">Terminar de completar →</Link>
+                <Progress value={completenessScore} className="h-2 mb-3" />
+
+                <div className="space-y-2 text-sm">
+                  {[
+                    { label: 'Foto principal', done: (profile as any)?.photos?.length > 0 },
+                    { label: 'Bio (50+ caracteres)', done: (profile as any)?.bio?.length >= 50 },
+                    { label: 'Ciudad', done: !!(profile as any)?.city },
+                    { label: 'Intereses (3+)', done: (profile as any)?.interests?.length >= 3 },
+                    { label: 'Valores (2+)', done: (profile as any)?.values?.length >= 2 },
+                    { label: 'Gustos musicales', done: (profile as any)?.musicGenres?.length > 0 },
+                    { label: 'Verificación', done: (profile as any)?.isVerified },
+                    { label: 'Quiz completado', done: false },
+                  ].map((item, i) => (
+                    <div key={i} className="flex items-center gap-2">
+                      {item.done ? (
+                        <CheckCircle className="h-4 w-4 text-green-500" />
+                      ) : (
+                        <div className="h-4 w-4 rounded-full border-2 border-muted-foreground/30" />
+                      )}
+                      <span className={item.done ? 'text-muted-foreground line-through' : ''}>{item.label}</span>
+                    </div>
+                  ))}
+                </div>
+
+                <Button variant="link" asChild className="p-0 h-auto text-xs font-bold text-primary mt-3">
+                  <Link href="/profile/edit">Completar perfil →</Link>
                 </Button>
+              </CardContent>
+            </Card>
+          )}
+
+          {completenessScore >= 90 && (
+            <Card className="rounded-3xl border-yellow-200 bg-yellow-50/50">
+              <CardContent className="p-4 flex items-center gap-3">
+                <span className="text-2xl">⭐</span>
+                <div>
+                  <p className="font-bold text-sm text-yellow-800">Perfil destacado</p>
+                  <p className="text-xs text-yellow-600">Tu perfil está en el top 10% de completitud</p>
+                </div>
               </CardContent>
             </Card>
           )}
@@ -254,6 +297,23 @@ export default function ProfilePage() {
               />
             </CardContent>
           </Card>
+
+          <Link href="/profile/trust">
+            <Card className="rounded-3xl border hover:shadow-md transition-shadow cursor-pointer">
+              <CardContent className="p-4 flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-green-100 rounded-xl">
+                    <Shield className="h-5 w-5 text-green-600" />
+                  </div>
+                  <div>
+                    <h4 className="font-bold text-foreground">Score de confianza</h4>
+                    <p className="text-xs text-muted-foreground">Tu reputación en la comunidad</p>
+                  </div>
+                </div>
+                <ChevronRight className="h-5 w-5 text-muted-foreground" />
+              </CardContent>
+            </Card>
+          </Link>
 
           <Link href="/profile/visitors">
             <Card className="rounded-3xl border hover:shadow-md transition-shadow cursor-pointer">
