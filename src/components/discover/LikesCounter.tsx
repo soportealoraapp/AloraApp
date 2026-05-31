@@ -4,6 +4,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { Heart } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
 import { cn } from '@/lib/utils';
+import { UpgradePrompt } from '@/components/premium/UpgradePrompt';
 
 interface LikesCounterProps {
     dailyLikesUsed: number;
@@ -80,6 +81,7 @@ export function LikesCounter({
                     isLow && !isEmpty && "[&>div]:bg-orange-500"
                 )}
             />
+            {isEmpty && <UpgradePrompt trigger="likes_exhausted" className="mt-2" />}
         </div>
     );
 }

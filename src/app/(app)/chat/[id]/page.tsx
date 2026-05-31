@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { ArrowLeft, MoreVertical, Sparkles, Loader2, Circle } from "lucide-react";
 import { ChatInput } from "@/components/chat/chat-input";
+import { VoiceMessage } from "@/components/chat/VoiceMessage";
 import { cn } from "@/lib/utils";
 import {
     DropdownMenu,
@@ -164,6 +165,52 @@ export default function ChatWindowPage() {
         }
     };
 
+    const handleSendImage = async (imageUrl: string) => {
+        if (!otherUserId) return;
+        try {
+            const response = await fetch('/api/chat/send', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    matchId,
+                    receiverId: otherUserId,
+                    text: imageUrl,
+                    type: 'image',
+                }),
+            });
+            if (!response.ok) throw new Error('Failed to send image');
+        } catch (error) {
+            toast({
+                title: "Error",
+                description: "No se pudo enviar la imagen.",
+                variant: "destructive"
+            });
+        }
+    };
+
+    const handleSendVoice = async (audioUrl: string, duration: number) => {
+        if (!otherUserId) return;
+        try {
+            const response = await fetch('/api/chat/send', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    matchId,
+                    receiverId: otherUserId,
+                    text: JSON.stringify({ audioUrl, duration }),
+                    type: 'voice',
+                }),
+            });
+            if (!response.ok) throw new Error('Failed to send voice message');
+        } catch (error) {
+            toast({
+                title: "Error",
+                description: "No se pudo enviar el mensaje de voz.",
+                variant: "destructive"
+            });
+        }
+    };
+
     if (loading && messages.length === 0) {
         return (
             <div className="md:pl-60 h-screen flex flex-col">
@@ -287,13 +334,36 @@ export default function ChatWindowPage() {
                                         {getDateLabel(group.date)}
                                     </span>
                                 </div>
-                                {group.messages.map((message) => (
-                                    <MessageBubble
-                                        key={message.id}
-                                        message={message}
-                                        isMe={message.senderId === user?.id}
-                                    />
-                                ))}
+                                {group.messages.map((message) => {
+                                    if (message.type === 'voice') {
+                                        try {
+                                            const voiceData = JSON.parse(message.content);
+                                            return (
+                                                <VoiceMessage
+                                                    key={message.id}
+                                                    audioUrl={voiceData.audioUrl}
+                                                    duration={voiceData.duration}
+                                                    isOwn={message.senderId === user?.id}
+                                                />
+                                            );
+                                        } catch {
+                                            return (
+                                                <MessageBubble
+                                                    key={message.id}
+                                                    message={message}
+                                                    isMe={message.senderId === user?.id}
+                                                />
+                                            );
+                                        }
+                                    }
+                                    return (
+                                        <MessageBubble
+                                            key={message.id}
+                                            message={message}
+                                            isMe={message.senderId === user?.id}
+                                        />
+                                    );
+                                })}
                             </div>
                         ))}
                         {/* Partner typing indicator */}
@@ -386,6 +456,8 @@ export default function ChatWindowPage() {
                         </div>
                         <ChatInput
                             onSend={handleSendMessage}
+                            onSendImage={handleSendImage}
+                            onSendVoice={handleSendVoice}
                             onTyping={emitTyping}
                             disabled={sending || !otherUserId}
                             placeholder="Escribe un mensaje..."

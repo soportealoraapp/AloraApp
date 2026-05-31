@@ -27,25 +27,24 @@ The final score for each candidate profile is calculated as:
 finalScore = baseCompatibilityScore + bonuses
 ```
 
-### Base Score
-- `compatibilityScore * 0.3` — 30% weight of total
+### Base Score (SPRINT 2 — REBALANCED)
+- `compatibilityScore * 0.5` — 50% weight of total (was 30%)
 
-### Bonus Points
+### Bonus Points (SPRINT 2 — REBALANCED)
 
-| Factor | Points | Condition |
-|--------|--------|-----------|
-| Boost active | +50 | User has active boost |
-| Active now | +25 | User is currently online |
-| Plus subscription | +25 | Priority boost for paid users |
-| Plus base | +10 | All Plus subscribers |
-| Verified | +15 | Identity verified |
-| High response rate | +15 | 5+ messages sent historically |
-| Active today | +10 | Logged in today |
-| Complete profile (90+) | +20 | Profile completeness ≥ 90% |
-| Complete profile (70+) | +10 | Profile completeness ≥ 70% |
-| Shared interests | +5 each | Per shared interest |
-| Complete + active today | +10 | Both conditions met |
-| Reputation > 90 | +10 | High trust score |
+| Factor | Points | Condition | Before |
+|--------|--------|-----------|--------|
+| Boost active | +30 | User has active boost | +50 |
+| Active now | +20 | User is currently online | +25 |
+| Plus subscription | +15 | Priority boost for paid users | +35 |
+| Verified | +15 | Identity verified | +15 |
+| High response rate | +15 | 5+ messages sent historically | +15 |
+| Active today | +10 | Logged in today | +10 |
+| Complete profile (90+) | +15 | Profile completeness ≥ 90% | +20 |
+| Complete profile (70+) | +10 | Profile completeness ≥ 70% | +10 |
+| Shared interests | +3 each | Per shared interest | +5 |
+| Complete + active today | +10 | Both conditions met | +10 |
+| Reputation > 90 | +10 | High trust score | +10 |
 
 ### Penalty Factors
 

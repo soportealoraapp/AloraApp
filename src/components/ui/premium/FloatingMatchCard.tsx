@@ -12,9 +12,14 @@ interface FloatingMatchCardProps {
     profile: UserProfile;
     onSwipe: (direction: 'left' | 'right') => void;
     compatibility?: number;
+    compatibilityDetails?: {
+        sharedValues?: string[];
+        sharedInterests?: string[];
+        sharedMusic?: string[];
+    };
 }
 
-export function FloatingMatchCard({ profile, onSwipe, compatibility }: FloatingMatchCardProps) {
+export function FloatingMatchCard({ profile, onSwipe, compatibility, compatibilityDetails }: FloatingMatchCardProps) {
     const controls = useAnimation();
 
     const handleDragEnd = async (event: any, info: PanInfo) => {
@@ -123,6 +128,25 @@ export function FloatingMatchCard({ profile, onSwipe, compatibility }: FloatingM
                         {profile.isVerified && <TrustBadge type="verified" />}
                         {(profile.completenessScore ?? 0) >= 90 && <TrustBadge type="complete" />}
                     </div>
+
+                    {compatibility !== undefined && compatibility >= 50 && compatibilityDetails && (
+                        <div className="mb-3 space-y-1">
+                            {(() => {
+                                const shared: string[] = [
+                                    ...(compatibilityDetails.sharedValues || []),
+                                    ...(compatibilityDetails.sharedInterests || []),
+                                    ...(compatibilityDetails.sharedMusic || []),
+                                ].slice(0, 3);
+                                if (shared.length === 0) return null;
+                                return (
+                                    <div className="text-white/90 text-xs">
+                                        <span className="font-semibold text-white/70">Comparten: </span>
+                                        {shared.join(' · ')}
+                                    </div>
+                                );
+                            })()}
+                        </div>
+                    )}
 
                     <h2 className="text-3xl font-bold tracking-tight mb-1">{profile.displayName}, {profile.age}</h2>
                     <p className="text-white/80 text-sm line-clamp-2 leading-relaxed">{profile.bio}</p>

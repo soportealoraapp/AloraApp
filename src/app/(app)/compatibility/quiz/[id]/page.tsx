@@ -211,9 +211,9 @@ export default function QuizPage() {
   
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [showResults, setShowResults] = useState(false);
-  const [compatibleProfiles, setCompatibleProfiles] = useState<UserProfile[]>([]);
+  const [compatibleProfiles, setCompatibleProfiles] = useState<any[]>([]);
   const [personalityResult, setPersonalityResult] = useState({ type: '', description: '' });
-
+  const [loadingProfiles, setLoadingProfiles] = useState(false);
 
   // State for roulette
   const [isSpinning, setIsSpinning] = useState(false);
@@ -221,15 +221,33 @@ export default function QuizPage() {
   const [isSendSheetOpen, setIsSendSheetOpen] = useState(false);
 
   useEffect(() => {
-    if(showResults){
-      // Simulate finding compatible profiles
-      const shuffled = [...mockProfiles].sort(() => 0.5 - Math.random());
-      setCompatibleProfiles(shuffled.slice(0, 3));
-      
-      if (quizId !== 'ruleta' && 'results' in quizData && quizData.results) {
-        const randomResult = quizData.results[Math.floor(Math.random() * quizData.results.length)];
-        setPersonalityResult(randomResult);
-      }
+    if (showResults && quizId !== 'ruleta') {
+      const fetchSimilarProfiles = async () => {
+        setLoadingProfiles(true);
+        try {
+          if ('results' in quizData && quizData.results) {
+            const randomResult = quizData.results[Math.floor(Math.random() * quizData.results.length)];
+            setPersonalityResult(randomResult);
+          }
+
+          const archetype = personalityResult.type || ('results' in quizData && quizData.results
+            ? quizData.results[Math.floor(Math.random() * quizData.results.length)].type
+            : '');
+
+          const response = await fetch(
+            `/api/compatibility/similar?quizId=${quizId}&archetype=${encodeURIComponent(archetype)}&score=75`
+          );
+          const data = await response.json();
+          setCompatibleProfiles(data.profiles || []);
+        } catch (error) {
+          console.error('Error fetching similar profiles:', error);
+          setCompatibleProfiles([]);
+        } finally {
+          setLoadingProfiles(false);
+        }
+      };
+
+      fetchSimilarProfiles();
     }
   }, [showResults, quizId, quizData])
 
@@ -392,12 +410,18 @@ export default function QuizPage() {
                     )}
                     <div className="space-y-3">
                          <h4 className="font-semibold text-left">Personas con resultados similares</h4>
+                         {loadingProfiles && (
+                            <div className="text-center py-4 text-sm text-muted-foreground">Buscando personas compatibles...</div>
+                         )}
+                         {!loadingProfiles && compatibleProfiles.length === 0 && (
+                            <div className="text-center py-4 text-sm text-muted-foreground">Aún no hay personas con resultados similares</div>
+                         )}
                          {compatibleProfiles.map(profile => (
                             <div key={profile.id} className="flex items-center justify-between rounded-lg border p-3 text-left">
                                 <div className="flex items-center gap-3">
                                     <Avatar className="h-12 w-12 border">
-                                        <AvatarImage src={profile.photos[0]} alt={profile.name} data-ai-hint="person" />
-                                        <AvatarFallback>{profile.name.charAt(0)}</AvatarFallback>
+                                        <AvatarImage src={profile.photo} alt={profile.name} data-ai-hint="person" />
+                                        <AvatarFallback>{profile.name?.charAt(0) || '?'}</AvatarFallback>
                                     </Avatar>
                                     <div>
                                         <p className="font-semibold">{profile.name}, {profile.age}</p>

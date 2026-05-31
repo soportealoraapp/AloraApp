@@ -12,6 +12,7 @@ import { CityAutocomplete } from '@/components/ui/city-autocomplete';
 import type { LocationResult } from '@/lib/location';
 import { useAuth } from '@/contexts/AuthContext';
 import { PaywallModal } from '@/components/premium/PaywallModal';
+import { UpgradePrompt } from '@/components/premium/UpgradePrompt';
 
 export default function TravelModePage() {
     const { profile, refreshProfile } = useAuth();
@@ -175,11 +176,7 @@ export default function TravelModePage() {
                     </div>
 
                     {!isPlus && (
-                        <div className="p-4 bg-gradient-to-r from-pink-50 to-orange-50 rounded-xl border border-pink-100">
-                            <p className="text-sm text-gray-700">
-                                <strong>Alora Plus</strong> — El modo viaje es un beneficio exclusivo para suscriptores Plus.
-                            </p>
-                        </div>
+                        <UpgradePrompt trigger="travel_mode" />
                     )}
                 </CardContent>
             </Card>

@@ -11,6 +11,7 @@ import { ArrowLeft, Shield, Eye, EyeOff, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { useToast } from "@/hooks/use-toast";
 import { Skeleton } from "@/components/ui/skeleton";
+import { UpgradePrompt } from "@/components/premium/UpgradePrompt";
 
 export default function PrivacySettingsPage() {
     const router = useRouter();
@@ -175,6 +176,10 @@ export default function PrivacySettingsPage() {
                                 disabled={saving}
                             />
                         </div>
+
+                        {user && (user as any).user_metadata?.subscriptionStatus !== 'plus' && (
+                            <UpgradePrompt trigger="incognito" />
+                        )}
 
                         <div className="flex items-center justify-between p-3 rounded-lg border">
                             <div className="flex-1">

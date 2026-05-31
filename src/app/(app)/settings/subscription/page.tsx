@@ -4,10 +4,23 @@ import { PLANS } from '@/lib/domain/subscription';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { useAuth } from '@/contexts/AuthContext';
-import { Check, Loader2, Sparkles } from 'lucide-react';
+import { Check, X, Loader2, Sparkles } from 'lucide-react';
 import { useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
+
+const COMPARISON_FEATURES = [
+    { feature: 'Likes diarios', free: '50', plus: 'Ilimitados' },
+    { feature: 'Prioridad en Discover', free: false, plus: true },
+    { feature: 'Boost de visibilidad', free: 'Cada 5 días de racha', plus: 'Cada 7 días' },
+    { feature: 'Rewind (deshacer swipe)', free: '1/día', plus: '3/día' },
+    { feature: 'Modo Viaje', free: false, plus: true },
+    { feature: 'Modo Incógnito', free: false, plus: true },
+    { feature: 'Chat', free: true, plus: true },
+    { feature: 'Compatibilidad', free: 'Básica', plus: 'Básica' },
+    { feature: 'Quizzes', free: true, plus: true },
+    { feature: 'Verificación', free: true, plus: true },
+];
 
 export default function SubscriptionPage() {
     const { profile } = useAuth();
@@ -86,6 +99,46 @@ export default function SubscriptionPage() {
                     );
                 })}
             </div>
+
+            <Card className="max-w-3xl mx-auto">
+                <CardHeader>
+                    <CardTitle className="text-lg">Comparativa de beneficios</CardTitle>
+                </CardHeader>
+                <CardContent>
+                    <div className="overflow-x-auto">
+                        <table className="w-full text-sm">
+                            <thead>
+                                <tr className="border-b">
+                                    <th className="text-left py-3 px-2 font-medium text-muted-foreground">Beneficio</th>
+                                    <th className="text-center py-3 px-2 font-medium text-muted-foreground">Gratis</th>
+                                    <th className="text-center py-3 px-2 font-medium text-primary">Alora+</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {COMPARISON_FEATURES.map((row, i) => (
+                                    <tr key={i} className="border-b last:border-0">
+                                        <td className="py-3 px-2 font-medium">{row.feature}</td>
+                                        <td className="py-3 px-2 text-center">
+                                            {typeof row.free === 'boolean' ? (
+                                                row.free ? <Check className="h-4 w-4 text-green-500 mx-auto" /> : <X className="h-4 w-4 text-red-400 mx-auto" />
+                                            ) : (
+                                                <span className="text-muted-foreground">{row.free}</span>
+                                            )}
+                                        </td>
+                                        <td className="py-3 px-2 text-center">
+                                            {typeof row.plus === 'boolean' ? (
+                                                row.plus ? <Check className="h-4 w-4 text-green-500 mx-auto" /> : <X className="h-4 w-4 text-red-400 mx-auto" />
+                                            ) : (
+                                                <span className="font-medium text-primary">{row.plus}</span>
+                                            )}
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                </CardContent>
+            </Card>
         </div>
     );
 }

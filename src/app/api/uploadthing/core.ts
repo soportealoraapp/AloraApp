@@ -59,6 +59,26 @@ export const ourFileRouter = {
             console.log("Verification upload complete for userId:", metadata.userId);
             return { uploadedBy: metadata.userId, url: file.url };
         }),
+
+    voiceUploader: f({ blob: { maxFileSize: "2MB", maxFileCount: 1 } })
+        .middleware(async () => {
+            const supabase = await createClient();
+            const { data: { user } } = await supabase.auth.getUser();
+
+            if (!user) {
+                throw new Error("Unauthorized");
+            }
+
+            return { userId: user.id, type: 'voice' };
+        })
+        .onUploadComplete(async ({ metadata, file }) => {
+            console.log("Voice upload complete for userId:", metadata.userId);
+            return {
+                uploadedBy: metadata.userId,
+                url: file.url,
+                type: 'voice',
+            };
+        }),
 } satisfies FileRouter;
 
 export type OurFileRouter = typeof ourFileRouter;

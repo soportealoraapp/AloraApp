@@ -11,13 +11,14 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ArrowLeft, Upload, X, Loader2, GripVertical } from "lucide-react";
+import { ArrowLeft, Upload, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import Image from "next/image";
 import { Skeleton } from "@/components/ui/skeleton";
 import { CityAutocomplete } from "@/components/ui/city-autocomplete";
 import type { LocationResult } from "@/lib/location";
 import { INTERESTS, VALUES, MUSIC_GENRES, LIFESTYLE_OPTIONS } from "@/lib/constants/preferences";
+import { PhotoGrid } from "@/components/photos/PhotoGrid";
+import { PhotoCrop } from "@/components/photos/PhotoCrop";
 
 const lifestyleOptions = {
     smoking: [...LIFESTYLE_OPTIONS.smoking],
@@ -60,6 +61,8 @@ export default function ProfileEditPage() {
     const [latitude, setLatitude] = useState<number | null>(null);
     const [longitude, setLongitude] = useState<number | null>(null);
     const [lookingFor, setLookingFor] = useState("");
+    const [cropIndex, setCropIndex] = useState<number | null>(null);
+    const [cropImageSrc, setCropImageSrc] = useState<string | null>(null);
 
     useEffect(() => {
         if (currentProfile) {
@@ -128,11 +131,19 @@ export default function ProfileEditPage() {
         setPhotos(photos.filter((_, i) => i !== index));
     };
 
-    const movePhoto = (fromIndex: number, toIndex: number) => {
+    const handleCropStart = (index: number) => {
+        setCropIndex(index);
+        setCropImageSrc(photos[index]);
+    };
+
+    const handleCropComplete = (blob: Blob) => {
+        if (cropIndex === null) return;
+        const url = URL.createObjectURL(blob);
         const newPhotos = [...photos];
-        const [removed] = newPhotos.splice(fromIndex, 1);
-        newPhotos.splice(toIndex, 0, removed);
+        newPhotos[cropIndex] = url;
         setPhotos(newPhotos);
+        setCropIndex(null);
+        setCropImageSrc(null);
     };
 
     const toggleInterest = (interest: string) => {
@@ -251,31 +262,12 @@ export default function ProfileEditPage() {
                         <CardTitle>Fotos ({photos.length}/6)</CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-4">
-                        <div className="grid grid-cols-3 gap-3">
-                            {photos.map((photo, index) => (
-                                <div key={index} className="relative aspect-square rounded-lg overflow-hidden group">
-                                    <Image src={photo} alt={`Foto ${index + 1}`} fill className="object-cover" />
-                                    <div className="absolute inset-0 bg-black/50 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
-                                        {index > 0 && (
-                                            <Button size="sm" variant="secondary" onClick={() => movePhoto(index, index - 1)}>
-                                                ←
-                                            </Button>
-                                        )}
-                                        <Button size="sm" variant="destructive" onClick={() => removePhoto(index)}>
-                                            <X className="h-4 w-4" />
-                                        </Button>
-                                        {index < photos.length - 1 && (
-                                            <Button size="sm" variant="secondary" onClick={() => movePhoto(index, index + 1)}>
-                                                →
-                                            </Button>
-                                        )}
-                                    </div>
-                                    {index === 0 && (
-                                        <Badge className="absolute top-2 left-2">Principal</Badge>
-                                    )}
-                                </div>
-                            ))}
-                        </div>
+                        <PhotoGrid
+                            photos={photos}
+                            onReorder={setPhotos}
+                            onRemove={removePhoto}
+                            onCrop={handleCropStart}
+                        />
 
                         {photos.length < 6 && (
                             <div>
@@ -545,6 +537,13 @@ export default function ProfileEditPage() {
                     </CardContent>
                 </Card>
             </main>
+
+            <PhotoCrop
+                isOpen={cropIndex !== null}
+                onClose={() => { setCropIndex(null); setCropImageSrc(null); }}
+                imageSrc={cropImageSrc || ''}
+                onCrop={handleCropComplete}
+            />
         </div>
     );
 }

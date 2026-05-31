@@ -195,6 +195,13 @@ export default function DiscoverPage() {
                   key={currentProfile.id}
                   profile={currentProfile}
                   compatibility={profiles[0]?.compatibility}
+                  compatibilityDetails={
+                    profiles[0]?.score?.details ? {
+                      sharedValues: profiles[0].score.details.sharedValues,
+                      sharedInterests: profiles[0].score.details.sharedInterests,
+                      sharedMusic: profiles[0].score.details.sharedMusic,
+                    } : undefined
+                  }
                   onSwipe={handleSwipe}
                 />
               </div>

@@ -114,7 +114,7 @@ export interface Message {
     content: string;
     createdAt: Date;
     readAt?: Date;
-    type: 'text' | 'image' | 'icebreaker';
+    type: 'text' | 'image' | 'icebreaker' | 'voice';
     status?: 'sent' | 'delivered' | 'read' | 'pending' | 'flagged';
 }
 

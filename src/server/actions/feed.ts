@@ -278,15 +278,15 @@ export async function getDynamicFeed(
                 const completeness = calculateCompleteness(profile);
                 const deepScore = await getCompatibilityScore(currentUserId, profile.id);
 
-                let totalScore = deepScore.score;
+                // Compatibility now has higher weight (×0.5 instead of ×0.3)
+                let totalScore = deepScore.score * 0.5;
 
-                // --- SCORING WITH RETENTION BOOSTS ---
+                // --- SCORING WITH REBALANCED WEIGHTS ---
                 if (cp.isVerified) totalScore += 15;
-                if (completeness >= 90) totalScore += 20;
+                if (completeness >= 90) totalScore += 15;
                 else if (completeness >= 70) totalScore += 10;
                 else if (completeness < 50) totalScore *= 0.5;
 
-                if (cp.subscriptionStatus === 'plus') totalScore += 10;
                 if (cp.trustStatus === 'watchlist') totalScore *= 0.8;
 
                 const reputation = (cp as any).reputationScore ?? 100;
@@ -297,26 +297,25 @@ export async function getDynamicFeed(
                 else if (reputation < 70) totalScore *= 0.8;
                 else if (reputation > 90) totalScore += 10;
 
-                // Retention boosts
-                if (activeNow) totalScore += 25;
+                // Activity signals (reduced from previous)
+                if (activeNow) totalScore += 20;
                 else if (activeToday) totalScore += 10;
 
                 if (highResponseRate) totalScore += 15;
 
-                totalScore += sharedInterests * 5;
+                totalScore += sharedInterests * 3;
 
-                // Boost users with complete profile and recent activity
                 if (completeness >= 80 && activeToday) totalScore += 10;
 
-                // Active profile boost (30-minute visibility boost)
+                // Boost: reduced from +50 to +30
                 const boostExpires = (cp as any).boostExpiresAt;
                 if (boostExpires && new Date(boostExpires) > now) {
-                    totalScore += 50;
+                    totalScore += 30;
                 }
 
-                // Plus priority: higher visibility in discover
+                // Plus priority: reduced from +35 total to +15
                 if (cp.subscriptionStatus === 'plus') {
-                    totalScore += 25;
+                    totalScore += 15;
                 }
 
                 return {

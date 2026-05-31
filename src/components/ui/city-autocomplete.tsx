@@ -1,9 +1,9 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { Input } from '@/components/ui/input';
 import { searchCities, type LocationResult } from '@/lib/location';
-import { MapPin } from 'lucide-react';
+import { MapPin, Loader2 } from 'lucide-react';
 
 interface CityAutocompleteProps {
     value: string;
@@ -17,23 +17,61 @@ export function CityAutocomplete({ value, onSelect, placeholder = "Buscar ciudad
     const [results, setResults] = useState<LocationResult[]>([]);
     const [isOpen, setIsOpen] = useState(false);
     const [highlightIndex, setHighlightIndex] = useState(-1);
+    const [loading, setLoading] = useState(false);
+    const [source, setSource] = useState<'nominatim' | 'local' | null>(null);
     const inputRef = useRef<HTMLInputElement>(null);
     const containerRef = useRef<HTMLDivElement>(null);
+    const abortControllerRef = useRef<AbortController | null>(null);
 
-    useEffect(() => {
-        if (query.length >= 2) {
-            const timer = setTimeout(() => {
-                const matches = searchCities(query, 8);
-                setResults(matches);
-                setIsOpen(matches.length > 0);
-                setHighlightIndex(-1);
-            }, 200);
-            return () => clearTimeout(timer);
-        } else {
+    const fetchResults = useCallback(async (searchQuery: string) => {
+        if (searchQuery.length < 2) {
             setResults([]);
             setIsOpen(false);
+            setSource(null);
+            return;
         }
-    }, [query]);
+
+        if (abortControllerRef.current) {
+            abortControllerRef.current.abort();
+        }
+
+        const controller = new AbortController();
+        abortControllerRef.current = controller;
+        setLoading(true);
+
+        try {
+            const response = await fetch(
+                `/api/location/search?q=${encodeURIComponent(searchQuery)}&limit=8`,
+                { signal: controller.signal }
+            );
+
+            if (!response.ok) throw new Error('Search failed');
+
+            const data = await response.json();
+            setResults(data.results || []);
+            setSource(data.source || 'local');
+            setIsOpen((data.results || []).length > 0);
+            setHighlightIndex(-1);
+        } catch (error: any) {
+            if (error?.name !== 'AbortError') {
+                const localResults = searchCities(searchQuery, 8);
+                setResults(localResults);
+                setSource('local');
+                setIsOpen(localResults.length > 0);
+                setHighlightIndex(-1);
+            }
+        } finally {
+            setLoading(false);
+        }
+    }, []);
+
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            fetchResults(query);
+        }, 300);
+
+        return () => clearTimeout(timer);
+    }, [query, fetchResults]);
 
     useEffect(() => {
         function handleClickOutside(e: MouseEvent) {
@@ -70,7 +108,11 @@ export function CityAutocomplete({ value, onSelect, placeholder = "Buscar ciudad
     return (
         <div ref={containerRef} className={`relative ${className}`}>
             <div className="relative">
-                <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                {loading ? (
+                    <Loader2 className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground animate-spin" />
+                ) : (
+                    <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                )}
                 <Input
                     ref={inputRef}
                     value={query}
@@ -98,12 +140,15 @@ export function CityAutocomplete({ value, onSelect, placeholder = "Buscar ciudad
                             onMouseEnter={() => setHighlightIndex(index)}
                         >
                             <MapPin className="h-4 w-4 text-muted-foreground flex-shrink-0" />
-                            <div>
+                            <div className="flex-1 min-w-0">
                                 <div className="font-medium text-sm">{result.city.name}</div>
-                                <div className="text-xs text-muted-foreground">
-                                    {result.city.stateCode}, {result.country.name}
+                                <div className="text-xs text-muted-foreground truncate">
+                                    {[result.city.stateCode, result.country.name].filter(Boolean).join(', ')}
                                 </div>
                             </div>
+                            {source === 'nominatim' && index === 0 && (
+                                <span className="text-[9px] text-muted-foreground bg-muted px-1.5 py-0.5 rounded-full flex-shrink-0">Global</span>
+                            )}
                         </button>
                     ))}
                 </div>
