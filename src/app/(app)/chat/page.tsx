@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Search, Heart, X, CheckCircle, Loader2, MessageSquare } from "lucide-react";
+import { Search, Heart, X, CheckCircle, Loader2, MessageSquare, Trash2 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useToast } from "@/hooks/use-toast";
@@ -23,8 +23,17 @@ export default function ChatPage() {
     const [searchTerm, setSearchTerm] = useState("");
     const { toast } = useToast();
     const [processingMatch, setProcessingMatch] = useState<string | null>(null);
+    const [hidingMatch, setHidingMatch] = useState<string | null>(null);
+    const [hiddenMatches, setHiddenMatches] = useState<Set<string>>(() => {
+        if (typeof window !== 'undefined') {
+            const stored = localStorage.getItem('hiddenMatches');
+            return stored ? new Set(JSON.parse(stored)) : new Set();
+        }
+        return new Set();
+    });
 
     const filteredMatches = matches.filter((match) => {
+        if (hiddenMatches.has(match.id)) return false;
         if (!searchTerm.trim()) return true;
         const partnerName = match.partner?.displayName || '';
         return partnerName.toLowerCase().includes(searchTerm.toLowerCase());
@@ -56,6 +65,35 @@ export default function ChatPage() {
             description: "No volverás a ver este perfil",
         });
         refresh();
+    };
+
+    const handleHideConversation = async (matchId: string) => {
+        setHidingMatch(matchId);
+        try {
+            const newHidden = new Set(hiddenMatches);
+            newHidden.add(matchId);
+            setHiddenMatches(newHidden);
+            localStorage.setItem('hiddenMatches', JSON.stringify([...newHidden]));
+
+            await fetch('/api/chat/hide', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ matchId }),
+            });
+
+            toast({
+                title: "Conversación eliminada",
+                description: "La conversación se ocultó de tu lista",
+            });
+        } catch (error) {
+            toast({
+                variant: "destructive",
+                title: "Error",
+                description: "No se pudo eliminar la conversación",
+            });
+        } finally {
+            setHidingMatch(null);
+        }
     };
 
     if (loading) {
@@ -137,31 +175,49 @@ export default function ChatPage() {
                                                 animate={{ opacity: 1, y: 0 }}
                                                 transition={{ delay: idx * 0.05, type: "spring", stiffness: 180, damping: 35 }}
                                             >
-                                                <Link href={`/chat/${match.id}`}>
-                                                    <Card className="rounded-2xl border shadow-sm hover:shadow-md transition-all cursor-pointer group active:scale-[0.98]">
-                                                        <CardContent className="flex items-center gap-4 p-4">
-                                                            <div className="relative h-16 w-16 rounded-full overflow-hidden flex-shrink-0 border-2 border-muted">
-                                                                <Image
-                                                                    src={partnerPhoto}
-                                                                    alt={partnerName}
-                                                                    fill
-                                                                    className="object-cover"
-                                                                />
-                                                            </div>
-                                                            <div className="flex-1 min-w-0">
-                                                                <div className="flex items-center justify-between mb-1">
-                                                                    <p className="font-bold text-foreground truncate">{partnerName}</p>
-                                                                    <Badge variant="secondary" className="text-[10px] uppercase font-bold tracking-wider">
-                                                                        {match.compatibility}% compatible
-                                                                    </Badge>
+                                                <div className="flex items-center gap-2">
+                                                    <Link href={`/chat/${match.id}`} className="flex-1">
+                                                        <Card className="rounded-2xl border shadow-sm hover:shadow-md transition-all cursor-pointer group active:scale-[0.98]">
+                                                            <CardContent className="flex items-center gap-4 p-4">
+                                                                <div className="relative h-16 w-16 rounded-full overflow-hidden flex-shrink-0 border-2 border-muted">
+                                                                    <Image
+                                                                        src={partnerPhoto}
+                                                                        alt={partnerName}
+                                                                        fill
+                                                                        className="object-cover"
+                                                                    />
                                                                 </div>
-                                                                <p className="text-xs text-muted-foreground truncate italic">
-                                                                    {match.lastMessage?.content || `¡Es un match! ${BRAND_VOICE.nudges.newMatch}`}
-                                                                </p>
-                                                            </div>
-                                                        </CardContent>
-                                                    </Card>
-                                                </Link>
+                                                                <div className="flex-1 min-w-0">
+                                                                    <div className="flex items-center justify-between mb-1">
+                                                                        <p className="font-bold text-foreground truncate">{partnerName}</p>
+                                                                        <Badge variant="secondary" className="text-[10px] uppercase font-bold tracking-wider">
+                                                                            {match.compatibility}% compatible
+                                                                        </Badge>
+                                                                    </div>
+                                                                    <p className="text-xs text-muted-foreground truncate italic">
+                                                                        {match.lastMessage?.content || `¡Es un match! ${BRAND_VOICE.nudges.newMatch}`}
+                                                                    </p>
+                                                                </div>
+                                                            </CardContent>
+                                                        </Card>
+                                                    </Link>
+                                                    <Button
+                                                        size="icon"
+                                                        variant="ghost"
+                                                        className="h-9 w-9 flex-shrink-0 text-muted-foreground hover:text-destructive"
+                                                        onClick={(e) => {
+                                                            e.preventDefault();
+                                                            handleHideConversation(match.id);
+                                                        }}
+                                                        disabled={hidingMatch === match.id}
+                                                    >
+                                                        {hidingMatch === match.id ? (
+                                                            <Loader2 className="h-4 w-4 animate-spin" />
+                                                        ) : (
+                                                            <Trash2 className="h-4 w-4" />
+                                                        )}
+                                                    </Button>
+                                                </div>
                                             </motion.div>
                                         );
                                     })}

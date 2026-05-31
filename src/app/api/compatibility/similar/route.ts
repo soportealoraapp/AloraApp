@@ -22,6 +22,11 @@ export async function GET(request: NextRequest) {
     }
 
     try {
+        const currentUserProfile = await prisma.profile.findUnique({
+            where: { userId: user.id },
+            select: { values: true, interests: true },
+        });
+
         const similarResults = await prisma.quizResult.findMany({
             where: {
                 quizId,
@@ -54,24 +59,33 @@ export async function GET(request: NextRequest) {
             orderBy: {
                 createdAt: 'desc',
             },
-            take: 10,
+            take: 30,
         });
 
         const profiles = similarResults
             .filter(r => r.user.profile && r.user.profile.photos && r.user.profile.photos.length > 0)
-            .slice(0, 5)
-            .map(r => ({
-                id: r.user.id,
-                name: r.user.profile!.displayName,
-                age: r.user.profile!.age,
-                city: r.user.profile!.city,
-                photo: r.user.profile!.photos[0],
-                bio: r.user.profile!.bio,
-                compatibility: Math.abs((r.score ?? 0) - score),
-                archetype: r.archetype,
-                isVerified: r.user.profile!.isVerified,
-                lastActiveAt: r.user.profile!.lastActiveAt,
-            }));
+            .slice(0, 20)
+            .map(r => {
+                const sharedValues = (currentUserProfile?.values || [])
+                    .filter(v => (r.user.profile?.values || []).includes(v));
+                const sharedInterests = (currentUserProfile?.interests || [])
+                    .filter(i => (r.user.profile?.interests || []).includes(i));
+
+                return {
+                    id: r.user.id,
+                    name: r.user.profile!.displayName,
+                    age: r.user.profile!.age,
+                    city: r.user.profile!.city,
+                    photo: r.user.profile!.photos[0],
+                    bio: r.user.profile!.bio,
+                    compatibility: Math.abs((r.score ?? 0) - score),
+                    archetype: r.archetype,
+                    isVerified: r.user.profile!.isVerified,
+                    lastActiveAt: r.user.profile!.lastActiveAt,
+                    sharedValues: sharedValues.slice(0, 3),
+                    sharedInterests: sharedInterests.slice(0, 3),
+                };
+            });
 
         return NextResponse.json({ profiles });
     } catch (error) {

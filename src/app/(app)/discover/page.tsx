@@ -19,6 +19,7 @@ import { DailyQuestionCard } from "@/components/daily-question/DailyQuestionCard
 import { DailyCompatibilityCard } from "@/components/compatibility/DailyCompatibilityCard";
 import { useAnalytics, AnalyticsEvents } from "@/hooks/use-analytics";
 import { LikesCounter } from "@/components/discover/LikesCounter";
+import { StoryCircle } from "@/components/stories/StoryCircle";
 
 const DEFAULT_FILTERS: Filters = {
   ageRange: [18, 60],
@@ -41,7 +42,15 @@ export default function DiscoverPage() {
 
   const [matchedProfile, setMatchedProfile] = useState<UserProfile | null>(null);
   const [showMatchScreen, setShowMatchScreen] = useState(false);
+  const [stories, setStories] = useState<any[]>([]);
   const [swipeCount, setSwipeCount] = useState(0);
+
+  useEffect(() => {
+    fetch('/api/stories')
+      .then(r => r.json())
+      .then(data => setStories(data.stories || []))
+      .catch(() => {});
+  }, []);
   const SWIPE_LIMIT = 20;
   const sentinelRef = useRef<HTMLDivElement>(null);
 
@@ -165,6 +174,22 @@ export default function DiscoverPage() {
           </Button>
         </div>
       </header>
+
+      {stories.length > 0 && (
+        <div className="px-4 pt-2 overflow-x-auto">
+          <div className="flex gap-4 pb-2">
+            {stories.map((storyGroup: any) => (
+              <StoryCircle
+                key={storyGroup.userId}
+                photo={storyGroup.photo}
+                name={storyGroup.displayName}
+                hasUnviewed={!storyGroup.stories.some((s: any) => s.viewedByMe)}
+                onClick={() => {}}
+              />
+            ))}
+          </div>
+        </div>
+      )}
 
       <div className="px-4 pt-2">
         <LikesCounter

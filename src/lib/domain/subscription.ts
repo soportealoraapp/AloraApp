@@ -56,11 +56,15 @@ export const PLANS: Record<PlanTier, Plan> = {
         interval: 'month',
         features: [
             'Likes ilimitados sin límite diario',
-            'Prioridad en Discover (+25 puntos)',
+            'Prioridad en Discover (+15 puntos)',
             'Boost de visibilidad cada 7 días de racha',
             'Rewind: deshacer 3 swipes al día',
             'Modo Viaje: explora otras ciudades',
-            'Modo Incógnito: controla tu visibilidad'
+            'Modo Incógnito: controla tu visibilidad',
+            'Historial completo de visitantes',
+            'Filtros avanzados de búsqueda',
+            'Estadísticas detalladas del perfil',
+            'Compatibilidad premium explicada'
         ]
     }
 };

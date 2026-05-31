@@ -116,6 +116,7 @@ export interface Message {
     readAt?: Date;
     type: 'text' | 'image' | 'icebreaker' | 'voice';
     status?: 'sent' | 'delivered' | 'read' | 'pending' | 'flagged';
+    reactions?: Record<string, string>;
 }
 
 export interface AuditLog {

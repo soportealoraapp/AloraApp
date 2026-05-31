@@ -11,7 +11,7 @@ import {
 } from '@/components/ui/dialog';
 import { VisuallyHidden } from '@radix-ui/react-visually-hidden';
 import { Button } from '@/components/ui/button';
-import { Check, Sparkles, Heart, Zap, ShieldCheck, Loader2, RotateCcw, Globe } from 'lucide-react';
+import { Check, Sparkles, Heart, Zap, ShieldCheck, Loader2, RotateCcw, Globe, Eye } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -65,6 +65,7 @@ export function PaywallModal({ isOpen, onClose }: PaywallModalProps) {
         { icon: <RotateCcw className="text-purple-500 h-5 w-5" />, title: "Rewind", subtitle: "Deshacer 3 swipes al día" },
         { icon: <Globe className="text-green-500 h-5 w-5" />, title: "Modo Viaje", subtitle: "Explora perfiles en otras ciudades" },
         { icon: <ShieldCheck className="text-emerald-500 h-5 w-5" />, title: "Modo incógnito", subtitle: "Controla quién te ve" },
+        { icon: <Eye className="text-indigo-500 h-5 w-5" />, title: "Historial de visitas", subtitle: "Ve quién visitó tu perfil" },
     ];
 
     return (

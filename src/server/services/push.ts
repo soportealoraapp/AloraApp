@@ -131,3 +131,21 @@ export async function notifyLikesRestored(userId: string) {
         channel: 'engagement',
     });
 }
+
+export async function notifyBoostAvailable(userId: string) {
+    return sendPushToUser(userId, {
+        title: 'Boost disponible',
+        body: 'Tienes un boost gratuito disponible. ¡Destaca por 30 minutos!',
+        data: { type: 'boost_available' },
+        channel: 'engagement',
+    });
+}
+
+export async function notifyProfileVisit(userId: string, visitorName: string) {
+    return sendPushToUser(userId, {
+        title: 'Alguien visitó tu perfil',
+        body: `${visitorName} vio tu perfil`,
+        data: { type: 'profile_visit' },
+        channel: 'engagement',
+    });
+}

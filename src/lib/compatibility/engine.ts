@@ -13,6 +13,16 @@ export interface CompatibilityResult {
         lifestyle: number;
     };
     explanations: string[];
+    sharedItems: {
+        values: string[];
+        interests: string[];
+        music: string[];
+        lifestyle: string[];
+    };
+    differences: {
+        values: string[];
+        lifestyle: string[];
+    };
 }
 
 /**
@@ -219,6 +229,8 @@ export async function calculateCompatibility(
             totalScore: 50,
             dimensions: { values: 50, relationshipGoals: 50, personality: 50, quizzes: 50, interests: 50, lifestyle: 50 },
             explanations: ['Perfiles incompletos — no se puede calcular compatibilidad'],
+            sharedItems: { values: [], interests: [], music: [], lifestyle: [] },
+            differences: { values: [], lifestyle: [] },
         };
     }
 
@@ -273,5 +285,51 @@ export async function calculateCompatibility(
         educationB: profileB.education || '',
     });
 
-    return { totalScore, dimensions, explanations };
+    // Compute shared items
+    const valuesA = new Set((profileA.values || []).map(v => v.toLowerCase()));
+    const valuesB = new Set((profileB.values || []).map(v => v.toLowerCase()));
+    const sharedValues = [...valuesA].filter(v => valuesB.has(v));
+
+    const interestsA = new Set((profileA.interests || []).map(i => i.toLowerCase()));
+    const interestsB = new Set((profileB.interests || []).map(i => i.toLowerCase()));
+    const sharedInterests = [...interestsA].filter(i => interestsB.has(i));
+
+    const musicA = new Set((profileA.musicGenres || []).map(m => m.toLowerCase()));
+    const musicB = new Set((profileB.musicGenres || []).map(m => m.toLowerCase()));
+    const sharedMusic = [...musicA].filter(m => musicB.has(m));
+
+    const lifestyle: string[] = [];
+    if (profileA.smoking && profileB.smoking && profileA.smoking === profileB.smoking) {
+        lifestyle.push(`Ambos: ${profileA.smoking === 'no' ? 'No fuman' : 'Fuman'}`);
+    }
+    if (profileA.drinking && profileB.drinking && profileA.drinking === profileB.drinking) {
+        lifestyle.push(`Ambos: ${profileA.drinking === 'no' ? 'No beben' : 'Beben'}`);
+    }
+    if (profileA.children && profileB.children && profileA.children === profileB.children) {
+        lifestyle.push(`Ambos: ${profileA.children === 'no' ? 'No tienen hijos' : 'Tienen hijos'}`);
+    }
+
+    // Compute differences
+    const valueDiffs = [...valuesA].filter(v => !valuesB.has(v)).map(v => v);
+    const lifestyleDiffs: string[] = [];
+    if (profileA.children && profileB.children && profileA.children !== profileB.children) {
+        lifestyleDiffs.push(`Hijos: Tú "${profileA.children}" · Ellos "${profileB.children}"`);
+    }
+    if (profileA.drinking && profileB.drinking && profileA.drinking !== profileB.drinking) {
+        lifestyleDiffs.push(`Alcohol: Tú "${profileA.drinking}" · Ellos "${profileB.drinking}"`);
+    }
+
+    const sharedItems = {
+        values: sharedValues,
+        interests: sharedInterests,
+        music: sharedMusic,
+        lifestyle,
+    };
+
+    const differences = {
+        values: valueDiffs,
+        lifestyle: lifestyleDiffs,
+    };
+
+    return { totalScore, dimensions, explanations, sharedItems, differences };
 }

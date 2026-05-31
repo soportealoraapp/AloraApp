@@ -16,8 +16,9 @@ const COMPARISON_FEATURES = [
     { feature: 'Rewind (deshacer swipe)', free: '1/día', plus: '3/día' },
     { feature: 'Modo Viaje', free: false, plus: true },
     { feature: 'Modo Incógnito', free: false, plus: true },
+    { feature: 'Historial de visitas', free: 'Últimos 3', plus: 'Completo' },
+    { feature: 'Compatibilidad', free: 'Básica', plus: 'Explicada' },
     { feature: 'Chat', free: true, plus: true },
-    { feature: 'Compatibilidad', free: 'Básica', plus: 'Básica' },
     { feature: 'Quizzes', free: true, plus: true },
     { feature: 'Verificación', free: true, plus: true },
 ];

@@ -213,6 +213,7 @@ export function useChat(matchId: string) {
 
     return {
         messages,
+        setMessages,
         loading,
         loadingMore,
         hasMore,

@@ -15,6 +15,7 @@ import placeholderImages from '@/lib/placeholder-images.json';
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { useToast } from '@/hooks/use-toast';
 import { ChatMessage } from '@/lib/actions';
+import { ARCHETYPES } from '@/lib/compatibility/quizzes';
 
 const quizzes = {
   personalidad: {
@@ -215,6 +216,9 @@ export default function QuizPage() {
   const [personalityResult, setPersonalityResult] = useState({ type: '', description: '' });
   const [loadingProfiles, setLoadingProfiles] = useState(false);
 
+  const archetypeKey = personalityResult.type?.toLowerCase().replace(/\s+/g, '') || '';
+  const archetypeInfo = ARCHETYPES[archetypeKey] || null;
+
   // State for roulette
   const [isSpinning, setIsSpinning] = useState(false);
   const [rouletteResult, setRouletteResult] = useState('');
@@ -395,7 +399,7 @@ export default function QuizPage() {
                     <CardTitle className="text-2xl">¡Test completado!</CardTitle>
                     {personalityResult.type ? (
                          <>
-                            <CardDescription>Tu arquetipo es:</CardDescription>
+                            <CardDescription>Tu tipo de personalidad es:</CardDescription>
                             <p className="text-xl font-bold text-primary pt-2">{personalityResult.type}</p>
                          </>
                     ) : (
@@ -408,34 +412,77 @@ export default function QuizPage() {
                             {personalityResult.description}
                         </div>
                     )}
+
+                    {quizId !== 'ruleta' && archetypeInfo && (
+                        <div className="space-y-4">
+                            <div className="rounded-lg border p-4">
+                                <h4 className="font-semibold text-sm mb-2 text-green-600">Fortalezas</h4>
+                                <div className="flex flex-wrap gap-2">
+                                    {archetypeInfo.strengths.map(s => (
+                                        <span key={s} className="text-xs bg-green-50 text-green-700 px-2 py-1 rounded-full">{s}</span>
+                                    ))}
+                                </div>
+                            </div>
+                            <div className="rounded-lg border p-4">
+                                <h4 className="font-semibold text-sm mb-2 text-orange-600">Desafíos</h4>
+                                <div className="flex flex-wrap gap-2">
+                                    {archetypeInfo.risks.map(r => (
+                                        <span key={r} className="text-xs bg-orange-50 text-orange-700 px-2 py-1 rounded-full">{r}</span>
+                                    ))}
+                                </div>
+                            </div>
+                            <div className="rounded-lg border p-4">
+                                <h4 className="font-semibold text-sm mb-2 text-purple-600">Cómo te perciben</h4>
+                                <p className="text-sm text-muted-foreground">{archetypeInfo.perception}</p>
+                            </div>
+                            <div className="rounded-lg border p-4">
+                                <h4 className="font-semibold text-sm mb-2 text-pink-600">Compatibilidad ideal</h4>
+                                <div className="flex flex-wrap gap-2">
+                                    {archetypeInfo.idealPartner.map(p => (
+                                        <span key={p} className="text-xs bg-pink-50 text-pink-700 px-2 py-1 rounded-full">{p}</span>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
                     <div className="space-y-3">
-                         <h4 className="font-semibold text-left">Personas con resultados similares</h4>
+                         <h4 className="font-semibold text-left">Personas similares a ti</h4>
                          {loadingProfiles && (
                             <div className="text-center py-4 text-sm text-muted-foreground">Buscando personas compatibles...</div>
                          )}
                          {!loadingProfiles && compatibleProfiles.length === 0 && (
                             <div className="text-center py-4 text-sm text-muted-foreground">Aún no hay personas con resultados similares</div>
                          )}
+                         <div className="space-y-2 max-h-[400px] overflow-y-auto">
                          {compatibleProfiles.map(profile => (
                             <div key={profile.id} className="flex items-center justify-between rounded-lg border p-3 text-left">
-                                <div className="flex items-center gap-3">
-                                    <Avatar className="h-12 w-12 border">
+                                <div className="flex items-center gap-3 min-w-0">
+                                    <Avatar className="h-12 w-12 border flex-shrink-0">
                                         <AvatarImage src={profile.photo} alt={profile.name} data-ai-hint="person" />
                                         <AvatarFallback>{profile.name?.charAt(0) || '?'}</AvatarFallback>
                                     </Avatar>
-                                    <div>
-                                        <p className="font-semibold">{profile.name}, {profile.age}</p>
-                                        <p className="text-sm text-muted-foreground">{profile.city}</p>
+                                    <div className="min-w-0">
+                                        <p className="font-semibold truncate">{profile.name}, {profile.age}</p>
+                                        <p className="text-xs text-muted-foreground truncate">{profile.city}</p>
+                                        {(profile.sharedValues?.length > 0 || profile.sharedInterests?.length > 0) && (
+                                            <p className="text-[10px] text-primary truncate">
+                                                {[...(profile.sharedValues || []), ...(profile.sharedInterests || [])].slice(0, 2).join(' · ')}
+                                            </p>
+                                        )}
                                     </div>
                                 </div>
-                                <Button asChild variant="secondary" size="sm">
-                                    <Link href={`/profile/${profile.id}`}>
-                                        <Eye className="h-4 w-4 mr-2" />
-                                        Ver Perfil
-                                    </Link>
-                                </Button>
+                                <div className="flex gap-1 flex-shrink-0">
+                                    <Button asChild variant="secondary" size="sm">
+                                        <Link href={`/profile/${profile.id}`}>
+                                            <Eye className="h-3 w-3 mr-1" />
+                                            Ver
+                                        </Link>
+                                    </Button>
+                                </div>
                             </div>
                          ))}
+                         </div>
                     </div>
                     <div className="pt-4 space-y-2">
                         <Button asChild className="w-full">

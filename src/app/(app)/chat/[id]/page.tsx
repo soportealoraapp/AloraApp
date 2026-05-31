@@ -10,6 +10,8 @@ import { Card } from "@/components/ui/card";
 import { ArrowLeft, MoreVertical, Sparkles, Loader2, Circle } from "lucide-react";
 import { ChatInput } from "@/components/chat/chat-input";
 import { VoiceMessage } from "@/components/chat/VoiceMessage";
+import { MuteDialog } from "@/components/chat/MuteDialog";
+import { ConversationRoulette } from "@/components/chat/ConversationRoulette";
 import { cn } from "@/lib/utils";
 import {
     DropdownMenu,
@@ -33,7 +35,7 @@ export default function ChatWindowPage() {
     const router = useRouter();
     const { user, profile } = useAuth();
     const matchId = params.id as string;
-    const { messages, loading, sending, sendMessage, emitTyping, markAsRead, loadMore, hasMore, loadingMore, isPartnerOnline, partnerTyping } = useChat(matchId);
+    const { messages, setMessages, loading, sending, sendMessage, emitTyping, markAsRead, loadMore, hasMore, loadingMore, isPartnerOnline, partnerTyping } = useChat(matchId);
     const { matches } = useMatches();
     const { toast } = useToast();
     const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -43,6 +45,7 @@ export default function ChatWindowPage() {
     const [showIcebreakers, setShowIcebreakers] = useState(false);
     const [showReportDialog, setShowReportDialog] = useState(false);
     const [showBlockDialog, setShowBlockDialog] = useState(false);
+    const [showMuteDialog, setShowMuteDialog] = useState(false);
     const [autoScroll, setAutoScroll] = useState(true);
     const { track } = useAnalytics();
     const messageCountRef = useRef(0);
@@ -211,6 +214,48 @@ export default function ChatWindowPage() {
         }
     };
 
+    const handleReact = async (messageId: string, emoji: string) => {
+        try {
+            const response = await fetch('/api/chat/react', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ messageId, emoji }),
+            });
+            if (!response.ok) throw new Error('Failed to react');
+            const data = await response.json();
+            setMessages(prev =>
+                prev.map(m =>
+                    m.id === messageId ? { ...m, reactions: data.reactions } : m
+                )
+            );
+        } catch (error) {
+            console.error('Error reacting:', error);
+        }
+    };
+
+    const handleMute = async (duration: number | null) => {
+        try {
+            const response = await fetch('/api/chat/mute', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ matchId, duration }),
+            });
+            if (!response.ok) throw new Error('Failed to mute');
+            toast({
+                title: duration === -1 ? 'Notificaciones activadas' : 'Conversación silenciada',
+                description: duration === -1
+                    ? 'Recibirás notificaciones de nuevos mensajes'
+                    : 'No recibirás notificaciones de esta conversación',
+            });
+        } catch (error) {
+            toast({
+                title: 'Error',
+                description: 'No se pudo cambiar el silencio',
+                variant: 'destructive',
+            });
+        }
+    };
+
     if (loading && messages.length === 0) {
         return (
             <div className="md:pl-60 h-screen flex flex-col">
@@ -280,6 +325,9 @@ export default function ChatWindowPage() {
                     <DropdownMenuContent align="end">
                         <DropdownMenuItem asChild>
                             <Link href={`/profile/${otherUserId}`}>Ver perfil</Link>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => setShowMuteDialog(true)}>
+                            Silenciar
                         </DropdownMenuItem>
                         <DropdownMenuItem onClick={handleReport}>
                             Reportar
@@ -352,6 +400,8 @@ export default function ChatWindowPage() {
                                                     key={message.id}
                                                     message={message}
                                                     isMe={message.senderId === user?.id}
+                                                    currentUserId={user?.id}
+                                                    onReact={handleReact}
                                                 />
                                             );
                                         }
@@ -361,6 +411,8 @@ export default function ChatWindowPage() {
                                             key={message.id}
                                             message={message}
                                             isMe={message.senderId === user?.id}
+                                            currentUserId={user?.id}
+                                            onReact={handleReact}
                                         />
                                     );
                                 })}
@@ -454,6 +506,10 @@ export default function ChatWindowPage() {
                                 </span>
                             )}
                         </div>
+                        <ConversationRoulette
+                            onSend={handleSendMessage}
+                            disabled={sending || !otherUserId}
+                        />
                         <ChatInput
                             onSend={handleSendMessage}
                             onSendImage={handleSendImage}
@@ -485,6 +541,12 @@ export default function ChatWindowPage() {
                         onClose={() => setShowBlockDialog(false)}
                         blockedId={otherUserId}
                         onSuccess={() => router.push('/chat')}
+                    />
+                    <MuteDialog
+                        isOpen={showMuteDialog}
+                        onClose={() => setShowMuteDialog(false)}
+                        onMute={handleMute}
+                        isMuted={false}
                     />
                 </>
             )}
