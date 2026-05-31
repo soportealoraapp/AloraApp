@@ -55,12 +55,12 @@ export const PLANS: Record<PlanTier, Plan> = {
         currency: 'MXN',
         interval: 'month',
         features: [
-            'Likes ilimitados',
-            'Mayor visibilidad en descubrimiento',
-            'Boosts más frecuentes (semanales)',
-            'Matching internacional',
-            'Modo incógnito',
-            'Rewind (deshacer swipe)'
+            'Likes ilimitados sin límite diario',
+            'Prioridad en Discover (+25 puntos)',
+            'Boost de visibilidad cada 7 días de racha',
+            'Rewind: deshacer 3 swipes al día',
+            'Modo Viaje: explora otras ciudades',
+            'Modo Incógnito: controla tu visibilidad'
         ]
     }
 };

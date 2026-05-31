@@ -116,10 +116,10 @@ export default function ChatWindowPage() {
         if (!matchId || !otherUserId) return;
         setLoadingIcebreakers(true);
         try {
-            const response = await fetch('/api/chat/icebreakers', {
+            const response = await fetch('/api/ai/icebreakers', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ matchId, otherUserId })
+                body: JSON.stringify({ matchId })
             });
             const data = await response.json();
             setIcebreakers(data.icebreakers || []);
@@ -137,16 +137,30 @@ export default function ChatWindowPage() {
 
     const handleSendMessage = async (text: string) => {
         if (!otherUserId) return;
-        const isFirstMessage = messages.length === 0;
-        await sendMessage(text, otherUserId);
+        try {
+            await sendMessage(text, otherUserId);
 
-        track(AnalyticsEvents.FIRST_MESSAGE_SENT, { matchId, partnerId: otherUserId });
+            track(AnalyticsEvents.FIRST_MESSAGE_SENT, { matchId, partnerId: otherUserId });
 
-        // Track conversation milestones
-        const newCount = messageCountRef.current + 1;
-        messageCountRef.current = newCount;
-        if (newCount === 10 || newCount === 25 || newCount === 50) {
-            track(AnalyticsEvents.CONVERSATION_MILESTONE, { matchId, count: newCount });
+            const newCount = messageCountRef.current + 1;
+            messageCountRef.current = newCount;
+            if (newCount === 10 || newCount === 25 || newCount === 50) {
+                track(AnalyticsEvents.CONVERSATION_MILESTONE, { matchId, count: newCount });
+            }
+        } catch (error: any) {
+            if (error?.code === 'first_message_restriction') {
+                toast({
+                    title: "Ella da el primer paso",
+                    description: "En conexiones entre hombres y mujeres, ella inicia la conversación.",
+                    variant: "default"
+                });
+            } else {
+                toast({
+                    title: "Error",
+                    description: "No se pudo enviar el mensaje. Intenta de nuevo.",
+                    variant: "destructive"
+                });
+            }
         }
     };
 

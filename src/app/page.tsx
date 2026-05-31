@@ -32,10 +32,16 @@ export default function WelcomePage() {
           </Button>
         </div>
       </main>
-      <footer className="py-6 text-center text-muted-foreground">
-        <p className="flex items-center justify-center gap-2">
+      <footer className="py-6 text-center space-y-2">
+        <p className="flex items-center justify-center gap-2 text-muted-foreground">
           Hecho con <Heart className="h-4 w-4 text-primary" /> para una comunidad más segura.
         </p>
+        <div className="text-[10px] text-muted-foreground space-x-3">
+          <a href="https://docs.google.com/document/d/1dFjQ4aZqW2t9hVv0n8v7b3x9kLmZqYjR/edit" target="_blank" rel="noopener noreferrer" className="hover:underline">Términos</a>
+          <a href="https://docs.google.com/document/d/1dFjQ4aZqW2t9hVv0n8v7b3x9kLmZqYjR/edit" target="_blank" rel="noopener noreferrer" className="hover:underline">Privacidad</a>
+          <Link href="/support" className="hover:underline">Ayuda</Link>
+          <Link href="/contact" className="hover:underline">Contacto</Link>
+        </div>
       </footer>
     </div>
   );

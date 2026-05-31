@@ -11,8 +11,7 @@ import {
 } from '@/components/ui/dialog';
 import { VisuallyHidden } from '@radix-ui/react-visually-hidden';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Check, Sparkles, Heart, Zap, ShieldCheck, Loader2 } from 'lucide-react';
+import { Check, Sparkles, Heart, Zap, ShieldCheck, Loader2, RotateCcw, Globe } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -60,10 +59,12 @@ export function PaywallModal({ isOpen, onClose }: PaywallModalProps) {
     };
 
     const features = [
-        { icon: <Heart className="text-pink-500 h-5 w-5" />, title: "Likes ilimitados", subtitle: "Sin limites diarios para conectar" },
-        { icon: <Zap className="text-blue-500 h-5 w-5" />, title: "Boosts semanales", subtitle: "Destaque prioritario por 30 min" },
-        { icon: <Sparkles className="text-amber-500 h-5 w-5" />, title: "Likes prioritarios", subtitle: "Tus likes aparecen primero" },
-        { icon: <ShieldCheck className="text-green-500 h-5 w-5" />, title: "Modo incognito", subtitle: "Controla quien te ve" },
+        { icon: <Heart className="text-pink-500 h-5 w-5" />, title: "Likes ilimitados", subtitle: "Sin límite diario para conectar" },
+        { icon: <Sparkles className="text-amber-500 h-5 w-5" />, title: "Prioridad en Discover", subtitle: "Tus perfiles aparecen primero" },
+        { icon: <Zap className="text-blue-500 h-5 w-5" />, title: "Boost de visibilidad", subtitle: "Cada 7 días de racha activa" },
+        { icon: <RotateCcw className="text-purple-500 h-5 w-5" />, title: "Rewind", subtitle: "Deshacer 3 swipes al día" },
+        { icon: <Globe className="text-green-500 h-5 w-5" />, title: "Modo Viaje", subtitle: "Explora perfiles en otras ciudades" },
+        { icon: <ShieldCheck className="text-emerald-500 h-5 w-5" />, title: "Modo incógnito", subtitle: "Controla quién te ve" },
     ];
 
     return (
@@ -96,12 +97,11 @@ export function PaywallModal({ isOpen, onClose }: PaywallModalProps) {
                         ))}
                     </div>
 
-                    <div className="bg-pink-50 rounded-2xl p-4 border border-pink-100 flex justify-between items-center">
+                    <div className="bg-pink-50 rounded-2xl p-4 border border-pink-100">
                         <div>
                             <span className="text-xs font-bold text-pink-600 uppercase tracking-wider">Plan Mensual</span>
                             <div className="text-2xl font-bold text-gray-900">$99 <span className="text-sm font-normal text-muted-foreground">MXN / mes</span></div>
                         </div>
-                        <Badge variant="secondary" className="bg-muted text-muted-foreground font-bold">-20% Hoy</Badge>
                     </div>
 
                     <Button

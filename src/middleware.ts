@@ -11,25 +11,45 @@ export async function middleware(request: NextRequest) {
     const response = await updateSession(modifiedRequest);
     const { data: { user } } = await (await createClient(modifiedRequest, response)).auth.getUser();
 
-    const isAppRoute = modifiedRequest.nextUrl.pathname.startsWith('/discover') ||
-        modifiedRequest.nextUrl.pathname.startsWith('/profile') ||
-        modifiedRequest.nextUrl.pathname.startsWith('/messages') ||
-        modifiedRequest.nextUrl.pathname.startsWith('/chat') ||
-        modifiedRequest.nextUrl.pathname.startsWith('/settings') ||
-        modifiedRequest.nextUrl.pathname.startsWith('/qa') ||
-        modifiedRequest.nextUrl.pathname.startsWith('/onboarding');
+    const pathname = modifiedRequest.nextUrl.pathname;
 
-    const isAuthRoute = modifiedRequest.nextUrl.pathname.startsWith('/login') ||
-        modifiedRequest.nextUrl.pathname.startsWith('/signup') ||
-        modifiedRequest.nextUrl.pathname.startsWith('/forgot-password') ||
-        modifiedRequest.nextUrl.pathname.startsWith('/password-update') ||
-        modifiedRequest.nextUrl.pathname.startsWith('/auth');
+    const isAppRoute = pathname.startsWith('/discover') ||
+        pathname.startsWith('/profile') ||
+        pathname.startsWith('/messages') ||
+        pathname.startsWith('/chat') ||
+        pathname.startsWith('/settings') ||
+        pathname.startsWith('/qa') ||
+        pathname.startsWith('/onboarding') ||
+        pathname.startsWith('/admin') ||
+        pathname.startsWith('/contact') ||
+        pathname.startsWith('/support');
+
+    const isAdminRoute = pathname.startsWith('/admin');
+
+    const isAuthRoute = pathname.startsWith('/login') ||
+        pathname.startsWith('/signup') ||
+        pathname.startsWith('/forgot-password') ||
+        pathname.startsWith('/password-update') ||
+        pathname.startsWith('/auth');
 
     if (isAppRoute && !user) {
         return NextResponse.redirect(new URL('/login', modifiedRequest.url));
     }
 
-    if (isAuthRoute && user && !modifiedRequest.nextUrl.pathname.startsWith('/auth/callback')) {
+    if (isAdminRoute && user) {
+        const supabaseClient = await createClient(modifiedRequest, response);
+        const { data: profile } = await supabaseClient
+            .from('users')
+            .select('role')
+            .eq('id', user.id)
+            .single();
+
+        if (!profile || (profile.role !== 'admin' && profile.role !== 'moderator')) {
+            return NextResponse.redirect(new URL('/discover', modifiedRequest.url));
+        }
+    }
+
+    if (isAuthRoute && user && !pathname.startsWith('/auth/callback')) {
         return NextResponse.redirect(new URL('/discover', modifiedRequest.url));
     }
 

@@ -53,6 +53,7 @@ export default function ForgotPasswordPage() {
     }
 
     return (
+        <>
         <Card className="w-full">
             <CardHeader>
                 <CardTitle>Recuperar contraseña</CardTitle>
@@ -93,5 +94,11 @@ export default function ForgotPasswordPage() {
                 </CardFooter>
             </form>
         </Card>
+        <div className="text-center text-[10px] text-muted-foreground space-x-3 mt-4">
+            <a href="https://docs.google.com/document/d/1dFjQ4aZqW2t9hVv0n8v7b3x9kLmZqYjR/edit" target="_blank" rel="noopener noreferrer" className="hover:underline">Términos</a>
+            <a href="https://docs.google.com/document/d/1dFjQ4aZqW2t9hVv0n8v7b3x9kLmZqYjR/edit" target="_blank" rel="noopener noreferrer" className="hover:underline">Privacidad</a>
+            <Link href="/support" className="hover:underline">Ayuda</Link>
+        </div>
+        </>
     );
 }

@@ -154,7 +154,10 @@ export function useChat(matchId: string) {
             });
 
             if (!response.ok) {
-                throw new Error('Error al enviar mensaje');
+                const errorData = await response.json().catch(() => ({}));
+                const error: any = new Error(errorData.message || 'Error al enviar mensaje');
+                error.code = errorData.error;
+                throw error;
             }
 
             // The realtime subscription will add the confirmed message.

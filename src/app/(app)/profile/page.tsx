@@ -16,6 +16,7 @@ import { BoostDashboard } from "@/components/premium/BoostDashboard";
 import { MissionCenter } from "@/components/retention/MissionCenter";
 import { StreakCard } from "@/components/gamification/StreakCard";
 import { PaywallModal } from "@/components/premium/PaywallModal";
+import { LikesCounter } from "@/components/discover/LikesCounter";
 import { useState } from "react";
 
 export default function ProfilePage() {
@@ -242,6 +243,17 @@ export default function ProfilePage() {
               </CardContent>
             </Card>
           )}
+
+          <Card className="rounded-3xl border">
+            <CardContent className="p-4">
+              <LikesCounter
+                dailyLikesUsed={(profile as any)?.dailyLikesUsed || 0}
+                dailyLikesLimit={50}
+                resetAt={(profile as any)?.dailyLikesResetAt || new Date()}
+                subscriptionStatus={(profile as any)?.subscriptionStatus}
+              />
+            </CardContent>
+          </Card>
 
           <BoostDashboard />
 

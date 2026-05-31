@@ -18,6 +18,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { DailyQuestionCard } from "@/components/daily-question/DailyQuestionCard";
 import { DailyCompatibilityCard } from "@/components/compatibility/DailyCompatibilityCard";
 import { useAnalytics, AnalyticsEvents } from "@/hooks/use-analytics";
+import { LikesCounter } from "@/components/discover/LikesCounter";
 
 const DEFAULT_FILTERS: Filters = {
   ageRange: [18, 60],
@@ -164,6 +165,15 @@ export default function DiscoverPage() {
           </Button>
         </div>
       </header>
+
+      <div className="px-4 pt-2">
+        <LikesCounter
+          dailyLikesUsed={(currentUserProfile as any)?.dailyLikesUsed || 0}
+          dailyLikesLimit={50}
+          resetAt={(currentUserProfile as any)?.dailyLikesResetAt || new Date()}
+          subscriptionStatus={(currentUserProfile as any)?.subscriptionStatus}
+        />
+      </div>
 
       <main className="flex-1 flex flex-col items-center justify-center p-4 relative">
         <AnimatePresence>

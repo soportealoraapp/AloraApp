@@ -52,6 +52,29 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ error: 'Interaction not available' }, { status: 403 });
         }
 
+        // Women-first: in heterosexual matches, only the woman can send the first message
+        const prevMessageCount = await prisma.message.count({ where: { matchId } });
+        if (prevMessageCount === 0) {
+            const [senderProfile, receiverProfile] = await Promise.all([
+                prisma.profile.findUnique({ where: { userId: user.id }, select: { gender: true } }),
+                prisma.profile.findUnique({ where: { userId: receiverId }, select: { gender: true } }),
+            ]);
+
+            const isHeteroMatch =
+                (senderProfile?.gender === 'male' && receiverProfile?.gender === 'female') ||
+                (senderProfile?.gender === 'female' && receiverProfile?.gender === 'male');
+
+            if (isHeteroMatch && senderProfile?.gender === 'male') {
+                return NextResponse.json(
+                    {
+                        error: 'first_message_restriction',
+                        message: 'En conexiones entre hombres y mujeres, ella da el primer paso 💬'
+                    },
+                    { status: 403 }
+                );
+            }
+        }
+
         // Moderate message content
         let content = text;
         let isFiltered = false;
@@ -113,17 +136,13 @@ export async function POST(request: NextRequest) {
         notifyNewMessage(receiverId, senderProfile?.displayName || 'Alguien', matchId, content).catch(() => {});
 
         // Analytics: track first_message and first_reply
-        const prevMessageCount = await prisma.message.count({ where: { matchId } });
-        if (prevMessageCount === 1) {
-            // This is the first message in the match
+        if (prevMessageCount === 0) {
             trackEvent(user.id, 'first_message', { matchId }).catch(() => {});
-        } else if (prevMessageCount > 1) {
-            // Check if the receiver has already messaged (reply)
+        } else {
             const repliesFromReceiver = await prisma.message.count({
                 where: { matchId, senderId: receiverId },
             });
             if (repliesFromReceiver === 1) {
-                // This is the first reply from the receiver
                 trackEvent(receiverId, 'first_reply', { matchId }).catch(() => {});
             }
         }

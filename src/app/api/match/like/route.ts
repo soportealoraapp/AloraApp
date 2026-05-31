@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { withRateLimit } from '@/server/utils/api-rate-limit';
-import { notifyNewMatch } from '@/server/services/push';
+import { notifyNewMatch, notifyLikesRestored } from '@/server/services/push';
 import { trackEvent } from '@/server/services/analytics';
 
 const FREE_DAILY_LIKES_LIMIT = 50;
@@ -41,10 +41,14 @@ export async function POST(request: NextRequest) {
                 const isNewDay = now.toDateString() !== lastReset.toDateString();
 
                 if (isNewDay) {
+                    const previousLikesUsed = profile.dailyLikesUsed;
                     await prisma.profile.update({
                         where: { userId: user.id },
                         data: { dailyLikesUsed: 0, dailyLikesResetAt: now }
                     });
+                    if (previousLikesUsed > 0) {
+                        notifyLikesRestored(user.id).catch(() => {});
+                    }
                 } else if (profile.dailyLikesUsed >= FREE_DAILY_LIKES_LIMIT) {
                     const tomorrow = new Date(now);
                     tomorrow.setDate(tomorrow.getDate() + 1);

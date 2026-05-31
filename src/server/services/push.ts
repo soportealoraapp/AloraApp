@@ -122,3 +122,12 @@ export async function notifyReportResolved(userId: string) {
         channel: 'safety',
     });
 }
+
+export async function notifyLikesRestored(userId: string) {
+    return sendPushToUser(userId, {
+        title: 'Tus likes ya están disponibles',
+        body: 'Tus 50 likes diarios ya están disponibles. ¡A conectar!',
+        data: { type: 'likes_restored' },
+        channel: 'engagement',
+    });
+}

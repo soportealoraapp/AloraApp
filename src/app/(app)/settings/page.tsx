@@ -116,20 +116,42 @@ export default function SettingsPage() {
                         <CardTitle>Soporte y Legal</CardTitle>
                     </CardHeader>
                     <CardContent className="divide-y">
-                        <div className="flex items-center justify-between p-3 rounded-lg -mx-3 opacity-70">
-                            <div className="flex items-center gap-3">
-                            <HelpCircle className="w-5 h-5 text-muted-foreground" />
-                            <span>Ayuda y Soporte</span>
+                        <Link href="/support">
+                            <div className="flex items-center justify-between p-3 rounded-lg hover:bg-secondary -mx-3">
+                                <div className="flex items-center gap-3">
+                                <HelpCircle className="w-5 h-5 text-muted-foreground" />
+                                <span>Ayuda y Soporte</span>
+                                </div>
+                                <ChevronRight className="w-5 h-5 text-muted-foreground" />
                             </div>
-                            <span className="text-[10px] text-muted-foreground uppercase tracking-wider">Próximamente</span>
-                        </div>
-                        <div className="flex items-center justify-between p-3 rounded-lg -mx-3 opacity-70">
-                            <div className="flex items-center gap-3">
-                            <FileText className="w-5 h-5 text-muted-foreground" />
-                            <span>Términos y Condiciones</span>
+                        </Link>
+                        <Link href="/contact">
+                            <div className="flex items-center justify-between p-3 rounded-lg hover:bg-secondary -mx-3">
+                                <div className="flex items-center gap-3">
+                                <HelpCircle className="w-5 h-5 text-muted-foreground" />
+                                <span>Contacto</span>
+                                </div>
+                                <ChevronRight className="w-5 h-5 text-muted-foreground" />
                             </div>
-                            <span className="text-[10px] text-muted-foreground uppercase tracking-wider">Próximamente</span>
-                        </div>
+                        </Link>
+                        <a href="https://docs.google.com/document/d/1dFjQ4aZqW2t9hVv0n8v7b3x9kLmZqYjR/edit" target="_blank" rel="noopener noreferrer">
+                            <div className="flex items-center justify-between p-3 rounded-lg hover:bg-secondary -mx-3">
+                                <div className="flex items-center gap-3">
+                                <FileText className="w-5 h-5 text-muted-foreground" />
+                                <span>Términos y Condiciones</span>
+                                </div>
+                                <ChevronRight className="w-5 h-5 text-muted-foreground" />
+                            </div>
+                        </a>
+                        <a href="https://docs.google.com/document/d/1dFjQ4aZqW2t9hVv0n8v7b3x9kLmZqYjR/edit" target="_blank" rel="noopener noreferrer">
+                            <div className="flex items-center justify-between p-3 rounded-lg hover:bg-secondary -mx-3">
+                                <div className="flex items-center gap-3">
+                                <FileText className="w-5 h-5 text-muted-foreground" />
+                                <span>Política de Privacidad</span>
+                                </div>
+                                <ChevronRight className="w-5 h-5 text-muted-foreground" />
+                            </div>
+                        </a>
                     </CardContent>
                 </Card>
 

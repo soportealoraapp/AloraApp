@@ -1,0 +1,85 @@
+'use client';
+
+import { useState, useEffect, useMemo } from 'react';
+import { Heart } from 'lucide-react';
+import { Progress } from '@/components/ui/progress';
+import { cn } from '@/lib/utils';
+
+interface LikesCounterProps {
+    dailyLikesUsed: number;
+    dailyLikesLimit: number;
+    resetAt: Date | string;
+    subscriptionStatus?: string;
+    className?: string;
+}
+
+export function LikesCounter({
+    dailyLikesUsed,
+    dailyLikesLimit,
+    resetAt,
+    subscriptionStatus = 'free',
+    className
+}: LikesCounterProps) {
+    const [now, setNow] = useState(new Date());
+
+    useEffect(() => {
+        const interval = setInterval(() => setNow(new Date()), 60000);
+        return () => clearInterval(interval);
+    }, []);
+
+    const resetDate = useMemo(() => new Date(resetAt), [resetAt]);
+    const isPlus = subscriptionStatus === 'plus';
+
+    if (isPlus) {
+        return (
+            <div className={cn("flex items-center gap-2 text-xs text-muted-foreground", className)}>
+                <Heart className="h-3.5 w-3.5 text-pink-500 fill-pink-500" />
+                <span className="font-medium">Likes ilimitados</span>
+            </div>
+        );
+    }
+
+    const remaining = Math.max(0, dailyLikesLimit - dailyLikesUsed);
+    const percentage = Math.round((remaining / dailyLikesLimit) * 100);
+
+    const timeUntilReset = useMemo(() => {
+        if (remaining > 0) return null;
+        const diff = resetDate.getTime() - now.getTime();
+        if (diff <= 0) return null;
+        const hours = Math.floor(diff / (1000 * 60 * 60));
+        const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+        return `${hours}h ${minutes}m`;
+    }, [remaining, resetDate, now]);
+
+    const isLow = remaining <= 10;
+    const isEmpty = remaining === 0;
+
+    return (
+        <div className={cn("space-y-1.5", className)}>
+            <div className="flex items-center justify-between">
+                <div className="flex items-center gap-1.5">
+                    <Heart className={cn(
+                        "h-3.5 w-3.5",
+                        isEmpty ? "text-muted-foreground" : isLow ? "text-orange-500" : "text-pink-500 fill-pink-500"
+                    )} />
+                    <span className="text-xs font-medium text-muted-foreground">
+                        {remaining} de {dailyLikesLimit} likes disponibles
+                    </span>
+                </div>
+                {timeUntilReset && (
+                    <span className="text-[10px] text-muted-foreground">
+                        Se restauran en {timeUntilReset}
+                    </span>
+                )}
+            </div>
+            <Progress
+                value={percentage}
+                className={cn(
+                    "h-1.5",
+                    isEmpty && "[&>div]:bg-muted-foreground",
+                    isLow && !isEmpty && "[&>div]:bg-orange-500"
+                )}
+            />
+        </div>
+    );
+}
