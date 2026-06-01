@@ -43,6 +43,11 @@ export interface FeedFilters {
     distance?: number; // km
     userLat?: number;
     userLng?: number;
+    withVoiceIntro?: boolean;
+    withQuiz?: boolean;
+    featuredOnly?: boolean;
+    highCompatibility?: boolean;
+    activeToday?: boolean;
 }
 
 export async function getDynamicFeed(
@@ -204,7 +209,48 @@ export async function getDynamicFeed(
         });
 
         const hasMore = candidates.length > limit;
-        const results = hasMore ? candidates.slice(0, limit) : candidates;
+        let results = hasMore ? candidates.slice(0, limit) : candidates;
+
+        // Apply smart filters that need extra lookups
+        if (filters?.withVoiceIntro || filters?.withQuiz || filters?.activeToday) {
+            const candidateIds = results.map(c => c.userId);
+            const [voiceUsers, quizUsers, activeUsers] = await Promise.all([
+                filters.withVoiceIntro
+                    ? prisma.profile.findMany({
+                        where: { userId: { in: candidateIds }, voiceIntro: { not: null } },
+                        select: { userId: true }
+                    })
+                    : Promise.resolve([]),
+                filters.withQuiz
+                    ? prisma.quizResult.findMany({
+                        where: { userId: { in: candidateIds } },
+                        select: { userId: true },
+                        distinct: ['userId']
+                    })
+                    : Promise.resolve([]),
+                filters.activeToday
+                    ? prisma.profile.findMany({
+                        where: {
+                            userId: { in: candidateIds },
+                            lastActiveAt: { gte: new Date(Date.now() - 24 * 60 * 60 * 1000) }
+                        },
+                        select: { userId: true }
+                    })
+                    : Promise.resolve([]),
+            ]);
+
+            const voiceSet = new Set(voiceUsers.map(u => u.userId));
+            const quizSet = new Set(quizUsers.map(u => u.userId));
+            const activeSet = new Set(activeUsers.map(u => u.userId));
+
+            results = results.filter(c => {
+                if (filters.withVoiceIntro && !voiceSet.has(c.userId)) return false;
+                if (filters.withQuiz && !quizSet.has(c.userId)) return false;
+                if (filters.activeToday && !activeSet.has(c.userId)) return false;
+                return true;
+            });
+        }
+
         const nextCursor = hasMore ? results[results.length - 1]?.userId ?? null : null;
 
         // Calculate response rates for all candidates in batch

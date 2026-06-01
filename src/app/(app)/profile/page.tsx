@@ -15,6 +15,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { BoostDashboard } from "@/components/premium/BoostDashboard";
 import { MissionCenter } from "@/components/retention/MissionCenter";
 import { StreakCard } from "@/components/gamification/StreakCard";
+import { FirstWeekJourney } from "@/components/gamification/FirstWeekJourney";
 import { PaywallModal } from "@/components/premium/PaywallModal";
 import { LikesCounter } from "@/components/discover/LikesCounter";
 import { VoiceIntro } from "@/components/audio/VoiceIntro";
@@ -315,6 +316,23 @@ export default function ProfilePage() {
             </Card>
           </Link>
 
+          <Link href="/profile/review">
+            <Card className="rounded-3xl border hover:shadow-md transition-shadow cursor-pointer bg-gradient-to-r from-primary/5 to-purple-500/5">
+              <CardContent className="p-4 flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-primary/10 rounded-xl">
+                    <Sparkles className="h-5 w-5 text-primary" />
+                  </div>
+                  <div>
+                    <h4 className="font-bold text-foreground">Revisión IA de tu perfil</h4>
+                    <p className="text-xs text-muted-foreground">Descubre cómo mejorarlo</p>
+                  </div>
+                </div>
+                <ChevronRight className="h-5 w-5 text-muted-foreground" />
+              </CardContent>
+            </Card>
+          </Link>
+
           <Link href="/profile/visitors">
             <Card className="rounded-3xl border hover:shadow-md transition-shadow cursor-pointer">
               <CardContent className="p-4 flex items-center justify-between">
@@ -347,6 +365,8 @@ export default function ProfilePage() {
           </Card>
 
           <StreakCard />
+
+          <FirstWeekJourney />
 
           <MissionCenter />
         </div>

@@ -828,3 +828,77 @@ model Report {
   @@index([reportedId])
   @@map("reports")
 }
+
+// -----------------------------------------------------------------------------
+// SPRINT 5 MODELS
+// -----------------------------------------------------------------------------
+
+model Favorite {
+  id        String   @id @default(uuid())
+  userId    String
+  profileId String
+  createdAt DateTime @default(now())
+
+  @@unique([userId, profileId])
+  @@index([userId])
+  @@index([profileId])
+  @@map("favorites")
+}
+
+model DailyPick {
+  id        String   @id @default(uuid())
+  userId    String
+  profileId String
+  reason    String
+  score     Int      @default(0)
+  date      DateTime @default(now())
+  viewed    Boolean  @default(false)
+  liked     Boolean?
+  createdAt DateTime @default(now())
+
+  @@unique([userId, profileId, date])
+  @@index([userId, date])
+  @@map("daily_picks")
+}
+
+model MatchFeedback {
+  id        String   @id @default(uuid())
+  matchId   String
+  userId    String
+  rating    Int
+  comment   String?
+  createdAt DateTime @default(now())
+
+  @@unique([matchId, userId])
+  @@index([matchId])
+  @@map("match_feedback")
+}
+
+model Referral {
+  id          String    @id @default(uuid())
+  referrerId  String
+  referredId  String?
+  code        String    @unique
+  status      String    @default("pending")
+  rewardType  String?
+  rewardValue Int?
+  createdAt   DateTime  @default(now())
+  completedAt DateTime?
+
+  @@index([referrerId])
+  @@index([code])
+  @@map("referrals")
+}
+
+model SuccessStory {
+  id        String   @id @default(uuid())
+  title     String
+  story     String
+  photoUrl  String?
+  authorId  String?
+  approved  Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@index([approved])
+  @@map("success_stories")
+}

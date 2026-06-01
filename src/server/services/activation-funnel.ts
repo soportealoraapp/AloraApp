@@ -12,6 +12,20 @@ export interface ActivationFunnel {
     biggestDropoff: string;
 }
 
+export interface ActivationMetrics {
+    funnel: ActivationFunnel;
+    retention: {
+        d1: { active: number; total: number; rate: number };
+        d7: { active: number; total: number; rate: number };
+    };
+    plusConversions: number;
+    plusConversionRate: number;
+    voiceIntroCount: number;
+    quizCount: number;
+    verifiedCount: number;
+    avgCompleteness: number;
+}
+
 /**
  * Calculate activation funnel metrics.
  */
@@ -103,5 +117,90 @@ export async function getActivationFunnel(): Promise<ActivationFunnel> {
         steps,
         overallConversion: Math.round(overallConversion * 10) / 10,
         biggestDropoff,
+    };
+}
+
+/**
+ * Calculate extended activation metrics including retention and conversion.
+ */
+export async function getActivationMetrics(): Promise<ActivationMetrics> {
+    const now = new Date();
+    const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+    const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+
+    const [
+        funnel,
+        voiceIntroCount,
+        quizCount,
+        verifiedCount,
+        recentUsers,
+        plusUsers,
+        newUsersLast30,
+        completenessAgg,
+    ] = await Promise.all([
+        getActivationFunnel(),
+        prisma.profile.count({ where: { voiceIntro: { not: null } } }),
+        prisma.quizResult.groupBy({ by: ['userId'] }).then(r => r.length),
+        prisma.profile.count({ where: { isVerified: true } }),
+        prisma.analyticsEvent.findMany({
+            where: { event: 'daily_active', createdAt: { gte: thirtyDaysAgo } },
+            select: { userId: true, createdAt: true, metadata: true },
+        }),
+        prisma.profile.count({ where: { subscriptionStatus: 'plus' } }),
+        prisma.user.count({ where: { createdAt: { gte: thirtyDaysAgo } } }),
+        prisma.profile.aggregate({
+            _avg: { reputationScore: true }
+        }),
+    ]);
+
+    // D1 retention
+    const d1Cohort = await prisma.user.findMany({
+        where: { createdAt: { gte: new Date(now.getTime() - 2 * 24 * 60 * 60 * 1000), lte: new Date(now.getTime() - 24 * 60 * 60 * 1000) } },
+        select: { id: true, createdAt: true },
+    });
+
+    const d1ActiveUserIds = new Set(
+        recentUsers
+            .filter(e => new Date(e.createdAt) >= new Date(d1Cohort[0]?.createdAt || now))
+            .map(e => e.userId)
+    );
+
+    const d1Active = d1Cohort.filter(u => d1ActiveUserIds.has(u.id)).length;
+    const d1Total = d1Cohort.length;
+
+    // D7 retention (approximation)
+    const d7Cohort = await prisma.user.findMany({
+        where: { createdAt: { gte: new Date(now.getTime() - 8 * 24 * 60 * 60 * 1000), lte: new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000) } },
+        select: { id: true },
+    });
+
+    const d7ActiveUserIds = new Set(recentUsers.map(e => e.userId));
+    const d7Active = d7Cohort.filter(u => d7ActiveUserIds.has(u.id)).length;
+    const d7Total = d7Cohort.length;
+
+    const plusConversionRate = newUsersLast30 > 0
+        ? Math.round((plusUsers / (newUsersLast30 * 5)) * 1000) / 10
+        : 0;
+
+    return {
+        funnel,
+        retention: {
+            d1: {
+                active: d1Active,
+                total: d1Total,
+                rate: d1Total > 0 ? Math.round((d1Active / d1Total) * 1000) / 10 : 0,
+            },
+            d7: {
+                active: d7Active,
+                total: d7Total,
+                rate: d7Total > 0 ? Math.round((d7Active / d7Total) * 1000) / 10 : 0,
+            },
+        },
+        plusConversions: plusUsers,
+        plusConversionRate,
+        voiceIntroCount,
+        quizCount,
+        verifiedCount,
+        avgCompleteness: completenessAgg._avg.reputationScore || 0,
     };
 }

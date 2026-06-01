@@ -9,6 +9,7 @@ import { ArrowLeft, Eye, Lock, Sparkles } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { PaywallModal } from '@/components/premium/PaywallModal';
+import { PlusBadge } from '@/components/premium/PlusBadge';
 
 interface Visitor {
     id: string;
@@ -50,8 +51,11 @@ export default function VisitorsPage() {
                 <Button variant="ghost" size="icon" onClick={() => router.back()}>
                     <ArrowLeft className="h-5 w-5" />
                 </Button>
-                <div>
-                    <h1 className="text-2xl font-bold">Visitantes del perfil</h1>
+                <div className="flex-1">
+                    <div className="flex items-center gap-2">
+                        <h1 className="text-2xl font-bold">Visitantes del perfil</h1>
+                        {!isPlus && <PlusBadge label="Beneficio Plus" />}
+                    </div>
                     <p className="text-sm text-muted-foreground">{total} persona{total !== 1 ? 's' : ''} visitó tu perfil</p>
                 </div>
             </div>

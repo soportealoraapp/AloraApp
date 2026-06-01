@@ -9,6 +9,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ArrowLeft, CheckCircle, Heart, MessageSquare, Sparkles, MapPin, Briefcase, Cigarette, GlassWater, Baby, Star, BookOpen, Music, X, Undo, UserCheck, Loader2 } from "lucide-react";
+import { ProfileHighlights } from "@/components/profile/ProfileHighlights";
+import { FavoriteButton } from "@/components/profile/FavoriteButton";
 import Image from "next/image";
 import Link from "next/link";
 import { useToast } from "@/hooks/use-toast";
@@ -186,6 +188,9 @@ export default function UserProfilePage() {
                     </h1>
                     {profile.isVerified && <CheckCircle className="h-5 w-5 text-primary" />}
                 </div>
+                <div className="ml-auto">
+                    {user?.id !== id && <FavoriteButton profileId={id as string} />}
+                </div>
             </header>
 
             <main className="pb-24 md:pb-4">
@@ -230,6 +235,14 @@ export default function UserProfilePage() {
                             </CardContent>
                         </Card>
                     )}
+
+                    <ProfileHighlights
+                        bio={profile.bio}
+                        interests={profile.interests}
+                        values={profile.values}
+                        lookingFor={profile.lookingFor}
+                        musicGenres={profile.musicGenres}
+                    />
 
                     {profile.personalGuide && profile.personalGuide.length > 0 && (
                         <Card>

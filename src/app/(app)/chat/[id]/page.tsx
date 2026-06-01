@@ -7,11 +7,13 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useMatches } from "@/hooks/use-matches";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { ArrowLeft, MoreVertical, Sparkles, Loader2, Circle } from "lucide-react";
+import { ArrowLeft, MoreVertical, Sparkles, Loader2, Circle, History } from "lucide-react";
 import { ChatInput } from "@/components/chat/chat-input";
 import { VoiceMessage } from "@/components/chat/VoiceMessage";
 import { MuteDialog } from "@/components/chat/MuteDialog";
 import { ConversationRoulette } from "@/components/chat/ConversationRoulette";
+import { MatchTimeline } from "@/components/chat/MatchTimeline";
+import { MatchFeedbackDialog } from "@/components/match/MatchFeedbackDialog";
 import { cn } from "@/lib/utils";
 import {
     DropdownMenu,
@@ -46,6 +48,8 @@ export default function ChatWindowPage() {
     const [showReportDialog, setShowReportDialog] = useState(false);
     const [showBlockDialog, setShowBlockDialog] = useState(false);
     const [showMuteDialog, setShowMuteDialog] = useState(false);
+    const [showTimeline, setShowTimeline] = useState(false);
+    const [showFeedbackDialog, setShowFeedbackDialog] = useState(false);
     const [matchHealth, setMatchHealth] = useState(0);
 
     useEffect(() => {
@@ -54,6 +58,22 @@ export default function ChatWindowPage() {
             .then(r => r.json())
             .then(data => setMatchHealth(data.score || 0))
             .catch(() => {});
+    }, [matchId]);
+
+    useEffect(() => {
+        if (!matchId) return;
+        const checkFeedback = async () => {
+            try {
+                const res = await fetch(`/api/match/feedback?matchId=${matchId}`);
+                if (!res.ok) return;
+                const data = await res.json();
+                if (data?.showPrompt) {
+                    setShowFeedbackDialog(true);
+                }
+            } catch {}
+        };
+        const timer = setTimeout(checkFeedback, 1500);
+        return () => clearTimeout(timer);
     }, [matchId]);
     const [autoScroll, setAutoScroll] = useState(true);
     const { track } = useAnalytics();
@@ -339,6 +359,15 @@ export default function ChatWindowPage() {
                     </div>
                 </Link>
 
+                <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => setShowTimeline(true)}
+                    title="Línea de tiempo"
+                >
+                    <History className="h-5 w-5" />
+                </Button>
+
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                         <Button variant="ghost" size="icon">
@@ -348,6 +377,9 @@ export default function ChatWindowPage() {
                     <DropdownMenuContent align="end">
                         <DropdownMenuItem asChild>
                             <Link href={`/profile/${otherUserId}`}>Ver perfil</Link>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => setShowTimeline(true)}>
+                            <History className="h-4 w-4 mr-2" /> Línea de tiempo
                         </DropdownMenuItem>
                         <DropdownMenuItem onClick={() => setShowMuteDialog(true)}>
                             Silenciar
@@ -570,6 +602,17 @@ export default function ChatWindowPage() {
                         onClose={() => setShowMuteDialog(false)}
                         onMute={handleMute}
                         isMuted={false}
+                    />
+                    <MatchTimeline
+                        matchId={matchId}
+                        open={showTimeline}
+                        onClose={() => setShowTimeline(false)}
+                    />
+                    <MatchFeedbackDialog
+                        matchId={matchId}
+                        partnerName={partnerName}
+                        open={showFeedbackDialog}
+                        onClose={() => setShowFeedbackDialog(false)}
                     />
                 </>
             )}

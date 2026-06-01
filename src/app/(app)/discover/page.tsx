@@ -20,6 +20,7 @@ import { DailyCompatibilityCard } from "@/components/compatibility/DailyCompatib
 import { useAnalytics, AnalyticsEvents } from "@/hooks/use-analytics";
 import { LikesCounter } from "@/components/discover/LikesCounter";
 import { StoryCircle } from "@/components/stories/StoryCircle";
+import { DailyPicks } from "@/components/discover/DailyPicks";
 
 const DEFAULT_FILTERS: Filters = {
   ageRange: [18, 60],
@@ -41,6 +42,7 @@ export default function DiscoverPage() {
   const { track } = useAnalytics();
 
   const [matchedProfile, setMatchedProfile] = useState<UserProfile | null>(null);
+  const [matchId, setMatchId] = useState<string | undefined>(undefined);
   const [showMatchScreen, setShowMatchScreen] = useState(false);
   const [stories, setStories] = useState<any[]>([]);
   const [swipeCount, setSwipeCount] = useState(0);
@@ -119,6 +121,7 @@ export default function DiscoverPage() {
         if (result?.matched) {
           track(AnalyticsEvents.MATCH_CREATED, { partnerId: profileToActOn.id });
           setMatchedProfile(profileToActOn);
+          setMatchId((result as any)?.matchId);
           setShowMatchScreen(true);
         }
       } else {
@@ -148,8 +151,12 @@ export default function DiscoverPage() {
       <MatchScreen
         userProfile={currentUserProfile as unknown as UserProfile}
         matchedProfile={matchedProfile}
+        matchId={matchId}
         onChat={handleChat}
-        onKeepSwiping={() => setShowMatchScreen(false)}
+        onKeepSwiping={() => {
+          setShowMatchScreen(false);
+          setMatchId(undefined);
+        }}
       />
     );
   }
@@ -176,7 +183,7 @@ export default function DiscoverPage() {
       </header>
 
       {stories.length > 0 && (
-        <div className="px-4 pt-2 overflow-x-auto">
+      <div className="px-4 pt-2 overflow-x-auto">
           <div className="flex gap-4 pb-2">
             {stories.map((storyGroup: any) => (
               <StoryCircle
@@ -192,12 +199,7 @@ export default function DiscoverPage() {
       )}
 
       <div className="px-4 pt-2">
-        <LikesCounter
-          dailyLikesUsed={(currentUserProfile as any)?.dailyLikesUsed || 0}
-          dailyLikesLimit={50}
-          resetAt={(currentUserProfile as any)?.dailyLikesResetAt || new Date()}
-          subscriptionStatus={(currentUserProfile as any)?.subscriptionStatus}
-        />
+        <DailyPicks />
       </div>
 
       <main className="flex-1 flex flex-col items-center justify-center p-4 relative">

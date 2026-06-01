@@ -13,6 +13,7 @@ import type { LocationResult } from '@/lib/location';
 import { useAuth } from '@/contexts/AuthContext';
 import { PaywallModal } from '@/components/premium/PaywallModal';
 import { UpgradePrompt } from '@/components/premium/UpgradePrompt';
+import { PlusBadge } from '@/components/premium/PlusBadge';
 
 export default function TravelModePage() {
     const { profile, refreshProfile } = useAuth();
@@ -124,8 +125,11 @@ export default function TravelModePage() {
                 <Button variant="ghost" size="icon" onClick={() => router.back()}>
                     <ArrowLeft className="h-5 w-5" />
                 </Button>
-                <div>
-                    <h1 className="text-2xl font-bold">Modo Viaje</h1>
+                <div className="flex-1">
+                    <div className="flex items-center gap-2">
+                        <h1 className="text-2xl font-bold">Modo Viaje</h1>
+                        <PlusBadge label="Beneficio Plus" />
+                    </div>
                     <p className="text-sm text-muted-foreground">Explora personas en otra ciudad</p>
                 </div>
             </div>

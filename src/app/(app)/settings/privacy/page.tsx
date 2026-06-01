@@ -12,6 +12,7 @@ import Link from "next/link";
 import { useToast } from "@/hooks/use-toast";
 import { Skeleton } from "@/components/ui/skeleton";
 import { UpgradePrompt } from "@/components/premium/UpgradePrompt";
+import { PlusBadge } from "@/components/premium/PlusBadge";
 
 export default function PrivacySettingsPage() {
     const router = useRouter();
@@ -165,6 +166,7 @@ export default function PrivacySettingsPage() {
                                 <div className="flex items-center gap-2 mb-1">
                                     <EyeOff className="h-4 w-4 text-muted-foreground" />
                                     <p className="font-medium">Modo Incógnito</p>
+                                    <PlusBadge label="Plus" />
                                 </div>
                                 <p className="text-sm text-muted-foreground">
                                     Tu perfil no aparecerá en descubrir, solo tus matches actuales te verán

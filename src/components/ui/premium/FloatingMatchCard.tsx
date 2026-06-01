@@ -6,6 +6,7 @@ import { UserProfile } from '@/lib/domain/types';
 import Image from 'next/image';
 import { TrustBadge } from './TrustBadge';
 import { ProfileActions } from '../../match/ProfileActions';
+import { FavoriteButton } from '../../profile/FavoriteButton';
 import { Clock, Zap, MessageCircle, Heart } from 'lucide-react';
 
 interface FloatingMatchCardProps {

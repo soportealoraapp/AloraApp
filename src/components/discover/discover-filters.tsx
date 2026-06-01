@@ -35,6 +35,10 @@ export interface Filters {
   children?: string;
   userLat?: number;
   userLng?: number;
+  withVoiceIntro?: boolean;
+  withQuiz?: boolean;
+  featuredOnly?: boolean;
+  activeToday?: boolean;
 }
 
 
@@ -55,6 +59,10 @@ export function DiscoverFilters({ open, onOpenChange, onApplyFilters, initialFil
   const [selectedSmoking, setSelectedSmoking] = useState<string | undefined>(initialFilters.smoking);
   const [selectedDrinking, setSelectedDrinking] = useState<string | undefined>(initialFilters.drinking);
   const [selectedChildren, setSelectedChildren] = useState<string | undefined>(initialFilters.children);
+  const [withVoiceIntro, setWithVoiceIntro] = useState(initialFilters.withVoiceIntro || false);
+  const [withQuiz, setWithQuiz] = useState(initialFilters.withQuiz || false);
+  const [featuredOnly, setFeaturedOnly] = useState(initialFilters.featuredOnly || false);
+  const [activeToday, setActiveToday] = useState(initialFilters.activeToday || false);
 
   const toggleSelection = (
     item: string,
@@ -82,6 +90,10 @@ export function DiscoverFilters({ open, onOpenChange, onApplyFilters, initialFil
       smoking: selectedSmoking,
       drinking: selectedDrinking,
       children: selectedChildren,
+      withVoiceIntro,
+      withQuiz,
+      featuredOnly,
+      activeToday,
       userLat: initialFilters.userLat,
       userLng: initialFilters.userLng,
     });
@@ -99,6 +111,10 @@ export function DiscoverFilters({ open, onOpenChange, onApplyFilters, initialFil
       smoking: undefined,
       drinking: undefined,
       children: undefined,
+      withVoiceIntro: false,
+      withQuiz: false,
+      featuredOnly: false,
+      activeToday: false,
     }
     setAgeRange(defaultFilters.ageRange);
     setDistance([defaultFilters.distance]);
@@ -109,6 +125,10 @@ export function DiscoverFilters({ open, onOpenChange, onApplyFilters, initialFil
     setSelectedSmoking(defaultFilters.smoking);
     setSelectedDrinking(defaultFilters.drinking);
     setSelectedChildren(defaultFilters.children);
+    setWithVoiceIntro(false);
+    setWithQuiz(false);
+    setFeaturedOnly(false);
+    setActiveToday(false);
     onApplyFilters(defaultFilters);
   }
 
@@ -170,6 +190,35 @@ export function DiscoverFilters({ open, onOpenChange, onApplyFilters, initialFil
               <div className="flex items-center space-x-2 rounded-lg border p-3">
                 <Switch id="verified-only" checked={verifiedOnly} onCheckedChange={setVerifiedOnly} />
                 <Label htmlFor="verified-only" className="flex-grow cursor-pointer">Mostrar solo perfiles verificados</Label>
+              </div>
+            </div>
+
+            <Separator />
+
+            <div className="space-y-3">
+              <Label>Filtros inteligentes</Label>
+
+              <div className="flex items-center space-x-2 rounded-lg border p-3">
+                <Switch id="voice-intro" checked={withVoiceIntro} onCheckedChange={setWithVoiceIntro} />
+                <Label htmlFor="voice-intro" className="flex-grow cursor-pointer">🎤 Con presentación de voz</Label>
+              </div>
+
+              <div className="flex items-center space-x-2 rounded-lg border p-3">
+                <Switch id="quiz-completed" checked={withQuiz} onCheckedChange={setWithQuiz} />
+                <Label htmlFor="quiz-completed" className="flex-grow cursor-pointer">🧪 Con quiz completado</Label>
+              </div>
+
+              <div className="flex items-center space-x-2 rounded-lg border p-3">
+                <Switch id="active-today" checked={activeToday} onCheckedChange={setActiveToday} />
+                <Label htmlFor="active-today" className="flex-grow cursor-pointer">🟢 Activo hoy</Label>
+              </div>
+
+              <div className="flex items-center space-x-2 rounded-lg border p-3 bg-amber-50/30">
+                <Switch id="featured" checked={featuredOnly} onCheckedChange={setFeaturedOnly} />
+                <Label htmlFor="featured" className="flex-grow cursor-pointer">
+                  ⭐ Perfil destacado
+                  <span className="block text-[10px] text-muted-foreground">Completitud 90%+</span>
+                </Label>
               </div>
             </div>
 
