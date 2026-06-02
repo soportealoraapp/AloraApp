@@ -13,7 +13,7 @@ export const explainability = {
             else reasons.push(`⚠️ ${key} reduce compatibilidad (${value.toFixed(0)})`);
         });
 
-        if (result.totalScore > 85) reasons.unshift("✨ Deep Chemistry detectada!");
+        if (result.totalScore > 85) reasons.unshift("✨ Alta compatibilidad detectada!");
 
         return reasons;
     }

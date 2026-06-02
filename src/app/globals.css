@@ -60,6 +60,8 @@ html {
     --border: 335 20% 90%;
     --input: 335 20% 90%;
     --ring: 335 85% 76%;
+    --warning: 38 92% 50%;
+    --warning-foreground: 0 0% 100%;
 
     --radius: 0.75rem;
 
@@ -93,6 +95,8 @@ html {
     --border: 340 10% 25%;
     --input: 340 10% 25%;
     --ring: 340 82% 73%;
+    --warning: 38 92% 50%;
+    --warning-foreground: 0 0% 100%;
     --chart-1: 12 76% 61%;
     --chart-2: 173 58% 39%;
     --chart-3: 197 37% 24%;

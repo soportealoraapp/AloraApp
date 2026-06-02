@@ -24,27 +24,34 @@ export async function analyzeReplyPatterns(userId: string): Promise<ReplyAnalysi
     // Get unique matchIds
     const matchIds = [...new Set(sentMessages.map(m => m.matchId))];
 
-    // Check which messages got replies
-    let repliedCount = 0;
+    // Batch: get all replies in these matches (N+1 → 1 query)
+    const allReplies = await prisma.message.findMany({
+        where: {
+            matchId: { in: matchIds },
+            senderId: { not: userId },
+        },
+        select: { matchId: true, createdAt: true },
+        orderBy: { createdAt: 'asc' },
+    });
+
+    // Group replies by matchId, pick earliest per match
+    const firstReplyByMatch = new Map<string, Date>();
+    for (const reply of allReplies) {
+        if (!firstReplyByMatch.has(reply.matchId)) {
+            firstReplyByMatch.set(reply.matchId, reply.createdAt);
+        }
+    }
+
     const replyTimes: number[] = [];
-
     for (const msg of sentMessages) {
-        const reply = await prisma.message.findFirst({
-            where: {
-                matchId: msg.matchId,
-                senderId: { not: userId },
-                createdAt: { gt: msg.createdAt }
-            },
-            select: { createdAt: true },
-            orderBy: { createdAt: 'asc' }
-        });
-
-        if (reply) {
-            repliedCount++;
-            const hours = (reply.createdAt.getTime() - msg.createdAt.getTime()) / (1000 * 60 * 60);
+        const firstReply = firstReplyByMatch.get(msg.matchId);
+        if (firstReply && firstReply > msg.createdAt) {
+            const hours = (firstReply.getTime() - msg.createdAt.getTime()) / (1000 * 60 * 60);
             replyTimes.push(hours);
         }
     }
+
+    const repliedCount = replyTimes.length;
 
     const replyRate = sentMessages.length > 0 ? (repliedCount / sentMessages.length) * 100 : 0;
     const avgTimeToReply = replyTimes.length > 0

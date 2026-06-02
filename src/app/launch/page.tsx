@@ -23,11 +23,11 @@ export default function LaunchPage() {
                         <h2 className="text-5xl md:text-6xl font-extrabold leading-tight">
                             Dating with <br />
                             <span className="text-transparent bg-clip-text bg-gradient-to-r from-pink-400 to-purple-400">
-                                Deep Chemistry
+                                Compatibilidad Inteligente
                             </span>
                         </h2>
                         <p className="text-lg text-gray-300 max-w-lg">
-                            Alora uses advanced AI to find connections that matter. Safe, fair, and designed for real human moments.
+                            Alora encuentra conexiones que importan. Seguro, justo y diseñado para momentos humanos reales.
                         </p>
                         <div className="flex flex-col md:flex-row gap-4 pt-4">
                             <button className="flex items-center justify-center gap-2 px-8 py-4 bg-white text-indigo-900 rounded-full font-bold hover:bg-gray-100 transition shadow-lg">
@@ -52,8 +52,8 @@ export default function LaunchPage() {
                 <section id="features" className="mt-24 grid md:grid-cols-3 gap-8">
                     <div className="p-6 bg-white/5 rounded-2xl border border-white/10 backdrop-blur-sm">
                         <Heart className="w-10 h-10 text-pink-400 mb-4" />
-                        <h3 className="text-xl font-bold mb-2">Deep Chemistry Score</h3>
-                        <p className="text-gray-400">AI analysis of compatibility beyond just photos.</p>
+                        <h3 className="text-xl font-bold mb-2">Score de Compatibilidad</h3>
+                        <p className="text-gray-400">Análisis de compatibilidad basado en valores, intereses y personalidad.</p>
                     </div>
                     <div className="p-6 bg-white/5 rounded-2xl border border-white/10 backdrop-blur-sm">
                         <Shield className="w-10 h-10 text-green-400 mb-4" />

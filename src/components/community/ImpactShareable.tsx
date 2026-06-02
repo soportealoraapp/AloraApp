@@ -24,7 +24,7 @@ export function ImpactShareable({ stats, name }: { stats: { stars: number, event
                     <span className="font-bold text-lg">{stats.events}</span>
                 </div>
                 <div className="bg-white/10 rounded-lg p-3 flex justify-between items-center">
-                    <span className="flex items-center gap-2 text-sm"><Heart size={16} /> HeartScore</span>
+                    <span className="flex items-center gap-2 text-sm"><Heart size={16} /> Impacto</span>
                     <span className="font-bold text-lg">{stats.score}</span>
                 </div>
             </div>

@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { calculateProfileCompleteness } from '@/server/services/profile-completeness';
 
 // GET /api/profile/analytics — Get real profile analytics
 export async function GET() {
@@ -72,17 +73,8 @@ export async function GET() {
         const replyRate = messagesReceived > 0 ? Math.round((messagesSent / messagesReceived) * 100) : 0;
         const matchRate = totalLikesReceived > 0 ? Math.round((totalMatches / totalLikesReceived) * 100) : 0;
 
-        // Profile completeness
-        let completeness = 0;
-        if (profile?.photos && profile.photos.length >= 1) completeness += 20;
-        if (profile?.photos && profile.photos.length >= 4) completeness += 10;
-        if (profile?.bio && profile.bio.length >= 50) completeness += 15;
-        if (profile?.bio && profile.bio.length >= 100) completeness += 5;
-        if (profile?.interests && profile.interests.length >= 3) completeness += 10;
-        if (profile?.interests && profile.interests.length >= 5) completeness += 5;
-        if (profile?.values && profile.values.length >= 2) completeness += 10;
-        if (profile?.isVerified) completeness += 10;
-        if (quizResults >= 3) completeness += 10;
+        // Profile completeness (centralized calculation)
+        const completeness = calculateProfileCompleteness(profile || {});
 
         // Recommendations based on real data
         const recommendations: string[] = [];

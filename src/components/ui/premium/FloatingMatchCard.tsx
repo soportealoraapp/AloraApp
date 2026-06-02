@@ -6,12 +6,13 @@ import { UserProfile } from '@/lib/domain/types';
 import Image from 'next/image';
 import { TrustBadge } from './TrustBadge';
 import { ProfileActions } from '../../match/ProfileActions';
-import { FavoriteButton } from '../../profile/FavoriteButton';
-import { Clock, Zap, MessageCircle, Heart } from 'lucide-react';
+import { Clock, Zap, MessageCircle, Heart, X, Star } from 'lucide-react';
+import { useState } from 'react';
 
 interface FloatingMatchCardProps {
     profile: UserProfile;
     onSwipe: (direction: 'left' | 'right') => void;
+    onFlechado?: () => void;
     compatibility?: number | null;
     compatibilityDetails?: {
         sharedValues?: string[];
@@ -20,10 +21,16 @@ interface FloatingMatchCardProps {
     };
 }
 
-export function FloatingMatchCard({ profile, onSwipe, compatibility, compatibilityDetails }: FloatingMatchCardProps) {
+export function FloatingMatchCard({ profile, onSwipe, onFlechado, compatibility, compatibilityDetails }: FloatingMatchCardProps) {
     const controls = useAnimation();
+    const [dragX, setDragX] = useState(0);
+
+    const handleDrag = (event: any, info: PanInfo) => {
+        setDragX(info.offset.x);
+    };
 
     const handleDragEnd = async (event: any, info: PanInfo) => {
+        setDragX(0);
         const threshold = 100;
         if (info.offset.x > threshold) {
             await controls.start({ x: 500, opacity: 0, rotate: 20 });
@@ -49,6 +56,7 @@ export function FloatingMatchCard({ profile, onSwipe, compatibility, compatibili
         <motion.div
             drag="x"
             dragConstraints={{ left: 0, right: 0 }}
+            onDrag={handleDrag}
             onDragEnd={handleDragEnd}
             animate={controls}
             initial={{ scale: 0.95, opacity: 0 }}
@@ -67,12 +75,39 @@ export function FloatingMatchCard({ profile, onSwipe, compatibility, compatibili
                     priority
                 />
 
+                {/* Swipe indicators during drag */}
+                {dragX > 50 && (
+                    <div className="absolute inset-0 z-30 bg-green-500/20 flex items-center justify-start p-8">
+                        <div className="bg-white rounded-full p-4 shadow-xl">
+                            <Heart className="h-10 w-10 text-green-500 fill-green-500" />
+                        </div>
+                    </div>
+                )}
+                {dragX < -50 && (
+                    <div className="absolute inset-0 z-30 bg-red-500/20 flex items-center justify-end p-8">
+                        <div className="bg-white rounded-full p-4 shadow-xl">
+                            <X className="h-10 w-10 text-red-500" />
+                        </div>
+                    </div>
+                )}
+
                 <div className="absolute top-4 right-4 z-20">
                     <ProfileActions userId={profile.id} userName={profile.displayName} />
                 </div>
 
+                {/* Flechado button */}
+                {onFlechado && (
+                    <button
+                        onClick={(e) => { e.stopPropagation(); onFlechado(); }}
+                        className="absolute top-4 left-4 z-20 bg-blue-500 hover:bg-blue-600 text-white rounded-full w-12 h-12 flex items-center justify-center shadow-lg transition-transform hover:scale-110 active:scale-95"
+                        aria-label="Flechado"
+                    >
+                        <Star className="h-5 w-5 fill-white" />
+                    </button>
+                )}
+
                 {/* Retention signals */}
-                <div className="absolute top-4 left-4 z-20 flex flex-col gap-2">
+                <div className="absolute top-4 left-4 z-10 flex flex-col gap-2" style={{ marginTop: onFlechado ? '3.5rem' : '0' }}>
                     {profile.activeNow && (
                         <motion.div
                             initial={{ scale: 0.8, opacity: 0 }}

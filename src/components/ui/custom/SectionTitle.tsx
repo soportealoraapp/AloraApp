@@ -9,7 +9,7 @@ interface SectionTitleProps {
 export function SectionTitle({ title, subtitle, className }: SectionTitleProps) {
     return (
         <div className={cn("mb-6", className)}>
-            <h2 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-pink-500 to-purple-500 font-headline">
+            <h2 className="text-2xl font-bold text-foreground font-headline">
                 {title}
             </h2>
             {subtitle && (
@@ -17,7 +17,7 @@ export function SectionTitle({ title, subtitle, className }: SectionTitleProps) 
                     {subtitle}
                 </p>
             )}
-            <div className="h-1 w-12 bg-pink-300 rounded-full mt-2" />
+            <div className="h-1 w-12 bg-primary/30 rounded-full mt-2" />
         </div>
     );
 }

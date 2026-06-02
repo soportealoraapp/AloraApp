@@ -104,6 +104,8 @@ export interface Match {
         id: string;
         displayName?: string;
         photoURL?: string | null;
+        photos?: string[];
+        isVerified?: boolean;
     };
 }
 

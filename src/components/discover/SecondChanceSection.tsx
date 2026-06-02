@@ -1,0 +1,79 @@
+'use client';
+
+import { useState, useEffect } from 'react';
+import { Card, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Heart, RotateCcw, UserX } from 'lucide-react';
+import Image from 'next/image';
+import { useMatches } from '@/hooks/use-matches';
+import { useToast } from '@/hooks/use-toast';
+
+export function SecondChanceSection() {
+  const [passedProfiles, setPassedProfiles] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const { sendLike } = useMatches();
+  const { toast } = useToast();
+
+  useEffect(() => {
+    fetch('/api/match/passed')
+      .then(r => r.json())
+      .then(data => { setPassedProfiles(data.profiles || []); })
+      .catch(() => {})
+      .finally(() => setLoading(false));
+  }, []);
+
+  if (loading || passedProfiles.length === 0) return null;
+
+  const handleLike = async (profileId: string) => {
+    try {
+      await sendLike(profileId, 'like');
+      toast({ title: '¡Like enviado!' });
+      setPassedProfiles(prev => prev.filter(p => p.id !== profileId));
+    } catch {
+      toast({ title: 'Error', variant: 'destructive' });
+    }
+  };
+
+  const handleDefinitivePass = (profileId: string) => {
+    setPassedProfiles(prev => prev.filter(p => p.id !== profileId));
+    toast({ title: 'Descartado definitivamente' });
+  };
+
+  return (
+    <Card className="rounded-3xl border-dashed border-2 border-muted-foreground/20 bg-muted/10">
+      <CardContent className="p-6">
+        <div className="flex items-center gap-2 mb-4">
+          <RotateCcw className="h-5 w-5 text-primary" />
+          <h3 className="font-bold text-lg">Segunda Oportunidad</h3>
+        </div>
+        <p className="text-sm text-muted-foreground mb-4">Personas que pasaste. ¿Seguro que no te interesan?</p>
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+          {passedProfiles.map((profile) => (
+            <Card key={profile.id} className="rounded-2xl overflow-hidden shadow-sm border">
+              <div className="aspect-[3/4] relative">
+                <Image
+                  src={profile.photos?.[0] || '/placeholder.svg'}
+                  alt={profile.displayName || ''}
+                  fill
+                  className="object-cover"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
+                <div className="absolute bottom-2 left-2 text-white text-xs font-bold">
+                  {profile.displayName}, {profile.age}
+                </div>
+              </div>
+              <div className="flex gap-1 p-1.5">
+                <Button size="sm" variant="ghost" className="flex-1 h-8" onClick={() => handleLike(profile.id)}>
+                  <Heart className="h-4 w-4 text-green-500" />
+                </Button>
+                <Button size="sm" variant="ghost" className="flex-1 h-8" onClick={() => handleDefinitivePass(profile.id)}>
+                  <UserX className="h-4 w-4 text-red-500" />
+                </Button>
+              </div>
+            </Card>
+          ))}
+        </div>
+      </CardContent>
+    </Card>
+  );
+}

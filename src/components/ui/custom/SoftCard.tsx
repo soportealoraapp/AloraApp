@@ -5,7 +5,7 @@ export function SoftCard({ className, children, ...props }: React.HTMLAttributes
     return (
         <Card
             className={cn(
-                "bg-white/80 backdrop-blur-md border-pink-100 shadow-sm hover:shadow-md transition-all duration-300 rounded-2xl",
+                "bg-card/80 backdrop-blur-md border-border shadow-sm hover:shadow-md transition-all duration-300 rounded-2xl",
                 className
             )}
             {...props}

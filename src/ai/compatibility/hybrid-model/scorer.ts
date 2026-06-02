@@ -20,10 +20,10 @@ export const hybridScorer = {
         score += interestPoints;
         breakdown['Shared Interests'] = interestPoints;
 
-        // 3. Social Synergy (Lower delta is better)
-        const socialBonus = Math.max(0, 20 - (features.socialEnergyDelta / 2));
-        score += socialBonus;
-        breakdown['Social Energy Sync'] = socialBonus;
+        // 3. Interest depth (more shared interests = better)
+        const depthBonus = Math.min(10, features.interestOverlap * 2);
+        score += depthBonus;
+        breakdown['Shared Interests Depth'] = depthBonus;
 
         // 4. Verification Bonus
         if (features.isVerifiedPair) {

@@ -18,12 +18,9 @@ export function FavoriteButton({ profileId, className, size = 'default' }: Favor
     const { toast } = useToast();
 
     useEffect(() => {
-        fetch('/api/profile/favorites')
+        fetch(`/api/profile/favorites/check?profileId=${profileId}`)
             .then(r => r.json())
-            .then(data => {
-                const favs = data.favorites || [];
-                setIsFavorited(favs.some((f: any) => f.id === profileId));
-            })
+            .then(data => { setIsFavorited(data.isFavorited); })
             .catch(() => {});
     }, [profileId]);
 

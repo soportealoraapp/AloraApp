@@ -12,8 +12,8 @@ import { Settings, Edit, MapPin, Briefcase, Cigarette, GlassWater, Baby, Star, B
 import Image from "next/image";
 import Link from "next/link";
 import { Skeleton } from "@/components/ui/skeleton";
+import dynamic from "next/dynamic";
 import { BoostDashboard } from "@/components/premium/BoostDashboard";
-import { MissionCenter } from "@/components/retention/MissionCenter";
 import { StreakCard } from "@/components/gamification/StreakCard";
 import { FirstWeekJourney } from "@/components/gamification/FirstWeekJourney";
 import { PaywallModal } from "@/components/premium/PaywallModal";
@@ -21,6 +21,9 @@ import { LikesCounter } from "@/components/discover/LikesCounter";
 import { VoiceIntro } from "@/components/audio/VoiceIntro";
 import { useState, useEffect } from "react";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
+
+const DynamicFirstWeekJourney = dynamic(() => import("@/components/gamification/FirstWeekJourney").then(m => ({ default: m.FirstWeekJourney })), { ssr: false });
+const DynamicStreakCard = dynamic(() => import("@/components/gamification/StreakCard").then(m => ({ default: m.StreakCard })), { ssr: false });
 
 export default function ProfilePage() {
   const { profile, loading } = useAuth();
@@ -428,11 +431,9 @@ export default function ProfilePage() {
             </CardContent>
           </Card>
 
-          <StreakCard />
+          <DynamicStreakCard />
 
-          <FirstWeekJourney />
-
-          <MissionCenter />
+          <DynamicFirstWeekJourney />
         </div>
       </main>
 

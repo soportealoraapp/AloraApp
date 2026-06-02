@@ -10,7 +10,7 @@ export function PinkButton({ className, glow, children, ...props }: PinkButtonPr
     return (
         <Button
             className={cn(
-                "bg-pink-400 hover:bg-pink-500 text-white border-none rounded-full font-bold transition-all duration-300",
+                "bg-primary hover:bg-primary/90 text-primary-foreground border-none rounded-full font-bold transition-all duration-300",
                 glow && "shadow-[0_0_20px_rgba(244,143,177,0.5)] hover:shadow-[0_0_30px_rgba(244,143,177,0.7)]",
                 className
             )}

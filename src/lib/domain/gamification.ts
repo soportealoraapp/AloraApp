@@ -1,11 +1,3 @@
-export interface HeartScore {
-    userId: string;
-    score: number;
-    dailyBonusClaimed: boolean;
-    lastUpdated: Date;
-    streak: number;
-}
-
 export interface Badge {
     id: string;
     key: BadgeKey;

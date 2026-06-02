@@ -50,18 +50,24 @@ export async function getMarketplaceHealth() {
     }
     const responseRate = totalPairs > 0 ? (responseCount / totalPairs) * 100 : 0;
 
-    // Ghosting rate
+    // Ghosting rate (batch message count per match — N+1 → 1 query)
     const matchesWithMsgs = await prisma.match.findMany({
         where: { messages: { some: {} } },
         select: { id: true },
-        take: 100,
+        take: 50,
     });
+    const matchIds = matchesWithMsgs.map(m => m.id);
+    const messageCounts = await prisma.message.groupBy({
+        by: ['matchId'],
+        where: { matchId: { in: matchIds } },
+        _count: { id: true },
+    });
+    const countMap = new Map(messageCounts.map(m => [m.matchId, m._count.id]));
     let ghosted = 0;
-    for (const m of matchesWithMsgs.slice(0, 50)) {
-        const count = await prisma.message.count({ where: { matchId: m.id } });
-        if (count <= 2) ghosted++;
+    for (const matchId of matchIds) {
+        if ((countMap.get(matchId) || 0) <= 2) ghosted++;
     }
-    const ghostingRate = matchesWithMsgs.length > 0 ? (ghosted / matchesWithMsgs.length) * 100 : 0;
+    const ghostingRate = matchIds.length > 0 ? (ghosted / matchIds.length) * 100 : 0;
 
     // Gender ratio alert
     const ratio = femaleUsers > 0 ? maleUsers / femaleUsers : maleUsers;

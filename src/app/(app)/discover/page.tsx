@@ -5,7 +5,7 @@ import { AnimatePresence } from "framer-motion";
 import { FloatingMatchCard } from "@/components/ui/premium/FloatingMatchCard";
 import { MatchScreen } from "@/components/ui/premium/MatchScreen";
 import { Button } from "@/components/ui/button";
-import { Filter, Loader2, RefreshCcw, Sparkles, SlidersHorizontal } from "lucide-react";
+import { Filter, Loader2, RefreshCcw, Sparkles, SlidersHorizontal, RotateCcw } from "lucide-react";
 import { DiscoverFilters, Filters } from "@/components/discover/discover-filters";
 import { useDiscover } from "@/hooks/use-discover";
 import { useAuth } from "@/contexts/AuthContext";
@@ -21,6 +21,7 @@ import { useAnalytics, AnalyticsEvents } from "@/hooks/use-analytics";
 import { LikesCounter } from "@/components/discover/LikesCounter";
 import { StoryCircle } from "@/components/stories/StoryCircle";
 import { DailyPicks } from "@/components/discover/DailyPicks";
+import { SecondChanceSection } from "@/components/discover/SecondChanceSection";
 
 const DEFAULT_FILTERS: Filters = {
   ageRange: [18, 60],
@@ -31,11 +32,13 @@ const DEFAULT_FILTERS: Filters = {
   values: []
 };
 
+const SWIPE_LIMIT = 50;
+
 export default function DiscoverPage() {
   const { profile: currentUserProfile } = useAuth();
   const [filters, setFilters] = useState<Filters>(DEFAULT_FILTERS);
   const [filterOpen, setFilterOpen] = useState(false);
-  const { profiles, loading, loadingMore, refresh, loadMore, hasMore, setProfiles } = useDiscover("", filters);
+  const { profiles, loading, loadingMore, refresh, loadMore, hasMore, setProfiles, error } = useDiscover("", filters);
   const { sendLike } = useMatches();
   const { toast } = useToast();
   const router = useRouter();
@@ -46,6 +49,16 @@ export default function DiscoverPage() {
   const [showMatchScreen, setShowMatchScreen] = useState(false);
   const [stories, setStories] = useState<any[]>([]);
   const [swipeCount, setSwipeCount] = useState(0);
+  const [rewinding, setRewinding] = useState(false);
+  const [showSwipeHint, setShowSwipeHint] = useState(true);
+
+  const lastSwipeRef = useRef<{ profileId: string; direction: string } | null>(null);
+  const sentinelRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const hintDismissed = localStorage.getItem('swipeHintDismissed');
+    if (hintDismissed) setShowSwipeHint(false);
+  }, []);
 
   useEffect(() => {
     fetch('/api/stories')
@@ -53,8 +66,6 @@ export default function DiscoverPage() {
       .then(data => setStories(data.stories || []))
       .catch(() => {});
   }, []);
-  const SWIPE_LIMIT = 20;
-  const sentinelRef = useRef<HTMLDivElement>(null);
 
   // Request geolocation for distance filter
   useEffect(() => {
@@ -67,7 +78,7 @@ export default function DiscoverPage() {
             userLng: pos.coords.longitude
           }));
         },
-        () => { /* User denied geolocation — distance filter won't work */ },
+        () => { /* User denied geolocation */ },
         { enableHighAccuracy: false, timeout: 10000 }
       );
     }
@@ -100,7 +111,7 @@ export default function DiscoverPage() {
 
     if (swipeCount >= SWIPE_LIMIT) {
       toast({
-        title: "¡Tómate un respiro! 🧘",
+        title: "¡Tómate un respiro!",
         description: "Has visto muchos perfiles. Vuelve en un momento para asegurar conexiones de calidad.",
         variant: "default"
       });
@@ -109,6 +120,8 @@ export default function DiscoverPage() {
 
     const profileToActOn = currentProfile;
     const previousProfiles = profilesRef.current;
+
+    lastSwipeRef.current = { profileId: profileToActOn.id, direction };
     setSwipeCount(prev => prev + 1);
 
     const remainingProfiles = profiles.slice(1);
@@ -133,6 +146,55 @@ export default function DiscoverPage() {
       setProfiles(previousProfiles as any);
       toast({ title: "Error", description: "No se pudo procesar la acción. Perfil restaurado.", variant: "destructive" });
     }
+  };
+
+  const handleFlechado = async () => {
+    if (!currentProfile || !currentUserProfile) return;
+
+    const profileToActOn = currentProfile;
+    lastSwipeRef.current = { profileId: profileToActOn.id, direction: 'flechado' };
+    setSwipeCount(prev => prev + 1);
+
+    const remainingProfiles = profiles.slice(1);
+    setProfiles(remainingProfiles as any);
+
+    try {
+      track(AnalyticsEvents.LIKE_SENT, { targetUserId: profileToActOn.id });
+      const result = await sendLike(profileToActOn.id, 'superlike');
+      if (result?.matched) {
+        track(AnalyticsEvents.MATCH_CREATED, { partnerId: profileToActOn.id });
+        setMatchedProfile(profileToActOn);
+        setMatchId((result as any)?.matchId);
+        setShowMatchScreen(true);
+      }
+    } catch (error) {
+      console.error("Flechado failed", error);
+      toast({ title: "Error", description: "No se pudo enviar el Flechado.", variant: "destructive" });
+    }
+  };
+
+  const handleRewind = async () => {
+    if (!lastSwipeRef.current || rewinding) return;
+    setRewinding(true);
+    try {
+      const res = await fetch('/api/match/rewind', { method: 'POST' });
+      if (res.ok) {
+        toast({ title: "Deshecho", description: "Último swipe revertido." });
+        refresh();
+      } else {
+        const data = await res.json();
+        toast({ title: "No se pudo deshacer", description: data.error || "Intenta de nuevo.", variant: "destructive" });
+      }
+    } catch {
+      toast({ title: "Error", description: "No se pudo conectar.", variant: "destructive" });
+    } finally {
+      setRewinding(false);
+    }
+  };
+
+  const dismissSwipeHint = () => {
+    setShowSwipeHint(false);
+    localStorage.setItem('swipeHintDismissed', 'true');
   };
 
   const handleApplyFilters = (newFilters: Filters) => {
@@ -172,7 +234,10 @@ export default function DiscoverPage() {
             </span>
           )}
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1">
+          <Button variant="ghost" size="icon" onClick={handleRewind} disabled={!lastSwipeRef.current || rewinding} title="Deshacer último swipe">
+            <RotateCcw className="h-5 w-5 text-muted-foreground" />
+          </Button>
           <Button variant="ghost" size="icon" onClick={() => setFilterOpen(true)}>
             <SlidersHorizontal className="h-5 w-5 text-muted-foreground" />
           </Button>
@@ -203,6 +268,15 @@ export default function DiscoverPage() {
       </div>
 
       <main className="flex-1 flex flex-col items-center justify-center p-4 relative">
+        {error && !loading && profiles.length === 0 && (
+          <div className="text-center px-8 mb-4">
+            <p className="text-destructive text-sm mb-2">Error al cargar perfiles</p>
+            <Button variant="outline" size="sm" onClick={() => refresh()}>
+              <RefreshCcw className="h-4 w-4 mr-2" /> Reintentar
+            </Button>
+          </div>
+        )}
+
         <AnimatePresence>
           {loading && profiles.length === 0 ? (
             <div className="w-full max-w-sm space-y-4">
@@ -214,6 +288,14 @@ export default function DiscoverPage() {
             </div>
           ) : currentProfile ? (
             <div className="w-full max-w-sm h-[600px] relative">
+              {/* Swipe hint for new users */}
+              {showSwipeHint && (
+                <div className="absolute -top-10 left-0 right-0 flex justify-center z-30 pointer-events-none" onClick={dismissSwipeHint}>
+                  <div className="bg-foreground/90 text-background px-4 py-2 rounded-full text-xs font-medium shadow-lg animate-bounce cursor-pointer pointer-events-auto">
+                    ← Pasar · Like →  <span className="opacity-50">(tocar para cerrar)</span>
+                  </div>
+                </div>
+              )}
               {profiles[1] && (
                 <div className="absolute inset-0 top-4 scale-95 opacity-50 bg-white rounded-3xl shadow-xl z-0 transform translate-y-2" />
               )}
@@ -230,19 +312,23 @@ export default function DiscoverPage() {
                     } : undefined
                   }
                   onSwipe={handleSwipe}
+                  onFlechado={handleFlechado}
                 />
               </div>
             </div>
           ) : (
-            <div className="text-center px-8">
-              <div className="bg-muted/50 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6">
-                <Sparkles className="h-10 w-10 text-muted-foreground" />
+            <div className="w-full max-w-sm space-y-6">
+              <div className="text-center px-8">
+                <div className="bg-muted/50 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6">
+                  <Sparkles className="h-10 w-10 text-muted-foreground" />
+                </div>
+                <p className="text-xl font-bold text-foreground mb-2">{BRAND_VOICE.states.noMatches.title}</p>
+                <p className="text-muted-foreground mb-8 max-w-xs mx-auto">{BRAND_VOICE.states.noMatches.subtitle}</p>
+                <Button onClick={() => refresh()} className="px-8 py-6 rounded-2xl shadow-lg hover:shadow-xl transition-all">
+                  Explorar de nuevo
+                </Button>
               </div>
-              <p className="text-xl font-bold text-foreground mb-2">{BRAND_VOICE.states.noMatches.title}</p>
-              <p className="text-muted-foreground mb-8 max-w-xs mx-auto">{BRAND_VOICE.states.noMatches.subtitle}</p>
-              <Button onClick={() => refresh()} className="px-8 py-6 rounded-2xl shadow-lg hover:shadow-xl transition-all">
-                Explorar de nuevo
-              </Button>
+              <SecondChanceSection />
             </div>
           )}
         </AnimatePresence>
@@ -262,7 +348,7 @@ export default function DiscoverPage() {
       <div className="px-4 pb-4 max-w-sm mx-auto w-full space-y-3">
         <LikesCounter
           dailyLikesUsed={currentUserProfile?.dailyLikesUsed ?? 0}
-          dailyLikesLimit={20}
+          dailyLikesLimit={SWIPE_LIMIT}
           resetAt={
             currentUserProfile?.dailyLikesResetAt
               ? new Date(currentUserProfile.dailyLikesResetAt)

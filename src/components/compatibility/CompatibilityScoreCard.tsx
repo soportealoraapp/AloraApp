@@ -46,7 +46,7 @@ export function CompatibilityScoreCard({ score, explanation, dimensions, sharedI
         <Card className="overflow-hidden border-none shadow-lg">
             <div className="bg-gradient-to-br from-pink-500 via-rose-500 to-purple-600 p-6 text-white text-center">
                 <Sparkles className="h-8 w-8 mx-auto mb-2 fill-white" />
-                <h3 className="text-lg font-bold mb-1">Deep Chemistry</h3>
+                <h3 className="text-lg font-bold mb-1">Compatibilidad</h3>
                 <div className="text-5xl font-bold">{score}%</div>
                 <Progress value={score} className="mt-3 h-2 bg-white/30" />
             </div>
