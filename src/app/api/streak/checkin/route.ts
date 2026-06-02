@@ -70,9 +70,10 @@ export async function POST() {
         if (todayActions === 0) {
             return NextResponse.json({
                 success: false,
-                error: 'No hay actividad real hoy',
+                currentStreak: profile.currentStreak,
+                longestStreak: profile.longestStreak,
                 message: 'Haz algo hoy para mantener tu racha: responde la pregunta diaria, envia un mensaje, o da un like.'
-            }, { status: 400 });
+            });
         }
 
         // Calculate if streak continues or resets

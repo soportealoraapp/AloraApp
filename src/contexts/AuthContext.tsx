@@ -60,7 +60,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                             const userProfile = await profileService.getProfile(session.user.id);
                             if (cancelled) return;
                             setProfile(userProfile);
-                            await profileService.updateLastActive(session.user.id);
                         }
                     })(),
                     timeoutPromise
