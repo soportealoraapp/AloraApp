@@ -25,7 +25,7 @@ export async function getFemaleRetentionMetrics(): Promise<FemaleRetentionMetric
 
     // Female profiles
     const femaleProfiles = await prisma.profile.findMany({
-        where: { gender: { in: ['woman', 'female'] } },
+        where: { gender: 'woman' },
         select: { userId: true, lastActiveAt: true, isVerified: true }
     });
 
@@ -40,7 +40,7 @@ export async function getFemaleRetentionMetrics(): Promise<FemaleRetentionMetric
 
     // Male comparison
     const maleProfiles = await prisma.profile.findMany({
-        where: { gender: { in: ['man', 'male'] } },
+        where: { gender: 'man' },
         select: { userId: true, lastActiveAt: true }
     });
 

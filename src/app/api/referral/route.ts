@@ -1,71 +1,29 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
-import { getReferralCode, generateReferralLink, getReferralStats } from '@/server/actions/referral';
+import { NextResponse } from 'next/server';
+import { redeemReferral } from '@/server/actions/referral';
 
-export const dynamic = 'force-dynamic';
-
-export async function GET(request: NextRequest) {
-    const { createClient } = await import('@/lib/supabase/server');
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-
-    if (!user) {
-        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
+export async function POST(request: Request) {
+    let body: unknown;
     try {
-        const [code, link, stats, invitedUsers] = await Promise.all([
-            getReferralCode(user.id),
-            generateReferralLink(user.id),
-            getReferralStats(user.id),
-            prisma.referral.findMany({
-                where: {
-                    referrerId: user.id,
-                    referredId: { not: null },
-                },
-                orderBy: { completedAt: 'desc' },
-                take: 20,
-            }),
-        ]);
-
-        const referredIds = invitedUsers
-            .filter(r => r.referredId)
-            .map(r => r.referredId as string);
-
-        const profiles = referredIds.length > 0
-            ? await prisma.profile.findMany({
-                where: { userId: { in: referredIds } },
-                select: {
-                    userId: true,
-                    displayName: true,
-                    photos: true,
-                },
-            })
-            : [];
-
-        const profileMap = new Map(profiles.map(p => [p.userId, p]));
-
-        const invitedList = invitedUsers
-            .filter(r => r.referredId)
-            .map(r => {
-                const profile = profileMap.get(r.referredId!);
-                return {
-                    id: r.referredId,
-                    name: profile?.displayName || 'Usuario',
-                    photo: profile?.photos?.[0] || '/placeholder.svg',
-                    status: r.status,
-                    completedAt: r.completedAt,
-                };
-            });
-
-        return NextResponse.json({
-            code,
-            link,
-            stats,
-            invited: invitedList,
-        });
-    } catch (error) {
-        console.error('Error fetching referral data:', error);
-        return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+        body = await request.json();
+    } catch {
+        return NextResponse.json({ ok: false, reason: 'invalid_body' }, { status: 400 });
     }
+
+    const code = typeof body === 'object' && body !== null && 'code' in body
+        ? String((body as { code?: unknown }).code ?? '')
+        : '';
+
+    const result = await redeemReferral(code);
+
+    if (result.ok) {
+        return NextResponse.json({ ok: true });
+    }
+
+    const status =
+        result.reason === 'unauthenticated' ? 401 :
+        result.reason === 'already_redeemed' ? 409 :
+        result.reason === 'self_referral' ? 403 :
+        400;
+
+    return NextResponse.json({ ok: false, reason: result.reason }, { status });
 }

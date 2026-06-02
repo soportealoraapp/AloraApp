@@ -40,21 +40,35 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     };
 
     useEffect(() => {
-        // Initial session check
-        const checkSession = async () => {
-            try {
-                const { data: { session } } = await supabase.auth.getSession();
-                setUser(session?.user ?? null);
+        let cancelled = false;
 
-                if (session?.user) {
-                    const userProfile = await profileService.getProfile(session.user.id);
-                    setProfile(userProfile);
-                    await profileService.updateLastActive(session.user.id);
-                }
+        // Initial session check with defensive timeout
+        const checkSession = async () => {
+            const SESSION_TIMEOUT_MS = 15000;
+            const timeoutPromise = new Promise<never>((_, reject) =>
+                setTimeout(() => reject(new Error('Session check timed out')), SESSION_TIMEOUT_MS)
+            );
+
+            try {
+                await Promise.race([
+                    (async () => {
+                        const { data: { session } } = await supabase.auth.getSession();
+                        if (cancelled) return;
+                        setUser(session?.user ?? null);
+
+                        if (session?.user) {
+                            const userProfile = await profileService.getProfile(session.user.id);
+                            if (cancelled) return;
+                            setProfile(userProfile);
+                            await profileService.updateLastActive(session.user.id);
+                        }
+                    })(),
+                    timeoutPromise
+                ]);
             } catch (error) {
                 console.error("Session check error", error);
             } finally {
-                setLoading(false);
+                if (!cancelled) setLoading(false);
             }
         };
 

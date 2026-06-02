@@ -64,15 +64,20 @@ export function useChat(matchId: string) {
         const unsubscribeTyping = chatService.subscribeToTyping(
             matchId,
             user.id,
-            (typingUserId) => {
-                setPartnerTyping(true);
+            (typingUserIds) => {
+                const isPartnerTyping = typingUserIds.length > 0;
+                setPartnerTyping(isPartnerTyping);
                 if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
-                typingTimeoutRef.current = setTimeout(() => setPartnerTyping(false), 3000);
+                if (isPartnerTyping) {
+                    // Auto-clear after 3s of no signal
+                    typingTimeoutRef.current = setTimeout(() => setPartnerTyping(false), 3000);
+                }
             }
         );
 
         return () => {
             unsubscribeTyping();
+            chatService.closeTypingChannel(matchId);
             if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
         };
     }, [matchId, user?.id]);
@@ -95,20 +100,31 @@ export function useChat(matchId: string) {
         setLoadingMore(true);
 
         try {
-            const response = await fetch(`/api/chat/${matchId}?offset=${offset + PAGE_SIZE}&limit=${PAGE_SIZE}`);
+            // The endpoint returns messages oldest -> newest. We use the
+            // last message's id as a cursor for the next page (stable across
+            // inserts). For the very first page we use offset=0.
+            const firstId = messages[0]?.id;
+            const url = firstId && !firstId.startsWith('optimistic_')
+                ? `/api/chat/${matchId}?before=${encodeURIComponent(firstId)}&limit=${PAGE_SIZE}`
+                : `/api/chat/${matchId}?offset=${offset}&limit=${PAGE_SIZE}`;
+
+            const response = await fetch(url);
             if (!response.ok) throw new Error('Failed to load more messages');
 
-            const olderMessages = await response.json();
+            const data = await response.json();
+            const olderMessages: Message[] = Array.isArray(data) ? data : (data.messages ?? []);
+
             if (olderMessages.length < PAGE_SIZE) setHasMore(false);
 
-            setMessages(prev => deduplicate([...olderMessages.reverse(), ...prev]));
+            // olderMessages is already oldest -> newest from the server.
+            setMessages(prev => deduplicate([...olderMessages, ...prev]));
             setOffset(prev => prev + PAGE_SIZE);
         } catch (err) {
             console.error('Error loading more messages:', err);
         } finally {
             setLoadingMore(false);
         }
-    }, [matchId, hasMore, loadingMore, offset]);
+    }, [matchId, hasMore, loadingMore, offset, messages]);
 
     const sendMessage = useCallback(async (text: string, receiverId: string) => {
         if (!user || !text.trim() || !matchId) return;
@@ -160,10 +176,11 @@ export function useChat(matchId: string) {
                 throw error;
             }
 
-            // The realtime subscription will add the confirmed message.
-            // Remove the optimistic one to avoid duplicates.
             const data = await response.json();
-            setMessages(prev => prev.filter(m => m.id !== optimisticId));
+            setMessages(prev => deduplicate([
+                ...prev.filter(m => m.id !== optimisticId),
+                { ...data, createdAt: new Date(data.created_at || data.createdAt) }
+            ]));
 
         } catch (err) {
             // Queue for retry when offline

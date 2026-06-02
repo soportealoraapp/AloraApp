@@ -2,6 +2,7 @@
 
 import { prisma } from '@/lib/prisma';
 import { BADGE_DEFINITIONS, BadgeKey } from '@/lib/domain/gamification';
+import { calculateCompleteness } from '@/lib/utils/completeness';
 
 export async function getUserBadges(userId: string): Promise<{ key: BadgeKey; unlockedAt: Date | null }[]> {
     try {
@@ -23,12 +24,22 @@ export async function getUserBadges(userId: string): Promise<{ key: BadgeKey; un
 
 export async function checkAndAwardBadges(userId: string): Promise<BadgeKey[]> {
     try {
-        const profileResult = await prisma.$queryRaw`
-            SELECT badges, "isVerified", "completenessScore", "currentStreak", "lastActiveAt"
-            FROM profiles WHERE "userId" = ${userId}
-        ` as any[];
+        const profile = await prisma.profile.findUnique({
+            where: { userId },
+            select: {
+                badges: true,
+                isVerified: true,
+                photos: true,
+                bio: true,
+                interests: true,
+                city: true,
+                education: true,
+                zodiacSign: true,
+                currentStreak: true,
+                lastActiveAt: true,
+            },
+        });
 
-        const profile = profileResult[0];
         if (!profile) return [];
 
         const currentBadges = ((profile.badges as any[]) || []).map((b: any) => b.key);
@@ -66,7 +77,16 @@ export async function checkAndAwardBadges(userId: string): Promise<BadgeKey[]> {
             newBadges.push('listener');
         }
 
-        if (profile.isVerified && (profile.completenessScore ?? 0) >= 100 && !currentBadges.includes('honest_profile')) {
+        const completeness = calculateCompleteness({
+            photos: profile.photos ?? undefined,
+            bio: profile.bio ?? undefined,
+            interests: profile.interests ?? undefined,
+            city: profile.city ?? undefined,
+            education: profile.education ?? undefined,
+            zodiacSign: profile.zodiacSign ?? undefined,
+        });
+
+        if (profile.isVerified && completeness >= 100 && !currentBadges.includes('honest_profile')) {
             newBadges.push('honest_profile');
         }
 
@@ -83,13 +103,15 @@ export async function checkAndAwardBadges(userId: string): Promise<BadgeKey[]> {
 
         if (newBadges.length > 0) {
             const updatedBadges = [
-                ...currentBadges.map(key => ({ key, unlockedAt: new Date().toISOString() })),
+                ...(profile.badges as any[] || []).filter((b: any) => newBadges.includes(b.key)),
                 ...newBadges.map(key => ({ key, unlockedAt: new Date().toISOString() })),
             ];
 
+            const allBadges = [...((profile.badges as any[]) || []), ...newBadges.map(key => ({ key, unlockedAt: new Date().toISOString() }))];
+
             await prisma.$executeRaw`
                 UPDATE profiles
-                SET badges = ${JSON.stringify(updatedBadges)}::jsonb
+                SET badges = ${JSON.stringify(allBadges)}::jsonb
                 WHERE "userId" = ${userId}
             `;
         }

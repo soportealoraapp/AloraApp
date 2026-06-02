@@ -24,13 +24,13 @@ export async function detectRecoveryNeeds(): Promise<RecoveryAlert[]> {
     const [thisWeekWomen, lastWeekWomen] = await Promise.all([
         prisma.profile.count({
             where: {
-                gender: { in: ['woman', 'female'] },
+                gender: 'woman',
                 lastActiveAt: { gte: oneWeekAgo }
             }
         }),
         prisma.profile.findMany({
             where: {
-                gender: { in: ['woman', 'female'] },
+                gender: 'woman',
                 lastActiveAt: { gte: twoWeeksAgo, lt: oneWeekAgo }
             },
             select: { id: true }

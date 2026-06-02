@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
 import { preferencesService } from "@/lib/firebase/preferences-service";
+import { setVerifiedOnlyFilter } from "@/server/actions/user";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
@@ -33,7 +34,7 @@ export default function PrivacySettingsPage() {
                 const prefs = await preferencesService.getPreferences(user.id);
                 setIncognitoMode(prefs.incognito);
                 setShowMe(prefs.showMe);
-                setVerifiedOnly(false); // verifiedOnly is not stored in preferences
+                setVerifiedOnly(!!(prefs as { verifiedOnly?: boolean }).verifiedOnly);
             } catch (error) {
                 console.error("Error loading preferences:", error);
             } finally {
@@ -103,14 +104,15 @@ export default function PrivacySettingsPage() {
 
         setSaving(true);
         try {
-            // verifiedOnly is handled by DiscoverFilters, not stored in backend preferences
+            const result = await setVerifiedOnlyFilter(user.id, value);
+            if (!result.success) throw new Error(result.error || 'toggle failed');
             setVerifiedOnly(value);
 
             toast({
                 title: value ? "Solo Verificados" : "Todos los Perfiles",
                 description: value
-                    ? "Solo verás perfiles verificados"
-                    : "Verás todos los perfiles",
+                    ? "Solo verás perfiles verificados en Descubrir"
+                    : "Verás todos los perfiles en Descubrir",
             });
         } catch (error) {
             console.error("Error toggling verified only:", error);

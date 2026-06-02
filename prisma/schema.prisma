@@ -115,6 +115,7 @@ model Profile {
   // Privacy settings
   incognitoMode    Boolean @default(false)
   showMeInDiscover Boolean @default(true)
+  verifiedOnly     Boolean @default(false)
 
   // Location (structured)
   cityId      String?
@@ -468,6 +469,7 @@ model AuditLog {
   action    String
   ipAddress String?
   details   Json?
+  metadata  Json?
 
   timestamp DateTime @default(now())
 
@@ -884,6 +886,9 @@ model Referral {
   rewardValue Int?
   createdAt   DateTime  @default(now())
   completedAt DateTime?
+  expiresAt   DateTime?
+  maxUses     Int       @default(1)
+  usesCount   Int       @default(0)
 
   @@index([referrerId])
   @@index([code])

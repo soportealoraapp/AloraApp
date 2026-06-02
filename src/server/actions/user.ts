@@ -97,3 +97,17 @@ export async function updateUserProfile(userId: string, data: Partial<UserProfil
         return { success: false, error: 'Update failed' };
     }
 }
+
+export async function setVerifiedOnlyFilter(userId: string, value: boolean) {
+    try {
+        await prisma.profile.upsert({
+            where: { userId },
+            update: { verifiedOnly: value },
+            create: { userId, verifiedOnly: value },
+        });
+        return { success: true };
+    } catch (e) {
+        console.error('Error toggling verifiedOnly', e);
+        return { success: false, error: 'Toggle failed' };
+    }
+}

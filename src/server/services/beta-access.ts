@@ -6,6 +6,9 @@ export interface BetaAccessResult {
     code?: string;
 }
 
+const accessCache = new Map<string, { value: boolean; expiresAt: number }>();
+const ACCESS_TTL_MS = 60_000;
+
 /**
  * Generate a beta invitation code.
  */
@@ -79,17 +82,44 @@ export async function useBetaCode(code: string, userId: string, userRegion?: str
 
 /**
  * Check if a user has beta access.
+ * Cached in-process for 60s to avoid hammering the DB on every request.
  */
 export async function hasBetaAccess(userId: string): Promise<boolean> {
+    if (!userId) return false;
+
+    const now = Date.now();
+    const cached = accessCache.get(userId);
+    if (cached && cached.expiresAt > now) {
+        return cached.value;
+    }
+
     const user = await prisma.user.findUnique({
         where: { id: userId },
-        select: { isBetaUser: true, role: true }
+        select: { isBetaUser: true, role: true, isActive: true }
     });
 
-    // Admins always have access
-    if (user?.role === 'admin' || user?.role === 'moderator') return true;
+    if (!user || !user.isActive) {
+        accessCache.set(userId, { value: false, expiresAt: now + ACCESS_TTL_MS });
+        return false;
+    }
 
-    return user?.isBetaUser ?? false;
+    // Admins and moderators always have access
+    if (user.role === 'admin' || user.role === 'moderator') {
+        accessCache.set(userId, { value: true, expiresAt: now + ACCESS_TTL_MS });
+        return true;
+    }
+
+    const hasAccess = user.isBetaUser === true;
+    accessCache.set(userId, { value: hasAccess, expiresAt: now + ACCESS_TTL_MS });
+    return hasAccess;
+}
+
+export function clearBetaAccessCache(userId?: string) {
+    if (userId) {
+        accessCache.delete(userId);
+    } else {
+        accessCache.clear();
+    }
 }
 
 /**

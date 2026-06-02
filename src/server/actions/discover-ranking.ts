@@ -66,16 +66,29 @@ export async function getAdvancedFeed(
 
     const candidates = await prisma.profile.findMany({
         where: {
-            userId: { notIn: Array.from(excludedIds) },
+            userId: {
+                notIn: Array.from(excludedIds),
+                ...(cursor ? { gt: cursor } : {}),
+            },
             trustStatus: { not: 'banned' },
             photos: { isEmpty: false },
             incognitoMode: false,
             showMeInDiscover: true,
-            ...(cursor ? { userId: { gt: cursor } } : {}),
         },
         take: limit * 3, // Fetch extra for diversity sampling
         orderBy: { lastActiveAt: 'desc' },
         include: { user: true },
+    });
+
+    // Bidirectional seeking filter
+    const viewerGender = currentUser.profile.gender || null;
+    const candidatesFiltered = candidates.filter(c => {
+        if (!viewerGender || viewerGender === 'non-binary' || viewerGender === 'other') return true;
+        const cs = (c.seeking || 'everyone').toLowerCase();
+        if (cs === 'everyone' || cs === 'all') return true;
+        if (cs === 'women' && viewerGender === 'woman') return true;
+        if (cs === 'men' && viewerGender === 'man') return true;
+        return false;
     });
 
     const now = new Date();
@@ -132,7 +145,7 @@ export async function getAdvancedFeed(
     const scoredCandidates: RankingProfile[] = [];
     let processedCount = 0;
 
-    for (const cp of candidates) {
+    for (const cp of candidatesFiltered) {
         processedCount++;
 
         // Convert to UserProfile
@@ -278,8 +291,8 @@ export async function getAdvancedFeed(
     // Avoid too-similar profiles (don't show 2 profiles with identical interests in a row)
     const deduplicated = applyInterestDiversity(finalItems, currentInterests);
 
-    const hasMore = candidates.length > limit * 2;
-    const nextCursor = hasMore && candidates.length > 0 ? candidates[candidates.length - 1].userId : null;
+    const hasMore = candidatesFiltered.length > limit * 2;
+    const nextCursor = hasMore && candidatesFiltered.length > 0 ? candidatesFiltered[candidatesFiltered.length - 1].userId : null;
 
     return { items: deduplicated.slice(0, limit), nextCursor, hasMore };
 }

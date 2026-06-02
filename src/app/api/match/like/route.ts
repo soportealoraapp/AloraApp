@@ -20,7 +20,7 @@ export async function POST(request: NextRequest) {
     if (rateLimitResponse) return rateLimitResponse;
 
     try {
-        const { toUserId, type } = await request.json(); // type: 'like' | 'superlike' | 'pass'
+        const { toUserId, type } = await request.json();
 
         if (!toUserId) {
             return NextResponse.json({ error: 'Missing userId' }, { status: 400 });
@@ -47,7 +47,8 @@ export async function POST(request: NextRequest) {
                         data: { dailyLikesUsed: 0, dailyLikesResetAt: now }
                     });
                     if (previousLikesUsed > 0) {
-                        notifyLikesRestored(user.id).catch(() => {});
+                        notifyLikesRestored(user.id)
+                            .catch((err) => console.warn('[match/like] notifyLikesRestored failed:', err));
                     }
                 } else if (profile.dailyLikesUsed >= FREE_DAILY_LIKES_LIMIT) {
                     const tomorrow = new Date(now);
@@ -81,7 +82,7 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ error: 'Interaction not available' }, { status: 403 });
         }
 
-        // 1. Create/Update Interaction
+        // 1. Create/Update Interaction (idempotent via upsert)
         const interaction = await prisma.interaction.upsert({
             where: {
                 fromUserId_toUserId: {
@@ -104,90 +105,97 @@ export async function POST(request: NextRequest) {
                 lastSwipeId: interaction.id,
                 lastSwipeAt: new Date(),
             }
-        }).catch(() => {});
+        }).catch((err) => console.warn('[match/like] lastSwipe update failed:', err));
 
         // Increment daily likes counter for free users
         if (interactionType !== 'pass') {
             await prisma.profile.update({
                 where: { userId: user.id },
                 data: { dailyLikesUsed: { increment: 1 } }
-            }).catch(() => {}); // Ignore errors on counter increment
+            }).catch((err) => console.warn('[match/like] dailyLikesUsed increment failed:', err));
         }
 
         if (interactionType === 'pass') {
             return NextResponse.json({ matched: false });
         }
 
-        // 2. Check for Mutual Like
-        const mutualInteraction = await prisma.interaction.findUnique({
-            where: {
-                fromUserId_toUserId: {
-                    fromUserId: toUserId,
-                    toUserId: user.id
+        // 2. Atomic transaction: check reciprocal like + create match.
+        // Serializable isolation guarantees no race condition when both users
+        // like each other simultaneously: one transaction will see the other's
+        // committed upsert and create the match; the other will see the match
+        // already exists and return matched=true.
+        type MatchResult = { matched: true; matchId: string; u1: string; u2: string } | { matched: false; matchId: null; u1?: undefined; u2?: undefined };
+        const result: MatchResult = await prisma.$transaction(async (tx) => {
+            const mutual = await tx.interaction.findUnique({
+                where: {
+                    fromUserId_toUserId: {
+                        fromUserId: toUserId,
+                        toUserId: user.id
+                    }
                 }
+            });
+
+            if (!mutual || !['like', 'superlike'].includes(mutual.type)) {
+                return { matched: false as const, matchId: null };
+            }
+
+            const [u1, u2] = [user.id, toUserId].sort();
+            const match = await tx.match.upsert({
+                where: {
+                    user1Id_user2Id: {
+                        user1Id: u1,
+                        user2Id: u2
+                    }
+                },
+                update: { isActive: true, stage: 'talking' },
+                create: {
+                    user1Id: u1,
+                    user2Id: u2,
+                    isActive: true,
+                    stage: 'talking',
+                    score: 0
+                }
+            });
+
+            return { matched: true as const, matchId: match.id, u1, u2 };
+        }, { isolationLevel: 'Serializable' });
+
+        if (!result.matched) {
+            return NextResponse.json({ matched: false, matchId: null });
+        }
+
+        // Compute and persist real compatibility score (outside critical path)
+        try {
+            const { calculateCompatibility } = await import('@/lib/compatibility/engine');
+            const compat = await calculateCompatibility(result.u1, result.u2);
+            await prisma.match.update({
+                where: { id: result.matchId },
+                data: { score: compat.totalScore },
+            }).catch(() => {});
+        } catch (err) {
+            console.warn('[match/like] calculateCompatibility failed:', err);
+        }
+
+        // Send push notifications to both users (fire-and-forget, non-critical)
+        const [partner1, partner2] = await Promise.all([
+            prisma.profile.findUnique({ where: { userId: result.u1 }, select: { displayName: true } }),
+            prisma.profile.findUnique({ where: { userId: result.u2 }, select: { displayName: true } }),
+        ]);
+
+        const settled = await Promise.allSettled([
+            notifyNewMatch(result.u1, partner2?.displayName || 'Alguien', result.matchId),
+            notifyNewMatch(result.u2, partner1?.displayName || 'Alguien', result.matchId),
+            trackEvent(result.u1, 'first_match', { matchId: result.matchId }),
+            trackEvent(result.u2, 'first_match', { matchId: result.matchId }),
+        ]);
+        settled.forEach((s, idx) => {
+            if (s.status === 'rejected') {
+                const names = ['notifyNewMatch#1', 'notifyNewMatch#2', 'trackEvent#1', 'trackEvent#2'];
+                console.warn(`[match/like] ${names[idx]} failed:`, s.reason);
             }
         });
 
-        let matched = false;
-        let matchId = null;
-
-        if (mutualInteraction && ['like', 'superlike'].includes(mutualInteraction.type)) {
-            matched = true;
-
-            const [u1, u2] = [user.id, toUserId].sort();
-
-            try {
-                const match = await prisma.match.upsert({
-                    where: {
-                        user1Id_user2Id: {
-                            user1Id: u1,
-                            user2Id: u2
-                        }
-                    },
-                    update: { isActive: true, stage: 'talking' },
-                    create: {
-                        user1Id: u1,
-                        user2Id: u2,
-                        isActive: true,
-                        stage: 'talking',
-                        score: 0
-                    }
-                });
-                matchId = match.id;
-
-                // Send push notifications to both users
-                const [partner1, partner2] = await Promise.all([
-                    prisma.profile.findUnique({ where: { userId: u1 }, select: { displayName: true } }),
-                    prisma.profile.findUnique({ where: { userId: u2 }, select: { displayName: true } }),
-                ]);
-
-                Promise.allSettled([
-                    notifyNewMatch(u1, partner2?.displayName || 'Alguien', match.id),
-                    notifyNewMatch(u2, partner1?.displayName || 'Alguien', match.id),
-                    trackEvent(u1, 'first_match', { matchId: match.id }),
-                    trackEvent(u2, 'first_match', { matchId: match.id }),
-                ]);
-            } catch (matchError: any) {
-                if (matchError.code === 'P2002') {
-                    const existing = await prisma.match.findFirst({
-                        where: {
-                            OR: [
-                                { user1Id: u1, user2Id: u2 },
-                                { user1Id: u2, user2Id: u1 }
-                            ]
-                        }
-                    });
-                    if (existing) {
-                        matchId = existing.id;
-                        matched = true;
-                    }
-                } else {
-                    throw matchError;
-                }
-            }
-        }
-
-        return NextResponse.json({ matched, matchId });
+        return NextResponse.json({ matched: true, matchId: result.matchId });
 
     } catch (error) {
         console.error('Error sending like:', error);

@@ -35,6 +35,9 @@ export interface Filters {
   children?: string;
   userLat?: number;
   userLng?: number;
+  countryCode?: string;
+  stateCode?: string;
+  city?: string;
   withVoiceIntro?: boolean;
   withQuiz?: boolean;
   featuredOnly?: boolean;

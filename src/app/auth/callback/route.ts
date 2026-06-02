@@ -1,5 +1,8 @@
 import { NextResponse } from 'next/server';
+import { cookies } from 'next/headers';
 import { createClient } from '@/lib/supabase/server';
+import { redeemReferral } from '@/server/actions/referral';
+import { REFERRAL_COOKIE, REFERRAL_CODE_PATTERN } from '@/lib/referral/constants';
 
 export async function GET(request: Request) {
     const { searchParams, origin } = new URL(request.url);
@@ -11,11 +14,26 @@ export async function GET(request: Request) {
         const { error } = await supabase.auth.exchangeCodeForSession(code);
 
         if (!error) {
-            const forwardedHost = request.headers.get('x-forwarded-host'); // original origin before load balancer
+            try {
+                const cookieStore = await cookies();
+                const refCookie = cookieStore.get(REFERRAL_COOKIE)?.value ?? '';
+                if (refCookie && REFERRAL_CODE_PATTERN.test(refCookie)) {
+                    await redeemReferral(refCookie);
+                    cookieStore.set(REFERRAL_COOKIE, '', {
+                        path: '/',
+                        maxAge: 0,
+                        sameSite: 'lax',
+                        httpOnly: false,
+                    });
+                }
+            } catch (err) {
+                console.warn('[auth/callback] referral redemption skipped:', err);
+            }
+
+            const forwardedHost = request.headers.get('x-forwarded-host');
             const isLocalEnv = process.env.NODE_ENV === 'development';
 
             if (isLocalEnv) {
-                // we can be sure that there is no load balancer in between, so no need to watch for X-Forwarded-Host
                 return NextResponse.redirect(`${origin}${next}`);
             } else if (forwardedHost) {
                 return NextResponse.redirect(`https://${forwardedHost}${next}`);
@@ -25,6 +43,5 @@ export async function GET(request: Request) {
         }
     }
 
-    // return the user to an error page with instructions
     return NextResponse.redirect(`${origin}/auth/auth-code-error`);
 }

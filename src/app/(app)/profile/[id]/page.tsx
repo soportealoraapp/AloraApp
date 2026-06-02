@@ -8,7 +8,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, CheckCircle, Heart, MessageSquare, Sparkles, MapPin, Briefcase, Cigarette, GlassWater, Baby, Star, BookOpen, Music, X, Undo, UserCheck, Loader2 } from "lucide-react";
+import { ArrowLeft, CheckCircle, Heart, MessageSquare, Sparkles, MapPin, Briefcase, Cigarette, GlassWater, Baby, Star, BookOpen, Music, X, Undo, UserCheck, Loader2, ChevronLeft, ChevronRight } from "lucide-react";
 import { ProfileHighlights } from "@/components/profile/ProfileHighlights";
 import { FavoriteButton } from "@/components/profile/FavoriteButton";
 import Image from "next/image";
@@ -16,6 +16,7 @@ import Link from "next/link";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 
 const detailIcons: { [key: string]: React.ElementType } = {
     city: MapPin,
@@ -195,15 +196,38 @@ export default function UserProfilePage() {
 
             <main className="pb-24 md:pb-4">
                 <div className="w-full relative">
-                    <Image
-                        src={mainPhoto}
-                        alt={`Foto de ${profile.displayName}`}
-                        width={600}
-                        height={800}
-                        className="w-full aspect-[3/4] object-cover"
-                        data-ai-hint="person"
-                        priority
-                    />
+                    {profile.photos && profile.photos.length > 1 ? (
+                        <Carousel className="w-full">
+                            <CarouselContent>
+                                {profile.photos.map((photo, index) => (
+                                    <CarouselItem key={index}>
+                                        <div className="w-full aspect-[3/4] relative">
+                                            <Image
+                                                src={photo}
+                                                alt={`Foto de ${profile.displayName} ${index + 1}`}
+                                                fill
+                                                className="object-cover"
+                                                data-ai-hint="person"
+                                                priority={index === 0}
+                                            />
+                                        </div>
+                                    </CarouselItem>
+                                ))}
+                            </CarouselContent>
+                            <CarouselPrevious className="left-2" />
+                            <CarouselNext className="right-2" />
+                        </Carousel>
+                    ) : (
+                        <Image
+                            src={mainPhoto}
+                            alt={`Foto de ${profile.displayName}`}
+                            width={600}
+                            height={800}
+                            className="w-full aspect-[3/4] object-cover"
+                            data-ai-hint="person"
+                            priority
+                        />
+                    )}
                 </div>
 
                 <div className="p-4 space-y-6">

@@ -1,6 +1,44 @@
 import { NextResponse, NextRequest } from 'next/server';
 import { updateSession, createClient } from '@/lib/supabase/middleware';
 import { getCSP, SECURITY_HEADERS } from '@/lib/security';
+import { hasBetaAccess } from '@/server/services/beta-access';
+
+const BETA_EXEMPT_PREFIXES = [
+    '/login',
+    '/signup',
+    '/forgot-password',
+    '/password-update',
+    '/auth',
+    '/launch',
+    '/api/auth',
+    '/api/waitlist',
+    '/api/beta-codes',
+    '/api/health',
+    '/api/lemonsqueezy',
+    '/api/stripe',
+    '/waitlist',
+    '/privacy',
+    '/terms',
+    '/partners',
+    '/community',
+    '/_next',
+    '/favicon',
+    '/manifest',
+    '/sw',
+    '/icons',
+];
+
+const BETA_EXEMPT_EXACT = new Set([
+    '/launch',
+    '/waitlist',
+    '/privacy',
+    '/terms',
+]);
+
+function isBetaExempt(pathname: string): boolean {
+    if (BETA_EXEMPT_EXACT.has(pathname)) return true;
+    return BETA_EXEMPT_PREFIXES.some(prefix => pathname.startsWith(prefix));
+}
 
 export async function middleware(request: NextRequest) {
     const csp = getCSP();
@@ -22,7 +60,15 @@ export async function middleware(request: NextRequest) {
         pathname.startsWith('/onboarding') ||
         pathname.startsWith('/admin') ||
         pathname.startsWith('/contact') ||
-        pathname.startsWith('/support');
+        pathname.startsWith('/support') ||
+        pathname.startsWith('/compatibility') ||
+        pathname.startsWith('/match') ||
+        pathname.startsWith('/stories') ||
+        pathname.startsWith('/events') ||
+        pathname.startsWith('/success-stories') ||
+        pathname.startsWith('/why-alora') ||
+        pathname.startsWith('/refer') ||
+        pathname.startsWith('/app');
 
     const isAdminRoute = pathname.startsWith('/admin');
 
@@ -36,6 +82,14 @@ export async function middleware(request: NextRequest) {
         return NextResponse.redirect(new URL('/login', modifiedRequest.url));
     }
 
+    // BETA ACCESS: gate app routes behind beta access
+    if (isAppRoute && user && !isBetaExempt(pathname)) {
+        const allowed = await hasBetaAccess(user.id);
+        if (!allowed) {
+            return NextResponse.redirect(new URL('/waitlist', modifiedRequest.url));
+        }
+    }
+
     if (isAdminRoute && user) {
         const supabaseClient = await createClient(modifiedRequest, response);
         const { data: profile } = await supabaseClient
@@ -45,7 +99,7 @@ export async function middleware(request: NextRequest) {
             .single();
 
         if (!profile || (profile.role !== 'admin' && profile.role !== 'moderator')) {
-            return NextResponse.redirect(new URL('/discover', modifiedRequest.url));
+            return NextResponse.redirect(new URL('/waitlist', modifiedRequest.url));
         }
     }
 

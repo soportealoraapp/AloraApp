@@ -26,7 +26,7 @@ const DEFAULT_FILTERS: Filters = {
   ageRange: [18, 60],
   distance: 100,
   seeking: 'all',
-  verifiedOnly: true,
+  verifiedOnly: false,
   interests: [],
   values: []
 };
@@ -260,6 +260,16 @@ export default function DiscoverPage() {
 
       {/* Daily Question and Compatibility - shown below the feed */}
       <div className="px-4 pb-4 max-w-sm mx-auto w-full space-y-3">
+        <LikesCounter
+          dailyLikesUsed={currentUserProfile?.dailyLikesUsed ?? 0}
+          dailyLikesLimit={20}
+          resetAt={
+            currentUserProfile?.dailyLikesResetAt
+              ? new Date(currentUserProfile.dailyLikesResetAt)
+              : new Date(new Date().setHours(24, 0, 0, 0))
+          }
+          subscriptionStatus={currentUserProfile?.subscriptionStatus ?? 'free'}
+        />
         <DailyCompatibilityCard />
         <DailyQuestionCard />
       </div>

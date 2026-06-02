@@ -24,6 +24,7 @@ export default function TravelModePage() {
     const [city, setCity] = useState('');
     const [countryCode, setCountryCode] = useState('');
     const [startedAt, setStartedAt] = useState<string | null>(null);
+    const [selectedCityId, setSelectedCityId] = useState<string | null>(null);
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
     const [showPaywall, setShowPaywall] = useState(false);
@@ -65,7 +66,7 @@ export default function TravelModePage() {
             const res = await fetch('/api/travel', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ enabled: checked, cityId: undefined })
+                body: JSON.stringify({ enabled: checked, cityId: selectedCityId })
             });
 
             if (!res.ok) {

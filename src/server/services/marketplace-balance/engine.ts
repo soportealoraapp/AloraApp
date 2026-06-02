@@ -17,10 +17,10 @@ export async function getRegionalHealth(region: string, regionType: 'city' | 'co
     const oneWeekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
     const active = profiles.filter(p => p.lastActiveAt && p.lastActiveAt > oneWeekAgo);
 
-    const activeMen = active.filter(p => p.gender === 'man' || p.gender === 'male').length;
-    const activeWomen = active.filter(p => p.gender === 'woman' || p.gender === 'female').length;
-    const activeVerifiedMen = active.filter(p => (p.gender === 'man' || p.gender === 'male') && p.isVerified).length;
-    const activeVerifiedWomen = active.filter(p => (p.gender === 'woman' || p.gender === 'female') && p.isVerified).length;
+    const activeMen = active.filter(p => p.gender === 'man').length;
+    const activeWomen = active.filter(p => p.gender === 'woman').length;
+    const activeVerifiedMen = active.filter(p => p.gender === 'man' && p.isVerified).length;
+    const activeVerifiedWomen = active.filter(p => p.gender === 'woman' && p.isVerified).length;
 
     const ratio = activeWomen > 0 ? activeMen / activeWomen : activeMen;
     const saturationLevel = getSaturationLevel(ratio);
@@ -51,10 +51,10 @@ export async function getGlobalMarketplaceHealth(): Promise<RegionalHealth> {
         select: { gender: true, isVerified: true }
     });
 
-    const activeMen = profiles.filter(p => p.gender === 'man' || p.gender === 'male').length;
-    const activeWomen = profiles.filter(p => p.gender === 'woman' || p.gender === 'female').length;
-    const activeVerifiedMen = profiles.filter(p => (p.gender === 'man' || p.gender === 'male') && p.isVerified).length;
-    const activeVerifiedWomen = profiles.filter(p => (p.gender === 'woman' || p.gender === 'female') && p.isVerified).length;
+    const activeMen = profiles.filter(p => p.gender === 'man').length;
+    const activeWomen = profiles.filter(p => p.gender === 'woman').length;
+    const activeVerifiedMen = profiles.filter(p => p.gender === 'man' && p.isVerified).length;
+    const activeVerifiedWomen = profiles.filter(p => p.gender === 'woman' && p.isVerified).length;
 
     const ratio = activeWomen > 0 ? activeMen / activeWomen : activeMen;
     const saturationLevel = getSaturationLevel(ratio);
@@ -99,10 +99,10 @@ export async function getAllRegionalHealth(): Promise<RegionalHealth[]> {
 
     const regions: RegionalHealth[] = [];
     for (const [cityId, cityProfiles] of cityGroups) {
-        const activeMen = cityProfiles.filter(p => p.gender === 'man' || p.gender === 'male').length;
-        const activeWomen = cityProfiles.filter(p => p.gender === 'woman' || p.gender === 'female').length;
-        const activeVerifiedMen = cityProfiles.filter(p => (p.gender === 'man' || p.gender === 'male') && p.isVerified).length;
-        const activeVerifiedWomen = cityProfiles.filter(p => (p.gender === 'woman' || p.gender === 'female') && p.isVerified).length;
+        const activeMen = cityProfiles.filter(p => p.gender === 'man').length;
+        const activeWomen = cityProfiles.filter(p => p.gender === 'woman').length;
+        const activeVerifiedMen = cityProfiles.filter(p => p.gender === 'man' && p.isVerified).length;
+        const activeVerifiedWomen = cityProfiles.filter(p => p.gender === 'woman' && p.isVerified).length;
 
         const ratio = activeWomen > 0 ? activeMen / activeWomen : activeMen;
         const saturationLevel = getSaturationLevel(ratio);

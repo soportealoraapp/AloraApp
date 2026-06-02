@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { calculateCompatibility } from '@/lib/compatibility/engine';
 
 export const dynamic = 'force-dynamic';
 
@@ -39,21 +40,17 @@ export async function GET(request: NextRequest) {
             return NextResponse.json({ score: 0, status: 'empty' });
         }
 
-        // Calculate health score
         let score = 0;
 
-        // Both talked (+25)
         const senders = new Set(messages.map(m => m.senderId));
         if (senders.size >= 2) {
             score += 25;
         }
 
-        // >10 messages (+25)
         if (messages.length > 10) {
             score += 25;
         }
 
-        // Conversation balanced (+20)
         const user1Count = messages.filter(m => m.senderId === match.user1Id).length;
         const user2Count = messages.filter(m => m.senderId === match.user2Id).length;
         const ratio = Math.min(user1Count, user2Count) / Math.max(user1Count, user2Count);
@@ -61,7 +58,6 @@ export async function GET(request: NextRequest) {
             score += 20;
         }
 
-        // Fast responses (+15)
         let totalResponseTime = 0;
         let responseCount = 0;
         for (let i = 1; i < messages.length; i++) {
@@ -72,12 +68,19 @@ export async function GET(request: NextRequest) {
             }
         }
         const avgResponseTime = responseCount > 0 ? totalResponseTime / responseCount : Infinity;
-        if (avgResponseTime < 2 * 60 * 60 * 1000) { // < 2 hours
+        if (avgResponseTime < 2 * 60 * 60 * 1000) {
             score += 15;
         }
 
-        // High compatibility (+15)
-        if ((match.score ?? 0) >= 70) {
+        const otherUserId = match.user1Id === user.id ? match.user2Id : match.user1Id;
+        let realCompatibility: number | null = null;
+        try {
+            const compat = await calculateCompatibility(user.id, otherUserId);
+            realCompatibility = compat.totalScore;
+        } catch (err) {
+            console.warn('[chat/health] calculateCompatibility failed:', err);
+        }
+        if (realCompatibility !== null && realCompatibility >= 70) {
             score += 15;
         }
 

@@ -8,7 +8,8 @@ import { Progress } from '@/components/ui/progress';
 import { COMPATIBILITY_QUIZZES, Quiz, QuizQuestion } from '@/lib/compatibility/quizzes';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from '@/components/ui/use-toast';
-import { Loader2, CheckCircle2, Heart, MessageCircle, Zap, Target, ArrowRight, ArrowLeft } from 'lucide-react';
+import { Loader2, CheckCircle2, Heart, MessageCircle, Zap, Target, ArrowRight, ArrowLeft, Trophy } from 'lucide-react';
+import { ARCHETYPES } from '@/lib/compatibility/quizzes';
 
 const icons: Record<string, any> = {
   Heart,
@@ -23,7 +24,34 @@ export default function CompatibilityPage() {
   const [currentStep, setCurrentStep] = useState(0);
   const [answers, setAnswers] = useState<Record<string, any>>({});
   const [isSaving, setIsSaving] = useState(false);
-  const [completedQuizzes, setCompletedQuizzes] = useState<string[]>([]);
+  interface QuizResult { quizId: string; score: number; archetype: string; completedAt: string; }
+  const [completedQuizzes, setCompletedQuizzes] = useState<QuizResult[]>([]);
+  const [loadingCompleted, setLoadingCompleted] = useState(true);
+
+  useEffect(() => {
+    if (!user) {
+      setLoadingCompleted(false);
+      return;
+    }
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await fetch('/api/compatibility/list', { cache: 'no-store' });
+        if (!res.ok) throw new Error('list failed');
+        const data = await res.json();
+        if (!cancelled) {
+          setCompletedQuizzes(
+            Array.isArray(data.completedQuizzes) ? data.completedQuizzes : []
+          );
+        }
+      } catch (err) {
+        console.error('Error loading completed quizzes:', err);
+      } finally {
+        if (!cancelled) setLoadingCompleted(false);
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [user]);
 
   const handleStartQuiz = (quiz: Quiz) => {
     setSelectedQuiz(quiz);
@@ -57,8 +85,13 @@ export default function CompatibilityPage() {
       });
 
       if (!response.ok) throw new Error('Error al guardar');
+      const saved = await response.json();
 
-      setCompletedQuizzes(prev => [...prev, selectedQuiz.id]);
+      setCompletedQuizzes(prev =>
+        prev.some(r => r.quizId === selectedQuiz.id)
+          ? prev
+          : [...prev, { quizId: selectedQuiz.id, score: saved.score ?? 0, archetype: saved.archetype ?? '', completedAt: new Date().toISOString() }]
+      );
       setSelectedQuiz(null);
       toast({
         title: "¡Quiz completado!",
@@ -189,19 +222,21 @@ export default function CompatibilityPage() {
       <div className="grid grid-cols-1 gap-4">
         {COMPATIBILITY_QUIZZES.map((quiz) => {
           const Icon = icons[quiz.icon] || Heart;
-          const isCompleted = completedQuizzes.includes(quiz.id);
+          const result = completedQuizzes.find(q => q.quizId === quiz.id);
+          const isCompleted = !!result;
+          const isDisabled = isCompleted || loadingCompleted;
+          const archetypeInfo = result ? ARCHETYPES[result.archetype] : null;
 
           return (
             <Card
               key={quiz.id}
-              onClick={() => !isCompleted && handleStartQuiz(quiz)}
-              className={`group border-none shadow-sm hover:shadow-md transition-all cursor-pointer rounded-3xl overflow-hidden ${isCompleted ? 'opacity-70 grayscale bg-gray-50' : 'bg-white'
-                }`}
+              onClick={() => !isDisabled && handleStartQuiz(quiz)}
+              className={`group border-none shadow-sm hover:shadow-md transition-all rounded-3xl overflow-hidden ${isDisabled ? 'cursor-not-allowed' : 'cursor-pointer'} ${isCompleted ? 'bg-gray-50' : 'bg-white'}`}
             >
               <CardContent className="p-6 flex items-center gap-4">
-                <div className={`p-4 rounded-2xl ${isCompleted ? 'bg-gray-200' : 'bg-pink-100 group-hover:bg-pink-200'
+                <div className={`p-4 rounded-2xl ${isCompleted ? 'bg-green-100' : 'bg-pink-100 group-hover:bg-pink-200'
                   } transition-colors`}>
-                  <Icon className={`w-6 h-6 ${isCompleted ? 'text-gray-500' : 'text-pink-600'}`} />
+                  <Icon className={`w-6 h-6 ${isCompleted ? 'text-green-600' : 'text-pink-600'}`} />
                 </div>
                 <div className="flex-1">
                   <h3 className="font-semibold text-gray-800 flex items-center gap-2">
@@ -211,6 +246,18 @@ export default function CompatibilityPage() {
                   <p className="text-sm text-gray-500 line-clamp-1">
                     {quiz.description}
                   </p>
+                  {isCompleted && result && (
+                    <div className="flex items-center gap-2 mt-2">
+                      <span className="text-xs font-bold text-green-700 bg-green-50 px-2 py-0.5 rounded-full">
+                        {result.score}/100
+                      </span>
+                      {archetypeInfo && (
+                        <span className="text-xs text-muted-foreground">
+                          {archetypeInfo.name}
+                        </span>
+                      )}
+                    </div>
+                  )}
                 </div>
                 {!isCompleted && (
                   <ArrowRight className="w-5 h-5 text-pink-300 group-hover:text-pink-500 transition-colors" />

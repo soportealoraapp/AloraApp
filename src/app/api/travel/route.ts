@@ -71,29 +71,42 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ error: 'Travel mode is a Plus feature' }, { status: 403 });
         }
 
-        if (enabled && !cityId) {
-            return NextResponse.json({ error: 'cityId required to enable travel mode' }, { status: 400 });
-        }
-
         let updateData: Record<string, unknown> = {};
 
         if (enabled) {
-            // Look up city from our static data
-            const { getCityById } = await import('@/lib/location');
-            const result = getCityById(cityId);
+            if (cityId) {
+                // Look up city from our static data
+                const { getCityById } = await import('@/lib/location');
+                const result = getCityById(cityId);
 
-            if (!result) {
-                return NextResponse.json({ error: 'City not found' }, { status: 404 });
+                if (!result) {
+                    return NextResponse.json({ error: 'City not found' }, { status: 404 });
+                }
+
+                updateData = {
+                    travelModeEnabled: true,
+                    travelCity: result.city.name,
+                    travelCountryCode: result.city.countryCode,
+                    travelLatitude: result.city.lat,
+                    travelLongitude: result.city.lng,
+                    travelStartedAt: new Date(),
+                };
+            } else {
+                // Re-enable with existing travel data (city already configured from a previous call)
+                const existing = await prisma.profile.findUnique({
+                    where: { userId: user.id },
+                    select: { travelCity: true, travelCountryCode: true, travelLatitude: true, travelLongitude: true }
+                });
+
+                if (!existing?.travelCity) {
+                    return NextResponse.json({ error: 'Select a city first' }, { status: 400 });
+                }
+
+                updateData = {
+                    travelModeEnabled: true,
+                    travelStartedAt: new Date(),
+                };
             }
-
-            updateData = {
-                travelModeEnabled: true,
-                travelCity: result.city.name,
-                travelCountryCode: result.city.countryCode,
-                travelLatitude: result.city.lat,
-                travelLongitude: result.city.lng,
-                travelStartedAt: new Date(),
-            };
         } else {
             updateData = {
                 travelModeEnabled: false,

@@ -98,10 +98,14 @@ export async function sendPushToUser(userId: string, payload: PushPayload) {
         if (staleTokens.length > 0) {
             await prisma.pushToken.deleteMany({
                 where: { id: { in: staleTokens.map(t => t.id) } },
-            }).catch(() => {});
+            }).catch((err) => console.warn('[push] deleteMany staleTokens failed:', err));
         }
 
         const activeTokens = tokens.filter(t => t.lastSeen >= thirtyDaysAgo);
+
+        if (activeTokens.length === 0) {
+            console.warn(`[push] no FCM tokens active for user ${userId} (notif=${notifType})`);
+        }
 
         for (const tokenRecord of activeTokens) {
             let result = await sendFCMMessage(
@@ -123,8 +127,10 @@ export async function sendPushToUser(userId: string, payload: PushPayload) {
                 succeeded++;
             } else {
                 failed++;
+                console.warn(`[push] FCM send failed for token ${tokenRecord.id}: ${result.error}`);
                 if (result.error === 'invalid_token') {
-                    await prisma.pushToken.delete({ where: { id: tokenRecord.id } }).catch(() => {});
+                    await prisma.pushToken.delete({ where: { id: tokenRecord.id } })
+                        .catch((err) => console.warn('[push] invalid_token delete failed:', err));
                 }
             }
         }

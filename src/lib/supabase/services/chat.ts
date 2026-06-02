@@ -5,8 +5,10 @@ import { RealtimePostgresChangesPayload } from '@supabase/supabase-js'
 type MessageCallback = (messages: Message[]) => void
 type NewMessageCallback = (message: Message) => void
 type PresenceCallback = (online: boolean) => void
+type TypingCallback = (typingUserIds: string[]) => void
 
 const messageCache = new Map<string, { messages: Message[]; offset: number; hasMore: boolean }>()
+const typingChannels = new Map<string, { channel: any; supabase: ReturnType<typeof createClient>; userId: string }>()
 
 function deduplicate(messages: Message[]): Message[] {
     const seen = new Set<string>()
@@ -17,7 +19,26 @@ function deduplicate(messages: Message[]): Message[] {
     })
 }
 
+function normalizeMessage(row: any): Message {
+    return {
+        id: row.id,
+        matchId: row.match_id,
+        senderId: row.sender_id,
+        content: row.content,
+        createdAt: new Date(row.created_at),
+        readAt: row.read_at ? new Date(row.read_at) : undefined,
+        type: row.type || 'text',
+        status: row.status || 'sent',
+        reactions: row.reactions || {},
+    }
+}
+
 export const chatService = {
+    /**
+     * Subscribe to all messages for a match.
+     * Initial fetch is the most recent `limit` messages, ordered newest -> oldest.
+     * Realtime delivery is for new INSERTs only.
+     */
     subscribeToMessages(
         matchId: string,
         callback: MessageCallback,
@@ -27,20 +48,14 @@ export const chatService = {
         const limit = options?.limit || 50
         const cacheKey = matchId
 
-        // Initial fetch
+        // Initial fetch (newest first; we reverse for chronological display)
         let query = supabase
             .from('messages')
             .select('*')
             .eq('match_id', matchId)
             .order('created_at', { ascending: false })
+            .limit(limit)
 
-        if (options?.offset) {
-            query = query.range(options.offset, options.offset + limit - 1)
-        } else {
-            query = query.limit(limit)
-        }
-
-        let initialFetched = false
         let knownIds = new Set<string>()
 
         query.then(({ data, error }) => {
@@ -49,15 +64,15 @@ export const chatService = {
                 return
             }
             if (data) {
-                const messages = (data as any as Message[]).reverse()
+                // Reverse to oldest -> newest for display
+                const messages = (data as any[]).map(normalizeMessage).reverse()
                 knownIds = new Set(messages.map(m => m.id))
                 messageCache.set(cacheKey, { messages, offset: 0, hasMore: data.length === limit })
-                initialFetched = true
                 callback(messages)
             }
         })
 
-        // Realtime subscription with deduplication
+        // Realtime subscription for new messages
         const channel = supabase
             .channel(`match:${matchId}`)
             .on(
@@ -71,23 +86,11 @@ export const chatService = {
                 (payload: RealtimePostgresChangesPayload<{ [key: string]: any }>) => {
                     const newMsg = payload.new as any
                     if (!newMsg || !newMsg.id) return
-
-                    // Deduplication: skip if we already have this message
                     if (knownIds.has(newMsg.id)) return
                     knownIds.add(newMsg.id)
 
+                    const message = normalizeMessage(newMsg)
                     const cached = messageCache.get(cacheKey)
-                    const message: Message = {
-                        id: newMsg.id,
-                        matchId: newMsg.match_id,
-                        senderId: newMsg.sender_id,
-                        content: newMsg.content,
-                        createdAt: newMsg.created_at,
-                        readAt: newMsg.read_at || undefined,
-                        type: newMsg.type || 'text',
-                        status: newMsg.status || 'sent',
-                    }
-
                     if (cached) {
                         cached.messages = deduplicate([...cached.messages, message])
                         callback(cached.messages)
@@ -126,17 +129,7 @@ export const chatService = {
                     const newMsg = payload.new as any
                     if (!newMsg || !newMsg.id || seenIds.has(newMsg.id)) return
                     seenIds.add(newMsg.id)
-
-                    callback({
-                        id: newMsg.id,
-                        matchId: newMsg.match_id,
-                        senderId: newMsg.sender_id,
-                        content: newMsg.content,
-                        createdAt: newMsg.created_at,
-                        readAt: newMsg.read_at || undefined,
-                        type: newMsg.type || 'text',
-                        status: newMsg.status || 'sent',
-                    })
+                    callback(normalizeMessage(newMsg))
                 }
             )
             .subscribe()
@@ -146,26 +139,29 @@ export const chatService = {
         }
     },
 
-    subscribeToTyping(matchId: string, userId: string, callback: (typingUserId: string) => void) {
+    /**
+     * Subscribe to typing indicators using Supabase presence.
+     *
+     * Presence keys are unique per-user (we use the user id as the key), so each
+     * participant occupies a distinct slot in the presence state. The receiver
+     * can filter out their own key and read the rest as "currently typing".
+     */
+    subscribeToTyping(matchId: string, userId: string, callback: TypingCallback) {
         const supabase = createClient()
-        const channel = supabase
-            .channel(`typing:${matchId}`)
-            .on(
-                'presence' as any,
-                { event: 'sync' },
-                () => {
-                    const state = channel.presenceState()
-                    const typingUsers = Object.keys(state).filter(id => id !== userId)
-                    typingUsers.forEach(id => callback(id))
-                }
-            )
-            .on(
-                'presence' as any,
-                { event: 'join' },
-                ({ key }) => {
-                    if (key !== userId) callback(key)
-                }
-            )
+        const channel = supabase.channel(`typing:${matchId}`, {
+            config: { presence: { key: userId } },
+        })
+
+        const collect = () => {
+            const state = channel.presenceState()
+            const typingUserIds = Object.keys(state).filter(id => id !== userId)
+            callback(typingUserIds)
+        }
+
+        channel
+            .on('presence' as any, { event: 'sync' }, collect)
+            .on('presence' as any, { event: 'join' }, collect)
+            .on('presence' as any, { event: 'leave' }, collect)
             .subscribe()
 
         return () => {
@@ -175,29 +171,61 @@ export const chatService = {
 
     async emitTyping(matchId: string, userId: string) {
         const supabase = createClient()
-        const channel = supabase.channel(`typing:${matchId}`)
-        await channel.subscribe()
-        await channel.track({ userId, typingAt: new Date().toISOString() })
-        setTimeout(() => {
-            supabase.removeChannel(channel)
-        }, 3000)
+        const key = `typing:${matchId}`
+
+        let entry = typingChannels.get(key)
+        if (!entry) {
+            const channel = supabase.channel(key, {
+                config: { presence: { key: userId } },
+            })
+            await new Promise<void>((resolve) => {
+                channel.subscribe((status) => {
+                    if (status === 'SUBSCRIBED' || status === 'CHANNEL_ERROR' || status === 'TIMED_OUT' || status === 'CLOSED') {
+                        resolve()
+                    }
+                })
+            })
+            entry = { channel, supabase, userId }
+            typingChannels.set(key, entry)
+        }
+
+        await entry.channel.track({ userId, typingAt: new Date().toISOString() })
     },
 
+    closeTypingChannel(matchId: string) {
+        const key = `typing:${matchId}`
+        const entry = typingChannels.get(key)
+        if (entry) {
+            try { entry.channel.untrack() } catch { /* ignore */ }
+            entry.supabase.removeChannel(entry.channel)
+            typingChannels.delete(key)
+        }
+    },
+
+    /**
+     * Subscribe to online presence for a match.
+     * The receiver is "online" if any presence key other than its own exists.
+     */
     subscribeToPresence(matchId: string, userId: string, callback: PresenceCallback) {
         const supabase = createClient()
-        const channel = supabase
-            .channel(`presence:${matchId}`)
-            .on(
-                'presence' as any,
-                { event: 'sync' },
-                () => {
-                    const state = channel.presenceState()
-                    const onlineUsers = Object.keys(state).filter(id => id !== userId)
-                    callback(onlineUsers.length > 0)
+        const channel = supabase.channel(`presence:${matchId}`, {
+            config: { presence: { key: userId } },
+        })
+
+        const check = () => {
+            const state = channel.presenceState()
+            const onlineUsers = Object.keys(state).filter(id => id !== userId)
+            callback(onlineUsers.length > 0)
+        }
+
+        channel
+            .on('presence' as any, { event: 'sync' }, check)
+            .on('presence' as any, { event: 'join' }, check)
+            .on('presence' as any, { event: 'leave' }, check)
+            .subscribe((status) => {
+                if (status === 'SUBSCRIBED') {
+                    channel.track({ userId, onlineAt: new Date().toISOString() }).catch(() => { /* ignore */ })
                 }
-            )
-            .subscribe(async () => {
-                await channel.track({ userId, onlineAt: new Date().toISOString() })
             })
 
         return () => {
@@ -205,8 +233,33 @@ export const chatService = {
         }
     },
 
+    /**
+     * Mark all incoming messages in a match as read.
+     * Validates ownership before writing.
+     */
     async markMatchMessagesAsRead(matchId: string, userId: string) {
+        if (!matchId || !userId) return
         const supabase = createClient()
+
+        // Ownership validation: caller must be a participant in the match.
+        // Done via the `matches` table; if the row doesn't match user1/user2
+        // we abort.
+        const { data: match, error: matchError } = await supabase
+            .from('matches')
+            .select('id, user1_id, user2_id')
+            .eq('id', matchId)
+            .or(`user1_id.eq.${userId},user2_id.eq.${userId}`)
+            .maybeSingle()
+
+        if (matchError) {
+            console.error('Error validating match ownership:', matchError)
+            return
+        }
+        if (!match) {
+            console.warn('markMatchMessagesAsRead: user is not a participant of match', matchId)
+            return
+        }
+
         const { error } = await supabase
             .from('messages')
             .update({ read_at: new Date().toISOString(), status: 'read' })
@@ -219,6 +272,10 @@ export const chatService = {
         }
     },
 
+    /**
+     * Unread count: how many incoming messages in the match are still unread.
+     * The caller must already be a participant in the match.
+     */
     async getUnreadCount(matchId: string, userId: string): Promise<number> {
         const supabase = createClient()
         const { count, error } = await supabase
@@ -235,26 +292,49 @@ export const chatService = {
         return count || 0
     },
 
+    /**
+     * Subscribe to unread-count changes. We listen only to UPDATEs (a message
+     * becoming read) and INSERTs (new incoming messages), avoiding the storm
+     * caused by `event: '*'`.
+     */
     subscribeToUnreadCount(matchId: string, userId: string, callback: (count: number) => void) {
         const supabase = createClient()
+        let debounceTimer: ReturnType<typeof setTimeout> | null = null
+
+        const refresh = () => {
+            if (debounceTimer) clearTimeout(debounceTimer)
+            debounceTimer = setTimeout(async () => {
+                const count = await chatService.getUnreadCount(matchId, userId)
+                callback(count)
+            }, 250)
+        }
+
         const channel = supabase
             .channel(`unread:${matchId}:${userId}`)
             .on(
                 'postgres_changes' as any,
                 {
-                    event: '*',
+                    event: 'INSERT',
                     schema: 'public',
                     table: 'messages',
                     filter: `match_id=eq.${matchId}`,
                 },
-                async () => {
-                    const count = await this.getUnreadCount(matchId, userId)
-                    callback(count)
-                }
+                refresh
+            )
+            .on(
+                'postgres_changes' as any,
+                {
+                    event: 'UPDATE',
+                    schema: 'public',
+                    table: 'messages',
+                    filter: `match_id=eq.${matchId}`,
+                },
+                refresh
             )
             .subscribe()
 
         return () => {
+            if (debounceTimer) clearTimeout(debounceTimer)
             supabase.removeChannel(channel)
         }
     },

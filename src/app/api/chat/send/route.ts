@@ -60,11 +60,14 @@ export async function POST(request: NextRequest) {
                 prisma.profile.findUnique({ where: { userId: receiverId }, select: { gender: true } }),
             ]);
 
-            const isHeteroMatch =
-                (senderProfile?.gender === 'male' && receiverProfile?.gender === 'female') ||
-                (senderProfile?.gender === 'female' && receiverProfile?.gender === 'male');
+            const senderGender = (senderProfile?.gender || '').toLowerCase();
+            const receiverGender = (receiverProfile?.gender || '').toLowerCase();
 
-            if (isHeteroMatch && senderProfile?.gender === 'male') {
+            const isHeteroMatch =
+                (senderGender === 'man' && receiverGender === 'woman') ||
+                (senderGender === 'woman' && receiverGender === 'man');
+
+            if (isHeteroMatch && senderGender === 'man') {
                 return NextResponse.json(
                     {
                         error: 'first_message_restriction',
@@ -105,7 +108,7 @@ export async function POST(request: NextRequest) {
                 await prisma.profile.update({
                     where: { userId: user.id },
                     data: { reputationScore: { decrement: riskAssessment.assessment.riskLevel === 'critical' ? 10 : 5 } }
-                }).catch(() => {});
+                }).catch((err) => console.warn('[chat/send] reputation decrement failed:', err));
             }
         } catch (riskError) {
             console.error('Risk engine error:', riskError);
@@ -133,17 +136,20 @@ export async function POST(request: NextRequest) {
             where: { userId: user.id },
             select: { displayName: true }
         });
-        notifyNewMessage(receiverId, senderProfile?.displayName || 'Alguien', matchId, content).catch(() => {});
+        notifyNewMessage(receiverId, senderProfile?.displayName || 'Alguien', matchId, content)
+            .catch((err) => console.warn('[chat/send] notifyNewMessage failed:', err));
 
         // Analytics: track first_message and first_reply
         if (prevMessageCount === 0) {
-            trackEvent(user.id, 'first_message', { matchId }).catch(() => {});
+            trackEvent(user.id, 'first_message', { matchId })
+                .catch((err) => console.warn('[chat/send] trackEvent first_message failed:', err));
         } else {
             const repliesFromReceiver = await prisma.message.count({
                 where: { matchId, senderId: receiverId },
             });
             if (repliesFromReceiver === 1) {
-                trackEvent(receiverId, 'first_reply', { matchId }).catch(() => {});
+                trackEvent(receiverId, 'first_reply', { matchId })
+                    .catch((err) => console.warn('[chat/send] trackEvent first_reply failed:', err));
             }
         }
 

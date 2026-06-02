@@ -72,3 +72,20 @@ export async function getDailyQuestionForUser(userId: string) {
         answered: !!userAnswer
     };
 }
+
+export async function getLatestAnswer(userId: string): Promise<{ questionId: string; answer: string; createdAt: Date } | null> {
+    const row = await prisma.dailyAnswer.findFirst({
+        where: { userId },
+        orderBy: { createdAt: 'desc' },
+        select: { questionId: true, answer: true, createdAt: true },
+    });
+    return row;
+}
+
+export async function getLatestAnswerForUserById(targetUserId: string) {
+    return prisma.dailyAnswer.findFirst({
+        where: { userId: targetUserId },
+        orderBy: { createdAt: 'desc' },
+        select: { questionId: true, answer: true, createdAt: true, question: { select: { question: true, category: true } } },
+    });
+}

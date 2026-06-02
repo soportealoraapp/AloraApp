@@ -12,7 +12,7 @@ import { Clock, Zap, MessageCircle, Heart } from 'lucide-react';
 interface FloatingMatchCardProps {
     profile: UserProfile;
     onSwipe: (direction: 'left' | 'right') => void;
-    compatibility?: number;
+    compatibility?: number | null;
     compatibilityDetails?: {
         sharedValues?: string[];
         sharedInterests?: string[];
@@ -117,7 +117,7 @@ export function FloatingMatchCard({ profile, onSwipe, compatibility, compatibili
 
                 <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent p-6 text-white min-h-[180px] flex flex-col justify-end">
                     <div className="flex flex-wrap gap-2 mb-3">
-                        {compatibility !== undefined && compatibility >= 70 && (
+                        {compatibility !== null && compatibility !== undefined && compatibility >= 70 && (
                             <motion.div
                                 initial={{ scale: 0.8, opacity: 0 }}
                                 animate={{ scale: 1, opacity: 1 }}
@@ -130,7 +130,7 @@ export function FloatingMatchCard({ profile, onSwipe, compatibility, compatibili
                         {(profile.completenessScore ?? 0) >= 90 && <TrustBadge type="complete" />}
                     </div>
 
-                    {compatibility !== undefined && compatibility >= 50 && compatibilityDetails && (
+                    {compatibility !== null && compatibility !== undefined && compatibility >= 50 && compatibilityDetails && (
                         <div className="mb-3 space-y-1">
                             {(() => {
                                 const shared: string[] = [

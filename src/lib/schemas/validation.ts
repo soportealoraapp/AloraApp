@@ -1,6 +1,11 @@
 import { z } from 'zod';
 
-const ALLOWED_GENDERS = ['woman', 'man', 'non-binary', 'female', 'male'] as const;
+// Canonical gender vocabulary. Legacy values ('male' / 'female') are normalized
+// to ('man' / 'woman') by `normalizeGender` before they ever reach the DB or
+// the validation pipeline. New code MUST use these three values only.
+export const ALLOWED_GENDERS = ['woman', 'man', 'non-binary'] as const;
+export type Gender = (typeof ALLOWED_GENDERS)[number];
+
 const ALLOWED_SEEKING = ['women', 'men', 'all', 'everyone'] as const;
 const MAX_PHOTOS = 6;
 const MAX_INTERESTS = 10;
@@ -16,7 +21,7 @@ export const EditableProfileSchema = z.object({
     displayName: z.string().min(1, 'Display name is required').max(MAX_DISPLAY_NAME_LENGTH).trim(),
     bio: z.string().max(MAX_BIO_LENGTH, `Bio must be ${MAX_BIO_LENGTH} characters or less`).trim().optional().default(''),
     age: z.number().int().min(MIN_AGE, `Must be at least ${MIN_AGE}`).max(MAX_AGE, `Must be at most ${MAX_AGE}`).optional(),
-    gender: z.string().min(1).optional(),
+    gender: z.enum(ALLOWED_GENDERS).optional(),
     photos: z.array(z.string().url('Each photo must be a valid URL')).max(MAX_PHOTOS, `Maximum ${MAX_PHOTOS} photos`).optional().default([]),
     interests: z.array(z.string()).max(MAX_INTERESTS).optional().default([]),
     values: z.array(z.string()).max(MAX_VALUES).optional().default([]),
@@ -73,3 +78,32 @@ export const LikeSchema = z.object({
     toUserId: z.string().uuid(),
     type: z.enum(['like', 'superlike', 'pass']).default('like'),
 });
+
+/**
+ * Normalize any legacy gender string ('male' / 'female' / mixed case) to the
+ * canonical vocabulary. Returns `null` for empty / unknown values so callers
+ * can decide what to do.
+ */
+export function normalizeGender(value: string | null | undefined): Gender | null {
+    if (!value) return null;
+    const v = value.toLowerCase().trim();
+    if (v === 'woman' || v === 'female') return 'woman';
+    if (v === 'man' || v === 'male') return 'man';
+    if (v === 'non-binary' || v === 'nonbinary' || v === 'nb') return 'non-binary';
+    return null;
+}
+
+/**
+ * True iff a (sender, receiver) pair is a heterosexual matchup under the
+ * canonical vocabulary. Non-binary and unknown values are never "hetero".
+ */
+export function isHeteroMatch(
+    senderGender: string | null | undefined,
+    receiverGender: string | null | undefined
+): boolean {
+    const a = normalizeGender(senderGender);
+    const b = normalizeGender(receiverGender);
+    if (!a || !b) return false;
+    if (a === 'non-binary' || b === 'non-binary') return false;
+    return a !== b;
+}

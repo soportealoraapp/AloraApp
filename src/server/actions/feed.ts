@@ -28,6 +28,11 @@ export interface FeedPage {
     hasMore: boolean;
 }
 
+export interface GetFeedOptions {
+    page?: number;
+    pageSize?: number;
+}
+
 export interface FeedFilters {
     ageRange?: [number, number];
     seeking?: string;
@@ -43,6 +48,9 @@ export interface FeedFilters {
     distance?: number; // km
     userLat?: number;
     userLng?: number;
+    countryCode?: string; // ISO-2: 'MX', 'CO', ...
+    stateCode?: string;   // ISO-3166-2
+    city?: string;
     withVoiceIntro?: boolean;
     withQuiz?: boolean;
     featuredOnly?: boolean;
@@ -89,9 +97,20 @@ export async function getDynamicFeed(
         ]);
 
         const seeking = currentUser.profile.seeking || 'everyone';
-        const genderFilter = seeking === 'everyone'
-            ? {}
-            : { gender: seeking === 'women' ? 'woman' : 'man' };
+        // Viewer wants candidates of `seeking` gender
+        const viewerWantsGender = seeking === 'everyone'
+            ? null
+            : (seeking === 'women' ? 'woman' : 'man');
+
+        // Bidirectional seeking: candidate.seeking must accept the viewer's gender
+        // candidate.seeking ∈ {'women','men','all'} vs viewer.gender ∈ {'woman','man','non-binary','other'}
+        const viewerGender = currentUser.profile.gender || null;
+        const candidateAcceptsViewer = (() => {
+            if (!viewerGender || viewerGender === 'non-binary' || viewerGender === 'other') return true;
+            // We can't pre-filter by inverse seeking in SQL; we apply the constraint in-memory
+            // by excluding candidates whose explicit `seeking` is opposite of the viewer.
+            return null; // marker for "check in-memory"
+        })();
 
         const searchFilter = searchTerm
             ? {
@@ -114,7 +133,10 @@ export async function getDynamicFeed(
         }
 
         if (filters?.seeking && filters.seeking !== 'all') {
+            // Override with explicit UI filter (same vocabulary: 'women' -> 'woman', 'men' -> 'man')
             dynamicFilters.gender = filters.seeking === 'women' ? 'woman' : 'man';
+        } else if (viewerWantsGender) {
+            dynamicFilters.gender = viewerWantsGender;
         }
 
         if (filters?.verifiedOnly) {
@@ -153,6 +175,17 @@ export async function getDynamicFeed(
             dynamicFilters.religion = filters.religion;
         }
 
+        // Country / state / city filters
+        if (filters?.countryCode) {
+            dynamicFilters.countryCode = filters.countryCode;
+        }
+        if (filters?.stateCode) {
+            dynamicFilters.stateCode = filters.stateCode;
+        }
+        if (filters?.city) {
+            dynamicFilters.city = filters.city;
+        }
+
         // Distance filtering (using Haversine via Prisma raw query if coordinates available)
         // If travel mode is enabled, use travel coordinates instead of filter coordinates
         let effectiveLat = filters?.userLat;
@@ -175,6 +208,9 @@ export async function getDynamicFeed(
                     trustStatus: { not: 'banned' },
                     incognitoMode: false,
                     showMeInDiscover: true,
+                    // Apply country/state/city prefilter when relevant
+                    ...(filters.countryCode ? { countryCode: filters.countryCode } : {}),
+                    ...(filters.stateCode ? { stateCode: filters.stateCode } : {}),
                 },
                 select: { userId: true, latitude: true, longitude: true }
             });
@@ -191,25 +227,44 @@ export async function getDynamicFeed(
             }
         }
 
+        // Compose the where clause
+        const userIdFilter: { notIn: string[]; in?: string[] } = {
+            notIn: Array.from(excludedIds),
+        };
+        if (candidateIds) {
+            userIdFilter.in = candidateIds;
+        }
+
+        // Decode page offset from cursor (format: "page_N")
+        const currentPage = cursor ? parseInt(cursor.replace('page_', ''), 10) || 0 : 0;
+        const fetchSize = (limit + 1) * 3; // Fetch extra to compensate for in-memory post-filters
+
         const candidates = await prisma.profile.findMany({
             where: {
-                userId: { notIn: Array.from(excludedIds) },
+                userId: userIdFilter,
                 trustStatus: { not: 'banned' },
                 incognitoMode: false,
                 showMeInDiscover: true,
-                ...genderFilter,
                 ...searchFilter,
                 ...dynamicFilters,
-                ...(candidateIds ? { userId: { in: candidateIds } } : {}),
-                ...(cursor ? { userId: { gt: cursor } } : {}),
             },
-            take: limit + 1,
+            skip: currentPage * fetchSize,
+            take: fetchSize,
             orderBy: { userId: 'asc' },
             include: { user: true }
         });
 
-        const hasMore = candidates.length > limit;
-        let results = hasMore ? candidates.slice(0, limit) : candidates;
+        // Bidirectional seeking filter: candidate.seeking must accept the viewer's gender
+        const filteredByBidirectionalSeeking = candidates.filter(c => {
+            if (!viewerGender || viewerGender === 'non-binary' || viewerGender === 'other') return true;
+            const cs = (c.seeking || 'everyone').toLowerCase();
+            if (cs === 'everyone' || cs === 'all') return true;
+            if (cs === 'women' && viewerGender === 'woman') return true;
+            if (cs === 'men' && viewerGender === 'man') return true;
+            return false;
+        });
+
+        let results = filteredByBidirectionalSeeking.slice(0, limit);
 
         // Apply smart filters that need extra lookups
         if (filters?.withVoiceIntro || filters?.withQuiz || filters?.activeToday) {
@@ -251,7 +306,8 @@ export async function getDynamicFeed(
             });
         }
 
-        const nextCursor = hasMore ? results[results.length - 1]?.userId ?? null : null;
+        const hasMore = filteredByBidirectionalSeeking.length > limit || candidates.length === fetchSize;
+        const nextCursor = hasMore ? `page_${currentPage + 1}` : null;
 
         // Calculate response rates for all candidates in batch
         const resultCandidateIds = results.map(c => c.userId);

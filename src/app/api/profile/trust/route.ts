@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { calculateCompleteness } from '@/lib/utils/completeness';
 
 export const dynamic = 'force-dynamic';
 
@@ -13,16 +14,33 @@ export async function GET(request: NextRequest) {
     }
 
     try {
-        const profileResult = await prisma.$queryRaw`
-            SELECT "isVerified", "completenessScore", "lastActiveAt", "reputationScore"
-            FROM profiles WHERE "userId" = ${user.id}
-        ` as any[];
-
-        const profile = profileResult[0];
+        const profile = await prisma.profile.findUnique({
+            where: { userId: user.id },
+            select: {
+                isVerified: true,
+                lastActiveAt: true,
+                reputationScore: true,
+                photos: true,
+                bio: true,
+                interests: true,
+                city: true,
+                education: true,
+                zodiacSign: true,
+            },
+        });
 
         if (!profile) {
             return NextResponse.json({ score: 50, level: 'Nuevo', factors: [], tips: [], breakdown: {} });
         }
+
+        const completenessScore = calculateCompleteness({
+            photos: profile.photos ?? undefined,
+            bio: profile.bio ?? undefined,
+            interests: profile.interests ?? undefined,
+            city: profile.city ?? undefined,
+            education: profile.education ?? undefined,
+            zodiacSign: profile.zodiacSign ?? undefined,
+        });
 
         const reportsReceived = await prisma.report.count({
             where: { reportedId: user.id, status: 'reviewed' },
@@ -71,10 +89,10 @@ export async function GET(request: NextRequest) {
         const factors: { label: string; points: number; positive: boolean }[] = [];
 
         // Positive factors
-        if ((profile.completenessScore ?? 0) >= 90) {
+        if (completenessScore >= 90) {
             score += 20;
             factors.push({ label: 'Perfil completo (90%+)', points: 20, positive: true });
-        } else if ((profile.completenessScore ?? 0) >= 70) {
+        } else if (completenessScore >= 70) {
             score += 10;
             factors.push({ label: 'Perfil casi completo (70%+)', points: 10, positive: true });
         }
@@ -124,7 +142,7 @@ export async function GET(request: NextRequest) {
         // Improvement tips
         const tips: string[] = [];
         if (!profile.isVerified) tips.push('Verifica tu identidad para +20 puntos');
-        if ((profile.completenessScore ?? 0) < 90) tips.push('Completa tu perfil al 90%+ para +20 puntos');
+        if (completenessScore < 90) tips.push('Completa tu perfil al 90%+ para +20 puntos');
         if (responseRate < 50) tips.push('Responde a más mensajes para mejorar tu score');
         if (!isActive) tips.push('Actívate en la app para +20 puntos');
         if (reportsReceived > 0) tips.push('Mantén un comportamiento respetuoso para evitar reportes');
@@ -135,7 +153,7 @@ export async function GET(request: NextRequest) {
             factors,
             tips,
             breakdown: {
-                completeness: profile.completenessScore ?? 0,
+                completeness: completenessScore,
                 verified: profile.isVerified,
                 reportsReceived,
                 blocksReceived,

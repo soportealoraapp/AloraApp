@@ -22,13 +22,13 @@ export async function getWomenExperienceAudit(): Promise<WomenExperienceMetrics>
 
     // Get female users
     const femaleUsers = await prisma.user.findMany({
-        where: { profile: { gender: { in: ['woman', 'female'] } } },
+        where: { profile: { gender: 'woman' } },
         select: { id: true, createdAt: true }
     });
 
     // Get male users for comparison
     const maleUsers = await prisma.user.findMany({
-        where: { profile: { gender: { in: ['man', 'male'] } } },
+        where: { profile: { gender: 'man' } },
         select: { id: true, createdAt: true }
     });
 
@@ -126,7 +126,7 @@ export async function getWomenExperienceAudit(): Promise<WomenExperienceMetrics>
 
     // Verification rate
     const verifiedWomen = await prisma.profile.count({
-        where: { gender: { in: ['woman', 'female'] }, isVerified: true }
+        where: { gender: 'woman', isVerified: true }
     });
 
     const avgTimeToMatch = femaleMatchCount > 0 ? totalFemaleMatchTime / femaleMatchCount : 0;

@@ -11,6 +11,7 @@ export interface CompatibilityResult {
         quizzes: number;
         interests: number;
         lifestyle: number;
+        dailyQuestion: number;
     };
     explanations: string[];
     sharedItems: {
@@ -146,6 +147,24 @@ async function scoreQuizzes(userIdA: string, userIdB: string): Promise<number> {
 }
 
 /**
+ * Score daily-question compatibility (5% weight).
+ * Rewards shared category + length similarity.
+ */
+function scoreDailyQuestion(questionA: { category: string | null } | null, answerA: string | null,
+                            questionB: { category: string | null } | null, answerB: string | null): number {
+    if (!answerA || !answerB || !questionA?.category || !questionB?.category) return 50;
+    let score = 50;
+    if (questionA.category === questionB.category) score += 30;
+    const lenA = answerA.trim().length;
+    const lenB = answerB.trim().length;
+    if (lenA > 0 && lenB > 0) {
+        const ratio = Math.min(lenA, lenB) / Math.max(lenA, lenB);
+        score += Math.round(ratio * 20);
+    }
+    return Math.max(0, Math.min(100, score));
+}
+
+/**
  * Score lifestyle compatibility (10% weight).
  */
 function scoreLifestyle(profileA: any, profileB: any): number {
@@ -227,7 +246,7 @@ export async function calculateCompatibility(
     if (!profileA || !profileB) {
         return {
             totalScore: 50,
-            dimensions: { values: 50, relationshipGoals: 50, personality: 50, quizzes: 50, interests: 50, lifestyle: 50 },
+            dimensions: { values: 50, relationshipGoals: 50, personality: 50, quizzes: 50, interests: 50, lifestyle: 50, dailyQuestion: 50 },
             explanations: ['Perfiles incompletos — no se puede calcular compatibilidad'],
             sharedItems: { values: [], interests: [], music: [], lifestyle: [] },
             differences: { values: [], lifestyle: [] },
@@ -235,9 +254,19 @@ export async function calculateCompatibility(
     }
 
     // Calculate all dimensions
-    const [quizScore, goalsScore] = await Promise.all([
+    const [quizScore, goalsScore, latestA, latestB] = await Promise.all([
         scoreQuizzes(userIdA, userIdB),
         scoreRelationshipGoals(userIdA, userIdB),
+        prisma.dailyAnswer.findFirst({
+            where: { userId: userIdA },
+            orderBy: { createdAt: 'desc' },
+            select: { answer: true, question: { select: { category: true } } },
+        }),
+        prisma.dailyAnswer.findFirst({
+            where: { userId: userIdB },
+            orderBy: { createdAt: 'desc' },
+            select: { answer: true, question: { select: { category: true } } },
+        }),
     ]);
 
     const valuesScore = scoreValues(profileA.values || [], profileB.values || []);
@@ -247,15 +276,20 @@ export async function calculateCompatibility(
         profileA.interests || [], profileB.interests || []
     );
     const lifestyleScore = scoreLifestyle(profileA, profileB);
+    const dailyScore = scoreDailyQuestion(
+        latestA?.question ?? null, latestA?.answer ?? null,
+        latestB?.question ?? null, latestB?.answer ?? null,
+    );
 
     // Weighted total
     const totalScore = Math.round(
         valuesScore * 0.30 +
         goalsScore * 0.20 +
         personalityScore * 0.15 +
-        quizScore * 0.15 +
+        quizScore * 0.13 +
         interestsScore * 0.10 +
-        lifestyleScore * 0.10
+        lifestyleScore * 0.07 +
+        dailyScore * 0.05
     );
 
     const dimensions = {
@@ -265,6 +299,7 @@ export async function calculateCompatibility(
         quizzes: Math.round(quizScore),
         interests: Math.round(interestsScore),
         lifestyle: Math.round(lifestyleScore),
+        dailyQuestion: Math.round(dailyScore),
     };
 
     // Generate explanations

@@ -2,7 +2,7 @@
 
 import { prisma } from '@/lib/prisma';
 import { UserProfile } from '@/lib/domain/types';
-import { cache } from '@/server/cache/redis';
+import { cache, HybridCache } from '@/server/cache/redis';
 
 export interface PersonalizedProfile {
     profile: UserProfile;
@@ -21,6 +21,11 @@ export interface PersonalizedProfile {
     diversityLabel: 'safe_bet' | 'exploration' | 'serendipity' | 'compatible';
 }
 
+/**
+ * @deprecated Unused by the current UI (use getDynamicFeed in feed.ts).
+ * Kept exported to avoid breaking any admin/QA scripts; the cached
+ * implementation now references the real HybridCache.TTL constants.
+ */
 export async function getPersonalizedFeed(
     userId: string,
     cursor?: string,
@@ -216,17 +221,7 @@ export async function getPersonalizedFeed(
     const feedResult = { items: result, nextCursor, hasMore };
 
     // Cache for 2 minutes
-    await cache.set('feed', userId, feedResult, HybridCache_TTL.FEED);
+    await cache.set('feed', userId, feedResult, HybridCache.TTL.FEED);
 
     return feedResult;
 }
-
-const HybridCache_TTL = {
-    FEED: 120,
-    PROFILE: 300,
-    COMPATIBILITY: 600,
-    AI_INSIGHT: 900,
-    UNREAD_COUNT: 30,
-    POPULARITY: 3600,
-    NOTIFICATION_DEDUP: 86400,
-};

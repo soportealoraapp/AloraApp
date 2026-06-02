@@ -413,11 +413,11 @@ export default function ChatWindowPage() {
                         </div>
                         <h3 className="font-semibold text-lg mb-2">¡Es un match!</h3>
                         <p className="text-muted-foreground mb-4 max-w-xs">
-                            {profile?.gender === 'woman' || profile?.gender === 'female'
+                            {profile?.gender === 'woman'
                                 ? 'Da el primer paso — tu mensaje puede ser el inicio de algo especial.'
                                 : 'Ella dará el primer paso cuando esté lista.'}
                         </p>
-                        {(profile?.gender === 'woman' || profile?.gender === 'female') && (
+                        {profile?.gender === 'woman' && (
                             <Button
                                 onClick={fetchIcebreakers}
                                 disabled={loadingIcebreakers}
@@ -535,7 +535,7 @@ export default function ChatWindowPage() {
 
             {/* Chat input area */}
             <div className="border-t bg-background p-4 pb-safe">
-                {messages.length === 0 && (profile?.gender !== 'woman' && profile?.gender !== 'female') ? (
+                {messages.length === 0 && profile?.gender !== 'woman' ? (
                     <div className="flex flex-col items-center justify-center p-4 bg-muted/50 rounded-2xl text-center">
                         <Sparkles className="h-8 w-8 text-primary mb-2" />
                         <p className="font-semibold text-primary">Ella da el primer paso</p>

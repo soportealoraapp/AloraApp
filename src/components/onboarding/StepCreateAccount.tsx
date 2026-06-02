@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
@@ -10,12 +10,37 @@ import { useToast } from '@/hooks/use-toast';
 import { authService } from '@/lib/supabase/services/auth';
 import { Eye, EyeOff, Loader2, Check, X, Mail } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { REFERRAL_COOKIE, REFERRAL_SESSION_KEY, REFERRAL_CODE_PATTERN } from '@/lib/referral/constants';
 
 interface StepCreateAccountProps {
     onAccountCreated: (userId: string) => void;
+    initialRef?: string;
 }
 
-export function StepCreateAccount({ onAccountCreated }: StepCreateAccountProps) {
+function readReferralCookie(): string {
+    if (typeof document === 'undefined') return '';
+    const match = document.cookie
+        .split(';')
+        .map(c => c.trim())
+        .find(c => c.startsWith(`${REFERRAL_COOKIE}=`));
+    if (!match) return '';
+    const raw = decodeURIComponent(match.substring(REFERRAL_COOKIE.length + 1));
+    return REFERRAL_CODE_PATTERN.test(raw) ? raw : '';
+}
+
+function persistReferral(code: string) {
+    if (typeof document === 'undefined') return;
+    if (!REFERRAL_CODE_PATTERN.test(code)) return;
+    const oneMonth = 60 * 60 * 24 * 30;
+    document.cookie = `${REFERRAL_COOKIE}=${encodeURIComponent(code)}; path=/; max-age=${oneMonth}; samesite=lax`;
+    try { sessionStorage.setItem(REFERRAL_SESSION_KEY, code); } catch { /* noop */ }
+}
+
+export function StepCreateAccount({ onAccountCreated, initialRef }: StepCreateAccountProps) {
+    const referralCode = readReferralCookie() || initialRef || '';
+    useEffect(() => {
+        if (initialRef) persistReferral(initialRef);
+    }, [initialRef]);
     const router = useRouter();
     const { toast } = useToast();
     const [email, setEmail] = useState('');

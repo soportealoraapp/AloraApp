@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { recordProfileVisit } from '@/server/services/visit-tracker';
 import { notifyProfileVisit } from '@/server/services/push';
+import { getLatestAnswerForUserById } from '@/server/services/daily-question';
 
 // GET /api/profile/[userId]
 export async function GET(
@@ -56,7 +57,21 @@ export async function GET(
 
         // Hide private fields
         const { incognitoMode, showMeInDiscover, ...safeProfile } = profile as any;
-        return NextResponse.json(safeProfile);
+
+        const latestAnswer = await getLatestAnswerForUserById(targetUserId);
+
+        return NextResponse.json({
+            ...safeProfile,
+            latestAnswer: latestAnswer
+                ? {
+                    questionId: latestAnswer.questionId,
+                    question: latestAnswer.question?.question ?? null,
+                    category: latestAnswer.question?.category ?? null,
+                    answer: latestAnswer.answer,
+                    createdAt: latestAnswer.createdAt.toISOString(),
+                }
+                : null,
+        });
     } catch (error) {
         console.error('Error getting profile:', error);
         return NextResponse.json({ error: 'Internal server error' }, { status: 500 });

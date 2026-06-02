@@ -14,6 +14,7 @@ import { StepVerification } from "./StepVerification";
 import { StepCreateAccount } from "./StepCreateAccount";
 import { UserProfile } from "@/lib/domain/types";
 import { Heart, Cloud } from "lucide-react";
+import { REFERRAL_COOKIE, REFERRAL_SESSION_KEY, REFERRAL_CODE_PATTERN } from "@/lib/referral/constants";
 
 const STEP_LABELS = ['Tu cuenta', 'Tu esencia', 'Tus colores', 'Tu sonrisa', 'Tu seguridad'];
 const STEP_WELCOME = [
@@ -24,7 +25,7 @@ const STEP_WELCOME = [
     'Protege tu espacio',
 ];
 
-export function OnboardingWizard() {
+export function OnboardingWizard({ initialRef }: { initialRef?: string } = {}) {
     const { user, profile, loading: authLoading } = useAuth();
     const router = useRouter();
     const [step, setStep] = useState(1);
@@ -34,6 +35,17 @@ export function OnboardingWizard() {
     const [syncStatus, setSyncStatus] = useState<'idle' | 'syncing' | 'saved' | 'error'>('idle');
     const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
     const lastSavedRef = useRef<string>('');
+
+    useEffect(() => {
+        if (!initialRef || !REFERRAL_CODE_PATTERN.test(initialRef)) return;
+        try {
+            sessionStorage.setItem(REFERRAL_SESSION_KEY, initialRef);
+            const oneMonth = 60 * 60 * 24 * 30;
+            document.cookie = `${REFERRAL_COOKIE}=${encodeURIComponent(initialRef)}; path=/; max-age=${oneMonth}; samesite=lax`;
+        } catch {
+            // sessionStorage may be unavailable; cookie is the source of truth.
+        }
+    }, [initialRef]);
 
     useEffect(() => {
         if (!authLoading && user) {
@@ -143,7 +155,7 @@ export function OnboardingWizard() {
                         className="flex-1 flex flex-col"
                     >
                         {step === 1 && (
-                            <StepCreateAccount onAccountCreated={handleAccountCreated} />
+                            <StepCreateAccount onAccountCreated={handleAccountCreated} initialRef={initialRef} />
                         )}
                         {step === 2 && <StepBasicInfo userId={userId} data={formData} onUpdate={saveProgress} onNext={nextStep} />}
                         {step === 3 && <StepInterests userId={userId} data={formData} onUpdate={saveProgress} onNext={nextStep} onPrev={prevStep} />}

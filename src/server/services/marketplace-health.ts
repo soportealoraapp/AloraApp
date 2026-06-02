@@ -13,8 +13,8 @@ export async function getMarketplaceHealth() {
     const oneDayAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000);
     const oneWeekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
 
-    const maleUsers = profiles.filter(p => p.gender === 'man' || p.gender === 'male').length;
-    const femaleUsers = profiles.filter(p => p.gender === 'woman' || p.gender === 'female').length;
+    const maleUsers = profiles.filter(p => p.gender === 'man').length;
+    const femaleUsers = profiles.filter(p => p.gender === 'woman').length;
     const activeUsers = profiles.filter(p => p.lastActiveAt && p.lastActiveAt > oneWeekAgo).length;
     const verifiedUsers = profiles.filter(p => p.isVerified).length;
     const premiumUsers = profiles.filter(p => p.subscriptionStatus === 'plus' || p.subscriptionStatus === 'premium').length;

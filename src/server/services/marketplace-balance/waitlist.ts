@@ -71,7 +71,7 @@ export async function joinWaitlist(userId: string, region: string): Promise<Wait
     });
 
     let priority = 0;
-    if (profile?.gender === 'woman' || profile?.gender === 'female') priority += 100;
+    if (profile?.gender === 'woman') priority += 100;
     if (profile?.isVerified) priority += 50;
     if (health.activeWomen < health.activeMen * 0.3) priority += 30; // Extra priority if severely imbalanced
 

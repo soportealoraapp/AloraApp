@@ -7,7 +7,7 @@ import { getDynamicFeed, FeedItem, FeedFilters } from '@/server/actions/feed';
 
 interface DiscoverProfile {
     profile: UserProfile;
-    compatibility: number;
+    compatibility: number | null;
     score?: any;
 }
 
@@ -45,18 +45,28 @@ export function useDiscover(searchTerm: string = '', filters?: FeedFilters, limi
             cursorRef.current = result.nextCursor;
             hasMoreRef.current = result.hasMore;
 
-            const mapped: DiscoverProfile[] = result.items.map(item => ({
-                profile: {
-                    ...item.profile,
-                    activeNow: item.signals?.activeNow,
-                    highResponseRate: item.signals?.highResponseRate,
-                    sharedInterests: item.signals?.sharedInterests,
-                    messageResponseRate: item.signals?.messageResponseRate,
-                    lastActiveHours: item.signals?.lastActiveHours,
-                },
-                compatibility: item.score?.details?.quizCompatibility || item.score?.total || 0,
-                score: item.score,
-            }));
+            const mapped: DiscoverProfile[] = result.items.map(item => {
+                const realCompatibility = item.score?.details?.quizzes;
+                const totalScore = item.score?.total;
+                const compatibility =
+                    typeof realCompatibility === 'number'
+                        ? realCompatibility
+                        : typeof totalScore === 'number'
+                            ? totalScore
+                            : null;
+                return {
+                    profile: {
+                        ...item.profile,
+                        activeNow: item.signals?.activeNow,
+                        highResponseRate: item.signals?.highResponseRate,
+                        sharedInterests: item.signals?.sharedInterests,
+                        messageResponseRate: item.signals?.messageResponseRate,
+                        lastActiveHours: item.signals?.lastActiveHours,
+                    },
+                    compatibility,
+                    score: item.score,
+                };
+            });
 
             if (isRefresh || !cursorRef.current) {
                 setProfilesData(mapped);

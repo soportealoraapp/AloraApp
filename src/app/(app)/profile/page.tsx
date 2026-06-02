@@ -8,7 +8,7 @@ import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Settings, Edit, MapPin, Briefcase, Cigarette, GlassWater, Baby, Star, BookOpen, Music, CheckCircle, AlertCircle, ShieldCheck, Shield, Sparkles, Eye, ChevronRight } from "lucide-react";
+import { Settings, Edit, MapPin, Briefcase, Cigarette, GlassWater, Baby, Star, BookOpen, Music, CheckCircle, AlertCircle, ShieldCheck, Shield, Sparkles, Eye, ChevronRight, Trophy } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -19,11 +19,22 @@ import { FirstWeekJourney } from "@/components/gamification/FirstWeekJourney";
 import { PaywallModal } from "@/components/premium/PaywallModal";
 import { LikesCounter } from "@/components/discover/LikesCounter";
 import { VoiceIntro } from "@/components/audio/VoiceIntro";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 
 export default function ProfilePage() {
   const { profile, loading } = useAuth();
   const [showPaywall, setShowPaywall] = useState(false);
+  const [quizResults, setQuizResults] = useState<{ quizId: string; score: number; archetype: string }[]>([]);
+
+  useEffect(() => {
+    fetch('/api/compatibility/list')
+      .then(r => r.json())
+      .then(data => {
+        if (Array.isArray(data.completedQuizzes)) setQuizResults(data.completedQuizzes);
+      })
+      .catch(() => {});
+  }, []);
 
   if (loading) {
     return (
@@ -86,15 +97,38 @@ export default function ProfilePage() {
 
       <main className="pb-24 md:pb-4">
         <div className="w-full relative">
-          <Image
-            src={profile.photos?.[0] || '/placeholder.svg'}
-            alt={profile.displayName}
-            width={600}
-            height={800}
-            className="w-full aspect-[3/4] object-cover"
-            data-ai-hint="person"
-            priority
-          />
+          {(profile.photos?.length ?? 0) > 1 ? (
+            <Carousel className="w-full">
+              <CarouselContent>
+                {profile.photos?.map((photo, index) => (
+                  <CarouselItem key={index}>
+                    <div className="w-full aspect-[3/4] relative">
+                      <Image
+                        src={photo}
+                        alt={`${profile.displayName} ${index + 1}`}
+                        fill
+                        className="object-cover"
+                        data-ai-hint="person"
+                        priority={index === 0}
+                      />
+                    </div>
+                  </CarouselItem>
+                ))}
+              </CarouselContent>
+              <CarouselPrevious className="left-2" />
+              <CarouselNext className="right-2" />
+            </Carousel>
+          ) : (
+            <Image
+              src={profile.photos?.[0] || '/placeholder.svg'}
+              alt={profile.displayName}
+              width={600}
+              height={800}
+              className="w-full aspect-[3/4] object-cover"
+              data-ai-hint="person"
+              priority
+            />
+          )}
         </div>
 
         <div className="p-4 space-y-6">
@@ -283,6 +317,36 @@ export default function ProfilePage() {
                 <div>
                   <p className="font-bold text-sm text-yellow-800">Perfil destacado</p>
                   <p className="text-xs text-yellow-600">Tu perfil está en el top 10% de completitud</p>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {quizResults.length > 0 && (
+            <Card className="rounded-3xl border shadow-sm">
+              <CardContent className="p-5">
+                <h3 className="font-bold text-lg mb-3 flex items-center gap-2">
+                  <Trophy className="h-5 w-5 text-yellow-500" />
+                  Resultados de quizzes
+                </h3>
+                <div className="space-y-2">
+                  {quizResults.map((qr) => (
+                    <div key={qr.quizId} className="flex items-center justify-between p-3 rounded-2xl bg-muted/30">
+                      <span className="text-sm font-medium capitalize">
+                        {qr.quizId.replace(/-/g, ' ')}
+                      </span>
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs font-bold text-green-700 bg-green-50 px-2 py-0.5 rounded-full">
+                          {qr.score}/100
+                        </span>
+                        {qr.archetype && (
+                          <span className="text-xs text-muted-foreground capitalize">
+                            {qr.archetype}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  ))}
                 </div>
               </CardContent>
             </Card>
