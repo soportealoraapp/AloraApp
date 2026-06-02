@@ -10,6 +10,26 @@ export interface RedeemReferralResult {
     referrerId?: string;
 }
 
+export async function getReferralCode(userId: string): Promise<string> {
+    const existing = await prisma.referral.findFirst({
+        where: { referrerId: userId },
+        select: { code: true },
+    });
+    if (existing) return existing.code;
+
+    const code = `ALORA-${crypto.randomUUID().slice(0, 6).toUpperCase()}`;
+    await prisma.referral.create({
+        data: { code, referrerId: userId, maxUses: 10 },
+    });
+    return code;
+}
+
+export async function generateReferralLink(userId: string): Promise<string> {
+    const code = await getReferralCode(userId);
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://alora-app-kappa.vercel.app';
+    return `${baseUrl}/signup?ref=${code}`;
+}
+
 export async function redeemReferral(rawCode: string): Promise<RedeemReferralResult> {
     const code = (rawCode || '').trim();
     if (!REFERRAL_CODE_PATTERN.test(code)) {
