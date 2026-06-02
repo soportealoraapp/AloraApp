@@ -1,7 +1,6 @@
 import { NextResponse, NextRequest } from 'next/server';
 import { updateSession, createClient } from '@/lib/supabase/middleware';
 import { getCSP, SECURITY_HEADERS } from '@/lib/security';
-import { hasBetaAccess } from '@/server/services/beta-access';
 
 const BETA_EXEMPT_PREFIXES = [
     '/login',
@@ -38,6 +37,38 @@ const BETA_EXEMPT_EXACT = new Set([
 function isBetaExempt(pathname: string): boolean {
     if (BETA_EXEMPT_EXACT.has(pathname)) return true;
     return BETA_EXEMPT_PREFIXES.some(prefix => pathname.startsWith(prefix));
+}
+
+const betaAccessCache = new Map<string, { value: boolean; expiresAt: number }>();
+const BETA_CACHE_TTL = 60_000;
+
+async function checkBetaAccess(userId: string, request: NextRequest, response: NextResponse): Promise<boolean> {
+    if (!userId) return false;
+
+    const now = Date.now();
+    const cached = betaAccessCache.get(userId);
+    if (cached && cached.expiresAt > now) return cached.value;
+
+    const supabase = await createClient(request, response);
+    const { data: user } = await supabase
+        .from('users')
+        .select('isBetaUser, role, isActive')
+        .eq('id', userId)
+        .single();
+
+    if (!user || !user.isActive) {
+        betaAccessCache.set(userId, { value: false, expiresAt: now + BETA_CACHE_TTL });
+        return false;
+    }
+
+    if (user.role === 'admin' || user.role === 'moderator') {
+        betaAccessCache.set(userId, { value: true, expiresAt: now + BETA_CACHE_TTL });
+        return true;
+    }
+
+    const hasAccess = user.isBetaUser === true;
+    betaAccessCache.set(userId, { value: hasAccess, expiresAt: now + BETA_CACHE_TTL });
+    return hasAccess;
 }
 
 export async function middleware(request: NextRequest) {
@@ -84,7 +115,7 @@ export async function middleware(request: NextRequest) {
 
     // BETA ACCESS: gate app routes behind beta access
     if (isAppRoute && user && !isBetaExempt(pathname)) {
-        const allowed = await hasBetaAccess(user.id);
+        const allowed = await checkBetaAccess(user.id, modifiedRequest, response);
         if (!allowed) {
             return NextResponse.redirect(new URL('/waitlist', modifiedRequest.url));
         }
