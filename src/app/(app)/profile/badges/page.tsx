@@ -25,7 +25,7 @@ export default function BadgesPage() {
     const badgeKeys = Object.keys(BADGE_DEFINITIONS) as BadgeKey[];
 
     return (
-        <div className="md:pl-60 p-6 space-y-6 bg-pink-50/30 min-h-screen">
+        <div className="md:pl-60 p-6 space-y-6 bg-background min-h-screen">
             <SectionTitle title="Aura Badges ✨" subtitle="Reconocimientos por tus conexiones sanas" />
 
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
@@ -35,11 +35,11 @@ export default function BadgesPage() {
                     const isUnlocked = !!userBadge?.unlockedAt;
 
                     return (
-                        <Card key={key} className={`text-center transition-all ${!isUnlocked ? 'opacity-50 grayscale' : 'border-pink-500 shadow-md'}`}>
+                        <Card key={key} className={`text-center transition-all ${!isUnlocked ? 'opacity-50 grayscale' : 'border-primary/20 shadow-md'}`}>
                             <CardContent className="pt-6 flex flex-col items-center gap-2">
                                 <div className="text-4xl mb-2">{def.icon}</div>
-                                <h4 className="font-bold text-gray-800 text-sm">{def.name}</h4>
-                                <p className="text-[10px] text-gray-500 leading-tight">{def.description}</p>
+                                <h4 className="font-bold text-foreground text-sm">{def.name}</h4>
+                                <p className="text-[10px] text-muted-foreground leading-tight">{def.description}</p>
                                 {def.reward && (
                                     <div className="flex items-center gap-1 mt-1 text-[10px] text-primary bg-primary/10 px-2 py-1 rounded-full">
                                         <Gift className="h-3 w-3" />
@@ -47,9 +47,9 @@ export default function BadgesPage() {
                                     </div>
                                 )}
                                 {isUnlocked ? (
-                                    <span className="text-[10px] bg-green-100 text-green-700 px-2 py-0.5 rounded-full mt-1">Desbloqueado</span>
+                                    <span className="text-[10px] bg-primary/10 text-primary px-2 py-0.5 rounded-full mt-1">Desbloqueado</span>
                                 ) : (
-                                    <span className="text-[10px] bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full mt-1">Bloqueado</span>
+                                    <span className="text-[10px] bg-muted text-muted-foreground px-2 py-0.5 rounded-full mt-1">Bloqueado</span>
                                 )}
                             </CardContent>
                         </Card>

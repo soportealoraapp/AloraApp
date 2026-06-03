@@ -27,6 +27,8 @@ export function useProfile(userId?: string) {
             }
 
             // Fetch otro perfil
+            if (!userId || userId === 'undefined') return;
+
             try {
                 setLoading(true);
                 // Cookie auth handles authentication automatically

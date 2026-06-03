@@ -46,7 +46,7 @@ export default function VisitorsPage() {
     const hiddenCount = total - visitors.length;
 
     return (
-        <div className="md:pl-60 p-6 space-y-6 bg-gray-50 min-h-screen">
+        <div className="md:pl-60 p-6 space-y-6 bg-background min-h-screen">
             <div className="flex items-center gap-4">
                 <Button variant="ghost" size="icon" onClick={() => router.back()}>
                     <ArrowLeft className="h-5 w-5" />

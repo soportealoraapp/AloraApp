@@ -90,8 +90,8 @@ export default function AnalyticsPage() {
                 <Card>
                     <CardContent className="p-4">
                         <div className="flex items-center gap-3">
-                            <div className="p-2 bg-pink-100 rounded-xl">
-                                <Heart className="h-5 w-5 text-pink-600" />
+                            <div className="p-2 bg-primary/10 rounded-xl">
+                                <Heart className="h-5 w-5 text-primary" />
                             </div>
                             <div>
                                 <p className="text-2xl font-bold">{metrics.likesLast30d}</p>
@@ -104,8 +104,8 @@ export default function AnalyticsPage() {
                 <Card>
                     <CardContent className="p-4">
                         <div className="flex items-center gap-3">
-                            <div className="p-2 bg-purple-100 rounded-xl">
-                                <Users className="h-5 w-5 text-purple-600" />
+                            <div className="p-2 bg-primary/10 rounded-xl">
+                                <Users className="h-5 w-5 text-primary" />
                             </div>
                             <div>
                                 <p className="text-2xl font-bold">{metrics.matchesLast30d}</p>
@@ -118,8 +118,8 @@ export default function AnalyticsPage() {
                 <Card>
                     <CardContent className="p-4">
                         <div className="flex items-center gap-3">
-                            <div className="p-2 bg-blue-100 rounded-xl">
-                                <MessageCircle className="h-5 w-5 text-blue-600" />
+                            <div className="p-2 bg-primary/10 rounded-xl">
+                                <MessageCircle className="h-5 w-5 text-primary" />
                             </div>
                             <div>
                                 <p className="text-2xl font-bold">{metrics.replyRate}%</p>
@@ -132,8 +132,8 @@ export default function AnalyticsPage() {
                 <Card>
                     <CardContent className="p-4">
                         <div className="flex items-center gap-3">
-                            <div className="p-2 bg-green-100 rounded-xl">
-                                <Eye className="h-5 w-5 text-green-600" />
+                            <div className="p-2 bg-primary/10 rounded-xl">
+                                <Eye className="h-5 w-5 text-primary" />
                             </div>
                             <div>
                                 <p className="text-2xl font-bold">{metrics.profileVisits}</p>
@@ -186,7 +186,7 @@ export default function AnalyticsPage() {
                 <Card>
                     <CardHeader>
                         <CardTitle className="text-base flex items-center gap-2">
-                            <Lightbulb className="h-4 w-4 text-amber-500" />
+                            <Lightbulb className="h-4 w-4 text-warning" />
                             Recomendaciones
                         </CardTitle>
                     </CardHeader>
@@ -194,7 +194,7 @@ export default function AnalyticsPage() {
                         <ul className="space-y-3">
                             {recommendations.map((rec, i) => (
                                 <li key={i} className="flex items-start gap-2 text-sm">
-                                    <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 shrink-0" />
+                                    <CheckCircle className="h-4 w-4 text-primary mt-0.5 shrink-0" />
                                     {rec}
                                 </li>
                             ))}

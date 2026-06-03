@@ -297,7 +297,7 @@ export default function ProfilePage() {
                   ].map((item, i) => (
                     <div key={i} className="flex items-center gap-2">
                       {item.done ? (
-                        <CheckCircle className="h-4 w-4 text-green-500" />
+                        <CheckCircle className="h-4 w-4 text-primary" />
                       ) : (
                         <div className="h-4 w-4 rounded-full border-2 border-muted-foreground/30" />
                       )}
@@ -314,12 +314,12 @@ export default function ProfilePage() {
           )}
 
           {completenessScore >= 90 && (
-            <Card className="rounded-3xl border-yellow-200 bg-yellow-50/50">
+            <Card className="rounded-3xl border-warning bg-warning/10">
               <CardContent className="p-4 flex items-center gap-3">
                 <span className="text-2xl">⭐</span>
                 <div>
-                  <p className="font-bold text-sm text-yellow-800">Perfil destacado</p>
-                  <p className="text-xs text-yellow-600">Tu perfil está en el top 10% de completitud</p>
+                  <p className="font-bold text-sm text-warning-foreground">Perfil destacado</p>
+                  <p className="text-xs text-warning-foreground/80">Tu perfil está en el top 10% de completitud</p>
                 </div>
               </CardContent>
             </Card>
@@ -329,7 +329,7 @@ export default function ProfilePage() {
             <Card className="rounded-3xl border shadow-sm">
               <CardContent className="p-5">
                 <h3 className="font-bold text-lg mb-3 flex items-center gap-2">
-                  <Trophy className="h-5 w-5 text-yellow-500" />
+                  <Trophy className="h-5 w-5 text-warning" />
                   Resultados de quizzes
                 </h3>
                 <div className="space-y-2">
@@ -339,7 +339,7 @@ export default function ProfilePage() {
                         {qr.quizId.replace(/-/g, ' ')}
                       </span>
                       <div className="flex items-center gap-2">
-                        <span className="text-xs font-bold text-green-700 bg-green-50 px-2 py-0.5 rounded-full">
+                        <span className="text-xs font-bold bg-primary/10 text-primary px-2 py-0.5 rounded-full">
                           {qr.score}/100
                         </span>
                         {qr.archetype && (
@@ -370,8 +370,8 @@ export default function ProfilePage() {
             <Card className="rounded-3xl border hover:shadow-md transition-shadow cursor-pointer">
               <CardContent className="p-4 flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <div className="p-2 bg-green-100 rounded-xl">
-                    <Shield className="h-5 w-5 text-green-600" />
+                  <div className="p-2 bg-primary/10 rounded-xl">
+                    <Shield className="h-5 w-5 text-primary" />
                   </div>
                   <div>
                     <h4 className="font-bold text-foreground">Score de confianza</h4>
@@ -384,7 +384,7 @@ export default function ProfilePage() {
           </Link>
 
           <Link href="/profile/review">
-            <Card className="rounded-3xl border hover:shadow-md transition-shadow cursor-pointer bg-gradient-to-r from-primary/5 to-purple-500/5">
+            <Card className="rounded-3xl border hover:shadow-md transition-shadow cursor-pointer bg-gradient-to-r from-primary/5 to-primary/5">
               <CardContent className="p-4 flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <div className="p-2 bg-primary/10 rounded-xl">
@@ -404,8 +404,8 @@ export default function ProfilePage() {
             <Card className="rounded-3xl border hover:shadow-md transition-shadow cursor-pointer">
               <CardContent className="p-4 flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <div className="p-2 bg-purple-100 rounded-xl">
-                    <Eye className="h-5 w-5 text-purple-600" />
+                  <div className="p-2 bg-primary/10 rounded-xl">
+                    <Eye className="h-5 w-5 text-primary" />
                   </div>
                   <div>
                     <h4 className="font-bold text-foreground">Visitantes del perfil</h4>

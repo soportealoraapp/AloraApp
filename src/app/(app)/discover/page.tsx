@@ -67,6 +67,16 @@ export default function DiscoverPage() {
       .catch(() => {});
   }, []);
 
+  // Auto-set countryCode from user profile (same-country matching by default)
+  useEffect(() => {
+    if (currentUserProfile?.countryCode) {
+      setFilters(prev => ({
+        ...prev,
+        countryCode: currentUserProfile.countryCode,
+      }));
+    }
+  }, [currentUserProfile?.countryCode]);
+
   // Request geolocation for distance filter
   useEffect(() => {
     if ('geolocation' in navigator) {
@@ -224,7 +234,7 @@ export default function DiscoverPage() {
   }
 
   return (
-    <div className="md:pl-60 h-screen flex flex-col overflow-hidden bg-gradient-to-br from-background to-muted/30">
+    <div className="md:pl-60 h-screen flex flex-col overflow-y-auto bg-gradient-to-br from-background to-muted/30">
       <header className="flex h-16 items-center justify-between px-4 z-10">
         <div className="flex items-center gap-2">
           <h1 className="text-2xl font-bold tracking-tight text-foreground">Alora</h1>

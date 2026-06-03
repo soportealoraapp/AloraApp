@@ -64,7 +64,7 @@ export default function TrustPage() {
     }
 
     return (
-        <div className="md:pl-60 p-6 space-y-6 bg-gray-50 min-h-screen">
+        <div className="md:pl-60 p-6 space-y-6 bg-background min-h-screen">
             <div className="flex items-center gap-4">
                 <Button variant="ghost" size="icon" onClick={() => router.back()}>
                     <ArrowLeft className="h-5 w-5" />
@@ -97,15 +97,15 @@ export default function TrustPage() {
                         <div key={i} className="flex items-center justify-between">
                             <div className="flex items-center gap-2">
                                 {factor.positive ? (
-                                    <CheckCircle className="h-4 w-4 text-green-500" />
+                                    <CheckCircle className="h-4 w-4 text-primary" />
                                 ) : (
-                                    <XCircle className="h-4 w-4 text-red-500" />
+                                    <XCircle className="h-4 w-4 text-destructive" />
                                 )}
                                 <span className="text-sm">{factor.label}</span>
                             </div>
                             <span className={cn(
                                 "font-bold text-sm",
-                                factor.positive ? "text-green-600" : "text-red-600"
+                                factor.positive ? "text-primary" : "text-destructive"
                             )}>
                                 {factor.positive ? '+' : ''}{factor.points}
                             </span>
@@ -118,7 +118,7 @@ export default function TrustPage() {
                 <Card>
                     <CardHeader>
                         <CardTitle className="text-sm flex items-center gap-2">
-                            <Lightbulb className="h-4 w-4 text-yellow-500" />
+                            <Lightbulb className="h-4 w-4 text-warning" />
                             Cómo mejorar tu score
                         </CardTitle>
                     </CardHeader>

@@ -57,7 +57,7 @@ export function FavoriteButton({ profileId, className, size = 'default' }: Favor
             variant="ghost"
             className={cn(
                 "rounded-full",
-                isFavorited ? "text-pink-500 hover:text-pink-600" : "text-muted-foreground hover:text-pink-500",
+                isFavorited ? "text-primary hover:text-primary/80" : "text-muted-foreground hover:text-primary/80",
                 className
             )}
             onClick={toggleFavorite}

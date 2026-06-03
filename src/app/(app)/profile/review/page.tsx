@@ -66,7 +66,7 @@ export default function ProfileReviewPage() {
     };
 
     return (
-        <div className="md:pl-60 p-6 space-y-6 bg-gray-50 min-h-screen">
+        <div className="md:pl-60 p-6 space-y-6 bg-background min-h-screen">
             <div className="flex items-center gap-4">
                 <Button variant="ghost" size="icon" onClick={() => router.back()}>
                     <ArrowLeft className="h-5 w-5" />
@@ -96,7 +96,7 @@ export default function ProfileReviewPage() {
                 <Card>
                     <CardHeader>
                         <CardTitle className="text-base flex items-center gap-2">
-                            <Sparkles className="h-4 w-4 text-green-500" />
+                            <Sparkles className="h-4 w-4 text-primary" />
                             Fortalezas
                         </CardTitle>
                     </CardHeader>
@@ -104,7 +104,7 @@ export default function ProfileReviewPage() {
                         <ul className="space-y-2">
                             {data.strengths.map((s, i) => (
                                 <li key={i} className="flex items-center gap-2 text-sm">
-                                    <CheckCircle className="h-4 w-4 text-green-500 shrink-0" />
+                                    <CheckCircle className="h-4 w-4 text-primary shrink-0" />
                                     {s}
                                 </li>
                             ))}
@@ -117,7 +117,7 @@ export default function ProfileReviewPage() {
                 <Card>
                     <CardHeader>
                         <CardTitle className="text-base flex items-center gap-2">
-                            <AlertCircle className="h-4 w-4 text-amber-500" />
+                            <AlertCircle className="h-4 w-4 text-warning" />
                             Oportunidades
                         </CardTitle>
                     </CardHeader>
@@ -126,7 +126,7 @@ export default function ProfileReviewPage() {
                             {data.opportunities.map((item) => (
                                 <li key={item.key} className="flex items-center justify-between gap-3 text-sm">
                                     <div className="flex items-center gap-2 flex-1 min-w-0">
-                                        <div className="h-2 w-2 rounded-full bg-amber-500 shrink-0" />
+                                        <div className="h-2 w-2 rounded-full bg-warning shrink-0" />
                                         <span className="text-muted-foreground">{item.label}</span>
                                     </div>
                                     <Badge variant="outline" className="text-[10px]">+{item.weight} pts</Badge>
@@ -162,11 +162,11 @@ export default function ProfileReviewPage() {
             )}
 
             {data.percentage === 100 && (
-                <Card className="border-yellow-200 bg-yellow-50/50">
+                <Card className="border-warning bg-warning/10">
                     <CardContent className="p-6 text-center">
                         <p className="text-3xl mb-2">🎉</p>
-                        <p className="font-bold text-yellow-800">¡Perfil perfecto!</p>
-                        <p className="text-sm text-yellow-700 mt-1">
+                        <p className="font-bold text-warning-foreground">¡Perfil perfecto!</p>
+                        <p className="text-sm text-warning-foreground/90 mt-1">
                             Estás en el top 1% de Alora. Tu perfil destaca.
                         </p>
                     </CardContent>

@@ -48,7 +48,7 @@ export default function FavoritesPage() {
     };
 
     return (
-        <div className="md:pl-60 p-6 space-y-6 bg-gray-50 min-h-screen">
+        <div className="md:pl-60 p-6 space-y-6 bg-background min-h-screen">
             <div className="flex items-center gap-4">
                 <Button variant="ghost" size="icon" onClick={() => router.back()}>
                     <ArrowLeft className="h-5 w-5" />
@@ -60,7 +60,7 @@ export default function FavoritesPage() {
                     </div>
                     <p className="text-sm text-muted-foreground">
                         {favorites.length} perfil{favorites.length !== 1 ? 'es' : ''} guardado{favorites.length !== 1 ? 's' : ''}
-                        <span className="text-amber-600 ml-1">· Favoritos ilimitados con Plus</span>
+                        <span className="text-warning ml-1">· Favoritos ilimitados con Plus</span>
                     </p>
                 </div>
             </div>
