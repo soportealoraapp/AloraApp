@@ -11,6 +11,9 @@ export async function GET(request: NextRequest) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    const { ensureSubscriptionState } = await import('@/lib/subscription-helper');
+    await ensureSubscriptionState(user.id);
+
     try {
         const { searchParams } = new URL(request.url);
         const search = searchParams.get('search') || undefined;

@@ -16,6 +16,9 @@ export async function POST() {
     }
 
     try {
+        const { ensureSubscriptionState } = await import('@/lib/subscription-helper');
+        await ensureSubscriptionState(user.id);
+
         const profile = await prisma.profile.findUnique({
             where: { userId: user.id },
             select: {

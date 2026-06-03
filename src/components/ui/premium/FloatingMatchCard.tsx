@@ -19,9 +19,10 @@ interface FloatingMatchCardProps {
         sharedInterests?: string[];
         sharedMusic?: string[];
     };
+    superlikesRemaining?: number;
 }
 
-export function FloatingMatchCard({ profile, onSwipe, onFlechado, compatibility, compatibilityDetails }: FloatingMatchCardProps) {
+export function FloatingMatchCard({ profile, onSwipe, onFlechado, compatibility, compatibilityDetails, superlikesRemaining }: FloatingMatchCardProps) {
     const controls = useAnimation();
     const [dragX, setDragX] = useState(0);
 
@@ -99,11 +100,14 @@ export function FloatingMatchCard({ profile, onSwipe, onFlechado, compatibility,
                 {onFlechado && (
                     <button
                         onClick={(e) => { e.stopPropagation(); onFlechado(); }}
-                        className="absolute top-4 left-4 z-20 bg-blue-500 hover:bg-blue-600 text-white rounded-full w-12 h-12 flex items-center justify-center shadow-lg transition-transform hover:scale-110 active:scale-95"
+                        className="absolute top-4 left-4 z-20 bg-blue-500 hover:bg-blue-600 text-white rounded-full w-12 h-12 flex items-center justify-center shadow-lg transition-transform hover:scale-110 active:scale-95 relative"
                         aria-label="Flechado (superlike)"
-                        title="Flechado: envío prioritario. Le llegará como superlike destacado."
+                        title={`Flechado: envío prioritario (${superlikesRemaining ?? 3}/día). Le llegará como superlike destacado.`}
                     >
                         <Star className="h-5 w-5 fill-white" />
+                        <span className="absolute -top-1 -right-1 bg-white text-blue-600 text-[9px] font-bold rounded-full w-4.5 h-4.5 flex items-center justify-center shadow-sm border border-blue-200" style={{ width: '18px', height: '18px' }}>
+                            {superlikesRemaining ?? 3}
+                        </span>
                     </button>
                 )}
 
@@ -153,7 +157,7 @@ export function FloatingMatchCard({ profile, onSwipe, onFlechado, compatibility,
 
                 <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent p-6 text-white min-h-[180px] flex flex-col justify-end">
                     <div className="flex flex-wrap gap-2 mb-3">
-                        {compatibility !== null && compatibility !== undefined && compatibility >= 70 && (
+                        {compatibility !== null && compatibility !== undefined && (
                             <motion.div
                                 initial={{ scale: 0.8, opacity: 0 }}
                                 animate={{ scale: 1, opacity: 1 }}
@@ -166,7 +170,7 @@ export function FloatingMatchCard({ profile, onSwipe, onFlechado, compatibility,
                         {(profile.completenessScore ?? 0) >= 90 && <TrustBadge type="complete" />}
                     </div>
 
-                    {compatibility !== null && compatibility !== undefined && compatibility >= 50 && compatibilityDetails && (
+                    {compatibility !== null && compatibility !== undefined && compatibilityDetails && (
                         <div className="mb-3 space-y-1">
                             {(() => {
                                 const shared: string[] = [

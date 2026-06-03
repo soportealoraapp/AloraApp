@@ -16,6 +16,9 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    const { ensureSubscriptionState } = await import('@/lib/subscription-helper');
+    await ensureSubscriptionState(user.id);
+
     const rateLimitResponse = await withRateLimit(user.id, 'like');
     if (rateLimitResponse) return rateLimitResponse;
 

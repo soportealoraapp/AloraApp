@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { CheckCheck, Bell, Loader2, Info } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { useState, useEffect } from 'react';
 
 function NotificationItem({ notification, onRead }: { notification: any; onRead: () => void }) {
@@ -58,7 +59,10 @@ export default function NotificationsPage() {
           <div className="flex flex-col items-center justify-center py-24 text-muted-foreground">
             <Bell className="h-12 w-12 mb-4 opacity-50" />
             <p className="font-medium">Sin actividad</p>
-            <p className="text-sm">Aquí verás tus notificaciones de matches, likes y mensajes.</p>
+            <p className="text-sm text-center max-w-xs mb-6">Completa tu perfil y mantente activo para recibir notificaciones.</p>
+            <Button asChild variant="default" size="sm">
+              <Link href="/profile/edit">Completar perfil</Link>
+            </Button>
           </div>
         ) : (
           <div className="max-w-xl mx-auto">

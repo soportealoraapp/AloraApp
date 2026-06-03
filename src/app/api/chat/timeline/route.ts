@@ -145,7 +145,7 @@ export async function GET(request: NextRequest) {
                 id: `ai-${match.id}`,
                 type: 'ai_analyzed',
                 icon: '🤖',
-                title: 'Análisis IA',
+                title: 'Análisis de conversación',
                 description: 'Tu copiloto revisó la conversación',
                 createdAt: compatibility.lastAnalyzedAt.toISOString(),
             });

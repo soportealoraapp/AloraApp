@@ -50,7 +50,7 @@ export default function DiscoverPage() {
   const [showMatchScreen, setShowMatchScreen] = useState(false);
   const [swipeCount, setSwipeCount] = useState(0);
   const [rewinding, setRewinding] = useState(false);
-  const [showSwipeHint, setShowSwipeHint] = useState(true);
+  const [tutorialStep, setTutorialStep] = useState<number | null>(1);
   const [browseMode, setBrowseMode] = useState<'swipe' | 'grid'>('swipe');
 
   const lastSwipeRef = useRef<{ profileId: string; direction: string } | null>(null);
@@ -58,8 +58,8 @@ export default function DiscoverPage() {
   const geoRequestedRef = useRef(false);
 
   useEffect(() => {
-    const hintDismissed = localStorage.getItem('swipeHintDismissed');
-    if (hintDismissed) setShowSwipeHint(false);
+    const tutorialDone = localStorage.getItem('swipeTutorialDone');
+    if (tutorialDone) setTutorialStep(null);
   }, []);
 
   // Auto-set countryCode from user profile (same-country matching by default)
@@ -94,6 +94,12 @@ export default function DiscoverPage() {
   const currentProfile = profiles[0]?.profile;
   const profilesRef = useRef(profiles);
   profilesRef.current = profiles;
+
+  const maxRewinds = currentUserProfile?.subscriptionStatus === 'plus' ? 3 : 1;
+  const isNewRewindDay = !currentUserProfile?.rewindsResetAt || 
+    new Date().toDateString() !== new Date(currentUserProfile.rewindsResetAt).toDateString();
+  const rewindsUsed = isNewRewindDay ? 0 : (currentUserProfile?.rewindsUsed ?? 0);
+  const rewindsRemaining = maxRewinds - rewindsUsed;
 
   // Infinite scroll observer
   useEffect(() => {
@@ -199,9 +205,17 @@ export default function DiscoverPage() {
     }
   };
 
-  const dismissSwipeHint = () => {
-    setShowSwipeHint(false);
-    localStorage.setItem('swipeHintDismissed', 'true');
+  const dismissTutorial = () => {
+    setTutorialStep(null);
+    localStorage.setItem('swipeTutorialDone', 'true');
+  };
+
+  const nextTutorialStep = () => {
+    if (tutorialStep === 3) {
+      dismissTutorial();
+    } else {
+      setTutorialStep(prev => (prev ?? 1) + 1);
+    }
   };
 
   const handleApplyFilters = (newFilters: Filters) => {
@@ -260,9 +274,12 @@ export default function DiscoverPage() {
           >
             {browseMode === 'swipe' ? <LayoutGrid className="h-5 w-5 text-muted-foreground" /> : <CreditCard className="h-5 w-5 text-muted-foreground" />}
           </Button>
-          <Button variant="ghost" size="icon" onClick={handleRewind} disabled={!lastSwipeRef.current || rewinding} title="Rewind: deshace el último swipe (1/día gratis, 3/día Plus)">
-            <RotateCcw className="h-5 w-5 text-muted-foreground" />
-          </Button>
+          <div className="flex items-center">
+            <Button variant="ghost" size="icon" onClick={handleRewind} disabled={!lastSwipeRef.current || rewinding} title={`Rewind: deshace el último swipe (${rewindsRemaining}/${maxRewinds} disponibles)`}>
+              <RotateCcw className="h-5 w-5 text-muted-foreground" />
+            </Button>
+            <span className="text-[10px] text-muted-foreground font-bold -ml-1.5">{rewindsRemaining}</span>
+          </div>
           <Button variant="ghost" size="icon" onClick={() => setFilterOpen(true)} title="Filtros de búsqueda">
             <SlidersHorizontal className="h-5 w-5 text-muted-foreground" />
           </Button>
@@ -271,6 +288,17 @@ export default function DiscoverPage() {
           </Button>
         </div>
       </header>
+
+      {!currentUserProfile?.isVerified && (
+        <div className="px-4 pt-2">
+          <div className="bg-amber-50 border border-amber-200 rounded-xl p-3 flex items-center justify-between">
+            <p className="text-xs text-amber-800 font-medium">Verifica tu identidad para más visibilidad</p>
+            <Button size="sm" variant="outline" className="text-xs h-7" onClick={() => router.push('/settings/verification')}>
+              Verificar
+            </Button>
+          </div>
+        </div>
+      )}
 
       <div className="px-4 pt-2">
         <DailyPicks />
@@ -333,11 +361,19 @@ export default function DiscoverPage() {
             </div>
           ) : currentProfile ? (
             <div className="w-full max-w-sm h-[600px] relative">
-              {/* Swipe hint for new users */}
-              {showSwipeHint && (
-                <div className="absolute -top-10 left-0 right-0 flex justify-center z-30 pointer-events-none" onClick={dismissSwipeHint}>
-                  <div className="bg-foreground/90 text-background px-4 py-2 rounded-full text-xs font-medium shadow-lg animate-bounce cursor-pointer pointer-events-auto">
-                    ← Pasar · Like →  <span className="opacity-50">(tocar para cerrar)</span>
+              {/* Tutorial de swipe — primera vez */}
+              {tutorialStep !== null && (
+                <div className="absolute -top-14 left-0 right-0 flex justify-center z-30">
+                  <div className="bg-foreground/90 text-background px-5 py-3 rounded-2xl text-sm font-medium shadow-lg max-w-[260px]">
+                    {tutorialStep === 1 && <p>👉 Desliza a la derecha para dar <strong>Like</strong></p>}
+                    {tutorialStep === 2 && <p>👈 Desliza a la izquierda para <strong>Pasar</strong></p>}
+                    {tutorialStep === 3 && <p>⭐ Toca la estrella para <strong>Flechado</strong> (superlike)</p>}
+                    <div className="flex justify-between items-center mt-2.5">
+                      <span className="text-[10px] opacity-50">{tutorialStep}/3</span>
+                      <button onClick={tutorialStep === 3 ? dismissTutorial : nextTutorialStep} className="text-[11px] font-bold underline">
+                        {tutorialStep === 3 ? 'Cerrar' : 'Siguiente →'}
+                      </button>
+                    </div>
                   </div>
                 </div>
               )}
@@ -358,6 +394,7 @@ export default function DiscoverPage() {
                   }
                   onSwipe={handleSwipe}
                   onFlechado={handleFlechado}
+                  superlikesRemaining={3}
                 />
               </div>
             </div>

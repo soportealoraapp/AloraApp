@@ -325,6 +325,25 @@ export default function ProfilePage() {
             </Card>
           )}
 
+          {!profile.isVerified && (
+            <Link href="/settings/verification">
+              <Card className="rounded-3xl border border-amber-200 bg-amber-50/50 hover:shadow-md transition-shadow cursor-pointer">
+                <CardContent className="p-4 flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 bg-amber-100 rounded-xl">
+                      <ShieldCheck className="h-5 w-5 text-amber-600" />
+                    </div>
+                    <div>
+                      <h4 className="font-bold text-foreground text-sm">Verifica tu identidad</h4>
+                      <p className="text-xs text-muted-foreground">Aumenta tu visibilidad y confianza</p>
+                    </div>
+                  </div>
+                  <ChevronRight className="h-5 w-5 text-muted-foreground" />
+                </CardContent>
+              </Card>
+            </Link>
+          )}
+
           {quizResults.length > 0 && (
             <Card className="rounded-3xl border shadow-sm">
               <CardContent className="p-5">
@@ -365,6 +384,23 @@ export default function ProfilePage() {
               />
             </CardContent>
           </Card>
+
+          <Link href="/profile/favorites">
+            <Card className="rounded-3xl border hover:shadow-md transition-shadow cursor-pointer">
+              <CardContent className="p-4 flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-primary/10 rounded-xl">
+                    <Star className="h-5 w-5 text-primary" />
+                  </div>
+                  <div>
+                    <h4 className="font-bold text-foreground">Perfiles guardados</h4>
+                    <p className="text-xs text-muted-foreground">Tus favoritos</p>
+                  </div>
+                </div>
+                <ChevronRight className="h-5 w-5 text-muted-foreground" />
+              </CardContent>
+            </Card>
+          </Link>
 
           <Link href="/profile/trust">
             <Card className="rounded-3xl border hover:shadow-md transition-shadow cursor-pointer">
