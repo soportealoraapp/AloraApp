@@ -262,10 +262,10 @@ export default function ChatPage() {
                                                         <div className="flex items-center gap-2">
                                                             <p className="font-semibold truncate">{like.displayName || `Usuario #${(like.fromUserId || like.id).slice(0, 8)}`}</p>
                                                             {like.type === 'superlike' && (
-                                                                <Badge className="bg-gradient-to-r from-pink-500 to-violet-500 text-white">
-                                                                    Super Like
-                                                                </Badge>
-                                                            )}
+                                                                 <Badge className="bg-gradient-to-r from-pink-500 to-violet-500 text-white">
+                                                                     Flechado
+                                                                 </Badge>
+                                                             )}
                                                         </div>
                                                         <p className="text-sm text-muted-foreground">
                                                             Match mutuo • Chatea ahora

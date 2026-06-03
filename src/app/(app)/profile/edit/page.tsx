@@ -551,8 +551,8 @@ export default function ProfileEditPage() {
                             Graba una presentación de máximo 30 segundos para que otros te conozcan
                         </p>
                         <VoiceIntro
-                            audioUrl={(profile as any)?.voiceIntro}
-                            duration={(profile as any)?.voiceIntroDuration}
+                            audioUrl={(currentProfile as any)?.voiceIntro}
+                            duration={(currentProfile as any)?.voiceIntroDuration}
                             onSave={(url, dur) => {
                                 setVoiceIntroUrl(url);
                                 setVoiceIntroDuration(dur);

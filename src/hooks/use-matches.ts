@@ -78,7 +78,7 @@ export function useMatches() {
                 await fetchMatches();
             } else if (type !== 'pass') {
                 toast({
-                    title: type === 'superlike' ? '¡Super Like enviado! ✨' : 'Like enviado ❤️',
+                    title: type === 'superlike' ? '¡Flechado enviado! ✨' : 'Like enviado ❤️',
                     description: '¡Ojalá hagan match!',
                 });
             }

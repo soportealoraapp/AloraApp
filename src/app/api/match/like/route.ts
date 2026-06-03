@@ -38,7 +38,7 @@ export async function POST(request: NextRequest) {
             if (profile && profile.subscriptionStatus === 'free') {
                 const now = new Date();
                 const lastReset = profile.dailyLikesResetAt;
-                const isNewDay = now.toDateString() !== lastReset.toDateString();
+                const isNewDay = !lastReset || now.toDateString() !== lastReset.toDateString();
 
                 if (isNewDay) {
                     const previousLikesUsed = profile.dailyLikesUsed;
@@ -120,10 +120,6 @@ export async function POST(request: NextRequest) {
         }
 
         // 2. Atomic transaction: check reciprocal like + create match.
-        // Serializable isolation guarantees no race condition when both users
-        // like each other simultaneously: one transaction will see the other's
-        // committed upsert and create the match; the other will see the match
-        // already exists and return matched=true.
         type MatchResult = { matched: true; matchId: string; u1: string; u2: string } | { matched: false; matchId: null; u1?: undefined; u2?: undefined };
         const result: MatchResult = await prisma.$transaction(async (tx) => {
             const mutual = await tx.interaction.findUnique({
@@ -177,12 +173,14 @@ export async function POST(request: NextRequest) {
         }
 
         // Send push notifications to both users (fire-and-forget, non-critical)
-        const [partner1, partner2] = await Promise.all([
+        const [partner1, partner2] = await Promise.allSettled([
             prisma.profile.findUnique({ where: { userId: result.u1 }, select: { displayName: true } }),
             prisma.profile.findUnique({ where: { userId: result.u2 }, select: { displayName: true } }),
-        ]);
+        ]).then(r => r.map(p => p.status === 'fulfilled' ? p.value : null));
 
         const settled = await Promise.allSettled([
+            notifyNewMatch(result.u1, partner2?.displayName || 'Alguien', result.matchId),
+            notifyNewMatch(result.u2, partner1?.displayName || 'Alguien', result.matchId),
             notifyNewMatch(result.u1, partner2?.displayName || 'Alguien', result.matchId),
             notifyNewMatch(result.u2, partner1?.displayName || 'Alguien', result.matchId),
             trackEvent(result.u1, 'first_match', { matchId: result.matchId }),
@@ -198,7 +196,9 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ matched: true, matchId: result.matchId });
 
     } catch (error) {
-        console.error('Error sending like:', error);
-        return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+        const message = error instanceof Error ? error.message : 'Unknown error';
+        const stack = error instanceof Error ? error.stack : '';
+        console.error('[match/like] Error:', message, '\nStack:', stack);
+        return NextResponse.json({ error: 'Internal server error', detail: message }, { status: 500 });
     }
 }

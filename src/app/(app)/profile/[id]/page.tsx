@@ -120,14 +120,14 @@ export default function UserProfilePage() {
 
             if (result.matched) {
                 toast({
-                    title: `¡Super Match con ${profile.displayName}! 🚀`,
+                    title: `¡Flechado con ${profile.displayName}! 🚀`,
                     description: "Conexión especial - Ahora pueden chatear",
                     duration: 5000,
                 });
                 router.push(`/chat/${result.matchId}`);
             }
         } catch (error) {
-            console.error("Error sending superlike:", error);
+            console.error("Error enviando flechado:", error);
         } finally {
             setProcessing(false);
         }
@@ -470,7 +470,7 @@ export default function UserProfilePage() {
                                     ) : (
                                         <Sparkles className="h-5 w-5 mr-2" />
                                     )}
-                                    {isSuperMatched ? "Super Match Enviado" : "Super Match"}
+                                    {isSuperMatched ? "Flechado Enviado" : "Flechado"}
                                 </Button>
                             </div>
                         )}
