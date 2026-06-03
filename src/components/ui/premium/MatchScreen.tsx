@@ -43,12 +43,27 @@ export function MatchScreen({ userProfile, matchedProfile, onChat, onKeepSwiping
     const [icebreakers, setIcebreakers] = useState<string[]>([]);
     const [loadingIcebreakers, setLoadingIcebreakers] = useState(false);
     const [sending, setSending] = useState<string | null>(null);
+    const [compatScore, setCompatScore] = useState<number | null>(null);
+    const [compatExplanations, setCompatExplanations] = useState<string[]>([]);
     const router = useRouter();
     const { toast } = useToast();
 
     useEffect(() => {
         setWindowSize({ width: window.innerWidth, height: window.innerHeight });
     }, []);
+
+    useEffect(() => {
+        if (!matchedProfile?.id) return;
+        fetch(`/api/compatibility/score?targetId=${matchedProfile.id}`)
+            .then(r => r.json())
+            .then(data => {
+                if (data.score) {
+                    setCompatScore(data.score);
+                    setCompatExplanations(data.explanations || []);
+                }
+            })
+            .catch(() => {});
+    }, [matchedProfile?.id]);
 
     useEffect(() => {
         if (!matchId) return;
@@ -109,6 +124,27 @@ export function MatchScreen({ userProfile, matchedProfile, onChat, onKeepSwiping
                 </h1>
                 <p className="mt-2 text-base md:text-xl text-white/80">Todo gran vínculo comienza con una conexión especial.</p>
             </motion.div>
+
+            {compatScore !== null && (
+                <motion.div
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ delay: 0.6 }}
+                    className="z-10 mb-4 bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl px-5 py-3 max-w-sm w-full mx-4"
+                >
+                    <div className="flex items-center justify-between mb-1">
+                        <span className="text-sm font-bold text-white/90">{compatScore}% Compatibles</span>
+                        <Sparkles className="h-4 w-4 text-pink-300" />
+                    </div>
+                    {compatExplanations.length > 0 && (
+                        <div className="space-y-0.5">
+                            {compatExplanations.slice(0, 2).map((exp, i) => (
+                                <p key={i} className="text-[11px] text-white/70 leading-tight">• {exp}</p>
+                            ))}
+                        </div>
+                    )}
+                </motion.div>
+            )}
 
             <div className="flex items-center justify-center gap-4 md:gap-8 mb-6 relative z-10">
                 <motion.div

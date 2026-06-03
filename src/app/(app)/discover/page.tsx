@@ -292,7 +292,7 @@ export default function DiscoverPage() {
       {!currentUserProfile?.isVerified && (
         <div className="px-4 pt-2">
           <div className="bg-amber-50 border border-amber-200 rounded-xl p-3 flex items-center justify-between">
-            <p className="text-xs text-amber-800 font-medium">Verifica tu identidad para más visibilidad</p>
+            <p className="text-xs text-amber-800 font-medium">Los perfiles verificados aparecen primero en Discover</p>
             <Button size="sm" variant="outline" className="text-xs h-7" onClick={() => router.push('/settings/verification')}>
               Verificar
             </Button>
@@ -385,13 +385,7 @@ export default function DiscoverPage() {
                   key={currentProfile.id}
                   profile={currentProfile}
                   compatibility={profiles[0]?.compatibility}
-                  compatibilityDetails={
-                    profiles[0]?.score?.details ? {
-                      sharedValues: profiles[0].score.details.sharedValues,
-                      sharedInterests: profiles[0].score.details.sharedInterests,
-                      sharedMusic: profiles[0].score.details.sharedMusic,
-                    } : undefined
-                  }
+                  explanations={profiles[0]?.score?.explanation}
                   onSwipe={handleSwipe}
                   onFlechado={handleFlechado}
                   superlikesRemaining={3}

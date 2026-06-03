@@ -278,7 +278,7 @@ export default function ProfilePage() {
                 <div className="flex items-center justify-between mb-3">
                   <div className="flex items-center gap-2">
                     <Sparkles className="h-4 w-4 text-primary" />
-                    <span className="font-bold text-sm text-foreground">Completa tu perfil</span>
+                    <span className="font-bold text-sm text-foreground">Completa tu perfil — 2.4x más matches</span>
                   </div>
                   <span className="text-xs font-bold text-muted-foreground">{completenessScore}%</span>
                 </div>
@@ -335,7 +335,7 @@ export default function ProfilePage() {
                     </div>
                     <div>
                       <h4 className="font-bold text-foreground text-sm">Verifica tu identidad</h4>
-                      <p className="text-xs text-muted-foreground">Aumenta tu visibilidad y confianza</p>
+                      <p className="text-xs text-muted-foreground">Los perfiles verificados aparecen primero en Discover</p>
                     </div>
                   </div>
                   <ChevronRight className="h-5 w-5 text-muted-foreground" />

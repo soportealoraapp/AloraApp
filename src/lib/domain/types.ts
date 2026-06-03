@@ -89,6 +89,14 @@ export interface UserProfile extends User {
     sharedInterests?: number;
     messageResponseRate?: number | null;
     lastActiveHours?: number | null;
+    voiceIntro?: string;
+    latestAnswer?: {
+        questionId: string;
+        question: string | null;
+        category: string | null;
+        answer: string;
+        createdAt: string;
+    } | null;
 }
 
 export interface Match {

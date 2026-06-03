@@ -51,6 +51,7 @@ export default function ChatWindowPage() {
     const [showTimeline, setShowTimeline] = useState(false);
     const [showFeedbackDialog, setShowFeedbackDialog] = useState(false);
     const [matchHealth, setMatchHealth] = useState(0);
+    const [partnerAnswer, setPartnerAnswer] = useState<{ question: string; answer: string } | null>(null);
 
     useEffect(() => {
         if (!matchId) return;
@@ -59,6 +60,21 @@ export default function ChatWindowPage() {
             .then(data => setMatchHealth(data.score || 0))
             .catch(() => {});
     }, [matchId]);
+
+    useEffect(() => {
+        if (!otherUserId) return;
+        fetch(`/api/profile/${otherUserId}`)
+            .then(r => r.json())
+            .then(data => {
+                if (data?.latestAnswer?.question && data?.latestAnswer?.answer) {
+                    setPartnerAnswer({
+                        question: data.latestAnswer.question,
+                        answer: data.latestAnswer.answer,
+                    });
+                }
+            })
+            .catch(() => {});
+    }, [otherUserId]);
 
     useEffect(() => {
         if (!matchId) return;
@@ -402,6 +418,14 @@ export default function ChatWindowPage() {
                 onScroll={handleScroll}
                 className="flex-1 overflow-y-auto p-4 space-y-1 touch-pan-y overscroll-contain relative"
             >
+                {partnerAnswer && (
+                    <div className="bg-primary/5 border border-primary/10 rounded-2xl p-4 mb-4 mx-auto max-w-sm">
+                        <p className="text-[10px] font-bold text-primary uppercase tracking-wider mb-1">Su respuesta del día</p>
+                        <p className="text-xs text-muted-foreground mb-2 italic">&ldquo;{partnerAnswer.question}&rdquo;</p>
+                        <p className="text-sm font-medium text-foreground leading-relaxed">&ldquo;{partnerAnswer.answer}&rdquo;</p>
+                    </div>
+                )}
+
                 {loadingMore && (
                     <div className="flex justify-center py-2">
                         <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />

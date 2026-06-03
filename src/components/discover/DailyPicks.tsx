@@ -84,8 +84,12 @@ export function DailyPicks() {
                                 )}
                             </div>
                             <CardContent className="p-3">
-                                <p className="text-[10px] text-muted-foreground leading-tight">{pick.reason}</p>
-                                <div className="flex items-center gap-1 mt-2">
+                                <div className="flex flex-wrap gap-1 mb-2">
+                                    {pick.reason.split(' · ').slice(0, 2).map((r, i) => (
+                                        <span key={i} className="text-[9px] bg-primary/10 text-primary px-1.5 py-0.5 rounded-full font-medium leading-tight">{r}</span>
+                                    ))}
+                                </div>
+                                <div className="flex items-center gap-1">
                                     <div className="flex-1 bg-muted rounded-full h-1.5">
                                         <div
                                             className="bg-primary h-1.5 rounded-full"

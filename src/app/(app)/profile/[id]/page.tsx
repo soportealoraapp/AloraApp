@@ -260,6 +260,21 @@ export default function UserProfilePage() {
                         </Card>
                     )}
 
+                    {profile.latestAnswer?.question && profile.latestAnswer?.answer && (
+                        <Card className="rounded-3xl border border-primary/10 bg-primary/5">
+                            <CardContent className="p-5">
+                                <div className="flex items-center gap-2 mb-2">
+                                    <MessageSquare className="h-4 w-4 text-primary" />
+                                    <p className="text-xs font-bold text-primary uppercase tracking-wider">Pregunta del día</p>
+                                </div>
+                                <p className="text-sm font-medium text-foreground mb-2">{profile.latestAnswer.question}</p>
+                                <div className="bg-white/50 rounded-xl p-3 border border-primary/10">
+                                    <p className="text-sm text-foreground leading-relaxed">&ldquo;{profile.latestAnswer.answer}&rdquo;</p>
+                                </div>
+                            </CardContent>
+                        </Card>
+                    )}
+
                     <ProfileHighlights
                         bio={profile.bio}
                         interests={profile.interests}

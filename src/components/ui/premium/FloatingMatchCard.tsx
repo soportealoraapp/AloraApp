@@ -20,9 +20,10 @@ interface FloatingMatchCardProps {
         sharedMusic?: string[];
     };
     superlikesRemaining?: number;
+    explanations?: string[];
 }
 
-export function FloatingMatchCard({ profile, onSwipe, onFlechado, compatibility, compatibilityDetails, superlikesRemaining }: FloatingMatchCardProps) {
+export function FloatingMatchCard({ profile, onSwipe, onFlechado, compatibility, compatibilityDetails, superlikesRemaining, explanations }: FloatingMatchCardProps) {
     const controls = useAnimation();
     const [dragX, setDragX] = useState(0);
 
@@ -144,6 +145,15 @@ export function FloatingMatchCard({ profile, onSwipe, onFlechado, compatibility,
                             <Heart className="h-3 w-3" fill="white" /> {profile.sharedInterests} interés{profile.sharedInterests > 1 ? 'es' : ''} en común
                         </motion.div>
                     )}
+                    {profile.voiceIntro && (
+                        <motion.div
+                            initial={{ scale: 0.8, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            className="bg-indigo-500/90 backdrop-blur-md text-white px-3 py-1 rounded-full text-[10px] font-bold flex items-center gap-1 border border-indigo-300/30 shadow-lg"
+                        >
+                            <Music className="h-3 w-3" /> Voz
+                        </motion.div>
+                    )}
                     {!profile.activeNow && profile.lastActiveHours !== null && profile.lastActiveHours !== undefined && (
                         <motion.div
                             initial={{ scale: 0.8, opacity: 0 }}
@@ -170,22 +180,13 @@ export function FloatingMatchCard({ profile, onSwipe, onFlechado, compatibility,
                         {(profile.completenessScore ?? 0) >= 90 && <TrustBadge type="complete" />}
                     </div>
 
-                    {compatibility !== null && compatibility !== undefined && compatibilityDetails && (
-                        <div className="mb-3 space-y-1">
-                            {(() => {
-                                const shared: string[] = [
-                                    ...(compatibilityDetails.sharedValues || []),
-                                    ...(compatibilityDetails.sharedInterests || []),
-                                    ...(compatibilityDetails.sharedMusic || []),
-                                ].slice(0, 3);
-                                if (shared.length === 0) return null;
-                                return (
-                                    <div className="text-white/90 text-xs">
-                                        <span className="font-semibold text-white/70">Comparten: </span>
-                                        {shared.join(' · ')}
-                                    </div>
-                                );
-                            })()}
+                    {explanations && explanations.length > 0 && (
+                        <div className="mb-3 space-y-0.5">
+                            {explanations.slice(0, 2).map((exp, i) => (
+                                <div key={i} className="text-white/80 text-[11px] leading-tight">
+                                    • {exp}
+                                </div>
+                            ))}
                         </div>
                     )}
 
