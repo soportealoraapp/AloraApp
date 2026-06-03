@@ -14,7 +14,7 @@ function compressImage(file: File, maxWidth = 1080, quality = 0.8): Promise<Blob
         const reader = new FileReader();
         reader.onerror = () => reject(new Error('Failed to read file'));
         reader.onload = () => {
-            const img = new Image();
+            const img = document.createElement('img');
             img.onerror = () => reject(new Error('Failed to load image'));
             img.onload = () => {
                 const canvas = document.createElement('canvas');
