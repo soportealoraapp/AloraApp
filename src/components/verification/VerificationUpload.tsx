@@ -63,6 +63,7 @@ export function VerificationUpload({ gesture, onComplete }: VerificationUploadPr
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     const { startUpload } = useUploadThing("verificationUploader", {
+        headers: async () => ({ 'x-user-id': user?.id || '' }),
         onClientUploadComplete: async (res: any) => {
             if (res && res.length > 0) {
                 setUploadProgress(100);

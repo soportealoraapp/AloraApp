@@ -3,7 +3,6 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Progress } from "@/components/ui/progress";
-import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import { updateUserProfile } from "@/server/actions/user";
 import { useRouter } from "next/navigation";
@@ -163,15 +162,6 @@ export function OnboardingWizard({ initialRef }: { initialRef?: string } = {}) {
                         {step === 5 && (
                             <div className="flex-1 flex flex-col">
                                 <StepVerification onComplete={() => router.push('/discover')} />
-                                <div className="mt-auto pt-6 text-center">
-                                    <Button
-                                        variant="ghost"
-                                        className="text-muted-foreground hover:text-primary text-xs"
-                                        onClick={() => router.push('/discover')}
-                                    >
-                                        Lo haré más tarde
-                                    </Button>
-                                </div>
                             </div>
                         )}
                     </motion.div>

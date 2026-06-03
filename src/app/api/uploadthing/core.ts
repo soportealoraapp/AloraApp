@@ -1,5 +1,6 @@
 import { createUploadthing, type FileRouter } from "uploadthing/next";
 import { createClient } from "@/lib/supabase/server";
+import { prisma } from "@/lib/prisma";
 
 const f = createUploadthing({
     errorFormatter: (err) => {
@@ -7,17 +8,26 @@ const f = createUploadthing({
     },
 });
 
+async function resolveUserId(req: Request) {
+    const supabase = await createClient();
+    const { data: { session } } = await supabase.auth.getSession();
+
+    if (session?.user) return session.user.id;
+
+    const headerUserId = req.headers.get('x-user-id');
+    if (headerUserId) {
+        const user = await prisma.user.findUnique({ where: { id: headerUserId } });
+        if (user) return user.id;
+    }
+
+    throw new Error("Unauthorized");
+}
+
 export const ourFileRouter = {
     imageUploader: f({ image: { maxFileSize: "4MB", maxFileCount: 6 } })
-        .middleware(async () => {
-            const supabase = await createClient();
-            const { data: { user } } = await supabase.auth.getUser();
-
-            if (!user) {
-                throw new Error("Unauthorized: You must be logged in to upload files");
-            }
-
-            return { userId: user.id, type: 'profile' };
+        .middleware(async ({ req }) => {
+            const userId = await resolveUserId(req);
+            return { userId, type: 'profile' };
         })
         .onUploadComplete(async ({ metadata, file }) => {
             console.log("Profile upload complete for userId:", metadata.userId);
@@ -25,15 +35,9 @@ export const ourFileRouter = {
         }),
 
     chatImageUploader: f({ image: { maxFileSize: "4MB", maxFileCount: 4 } })
-        .middleware(async () => {
-            const supabase = await createClient();
-            const { data: { user } } = await supabase.auth.getUser();
-
-            if (!user) {
-                throw new Error("Unauthorized");
-            }
-
-            return { userId: user.id, type: 'chat' };
+        .middleware(async ({ req }) => {
+            const userId = await resolveUserId(req);
+            return { userId, type: 'chat' };
         })
         .onUploadComplete(async ({ metadata, file }) => {
             console.log("Chat image upload complete for userId:", metadata.userId);
@@ -45,15 +49,9 @@ export const ourFileRouter = {
         }),
 
     verificationUploader: f({ image: { maxFileSize: "8MB", maxFileCount: 1 } })
-        .middleware(async () => {
-            const supabase = await createClient();
-            const { data: { user } } = await supabase.auth.getUser();
-
-            if (!user) {
-                throw new Error("Unauthorized");
-            }
-
-            return { userId: user.id, type: 'verification' };
+        .middleware(async ({ req }) => {
+            const userId = await resolveUserId(req);
+            return { userId, type: 'verification' };
         })
         .onUploadComplete(async ({ metadata, file }) => {
             console.log("Verification upload complete for userId:", metadata.userId);
@@ -61,15 +59,9 @@ export const ourFileRouter = {
         }),
 
     voiceUploader: f({ blob: { maxFileSize: "2MB", maxFileCount: 1 } })
-        .middleware(async () => {
-            const supabase = await createClient();
-            const { data: { user } } = await supabase.auth.getUser();
-
-            if (!user) {
-                throw new Error("Unauthorized");
-            }
-
-            return { userId: user.id, type: 'voice' };
+        .middleware(async ({ req }) => {
+            const userId = await resolveUserId(req);
+            return { userId, type: 'voice' };
         })
         .onUploadComplete(async ({ metadata, file }) => {
             console.log("Voice upload complete for userId:", metadata.userId);

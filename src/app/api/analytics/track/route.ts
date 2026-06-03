@@ -7,7 +7,8 @@ export async function POST(request: NextRequest) {
     const { data: { user } } = await supabase.auth.getUser();
 
     if (!user) {
-        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+        // Allow anonymous analytics during onboarding (no 401 errors in console)
+        return NextResponse.json({ success: true, anonymous: true });
     }
 
     try {

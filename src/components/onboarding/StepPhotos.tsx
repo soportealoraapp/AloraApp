@@ -53,6 +53,7 @@ export function StepPhotos({ userId, data, onUpdate, onNext, onPrev }: any) {
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     const { startUpload, isUploading } = useUploadThing("imageUploader", {
+        headers: async () => ({ 'x-user-id': userId || '' }),
         onClientUploadComplete: (res: any) => {
             if (res && res.length > 0) {
                 const newUrls = res.map((r: any) => r.url);
