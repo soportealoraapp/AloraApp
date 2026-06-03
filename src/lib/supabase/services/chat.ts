@@ -22,11 +22,11 @@ function deduplicate(messages: Message[]): Message[] {
 function normalizeMessage(row: any): Message {
     return {
         id: row.id,
-        matchId: row.match_id,
-        senderId: row.sender_id,
+        matchId: row.matchId,
+        senderId: row.senderId,
         content: row.content,
-        createdAt: new Date(row.created_at),
-        readAt: row.read_at ? new Date(row.read_at) : undefined,
+        createdAt: new Date(row.createdAt),
+        readAt: row.readAt ? new Date(row.readAt) : undefined,
         type: row.type || 'text',
         status: row.status || 'sent',
         reactions: row.reactions || {},
@@ -52,8 +52,8 @@ export const chatService = {
         let query = supabase
             .from('messages')
             .select('*')
-            .eq('match_id', matchId)
-            .order('created_at', { ascending: false })
+            .eq('matchId', matchId)
+            .order('createdAt', { ascending: false })
             .limit(limit)
 
         let knownIds = new Set<string>()
@@ -81,7 +81,7 @@ export const chatService = {
                     event: 'INSERT',
                     schema: 'public',
                     table: 'messages',
-                    filter: `match_id=eq.${matchId}`,
+                    filter: `matchId=eq.${matchId}`,
                 },
                 (payload: RealtimePostgresChangesPayload<{ [key: string]: any }>) => {
                     const newMsg = payload.new as any
@@ -123,7 +123,7 @@ export const chatService = {
                     event: 'INSERT',
                     schema: 'public',
                     table: 'messages',
-                    filter: `match_id=eq.${matchId}`,
+                    filter: `matchId=eq.${matchId}`,
                 },
                 (payload: RealtimePostgresChangesPayload<{ [key: string]: any }>) => {
                     const newMsg = payload.new as any
@@ -246,9 +246,9 @@ export const chatService = {
         // we abort.
         const { data: match, error: matchError } = await supabase
             .from('matches')
-            .select('id, user1_id, user2_id')
+            .select('id, user1Id, user2Id')
             .eq('id', matchId)
-            .or(`user1_id.eq.${userId},user2_id.eq.${userId}`)
+            .or(`user1Id.eq.${userId},user2Id.eq.${userId}`)
             .maybeSingle()
 
         if (matchError) {
@@ -262,10 +262,10 @@ export const chatService = {
 
         const { error } = await supabase
             .from('messages')
-            .update({ read_at: new Date().toISOString(), status: 'read' })
-            .eq('match_id', matchId)
-            .neq('sender_id', userId)
-            .is('read_at', null)
+            .update({ readAt: new Date().toISOString(), status: 'read' })
+            .eq('matchId', matchId)
+            .neq('senderId', userId)
+            .is('readAt', null)
 
         if (error) {
             console.error('Error marking messages as read:', error)
@@ -281,9 +281,9 @@ export const chatService = {
         const { count, error } = await supabase
             .from('messages')
             .select('*', { count: 'exact', head: true })
-            .eq('match_id', matchId)
-            .neq('sender_id', userId)
-            .is('read_at', null)
+            .eq('matchId', matchId)
+            .neq('senderId', userId)
+            .is('readAt', null)
 
         if (error) {
             console.error('Error getting unread count:', error)
@@ -317,7 +317,7 @@ export const chatService = {
                     event: 'INSERT',
                     schema: 'public',
                     table: 'messages',
-                    filter: `match_id=eq.${matchId}`,
+                    filter: `matchId=eq.${matchId}`,
                 },
                 refresh
             )
@@ -327,7 +327,7 @@ export const chatService = {
                     event: 'UPDATE',
                     schema: 'public',
                     table: 'messages',
-                    filter: `match_id=eq.${matchId}`,
+                    filter: `matchId=eq.${matchId}`,
                 },
                 refresh
             )

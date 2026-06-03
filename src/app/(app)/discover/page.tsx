@@ -5,8 +5,10 @@ import { AnimatePresence } from "framer-motion";
 import { FloatingMatchCard } from "@/components/ui/premium/FloatingMatchCard";
 import { MatchScreen } from "@/components/ui/premium/MatchScreen";
 import { Button } from "@/components/ui/button";
-import { Filter, Loader2, RefreshCcw, Sparkles, SlidersHorizontal, RotateCcw } from "lucide-react";
+import { Filter, Loader2, RefreshCcw, Sparkles, SlidersHorizontal, RotateCcw, LayoutGrid, CreditCard, X, Heart } from "lucide-react";
 import { DiscoverFilters, Filters } from "@/components/discover/discover-filters";
+import { Card } from "@/components/ui/card";
+import Image from "next/image";
 import { useDiscover } from "@/hooks/use-discover";
 import { useAuth } from "@/contexts/AuthContext";
 import { useMatches } from "@/hooks/use-matches";
@@ -51,9 +53,11 @@ export default function DiscoverPage() {
   const [swipeCount, setSwipeCount] = useState(0);
   const [rewinding, setRewinding] = useState(false);
   const [showSwipeHint, setShowSwipeHint] = useState(true);
+  const [browseMode, setBrowseMode] = useState<'swipe' | 'grid'>('swipe');
 
   const lastSwipeRef = useRef<{ profileId: string; direction: string } | null>(null);
   const sentinelRef = useRef<HTMLDivElement>(null);
+  const geoRequestedRef = useRef(false);
 
   useEffect(() => {
     const hintDismissed = localStorage.getItem('swipeHintDismissed');
@@ -77,9 +81,11 @@ export default function DiscoverPage() {
     }
   }, [currentUserProfile?.countryCode]);
 
-  // Request geolocation for distance filter
+  // Request geolocation for distance filter (only once per session)
   useEffect(() => {
+    if (geoRequestedRef.current) return;
     if ('geolocation' in navigator) {
+      geoRequestedRef.current = true;
       navigator.geolocation.getCurrentPosition(
         (pos) => {
           setFilters(prev => ({
@@ -245,6 +251,14 @@ export default function DiscoverPage() {
           )}
         </div>
         <div className="flex items-center gap-1">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => setBrowseMode(b => b === 'swipe' ? 'grid' : 'swipe')}
+            title={browseMode === 'swipe' ? 'Vista exploración' : 'Vista swipe'}
+          >
+            {browseMode === 'swipe' ? <LayoutGrid className="h-5 w-5 text-muted-foreground" /> : <CreditCard className="h-5 w-5 text-muted-foreground" />}
+          </Button>
           <Button variant="ghost" size="icon" onClick={handleRewind} disabled={!lastSwipeRef.current || rewinding} title="Deshacer último swipe">
             <RotateCcw className="h-5 w-5 text-muted-foreground" />
           </Button>
@@ -295,6 +309,42 @@ export default function DiscoverPage() {
                 <Skeleton className="h-14 w-14 rounded-full" />
                 <Skeleton className="h-14 w-14 rounded-full" />
               </div>
+            </div>
+          ) : browseMode === 'grid' && profiles.length > 0 ? (
+            <div className="w-full">
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                {profiles.map(({ profile: p, compatibility }: any) => (
+                  <Card key={p.id} className="rounded-2xl overflow-hidden shadow-sm border">
+                    <div className="aspect-[3/4] relative cursor-pointer" onClick={() => router.push(`/profile/${p.id}?source=discover`)}>
+                      <Image
+                        src={p.photos?.[0] || '/placeholder.svg'}
+                        alt={p.displayName || ''}
+                        fill
+                        className="object-cover"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
+                      <div className="absolute bottom-2 left-2 right-2">
+                        <div className="text-white text-xs font-bold leading-tight">{p.displayName}, {p.age}</div>
+                        {p.city && <div className="text-white/70 text-[10px]">{p.city}</div>}
+                        {compatibility != null && (
+                          <div className="inline-block bg-primary/80 text-white text-[10px] px-1.5 py-0.5 rounded mt-1">
+                            {Math.round(compatibility)}% compatibles
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                    <div className="flex gap-1 p-1.5">
+                      <Button size="sm" variant="ghost" className="flex-1 h-8" onClick={() => handleSwipe('left')}>
+                        <X className="h-4 w-4 text-red-500" />
+                      </Button>
+                      <Button size="sm" variant="ghost" className="flex-1 h-8" onClick={() => handleSwipe('right')}>
+                        <Heart className="h-4 w-4 text-green-500" />
+                      </Button>
+                    </div>
+                  </Card>
+                ))}
+              </div>
+              <SecondChanceSection />
             </div>
           ) : currentProfile ? (
             <div className="w-full max-w-sm h-[600px] relative">
