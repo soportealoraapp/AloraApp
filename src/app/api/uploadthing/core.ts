@@ -16,8 +16,16 @@ async function resolveUserId(req: Request) {
 
     const headerUserId = req.headers.get('x-user-id');
     if (headerUserId) {
-        const user = await prisma.user.findUnique({ where: { id: headerUserId } });
-        if (user) return user.id;
+        await prisma.user.upsert({
+            where: { id: headerUserId },
+            create: {
+                id: headerUserId,
+                email: `${headerUserId}@placeholder.local`,
+                name: '',
+            },
+            update: {},
+        });
+        return headerUserId;
     }
 
     throw new Error("Unauthorized");

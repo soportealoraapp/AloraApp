@@ -9,7 +9,19 @@ export async function middleware(request: NextRequest) {
     const modifiedRequest = new NextRequest(request, { headers: requestHeaders });
 
     const response = await updateSession(modifiedRequest);
-    const { data: { user } } = await (await createClient(modifiedRequest, response)).auth.getUser();
+    let user = null;
+    try {
+        const timeout = new Promise<never>((_, reject) =>
+            setTimeout(() => reject(new Error('getUser timeout')), 10000)
+        );
+        const { data } = await Promise.race([
+            (await createClient(modifiedRequest, response)).auth.getUser(),
+            timeout,
+        ]);
+        user = data.user;
+    } catch (err) {
+        console.warn('middleware: getUser failed', err);
+    }
 
     const pathname = modifiedRequest.nextUrl.pathname;
 

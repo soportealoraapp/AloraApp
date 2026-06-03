@@ -31,7 +31,17 @@ export async function updateSession(request: NextRequest) {
     })
 
     const supabase = await createClient(request, supabaseResponse);
-    await supabase.auth.getUser();
+    try {
+        const timeout = new Promise<never>((_, reject) =>
+            setTimeout(() => reject(new Error('getUser timeout')), 10000)
+        );
+        await Promise.race([
+            supabase.auth.getUser(),
+            timeout,
+        ]);
+    } catch (err) {
+        console.warn('updateSession: getUser failed', err);
+    }
 
     return supabaseResponse
 }

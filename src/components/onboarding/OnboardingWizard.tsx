@@ -32,8 +32,11 @@ export function OnboardingWizard({ initialRef }: { initialRef?: string } = {}) {
     const [formData, setFormData] = useState<Partial<UserProfile>>({});
     const [isInitialized, setIsInitialized] = useState(false);
     const [syncStatus, setSyncStatus] = useState<'idle' | 'syncing' | 'saved' | 'error'>('idle');
+    const [signupUserId, setSignupUserId] = useState<string>();
     const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
     const lastSavedRef = useRef<string>('');
+
+    const effectiveUserId = user?.id || signupUserId;
 
     useEffect(() => {
         if (!initialRef || !REFERRAL_CODE_PATTERN.test(initialRef)) return;
@@ -60,7 +63,7 @@ export function OnboardingWizard({ initialRef }: { initialRef?: string } = {}) {
     }, [profile, isInitialized]);
 
     const saveProgress = useCallback(async (newData: Partial<UserProfile>) => {
-        if (!user) return;
+        if (!effectiveUserId) return;
         const updatedData = { ...formData, ...newData };
         setFormData(updatedData);
 
@@ -73,7 +76,7 @@ export function OnboardingWizard({ initialRef }: { initialRef?: string } = {}) {
         setSyncStatus('syncing');
         debounceRef.current = setTimeout(async () => {
             try {
-                await updateUserProfile(user.id, {
+                await updateUserProfile(effectiveUserId, {
                     ...updatedData,
                     createdAt: undefined,
                     isCompleted: step === totalSteps,
@@ -85,7 +88,7 @@ export function OnboardingWizard({ initialRef }: { initialRef?: string } = {}) {
                 console.error("Auto-save failed");
             }
         }, 800);
-    }, [user, formData, step]);
+    }, [effectiveUserId, formData, step]);
 
     useEffect(() => {
         return () => {
@@ -93,7 +96,8 @@ export function OnboardingWizard({ initialRef }: { initialRef?: string } = {}) {
         };
     }, []);
 
-    const handleAccountCreated = useCallback((_userId: string) => {
+    const handleAccountCreated = useCallback((userId: string) => {
+        setSignupUserId(userId);
         setStep(2);
     }, []);
 
@@ -106,7 +110,6 @@ export function OnboardingWizard({ initialRef }: { initialRef?: string } = {}) {
     }, [step, totalSteps, router]);
 
     const prevStep = useCallback(() => setStep(prev => Math.max(prev - 1, 1)), []);
-    const userId = user?.id;
 
     return (
         <div className="w-full min-h-dvh md:min-h-0 md:max-w-md md:mx-auto p-4 md:p-8 bg-background md:rounded-3xl md:shadow-xl md:border md:border-border/50 flex flex-col">
@@ -156,9 +159,9 @@ export function OnboardingWizard({ initialRef }: { initialRef?: string } = {}) {
                         {step === 1 && (
                             <StepCreateAccount onAccountCreated={handleAccountCreated} initialRef={initialRef} />
                         )}
-                        {step === 2 && <StepBasicInfo userId={userId} data={formData} onUpdate={saveProgress} onNext={nextStep} />}
-                        {step === 3 && <StepInterests userId={userId} data={formData} onUpdate={saveProgress} onNext={nextStep} onPrev={prevStep} />}
-                        {step === 4 && <StepPhotos userId={userId} data={formData} onUpdate={saveProgress} onNext={nextStep} onPrev={prevStep} />}
+                        {step === 2 && <StepBasicInfo userId={effectiveUserId} data={formData} onUpdate={saveProgress} onNext={nextStep} />}
+                        {step === 3 && <StepInterests userId={effectiveUserId} data={formData} onUpdate={saveProgress} onNext={nextStep} onPrev={prevStep} />}
+                        {step === 4 && <StepPhotos userId={effectiveUserId} data={formData} onUpdate={saveProgress} onNext={nextStep} onPrev={prevStep} />}
                         {step === 5 && (
                             <div className="flex-1 flex flex-col">
                                 <StepVerification onComplete={() => router.push('/discover')} />

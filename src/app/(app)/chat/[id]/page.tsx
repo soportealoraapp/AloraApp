@@ -311,7 +311,7 @@ export default function ChatWindowPage() {
                     <ArrowLeft className="h-5 w-5" />
                 </Button>
 
-                <Link href={`/profile/${otherUserId}`} className="flex items-center gap-3 flex-1 overflow-hidden">
+                <Link href={otherUserId ? `/profile/${otherUserId}` : '#'} className={`flex items-center gap-3 flex-1 overflow-hidden ${!otherUserId ? 'pointer-events-none' : ''}`}>
                     <div className="relative h-10 w-10 rounded-full overflow-hidden flex-shrink-0 border-2 border-muted">
                         <Image src={partnerPhoto} alt={partnerName} fill className="object-cover" />
                         {isPartnerOnline && (
@@ -375,9 +375,11 @@ export default function ChatWindowPage() {
                         </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
-                        <DropdownMenuItem asChild>
-                            <Link href={`/profile/${otherUserId}`}>Ver perfil</Link>
-                        </DropdownMenuItem>
+                        {otherUserId && (
+                            <DropdownMenuItem asChild>
+                                <Link href={`/profile/${otherUserId}`}>Ver perfil</Link>
+                            </DropdownMenuItem>
+                        )}
                         <DropdownMenuItem onClick={() => setShowTimeline(true)}>
                             <History className="h-4 w-4 mr-2" /> Línea de tiempo
                         </DropdownMenuItem>
