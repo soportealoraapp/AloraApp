@@ -381,14 +381,16 @@ export async function getDynamicFeed(
                 const completeness = calculateCompleteness(profile);
                 const deepScore = await getCompatibilityScore(currentUserId, profile.id);
 
-                // Compatibility now has higher weight (×0.5 instead of ×0.3)
                 let totalScore = deepScore.score * 0.5;
 
-                // --- SCORING WITH REBALANCED WEIGHTS ---
-                if (cp.isVerified) totalScore += 15;
-                if (completeness >= 90) totalScore += 15;
-                else if (completeness >= 70) totalScore += 10;
+                // --- SCORING WEIGHTS ---
+                if (cp.isVerified) totalScore += 20;
+
+                if (completeness >= 80) totalScore += 20;
+                else if (completeness >= 60) totalScore += 10;
                 else if (completeness < 50) totalScore *= 0.5;
+
+                if (cp.voiceIntro) totalScore += 15;
 
                 if (cp.trustStatus === 'watchlist') totalScore *= 0.8;
 
@@ -400,23 +402,20 @@ export async function getDynamicFeed(
                 else if (reputation < 70) totalScore *= 0.8;
                 else if (reputation > 90) totalScore += 10;
 
-                // Activity signals (reduced from previous)
-                if (activeNow) totalScore += 20;
-                else if (activeToday) totalScore += 10;
+                if (activeNow) totalScore += 15;
+                else if (activeToday) totalScore += 5;
 
                 if (highResponseRate) totalScore += 15;
 
                 totalScore += sharedInterests * 3;
 
-                if (completeness >= 80 && activeToday) totalScore += 10;
+                if (completeness >= 80 && activeToday) totalScore += 5;
 
-                // Boost: reduced from +50 to +30
                 const boostExpires = (cp as any).boostExpiresAt;
                 if (boostExpires && new Date(boostExpires) > now) {
                     totalScore += 30;
                 }
 
-                // Plus priority: reduced from +35 total to +15
                 if (cp.subscriptionStatus === 'plus') {
                     totalScore += 15;
                 }

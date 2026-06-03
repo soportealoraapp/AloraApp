@@ -6,7 +6,7 @@ import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip } from 'recha
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { SectionTitle } from "@/components/ui/custom/SectionTitle";
-import { Heart, Users, MessageCircle, Eye, Lightbulb, Loader2, ArrowLeft, CheckCircle } from "lucide-react";
+import { Heart, Users, MessageCircle, Eye, Lightbulb, Loader2, ArrowLeft, CheckCircle, Mic, Shield, BarChart3, Activity } from "lucide-react";
 import { useRouter } from 'next/navigation';
 
 interface ProfileAnalytics {
@@ -32,6 +32,7 @@ interface ProfileAnalytics {
 export default function AnalyticsPage() {
     const router = useRouter();
     const [data, setData] = useState<ProfileAnalytics | null>(null);
+    const [insights, setInsights] = useState<any>(null);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
@@ -40,9 +41,14 @@ export default function AnalyticsPage() {
 
     const fetchData = async () => {
         try {
-            const res = await fetch('/api/profile/analytics');
+            const [res, insightsRes] = await Promise.all([
+                fetch('/api/profile/analytics'),
+                fetch('/api/profile/insights'),
+            ]);
             const result = await res.json();
+            const insightsResult = await insightsRes.json();
             setData(result);
+            setInsights(insightsResult);
         } catch (error) {
             console.error('Error fetching analytics:', error);
         } finally {
@@ -180,6 +186,45 @@ export default function AnalyticsPage() {
                     </div>
                 </CardContent>
             </Card>
+
+            {/* Profile Insights */}
+            {insights && (
+                <Card>
+                    <CardHeader>
+                        <CardTitle className="text-base flex items-center gap-2">
+                            <Activity className="h-4 w-4 text-primary" />
+                            Por qué recibes matches
+                        </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <div className="space-y-3">
+                            {insights.insightFactors?.map((f: any) => (
+                                <div key={f.id} className="flex items-start gap-3 p-2 rounded-lg hover:bg-muted/50 transition-colors">
+                                    <div className="p-1.5 rounded-lg bg-muted">
+                                        {f.id === 'voice' ? <Mic className="h-4 w-4" /> :
+                                         f.id === 'verification' ? <Shield className="h-4 w-4" /> :
+                                         f.id === 'quiz' ? <BarChart3 className="h-4 w-4" /> :
+                                         f.id === 'activity' ? <Activity className="h-4 w-4" /> :
+                                         <BarChart3 className="h-4 w-4" />}
+                                    </div>
+                                    <div className="flex-1 min-w-0">
+                                        <div className="flex items-center gap-2">
+                                            <p className="text-sm font-medium">{f.label}</p>
+                                            <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-medium ${
+                                                f.impact === 'Alta' ? 'bg-green-100 text-green-700' :
+                                                f.impact === 'Media' ? 'bg-yellow-100 text-yellow-700' :
+                                                'bg-gray-100 text-gray-500'
+                                            }`}>{f.impact}</span>
+                                        </div>
+                                        <p className="text-xs text-muted-foreground mt-0.5">{f.detail}</p>
+                                    </div>
+                                    <span className="text-xs font-medium text-right shrink-0">{f.value}</span>
+                                </div>
+                            ))}
+                        </div>
+                    </CardContent>
+                </Card>
+            )}
 
             {/* Recommendations */}
             {recommendations.length > 0 && (

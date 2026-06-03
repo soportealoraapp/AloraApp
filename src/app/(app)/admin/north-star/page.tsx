@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   ArrowLeft, Loader2, TrendingUp, TrendingDown, BarChart3, Mic,
   HelpCircle, Users, MessageCircle, CheckCircle, Sparkles, Activity,
-  Crown,
+  Crown, Shield, Percent, Target,
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
@@ -48,16 +48,19 @@ export default function NorthStarDashboard() {
   const router = useRouter();
   const [metrics, setMetrics] = useState<ProductMetrics | null>(null);
   const [retention, setRetention] = useState<ExtendedRetentionRow[]>([]);
+  const [activationInsights, setActivationInsights] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     Promise.all([
       fetch('/api/admin/product-metrics?days=30').then(r => r.json()),
       fetch('/api/admin/retention-extended?days=30').then(r => r.json()),
+      fetch('/api/admin/activation-insights').then(r => r.json()),
     ])
-      .then(([metricsData, retentionData]) => {
+      .then(([metricsData, retentionData, activationData]) => {
         setMetrics(metricsData);
         setRetention(retentionData.rows || []);
+        setActivationInsights(activationData);
       })
       .catch(console.error)
       .finally(() => setLoading(false));
@@ -129,6 +132,75 @@ export default function NorthStarDashboard() {
         iconBg="bg-amber-100"
         metrics={metrics.verification}
       />
+
+      {/* Activation Distribution */}
+      {activationInsights?.activation && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base flex items-center gap-2">
+              <Target className="h-4 w-4 text-primary" />
+              Activación (30d)
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-4">
+              <div className="text-center p-2">
+                <p className="text-lg font-bold text-green-600">{activationInsights.activation.rate}%</p>
+                <p className="text-[10px] text-muted-foreground">Tasa activación</p>
+              </div>
+              <div className="text-center p-2">
+                <p className="text-lg font-bold">{activationInsights.activation.profilesWithPhotos}</p>
+                <p className="text-[10px] text-muted-foreground">Con fotos</p>
+              </div>
+              <div className="text-center p-2">
+                <p className="text-lg font-bold">{activationInsights.activation.profilesWithBio}</p>
+                <p className="text-[10px] text-muted-foreground">Con bio</p>
+              </div>
+              <div className="text-center p-2">
+                <p className="text-lg font-bold">{activationInsights.activation.profilesWithInterest}</p>
+                <p className="text-[10px] text-muted-foreground">Con intereses</p>
+              </div>
+              <div className="text-center p-2">
+                <p className="text-lg font-bold">{activationInsights.activation.profilesWithValues}</p>
+                <p className="text-[10px] text-muted-foreground">Con valores</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Conversion Stats */}
+      {activationInsights?.features && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base flex items-center gap-2">
+              <Percent className="h-4 w-4 text-primary" />
+              Adopción de Features
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              {[
+                { label: 'Voice intro', value: activationInsights.features.voiceIntroRate, icon: Mic, color: 'text-pink-500', bg: 'bg-pink-100' },
+                { label: 'Verificación', value: activationInsights.features.verificationRate, icon: Shield, color: 'text-amber-500', bg: 'bg-amber-100' },
+                { label: 'Quiz completado', value: activationInsights.features.quizCompletionRate, icon: BarChart3, color: 'text-indigo-500', bg: 'bg-indigo-100' },
+                { label: 'Pregunta diaria', value: activationInsights.features.dailyQuestionRate, icon: HelpCircle, color: 'text-emerald-500', bg: 'bg-emerald-100' },
+              ].map((f) => {
+                const Icon = f.icon;
+                return (
+                  <div key={f.label} className="text-center p-3 rounded-xl bg-muted/50">
+                    <div className={`inline-flex p-1.5 ${f.bg} rounded-lg mb-2`}>
+                      <Icon className={`h-4 w-4 ${f.color}`} />
+                    </div>
+                    <p className="text-xl font-bold">{f.value}%</p>
+                    <p className="text-[10px] text-muted-foreground">{f.label}</p>
+                  </div>
+                );
+              })}
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Activation by Segment */}
       <Card>

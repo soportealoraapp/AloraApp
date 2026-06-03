@@ -5,9 +5,10 @@ import { AnimatePresence } from "framer-motion";
 import { FloatingMatchCard } from "@/components/ui/premium/FloatingMatchCard";
 import { MatchScreen } from "@/components/ui/premium/MatchScreen";
 import { Button } from "@/components/ui/button";
-import { Filter, Loader2, RefreshCcw, Sparkles, SlidersHorizontal, RotateCcw, LayoutGrid, CreditCard, X, Heart } from "lucide-react";
+import { Filter, Loader2, RefreshCcw, Sparkles, SlidersHorizontal, RotateCcw, LayoutGrid, CreditCard, X, Heart, CheckCircle, Circle, ChevronRight } from "lucide-react";
 import { DiscoverFilters, Filters } from "@/components/discover/discover-filters";
 import { Card } from "@/components/ui/card";
+import { Progress } from "@/components/ui/progress";
 import Image from "next/image";
 import { useDiscover } from "@/hooks/use-discover";
 import { useAuth } from "@/contexts/AuthContext";
@@ -56,6 +57,21 @@ export default function DiscoverPage() {
   const lastSwipeRef = useRef<{ profileId: string; direction: string } | null>(null);
   const sentinelRef = useRef<HTMLDivElement>(null);
   const geoRequestedRef = useRef(false);
+
+  const [activationScore, setActivationScore] = useState<number | null>(null);
+  const [activationTasks, setActivationTasks] = useState<{ id: string; title: string; completed: boolean; rewardText: string }[]>([]);
+
+  useEffect(() => {
+    fetch('/api/discover/activation')
+      .then(r => r.json())
+      .then(data => {
+        if (data.score) {
+          setActivationScore(data.score.score);
+          setActivationTasks(data.tasks || []);
+        }
+      })
+      .catch(() => {});
+  }, []);
 
   useEffect(() => {
     const tutorialDone = localStorage.getItem('swipeTutorialDone');
@@ -297,6 +313,32 @@ export default function DiscoverPage() {
               Verificar
             </Button>
           </div>
+        </div>
+      )}
+
+      {activationScore !== null && activationScore < 80 && (
+        <div className="px-4 pt-2">
+          <Card className="p-4 bg-gradient-to-br from-primary/5 to-primary/10 border-primary/20">
+            <div className="flex items-center justify-between mb-3">
+              <p className="text-sm font-bold">Tu perfil está al {activationScore}%</p>
+              <span className="text-[10px] text-muted-foreground">Completa estas acciones</span>
+            </div>
+            <Progress value={activationScore} className="h-2 mb-3" />
+            <div className="space-y-1.5">
+              {activationTasks.filter(t => !t.completed).slice(0, 4).map(task => (
+                <div key={task.id} className="flex items-center gap-2 text-xs">
+                  <Circle className="h-3 w-3 text-muted-foreground shrink-0" />
+                  <span className="flex-1">{task.title}</span>
+                  <span className="text-[9px] text-primary font-medium">{task.rewardText}</span>
+                </div>
+              ))}
+            </div>
+            {activationTasks.filter(t => !t.completed).length > 4 && (
+              <button className="text-[10px] text-primary font-medium mt-2 flex items-center gap-1">
+                Ver más <ChevronRight className="h-3 w-3" />
+              </button>
+            )}
+          </Card>
         </div>
       )}
 
