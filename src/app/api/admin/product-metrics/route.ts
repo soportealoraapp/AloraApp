@@ -4,6 +4,7 @@ import {
   getCompatibilityImpact,
   getVoiceIntroImpact,
   getDailyQuestionImpact,
+  getVerificationImpact,
   getActivationBySegment,
 } from '@/server/services/product-metrics';
 
@@ -17,10 +18,11 @@ export async function GET(request: Request) {
   const days = Math.min(Math.max(parseInt(url.searchParams.get('days') || '30'), 1), 90);
 
   try {
-    const [compatibility, voiceIntro, dailyQuestion, activationBySegment] = await Promise.all([
+    const [compatibility, voiceIntro, dailyQuestion, verification, activationBySegment] = await Promise.all([
       getCompatibilityImpact(days),
       getVoiceIntroImpact(days),
       getDailyQuestionImpact(days),
+      getVerificationImpact(days),
       getActivationBySegment(days),
     ]);
 
@@ -28,6 +30,7 @@ export async function GET(request: Request) {
       compatibility,
       voiceIntro,
       dailyQuestion,
+      verification,
       activationBySegment,
     });
   } catch (error) {

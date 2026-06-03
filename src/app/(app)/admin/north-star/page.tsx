@@ -40,6 +40,7 @@ interface ProductMetrics {
   compatibility: SegmentMetric[];
   voiceIntro: SegmentMetric[];
   dailyQuestion: SegmentMetric[];
+  verification: SegmentMetric[];
   activationBySegment: ActivationSegment;
 }
 
@@ -118,6 +119,15 @@ export default function NorthStarDashboard() {
         iconColor="text-emerald-500"
         iconBg="bg-emerald-100"
         metrics={metrics.dailyQuestion}
+      />
+
+      {/* Verification Impact */}
+      <MetricComparisonCard
+        title="Impacto Verificación"
+        icon={Sparkles}
+        iconColor="text-amber-500"
+        iconBg="bg-amber-100"
+        metrics={metrics.verification}
       />
 
       {/* Activation by Segment */}

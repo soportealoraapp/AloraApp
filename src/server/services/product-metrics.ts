@@ -92,6 +92,31 @@ export async function getDailyQuestionImpact(days = 30): Promise<SegmentMetric[]
   ]);
 }
 
+// ========== Verification Impact ==========
+
+export async function getVerificationImpact(days = 30): Promise<SegmentMetric[]> {
+  const since = new Date(Date.now() - days * 24 * 60 * 60 * 1000);
+
+  const verifiedProfiles = await prisma.profile.findMany({
+    where: { isVerified: true },
+    select: { userId: true },
+  });
+  const verifiedSet = new Set(verifiedProfiles.map(p => p.userId));
+
+  const users = await prisma.user.findMany({
+    where: { createdAt: { gte: since } },
+    select: { id: true },
+  });
+
+  const verifiedIds = users.filter(u => verifiedSet.has(u.id)).map(u => u.id);
+  const notVerifiedIds = users.filter(u => !verifiedSet.has(u.id)).map(u => u.id);
+
+  return Promise.all([
+    computeSegmentMetric(verifiedIds, 'Verificados', since),
+    computeSegmentMetric(notVerifiedIds, 'No verificados', since),
+  ]);
+}
+
 async function computeSegmentMetric(userIds: string[], label: string, since: Date): Promise<SegmentMetric> {
   const count = userIds.length;
   if (count === 0) return { label, count: 0, matchRate: 0, messageRate: 0, d1Retention: 0, d7Retention: 0 };
@@ -166,10 +191,11 @@ export async function getExtendedRetention(days = 30): Promise<ExtendedRetention
   for (const [dayKey, bucket] of dayBuckets) {
     const userIds = Array.from(bucket.userIds);
     const newUsers = userIds.length;
+    if (newUsers === 0) continue;
 
-    async function countActive(daysOffset: number, lookbackDays: number): Promise<number> {
-      const lower = new Date(bucket.date.getTime() + daysOffset * 24 * 60 * 60 * 1000);
-      const upper = new Date(lower.getTime() + lookbackDays * 24 * 60 * 60 * 1000);
+    async function countActive(offsetHours: number, windowHours: number): Promise<number> {
+      const lower = new Date(bucket.date.getTime() + offsetHours * 60 * 60 * 1000);
+      const upper = new Date(lower.getTime() + windowHours * 60 * 60 * 1000);
       const raw = await prisma.$queryRaw<{ cnt: bigint }[]>`
         SELECT COUNT(DISTINCT user_id) as cnt
         FROM analytics_events
@@ -181,22 +207,23 @@ export async function getExtendedRetention(days = 30): Promise<ExtendedRetention
       return Number(raw[0]?.cnt || 0);
     }
 
+    // Ventanas no-superpuestas, secuenciales, basadas en cohorte de registro
     const [d1, d3, d7, d14, d30] = await Promise.all([
-      countActive(0, 1),
-      countActive(3, 1),
-      countActive(7, 1),
-      countActive(14, 1),
-      countActive(30, 1),
+      countActive(0, 24),    // D1:  primeras 24h
+      countActive(24, 48),   // D3:  horas 24-72 (días 2-3)
+      countActive(72, 96),   // D7:  horas 72-168 (días 4-7)
+      countActive(168, 168), // D14: horas 168-336 (días 8-14)
+      countActive(336, 384), // D30: horas 336-720 (días 15-30)
     ]);
 
     rows.push({
       date: dayKey,
       newUsers,
-      d1: { active: d1, rate: newUsers > 0 ? Math.round((d1 / newUsers) * 100) : 0 },
-      d3: { active: d3, rate: newUsers > 0 ? Math.round((d3 / newUsers) * 100) : 0 },
-      d7: { active: d7, rate: newUsers > 0 ? Math.round((d7 / newUsers) * 100) : 0 },
-      d14: { active: d14, rate: newUsers > 0 ? Math.round((d14 / newUsers) * 100) : 0 },
-      d30: { active: d30, rate: newUsers > 0 ? Math.round((d30 / newUsers) * 100) : 0 },
+      d1: { active: d1, rate: Math.round((d1 / newUsers) * 100) },
+      d3: { active: d3, rate: Math.round((d3 / newUsers) * 100) },
+      d7: { active: d7, rate: Math.round((d7 / newUsers) * 100) },
+      d14: { active: d14, rate: Math.round((d14 / newUsers) * 100) },
+      d30: { active: d30, rate: Math.round((d30 / newUsers) * 100) },
     });
   }
 

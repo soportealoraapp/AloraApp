@@ -36,6 +36,7 @@ export function OnboardingWizard({ initialRef }: { initialRef?: string } = {}) {
     const [signupUserId, setSignupUserId] = useState<string>();
     const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
     const lastSavedRef = useRef<string>('');
+    const hasCompletedRef = useRef(false);
 
     const effectiveUserId = user?.id || signupUserId;
 
@@ -102,14 +103,20 @@ export function OnboardingWizard({ initialRef }: { initialRef?: string } = {}) {
         setStep(2);
     }, []);
 
+    const completeOnboarding = useCallback(() => {
+        if (hasCompletedRef.current) return;
+        hasCompletedRef.current = true;
+        trackEvent('onboarding_completed', { userId: effectiveUserId });
+        router.push('/discover');
+    }, [effectiveUserId, router]);
+
     const nextStep = useCallback(() => {
         if (step === totalSteps) {
-            trackEvent('onboarding_completed', { userId: effectiveUserId });
-            router.push('/discover');
+            completeOnboarding();
             return;
         }
         setStep(prev => Math.min(prev + 1, totalSteps));
-    }, [step, totalSteps, router, effectiveUserId]);
+    }, [step, totalSteps, completeOnboarding]);
 
     const prevStep = useCallback(() => setStep(prev => Math.max(prev - 1, 1)), []);
 
@@ -166,7 +173,7 @@ export function OnboardingWizard({ initialRef }: { initialRef?: string } = {}) {
                         {step === 4 && <StepPhotos userId={effectiveUserId} data={formData} onUpdate={saveProgress} onNext={nextStep} onPrev={prevStep} />}
                         {step === 5 && (
                             <div className="flex-1 flex flex-col">
-                                <StepVerification onComplete={() => router.push('/discover')} />
+                                <StepVerification onComplete={completeOnboarding} />
                             </div>
                         )}
                     </motion.div>
