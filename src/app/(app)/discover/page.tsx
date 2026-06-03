@@ -21,7 +21,6 @@ import { DailyQuestionCard } from "@/components/daily-question/DailyQuestionCard
 import { DailyCompatibilityCard } from "@/components/compatibility/DailyCompatibilityCard";
 import { useAnalytics, AnalyticsEvents } from "@/hooks/use-analytics";
 import { LikesCounter } from "@/components/discover/LikesCounter";
-import { StoryCircle } from "@/components/stories/StoryCircle";
 import { DailyPicks } from "@/components/discover/DailyPicks";
 import { SecondChanceSection } from "@/components/discover/SecondChanceSection";
 
@@ -49,7 +48,6 @@ export default function DiscoverPage() {
   const [matchedProfile, setMatchedProfile] = useState<UserProfile | null>(null);
   const [matchId, setMatchId] = useState<string | undefined>(undefined);
   const [showMatchScreen, setShowMatchScreen] = useState(false);
-  const [stories, setStories] = useState<any[]>([]);
   const [swipeCount, setSwipeCount] = useState(0);
   const [rewinding, setRewinding] = useState(false);
   const [showSwipeHint, setShowSwipeHint] = useState(true);
@@ -62,13 +60,6 @@ export default function DiscoverPage() {
   useEffect(() => {
     const hintDismissed = localStorage.getItem('swipeHintDismissed');
     if (hintDismissed) setShowSwipeHint(false);
-  }, []);
-
-  useEffect(() => {
-    fetch('/api/stories')
-      .then(r => r.json())
-      .then(data => setStories(data.stories || []))
-      .catch(() => {});
   }, []);
 
   // Auto-set countryCode from user profile (same-country matching by default)
@@ -270,22 +261,6 @@ export default function DiscoverPage() {
           </Button>
         </div>
       </header>
-
-      {stories.length > 0 && (
-      <div className="px-4 pt-2 overflow-x-auto">
-          <div className="flex gap-4 pb-2">
-            {stories.map((storyGroup: any) => (
-              <StoryCircle
-                key={storyGroup.userId}
-                photo={storyGroup.photo}
-                name={storyGroup.displayName}
-                hasUnviewed={!storyGroup.stories.some((s: any) => s.viewedByMe)}
-                onClick={() => {}}
-              />
-            ))}
-          </div>
-        </div>
-      )}
 
       <div className="px-4 pt-2">
         <DailyPicks />

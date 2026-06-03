@@ -58,24 +58,33 @@ export async function getReferralStats(userId: string) {
  */
 export async function grantReferralReward(userId: string, rewardType: string) {
     switch (rewardType) {
-        case 'boost':
-            // Grant a visibility boost
-            await prisma.analyticsEvent.create({
-                data: { userId, event: 'referral_boost_granted', metadata: { type: 'visibility_boost' } }
-            });
-            break;
-        case 'badge':
-            // Grant ambassador badge
-            await prisma.analyticsEvent.create({
-                data: { userId, event: 'referral_badge_granted', metadata: { type: 'ambassador_badge' } }
-            });
-            break;
-        case 'premium_days':
-            // Grant 30 days of Plus
+        case 'boost': {
+            const boostExpiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
             await prisma.profile.update({
                 where: { userId },
-                data: { subscriptionStatus: 'plus' }
+                data: { boostExpiresAt, lastBoostAt: new Date(), totalBoosts: { increment: 1 } },
             });
             break;
+        }
+        case 'badge': {
+            const profile = await prisma.profile.findUnique({ where: { userId }, select: { badges: true } });
+            const currentBadges = (profile?.badges as { key: string; unlockedAt: string }[]) || [];
+            const badge = { key: 'ambassador', unlockedAt: new Date().toISOString() };
+            if (!currentBadges.some(b => b.key === 'ambassador')) {
+                currentBadges.push(badge);
+            }
+            await prisma.profile.update({
+                where: { userId },
+                data: { badges: currentBadges },
+            });
+            break;
+        }
+        case 'premium_days': {
+            await prisma.profile.update({
+                where: { userId },
+                data: { subscriptionStatus: 'plus' },
+            });
+            break;
+        }
     }
 }

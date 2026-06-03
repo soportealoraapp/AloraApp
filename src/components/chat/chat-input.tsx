@@ -73,10 +73,20 @@ export function ChatInput({ onSend, onSendImage, onSendVoice, onTyping, disabled
     },
   });
 
+  const getAudioMimeType = () => {
+    if (typeof window === 'undefined') return 'audio/webm';
+    const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+    const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+    if (isSafari || isIOS) return 'audio/mp4';
+    return 'audio/webm';
+  };
+
   const startRecording = async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      const mediaRecorder = new MediaRecorder(stream, { mimeType: 'audio/webm' });
+      const mimeType = getAudioMimeType();
+      const options = MediaRecorder.isTypeSupported(mimeType) ? { mimeType } : {};
+      const mediaRecorder = new MediaRecorder(stream, options);
       mediaRecorderRef.current = mediaRecorder;
       audioChunksRef.current = [];
 
@@ -87,7 +97,8 @@ export function ChatInput({ onSend, onSendImage, onSendVoice, onTyping, disabled
       };
 
       mediaRecorder.onstop = () => {
-        const blob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
+        const type = MediaRecorder.isTypeSupported(mimeType) ? mimeType : 'audio/webm';
+        const blob = new Blob(audioChunksRef.current, { type });
         setRecordedBlob(blob);
         setRecordedUrl(URL.createObjectURL(blob));
         stream.getTracks().forEach(track => track.stop());
@@ -131,7 +142,9 @@ export function ChatInput({ onSend, onSendImage, onSendVoice, onTyping, disabled
   const sendVoiceMessage = async () => {
     if (!recordedBlob) return;
     setUploadingVoice(true);
-    const file = new File([recordedBlob], `voice-${Date.now()}.webm`, { type: 'audio/webm' });
+    const mimeType = getAudioMimeType();
+    const ext = mimeType === 'audio/mp4' ? 'm4a' : 'webm';
+    const file = new File([recordedBlob], `voice-${Date.now()}.${ext}`, { type: mimeType });
     await startVoiceUpload([file]);
   };
 

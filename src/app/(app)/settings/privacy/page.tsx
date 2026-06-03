@@ -8,16 +8,20 @@ import { setVerifiedOnlyFilter } from "@/server/actions/user";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
-import { ArrowLeft, Shield, Eye, EyeOff, Loader2 } from "lucide-react";
+import { ArrowLeft, Shield, Eye, EyeOff, Loader2, AlertTriangle, Key, Trash2 } from "lucide-react";
 import Link from "next/link";
 import { useToast } from "@/hooks/use-toast";
 import { Skeleton } from "@/components/ui/skeleton";
 import { UpgradePrompt } from "@/components/premium/UpgradePrompt";
 import { PlusBadge } from "@/components/premium/PlusBadge";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { createClient } from "@/lib/supabase/client";
 
 export default function PrivacySettingsPage() {
     const router = useRouter();
-    const { user } = useAuth();
+    const { user, signOut } = useAuth();
     const { toast } = useToast();
 
     const [loading, setLoading] = useState(true);
@@ -25,6 +29,78 @@ export default function PrivacySettingsPage() {
     const [incognitoMode, setIncognitoMode] = useState(false);
     const [showMe, setShowMe] = useState(true);
     const [verifiedOnly, setVerifiedOnly] = useState(true);
+
+    const [passwordDialogOpen, setPasswordDialogOpen] = useState(false);
+    const [currentPassword, setCurrentPassword] = useState("");
+    const [newPassword, setNewPassword] = useState("");
+    const [confirmPassword, setConfirmPassword] = useState("");
+    const [changingPassword, setChangingPassword] = useState(false);
+
+    const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+    const [deleteConfirmText, setDeleteConfirmText] = useState("");
+    const [deleting, setDeleting] = useState(false);
+
+    const handleChangePassword = async () => {
+        if (!currentPassword || !newPassword) {
+            toast({ title: "Campos requeridos", description: "Completa todos los campos.", variant: "destructive" });
+            return;
+        }
+        if (newPassword.length < 6) {
+            toast({ title: "Contraseña muy corta", description: "Mínimo 6 caracteres.", variant: "destructive" });
+            return;
+        }
+        if (newPassword !== confirmPassword) {
+            toast({ title: "Las contraseñas no coinciden", description: "Verifica la confirmación.", variant: "destructive" });
+            return;
+        }
+
+        setChangingPassword(true);
+        try {
+            const supabase = createClient();
+            const { error: signInError } = await supabase.auth.signInWithPassword({
+                email: user?.email || "",
+                password: currentPassword,
+            });
+            if (signInError) {
+                toast({ title: "Contraseña actual incorrecta", variant: "destructive" });
+                setChangingPassword(false);
+                return;
+            }
+            const { error } = await supabase.auth.updateUser({ password: newPassword });
+            if (error) throw error;
+            toast({ title: "Contraseña actualizada", description: "Usa tu nueva contraseña en el próximo inicio de sesión." });
+            setPasswordDialogOpen(false);
+            setCurrentPassword("");
+            setNewPassword("");
+            setConfirmPassword("");
+        } catch {
+            toast({ title: "Error", description: "No se pudo cambiar la contraseña.", variant: "destructive" });
+        } finally {
+            setChangingPassword(false);
+        }
+    };
+
+    const handleDeleteAccount = async () => {
+        if (deleteConfirmText !== "ELIMINAR") {
+            toast({ title: "Confirmación requerida", description: "Escribe ELIMINAR para confirmar.", variant: "destructive" });
+            return;
+        }
+        setDeleting(true);
+        try {
+            const supabase = createClient();
+            const { error } = await supabase.rpc('delete_user_account', { user_id: user?.id });
+            if (error) {
+                const res = await fetch('/api/user/delete', { method: 'POST' });
+                if (!res.ok) throw new Error('delete failed');
+            }
+            await signOut();
+            router.push('/login');
+            toast({ title: "Cuenta eliminada", description: "Sentimos verte ir." });
+        } catch {
+            toast({ title: "Error", description: "No se pudo eliminar la cuenta. Contacta a soporte.", variant: "destructive" });
+            setDeleting(false);
+        }
+    };
 
     useEffect(() => {
         async function loadPreferences() {
@@ -263,12 +339,82 @@ export default function PrivacySettingsPage() {
                         </CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-2">
-                        <Button variant="outline" className="w-full justify-start">
-                            Cambiar Contraseña
-                        </Button>
-                        <Button variant="destructive" className="w-full">
-                            Eliminar Cuenta
-                        </Button>
+                        <Dialog open={passwordDialogOpen} onOpenChange={setPasswordDialogOpen}>
+                            <DialogTrigger asChild>
+                                <Button variant="outline" className="w-full justify-start">
+                                    <Key className="h-4 w-4 mr-2" />
+                                    Cambiar Contraseña
+                                </Button>
+                            </DialogTrigger>
+                            <DialogContent>
+                                <DialogHeader>
+                                    <DialogTitle>Cambiar Contraseña</DialogTitle>
+                                    <DialogDescription>Ingresa tu contraseña actual y una nueva.</DialogDescription>
+                                </DialogHeader>
+                                <div className="space-y-4 py-4">
+                                    <div className="space-y-2">
+                                        <Label htmlFor="current-password">Contraseña Actual</Label>
+                                        <Input id="current-password" type="password" value={currentPassword} onChange={e => setCurrentPassword(e.target.value)} disabled={changingPassword} />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Label htmlFor="new-password">Nueva Contraseña</Label>
+                                        <Input id="new-password" type="password" value={newPassword} onChange={e => setNewPassword(e.target.value)} disabled={changingPassword} />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Label htmlFor="confirm-password">Confirmar Nueva Contraseña</Label>
+                                        <Input id="confirm-password" type="password" value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} disabled={changingPassword} />
+                                    </div>
+                                </div>
+                                <DialogFooter>
+                                    <Button variant="outline" onClick={() => setPasswordDialogOpen(false)} disabled={changingPassword}>Cancelar</Button>
+                                    <Button onClick={handleChangePassword} disabled={changingPassword}>
+                                        {changingPassword ? <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Cambiando...</> : "Cambiar Contraseña"}
+                                    </Button>
+                                </DialogFooter>
+                            </DialogContent>
+                        </Dialog>
+
+                        <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+                            <DialogTrigger asChild>
+                                <Button variant="destructive" className="w-full">
+                                    <Trash2 className="h-4 w-4 mr-2" />
+                                    Eliminar Cuenta
+                                </Button>
+                            </DialogTrigger>
+                            <DialogContent>
+                                <DialogHeader>
+                                    <DialogTitle className="flex items-center gap-2 text-destructive">
+                                        <AlertTriangle className="h-5 w-5" />
+                                        Eliminar Cuenta
+                                    </DialogTitle>
+                                    <DialogDescription>
+                                        Esta acción es irreversible. Se eliminarán tu perfil, fotos, mensajes y matches.
+                                        No podrás recuperar tu cuenta.
+                                    </DialogDescription>
+                                </DialogHeader>
+                                <div className="space-y-4 py-4">
+                                    <div className="bg-destructive/10 p-4 rounded-lg text-sm text-destructive">
+                                        <p className="font-medium">Lo que se eliminará:</p>
+                                        <ul className="list-disc pl-4 mt-2 space-y-1 text-muted-foreground">
+                                            <li>Perfil y fotos</li>
+                                            <li>Mensajes y conversaciones</li>
+                                            <li>Matches y conexiones</li>
+                                            <li>Preferencias y ajustes</li>
+                                        </ul>
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Label>Escribe <span className="font-bold">ELIMINAR</span> para confirmar</Label>
+                                        <Input value={deleteConfirmText} onChange={e => setDeleteConfirmText(e.target.value)} placeholder="ELIMINAR" disabled={deleting} />
+                                    </div>
+                                </div>
+                                <DialogFooter>
+                                    <Button variant="outline" onClick={() => { setDeleteDialogOpen(false); setDeleteConfirmText(""); }} disabled={deleting}>Cancelar</Button>
+                                    <Button variant="destructive" onClick={handleDeleteAccount} disabled={deleting || deleteConfirmText !== "ELIMINAR"}>
+                                        {deleting ? <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Eliminando...</> : "Eliminar mi cuenta"}
+                                    </Button>
+                                </DialogFooter>
+                            </DialogContent>
+                        </Dialog>
                     </CardContent>
                 </Card>
 

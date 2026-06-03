@@ -77,51 +77,75 @@ export async function getWomenExperienceAudit(): Promise<WomenExperienceMetrics>
         }
     }
 
-    // Reply rates
+    // Reply rates — batch all match messages to avoid N+1
     const femaleMessages = await prisma.message.findMany({
         where: { senderId: { in: femaleIds }, createdAt: { gte: oneMonthAgo } },
         select: { matchId: true, createdAt: true, senderId: true }
     });
+    const femaleMsgSample = femaleMessages.slice(0, 200);
+    const femaleMatchIds = [...new Set(femaleMsgSample.map(m => m.matchId))];
+    const allFemaleMatchMessages = femaleMatchIds.length > 0 ? await prisma.message.findMany({
+        where: { matchId: { in: femaleMatchIds } },
+        select: { matchId: true, senderId: true, createdAt: true },
+        orderBy: { createdAt: 'asc' }
+    }) : [];
+    const msgsByMatch = new Map<string, typeof allFemaleMatchMessages>();
+    for (const m of allFemaleMatchMessages) {
+        if (!msgsByMatch.has(m.matchId)) msgsByMatch.set(m.matchId, []);
+        msgsByMatch.get(m.matchId)!.push(m);
+    }
 
     let femaleReplies = 0;
     let femaleTotalChecked = 0;
-    for (const msg of femaleMessages.slice(0, 200)) {
-        const reply = await prisma.message.findFirst({
-            where: { matchId: msg.matchId, senderId: { not: msg.senderId }, createdAt: { gt: msg.createdAt } },
-            select: { id: true }
-        });
+    for (const msg of femaleMsgSample) {
+        const msgs = msgsByMatch.get(msg.matchId) || [];
+        const hasReply = msgs.some(m => m.senderId !== msg.senderId && m.createdAt > msg.createdAt);
         femaleTotalChecked++;
-        if (reply) femaleReplies++;
+        if (hasReply) femaleReplies++;
     }
 
     const maleMessages = await prisma.message.findMany({
         where: { senderId: { in: maleIds }, createdAt: { gte: oneMonthAgo } },
         select: { matchId: true, createdAt: true, senderId: true }
     });
+    const maleMsgSample = maleMessages.slice(0, 200);
+    const maleMatchIds = [...new Set(maleMsgSample.map(m => m.matchId))];
+    const allMaleMatchMessages = maleMatchIds.length > 0 ? await prisma.message.findMany({
+        where: { matchId: { in: maleMatchIds } },
+        select: { matchId: true, senderId: true, createdAt: true },
+        orderBy: { createdAt: 'asc' }
+    }) : [];
+    const maleMsgsByMatch = new Map<string, typeof allMaleMatchMessages>();
+    for (const m of allMaleMatchMessages) {
+        if (!maleMsgsByMatch.has(m.matchId)) maleMsgsByMatch.set(m.matchId, []);
+        maleMsgsByMatch.get(m.matchId)!.push(m);
+    }
 
     let maleReplies = 0;
     let maleTotalChecked = 0;
-    for (const msg of maleMessages.slice(0, 200)) {
-        const reply = await prisma.message.findFirst({
-            where: { matchId: msg.matchId, senderId: { not: msg.senderId }, createdAt: { gt: msg.createdAt } },
-            select: { id: true }
-        });
+    for (const msg of maleMsgSample) {
+        const msgs = maleMsgsByMatch.get(msg.matchId) || [];
+        const hasReply = msgs.some(m => m.senderId !== msg.senderId && m.createdAt > msg.createdAt);
         maleTotalChecked++;
-        if (reply) maleReplies++;
+        if (hasReply) maleReplies++;
     }
 
-    // Conversation length
-    const femaleMatchIds = femaleMatches.map(m => m.user1Id);
-    const femaleConversations = await prisma.match.findMany({
+    // Conversation length — batch count via groupBy to avoid N+1
+    const femaleConvMatches = await prisma.match.findMany({
         where: { user1Id: { in: femaleIds } },
         select: { id: true },
         take: 50
     });
-
+    const convMatchIds = femaleConvMatches.map(m => m.id);
+    const msgCounts = convMatchIds.length > 0 ? await prisma.message.groupBy({
+        by: ['matchId'],
+        where: { matchId: { in: convMatchIds } },
+        _count: { id: true },
+    }) : [];
+    const countMap = new Map(msgCounts.map(m => [m.matchId, m._count.id]));
     let totalFemaleMsgCount = 0;
-    for (const m of femaleConversations) {
-        const count = await prisma.message.count({ where: { matchId: m.id } });
-        totalFemaleMsgCount += count;
+    for (const m of femaleConvMatches) {
+        totalFemaleMsgCount += countMap.get(m.id) || 0;
     }
 
     // Verification rate
@@ -131,7 +155,7 @@ export async function getWomenExperienceAudit(): Promise<WomenExperienceMetrics>
 
     const avgTimeToMatch = femaleMatchCount > 0 ? totalFemaleMatchTime / femaleMatchCount : 0;
     const avgReplyRate = femaleTotalChecked > 0 ? (femaleReplies / femaleTotalChecked) * 100 : 0;
-    const avgConversationLength = femaleConversations.length > 0 ? totalFemaleMsgCount / femaleConversations.length : 0;
+    const avgConversationLength = femaleConvMatches.length > 0 ? totalFemaleMsgCount / femaleConvMatches.length : 0;
     const verificationRate = femaleUsers.length > 0 ? (verifiedWomen / femaleUsers.length) * 100 : 0;
 
     return {

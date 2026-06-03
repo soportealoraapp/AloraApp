@@ -60,17 +60,21 @@ export async function detectGhostedMatches(userId: string): Promise<Array<{
 }
 
 export async function canSendRevivalNotification(matchId: string): Promise<boolean> {
-    const lastRevival = await prisma.$queryRaw`
-        SELECT "createdAt" FROM notifications
-        WHERE type = 'revival'
-        AND data::text LIKE ${`%${matchId}%`}
-        ORDER BY "createdAt" DESC
-        LIMIT 1
-    ` as any[];
+    const revivalNotifications = await prisma.notification.findMany({
+        where: { type: 'revival' },
+        orderBy: { createdAt: 'desc' },
+        take: 10,
+    });
 
-    if (!lastRevival || lastRevival.length === 0) return true;
+    const lastRevivalForMatch = revivalNotifications.find(n => {
+        if (!n.data) return false;
+        const dataStr = typeof n.data === 'string' ? n.data : JSON.stringify(n.data);
+        return dataStr.includes(matchId);
+    });
 
-    const hoursSince = (Date.now() - new Date(lastRevival[0].createdAt).getTime()) / (1000 * 60 * 60);
+    if (!lastRevivalForMatch) return true;
+
+    const hoursSince = (Date.now() - new Date(lastRevivalForMatch.createdAt).getTime()) / (1000 * 60 * 60);
     return hoursSince >= 168;
 }
 
