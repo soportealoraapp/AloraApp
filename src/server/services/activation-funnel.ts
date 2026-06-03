@@ -40,7 +40,7 @@ export async function getActivationFunnel(): Promise<ActivationFunnel> {
 
     // Step 2: Onboarding completed
     const onboardingCompleted = await prisma.analyticsEvent.count({
-        where: { event: 'onboarding_complete', createdAt: { gte: thirtyDaysAgo } }
+        where: { event: 'onboarding_completed', createdAt: { gte: thirtyDaysAgo } }
     });
 
     // Step 3: Profile complete (>50% completeness)

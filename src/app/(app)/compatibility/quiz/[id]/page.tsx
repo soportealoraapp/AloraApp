@@ -11,6 +11,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useToast } from '@/hooks/use-toast';
 import { COMPATIBILITY_QUIZZES, ARCHETYPES, calculateQuizScore, determineArchetype } from '@/lib/compatibility/quizzes';
 import { useAuth } from '@/contexts/AuthContext';
+import { trackEvent } from '@/lib/tracking/client';
 
 interface SimilarProfile {
     id: string;
@@ -51,12 +52,13 @@ export default function QuizPage() {
         (async () => {
             setSaving(true);
             try {
-                await fetch('/api/compatibility/save', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ quizId: quiz.id, answers }),
-                });
-            } catch (err) {
+                        await fetch('/api/compatibility/save', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ quizId: quiz.id, answers }),
+                        });
+                        trackEvent('quiz_completed', { quizId: quiz.id, score: finalScore, archetype: finalArchetype });
+                    } catch (err) {
                 toast({
                     title: 'No pudimos guardar tu resultado',
                     description: 'Lo intentaremos de nuevo más tarde.',

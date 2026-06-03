@@ -72,7 +72,7 @@ export async function getFunnelData(days: number = 30): Promise<FunnelStep[]> {
 
     const steps: { label: string; event: AnalyticsEventType }[] = [
         { label: 'Registros', event: 'signup' },
-        { label: 'Onboarding completo', event: 'onboarding_complete' },
+        { label: 'Onboarding completo', event: 'onboarding_completed' },
         { label: 'Primer match', event: 'first_match' },
         { label: 'Primer mensaje', event: 'first_message' },
         { label: 'Primera respuesta', event: 'first_reply' },

@@ -20,6 +20,7 @@ import { INTERESTS, VALUES, MUSIC_GENRES, LIFESTYLE_OPTIONS } from "@/lib/consta
 import { PhotoGrid } from "@/components/photos/PhotoGrid";
 import { PhotoCrop } from "@/components/photos/PhotoCrop";
 import { VoiceIntro } from "@/components/audio/VoiceIntro";
+import { trackEvent } from "@/lib/tracking/client";
 
 const lifestyleOptions = {
     smoking: [...LIFESTYLE_OPTIONS.smoking],
@@ -556,6 +557,7 @@ export default function ProfileEditPage() {
                             onSave={(url, dur) => {
                                 setVoiceIntroUrl(url);
                                 setVoiceIntroDuration(dur);
+                                trackEvent('voice_intro_saved', { duration: dur });
                             }}
                             onDelete={() => {
                                 setVoiceIntroUrl(null);

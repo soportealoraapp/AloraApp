@@ -14,6 +14,7 @@ import { StepCreateAccount } from "./StepCreateAccount";
 import { UserProfile } from "@/lib/domain/types";
 import { Heart, Cloud } from "lucide-react";
 import { REFERRAL_COOKIE, REFERRAL_SESSION_KEY, REFERRAL_CODE_PATTERN } from "@/lib/referral/constants";
+import { trackEvent } from "@/lib/tracking/client";
 
 const STEP_LABELS = ['Tu cuenta', 'Tu esencia', 'Tus colores', 'Tu sonrisa', 'Tu seguridad'];
 const STEP_WELCOME = [
@@ -103,11 +104,12 @@ export function OnboardingWizard({ initialRef }: { initialRef?: string } = {}) {
 
     const nextStep = useCallback(() => {
         if (step === totalSteps) {
+            trackEvent('onboarding_completed', { userId: effectiveUserId });
             router.push('/discover');
             return;
         }
         setStep(prev => Math.min(prev + 1, totalSteps));
-    }, [step, totalSteps, router]);
+    }, [step, totalSteps, router, effectiveUserId]);
 
     const prevStep = useCallback(() => setStep(prev => Math.max(prev - 1, 1)), []);
 
