@@ -70,7 +70,7 @@ export default function FemaleSafetyOnboarding() {
                             <p className="text-sm text-green-700 font-medium">Estas protegida</p>
                         </div>
                         <p className="text-xs text-green-600 mt-1">
-                            Nuestro sistema de IA detecta comportamientos sospechosos en tiempo real.
+                            Nuestro sistema detecta comportamientos sospechosos y permite reportarlos al instante.
                         </p>
                     </div>
 

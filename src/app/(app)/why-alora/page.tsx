@@ -14,15 +14,15 @@ const reasons = [
     },
     {
         icon: Sparkles,
-        title: 'IA Real, No Decorativa',
-        description: 'Gemini analiza tu perfil, genera icebreakers personalizados y te ayuda a mejorar tus conversaciones.',
+        title: 'Icebreakers Inteligentes',
+        description: 'Icebreakers personalizados basados en compatibilidad para iniciar conversaciones con más confianza.',
         color: 'text-pink-500',
         bg: 'bg-pink-50',
     },
     {
         icon: Shield,
         title: 'Seguridad para Mujeres',
-        description: 'Verificación de identidad, detección de acoso con IA, modo incógnito, y control total de tu visibilidad.',
+        description: 'Verificación de identidad, detección de acoso, modo incógnito, y control total de tu visibilidad.',
         color: 'text-blue-500',
         bg: 'bg-blue-50',
     },
@@ -36,7 +36,7 @@ const reasons = [
     {
         icon: MessageCircle,
         title: 'Conversaciones que Funcionan',
-        description: 'Icebreakers basados en compatibilidad, coaching de conversación, y detección de ghosting.',
+        description: 'Icebreakers basados en compatibilidad y detección de conversaciones abandonadas.',
         color: 'text-green-500',
         bg: 'bg-green-50',
     },
@@ -81,7 +81,7 @@ export default function WhyAloraPage() {
                     </div>
                     <div className="text-center">
                         <p className="text-3xl font-bold text-primary">IA</p>
-                        <p className="text-xs text-muted-foreground">Real con Gemini</p>
+                        <p className="text-xs text-muted-foreground">Icebreakers con Gemini</p>
                     </div>
                     <div className="text-center">
                         <p className="text-3xl font-bold text-primary">100%</p>

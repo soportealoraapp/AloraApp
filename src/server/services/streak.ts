@@ -13,7 +13,7 @@ const STREAK_REWARDS = [
     { days: 3, reward: 'Boost ligero de visibilidad' },
     { days: 5, reward: 'Boost completo de perfil' },
     { days: 10, reward: 'Insight de compatibilidad premium' },
-    { days: 15, reward: 'Análisis de perfil con IA' },
+    { days: 15, reward: 'Insight de perfil premium' },
     { days: 30, reward: 'Badge especial de dedicación' },
 ];
 

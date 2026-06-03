@@ -242,6 +242,16 @@ export default function DiscoverPage() {
           )}
         </div>
         <div className="flex items-center gap-1">
+          <LikesCounter
+            dailyLikesUsed={currentUserProfile?.dailyLikesUsed ?? 0}
+            dailyLikesLimit={SWIPE_LIMIT}
+            resetAt={
+              currentUserProfile?.dailyLikesResetAt
+                ? new Date(currentUserProfile.dailyLikesResetAt)
+                : new Date(new Date().setHours(24, 0, 0, 0))
+            }
+            subscriptionStatus={currentUserProfile?.subscriptionStatus ?? 'free'}
+          />
           <Button
             variant="ghost"
             size="icon"
@@ -250,13 +260,13 @@ export default function DiscoverPage() {
           >
             {browseMode === 'swipe' ? <LayoutGrid className="h-5 w-5 text-muted-foreground" /> : <CreditCard className="h-5 w-5 text-muted-foreground" />}
           </Button>
-          <Button variant="ghost" size="icon" onClick={handleRewind} disabled={!lastSwipeRef.current || rewinding} title="Deshacer último swipe">
+          <Button variant="ghost" size="icon" onClick={handleRewind} disabled={!lastSwipeRef.current || rewinding} title="Rewind: deshace el último swipe (1/día gratis, 3/día Plus)">
             <RotateCcw className="h-5 w-5 text-muted-foreground" />
           </Button>
-          <Button variant="ghost" size="icon" onClick={() => setFilterOpen(true)}>
+          <Button variant="ghost" size="icon" onClick={() => setFilterOpen(true)} title="Filtros de búsqueda">
             <SlidersHorizontal className="h-5 w-5 text-muted-foreground" />
           </Button>
-          <Button variant="ghost" size="icon" onClick={() => refresh()}>
+          <Button variant="ghost" size="icon" onClick={() => refresh()} title="Refrescar perfiles">
             <RefreshCcw className="h-5 w-5 text-muted-foreground" />
           </Button>
         </div>
@@ -381,16 +391,6 @@ export default function DiscoverPage() {
 
       {/* Daily Question and Compatibility - shown below the feed */}
       <div className="px-4 pb-4 max-w-sm mx-auto w-full space-y-3">
-        <LikesCounter
-          dailyLikesUsed={currentUserProfile?.dailyLikesUsed ?? 0}
-          dailyLikesLimit={SWIPE_LIMIT}
-          resetAt={
-            currentUserProfile?.dailyLikesResetAt
-              ? new Date(currentUserProfile.dailyLikesResetAt)
-              : new Date(new Date().setHours(24, 0, 0, 0))
-          }
-          subscriptionStatus={currentUserProfile?.subscriptionStatus ?? 'free'}
-        />
         <DailyCompatibilityCard />
         <DailyQuestionCard />
       </div>

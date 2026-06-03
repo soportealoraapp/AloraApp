@@ -3,26 +3,28 @@
 import { PlanTier, Subscription } from '@/lib/domain/subscription';
 import { prisma } from '@/lib/prisma';
 import { revalidatePath } from 'next/cache';
+import { grantPlus, revokePlus, ensureSubscriptionState } from '@/lib/subscription-helper';
 
 // Simplified Subscription Management for v3.0 (Stored on Profile mostly)
 export async function getUserSubscription(userId: string): Promise<Subscription | null> {
     try {
+        const state = await ensureSubscriptionState(userId);
+        if (state.subscriptionStatus === 'free') return null;
+
         const profile = await prisma.profile.findUnique({
             where: { userId },
-            select: { subscriptionStatus: true }
+            select: { subscriptionStartedAt: true, subscriptionExpiresAt: true },
         });
-
-        if (!profile || profile.subscriptionStatus === 'free') return null;
 
         return {
             id: 'sub_' + userId,
             userId,
-            plan: profile.subscriptionStatus as PlanTier,
-            startDate: new Date(),
-            endDate: new Date(new Date().setFullYear(new Date().getFullYear() + 1)), // Mock 1 year
+            plan: state.subscriptionStatus as PlanTier,
+            startDate: profile?.subscriptionStartedAt || new Date(),
+            endDate: profile?.subscriptionExpiresAt || new Date(),
             status: 'active',
             autoRenew: true,
-            stripeSubscriptionId: 'mock_stripe_id'
+            stripeSubscriptionId: 'stripe_' + userId,
         };
     } catch (e) {
         console.error(e);
@@ -32,11 +34,7 @@ export async function getUserSubscription(userId: string): Promise<Subscription 
 
 export async function createSubscription(userId: string, plan: PlanTier, stripeId?: string) {
     try {
-        // Update Profile status
-        await prisma.profile.update({
-            where: { userId },
-            data: { subscriptionStatus: plan }
-        });
+        await grantPlus(userId, 30);
 
         revalidatePath('/profile');
         revalidatePath('/settings/subscription');
@@ -48,10 +46,7 @@ export async function createSubscription(userId: string, plan: PlanTier, stripeI
 
 export async function cancelSubscription(userId: string) {
     try {
-        await prisma.profile.update({
-            where: { userId },
-            data: { subscriptionStatus: 'free' }
-        });
+        await revokePlus(userId);
 
         revalidatePath('/settings/subscription');
     } catch (e) {

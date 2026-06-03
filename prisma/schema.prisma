@@ -125,9 +125,11 @@ model Profile {
   longitude   Float?
 
   // Status
-  isVerified         Boolean  @default(false)
-  subscriptionStatus String   @default("free") // free, plus
-  trustStatus        String   @default("clean") // clean, watchlist, banned
+  isVerified             Boolean   @default(false)
+  subscriptionStatus     String    @default("free") // free, plus
+  subscriptionStartedAt  DateTime?
+  subscriptionExpiresAt  DateTime?
+  trustStatus            String    @default("clean") // clean, watchlist, banned
   reputationScore    Int      @default(100) // v3.9.0 Secret Score
   isShadowBanned     Boolean  @default(false) // v3.9.1 Shadow Moderation
   incomplete_media   Boolean  @default(false) // v3.9.2 Signup UX logic

@@ -134,7 +134,7 @@ export default function SettingsPage() {
                                 <ChevronRight className="w-5 h-5 text-muted-foreground" />
                             </div>
                         </Link>
-                        <a href="https://docs.google.com/document/d/1dFjQ4aZqW2t9hVv0n8v7b3x9kLmZqYjR/edit" target="_blank" rel="noopener noreferrer">
+                        <Link href="/terms">
                             <div className="flex items-center justify-between p-3 rounded-lg hover:bg-secondary -mx-3">
                                 <div className="flex items-center gap-3">
                                 <FileText className="w-5 h-5 text-muted-foreground" />
@@ -142,8 +142,8 @@ export default function SettingsPage() {
                                 </div>
                                 <ChevronRight className="w-5 h-5 text-muted-foreground" />
                             </div>
-                        </a>
-                        <a href="https://docs.google.com/document/d/1dFjQ4aZqW2t9hVv0n8v7b3x9kLmZqYjR/edit" target="_blank" rel="noopener noreferrer">
+                        </Link>
+                        <Link href="/privacy">
                             <div className="flex items-center justify-between p-3 rounded-lg hover:bg-secondary -mx-3">
                                 <div className="flex items-center gap-3">
                                 <FileText className="w-5 h-5 text-muted-foreground" />
@@ -151,7 +151,7 @@ export default function SettingsPage() {
                                 </div>
                                 <ChevronRight className="w-5 h-5 text-muted-foreground" />
                             </div>
-                        </a>
+                        </Link>
                     </CardContent>
                 </Card>
 

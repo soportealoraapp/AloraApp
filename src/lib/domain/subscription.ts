@@ -43,7 +43,7 @@ export const PLANS: Record<PlanTier, Plan> = {
             'Filtros de búsqueda',
             'Chat ilimitado',
             'Compatibilidad básica',
-            'IA y quizzes',
+            'Icebreakers y quizzes',
             'Seguridad y bloqueo',
             '1 boost cada 5 días de racha'
         ]

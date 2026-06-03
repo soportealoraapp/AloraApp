@@ -94,7 +94,7 @@ export function LegalConsent() {
                     <div className="bg-muted/50 p-4 rounded-2xl text-sm max-h-[200px] overflow-y-auto space-y-3">
                         <p><strong>Seguridad:</strong> Hemos reforzado nuestro sistema de reportes y bloqueo real.</p>
                         <p><strong>Privacidad:</strong> Tus datos ahora están protegidos con encriptación avanzada en reposo.</p>
-                        <p><strong>Moderación:</strong> Alora utiliza IA para detectar y prevenir el acoso en tiempo real.</p>
+                        <p><strong>Moderación:</strong> Alora cuenta con herramientas de reporte y bloqueo para mantener un entorno seguro.</p>
                         <p><em>Al continuar, aceptas que Alora es una comunidad basada en el respeto mutuo.</em></p>
                     </div>
 

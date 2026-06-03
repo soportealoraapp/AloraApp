@@ -1,4 +1,5 @@
 import { prisma } from '@/lib/prisma';
+import { grantPlus } from '@/lib/subscription-helper';
 
 export interface ReferralReward {
     type: 'boost' | 'badge' | 'premium_days';
@@ -80,10 +81,7 @@ export async function grantReferralReward(userId: string, rewardType: string) {
             break;
         }
         case 'premium_days': {
-            await prisma.profile.update({
-                where: { userId },
-                data: { subscriptionStatus: 'plus' },
-            });
+            await grantPlus(userId, 30);
             break;
         }
     }

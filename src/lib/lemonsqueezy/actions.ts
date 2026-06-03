@@ -4,6 +4,7 @@ import { prisma } from '@/lib/prisma';
 import { revalidatePath } from 'next/cache';
 import { createLemonSqueezyClient } from './client';
 import { PLAN_VARIANTS } from './types';
+import { grantPlus, revokePlus } from '@/lib/subscription-helper';
 
 /**
  * Create a checkout session for Alora+ subscription.
@@ -34,10 +35,7 @@ export async function createCheckout(userId: string, email: string) {
  */
 export async function handlePaymentSuccess(userId: string, subscriptionId: string) {
     try {
-        await prisma.profile.update({
-            where: { userId },
-            data: { subscriptionStatus: 'plus' }
-        });
+        await grantPlus(userId, 30);
 
         revalidatePath('/profile');
         revalidatePath('/settings/subscription');
@@ -53,10 +51,7 @@ export async function handlePaymentSuccess(userId: string, subscriptionId: strin
  */
 export async function handleSubscriptionCancel(userId: string) {
     try {
-        await prisma.profile.update({
-            where: { userId },
-            data: { subscriptionStatus: 'free' }
-        });
+        await revokePlus(userId);
 
         revalidatePath('/profile');
         revalidatePath('/settings/subscription');

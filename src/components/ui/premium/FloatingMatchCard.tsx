@@ -100,7 +100,8 @@ export function FloatingMatchCard({ profile, onSwipe, onFlechado, compatibility,
                     <button
                         onClick={(e) => { e.stopPropagation(); onFlechado(); }}
                         className="absolute top-4 left-4 z-20 bg-blue-500 hover:bg-blue-600 text-white rounded-full w-12 h-12 flex items-center justify-center shadow-lg transition-transform hover:scale-110 active:scale-95"
-                        aria-label="Flechado"
+                        aria-label="Flechado (superlike)"
+                        title="Flechado: envío prioritario. Le llegará como superlike destacado."
                     >
                         <Star className="h-5 w-5 fill-white" />
                     </button>

@@ -207,7 +207,7 @@ export default function UserProfilePage() {
                                                 alt={`Foto de ${profile.displayName} ${index + 1}`}
                                                 fill
                                                 className="object-cover"
-                                                data-ai-hint="person"
+                                                
                                                 priority={index === 0}
                                             />
                                         </div>
@@ -224,7 +224,7 @@ export default function UserProfilePage() {
                             width={600}
                             height={800}
                             className="w-full aspect-[3/4] object-cover"
-                            data-ai-hint="person"
+                            
                             priority
                         />
                     )}
@@ -377,7 +377,7 @@ export default function UserProfilePage() {
                                                 alt={`Galería de ${profile.displayName} ${index + 1}`}
                                                 fill
                                                 className="object-cover"
-                                                data-ai-hint="person"
+                                                
                                             />
                                         </div>
                                     ))}
@@ -464,6 +464,7 @@ export default function UserProfilePage() {
                                     )}
                                     onClick={handleSuperMatch}
                                     disabled={isSuperMatched || processing}
+                                    title="Flechado: envío prioritario destacado"
                                 >
                                     {processing ? (
                                         <Loader2 className="h-5 w-5 mr-2 animate-spin" />

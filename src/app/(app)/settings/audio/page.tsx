@@ -52,7 +52,7 @@ export default function AudioSettingsPage() {
             <Card>
                 <CardHeader>
                     <CardTitle>Análisis de Emociones</CardTitle>
-                    <CardDescription>Permitir que la IA detecte el tono emocional para mejorar la comunicación.</CardDescription>
+                    <CardDescription>Etiquetar mensajes de voz con indicadores de estado de ánimo para mejorar la comunicación.</CardDescription>
                 </CardHeader>
                 <CardContent className="flex justify-between items-center">
                     <span className="text-sm font-medium">Habilitar Insights Emocionales</span>

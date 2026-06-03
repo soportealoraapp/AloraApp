@@ -59,7 +59,7 @@ export function DailyPicks() {
                     <span className="font-bold text-sm">Para ti hoy</span>
                     <PlusBadge label="Avanzado" />
                 </div>
-                <span className="text-[10px] text-muted-foreground">Seleccionados por IA</span>
+                <span className="text-[10px] text-muted-foreground">Basado en compatibilidad</span>
             </div>
             <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
                 {picks.map(pick => (

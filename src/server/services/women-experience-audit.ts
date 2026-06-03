@@ -6,7 +6,6 @@ export interface WomenExperienceMetrics {
     avgReplyRate: number; // percentage
     avgConversationLength: number; // messages
     verificationRate: number;
-    safetyScore: number; // based on reports, blocks
     vsMale: {
         timeToMatch: number;
         replyRate: number;
@@ -164,7 +163,6 @@ export async function getWomenExperienceAudit(): Promise<WomenExperienceMetrics>
         avgReplyRate: Math.round(avgReplyRate * 10) / 10,
         avgConversationLength: Math.round(avgConversationLength * 10) / 10,
         verificationRate: Math.round(verificationRate * 10) / 10,
-        safetyScore: 85, // based on existing safety systems
         vsMale: {
             timeToMatch: maleMatchCount > 0 ? Math.round((totalMaleMatchTime / maleMatchCount) * 10) / 10 : 0,
             replyRate: maleTotalChecked > 0 ? Math.round((maleReplies / maleTotalChecked) * 100 * 10) / 10 : 0,

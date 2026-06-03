@@ -202,7 +202,7 @@ export default function QuizPage() {
                                             <div key={profile.id} className="flex items-center justify-between rounded-lg border p-3">
                                                 <div className="flex items-center gap-3 min-w-0">
                                                     <Avatar className="h-12 w-12 border flex-shrink-0">
-                                                        <AvatarImage src={profile.photo} alt={profile.name} data-ai-hint="person" />
+                                                        <AvatarImage src={profile.photo} alt={profile.name}  />
                                                         <AvatarFallback>{profile.name?.charAt(0) || '?'}</AvatarFallback>
                                                     </Avatar>
                                                     <div className="min-w-0">

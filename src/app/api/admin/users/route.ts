@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { requireAdmin } from '@/lib/middleware/admin';
+import { grantPlus, revokePlus } from '@/lib/subscription-helper';
 
 export async function GET(request: NextRequest) {
     const auth = await requireAdmin();
@@ -83,6 +84,12 @@ export async function PATCH(request: NextRequest) {
             case 'verify':
                 await prisma.profile.update({ where: { userId }, data: { isVerified: true } });
                 break;
+            case 'grant_plus':
+                await grantPlus(userId, 30);
+                break;
+            case 'revoke_plus':
+                await revokePlus(userId);
+                break;
             case 'set_role':
                 if (!['user', 'moderator', 'admin'].includes(value)) {
                     return NextResponse.json({ error: 'Invalid role' }, { status: 400 });
@@ -95,7 +102,7 @@ export async function PATCH(request: NextRequest) {
 
         await prisma.auditLog.create({
             data: {
-                userId: auth.user.id,
+                userId: auth.user!.id,
                 action: `admin_user_${action}`,
                 details: { targetUserId: userId, value, reason },
             }
