@@ -5,6 +5,7 @@ import { UserProfile } from '@/lib/domain/types';
 import { getCompatibilityScore } from './compatibility/getCompatibilityScore';
 import { calculateCompleteness } from '@/lib/utils/completeness';
 import { getDistance } from '@/lib/location';
+import { getFlags } from '@/lib/product/flags';
 
 export interface FeedItem {
     profile: UserProfile;
@@ -380,17 +381,18 @@ export async function getDynamicFeed(
 
                 const completeness = calculateCompleteness(profile);
                 const deepScore = await getCompatibilityScore(currentUserId, profile.id);
+                const flags = await getFlags(currentUserId);
 
                 let totalScore = deepScore.score * 0.5;
 
                 // --- SCORING WEIGHTS ---
-                if (cp.isVerified) totalScore += 20;
+                if (cp.isVerified) totalScore += flags.verificationPriority;
 
                 if (completeness >= 80) totalScore += 20;
                 else if (completeness >= 60) totalScore += 10;
                 else if (completeness < 50) totalScore *= 0.5;
 
-                if (cp.voiceIntro) totalScore += 15;
+                if (cp.voiceIntro) totalScore += flags.voiceIntroBoost;
 
                 if (cp.trustStatus === 'watchlist') totalScore *= 0.8;
 

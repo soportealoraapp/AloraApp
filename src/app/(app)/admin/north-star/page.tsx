@@ -9,6 +9,16 @@ import {
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
+interface ExperimentSummary {
+  id: string;
+  name: string;
+  status: string;
+  metric: string;
+  _count: { assignments: number };
+  variants: { id: string; name: string; trafficPct: number }[];
+  results: { winner: string | null; confidence: number | null; variants: { variantName: string; metricValue: number; userCount: number }[] } | null;
+}
+
 interface SegmentMetric {
   label: string;
   count: number;
@@ -49,6 +59,7 @@ export default function NorthStarDashboard() {
   const [metrics, setMetrics] = useState<ProductMetrics | null>(null);
   const [retention, setRetention] = useState<ExtendedRetentionRow[]>([]);
   const [activationInsights, setActivationInsights] = useState<any>(null);
+  const [experiments, setExperiments] = useState<ExperimentSummary[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -56,11 +67,13 @@ export default function NorthStarDashboard() {
       fetch('/api/admin/product-metrics?days=30').then(r => r.json()),
       fetch('/api/admin/retention-extended?days=30').then(r => r.json()),
       fetch('/api/admin/activation-insights').then(r => r.json()),
+      fetch('/api/admin/experiments').then(r => r.json()),
     ])
-      .then(([metricsData, retentionData, activationData]) => {
+      .then(([metricsData, retentionData, activationData, experimentsData]) => {
         setMetrics(metricsData);
         setRetention(retentionData.rows || []);
         setActivationInsights(activationData);
+        if (Array.isArray(experimentsData)) setExperiments(experimentsData);
       })
       .catch(console.error)
       .finally(() => setLoading(false));
@@ -237,6 +250,51 @@ export default function NorthStarDashboard() {
           </div>
         </CardContent>
       </Card>
+
+      {/* Running Experiments */}
+      {experiments.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base flex items-center gap-2">
+              <BarChart3 className="h-4 w-4 text-purple-500" />
+              Experimentos Activos ({experiments.filter(e => e.status === 'running').length})
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              {experiments.filter(e => e.status === 'running').slice(0, 4).map(exp => {
+                const best = exp.results?.variants?.reduce((a, b) => a.metricValue > b.metricValue ? a : b);
+                return (
+                  <div key={exp.id} className="p-3 rounded-xl bg-purple-50 border border-purple-100">
+                    <div className="flex items-center justify-between mb-2">
+                      <p className="text-sm font-bold">{exp.name}</p>
+                      <span className="text-[10px] bg-green-100 text-green-700 px-2 py-0.5 rounded-full font-medium">
+                        {exp._count.assignments} users
+                      </span>
+                    </div>
+                    <p className="text-[10px] text-muted-foreground mb-1">Métrica: {exp.metric}</p>
+                    {best && (
+                      <div className="flex items-center gap-2 text-xs">
+                        <span className="text-purple-600 font-medium">Lider: {best.variantName}</span>
+                        <span className="text-muted-foreground">({best.metricValue})</span>
+                        {exp.results?.winner && exp.results.confidence && exp.results.confidence > 80 && (
+                          <span className="text-green-600 font-bold">🏆 Ganador</span>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+            <button
+              onClick={() => router.push('/admin/experiments')}
+              className="mt-3 text-xs text-purple-600 font-medium hover:underline"
+            >
+              Gestionar experimentos →
+            </button>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Extended Retention */}
       <Card>

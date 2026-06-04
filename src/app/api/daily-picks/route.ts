@@ -179,14 +179,18 @@ export async function GET(request: NextRequest) {
         scored.sort((a, b) => b.score - a.score);
         const topPicks = scored.slice(0, 3);
 
-        // Replace reasons with real compatibility engine explanations
-        const { calculateCompatibility } = await import('@/lib/compatibility/engine');
-        await Promise.all(topPicks.map(async (pick) => {
-            const compat = await calculateCompatibility(user.id, pick.userId);
-            if (compat.explanations.length > 0) {
-                pick.reason = compat.explanations.slice(0, 2).join(' · ');
-            }
-        }));
+        // Replace reasons with real compatibility engine explanations (if flag enabled)
+        const { getFlag } = await import('@/lib/product/flags');
+        const reasoning = await getFlag(user.id, 'dailyPickReasoning');
+        if (reasoning === 'engine') {
+            const { calculateCompatibility } = await import('@/lib/compatibility/engine');
+            await Promise.all(topPicks.map(async (pick) => {
+                const compat = await calculateCompatibility(user.id, pick.userId);
+                if (compat.explanations.length > 0) {
+                    pick.reason = compat.explanations.slice(0, 2).join(' · ');
+                }
+            }));
+        }
 
         for (const pick of topPicks) {
             await prisma.dailyPick.upsert({

@@ -60,6 +60,7 @@ export default function DiscoverPage() {
 
   const [activationScore, setActivationScore] = useState<number | null>(null);
   const [activationTasks, setActivationTasks] = useState<{ id: string; title: string; completed: boolean; rewardText: string }[]>([]);
+  const [activationCardEnabled, setActivationCardEnabled] = useState(true);
 
   useEffect(() => {
     fetch('/api/discover/activation')
@@ -68,6 +69,14 @@ export default function DiscoverPage() {
         if (data.score) {
           setActivationScore(data.score.score);
           setActivationTasks(data.tasks || []);
+        }
+      })
+      .catch(() => {});
+    fetch('/api/experiments/flags')
+      .then(r => r.json())
+      .then(data => {
+        if (data.activationCardEnabled !== undefined) {
+          setActivationCardEnabled(data.activationCardEnabled);
         }
       })
       .catch(() => {});
@@ -316,7 +325,7 @@ export default function DiscoverPage() {
         </div>
       )}
 
-      {activationScore !== null && activationScore < 80 && (
+      {activationScore !== null && activationScore < 80 && activationCardEnabled && (
         <div className="px-4 pt-2">
           <Card className="p-4 bg-gradient-to-br from-primary/5 to-primary/10 border-primary/20">
             <div className="flex items-center justify-between mb-3">

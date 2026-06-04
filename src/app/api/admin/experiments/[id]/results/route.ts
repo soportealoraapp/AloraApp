@@ -1,0 +1,18 @@
+import { NextResponse } from 'next/server';
+import { requireAdmin } from '@/lib/middleware/admin';
+import { computeExperimentResults } from '@/server/services/experiment-results';
+
+export async function GET(request: Request, { params }: { params: { id: string } }) {
+  const auth = await requireAdmin();
+  if (auth.error) {
+    return NextResponse.json({ error: auth.error }, { status: auth.status });
+  }
+
+  try {
+    const results = await computeExperimentResults(params.id);
+    return NextResponse.json(results);
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'Internal server error';
+    return NextResponse.json({ error: message }, { status: 400 });
+  }
+}
