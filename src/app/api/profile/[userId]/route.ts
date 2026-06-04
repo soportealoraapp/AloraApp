@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { logger } from '@/lib/logger';
 import { recordProfileVisit } from '@/server/services/visit-tracker';
 import { notifyProfileVisit } from '@/server/services/push';
 import { getLatestAnswerForUserById } from '@/server/services/daily-question';
@@ -51,7 +52,7 @@ export async function GET(
             });
 
             if (!recentVisit || recentVisit.createdAt < new Date(Date.now() - 4 * 60 * 60 * 1000)) {
-                notifyProfileVisit(targetUserId, visitorProfile?.displayName || 'Alguien').catch(() => {});
+                notifyProfileVisit(targetUserId, visitorProfile?.displayName || 'Alguien').catch(() => logger.warn('Failed to notify profile visit'));
             }
         }
 

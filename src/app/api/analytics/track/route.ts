@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { trackEvent } from '@/server/services/analytics';
+import { logger } from '@/lib/logger';
 
 export async function POST(request: NextRequest) {
     const { createClient } = await import('@/lib/supabase/server');
@@ -17,7 +18,7 @@ export async function POST(request: NextRequest) {
         // Handle batch events (from client flush)
         if (body.events && Array.isArray(body.events)) {
             for (const evt of body.events) {
-                await trackEvent(user.id, evt.event, evt.metadata, body.sessionId).catch(() => {});
+                await trackEvent(user.id, evt.event, evt.metadata, body.sessionId).catch((err) => logger.warn('Analytics track failed', { metadata: { event: evt.event, userId: user.id, error: String(err) } }));
             }
             return NextResponse.json({ success: true, processed: body.events.length });
         }

@@ -160,7 +160,7 @@ export async function GET(request: NextRequest) {
             if (c.lastActiveAt && new Date(c.lastActiveAt) > oneDayAgo) reasons.push('Activo hoy');
 
             return {
-                userId: c.userId,
+                id: c.userId,
                 displayName: c.displayName,
                 age: c.age,
                 city: c.city,
@@ -185,7 +185,7 @@ export async function GET(request: NextRequest) {
         if (reasoning === 'engine') {
             const { calculateCompatibility } = await import('@/lib/compatibility/engine');
             await Promise.all(topPicks.map(async (pick) => {
-                const compat = await calculateCompatibility(user.id, pick.userId);
+                const compat = await calculateCompatibility(user.id, pick.id);
                 if (compat.explanations.length > 0) {
                     pick.reason = compat.explanations.slice(0, 2).join(' · ');
                 }
@@ -197,14 +197,14 @@ export async function GET(request: NextRequest) {
                 where: {
                     userId_profileId_date: {
                         userId: user.id,
-                        profileId: pick.userId,
+                        profileId: pick.id,
                         date: today,
                     },
                 },
                 update: { score: pick.score, reason: pick.reason },
                 create: {
                     userId: user.id,
-                    profileId: pick.userId,
+                    profileId: pick.id,
                     score: pick.score,
                     reason: pick.reason,
                     date: today,

@@ -55,26 +55,26 @@ export function VoiceRecorder({ onStop, onCancel }: { onStop: (blob: Blob, durat
     };
 
     return (
-        <Card className="p-4 flex items-center gap-4 bg-gray-50 border-pink-100">
+        <Card className="p-4 flex items-center gap-4 bg-muted/50 border-border">
             {recording ? (
                 <div className="flex items-center gap-4 w-full justify-between">
-                    <div className="flex items-center gap-2 text-red-500 animate-pulse font-mono">
-                        <div className="w-3 h-3 bg-red-500 rounded-full"></div>
+                    <div className="flex items-center gap-2 text-destructive animate-pulse font-mono">
+                        <div className="w-3 h-3 bg-destructive rounded-full"></div>
                         Rec {formatTime(duration)}
                     </div>
                     <div className="flex gap-2">
                         {onCancel && (
-                            <Button variant="ghost" size="icon" onClick={() => { stopRecording(); onCancel(); }} className="text-gray-500 hover:text-red-600">
+                            <Button variant="ghost" size="icon" onClick={() => { stopRecording(); onCancel(); }} className="text-muted-foreground hover:text-destructive">
                                 <Trash2 className="w-5 h-5" />
                             </Button>
                         )}
-                        <Button variant="ghost" size="icon" onClick={stopRecording} className="bg-red-100 text-red-600 hover:bg-red-200">
+                        <Button variant="ghost" size="icon" onClick={stopRecording} className="bg-destructive/10 text-destructive hover:bg-destructive/20">
                             <Square className="w-5 h-5 fill-current" />
                         </Button>
                     </div>
                 </div>
             ) : (
-                <Button variant="ghost" className="text-gray-500 hover:text-pink-500 hover:bg-pink-50 w-full justify-start gap-2" onClick={startRecording}>
+                <Button variant="ghost" className="text-muted-foreground hover:text-primary hover:bg-primary/5 w-full justify-start gap-2" onClick={startRecording}>
                     <Mic className="w-5 h-5" />
                     <span className="text-xs">Grabar Audio</span>
                 </Button>

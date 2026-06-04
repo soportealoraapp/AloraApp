@@ -1,0 +1,76 @@
+﻿.next/types/app/(app)/profile/compatibility/[candidateId]/page.ts(34,29): error TS2344: Type '{ params: { candidateId: string; }; }' does not satisfy the constraint 'PageProps'.
+  Types of property 'params' are incompatible.
+    Type '{ candidateId: string; }' is missing the following properties from type 'Promise<any>': then, catch, finally, [Symbol.toStringTag]
+.next/types/app/api/admin/analytics/route.ts(64,7): error TS2344: Type '{ __tag__: "GET"; __return_type__: Promise<{ error: string; status: number; user?: undefined; role?: undefined; } | { user: User; role: string; error?: undefined; status?: undefined; } | NextResponse<unknown>>; }' does not satisfy the constraint '{ __tag__: "GET"; __return_type__: void | Response | Promise<void | Response>; }'.
+  Types of property '__return_type__' are incompatible.
+    Type 'Promise<{ error: string; status: number; user?: undefined; role?: undefined; } | { user: User; role: string; error?: undefined; status?: undefined; } | NextResponse<unknown>>' is not assignable to type 'void | Response | Promise<void | Response>'.
+      Type 'Promise<{ error: string; status: number; user?: undefined; role?: undefined; } | { user: User; role: string; error?: undefined; status?: undefined; } | NextResponse<unknown>>' is not assignable to type 'Promise<void | Response>'.
+        Type '{ error: string; status: number; user?: undefined; role?: undefined; } | { user: User; role: string; error?: undefined; status?: undefined; } | NextResponse<unknown>' is not assignable to type 'void | Response'.
+          Type '{ error: string; status: number; user?: undefined; role?: undefined; }' is not assignable to type 'void | Response'.
+            Type '{ error: string; status: number; user?: undefined; role?: undefined; }' is missing the following properties from type 'Response': headers, ok, redirected, statusText, and 11 more.
+.next/types/app/api/admin/experiments/[id]/results/route.ts(49,7): error TS2344: Type '{ __tag__: "GET"; __param_position__: "second"; __param_type__: { params: { id: string; }; }; }' does not satisfy the constraint 'ParamCheck<RouteContext>'.
+  The types of '__param_type__.params' are incompatible between these types.
+    Type '{ id: string; }' is missing the following properties from type 'Promise<any>': then, catch, finally, [Symbol.toStringTag]
+.next/types/app/api/admin/experiments/[id]/route.ts(205,7): error TS2344: Type '{ __tag__: "PUT"; __param_position__: "second"; __param_type__: { params: { id: string; }; }; }' does not satisfy the constraint 'ParamCheck<RouteContext>'.
+  The types of '__param_type__.params' are incompatible between these types.
+    Type '{ id: string; }' is missing the following properties from type 'Promise<any>': then, catch, finally, [Symbol.toStringTag]
+.next/types/app/api/admin/experiments/[id]/route.ts(244,7): error TS2344: Type '{ __tag__: "DELETE"; __param_position__: "second"; __param_type__: { params: { id: string; }; }; }' does not satisfy the constraint 'ParamCheck<RouteContext>'.
+  The types of '__param_type__.params' are incompatible between these types.
+    Type '{ id: string; }' is missing the following properties from type 'Promise<any>': then, catch, finally, [Symbol.toStringTag]
+.next/types/app/api/chat/[matchId]/route.ts(49,7): error TS2344: Type '{ __tag__: "GET"; __param_position__: "second"; __param_type__: { params: { matchId: string; }; }; }' does not satisfy the constraint 'ParamCheck<RouteContext>'.
+  The types of '__param_type__.params' are incompatible between these types.
+    Type '{ matchId: string; }' is missing the following properties from type 'Promise<any>': then, catch, finally, [Symbol.toStringTag]
+src/ai/compatibility-v2/engine.ts(743,5): error TS2552: Cannot find name 'chemB'. Did you mean 'chemA'?
+src/ai/compatibility-v2/engine.ts(785,21): error TS2552: Cannot find name 'chemB'. Did you mean 'chemA'?
+src/ai/copilot/conversation-quality.ts(217,58): error TS2448: Block-scoped variable 'metrics' used before its declaration.
+src/ai/copilot/conversation-quality.ts(217,58): error TS2454: Variable 'metrics' is used before being assigned.
+src/ai/copilot/conversation-quality.ts(217,67): error TS2448: Block-scoped variable 'flags' used before its declaration.
+src/ai/copilot/conversation-quality.ts(217,67): error TS2454: Variable 'flags' is used before being assigned.
+src/ai/copilot/relationship-copilot.ts(380,13): error TS2322: Type '"milestone"' is not assignable to type '"warning" | "positive" | "neutral"'.
+src/ai/emotion/companion.ts(1,33): error TS2307: Cannot find module '@/lib/firebase/matching-service' or its corresponding type declarations.
+src/app/(app)/admin/verifications/page.tsx(26,34): error TS2339: Property 'json' does not exist on type 'void'.
+src/app/(app)/admin/verifications/page.tsx(36,53): error TS2554: Expected 1 arguments, but got 2.
+src/app/(app)/chat/[id]/page.tsx(77,9): error TS2448: Block-scoped variable 'otherUserId' used before its declaration.
+src/app/api/admin/activation-insights/route.ts(42,67): error TS1117: An object literal cannot have multiple properties with the same name.
+src/app/api/admin/activation-insights/route.ts(56,33): error TS1117: An object literal cannot have multiple properties with the same name.
+src/app/api/admin/reports/route.ts(134,25): error TS18048: 'auth.user' is possibly 'undefined'.
+src/app/api/admin/verifications/route.ts(63,57): error TS18048: 'auth.user' is possibly 'undefined'.
+src/app/api/admin/verifications/route.ts(81,94): error TS18048: 'auth.user' is possibly 'undefined'.
+src/app/api/admin/verifications/route.ts(98,25): error TS18048: 'auth.user' is possibly 'undefined'.
+src/app/api/ai/bio-improver/route.ts(26,17): error TS2353: Object literal may only specify known properties, and 'timestamp' does not exist in type 'AnalyticsEventWhereInput'.
+src/app/api/ai/bio-improver/route.ts(55,66): error TS2353: Object literal may only specify known properties, and 'timestamp' does not exist in type 'Without<AnalyticsEventCreateInput, AnalyticsEventUncheckedCreateInput> & AnalyticsEventUncheckedCreateInput'.
+src/app/api/ai/profile-coach/route.ts(26,17): error TS2353: Object literal may only specify known properties, and 'timestamp' does not exist in type 'AnalyticsEventWhereInput'.
+src/app/api/ai/profile-coach/route.ts(58,67): error TS2353: Object literal may only specify known properties, and 'timestamp' does not exist in type 'Without<AnalyticsEventCreateInput, AnalyticsEventUncheckedCreateInput> & AnalyticsEventUncheckedCreateInput'.
+src/app/api/uploadthing/core.ts(7,31): error TS2339: Property 'message' does not exist on type 'UploadThingError<{ message: string; }>'.
+src/app/api/uploadthing/core.ts(40,27): error TS2339: Property 'url' does not exist on type 'UploadedFileData'.
+src/app/api/uploadthing/core.ts(52,61): error TS2339: Property 'url' does not exist on type 'UploadedFileData'.
+src/app/api/uploadthing/core.ts(64,27): error TS2339: Property 'url' does not exist on type 'UploadedFileData'.
+src/app/api/user/emotional-onboarding/route.ts(25,17): error TS2353: Object literal may only specify known properties, and 'timestamp' does not exist in type 'Without<AnalyticsEventCreateInput, AnalyticsEventUncheckedCreateInput> & AnalyticsEventUncheckedCreateInput'.
+src/app/api/verification/submit/route.ts(24,13): error TS2322: Type '{ userId: string; }' is not assignable to type 'VerificationSubmissionWhereUniqueInput'.
+  Type '{ userId: string; }' is not assignable to type '{ id: string; } & { id?: string | undefined; AND?: VerificationSubmissionWhereInput | VerificationSubmissionWhereInput[] | undefined; ... 10 more ...; user?: (Without<...> & UserWhereInput) | ... 1 more ... | undefined; }'.
+    Property 'id' is missing in type '{ userId: string; }' but required in type '{ id: string; }'.
+src/app/api/verification/submit/route.ts(29,17): error TS2322: Type '{ userId: string; }' is not assignable to type 'VerificationSubmissionWhereUniqueInput'.
+  Type '{ userId: string; }' is not assignable to type '{ id: string; } & { id?: string | undefined; AND?: VerificationSubmissionWhereInput | VerificationSubmissionWhereInput[] | undefined; ... 10 more ...; user?: (Without<...> & UserWhereInput) | ... 1 more ... | undefined; }'.
+    Property 'id' is missing in type '{ userId: string; }' but required in type '{ id: string; }'.
+src/app/partners/index/page.tsx(4,24): error TS2305: Module '"@/server/actions/partners/actions"' has no exported member 'Partner'.
+src/app/partners/index/page.tsx(41,47): error TS7006: Parameter 'perk' implicitly has an 'any' type.
+src/app/partners/index/page.tsx(41,53): error TS7006: Parameter 'i' implicitly has an 'any' type.
+src/components/onboarding/StepPhotos.tsx(70,9): error TS2322: Type '(error: Error) => void' is not assignable to type '(e: UploadThingError<{ message: any; }>) => MaybePromise<void>'.
+  Types of parameters 'error' and 'e' are incompatible.
+    Property 'message' is missing in type 'UploadThingError<{ message: any; }>' but required in type 'Error'.
+src/components/ui/premium/FloatingMatchCard.tsx(154,30): error TS2304: Cannot find name 'Music'.
+src/components/verification/VerificationUpload.tsx(101,9): error TS2322: Type '(error: Error) => void' is not assignable to type '(e: UploadThingError<{ message: any; }>) => MaybePromise<void>'.
+  Types of parameters 'error' and 'e' are incompatible.
+    Property 'message' is missing in type 'UploadThingError<{ message: any; }>' but required in type 'Error'.
+src/lib/mobile.ts(31,55): error TS2307: Cannot find module '@capacitor/haptics' or its corresponding type declarations.
+src/lib/mobile.ts(39,55): error TS2307: Cannot find module '@capacitor/haptics' or its corresponding type declarations.
+src/lib/mobile.ts(47,55): error TS2307: Cannot find module '@capacitor/haptics' or its corresponding type declarations.
+src/lib/mobile.ts(55,60): error TS2307: Cannot find module '@capacitor/haptics' or its corresponding type declarations.
+src/lib/mobile.ts(65,44): error TS2307: Cannot find module '@capacitor/status-bar' or its corresponding type declarations.
+src/lib/mobile.ts(73,44): error TS2307: Cannot find module '@capacitor/status-bar' or its corresponding type declarations.
+src/lib/mobile.ts(131,52): error TS2307: Cannot find module '@capacitor/push-notifications' or its corresponding type declarations.
+src/lib/mobile.ts(182,52): error TS2307: Cannot find module '@capacitor/push-notifications' or its corresponding type declarations.
+src/server/actions/discover-personalized.ts(5,17): error TS2459: Module '"@/server/cache/redis"' declares 'HybridCache' locally, but it is not exported.
+src/server/actions/feed.ts(362,21): error TS2322: Type 'string | null' is not assignable to type 'string | undefined'.
+  Type 'null' is not assignable to type 'string | undefined'.
+src/server/actions/user.ts(72,84): error TS2339: Property 'isCompleted' does not exist on type 'Partial<UserProfile>'.

@@ -20,6 +20,7 @@ import { PaywallModal } from "@/components/premium/PaywallModal";
 import { LikesCounter } from "@/components/discover/LikesCounter";
 import { VoiceIntro } from "@/components/audio/VoiceIntro";
 import { useState, useEffect } from "react";
+import { logger } from "@/lib/logger";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 
 const DynamicFirstWeekJourney = dynamic(() => import("@/components/gamification/FirstWeekJourney").then(m => ({ default: m.FirstWeekJourney })), { ssr: false });
@@ -36,7 +37,7 @@ export default function ProfilePage() {
       .then(data => {
         if (Array.isArray(data.completedQuizzes)) setQuizResults(data.completedQuizzes);
       })
-      .catch(() => {});
+      .catch(() => logger.warn('Failed to fetch quiz results'));
   }, []);
 
   if (loading) {

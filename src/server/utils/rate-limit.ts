@@ -59,7 +59,7 @@ export async function checkRateLimit(key: string, limit: number = 10, windowSeco
         }
     } catch (error) {
         console.error('Rate limit error', error);
-        // Fail open in case of DB error (don't block users if cache/db down)
-        return true;
+        // Fail closed: on DB error, deny the request to prevent abuse
+        return false;
     }
 }

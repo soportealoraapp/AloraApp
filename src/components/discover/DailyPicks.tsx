@@ -9,6 +9,7 @@ import { Sparkles, ChevronRight, Check } from 'lucide-react';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
 import { PlusBadge } from '@/components/premium/PlusBadge';
+import { logger } from '@/lib/logger';
 
 interface DailyPick {
     id: string;
@@ -29,7 +30,7 @@ export function DailyPicks() {
         fetch('/api/daily-picks')
             .then(r => r.json())
             .then(data => setPicks(data.picks || []))
-            .catch(() => {})
+            .catch(() => logger.warn('Failed to fetch daily picks'))
             .finally(() => setLoading(false));
     }, []);
 

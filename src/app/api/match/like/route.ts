@@ -184,8 +184,6 @@ export async function POST(request: NextRequest) {
         const settled = await Promise.allSettled([
             notifyNewMatch(result.u1, partner2?.displayName || 'Alguien', result.matchId),
             notifyNewMatch(result.u2, partner1?.displayName || 'Alguien', result.matchId),
-            notifyNewMatch(result.u1, partner2?.displayName || 'Alguien', result.matchId),
-            notifyNewMatch(result.u2, partner1?.displayName || 'Alguien', result.matchId),
             trackEvent(result.u1, 'first_match', { matchId: result.matchId }),
             trackEvent(result.u2, 'first_match', { matchId: result.matchId }),
         ]);

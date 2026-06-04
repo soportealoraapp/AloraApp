@@ -125,7 +125,7 @@ export function CityAutocomplete({ value, onSelect, placeholder = "Buscar ciudad
                 />
             </div>
             {isOpen && results.length > 0 && (
-                <div className="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-60 overflow-auto">
+                <div className="absolute z-50 w-full mt-1 bg-popover border border-border rounded-lg shadow-lg max-h-60 overflow-auto">
                     {results.map((result, index) => (
                         <button
                             key={result.city.id}

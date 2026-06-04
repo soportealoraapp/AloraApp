@@ -27,7 +27,11 @@ export function useProfile(userId?: string) {
             }
 
             // Fetch otro perfil
-            if (!userId || userId === 'undefined') return;
+            if (!userId || userId === 'undefined') {
+                setError('ID de usuario inválido');
+                setLoading(false);
+                return;
+            }
 
             try {
                 setLoading(true);

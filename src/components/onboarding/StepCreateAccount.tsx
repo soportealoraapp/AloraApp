@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
@@ -8,7 +8,8 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 import { authService } from '@/lib/supabase/services/auth';
-import { Eye, EyeOff, Loader2, Check, X, Mail } from 'lucide-react';
+import { createClient } from '@/lib/supabase/client';
+import { Eye, EyeOff, Loader2, Check, X, Mail, RefreshCw } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { REFERRAL_COOKIE, REFERRAL_SESSION_KEY, REFERRAL_CODE_PATTERN } from '@/lib/referral/constants';
 
@@ -65,6 +66,48 @@ export function StepCreateAccount({ onAccountCreated, initialRef }: StepCreateAc
     const canSubmit = isEmailValid && allPasswordValid && passwordChecks.matches && agreedToTerms && !loading;
 
     const [showEmailSent, setShowEmailSent] = useState(false);
+    const [pendingUserId, setPendingUserId] = useState<string | null>(null);
+    const [verifying, setVerifying] = useState(false);
+    const [resending, setResending] = useState(false);
+    const pollingRef = useRef<ReturnType<typeof setInterval> | null>(null);
+    const supabase = createClient();
+
+    const startEmailPolling = useCallback((userId: string) => {
+        if (pollingRef.current) clearInterval(pollingRef.current);
+        setVerifying(true);
+
+        pollingRef.current = setInterval(async () => {
+            try {
+                const { data: { user } } = await supabase.auth.getUser();
+                if (user?.email_confirmed_at) {
+                    if (pollingRef.current) clearInterval(pollingRef.current);
+                    pollingRef.current = null;
+                    setVerifying(false);
+                    onAccountCreated(userId);
+                }
+            } catch {
+                // poll again next cycle
+            }
+        }, 3000);
+    }, [supabase, onAccountCreated]);
+
+    useEffect(() => {
+        return () => {
+            if (pollingRef.current) clearInterval(pollingRef.current);
+        };
+    }, []);
+
+    const handleResend = useCallback(async () => {
+        setResending(true);
+        try {
+            await authService.sendPasswordResetEmail(email);
+            toast({ title: "Correo reenviado", description: "Revisa tu bandeja de entrada." });
+        } catch {
+            toast({ title: "Error", description: "No se pudo reenviar. Intenta más tarde.", variant: "destructive" });
+        } finally {
+            setResending(false);
+        }
+    }, [email, toast]);
 
     const handleSignUp = useCallback(async (e: React.FormEvent) => {
         e.preventDefault();
@@ -82,13 +125,14 @@ export function StepCreateAccount({ onAccountCreated, initialRef }: StepCreateAc
 
             sessionStorage.setItem('alora_signup_email', email);
             setShowEmailSent(true);
+            setPendingUserId(result.id);
 
             toast({
                 title: "Cuenta creada",
                 description: "Hemos enviado un enlace de verificación a tu email.",
             });
 
-            onAccountCreated(result.id);
+            startEmailPolling(result.id);
         } catch (err: unknown) {
             const message = err instanceof Error ? err.message : 'Error al crear la cuenta';
 
@@ -104,7 +148,7 @@ export function StepCreateAccount({ onAccountCreated, initialRef }: StepCreateAc
         } finally {
             setLoading(false);
         }
-    }, [email, password, canSubmit, onAccountCreated, toast]);
+    }, [email, password, canSubmit, onAccountCreated, toast, startEmailPolling]);
 
     if (showEmailSent) {
         return (
@@ -117,13 +161,25 @@ export function StepCreateAccount({ onAccountCreated, initialRef }: StepCreateAc
                     Hemos enviado un enlace de verificación a <strong className="text-foreground">{email}</strong>.
                     Confirma tu email para continuar con tu perfil.
                 </p>
+
+                {verifying && (
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                        Esperando confirmación...
+                    </div>
+                )}
+
                 <Card className="w-full p-4 bg-muted/50 border-muted">
                     <p className="text-xs text-muted-foreground">
-                        ¿No recibiste el correo? Revisa tu bandeja de spam o solicita un nuevo enlace desde
-                        la página de inicio de sesión.
+                        ¿No recibiste el correo? Revisa tu bandeja de spam o solicita un nuevo enlace.
                     </p>
                 </Card>
-                <Button onClick={() => router.push('/login')} className="w-full h-12 rounded-2xl font-bold">
+
+                <Button onClick={handleResend} disabled={resending} variant="outline" className="w-full h-12 rounded-2xl font-bold">
+                    {resending ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Reenviando...</> : <><RefreshCw className="mr-2 h-4 w-4" /> Reenviar correo</>}
+                </Button>
+
+                <Button onClick={() => router.push('/login')} className="w-full h-12 rounded-2xl font-bold" variant="secondary">
                     Ir a iniciar sesión
                 </Button>
                 <p className="text-xs text-muted-foreground">

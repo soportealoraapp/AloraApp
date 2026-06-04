@@ -14,21 +14,7 @@ async function resolveUserId(req: Request) {
 
     if (session?.user) return session.user.id;
 
-    const headerUserId = req.headers.get('x-user-id');
-    if (headerUserId) {
-        await prisma.user.upsert({
-            where: { id: headerUserId },
-            create: {
-                id: headerUserId,
-                email: `${headerUserId}@placeholder.local`,
-                name: '',
-            },
-            update: {},
-        });
-        return headerUserId;
-    }
-
-    throw new Error("Unauthorized");
+    throw new Error("Unauthorized: se requiere una sesión válida de Supabase");
 }
 
 export const ourFileRouter = {

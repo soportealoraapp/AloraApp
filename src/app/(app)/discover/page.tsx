@@ -24,6 +24,7 @@ import { useAnalytics, AnalyticsEvents } from "@/hooks/use-analytics";
 import { LikesCounter } from "@/components/discover/LikesCounter";
 import { DailyPicks } from "@/components/discover/DailyPicks";
 import { SecondChanceSection } from "@/components/discover/SecondChanceSection";
+import { logger } from "@/lib/logger";
 
 const DEFAULT_FILTERS: Filters = {
   ageRange: [18, 60],
@@ -71,7 +72,7 @@ export default function DiscoverPage() {
           setActivationTasks(data.tasks || []);
         }
       })
-      .catch(() => {});
+      .catch(() => logger.warn('Failed to fetch activation data'));
     fetch('/api/experiments/flags')
       .then(r => r.json())
       .then(data => {
@@ -79,7 +80,7 @@ export default function DiscoverPage() {
           setActivationCardEnabled(data.activationCardEnabled);
         }
       })
-      .catch(() => {});
+      .catch(() => logger.warn('Failed to fetch experiment flags'));
   }, []);
 
   useEffect(() => {
@@ -281,16 +282,18 @@ export default function DiscoverPage() {
           )}
         </div>
         <div className="flex items-center gap-1">
-          <LikesCounter
-            dailyLikesUsed={currentUserProfile?.dailyLikesUsed ?? 0}
-            dailyLikesLimit={SWIPE_LIMIT}
-            resetAt={
-              currentUserProfile?.dailyLikesResetAt
-                ? new Date(currentUserProfile.dailyLikesResetAt)
-                : new Date(new Date().setHours(24, 0, 0, 0))
-            }
-            subscriptionStatus={currentUserProfile?.subscriptionStatus ?? 'free'}
-          />
+          <div className="hidden md:flex">
+            <LikesCounter
+              dailyLikesUsed={currentUserProfile?.dailyLikesUsed ?? 0}
+              dailyLikesLimit={SWIPE_LIMIT}
+              resetAt={
+                currentUserProfile?.dailyLikesResetAt
+                  ? new Date(currentUserProfile.dailyLikesResetAt)
+                  : new Date(new Date().setHours(24, 0, 0, 0))
+              }
+              subscriptionStatus={currentUserProfile?.subscriptionStatus ?? 'free'}
+            />
+          </div>
           <Button
             variant="ghost"
             size="icon"
@@ -313,6 +316,19 @@ export default function DiscoverPage() {
           </Button>
         </div>
       </header>
+
+      <div className="md:hidden px-4 pt-2">
+        <LikesCounter
+          dailyLikesUsed={currentUserProfile?.dailyLikesUsed ?? 0}
+          dailyLikesLimit={SWIPE_LIMIT}
+          resetAt={
+            currentUserProfile?.dailyLikesResetAt
+              ? new Date(currentUserProfile.dailyLikesResetAt)
+              : new Date(new Date().setHours(24, 0, 0, 0))
+          }
+          subscriptionStatus={currentUserProfile?.subscriptionStatus ?? 'free'}
+        />
+      </div>
 
       {!currentUserProfile?.isVerified && (
         <div className="px-4 pt-2">
