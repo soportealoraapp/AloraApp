@@ -37,7 +37,7 @@ export async function GET() {
       where: { userId: { in: recentUserIds }, photos: { isEmpty: false } },
     });
     const profilesWithBio = await prisma.profile.count({
-      where: { userId: { in: recentUserIds }, bio: { not: null }, bio: { not: '' } },
+      where: { userId: { in: recentUserIds }, bio: { not: '' } },
     });
     const profilesWithInterest = await prisma.profile.count({
       where: { userId: { in: recentUserIds }, interests: { isEmpty: false } },
@@ -51,7 +51,7 @@ export async function GET() {
         userId: { in: recentUserIds },
         OR: [
           { photos: { isEmpty: false } },
-          { bio: { not: null }, bio: { not: '' } },
+          { bio: { not: '' } },
           { interests: { isEmpty: false } },
           { values: { isEmpty: false } },
         ],

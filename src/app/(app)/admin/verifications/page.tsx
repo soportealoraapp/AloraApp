@@ -19,7 +19,7 @@ export default function AdminVerificationsPage() {
     const [loading, setLoading] = useState(true);
     const [filter, setFilter] = useState('pending');
 
-    const fetch = async (status: string) => {
+    const loadSubmissions = async (status: string) => {
         setLoading(true);
         try {
             const r = await fetch(`/api/admin/verifications?status=${status}`);
@@ -29,7 +29,7 @@ export default function AdminVerificationsPage() {
         finally { setLoading(false); }
     };
 
-    useEffect(() => { fetch(filter); }, [filter]);
+    useEffect(() => { loadSubmissions(filter); }, [filter]);
 
     const handleAction = async (submissionId: string, action: string) => {
         try {
@@ -38,7 +38,7 @@ export default function AdminVerificationsPage() {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ submissionId, action }),
             });
-            fetch(filter);
+            loadSubmissions(filter);
         } catch (e) { console.error(e); }
     };
 

@@ -2,7 +2,8 @@ import { NextResponse } from 'next/server';
 import { requireAdmin } from '@/lib/middleware/admin';
 import { prisma } from '@/lib/prisma';
 
-export async function PUT(request: Request, { params }: { params: { id: string } }) {
+export async function PUT(request: Request, { params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
   const auth = await requireAdmin();
   if (auth) return auth;
 
@@ -11,7 +12,7 @@ export async function PUT(request: Request, { params }: { params: { id: string }
     const { status, description, metric, variants } = body;
 
     const existing = await prisma.experiment.findUnique({
-      where: { id: params.id },
+      where: { id },
       include: { variants: true },
     });
 
@@ -27,7 +28,7 @@ export async function PUT(request: Request, { params }: { params: { id: string }
     }
 
     const experiment = await prisma.experiment.update({
-      where: { id: params.id },
+      where: { id },
       data: {
         ...(body.name && { name: body.name }),
         ...(description !== undefined && { description }),
@@ -50,14 +51,14 @@ export async function PUT(request: Request, { params }: { params: { id: string }
           });
         } else {
           await prisma.experimentVariant.create({
-            data: { experimentId: params.id, name: v.name, trafficPct: v.trafficPct },
+            data: { experimentId: id, name: v.name, trafficPct: v.trafficPct },
           });
         }
       }
     }
 
     const updated = await prisma.experiment.findUnique({
-      where: { id: params.id },
+      where: { id },
       include: { variants: true },
     });
 
@@ -68,14 +69,15 @@ export async function PUT(request: Request, { params }: { params: { id: string }
   }
 }
 
-export async function DELETE(request: Request, { params }: { params: { id: string } }) {
+export async function DELETE(request: Request, { params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
   const auth = await requireAdmin();
   if (auth) return auth;
 
   try {
-    await prisma.experimentAssignment.deleteMany({ where: { experimentId: params.id } });
-    await prisma.experimentVariant.deleteMany({ where: { experimentId: params.id } });
-    await prisma.experiment.delete({ where: { id: params.id } });
+    await prisma.experimentAssignment.deleteMany({ where: { experimentId: id } });
+    await prisma.experimentVariant.deleteMany({ where: { experimentId: id } });
+    await prisma.experiment.delete({ where: { id } });
 
     return NextResponse.json({ success: true });
   } catch (error) {
