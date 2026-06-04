@@ -27,7 +27,7 @@ const DynamicFirstWeekJourney = dynamic(() => import("@/components/gamification/
 const DynamicStreakCard = dynamic(() => import("@/components/gamification/StreakCard").then(m => ({ default: m.StreakCard })), { ssr: false });
 
 export default function ProfilePage() {
-  const { profile, loading } = useAuth();
+  const { profile, authLoading: loading } = useAuth();
   const [showPaywall, setShowPaywall] = useState(false);
   const [quizResults, setQuizResults] = useState<{ quizId: string; score: number; archetype: string }[]>([]);
 
@@ -328,11 +328,11 @@ export default function ProfilePage() {
 
           {!profile.isVerified && (
             <Link href="/settings/verification">
-              <Card className="rounded-3xl border border-amber-200 bg-amber-50/50 hover:shadow-md transition-shadow cursor-pointer">
+              <Card className="rounded-3xl border border-warning/20 bg-warning/10 hover:shadow-md transition-shadow cursor-pointer">
                 <CardContent className="p-4 flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <div className="p-2 bg-amber-100 rounded-xl">
-                      <ShieldCheck className="h-5 w-5 text-amber-600" />
+                    <div className="p-2 bg-warning/20 rounded-xl">
+                      <ShieldCheck className="h-5 w-5 text-warning-foreground" />
                     </div>
                     <div>
                       <h4 className="font-bold text-foreground text-sm">Verifica tu identidad</h4>

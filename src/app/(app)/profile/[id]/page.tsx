@@ -403,13 +403,13 @@ export default function UserProfilePage() {
                 </div>
 
                 {id !== user?.id && (
-                    <div className="fixed bottom-0 left-0 right-0 z-50 p-4 bg-background/80 backdrop-blur-sm border-t md:relative md:bg-transparent md:border-none md:p-0 md:mt-4 md:px-4">
+                    <div className="fixed bottom-0 left-0 right-0 z-50 p-4 bg-background/80 backdrop-blur-sm border-t pb-[env(safe-area-inset-bottom,16px)] md:relative md:bg-transparent md:border-none md:p-0 md:mt-4 md:px-4">
                         {isFromNewMatch ? (
-                            <div className="flex justify-around items-center max-w-md mx-auto gap-2">
+                            <div className="flex justify-around items-center max-w-md mx-auto gap-3">
                                 <Button
                                     size="lg"
                                     variant="outline"
-                                    className="w-full"
+                                    className="w-full min-h-[48px]"
                                     onClick={handleDeclineMatch}
                                     disabled={processing}
                                 >
@@ -418,7 +418,7 @@ export default function UserProfilePage() {
                                 <Button
                                     size="lg"
                                     variant="default"
-                                    className="w-full"
+                                    className="w-full min-h-[48px]"
                                     onClick={handleAcceptMatch}
                                     disabled={processing}
                                 >
@@ -431,11 +431,11 @@ export default function UserProfilePage() {
                                 </Button>
                             </div>
                         ) : isFromRejected ? (
-                            <div className="flex justify-around items-center max-w-md mx-auto gap-2">
+                            <div className="flex justify-around items-center max-w-md mx-auto gap-3">
                                 <Button
                                     size="lg"
                                     variant="default"
-                                    className="w-full"
+                                    className="w-full min-h-[48px]"
                                     onClick={handleGiveSecondChance}
                                     disabled={processing}
                                 >
@@ -448,11 +448,11 @@ export default function UserProfilePage() {
                                 </Button>
                             </div>
                         ) : (
-                            <div className="flex justify-around items-center max-w-md mx-auto gap-2">
+                            <div className="flex justify-around items-center max-w-md mx-auto gap-3">
                                 <Button
                                     size="lg"
                                     variant={isLiked ? "default" : "outline"}
-                                    className="w-full"
+                                    className="w-full min-h-[48px]"
                                     onClick={handleLike}
                                     disabled={isLiked || processing}
                                 >
@@ -465,7 +465,7 @@ export default function UserProfilePage() {
                                     )}
                                     {isLiked ? "Liked" : "Me Gusta"}
                                 </Button>
-                                <Button asChild size="lg" variant="default" className="w-full">
+                                <Button asChild size="lg" variant="default" className="w-full min-h-[48px]">
                                     <Link href={`/chat/${id}`}>
                                         <MessageSquare className="h-5 w-5 mr-2" /> Mensaje
                                     </Link>
@@ -474,7 +474,7 @@ export default function UserProfilePage() {
                                     size="lg"
                                     variant="secondary"
                                     className={cn(
-                                        "w-full bg-gradient-to-r from-pink-500 to-violet-500 text-white",
+                                        "w-full min-h-[48px] bg-gradient-to-r from-pink-500 to-violet-500 text-white",
                                         isSuperMatched && "animate-pulse"
                                     )}
                                     onClick={handleSuperMatch}

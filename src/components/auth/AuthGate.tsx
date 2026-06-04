@@ -8,7 +8,7 @@ import { Loader2 } from "lucide-react";
 const PUBLIC_ROUTES = ['/login', '/signup', '/auth/callback', '/', '/onboarding'];
 
 export function AuthGate({ children }: { children: React.ReactNode }) {
-    const { user, profile, loading } = useAuth();
+    const { user, profile, authLoading: loading } = useAuth();
     const router = useRouter();
     const pathname = usePathname();
 

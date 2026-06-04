@@ -128,7 +128,7 @@ export default function SettingsPage() {
                         <Link href="/contact">
                             <div className="flex items-center justify-between p-3 rounded-lg hover:bg-secondary -mx-3">
                                 <div className="flex items-center gap-3">
-                                <HelpCircle className="w-5 h-5 text-muted-foreground" />
+                                <span className="text-muted-foreground text-lg">✉️</span>
                                 <span>Contacto</span>
                                 </div>
                                 <ChevronRight className="w-5 h-5 text-muted-foreground" />

@@ -12,29 +12,24 @@ export function useProfile(userId?: string) {
 
     useEffect(() => {
         async function fetchProfile() {
-            // Si no hay userId, usar el perfil del usuario actual
-            if (!userId) {
-                setProfile(currentUserProfile);
-                setLoading(false);
-                return;
-            }
-
-            // Si el userId es el del usuario actual, usar el del context
-            if (user && userId === user.id) {
-                setProfile(currentUserProfile);
-                setLoading(false);
-                return;
-            }
-
-            // Fetch otro perfil
-            if (!userId || userId === 'undefined') {
-                setError('ID de usuario inválido');
-                setLoading(false);
-                return;
-            }
-
             try {
-                setLoading(true);
+                // Si no hay userId, usar el perfil del usuario actual
+                if (!userId || typeof userId !== 'string' || userId.trim() === '' || userId === 'undefined' || userId === 'null') {
+                    if (!userId || userId === 'undefined' || userId === 'null') {
+                        setError('ID de usuario inválido');
+                    } else {
+                        setProfile(currentUserProfile);
+                    }
+                    setLoading(false);
+                    return;
+                }
+
+                // Si el userId es el del usuario actual, usar el del context
+                if (user && userId === user.id) {
+                    setProfile(currentUserProfile);
+                    setLoading(false);
+                    return;
+                }
                 // Cookie auth handles authentication automatically
                 const response = await fetch(`/api/profile/${userId}`);
 

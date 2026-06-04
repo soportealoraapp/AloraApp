@@ -20,6 +20,25 @@ export default function VerificationPage() {
     const { user, profile } = useAuth();
     const [showUpload, setShowUpload] = useState(false);
     const [selectedGesture, setSelectedGesture] = useState<string | null>(null);
+    const [verificationStatus, setVerificationStatus] = useState<'unverified' | 'pending' | 'approved' | 'rejected'>('unverified');
+    const [rejectionReason, setRejectionReason] = useState<string | null>(null);
+    const [statusLoading, setStatusLoading] = useState(true);
+
+    useEffect(() => {
+        fetch('/api/verification/status')
+            .then(r => r.json())
+            .then(data => {
+                setVerificationStatus(data.status || 'unverified');
+                setRejectionReason(data.rejectionReason || null);
+            })
+            .catch(() => setVerificationStatus('unverified'))
+            .finally(() => setStatusLoading(false));
+    }, []);
+
+    const handleVerificationComplete = () => {
+        setVerificationStatus('pending');
+        setShowUpload(false);
+    };
 
     const isVerified = profile?.isVerified;
 
@@ -44,7 +63,7 @@ export default function VerificationPage() {
                 <main className="p-4 max-w-lg mx-auto">
                     <VerificationUpload
                         gesture={selectedGesture}
-                        onComplete={() => setShowUpload(false)}
+                        onComplete={handleVerificationComplete}
                     />
                 </main>
             </div>
@@ -52,6 +71,22 @@ export default function VerificationPage() {
     }
 
     const currentGesture = GESTURES.find(g => g.id === selectedGesture);
+
+    if (statusLoading) {
+        return (
+            <div className="md:pl-60">
+                <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b bg-background/80 px-4 backdrop-blur-sm sm:px-6">
+                    <Button variant="ghost" size="icon" onClick={() => router.back()}>
+                        <ArrowLeft className="h-5 w-5" />
+                    </Button>
+                    <h1 className="text-xl font-semibold md:text-2xl font-headline">Verificación de Identidad</h1>
+                </header>
+                <main className="p-4 max-w-lg mx-auto flex justify-center">
+                    <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+                </main>
+            </div>
+        );
+    }
 
     return (
         <div className="md:pl-60">
@@ -63,7 +98,40 @@ export default function VerificationPage() {
             </header>
 
             <main className="p-4 max-w-lg mx-auto space-y-6">
-                {isVerified ? (
+                {verificationStatus === 'rejected' ? (
+                    <Card className="border-red-200 bg-red-50/50">
+                        <CardContent className="p-6">
+                            <div className="flex items-center gap-4 mb-4">
+                                <div className="rounded-full bg-red-100 p-3">
+                                    <AlertCircle className="h-6 w-6 text-red-600" />
+                                </div>
+                                <div>
+                                    <p className="font-bold text-red-800">Verificación rechazada</p>
+                                    {rejectionReason && (
+                                        <p className="text-sm text-red-600">{rejectionReason}</p>
+                                    )}
+                                </div>
+                            </div>
+                            <Button onClick={() => setShowUpload(true)} variant="outline" className="w-full">
+                                Reintentar verificación
+                            </Button>
+                        </CardContent>
+                    </Card>
+                ) : verificationStatus === 'pending' || verificationStatus === 'approved' && !isVerified ? (
+                    <Card className="border-amber-200 bg-amber-50/50">
+                        <CardContent className="flex items-center gap-4 p-6">
+                            <div className="rounded-full bg-amber-100 p-3">
+                                <Clock className="h-6 w-6 text-amber-600" />
+                            </div>
+                            <div>
+                                <p className="font-bold text-amber-800">Verificación en revisión</p>
+                                <p className="text-sm text-amber-600">
+                                    Estamos revisando tu identidad. Te notificaremos en 24-48 horas.
+                                </p>
+                            </div>
+                        </CardContent>
+                    </Card>
+                ) : isVerified || verificationStatus === 'approved' ? (
                     <Card className="border-green-100 bg-green-50/50">
                         <CardContent className="flex items-center gap-4 p-6">
                             <div className="rounded-full bg-green-100 p-3">

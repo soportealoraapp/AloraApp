@@ -26,7 +26,7 @@ const STEP_WELCOME = [
 ];
 
 export function OnboardingWizard({ initialRef }: { initialRef?: string } = {}) {
-    const { user, profile, loading: authLoading } = useAuth();
+    const { user, profile, authLoading } = useAuth();
     const router = useRouter();
     const [step, setStep] = useState(1);
     const totalSteps = 5;

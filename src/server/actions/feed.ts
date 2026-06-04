@@ -331,7 +331,7 @@ export async function getDynamicFeed(
 
         const currentUserInterests = currentUser.profile.interests || [];
         const now = new Date();
-        const oneHourAgo = new Date(now.getTime() - 60 * 60 * 1000);
+        const fiveMinutesAgo = new Date(now.getTime() - 5 * 60 * 1000);
         const oneDayAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000);
 
         const scoredItems = await Promise.all(
@@ -365,7 +365,7 @@ export async function getDynamicFeed(
 
                 // --- RETENTION SIGNALS ---
                 const lastActive = cp.lastActiveAt as Date | null;
-                const activeNow = lastActive ? lastActive > oneHourAgo : false;
+                const activeNow = lastActive ? lastActive > fiveMinutesAgo : false;
                 const activeToday = lastActive ? lastActive > oneDayAgo : false;
 
                 // Shared interests count

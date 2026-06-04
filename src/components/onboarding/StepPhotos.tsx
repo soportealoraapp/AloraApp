@@ -125,8 +125,8 @@ export function StepPhotos({ userId, data, onUpdate, onNext, onPrev }: any) {
 
     return (
         <div className="space-y-6">
-            <h2 className="text-2xl font-bold text-center mb-2 dark:text-white">Tus Fotos</h2>
-            <p className="center text-muted-foreground dark:text-gray-400 mb-6 font-medium text-center">Sube fotos para aparecer en recomendaciones (opcional)</p>
+            <h2 className="text-2xl font-bold text-center mb-2 text-foreground">Tus Fotos</h2>
+            <p className="center text-muted-foreground mb-6 font-medium text-center">Sube fotos para aparecer en recomendaciones (opcional)</p>
 
             {uploadError && (
                 <motion.div
@@ -154,7 +154,7 @@ export function StepPhotos({ userId, data, onUpdate, onNext, onPrev }: any) {
                 ))}
 
                 {photos.length < 6 && (
-                    <label className={`flex flex-col items-center justify-center aspect-[3/4] border-2 border-dashed border-muted-foreground/25 dark:border-pink-900/30 rounded-xl cursor-pointer hover:bg-muted/50 dark:hover:bg-pink-950/10 transition-all hover:border-primary/50 group active:scale-[0.98] ${isUploading ? 'opacity-50 pointer-events-none' : ''}`}>
+                    <label className={`flex flex-col items-center justify-center aspect-[3/4] border-2 border-dashed border-muted-foreground/25 rounded-xl cursor-pointer hover:bg-muted/50 transition-all hover:border-primary/50 group active:scale-[0.98] ${isUploading ? 'opacity-50 pointer-events-none' : ''}`}>
                         {isUploading ? (
                             <div className="flex flex-col items-center gap-2">
                                 <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -166,8 +166,8 @@ export function StepPhotos({ userId, data, onUpdate, onNext, onPrev }: any) {
                             </div>
                         ) : (
                             <>
-                                <Plus className="h-8 w-8 text-muted-foreground dark:text-pink-400/50 mb-2 group-hover:text-primary transition-colors" />
-                                <span className="text-sm text-primary dark:text-pink-300 font-bold uppercase tracking-widest">Añadir</span>
+                                <Plus className="h-8 w-8 text-muted-foreground mb-2 group-hover:text-primary transition-colors" />
+                                <span className="text-sm text-primary font-bold uppercase tracking-widest">Añadir</span>
                             </>
                         )}
                         <input
@@ -185,10 +185,10 @@ export function StepPhotos({ userId, data, onUpdate, onNext, onPrev }: any) {
 
             <div className="flex flex-col gap-3 mt-8">
                 <div className="flex gap-4">
-                    <Button variant="outline" onClick={onPrev} className="w-1/3 hover:bg-muted dark:hover:bg-pink-950/10 border-pink-100 dark:border-pink-900/40">Atrás</Button>
+                    <Button variant="outline" onClick={onPrev} className="w-1/3 hover:bg-muted">Atrás</Button>
                     <Button
                         onClick={handleNext}
-                        className="w-2/3 shadow-md shadow-pink-100 dark:shadow-pink-950/10"
+                        className="w-2/3 shadow-md"
                         disabled={isUploading}
                     >
                         {isUploading ? <Loader2 className="h-4 w-4 animate-spin" /> : (photos.length > 0 ? "Continuar" : "Omitir por ahora")}

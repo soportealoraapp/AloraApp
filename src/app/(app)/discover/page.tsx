@@ -162,6 +162,7 @@ export default function DiscoverPage() {
 
     lastSwipeRef.current = { profileId: profileToActOn.id, direction };
     setSwipeCount(prev => prev + 1);
+    toast({ title: direction === 'right' ? 'Like enviado' : 'Descartado', description: direction === 'right' ? `Le gustas a ${profileToActOn.displayName}?` : 'Perfil descartado.' });
 
     const remainingProfiles = profiles.slice(1);
     setProfiles(remainingProfiles as any);
@@ -193,6 +194,7 @@ export default function DiscoverPage() {
     const profileToActOn = currentProfile;
     lastSwipeRef.current = { profileId: profileToActOn.id, direction: 'flechado' };
     setSwipeCount(prev => prev + 1);
+    toast({ title: '¡Flechado enviado!', description: `${profileToActOn.displayName} lo recibirá como superlike.` });
 
     const remainingProfiles = profiles.slice(1);
     setProfiles(remainingProfiles as any);
@@ -276,7 +278,7 @@ export default function DiscoverPage() {
         <div className="flex items-center gap-2">
           <h1 className="text-2xl font-bold tracking-tight text-foreground">Alora</h1>
           {(currentUserProfile as any)?.travelModeEnabled && (
-            <span className="text-[10px] bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full font-medium flex items-center gap-1">
+            <span className="text-[10px] bg-primary/10 text-primary px-2 py-0.5 rounded-full font-medium flex items-center gap-1">
               ✈️ Explorando: {(currentUserProfile as any).travelCity}
             </span>
           )}
@@ -332,8 +334,8 @@ export default function DiscoverPage() {
 
       {!currentUserProfile?.isVerified && (
         <div className="px-4 pt-2">
-          <div className="bg-amber-50 border border-amber-200 rounded-xl p-3 flex items-center justify-between">
-            <p className="text-xs text-amber-800 font-medium">Los perfiles verificados aparecen primero en Discover</p>
+          <div className="bg-warning/10 border border-warning/20 rounded-xl p-3 flex items-center justify-between">
+            <p className="text-xs text-warning-foreground font-medium">Los perfiles verificados aparecen primero en Discover</p>
             <Button size="sm" variant="outline" className="text-xs h-7" onClick={() => router.push('/settings/verification')}>
               Verificar
             </Button>
@@ -366,10 +368,6 @@ export default function DiscoverPage() {
           </Card>
         </div>
       )}
-
-      <div className="px-4 pt-2">
-        <DailyPicks />
-      </div>
 
       <main className="flex-1 flex flex-col items-center justify-center p-4 relative">
         {error && !loading && profiles.length === 0 && (
@@ -487,8 +485,14 @@ export default function DiscoverPage() {
         )}
       </main>
 
+      {/* Daily Picks - below the feed */}
+      <div className="px-4 pb-2">
+        <DailyPicks />
+      </div>
+
       {/* Daily Question and Compatibility - shown below the feed */}
       <div className="px-4 pb-4 max-w-sm mx-auto w-full space-y-3">
+        <SecondChanceSection />
         <DailyCompatibilityCard />
         <DailyQuestionCard />
       </div>

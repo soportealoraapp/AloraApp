@@ -53,6 +53,12 @@ export default function ChatWindowPage() {
     const [matchHealth, setMatchHealth] = useState(0);
     const [partnerAnswer, setPartnerAnswer] = useState<{ question: string; answer: string } | null>(null);
 
+    const match = matches.find((m) => m.id === matchId);
+    const otherUserId = match?.users.find((id) => id !== user?.id);
+    const partner = match?.partner;
+    const partnerName = partner?.displayName || `Usuario #${otherUserId?.slice(0, 8)}`;
+    const partnerPhoto = partner?.photoURL || '/placeholder.svg';
+
     useEffect(() => {
         if (!matchId) return;
         fetch(`/api/chat/health?matchId=${matchId}`)
@@ -91,15 +97,10 @@ export default function ChatWindowPage() {
         const timer = setTimeout(checkFeedback, 1500);
         return () => clearTimeout(timer);
     }, [matchId]);
+
     const [autoScroll, setAutoScroll] = useState(true);
     const { track } = useAnalytics();
     const messageCountRef = useRef(0);
-
-    const match = matches.find((m) => m.id === matchId);
-    const otherUserId = match?.users.find((id) => id !== user?.id);
-    const partner = match?.partner;
-    const partnerName = partner?.displayName || `Usuario #${otherUserId?.slice(0, 8)}`;
-    const partnerPhoto = partner?.photoURL || '/placeholder.svg';
 
     // Auto-scroll to bottom on new messages (if user is near bottom)
     useEffect(() => {
@@ -561,51 +562,46 @@ export default function ChatWindowPage() {
 
             {/* Chat input area */}
             <div className="border-t bg-background p-4 pb-safe">
+                <div className="flex items-center gap-2 mb-2">
+                    <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={fetchIcebreakers}
+                        disabled={loadingIcebreakers}
+                        className="text-xs text-pink-500 rounded-full h-8 px-3 hover:bg-pink-50"
+                    >
+                        {loadingIcebreakers ? <Loader2 className="animate-spin mr-1 h-3 w-3" /> : <Sparkles className="mr-1 h-3 w-3" />}
+                        Sugerir mensaje
+                    </Button>
+                    {isPartnerOnline && (
+                        <span className="text-[10px] text-green-600 flex items-center gap-1 ml-auto">
+                            <span className="h-1.5 w-1.5 rounded-full bg-green-500" />
+                            En línea
+                        </span>
+                    )}
+                </div>
                 {messages.length === 0 && profile?.gender !== 'woman' ? (
-                    <div className="flex flex-col items-center justify-center p-4 bg-muted/50 rounded-2xl text-center">
-                        <Sparkles className="h-8 w-8 text-primary mb-2" />
-                        <p className="font-semibold text-primary">Ella da el primer paso</p>
-                        <p className="text-sm text-muted-foreground">Recibirás una notificación cuando te escriba.</p>
+                    <p className="text-xs text-center text-muted-foreground mb-2">
+                        💡 Ella da el primer paso, pero puedes enviar un mensaje amable para romper el hielo.
+                    </p>
+                ) : null}
+                <ConversationRoulette
+                    onSend={handleSendMessage}
+                    disabled={sending || !otherUserId}
+                />
+                <ChatInput
+                    onSend={handleSendMessage}
+                    onSendImage={handleSendImage}
+                    onSendVoice={handleSendVoice}
+                    onTyping={emitTyping}
+                    disabled={sending || !otherUserId}
+                    placeholder="Escribe un mensaje..."
+                />
+                {sending && (
+                    <div className="flex items-center justify-center mt-2 text-xs text-muted-foreground">
+                        <Loader2 className="h-3 w-3 animate-spin mr-1" />
+                        Enviando...
                     </div>
-                ) : (
-                    <>
-                        <div className="flex items-center gap-2 mb-2">
-                            <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={fetchIcebreakers}
-                                disabled={loadingIcebreakers}
-                                className="text-xs text-pink-500 rounded-full h-8 px-3 hover:bg-pink-50"
-                            >
-                                {loadingIcebreakers ? <Loader2 className="animate-spin mr-1 h-3 w-3" /> : <Sparkles className="mr-1 h-3 w-3" />}
-                                Sugerir mensaje
-                            </Button>
-                            {isPartnerOnline && (
-                                <span className="text-[10px] text-green-600 flex items-center gap-1 ml-auto">
-                                    <span className="h-1.5 w-1.5 rounded-full bg-green-500" />
-                                    En línea
-                                </span>
-                            )}
-                        </div>
-                        <ConversationRoulette
-                            onSend={handleSendMessage}
-                            disabled={sending || !otherUserId}
-                        />
-                        <ChatInput
-                            onSend={handleSendMessage}
-                            onSendImage={handleSendImage}
-                            onSendVoice={handleSendVoice}
-                            onTyping={emitTyping}
-                            disabled={sending || !otherUserId}
-                            placeholder="Escribe un mensaje..."
-                        />
-                        {sending && (
-                            <div className="flex items-center justify-center mt-2 text-xs text-muted-foreground">
-                                <Loader2 className="h-3 w-3 animate-spin mr-1" />
-                                Enviando...
-                            </div>
-                        )}
-                    </>
                 )}
             </div>
 

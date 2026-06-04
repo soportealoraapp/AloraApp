@@ -63,20 +63,20 @@ export function DailyPicks() {
                 <span className="text-[10px] text-muted-foreground">Basado en compatibilidad</span>
             </div>
             <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
-                {picks.map(pick => (
-                    <Link key={pick.id} href={`/profile/${pick.id}?source=daily-pick`}>
+                {picks.filter(p => p.id && typeof p.id === 'string').map(pick => (
+                    <Link key={pick.id} href={`/profile/${encodeURIComponent(pick.id)}?source=daily-pick`}>
                         <Card className="flex-shrink-0 w-48 hover:shadow-lg transition-all cursor-pointer group overflow-hidden">
                             <div className="relative h-40 overflow-hidden">
                                 <Image
                                     src={pick.photo}
-                                    alt={pick.displayName}
+                                    alt={pick.displayName || 'Perfil'}
                                     fill
                                     className="object-cover group-hover:scale-105 transition-transform"
                                 />
                                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
                                 <div className="absolute bottom-2 left-2 right-2">
-                                    <p className="text-white font-bold text-sm">{pick.displayName}, {pick.age}</p>
-                                    <p className="text-white/70 text-[10px]">{pick.city}</p>
+                                    <p className="text-white font-bold text-sm">{pick.displayName || 'Usuario'}, {pick.age || '?'}</p>
+                                    <p className="text-white/70 text-[10px]">{pick.city || ''}</p>
                                 </div>
                                 {pick.isVerified && (
                                     <Badge className="absolute top-2 right-2 bg-blue-500 text-white text-[8px] px-1.5 py-0">
@@ -86,7 +86,7 @@ export function DailyPicks() {
                             </div>
                             <CardContent className="p-3">
                                 <div className="flex flex-wrap gap-1 mb-2">
-                                    {pick.reason.split(' · ').slice(0, 2).map((r, i) => (
+                                    {(pick.reason || '').split(' · ').slice(0, 2).map((r, i) => (
                                         <span key={i} className="text-[9px] bg-primary/10 text-primary px-1.5 py-0.5 rounded-full font-medium leading-tight">{r}</span>
                                     ))}
                                 </div>
@@ -94,10 +94,10 @@ export function DailyPicks() {
                                     <div className="flex-1 bg-muted rounded-full h-1.5">
                                         <div
                                             className="bg-primary h-1.5 rounded-full"
-                                            style={{ width: `${Math.min(100, pick.score)}%` }}
+                                            style={{ width: `${Math.min(100, pick.score || 0)}%` }}
                                         />
                                     </div>
-                                    <span className="text-[10px] font-bold text-primary">{pick.score}</span>
+                                    <span className="text-[10px] font-bold text-primary">{pick.score || 0}</span>
                                 </div>
                             </CardContent>
                         </Card>
