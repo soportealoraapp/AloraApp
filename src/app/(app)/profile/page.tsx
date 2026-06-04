@@ -27,7 +27,8 @@ const DynamicFirstWeekJourney = dynamic(() => import("@/components/gamification/
 const DynamicStreakCard = dynamic(() => import("@/components/gamification/StreakCard").then(m => ({ default: m.StreakCard })), { ssr: false });
 
 export default function ProfilePage() {
-  const { profile, authLoading: loading } = useAuth();
+  const { profile, authLoading, profileLoading } = useAuth();
+  const loading = authLoading || profileLoading;
   const [showPaywall, setShowPaywall] = useState(false);
   const [quizResults, setQuizResults] = useState<{ quizId: string; score: number; archetype: string }[]>([]);
 

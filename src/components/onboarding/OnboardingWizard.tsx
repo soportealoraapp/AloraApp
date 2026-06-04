@@ -26,7 +26,7 @@ const STEP_WELCOME = [
 ];
 
 export function OnboardingWizard({ initialRef }: { initialRef?: string } = {}) {
-    const { user, profile, authLoading } = useAuth();
+    const { user, profile, authLoading, profileLoading } = useAuth();
     const router = useRouter();
     const [step, setStep] = useState(1);
     const totalSteps = 5;
@@ -55,7 +55,7 @@ export function OnboardingWizard({ initialRef }: { initialRef?: string } = {}) {
         if (!authLoading && user) {
             setStep(2);
         }
-    }, [authLoading, user]);
+    }, [authLoading, profileLoading, user]);
 
     useEffect(() => {
         if (profile && !isInitialized) {

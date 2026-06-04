@@ -1,17 +1,19 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useParams } from 'next/navigation';
 import { getCompatibilityScore } from '@/server/actions/compatibility/getCompatibilityScore';
 import { CompatibilityScoreCard } from '@/components/compatibility/CompatibilityScoreCard';
 import { SectionTitle } from '@/components/ui/custom/SectionTitle';
 import { useAuth } from '@/contexts/AuthContext';
 
-export default function CompatibilityPage({ params }: { params: { candidateId: string } }) {
+export default function CompatibilityPage() {
+    const params = useParams<{ candidateId: string }>();
     const { user } = useAuth();
     const [data, setData] = useState<any>(null);
 
     useEffect(() => {
-        if (!user?.id) return;
+        if (!user?.id || !params.candidateId) return;
         getCompatibilityScore(user.id, params.candidateId).then(setData);
     }, [user?.id, params.candidateId]);
 
