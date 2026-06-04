@@ -4,9 +4,7 @@ import { computeExperimentResults } from '@/server/services/experiment-results';
 
 export async function GET(request: Request, { params }: { params: { id: string } }) {
   const auth = await requireAdmin();
-  if (auth.error) {
-    return NextResponse.json({ error: auth.error }, { status: auth.status });
-  }
+  if (auth) return auth;
 
   try {
     const results = await computeExperimentResults(params.id);

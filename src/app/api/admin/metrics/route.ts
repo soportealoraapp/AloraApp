@@ -4,9 +4,7 @@ import { requireAdmin } from '@/lib/middleware/admin';
 
 export async function GET() {
     const auth = await requireAdmin();
-    if (auth.error) {
-        return NextResponse.json({ error: auth.error }, { status: auth.status });
-    }
+    if (auth) return auth;
 
     try {
         const now = new Date();

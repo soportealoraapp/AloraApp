@@ -4,9 +4,7 @@ import { requireAdmin } from '@/lib/middleware/admin';
 
 export async function GET(request: NextRequest) {
     const auth = await requireAdmin();
-    if (auth.error) {
-        return NextResponse.json({ error: auth.error }, { status: auth.status });
-    }
+    if (auth) return auth;
 
     try {
         const { searchParams } = new URL(request.url);
@@ -62,9 +60,11 @@ export async function GET(request: NextRequest) {
 
 export async function PATCH(request: NextRequest) {
     const auth = await requireAdmin();
-    if (auth.error) {
-        return NextResponse.json({ error: auth.error }, { status: auth.status });
-    }
+    if (auth) return auth;
+    const { createClient } = await import('@/lib/supabase/server');
+    const supabase = await createClient();
+    const { data: { user: adminUser } } = await supabase.auth.getUser();
+    if (!adminUser) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
     try {
         const { reportId, action, reason } = await request.json();
@@ -131,7 +131,7 @@ export async function PATCH(request: NextRequest) {
 
         await prisma.auditLog.create({
             data: {
-                userId: auth.user.id,
+                userId: adminUser.id,
                 action: `admin_${action}`,
                 details: { reportId, targetUserId: report.reportedId, reason },
             }

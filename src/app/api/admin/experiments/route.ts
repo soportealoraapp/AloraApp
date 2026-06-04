@@ -5,9 +5,7 @@ import { computeExperimentResults } from '@/server/services/experiment-results';
 
 export async function GET() {
   const auth = await requireAdmin();
-  if (auth.error) {
-    return NextResponse.json({ error: auth.error }, { status: auth.status });
-  }
+  if (auth) return auth;
 
   try {
     const experiments = await prisma.experiment.findMany({
@@ -38,9 +36,7 @@ export async function GET() {
 
 export async function POST(request: Request) {
   const auth = await requireAdmin();
-  if (auth.error) {
-    return NextResponse.json({ error: auth.error }, { status: auth.status });
-  }
+  if (auth) return auth;
 
   try {
     const body = await request.json();

@@ -10,9 +10,7 @@ import {
 
 export async function GET(request: Request) {
   const auth = await requireAdmin();
-  if (auth.error) {
-    return NextResponse.json({ error: auth.error }, { status: auth.status });
-  }
+  if (auth) return auth;
 
   const url = new URL(request.url);
   const days = Math.min(Math.max(parseInt(url.searchParams.get('days') || '30'), 1), 90);

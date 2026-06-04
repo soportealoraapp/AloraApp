@@ -4,9 +4,7 @@ import { prisma } from '@/lib/prisma';
 
 export async function PUT(request: Request, { params }: { params: { id: string } }) {
   const auth = await requireAdmin();
-  if (auth.error) {
-    return NextResponse.json({ error: auth.error }, { status: auth.status });
-  }
+  if (auth) return auth;
 
   try {
     const body = await request.json();
@@ -72,9 +70,7 @@ export async function PUT(request: Request, { params }: { params: { id: string }
 
 export async function DELETE(request: Request, { params }: { params: { id: string } }) {
   const auth = await requireAdmin();
-  if (auth.error) {
-    return NextResponse.json({ error: auth.error }, { status: auth.status });
-  }
+  if (auth) return auth;
 
   try {
     await prisma.experimentAssignment.deleteMany({ where: { experimentId: params.id } });

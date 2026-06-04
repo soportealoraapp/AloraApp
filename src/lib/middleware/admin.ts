@@ -1,12 +1,13 @@
+import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
-export async function requireAdmin() {
+export async function requireAdmin(): Promise<NextResponse | null> {
     const { createClient } = await import('@/lib/supabase/server');
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
 
     if (!user) {
-        return { error: 'Unauthorized', status: 401 };
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     const dbUser = await prisma.user.findUnique({
@@ -15,17 +16,14 @@ export async function requireAdmin() {
     });
 
     if (!dbUser || (dbUser.role !== 'admin' && dbUser.role !== 'moderator')) {
-        return { error: 'Forbidden', status: 403 };
+        return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 
-    return { user, role: dbUser.role };
+    return null;
 }
 
-export async function requireSuperAdmin() {
+export async function requireSuperAdmin(): Promise<NextResponse | null> {
     const result = await requireAdmin();
-    if (result.error) return result;
-    if (result.role !== 'admin') {
-        return { error: 'Forbidden', status: 403 };
-    }
-    return result;
+    if (result) return result;
+    return null;
 }

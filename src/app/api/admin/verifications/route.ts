@@ -4,9 +4,7 @@ import { requireAdmin } from '@/lib/middleware/admin';
 
 export async function GET(request: NextRequest) {
     const auth = await requireAdmin();
-    if (auth.error) {
-        return NextResponse.json({ error: auth.error }, { status: auth.status });
-    }
+    if (auth) return auth;
 
     try {
         const { searchParams } = new URL(request.url);
@@ -41,9 +39,11 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
     const auth = await requireAdmin();
-    if (auth.error) {
-        return NextResponse.json({ error: auth.error }, { status: auth.status });
-    }
+    if (auth) return auth;
+    const { createClient } = await import('@/lib/supabase/server');
+    const supabase = await createClient();
+    const { data: { user: adminUser } } = await supabase.auth.getUser();
+    if (!adminUser) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
     try {
         const { submissionId, action, reason } = await request.json();
@@ -60,7 +60,7 @@ export async function POST(request: NextRequest) {
         if (action === 'approve') {
             await prisma.verificationSubmission.update({
                 where: { id: submissionId },
-                data: { status: 'approved', reviewedBy: auth.user.id, reviewedAt: new Date() },
+                data: { status: 'approved', reviewedBy: adminUser.id, reviewedAt: new Date() },
             });
             await prisma.profile.update({
                 where: { userId: submission.userId },
@@ -78,7 +78,7 @@ export async function POST(request: NextRequest) {
         } else if (action === 'reject') {
             await prisma.verificationSubmission.update({
                 where: { id: submissionId },
-                data: { status: 'rejected', reason: reason || 'Selfie no clara', reviewedBy: auth.user.id, reviewedAt: new Date() },
+                data: { status: 'rejected', reason: reason || 'Selfie no clara', reviewedBy: adminUser.id, reviewedAt: new Date() },
             });
             await prisma.notification.create({
                 data: {
@@ -95,7 +95,7 @@ export async function POST(request: NextRequest) {
 
         await prisma.auditLog.create({
             data: {
-                userId: auth.user.id,
+                userId: adminUser.id,
                 action: `admin_verification_${action}`,
                 details: { submissionId, targetUserId: submission.userId, reason },
             }
