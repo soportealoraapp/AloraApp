@@ -28,7 +28,7 @@ interface HistoryResponse {
  */
 export async function GET(
     request: NextRequest,
-    { params }: { params: { matchId: string } }
+    { params }: { params: Promise<{ matchId: string }> }
 ) {
     const { createClient } = await import('@/lib/supabase/server');
     const supabase = await createClient();
@@ -38,7 +38,7 @@ export async function GET(
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const matchId = params?.matchId;
+    const { matchId } = await params;
     if (!matchId) {
         return NextResponse.json({ error: 'matchId required' }, { status: 400 });
     }
