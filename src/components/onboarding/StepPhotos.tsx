@@ -67,10 +67,11 @@ export function StepPhotos({ userId, data, onUpdate, onNext, onPrev }: any) {
         onUploadProgress: (progress: number) => {
             setUploadProgress({ current: progress });
         },
-        onUploadError: (error: Error) => {
+        onUploadError: (error: any) => {
+            const msg = error?.data?.message || error?.message || 'Error al subir la foto';
             setUploadProgress({});
-            setUploadError(error.message || 'Error al subir la foto');
-            toast({ title: "Error al subir", description: error.message || 'Intenta de nuevo', variant: "destructive" });
+            setUploadError(msg);
+            toast({ title: "Error al subir", description: msg, variant: "destructive" });
         },
     });
 

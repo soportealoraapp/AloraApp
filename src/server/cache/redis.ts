@@ -16,7 +16,7 @@ interface CacheEntry<T> {
 
 type CacheStore = 'memory';
 
-class HybridCache {
+export class HybridCache {
     private store: CacheStore = 'memory';
     private memoryCache = new Map<string, CacheEntry<any>>();
     private maxMemoryItems = 500;

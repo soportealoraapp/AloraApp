@@ -359,7 +359,7 @@ export async function getDynamicFeed(
                     seeking: (cp.seeking as any) || 'everyone',
                     displayName: cp.displayName || 'User',
                     bio: cp.bio || '',
-                    voiceIntro: cp.voiceIntro,
+                    voiceIntro: cp.voiceIntro ?? undefined,
                     createdAt: cp.createdAt,
                 };
 

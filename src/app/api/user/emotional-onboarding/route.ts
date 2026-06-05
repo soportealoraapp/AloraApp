@@ -22,7 +22,7 @@ export async function POST(request: Request) {
             data: {
                 userId: user.id,
                 event: 'emotional_onboarding',
-                timestamp: new Date(),
+                createdAt: new Date(),
                 metadata: {
                     goals: data.goals,
                     values: data.values,

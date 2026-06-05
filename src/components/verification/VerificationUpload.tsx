@@ -98,11 +98,12 @@ export function VerificationUpload({ gesture, onComplete }: VerificationUploadPr
         onUploadProgress: (progress: number) => {
             setUploadProgress(progress);
         },
-        onUploadError: (error: Error) => {
+        onUploadError: (error: any) => {
+            const msg = error?.data?.message || error?.message || "Error de conexión. Intenta de nuevo.";
             setUploadProgress(0);
             toast({
                 title: "Error al subir",
-                description: error.message || "Error de conexión. Intenta de nuevo.",
+                description: msg,
                 variant: "destructive",
             });
         },

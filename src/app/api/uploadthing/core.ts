@@ -4,7 +4,7 @@ import { prisma } from "@/lib/prisma";
 
 const f = createUploadthing({
     errorFormatter: (err) => {
-        return { message: err.message };
+        return { message: err.data?.message ?? 'Upload error' };
     },
 });
 
@@ -37,7 +37,7 @@ export const ourFileRouter = {
             console.log("Chat image upload complete for userId:", metadata.userId);
             return {
                 uploadedBy: metadata.userId,
-                url: file.url,
+                url: (file as any).url,
                 type: 'image',
             };
         }),
@@ -49,7 +49,7 @@ export const ourFileRouter = {
         })
         .onUploadComplete(async ({ metadata, file }) => {
             console.log("Verification upload complete for userId:", metadata.userId);
-            return { uploadedBy: metadata.userId, url: file.url };
+            return { uploadedBy: metadata.userId, url: (file as any).url };
         }),
 
     voiceUploader: f({ blob: { maxFileSize: "2MB", maxFileCount: 1 } })
@@ -61,7 +61,7 @@ export const ourFileRouter = {
             console.log("Voice upload complete for userId:", metadata.userId);
             return {
                 uploadedBy: metadata.userId,
-                url: file.url,
+                url: (file as any).url,
                 type: 'voice',
             };
         }),

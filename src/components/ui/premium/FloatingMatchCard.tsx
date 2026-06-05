@@ -6,7 +6,7 @@ import { UserProfile } from '@/lib/domain/types';
 import Image from 'next/image';
 import { TrustBadge } from './TrustBadge';
 import { ProfileActions } from '../../match/ProfileActions';
-import { Clock, Zap, MessageCircle, Heart, X, Star } from 'lucide-react';
+import { Clock, Zap, MessageCircle, Heart, X, Star, Music } from 'lucide-react';
 import { useState } from 'react';
 
 interface FloatingMatchCardProps {

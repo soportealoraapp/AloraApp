@@ -23,7 +23,7 @@ export async function POST(request: Request) {
             where: {
                 userId: user.id,
                 event: 'bio_improver_call',
-                timestamp: { gte: today }
+                createdAt: { gte: today }
             }
         });
 
@@ -52,7 +52,7 @@ export async function POST(request: Request) {
         });
 
         await prisma.analyticsEvent.create({
-            data: { userId: user.id, event: 'bio_improver_call', timestamp: new Date() }
+            data: { userId: user.id, event: 'bio_improver_call', createdAt: new Date() }
         });
 
         return NextResponse.json(result);

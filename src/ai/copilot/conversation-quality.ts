@@ -213,12 +213,6 @@ export async function analyzeConversation(
     // Trend
     const trend = calculateTrend(messages);
 
-    // Insights
-    const insights = generateQualityInsights(dimensions, metrics, flags, totalMessages);
-
-    // Timeline
-    const timeline = buildTimeline(messages);
-
     const metrics = {
         totalMessages,
         messagesPerDay: Math.round(messagesPerDay * 10) / 10,
@@ -231,6 +225,12 @@ export async function analyzeConversation(
     };
 
     const flags = { isDryTexting, isUnilateral, isGhostingRisk, isToxic, isSpamBehavior };
+
+    // Insights
+    const insights = generateQualityInsights(dimensions, metrics, flags, totalMessages);
+
+    // Timeline
+    const timeline = buildTimeline(messages);
 
     return {
         matchId,

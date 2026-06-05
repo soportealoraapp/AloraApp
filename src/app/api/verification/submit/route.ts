@@ -20,13 +20,13 @@ export async function POST(request: NextRequest) {
         const validGestures = ['smile', 'v_sign', 'thumbs_up', 'open_palm'];
         const gestureValue = validGestures.includes(gesture) ? gesture : null;
 
-        const existing = await prisma.verificationSubmission.findUnique({
+        const existing = await prisma.verificationSubmission.findFirst({
             where: { userId: user.id }
         });
 
         if (existing) {
             await prisma.verificationSubmission.update({
-                where: { userId: user.id },
+                where: { id: existing.id },
                 data: {
                     selfieUrl,
                     gesture: gestureValue,

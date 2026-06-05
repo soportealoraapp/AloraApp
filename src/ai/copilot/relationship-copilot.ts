@@ -30,7 +30,7 @@ export interface GhostingAnalysis {
 }
 
 export interface EmotionalInsight {
-    type: 'positive' | 'neutral' | 'warning';
+    type: 'positive' | 'neutral' | 'warning' | 'milestone';
     message: string;
     details: string;
     confidence: number;

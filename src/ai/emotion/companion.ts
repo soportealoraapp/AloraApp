@@ -1,5 +1,3 @@
-import { matchingService } from '@/lib/firebase/matching-service';
-
 export const emotionCompanion = {
     async getWeeklyInsight(userId: string): Promise<string> {
         // Mock analysis of user activity

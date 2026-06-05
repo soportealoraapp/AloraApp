@@ -69,7 +69,7 @@ export const getUserProfile = unstable_cache(
 
 export async function updateUserProfile(userId: string, data: Partial<UserProfile>) {
     try {
-        const { id, email, isVerified, createdAt, subscriptionStatus, trustStatus, isCompleted, ...profileUpdates } = data;
+        const { id, email, isVerified, createdAt, subscriptionStatus, trustStatus, ...profileUpdates } = data;
 
         await prisma.user.upsert({
             where: { id: userId },
