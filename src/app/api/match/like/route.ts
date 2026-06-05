@@ -85,6 +85,15 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ error: 'Interaction not available' }, { status: 403 });
         }
 
+        // Validate target user exists
+        const targetUser = await prisma.user.findUnique({
+            where: { id: toUserId },
+            select: { id: true }
+        });
+        if (!targetUser) {
+            return NextResponse.json({ error: 'User not found' }, { status: 404 });
+        }
+
         // 1. Create/Update Interaction (idempotent via upsert)
         const interaction = await prisma.interaction.upsert({
             where: {
