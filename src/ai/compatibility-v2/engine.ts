@@ -740,7 +740,7 @@ function deriveFromConversation(
         ease: Math.min(1, msgs.filter(m => m.content.length > 10).length / msgs.length),
         depth: Math.min(1, msgs.filter(m => m.content.length > 50).length / Math.max(1, msgs.length) * 2),
     };
-    chemB = { ...chemA };
+    const chemB = { ...chemA };
 
     const now = Date.now();
     const timesA = aMsgs.map(m => m.createdAt.getTime()).sort((a, b) => a - b);
