@@ -70,6 +70,7 @@ export async function getAdvancedFeed(
                 notIn: Array.from(excludedIds),
                 ...(cursor ? { gt: cursor } : {}),
             },
+            user: { deletedAt: null },
             trustStatus: { not: 'banned' },
             photos: { isEmpty: false },
             incognitoMode: false,

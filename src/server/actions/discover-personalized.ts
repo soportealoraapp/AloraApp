@@ -69,6 +69,7 @@ export async function getPersonalizedFeed(
     const candidates = await prisma.profile.findMany({
         where: {
             userId: { notIn: Array.from(excludedIds) },
+            user: { deletedAt: null },
             trustStatus: { not: 'banned' },
             photos: { isEmpty: false },
             incognitoMode: false,

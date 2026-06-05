@@ -92,7 +92,7 @@ export default function UserProfilePage() {
 
         setProcessing(true);
         try {
-            const result = await sendLike(profile.id, "like");
+            const result = await sendLike(id as string, "like");
             setIsLiked(true);
 
             if (result.matched) {
@@ -114,7 +114,7 @@ export default function UserProfilePage() {
 
         setProcessing(true);
         try {
-            const result = await sendLike(profile.id, "superlike");
+            const result = await sendLike(id as string, "superlike");
             setIsSuperMatched(true);
             setIsLiked(true);
 
@@ -136,7 +136,7 @@ export default function UserProfilePage() {
     const handleAcceptMatch = async () => {
         setProcessing(true);
         try {
-            const result = await sendLike(profile.id, "like");
+            const result = await sendLike(id as string, "like");
 
             toast({
                 title: `¡Nuevo match con ${profile.displayName}! 🎉`,
@@ -160,7 +160,7 @@ export default function UserProfilePage() {
     const handleGiveSecondChance = async () => {
         setProcessing(true);
         try {
-            const result = await sendLike(profile.id, "like");
+            const result = await sendLike(id as string, "like");
 
             toast({
                 title: "¡Segunda oportunidad!",

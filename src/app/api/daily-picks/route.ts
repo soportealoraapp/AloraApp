@@ -95,6 +95,7 @@ export async function GET(request: NextRequest) {
         const candidates = await prisma.profile.findMany({
             where: {
                 userId: { notIn: excludeIds },
+                user: { deletedAt: null },
                 photos: { isEmpty: false },
                 trustStatus: { not: 'banned' },
                 incognitoMode: false,

@@ -243,6 +243,7 @@ export async function getDynamicFeed(
         const candidates = await prisma.profile.findMany({
             where: {
                 userId: userIdFilter,
+                user: { deletedAt: null },
                 trustStatus: { not: 'banned' },
                 incognitoMode: false,
                 showMeInDiscover: true,
