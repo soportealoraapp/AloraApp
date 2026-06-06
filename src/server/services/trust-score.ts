@@ -73,7 +73,7 @@ export async function calculateTrustScore(userId: string): Promise<TrustScoreRes
     if (accountAge > 30) { score += 5; reasons.push('Cuenta establecida'); }
 
     // 4. Reputation (max 20 points)
-    const reputation = profile.reputationScore || 100;
+    const reputation = profile.reputationScore ?? 100;
     if (reputation >= 90) { score += 20; reasons.push('Excelente reputación'); }
     else if (reputation >= 70) { score += 15; reasons.push('Buena reputación'); }
     else if (reputation >= 50) { score += 10; }

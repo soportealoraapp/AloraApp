@@ -13,11 +13,6 @@ export const getUserProfile = unstable_cache(
             });
 
             if (!user) {
-                await prisma.user.upsert({
-                    where: { id: userId },
-                    create: { id: userId, email: `${userId}@pending.local` },
-                    update: {},
-                });
                 return null;
             }
 

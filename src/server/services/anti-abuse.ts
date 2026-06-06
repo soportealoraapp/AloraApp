@@ -88,7 +88,7 @@ export async function calculateReputation(userId: string): Promise<number> {
     const [profile, reports, blocks, messages, matches] = await Promise.all([
         prisma.profile.findUnique({ where: { userId } }),
         prisma.report.count({ where: { reportedId: userId, status: { not: 'dismissed' } } }),
-        prisma.block.count({ where: { blockerId: userId } }),
+        prisma.block.count({ where: { blockedId: userId } }),
         prisma.message.count({ where: { senderId: userId } }),
         prisma.match.count({
             where: {
@@ -104,7 +104,7 @@ export async function calculateReputation(userId: string): Promise<number> {
 
     // Deductions
     score -= reports * 10;              // -10 per valid report
-    score -= blocks * 5;                // -5 per block received
+    score -= blocks * 5;                // -5 per block received (others blocked this user)
     if (profile.trustStatus === 'watchlist') score -= 30;
     if (profile.isShadowBanned) score -= 40;
 
