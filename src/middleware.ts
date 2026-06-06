@@ -37,7 +37,6 @@ export async function middleware(request: NextRequest) {
         pathname.startsWith('/support') ||
         pathname.startsWith('/compatibility') ||
         pathname.startsWith('/match') ||
-        pathname.startsWith('/stories') ||
         pathname.startsWith('/events') ||
         pathname.startsWith('/success-stories') ||
         pathname.startsWith('/why-alora') ||

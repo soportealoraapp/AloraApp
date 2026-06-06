@@ -910,31 +910,6 @@ model SuccessStory {
   @@map("success_stories")
 }
 
-model Story {
-  id        String   @id @default(uuid())
-  userId    String
-  content   String
-  type      String   @default("text")
-  expiresAt DateTime
-  createdAt DateTime @default(now())
-
-  @@index([userId])
-  @@index([expiresAt])
-  @@map("stories")
-}
-
-model StoryView {
-  id       String   @id @default(uuid())
-  storyId  String
-  userId   String
-  viewedAt DateTime @default(now())
-
-  @@unique([storyId, userId])
-  @@index([storyId])
-  @@index([userId])
-  @@map("story_views")
-}
-
 // ========== Experimentation Platform (v7) ==========
 
 model Experiment {

@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { liveProvider } from '@/server/utils/liveProviderAdapter';
 
-describe('Phase 9 Events & Stories', () => {
+describe('Live Provider Adapter', () => {
     it('Live Adapter creates room token', async () => {
         const room = await liveProvider.createRoom({
             roomId: 'test_room',
