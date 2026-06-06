@@ -56,6 +56,13 @@ export async function GET(
             }
         }
 
+        // Fetch quiz results (best score)
+        const quizResult = await prisma.quizResult.findFirst({
+            where: { userId: targetUserId },
+            orderBy: { score: 'desc' },
+            select: { score: true, archetype: true },
+        });
+
         // Hide private fields
         const { incognitoMode, showMeInDiscover, ...safeProfile } = profile as any;
 
@@ -63,6 +70,8 @@ export async function GET(
 
         return NextResponse.json({
             ...safeProfile,
+            quizArchetype: quizResult?.archetype ?? null,
+            quizScore: quizResult?.score ?? null,
             latestAnswer: latestAnswer
                 ? {
                     questionId: latestAnswer.questionId,

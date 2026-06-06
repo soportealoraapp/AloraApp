@@ -90,6 +90,8 @@ export interface UserProfile extends User {
     messageResponseRate?: number | null;
     lastActiveHours?: number | null;
     voiceIntro?: string;
+    quizArchetype?: string | null;
+    quizScore?: number | null;
     latestAnswer?: {
         questionId: string;
         question: string | null;

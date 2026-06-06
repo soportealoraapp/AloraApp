@@ -381,7 +381,25 @@ export default function DiscoverPage() {
             </div>
             <Progress value={activationScore} className="h-2 mb-3" />
             <div className="space-y-1.5">
-              {activationTasks.filter(t => !t.completed).slice(0, 4).map(task => (
+              {activationTasks
+                .filter(t => !t.completed)
+                .sort((a, b) => {
+                  const priority: Record<string, number> = {
+                    'Verifícate': 0,
+                    'Graba tu voz': 1,
+                    'Haz un quiz': 2,
+                    'Responde la pregunta diaria': 3,
+                    'Escribe tu biografía': 4,
+                    'Elige 3 intereses': 5,
+                    'Define tus valores': 6,
+                    'Sube 3 fotos': 7,
+                    'Da tu primer like': 8,
+                    'Consigue tu primer match': 9,
+                    'Envía tu primer mensaje': 10,
+                  };
+                  return (priority[a.title] ?? 99) - (priority[b.title] ?? 99);
+                })
+                .slice(0, 4).map(task => (
                 <button
                   key={task.id}
                   onClick={() => handleTaskClick(task.title)}

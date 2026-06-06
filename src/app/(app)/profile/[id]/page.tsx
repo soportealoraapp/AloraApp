@@ -232,12 +232,19 @@ export default function UserProfilePage() {
 
                 <div className="p-4 space-y-6">
                     <div>
-                        <div className="flex items-baseline gap-2">
+                        <div className="flex items-baseline gap-2 flex-wrap">
                             <h2 className="text-3xl font-bold font-headline">
                                 {profile.displayName}, {profile.age}
                             </h2>
                             {profile.isVerified && (
                                 <CheckCircle className="h-6 w-6 text-primary" />
+                            )}
+                            {(profile as any).quizArchetype && (
+                                <Badge variant="secondary" className="rounded-full text-[10px] gap-1">
+                                    <Sparkles className="h-3 w-3 text-primary" />
+                                    {(profile as any).quizArchetype}
+                                    {(profile as any).quizScore && ` · ${(profile as any).quizScore}`}
+                                </Badge>
                             )}
                         </div>
                         <div className="flex items-center gap-4 text-muted-foreground mt-2">
@@ -271,6 +278,7 @@ export default function UserProfilePage() {
                                 <div className="bg-white/50 rounded-xl p-3 border border-primary/10">
                                     <p className="text-sm text-foreground leading-relaxed">&ldquo;{profile.latestAnswer.answer}&rdquo;</p>
                                 </div>
+                                <p className="text-[10px] text-muted-foreground mt-2">Usa esta respuesta para iniciar una conversación</p>
                             </CardContent>
                         </Card>
                     )}
