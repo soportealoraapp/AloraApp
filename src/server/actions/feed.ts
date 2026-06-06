@@ -7,6 +7,7 @@ import { calculateCompleteness } from '@/lib/utils/completeness';
 import { getDistance } from '@/lib/location';
 import { getFlags } from '@/lib/product/flags';
 import { getNewUserBoost } from '@/server/services/new-user-boost';
+import { scoreCandidate } from '@/server/scoring/feed-scoring';
 
 export interface FeedItem {
     profile: UserProfile;
@@ -383,76 +384,24 @@ export async function getDynamicFeed(
                     createdAt: cp.createdAt,
                 };
 
-                const lastActive = cp.lastActiveAt as Date | null;
-                const activeNow = lastActive ? lastActive > fiveMinutesAgo : false;
-                const activeToday = lastActive ? lastActive > oneDayAgo : false;
-
-                const candidateInterests = cp.interests || [];
-                const sharedInterests = currentUserInterests.filter(i =>
-                    candidateInterests.some((ci: string) => ci.toLowerCase() === i.toLowerCase())
-                ).length;
-
-                const sent = messagesSentMap.get(cp.userId) || 0;
-                const messageResponseRate = sent > 0 ? Math.min(1, sent / 10) : null;
-                const highResponseRate = sent >= 5;
-
                 const completeness = calculateCompleteness(profile);
                 const deepScore = await getCompatibilityScore(currentUserId, profile.id);
                 const flags = await getFlags(currentUserId);
+                const messagesSent = messagesSentMap.get(cp.userId) || 0;
 
-                let totalScore = deepScore.score * 0.5;
-
-                if (cp.isVerified) totalScore += flags.verificationPriority;
-
-                if (completeness >= 80) totalScore += 20;
-                else if (completeness >= 60) totalScore += 10;
-                else if (completeness < 50) totalScore *= 0.5;
-
-                if (cp.voiceIntro) totalScore += flags.voiceIntroBoost;
-
-                if (cp.trustStatus === 'watchlist') totalScore *= 0.8;
-
-                const reputation = (cp as any).reputationScore ?? 100;
-                const isShadowBanned = (cp as any).isShadowBanned ?? false;
-
-                if (isShadowBanned) totalScore *= 0.1;
-                else if (reputation < 50) totalScore *= 0.6;
-                else if (reputation < 70) totalScore *= 0.8;
-                else if (reputation > 90) totalScore += 10;
-
-                if (activeNow) totalScore += 15;
-                else if (activeToday) totalScore += 5;
-
-                if (highResponseRate) totalScore += 15;
-
-                totalScore += sharedInterests * 3;
-
-                if (completeness >= 80 && activeToday) totalScore += 5;
-
-                const boostExpires = (cp as any).boostExpiresAt;
-                if (boostExpires && new Date(boostExpires) > now) {
-                    totalScore += 30;
-                }
-
-                if (cp.subscriptionStatus === 'plus') {
-                    totalScore += 15;
-                }
-
-                return {
-                    profile: { ...profile, completenessScore: completeness },
-                    score: {
-                        total: Math.min(100, Math.round(totalScore * newUserBoost)),
-                        details: deepScore.breakdown,
-                        explanation: deepScore.explanation,
-                    },
-                    signals: {
-                        activeNow,
-                        highResponseRate,
-                        sharedInterests,
-                        messageResponseRate,
-                        lastActiveHours: lastActive ? Math.round((now.getTime() - lastActive.getTime()) / (1000 * 60 * 60)) : null,
-                    },
-                };
+                return scoreCandidate({
+                    cp: cp as any,
+                    profile,
+                    currentUserInterests,
+                    messagesSent,
+                    now,
+                    fiveMinutesAgo,
+                    oneDayAgo,
+                    deepScore,
+                    completeness,
+                    flags,
+                    newUserBoost,
+                });
             })
         );
 

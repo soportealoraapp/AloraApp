@@ -61,16 +61,20 @@
 | /admin/success-stories | app/(app)/admin/success-stories/page.tsx |
 | /admin/north-star | app/(app)/admin/north-star/page.tsx |
 
-## ORPHAN Routes (exist, no navigation — no physical moves in V3.2)
+## ORPHAN Routes (exist, no navigation)
 
-### INCOMPLETE (feature started, never finished — keep for reference)
+### INCOMPLETE — MOVED TO DEPRECATED (V3.3)
 
-| Route | Page File | Notes |
-|-------|-----------|-------|
-| /onboarding/emotional | app/(app)/onboarding/emotional/page.tsx | Emotional onboarding screen with API + AI summary. Feature never wired into onboarding flow. |
-| /onboarding/female-safety | app/(app)/onboarding/female-safety/page.tsx | Female safety onboarding screen. Feature never wired into onboarding flow. |
+These features were started but never finished. Moved to `src/deprecated/routes/` in V3.3.
 
-### LEGACY (was used, now replaced — remove in V3.3)
+| Route | New Location |
+|-------|-------------|
+| /onboarding/emotional + API | `src/deprecated/routes/onboarding/emotional/page.tsx` |
+| | `src/deprecated/routes/emotional-onboarding-api/route.ts` |
+| | `src/deprecated/ai/copilot/emotional-onboarding.ts` |
+| /onboarding/female-safety | `src/deprecated/routes/onboarding/female-safety/page.tsx` |
+
+### LEGACY (was used, now replaced — remove in V3.4)
 
 | Route | Page File | Notes |
 |-------|-----------|-------|
@@ -79,7 +83,7 @@
 | /community/ambassador/apply | community/ambassador/apply/page.tsx | Ambassador program — UI exists, no backend integration. |
 | /partners/index | partners/index/page.tsx | Partner program — UI exists, no backend integration. |
 
-### ABANDONED (unreleased feature — remove in V3.3)
+### ABANDONED (unreleased feature — remove in V3.4)
 
 | Route | Page File | Notes |
 |-------|-----------|-------|
@@ -91,3 +95,14 @@
 | /settings/referral | app/(app)/settings/referral/page.tsx | Referral program. No backend. |
 | /settings/safety/experience | app/(app)/settings/safety/experience/page.tsx | Safety experience page. Abandoned. |
 | /settings/safety/center | app/(app)/settings/safety/center/page.tsx | Safety center (redirect-only). Abandoned. |
+
+---
+
+## Deprecation Calendar
+
+| Version | Action |
+|---------|--------|
+| V3.2 | Classified all orphan routes (INCOMPLETE / LEGACY / ABANDONED) |
+| V3.3 | Moved INCOMPLETE routes + API + AI modules to `src/deprecated/` |
+| V3.4 | Remove LEGACY and ABANDONED routes, ghost DB tables |
+| V3.5 | Remove deprecated tree entirely (all `src/deprecated/` content) |
