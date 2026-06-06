@@ -117,7 +117,7 @@ export default function VerificationPage() {
                             </Button>
                         </CardContent>
                     </Card>
-                ) : verificationStatus === 'pending' || verificationStatus === 'approved' && !isVerified ? (
+                ) : (verificationStatus === 'pending' || verificationStatus === 'approved') && !isVerified ? (
                     <Card className="border-amber-200 dark:border-amber-800 bg-amber-50/50 dark:bg-amber-950/30">
                         <CardContent className="flex items-center gap-4 p-6">
                             <div className="rounded-full bg-amber-100 dark:bg-amber-900/50 p-3">
@@ -153,6 +153,9 @@ export default function VerificationPage() {
                                 <CardDescription>
                                     Obtén el badge azul de verificación para aumentar la confianza en tus conexiones.
                                 </CardDescription>
+                                <div className="bg-primary/5 rounded-lg p-3 mt-2">
+                                    <p className="text-xs font-medium text-primary">Los perfiles verificados aparecen primero en Discover y reciben hasta 3× más matches.</p>
+                                </div>
                             </CardHeader>
                             <CardContent className="space-y-4">
                                 <div className="rounded-2xl bg-muted/50 p-4 space-y-3">

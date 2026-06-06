@@ -58,10 +58,39 @@ export default function DiscoverPage() {
   const lastSwipeRef = useRef<{ profileId: string; direction: string } | null>(null);
   const sentinelRef = useRef<HTMLDivElement>(null);
   const geoRequestedRef = useRef(false);
+  const dailyQuestionRef = useRef<HTMLDivElement>(null);
 
   const [activationScore, setActivationScore] = useState<number | null>(null);
   const [activationTasks, setActivationTasks] = useState<{ id: string; title: string; completed: boolean; rewardText: string }[]>([]);
   const [activationCardEnabled, setActivationCardEnabled] = useState(true);
+
+  const handleTaskClick = (title: string) => {
+    switch (title) {
+      case "Completa tu registro":
+      case "Escribe tu biografía":
+      case "Elige 3 intereses":
+      case "Define tus valores":
+      case "Sube 3 fotos":
+      case "Graba tu voz":
+        router.push('/profile/edit');
+        break;
+      case "Haz un quiz":
+        router.push('/compatibility');
+        break;
+      case "Responde la pregunta diaria":
+        dailyQuestionRef.current?.scrollIntoView({ behavior: 'smooth' });
+        break;
+      case "Verifícate":
+        router.push('/settings/verification');
+        break;
+      case "Da tu primer like":
+        break;
+      case "Consigue tu primer match":
+      case "Envía tu primer mensaje":
+        router.push('/chat');
+        break;
+    }
+  };
 
   useEffect(() => {
     fetch('/api/discover/activation')
@@ -353,11 +382,15 @@ export default function DiscoverPage() {
             <Progress value={activationScore} className="h-2 mb-3" />
             <div className="space-y-1.5">
               {activationTasks.filter(t => !t.completed).slice(0, 4).map(task => (
-                <div key={task.id} className="flex items-center gap-2 text-xs">
+                <button
+                  key={task.id}
+                  onClick={() => handleTaskClick(task.title)}
+                  className="w-full flex items-center gap-2 text-xs text-left"
+                >
                   <Circle className="h-3 w-3 text-muted-foreground shrink-0" />
                   <span className="flex-1">{task.title}</span>
                   <span className="text-[9px] text-primary font-medium">{task.rewardText}</span>
-                </div>
+                </button>
               ))}
             </div>
             {activationTasks.filter(t => !t.completed).length > 4 && (
@@ -494,7 +527,9 @@ export default function DiscoverPage() {
       <div className="px-4 pb-4 max-w-sm mx-auto w-full space-y-3">
         <SecondChanceSection />
         <DailyCompatibilityCard />
-        <DailyQuestionCard />
+        <div ref={dailyQuestionRef}>
+          <DailyQuestionCard />
+        </div>
       </div>
 
       <DiscoverFilters

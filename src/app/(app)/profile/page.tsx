@@ -295,7 +295,7 @@ export default function ProfilePage() {
                     { label: 'Valores (2+)', done: (profile as any)?.values?.length >= 2 },
                     { label: 'Gustos musicales', done: (profile as any)?.musicGenres?.length > 0 },
                     { label: 'Verificación', done: (profile as any)?.isVerified },
-                    { label: 'Quiz completado', done: false },
+                    { label: 'Quiz completado', done: quizResults.length > 0 },
                   ].map((item, i) => (
                     <div key={i} className="flex items-center gap-2">
                       {item.done ? (
@@ -346,7 +346,7 @@ export default function ProfilePage() {
             </Link>
           )}
 
-          {quizResults.length > 0 && (
+          {quizResults.length > 0 ? (
             <Card className="rounded-3xl border shadow-sm">
               <CardContent className="p-5">
                 <h3 className="font-bold text-lg mb-3 flex items-center gap-2">
@@ -372,8 +372,28 @@ export default function ProfilePage() {
                     </div>
                   ))}
                 </div>
+                <Button variant="link" asChild className="p-0 h-auto text-xs font-bold text-primary mt-3">
+                  <Link href="/compatibility">Ver todos los quizzes →</Link>
+                </Button>
               </CardContent>
             </Card>
+          ) : (
+            <Link href="/compatibility">
+              <Card className="rounded-3xl border hover:shadow-md transition-shadow cursor-pointer">
+                <CardContent className="p-4 flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 bg-primary/10 rounded-xl">
+                      <Trophy className="h-5 w-5 text-primary" />
+                    </div>
+                    <div>
+                      <h4 className="font-bold text-foreground text-sm">Descubre tu arquetipo de compatibilidad</h4>
+                      <p className="text-xs text-muted-foreground">Responde preguntas sobre valores, comunicación y estilo de vida</p>
+                    </div>
+                  </div>
+                  <ChevronRight className="h-5 w-5 text-muted-foreground" />
+                </CardContent>
+              </Card>
+            </Link>
           )}
 
           <Card className="rounded-3xl border">

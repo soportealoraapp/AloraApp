@@ -4,6 +4,7 @@ import { useState, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Mic, Square, Trash2, Send, Loader2 } from 'lucide-react';
 import { Card } from '@/components/ui/card';
+import { useToast } from '@/hooks/use-toast';
 
 export function VoiceRecorder({ onStop, onCancel }: { onStop: (blob: Blob, duration: number) => void; onCancel?: () => void }) {
     const [recording, setRecording] = useState(false);
@@ -11,6 +12,7 @@ export function VoiceRecorder({ onStop, onCancel }: { onStop: (blob: Blob, durat
     const mediaRecorder = useRef<MediaRecorder | null>(null);
     const timerRef = useRef<NodeJS.Timeout | null>(null);
     const chunks = useRef<Blob[]>([]);
+    const { toast } = useToast();
 
     const startRecording = async () => {
         try {
@@ -34,7 +36,11 @@ export function VoiceRecorder({ onStop, onCancel }: { onStop: (blob: Blob, durat
 
         } catch (err) {
             console.error("Mic access denied", err);
-            alert("Necesitamos acceso al micrófono para grabar notas de voz.");
+            toast({
+                title: "Permiso de micrófono requerido",
+                description: "Necesitamos acceso al micrófono para grabar tu presentación de voz. Por favor, habilita el micrófono en los ajustes de tu navegador.",
+                variant: "destructive",
+            });
         }
     };
 
@@ -74,10 +80,13 @@ export function VoiceRecorder({ onStop, onCancel }: { onStop: (blob: Blob, durat
                     </div>
                 </div>
             ) : (
-                <Button variant="ghost" className="text-muted-foreground hover:text-primary hover:bg-primary/5 w-full justify-start gap-2" onClick={startRecording}>
-                    <Mic className="w-5 h-5" />
-                    <span className="text-xs">Grabar Audio</span>
-                </Button>
+                <div className="w-full space-y-2">
+                    <p className="text-[10px] text-muted-foreground leading-tight">Tu voz ayuda a encontrar personas compatibles. Los perfiles con audio reciben 2× más visitas.</p>
+                    <Button variant="ghost" className="text-muted-foreground hover:text-primary hover:bg-primary/5 w-full justify-start gap-2" onClick={startRecording}>
+                        <Mic className="w-5 h-5" />
+                        <span className="text-xs">Grabar Audio</span>
+                    </Button>
+                </div>
             )}
         </Card>
     );
