@@ -170,10 +170,10 @@ export default function EmotionalOnboardingPage() {
     };
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-pink-50 to-purple-50 flex items-center justify-center p-4">
+        <div className="min-h-screen bg-gradient-to-br from-pink-50 to-purple-50 dark:from-pink-950 dark:to-purple-950 flex items-center justify-center p-4">
             <Card className="w-full max-w-lg">
                 <CardHeader className="text-center">
-                    <Sparkles className="h-8 w-8 text-pink-500 mx-auto mb-2" />
+                    <Sparkles className="h-8 w-8 text-pink-500 dark:text-pink-400 mx-auto mb-2" />
                     <CardTitle>{STEPS[step].title}</CardTitle>
                     <Progress value={((step + 1) / STEPS.length) * 100} className="h-2" />
                     <p className="text-xs text-muted-foreground">Paso {step + 1} de {STEPS.length}</p>

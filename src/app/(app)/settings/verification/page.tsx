@@ -99,16 +99,16 @@ export default function VerificationPage() {
 
             <main className="p-4 max-w-lg mx-auto space-y-6">
                 {verificationStatus === 'rejected' ? (
-                    <Card className="border-red-200 bg-red-50/50">
+                    <Card className="border-red-200 dark:border-red-800 bg-red-50/50 dark:bg-red-950/30">
                         <CardContent className="p-6">
                             <div className="flex items-center gap-4 mb-4">
-                                <div className="rounded-full bg-red-100 p-3">
-                                    <AlertCircle className="h-6 w-6 text-red-600" />
+                                <div className="rounded-full bg-red-100 dark:bg-red-900/50 p-3">
+                                    <AlertCircle className="h-6 w-6 text-red-600 dark:text-red-400" />
                                 </div>
                                 <div>
-                                    <p className="font-bold text-red-800">Verificación rechazada</p>
+                                    <p className="font-bold text-red-800 dark:text-red-300">Verificación rechazada</p>
                                     {rejectionReason && (
-                                        <p className="text-sm text-red-600">{rejectionReason}</p>
+                                        <p className="text-sm text-red-600 dark:text-red-400">{rejectionReason}</p>
                                     )}
                                 </div>
                             </div>
@@ -118,28 +118,28 @@ export default function VerificationPage() {
                         </CardContent>
                     </Card>
                 ) : verificationStatus === 'pending' || verificationStatus === 'approved' && !isVerified ? (
-                    <Card className="border-amber-200 bg-amber-50/50">
+                    <Card className="border-amber-200 dark:border-amber-800 bg-amber-50/50 dark:bg-amber-950/30">
                         <CardContent className="flex items-center gap-4 p-6">
-                            <div className="rounded-full bg-amber-100 p-3">
-                                <Clock className="h-6 w-6 text-amber-600" />
+                            <div className="rounded-full bg-amber-100 dark:bg-amber-900/50 p-3">
+                                <Clock className="h-6 w-6 text-amber-600 dark:text-amber-400" />
                             </div>
                             <div>
-                                <p className="font-bold text-amber-800">Verificación en revisión</p>
-                                <p className="text-sm text-amber-600">
+                                <p className="font-bold text-amber-800 dark:text-amber-300">Verificación en revisión</p>
+                                <p className="text-sm text-amber-600 dark:text-amber-400">
                                     Estamos revisando tu identidad. Te notificaremos en 24-48 horas.
                                 </p>
                             </div>
                         </CardContent>
                     </Card>
                 ) : isVerified || verificationStatus === 'approved' ? (
-                    <Card className="border-green-100 bg-green-50/50">
+                    <Card className="border-green-100 dark:border-green-800 bg-green-50/50 dark:bg-green-950/30">
                         <CardContent className="flex items-center gap-4 p-6">
-                            <div className="rounded-full bg-green-100 p-3">
-                                <ShieldCheck className="h-6 w-6 text-green-600" />
+                            <div className="rounded-full bg-green-100 dark:bg-green-900/50 p-3">
+                                <ShieldCheck className="h-6 w-6 text-green-600 dark:text-green-400" />
                             </div>
                             <div>
-                                <p className="font-bold text-green-800">Identidad verificada</p>
-                                <p className="text-sm text-green-600">
+                                <p className="font-bold text-green-800 dark:text-green-300">Identidad verificada</p>
+                                <p className="text-sm text-green-600 dark:text-green-400">
                                     Tienes el badge de verificación en tu perfil.
                                 </p>
                             </div>

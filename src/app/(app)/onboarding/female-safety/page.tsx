@@ -12,29 +12,29 @@ const safetyFeatures = [
         icon: Shield,
         title: 'Verificación de identidad',
         description: 'Verifica tu identidad con un selfie. Los usuarios verificados generan más confianza.',
-        color: 'text-blue-500',
-        bg: 'bg-blue-50',
+        color: 'text-blue-500 dark:text-blue-400',
+        bg: 'bg-blue-50 dark:bg-blue-950/50',
     },
     {
         icon: Lock,
         title: 'Modo incógnito',
         description: 'Activa el modo incógnito para controlar quién puede verte. Tu perfil no aparecerá en descubrir.',
-        color: 'text-purple-500',
-        bg: 'bg-purple-50',
+        color: 'text-purple-500 dark:text-purple-400',
+        bg: 'bg-purple-50 dark:bg-purple-950/50',
     },
     {
         icon: Eye,
         title: 'Control de visibilidad',
         description: 'Decide si quieres aparecer en descubrir o no. Tú tienes el control total.',
-        color: 'text-green-500',
-        bg: 'bg-green-50',
+        color: 'text-green-500 dark:text-green-400',
+        bg: 'bg-green-50 dark:bg-green-950/50',
     },
     {
         icon: UserX,
         title: 'Bloqueo y reporte',
         description: 'Puedes bloquear y reportar a cualquier usuario. Los reportes son anónimos y tomados en serio.',
-        color: 'text-red-500',
-        bg: 'bg-red-50',
+        color: 'text-red-500 dark:text-red-400',
+        bg: 'bg-red-50 dark:bg-red-950/50',
     },
 ];
 
@@ -42,10 +42,10 @@ export default function FemaleSafetyOnboarding() {
     const router = useRouter();
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-pink-50 to-purple-50 flex items-center justify-center p-4">
+        <div className="min-h-screen bg-gradient-to-br from-pink-50 to-purple-50 dark:from-pink-950 dark:to-purple-950 flex items-center justify-center p-4">
             <Card className="w-full max-w-lg">
                 <CardHeader className="text-center">
-                    <Shield className="h-10 w-10 text-pink-500 mx-auto mb-2" />
+                    <Shield className="h-10 w-10 text-pink-500 dark:text-pink-400 mx-auto mb-2" />
                     <CardTitle className="text-xl">Tu seguridad es nuestra prioridad</CardTitle>
                     <p className="text-sm text-muted-foreground">
                         Antes de comenzar, queremos que sepas que tienes control total sobre tu experiencia.
@@ -64,12 +64,12 @@ export default function FemaleSafetyOnboarding() {
                         </div>
                     ))}
 
-                    <div className="p-3 bg-green-50 rounded-lg border border-green-200">
+                    <div className="p-3 bg-green-50 dark:bg-green-950/50 rounded-lg border border-green-200 dark:border-green-800">
                         <div className="flex items-center gap-2">
-                            <CheckCircle className="h-4 w-4 text-green-600" />
-                            <p className="text-sm text-green-700 font-medium">Estas protegida</p>
+                            <CheckCircle className="h-4 w-4 text-green-600 dark:text-green-400" />
+                            <p className="text-sm text-green-700 dark:text-green-300 font-medium">Estas protegida</p>
                         </div>
-                        <p className="text-xs text-green-600 mt-1">
+                        <p className="text-xs text-green-600 dark:text-green-400 mt-1">
                             Nuestro sistema detecta comportamientos sospechosos y permite reportarlos al instante.
                         </p>
                     </div>

@@ -85,23 +85,23 @@ export function PaywallModal({ isOpen, onClose }: PaywallModalProps) {
                     <p className="opacity-90 text-sm">Eleva tu experiencia y encuentra conexiones reales más rápido.</p>
                 </div>
 
-                <div className="p-8 space-y-6 bg-white">
+                <div className="p-8 space-y-6 bg-white dark:bg-gray-950">
                     <div className="space-y-4">
                         {features.map((f, i) => (
                             <div key={i} className="flex items-start gap-4">
                                 <div className="mt-1">{f.icon}</div>
                                 <div>
-                                    <h4 className="font-bold text-sm text-gray-800">{f.title}</h4>
+                                    <h4 className="font-bold text-sm text-gray-800 dark:text-gray-200">{f.title}</h4>
                                     <p className="text-xs text-muted-foreground">{f.subtitle}</p>
                                 </div>
                             </div>
                         ))}
                     </div>
 
-                    <div className="bg-pink-50 rounded-2xl p-4 border border-pink-100">
+                    <div className="bg-pink-50 dark:bg-pink-950/50 rounded-2xl p-4 border border-pink-100 dark:border-pink-800">
                         <div>
-                            <span className="text-xs font-bold text-pink-600 uppercase tracking-wider">Plan Mensual</span>
-                            <div className="text-2xl font-bold text-gray-900">$99 <span className="text-sm font-normal text-muted-foreground">MXN / mes</span></div>
+                            <span className="text-xs font-bold text-pink-600 dark:text-pink-400 uppercase tracking-wider">Plan Mensual</span>
+                            <div className="text-2xl font-bold text-gray-900 dark:text-gray-100">$99 <span className="text-sm font-normal text-muted-foreground">MXN / mes</span></div>
                         </div>
                     </div>
 

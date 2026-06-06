@@ -361,7 +361,7 @@ export default function DiscoverPage() {
               ))}
             </div>
             {activationTasks.filter(t => !t.completed).length > 4 && (
-              <button className="text-[10px] text-primary font-medium mt-2 flex items-center gap-1">
+              <button onClick={() => router.push('/profile/edit')} className="text-[10px] text-primary font-medium mt-2 flex items-center gap-1">
                 Ver más <ChevronRight className="h-3 w-3" />
               </button>
             )}
