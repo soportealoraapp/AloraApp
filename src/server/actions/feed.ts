@@ -236,28 +236,49 @@ export async function getDynamicFeed(
             userIdFilter.in = candidateIds;
         }
 
-        // Decode page offset from cursor (format: "page_N")
-        const currentPage = cursor ? parseInt(cursor.replace('page_', ''), 10) || 0 : 0;
-        const fetchSize = (limit + 1) * 3; // Fetch extra to compensate for in-memory post-filters
+        // Cursor-based pagination: cursor is the userId of the last returned profile.
+        // Legacy "page_N" cursors are treated as fresh start (null cursor).
+        const cursorUserId = (cursor && !cursor.startsWith('page_')) ? cursor : null;
+        const batchSize = (limit + 1) * 3;
 
-        const candidates = await prisma.profile.findMany({
-            where: {
-                userId: userIdFilter,
-                user: { deletedAt: null },
-                trustStatus: { not: 'banned' },
-                incognitoMode: false,
-                showMeInDiscover: true,
-                ...searchFilter,
-                ...dynamicFilters,
-            },
-            skip: currentPage * fetchSize,
-            take: fetchSize,
-            orderBy: { userId: 'asc' },
-            include: { user: true }
-        });
+        // Scan loop: accumulate candidates across multiple DB queries when
+        // in-memory post-filters eliminate many profiles per batch.
+        // Always scan up to MAX_SCAN_ITERATIONS unless DB is exhausted.
+        let allCandidates: any[] = [];
+        let scanCursor: string | null = cursorUserId;
+        let iterations = 0;
+        const MAX_SCAN_ITERATIONS = 3;
+        let lastBatchSize = 0;
+
+        while (iterations < MAX_SCAN_ITERATIONS) {
+            const batch = await prisma.profile.findMany({
+                where: {
+                    userId: {
+                        ...userIdFilter,
+                        ...(scanCursor ? { gt: scanCursor } : {}),
+                    },
+                    user: { deletedAt: null },
+                    trustStatus: { not: 'banned' },
+                    incognitoMode: false,
+                    showMeInDiscover: true,
+                    ...searchFilter,
+                    ...dynamicFilters,
+                },
+                take: batchSize,
+                orderBy: { userId: 'asc' },
+                include: { user: true },
+            });
+
+            lastBatchSize = batch.length;
+            if (lastBatchSize === 0) break;
+            allCandidates.push(...batch);
+            scanCursor = batch[lastBatchSize - 1].userId;
+            iterations++;
+            if (lastBatchSize < batchSize) break;
+        }
 
         // Bidirectional seeking filter: candidate.seeking must accept the viewer's gender
-        const filteredByBidirectionalSeeking = candidates.filter(c => {
+        const filteredByBidirectionalSeeking = allCandidates.filter(c => {
             if (!viewerGender || viewerGender === 'non-binary' || viewerGender === 'other') return true;
             const cs = (c.seeking || 'everyone').toLowerCase();
             if (cs === 'everyone' || cs === 'all') return true;
@@ -266,9 +287,8 @@ export async function getDynamicFeed(
             return false;
         });
 
-        let results = filteredByBidirectionalSeeking.slice(0, limit);
-
         // Apply smart filters that need extra lookups
+        let results = filteredByBidirectionalSeeking;
         if (filters?.withVoiceIntro || filters?.withQuiz || filters?.activeToday) {
             const candidateIds = results.map(c => c.userId);
             const [voiceUsers, quizUsers, activeUsers] = await Promise.all([
@@ -308,10 +328,7 @@ export async function getDynamicFeed(
             });
         }
 
-        const hasMore = filteredByBidirectionalSeeking.length > limit || candidates.length === fetchSize;
-        const nextCursor = hasMore ? `page_${currentPage + 1}` : null;
-
-        // Calculate response rates for all candidates in batch
+        // Calculate response rates for all candidates
         const resultCandidateIds = results.map(c => c.userId);
         const recentMessages = resultCandidateIds.length > 0 ? await prisma.message.groupBy({
             by: ['senderId'],
@@ -322,7 +339,6 @@ export async function getDynamicFeed(
             _count: true,
         }) : [];
 
-        // Build a map of total messages sent per candidate
         const messagesSentMap = new Map<string, number>();
         for (const m of recentMessages) {
             if (resultCandidateIds.includes(m.senderId)) {
@@ -364,18 +380,15 @@ export async function getDynamicFeed(
                     createdAt: cp.createdAt,
                 };
 
-                // --- RETENTION SIGNALS ---
                 const lastActive = cp.lastActiveAt as Date | null;
                 const activeNow = lastActive ? lastActive > fiveMinutesAgo : false;
                 const activeToday = lastActive ? lastActive > oneDayAgo : false;
 
-                // Shared interests count
                 const candidateInterests = cp.interests || [];
                 const sharedInterests = currentUserInterests.filter(i =>
-                    candidateInterests.some(ci => ci.toLowerCase() === i.toLowerCase())
+                    candidateInterests.some((ci: string) => ci.toLowerCase() === i.toLowerCase())
                 ).length;
 
-                // Response rate (based on sent messages in last 7 days)
                 const sent = messagesSentMap.get(cp.userId) || 0;
                 const messageResponseRate = sent > 0 ? Math.min(1, sent / 10) : null;
                 const highResponseRate = sent >= 5;
@@ -386,7 +399,6 @@ export async function getDynamicFeed(
 
                 let totalScore = deepScore.score * 0.5;
 
-                // --- SCORING WEIGHTS ---
                 if (cp.isVerified) totalScore += flags.verificationPriority;
 
                 if (completeness >= 80) totalScore += 20;
@@ -450,7 +462,11 @@ export async function getDynamicFeed(
 
         visible.sort((a, b) => b.score.total - a.score.total);
 
-        return { items: visible, nextCursor, hasMore };
+        const finalItems = visible.slice(0, limit);
+        const hasMore = (visible.length > limit) || (finalItems.length > 0 && lastBatchSize === batchSize);
+        const nextCursor = hasMore ? finalItems[finalItems.length - 1].profile.id : null;
+
+        return { items: finalItems, nextCursor, hasMore };
     } catch (error) {
         console.error('Error generating dynamic feed', error);
         return { items: [], nextCursor: null, hasMore: false };
