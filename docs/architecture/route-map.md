@@ -61,21 +61,33 @@
 | /admin/success-stories | app/(app)/admin/success-stories/page.tsx |
 | /admin/north-star | app/(app)/admin/north-star/page.tsx |
 
-## ORPHAN Routes (exist, no navigation — candidates for connection or deprecation)
+## ORPHAN Routes (exist, no navigation — no physical moves in V3.2)
 
-| Route | Page File | Recommended Action |
-|-------|-----------|-------------------|
-| /onboarding/emotional | app/(app)/onboarding/emotional/page.tsx | Connect via onboarding wizard |
-| /onboarding/female-safety | app/(app)/onboarding/female-safety/page.tsx | Connect via onboarding wizard |
-| /profile/badges | app/(app)/profile/badges/page.tsx | LEGACY — move to deprecated |
-| /profile/analytics | app/(app)/profile/analytics/page.tsx | LEGACY — move to deprecated |
-| /profile/compatibility/[candidateId] | app/(app)/profile/compatibility/[candidateId]/page.tsx | LEGACY — move to deprecated |
-| /settings/audio | app/(app)/settings/audio/page.tsx | LEGACY — move to deprecated |
-| /settings/subscription | app/(app)/settings/subscription/page.tsx | LEGACY — move to deprecated |
-| /settings/referral | app/(app)/settings/referral/page.tsx | LEGACY — move to deprecated |
-| /settings/safety/experience | app/(app)/settings/safety/experience/page.tsx | LEGACY — move to deprecated |
-| /settings/safety/center | app/(app)/settings/safety/center/page.tsx | LEGACY — move to deprecated |
-| /launch | app/launch/page.tsx | LEGACY — move to deprecated |
-| /waitlist | app/waitlist/page.tsx | LEGACY — move to deprecated |
-| /community/ambassador/apply | community/ambassador/apply/page.tsx | LEGACY — move to deprecated |
-| /partners/index | partners/index/page.tsx | LEGACY — move to deprecated |
+### INCOMPLETE (feature started, never finished — keep for reference)
+
+| Route | Page File | Notes |
+|-------|-----------|-------|
+| /onboarding/emotional | app/(app)/onboarding/emotional/page.tsx | Emotional onboarding screen with API + AI summary. Feature never wired into onboarding flow. |
+| /onboarding/female-safety | app/(app)/onboarding/female-safety/page.tsx | Female safety onboarding screen. Feature never wired into onboarding flow. |
+
+### LEGACY (was used, now replaced — remove in V3.3)
+
+| Route | Page File | Notes |
+|-------|-----------|-------|
+| /launch | app/launch/page.tsx | Pre-launch landing page. Superseded by the active landing page. |
+| /waitlist | app/waitlist/page.tsx | Pre-launch waitlist. Superseded by live auth flow. |
+| /community/ambassador/apply | community/ambassador/apply/page.tsx | Ambassador program — UI exists, no backend integration. |
+| /partners/index | partners/index/page.tsx | Partner program — UI exists, no backend integration. |
+
+### ABANDONED (unreleased feature — remove in V3.3)
+
+| Route | Page File | Notes |
+|-------|-----------|-------|
+| /profile/badges | app/(app)/profile/badges/page.tsx | Badge display page. No emitter. |
+| /profile/analytics | app/(app)/profile/analytics/page.tsx | Personal analytics. No consumer. |
+| /profile/compatibility/[candidateId] | app/(app)/profile/compatibility/[candidateId]/page.tsx | Dynamic route — orphaned. |
+| /settings/audio | app/(app)/settings/audio/page.tsx | Audio settings. No consumer. |
+| /settings/subscription | app/(app)/settings/subscription/page.tsx | Pricing/subscription UI. Payment not integrated. |
+| /settings/referral | app/(app)/settings/referral/page.tsx | Referral program. No backend. |
+| /settings/safety/experience | app/(app)/settings/safety/experience/page.tsx | Safety experience page. Abandoned. |
+| /settings/safety/center | app/(app)/settings/safety/center/page.tsx | Safety center (redirect-only). Abandoned. |

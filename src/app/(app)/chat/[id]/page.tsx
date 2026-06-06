@@ -190,7 +190,7 @@ export default function ChatWindowPage() {
         try {
             await sendMessage(text, otherUserId);
 
-            track(AnalyticsEvents.FIRST_MESSAGE_SENT, { matchId, partnerId: otherUserId });
+            track(AnalyticsEvents.FIRST_MESSAGE, { matchId, partnerId: otherUserId });
 
             const newCount = messageCountRef.current + 1;
             messageCountRef.current = newCount;

@@ -1,10 +1,10 @@
 import { NextResponse } from 'next/server';
-import { requireAdmin } from '@/lib/middleware/admin';
+import { requireSuperAdmin } from '@/lib/middleware/admin';
 import { prisma } from '@/lib/prisma';
 
 export async function PUT(request: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const auth = await requireAdmin();
+  const auth = await requireSuperAdmin();
   if (auth) return auth;
 
   try {
@@ -71,7 +71,7 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
 
 export async function DELETE(request: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const auth = await requireAdmin();
+  const auth = await requireSuperAdmin();
   if (auth) return auth;
 
   try {

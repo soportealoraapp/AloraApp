@@ -1,10 +1,10 @@
 import { NextResponse } from 'next/server';
-import { requireAdmin } from '@/lib/middleware/admin';
+import { requireSuperAdmin } from '@/lib/middleware/admin';
 import { computeExperimentResults } from '@/server/services/experiment-results';
 
 export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const auth = await requireAdmin();
+  const auth = await requireSuperAdmin();
   if (auth) return auth;
 
   try {

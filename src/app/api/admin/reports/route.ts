@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { requireAdmin } from '@/lib/middleware/admin';
+import { requireModerator } from '@/lib/middleware/admin';
 
 export async function GET(request: NextRequest) {
-    const auth = await requireAdmin();
+    const auth = await requireModerator();
     if (auth) return auth;
 
     try {
@@ -59,7 +59,7 @@ export async function GET(request: NextRequest) {
 }
 
 export async function PATCH(request: NextRequest) {
-    const auth = await requireAdmin();
+    const auth = await requireModerator();
     if (auth) return auth;
     const { createClient } = await import('@/lib/supabase/server');
     const supabase = await createClient();

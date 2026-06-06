@@ -5,6 +5,7 @@ import { filterOffensiveMessages } from '@/ai/flows/filter-offensive-messages';
 import { analyzeMessageSafety } from '@/ai/safety-engine/risk-engine';
 import { notifyNewMessage } from '@/server/services/push';
 import { trackEvent } from '@/server/services/analytics';
+import { AnalyticsEvents } from '@/lib/tracking/events';
 
 // POST /api/chat/send
 export const dynamic = 'force-dynamic';
@@ -141,14 +142,14 @@ export async function POST(request: NextRequest) {
 
         // Analytics: track first_message and first_reply
         if (prevMessageCount === 0) {
-            trackEvent(user.id, 'first_message', { matchId })
+            trackEvent(user.id, AnalyticsEvents.FIRST_MESSAGE, { matchId })
                 .catch((err) => console.warn('[chat/send] trackEvent first_message failed:', err));
         } else {
             const repliesFromReceiver = await prisma.message.count({
                 where: { matchId, senderId: receiverId },
             });
             if (repliesFromReceiver === 1) {
-                trackEvent(receiverId, 'first_reply', { matchId })
+                trackEvent(receiverId, AnalyticsEvents.FIRST_REPLY, { matchId })
                     .catch((err) => console.warn('[chat/send] trackEvent first_reply failed:', err));
             }
         }

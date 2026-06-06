@@ -1,7 +1,18 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
-export async function requireAdmin(): Promise<NextResponse | null> {
+type RoleCheck = (role: string) => boolean;
+
+const allowModerator: RoleCheck = (role) =>
+    role === 'moderator' || role === 'admin' || role === 'super_admin';
+
+const allowAdmin: RoleCheck = (role) =>
+    role === 'admin' || role === 'super_admin';
+
+const allowSuperAdmin: RoleCheck = (role) =>
+    role === 'super_admin';
+
+async function checkRole(allow: RoleCheck, label: string): Promise<NextResponse | null> {
     const { createClient } = await import('@/lib/supabase/server');
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
@@ -15,26 +26,40 @@ export async function requireAdmin(): Promise<NextResponse | null> {
         select: { role: true }
     });
 
-    if (!dbUser || (dbUser.role !== 'admin' && dbUser.role !== 'moderator')) {
-        return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+    if (!dbUser || !allow(dbUser.role)) {
+        return NextResponse.json({
+            error: 'Forbidden',
+            message: `${label} role required`
+        }, { status: 403 });
     }
 
     return null;
 }
 
 /**
- * NOTE: requireSuperAdmin is intentionally aliased to requireAdmin because
- * the Prisma schema (schema.prisma:19) defines role as:
- *   role  String  @default("user")  // user, moderator, admin
+ * Requires moderator, admin, or super_admin role.
+ * Use for: reports review, read-only metrics, content moderation.
+ */
+export async function requireModerator(): Promise<NextResponse | null> {
+    return checkRole(allowModerator, 'Moderator');
+}
+
+/**
+ * Requires admin or super_admin role (rejects moderators).
+ * Use for: user bans, verification actions, feature flags.
+ */
+export async function requireAdmin(): Promise<NextResponse | null> {
+    return checkRole(allowAdmin, 'Admin');
+}
+
+/**
+ * Requires super_admin role only.
+ * Use for: experiment management, system configuration.
  *
- * There is NO `super_admin` role in the database schema.
- * If super_admin granularity is needed in the future:
- *   1. Add `super_admin` to the valid role values
- *   2. Create a Prisma migration
- *   3. Implement actual role checking here
+ * Assign super_admin manually in DB:
+ *   UPDATE "User" SET role = 'super_admin' WHERE id = '<admin-user-id>';
+ * No Prisma migration needed — role is String, accepts any value.
  */
 export async function requireSuperAdmin(): Promise<NextResponse | null> {
-    const result = await requireAdmin();
-    if (result) return result;
-    return null;
+    return checkRole(allowSuperAdmin, 'Super Admin');
 }

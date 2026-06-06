@@ -19,7 +19,12 @@ export const AnalyticsEvents = {
     // Matching
     MATCH_CREATED: 'match_created',
     FIRST_MATCH: 'first_match',
+
+    FIRST_MESSAGE: 'first_message',
+    /** @deprecated Use FIRST_MESSAGE */
     FIRST_MESSAGE_SENT: 'first_message',
+    FIRST_REPLY: 'first_reply',
+    /** @deprecated Use FIRST_REPLY */
     FIRST_REPLY_RECEIVED: 'first_reply',
 
     // Conversations

@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { requireAdmin } from '@/lib/middleware/admin';
+import { requireModerator } from '@/lib/middleware/admin';
 import {
   getCompatibilityImpact,
   getVoiceIntroImpact,
@@ -9,7 +9,7 @@ import {
 } from '@/server/services/product-metrics';
 
 export async function GET(request: Request) {
-  const auth = await requireAdmin();
+  const auth = await requireModerator();
   if (auth) return auth;
 
   const url = new URL(request.url);

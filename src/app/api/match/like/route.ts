@@ -3,6 +3,7 @@ import { prisma } from '@/lib/prisma';
 import { withRateLimit } from '@/server/utils/api-rate-limit';
 import { notifyNewMatch, notifyLikesRestored } from '@/server/services/push';
 import { trackEvent } from '@/server/services/analytics';
+import { AnalyticsEvents } from '@/lib/tracking/events';
 
 const FREE_DAILY_LIKES_LIMIT = 50;
 
@@ -193,8 +194,8 @@ export async function POST(request: NextRequest) {
         const settled = await Promise.allSettled([
             notifyNewMatch(result.u1, partner2?.displayName || 'Alguien', result.matchId),
             notifyNewMatch(result.u2, partner1?.displayName || 'Alguien', result.matchId),
-            trackEvent(result.u1, 'first_match', { matchId: result.matchId }),
-            trackEvent(result.u2, 'first_match', { matchId: result.matchId }),
+            trackEvent(result.u1, AnalyticsEvents.FIRST_MATCH, { matchId: result.matchId }),
+            trackEvent(result.u2, AnalyticsEvents.FIRST_MATCH, { matchId: result.matchId }),
         ]);
         settled.forEach((s, idx) => {
             if (s.status === 'rejected') {

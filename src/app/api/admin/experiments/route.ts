@@ -1,10 +1,10 @@
 import { NextResponse } from 'next/server';
-import { requireAdmin } from '@/lib/middleware/admin';
+import { requireSuperAdmin } from '@/lib/middleware/admin';
 import { prisma } from '@/lib/prisma';
 import { computeExperimentResults } from '@/server/services/experiment-results';
 
 export async function GET() {
-  const auth = await requireAdmin();
+  const auth = await requireSuperAdmin();
   if (auth) return auth;
 
   try {
@@ -35,7 +35,7 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
-  const auth = await requireAdmin();
+  const auth = await requireSuperAdmin();
   if (auth) return auth;
 
   try {

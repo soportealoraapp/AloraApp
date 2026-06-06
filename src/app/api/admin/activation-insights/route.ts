@@ -1,9 +1,9 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { requireAdmin } from '@/lib/middleware/admin';
+import { requireModerator } from '@/lib/middleware/admin';
 
 export async function GET() {
-  const auth = await requireAdmin();
+  const auth = await requireModerator();
   if (auth) return auth;
 
   try {

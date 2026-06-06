@@ -1,26 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { requireModerator } from '@/lib/middleware/admin';
 
 export const dynamic = 'force-dynamic';
 
-async function getServerUser() {
-    const { createClient } = await import('@/lib/supabase/server');
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    return user;
-}
-
-async function requireAdmin() {
-    const user = await getServerUser();
-    if (!user) return { error: 'Unauthorized', status: 401 };
-    const dbUser = await prisma.user.findUnique({ where: { id: user.id }, select: { role: true } });
-    if (dbUser?.role !== 'admin') return { error: 'Forbidden', status: 403 };
-    return { user };
-}
-
 export async function GET(request: NextRequest) {
-    const auth = await requireAdmin();
-    if ('error' in auth) return NextResponse.json({ error: auth.error }, { status: auth.status });
+    const auth = await requireModerator();
+    if (auth) return auth;
 
     try {
         const stories = await prisma.successStory.findMany({
@@ -35,8 +21,8 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
-    const auth = await requireAdmin();
-    if ('error' in auth) return NextResponse.json({ error: auth.error }, { status: auth.status });
+    const auth = await requireModerator();
+    if (auth) return auth;
 
     try {
         const { title, story, photoUrl, authorId, approved } = await request.json();
@@ -63,8 +49,8 @@ export async function POST(request: NextRequest) {
 }
 
 export async function PATCH(request: NextRequest) {
-    const auth = await requireAdmin();
-    if ('error' in auth) return NextResponse.json({ error: auth.error }, { status: auth.status });
+    const auth = await requireModerator();
+    if (auth) return auth;
 
     try {
         const { id, approved, title, story, photoUrl } = await request.json();
@@ -91,8 +77,8 @@ export async function PATCH(request: NextRequest) {
 }
 
 export async function DELETE(request: NextRequest) {
-    const auth = await requireAdmin();
-    if ('error' in auth) return NextResponse.json({ error: auth.error }, { status: auth.status });
+    const auth = await requireModerator();
+    if (auth) return auth;
 
     try {
         const { searchParams } = new URL(request.url);

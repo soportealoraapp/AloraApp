@@ -6,6 +6,7 @@ import { getCompatibilityScore } from './compatibility/getCompatibilityScore';
 import { calculateCompleteness } from '@/lib/utils/completeness';
 import { getDistance } from '@/lib/location';
 import { getFlags } from '@/lib/product/flags';
+import { getNewUserBoost } from '@/server/services/new-user-boost';
 
 export interface FeedItem {
     profile: UserProfile;
@@ -351,6 +352,8 @@ export async function getDynamicFeed(
         const fiveMinutesAgo = new Date(now.getTime() - 5 * 60 * 1000);
         const oneDayAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000);
 
+        const newUserBoost = await getNewUserBoost(currentUserId);
+
         const scoredItems = await Promise.all(
             results.map(async (cp) => {
                 const profile: UserProfile = {
@@ -438,7 +441,7 @@ export async function getDynamicFeed(
                 return {
                     profile: { ...profile, completenessScore: completeness },
                     score: {
-                        total: Math.min(100, Math.round(totalScore)),
+                        total: Math.min(100, Math.round(totalScore * newUserBoost)),
                         details: deepScore.breakdown,
                         explanation: deepScore.explanation,
                     },

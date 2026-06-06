@@ -1,32 +1,40 @@
-# Admin Role Gap
+# Admin Role Gap — RESOLVED in V3.2
 
 ## Problem
 
-`requireSuperAdmin()` in `src/lib/middleware/admin.ts:25-29` is a no-op — it calls `requireAdmin()` and returns null (always passes).
+`requireSuperAdmin()` in `src/lib/middleware/admin.ts:25-29` was a no-op — it called `requireAdmin()` and returned null (always passes).
 
-## Root Cause
+## Resolution (V3.2)
 
-The Prisma schema (`schema.prisma:19`) defines role as:
+Implemented real role hierarchy in `src/lib/middleware/admin.ts`:
 
-```prisma
-role  String  @default("user")  // user, moderator, admin
+| Function | moderator | admin | super_admin |
+|----------|:---------:|:-----:|:-----------:|
+| `requireModerator()` | ✅ | ✅ | ✅ |
+| `requireAdmin()` | ❌ | ✅ | ✅ |
+| `requireSuperAdmin()` | ❌ | ❌ | ✅ |
+
+### Route-level segmentation
+
+| Level | Routes |
+|-------|--------|
+| `requireSuperAdmin` | experiments/* (create/modify/delete), users (ban/suspend) |
+| `requireAdmin` | verifications, women-experience, go-no-go, success-stories, match-quality |
+| `requireModerator` | reports, activation-*, retention-*, metrics, analytics, marketplace-*, female-retention |
+
+### How to assign super_admin
+
+No Prisma migration needed — `role` is `String` (not an enum) and accepts any value:
+
+```sql
+UPDATE "User" SET role = 'super_admin' WHERE id = '<admin-user-id>';
 ```
 
-There is **no `super_admin` role** in the database. Valid values are: `user`, `moderator`, `admin`.
+### Per-route changes
 
-## Current Behavior
-
-- `requireAdmin()` allows both `admin` and `moderator` roles (`admin.ts:18`)
-- `requireSuperAdmin()` allows the same set (via delegation)
-- No actual superadmin granularity exists
-
-## To Fix in Future
-
-1. Add `super_admin` to valid role values
-2. Create Prisma migration
-3. Implement actual role checking in `admin.ts`
-4. Restrict experiment management and user banning to super_admin only
-
-## Risk
-
-Low — there is no production deployment that would have super_admin data. The gap only matters if super_admin granularity is needed.
+- 6 routes upgraded from `requireAdmin` → `requireSuperAdmin` (experiments ×3, users)
+- 12 routes downgraded from `requireAdmin` (or inline `admin` check) → `requireModerator`
+- 7 routes with inline auth blocks replaced with shared middleware imports
+- `success-stories/route.ts` — removed local `requireAdmin()` redefinition, uses shared middleware
+- Inline auth pattern eliminated: no more `dbUser?.role !== 'admin'` scattered across 7 files
+- All 19 admin API routes now use shared middleware from `@/lib/middleware/admin`

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { requireAdmin } from '@/lib/middleware/admin';
+import { requireModerator } from '@/lib/middleware/admin';
 import {
     getFunnelData,
     getRetentionData,
@@ -10,7 +10,7 @@ import {
 } from '@/server/services/analytics';
 
 export async function GET(request: NextRequest) {
-    const admin = await requireAdmin();
+    const admin = await requireModerator();
     if (admin) return admin;
 
     const { searchParams } = new URL(request.url);
