@@ -2,7 +2,7 @@
 
 import { prisma } from '@/lib/prisma';
 import { UserProfile } from '@/lib/domain/types';
-import { getCompatibilityV2 } from '@/ai/compatibility-v2/engine';
+import { getCompatibilityV2 } from '@/deprecated/ai/compatibility-v2/engine';
 import { analyzeConversation } from '@/ai/copilot/conversation-quality';
 
 export interface RankingProfile {

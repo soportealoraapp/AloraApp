@@ -18,8 +18,9 @@ export const AnalyticsEvents = {
 
     // Matching
     MATCH_CREATED: 'match_created',
-    FIRST_MESSAGE_SENT: 'first_message_sent',
-    FIRST_REPLY_RECEIVED: 'first_reply_received',
+    FIRST_MATCH: 'first_match',
+    FIRST_MESSAGE_SENT: 'first_message',
+    FIRST_REPLY_RECEIVED: 'first_reply',
 
     // Conversations
     CONVERSATION_STARTED: 'conversation_started',
