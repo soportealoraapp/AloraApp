@@ -1,5 +1,4 @@
 import { prisma } from '@/lib/prisma';
-import { scoreRelationshipGoals } from './scores';
 import { generateExplanations } from './explanations';
 
 export interface CompatibilityResult {
@@ -213,6 +212,68 @@ function scoreLifestyle(profileA: any, profileB: any): number {
     return Math.max(0, Math.min(100, score));
 }
 
+interface GoalsProfile {
+    seeking: string | null;
+    values: string[];
+    bio: string | null;
+}
+
+/**
+ * Score relationship goals compatibility based on seeking + values + bio signals.
+ * Accepts optional pre-fetched profiles to avoid duplicate Prisma queries.
+ */
+async function scoreRelationshipGoals(
+    userIdA: string,
+    userIdB: string,
+    profileA?: GoalsProfile | null,
+    profileB?: GoalsProfile | null
+): Promise<number> {
+    const [pA, pB] = (profileA && profileB)
+        ? [profileA, profileB]
+        : await Promise.all([
+            prisma.profile.findUnique({ where: { userId: userIdA }, select: { seeking: true, values: true, bio: true } }),
+            prisma.profile.findUnique({ where: { userId: userIdB }, select: { seeking: true, values: true, bio: true } }),
+        ]);
+
+    if (!pA || !pB) return 50;
+
+    let score = 50;
+
+    const seekingA = pA.seeking || 'everyone';
+    const seekingB = pB.seeking || 'everyone';
+
+    if (seekingA === 'everyone' || seekingB === 'everyone') {
+        score += 10;
+    }
+
+    const seriousValues = ['relación', 'familia', 'compromiso', 'lealtad', 'crecimiento'];
+    const valuesA = (pA.values || []).map(v => v.toLowerCase());
+    const valuesB = (pB.values || []).map(v => v.toLowerCase());
+
+    const seriousOverlap = seriousValues.filter(v =>
+        valuesA.some(va => va.includes(v)) || valuesB.some(vb => vb.includes(v))
+    );
+    score += Math.min(30, seriousOverlap.length * 10);
+
+    const bioA = (pA.bio || '').toLowerCase();
+    const bioB = (pB.bio || '').toLowerCase();
+
+    const longTermSignals = ['largo plazo', 'serio', 'compromiso', 'futuro', 'matrimonio', 'familia'];
+    const casualSignals = ['diversión', 'casual', 'sin compromiso', 'aventura'];
+
+    const aSerious = longTermSignals.some(s => bioA.includes(s));
+    const bSerious = longTermSignals.some(s => bioB.includes(s));
+    const aCasual = casualSignals.some(s => bioA.includes(s));
+    const bCasual = casualSignals.some(s => bioB.includes(s));
+
+    if (aSerious && bSerious) score += 15;
+    else if (aCasual && bCasual) score += 15;
+    else if (aSerious && bCasual) score -= 10;
+    else if (aCasual && bSerious) score -= 10;
+
+    return Math.max(0, Math.min(100, score));
+}
+
 /**
  * Main compatibility calculation.
  * Returns a 0-100 score with 6 dimension breakdown and explanations.
@@ -256,7 +317,7 @@ export async function calculateCompatibility(
     // Calculate all dimensions
     const [quizScore, goalsScore, latestA, latestB] = await Promise.all([
         scoreQuizzes(userIdA, userIdB),
-        scoreRelationshipGoals(userIdA, userIdB),
+        scoreRelationshipGoals(userIdA, userIdB, profileA, profileB),
         prisma.dailyAnswer.findFirst({
             where: { userId: userIdA },
             orderBy: { createdAt: 'desc' },

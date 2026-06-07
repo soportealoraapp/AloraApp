@@ -19,8 +19,8 @@ export async function createCheckout(userId: string, email: string) {
             email,
             planId: 'plus',
             variantId: variant.variantId,
-            successUrl: `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/settings/subscription?success=true`,
-            cancelUrl: `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/settings/subscription?canceled=true`,
+            successUrl: `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/settings`,
+            cancelUrl: `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/settings`,
         });
 
         return { success: true, url: result.url, checkoutId: result.id };
@@ -38,7 +38,8 @@ export async function handlePaymentSuccess(userId: string, subscriptionId: strin
         await grantPlus(userId, 30);
 
         revalidatePath('/profile');
-        revalidatePath('/settings/subscription');
+        // revalidatePath disabled — subscription route deprecated in V3.4
+        // revalidatePath('/settings/subscription');
         return { success: true };
     } catch (error) {
         console.error('Error handling payment success:', error);
@@ -54,7 +55,8 @@ export async function handleSubscriptionCancel(userId: string) {
         await revokePlus(userId);
 
         revalidatePath('/profile');
-        revalidatePath('/settings/subscription');
+        // revalidatePath disabled — subscription route deprecated in V3.4
+        // revalidatePath('/settings/subscription');
         return { success: true };
     } catch (error) {
         console.error('Error handling cancellation:', error);

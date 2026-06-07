@@ -37,7 +37,8 @@ export async function createSubscription(userId: string, plan: PlanTier, stripeI
         await grantPlus(userId, 30);
 
         revalidatePath('/profile');
-        revalidatePath('/settings/subscription');
+        // revalidatePath disabled — subscription route deprecated in V3.4
+        // revalidatePath('/settings/subscription');
     } catch (e) {
         console.error('Failed to create subscription', e);
         throw new Error('Subscription creation failed');
@@ -48,7 +49,8 @@ export async function cancelSubscription(userId: string) {
     try {
         await revokePlus(userId);
 
-        revalidatePath('/settings/subscription');
+        // revalidatePath disabled — subscription route deprecated in V3.4
+        // revalidatePath('/settings/subscription');
     } catch (e) {
         console.error(e);
     }

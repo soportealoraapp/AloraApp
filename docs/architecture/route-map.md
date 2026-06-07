@@ -74,27 +74,27 @@ These features were started but never finished. Moved to `src/deprecated/routes/
 | | `src/deprecated/ai/copilot/emotional-onboarding.ts` |
 | /onboarding/female-safety | `src/deprecated/routes/onboarding/female-safety/page.tsx` |
 
-### LEGACY (was used, now replaced — remove in V3.4)
+### LEGACY — MOVED TO DEPRECATED (V3.4)
 
-| Route | Page File | Notes |
-|-------|-----------|-------|
-| /launch | app/launch/page.tsx | Pre-launch landing page. Superseded by the active landing page. |
-| /waitlist | app/waitlist/page.tsx | Pre-launch waitlist. Superseded by live auth flow. |
-| /community/ambassador/apply | community/ambassador/apply/page.tsx | Ambassador program — UI exists, no backend integration. |
-| /partners/index | partners/index/page.tsx | Partner program — UI exists, no backend integration. |
+| Route | New Location |
+|-------|-------------|
+| /launch | `src/deprecated/routes/launch/page.tsx` |
+| /waitlist | `src/deprecated/routes/waitlist/page.tsx` |
+| /community/ambassador/apply | `src/deprecated/routes/community/ambassador/apply/page.tsx` |
+| /partners/index | `src/deprecated/routes/partners/index/page.tsx` |
 
-### ABANDONED (unreleased feature — remove in V3.4)
+### ABANDONED — MOVED TO DEPRECATED (V3.4)
 
-| Route | Page File | Notes |
-|-------|-----------|-------|
-| /profile/badges | app/(app)/profile/badges/page.tsx | Badge display page. No emitter. |
-| /profile/analytics | app/(app)/profile/analytics/page.tsx | Personal analytics. No consumer. |
-| /profile/compatibility/[candidateId] | app/(app)/profile/compatibility/[candidateId]/page.tsx | Dynamic route — orphaned. |
-| /settings/audio | app/(app)/settings/audio/page.tsx | Audio settings. No consumer. |
-| /settings/subscription | app/(app)/settings/subscription/page.tsx | Pricing/subscription UI. Payment not integrated. |
-| /settings/referral | app/(app)/settings/referral/page.tsx | Referral program. No backend. |
-| /settings/safety/experience | app/(app)/settings/safety/experience/page.tsx | Safety experience page. Abandoned. |
-| /settings/safety/center | app/(app)/settings/safety/center/page.tsx | Safety center (redirect-only). Abandoned. |
+| Route | New Location |
+|-------|-------------|
+| /profile/badges | `src/deprecated/routes/profile/badges/page.tsx` |
+| /profile/analytics | `src/deprecated/routes/profile/analytics/page.tsx` |
+| /profile/compatibility/[candidateId] | `src/deprecated/routes/profile/compatibility/[candidateId]/page.tsx` |
+| /settings/audio | `src/deprecated/routes/settings/audio/page.tsx` |
+| /settings/subscription | `src/deprecated/routes/settings/subscription/page.tsx` |
+| /settings/referral | `src/deprecated/routes/settings/referral/page.tsx` |
+| /settings/safety/experience | `src/deprecated/routes/settings/safety/experience/page.tsx` |
+| /settings/safety/center | `src/deprecated/routes/settings/safety/center/page.tsx` |
 
 ---
 
@@ -104,5 +104,5 @@ These features were started but never finished. Moved to `src/deprecated/routes/
 |---------|--------|
 | V3.2 | Classified all orphan routes (INCOMPLETE / LEGACY / ABANDONED) |
 | V3.3 | Moved INCOMPLETE routes + API + AI modules to `src/deprecated/` |
-| V3.4 | Remove LEGACY and ABANDONED routes, ghost DB tables |
+| V3.4 | Moved LEGACY and ABANDONED routes to `src/deprecated/routes/` |
 | V3.5 | Remove deprecated tree entirely (all `src/deprecated/` content) |
