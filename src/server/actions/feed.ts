@@ -354,6 +354,36 @@ export async function getDynamicFeed(
         const oneDayAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000);
 
         const newUserBoost = await getNewUserBoost(currentUserId);
+        const flags = await getFlags(currentUserId);
+
+        // Pre-fetch viewer data for compatibility scoring (avoids 3 redundant queries per candidate)
+        const [viewerQuizzes, viewerDailyAnswer] = await Promise.all([
+            prisma.quizResult.findMany({ where: { userId: currentUserId } }),
+            prisma.dailyAnswer.findFirst({
+                where: { userId: currentUserId },
+                orderBy: { createdAt: 'desc' },
+                select: { answer: true, question: { select: { category: true } } },
+            }),
+        ]);
+        const viewerProfile = currentUser.profile;
+        const viewerData = {
+            profile: {
+                values: viewerProfile.values,
+                interests: viewerProfile.interests,
+                musicGenres: viewerProfile.musicGenres,
+                smoking: viewerProfile.smoking as string | null,
+                drinking: viewerProfile.drinking as string | null,
+                children: viewerProfile.children as string | null,
+                education: viewerProfile.education as string | null,
+                religion: viewerProfile.religion as string | null,
+                bio: viewerProfile.bio as string | null,
+                seeking: viewerProfile.seeking as string | null,
+                city: viewerProfile.city as string | null,
+                zodiacSign: viewerProfile.zodiacSign as string | null,
+            },
+            quizzes: viewerQuizzes,
+            dailyAnswer: viewerDailyAnswer,
+        };
 
         const scoredItems = await Promise.all(
             results.map(async (cp) => {
@@ -385,8 +415,7 @@ export async function getDynamicFeed(
                 };
 
                 const completeness = calculateCompleteness(profile);
-                const deepScore = await getCompatibilityScore(currentUserId, profile.id);
-                const flags = await getFlags(currentUserId);
+                const deepScore = await getCompatibilityScore(currentUserId, profile.id, viewerData);
                 const messagesSent = messagesSentMap.get(cp.userId) || 0;
 
                 return scoreCandidate({

@@ -1,6 +1,7 @@
-import { COMPATIBILITY_QUIZZES, Quiz, QuizQuestion, ArchetypeInfo } from '@/data/quizzes-data';
+import { COMPATIBILITY_QUIZZES } from '@/data/quizzes-data';
+import { Quiz, QuizQuestion, ArchetypeInfo } from '@/types/compatibility';
 
-export type { Quiz, QuizQuestion };
+export type { Quiz, QuizQuestion, ArchetypeInfo };
 
 export { COMPATIBILITY_QUIZZES };
 
@@ -16,7 +17,7 @@ export function calculateQuizScore(quizId: string, answers: Record<string, strin
 
     for (const question of quiz.questions) {
         const answerId = answers[question.id];
-        const option = question.options.find(o => o.id === answerId);
+        const option = question.options?.find(o => o.id === answerId);
         if (option) {
             total += option.score;
         }

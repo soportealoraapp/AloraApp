@@ -1,6 +1,33 @@
 import { prisma } from '@/lib/prisma';
 import { generateExplanations } from './explanations';
 
+/** All profile fields needed by the compatibility engine. */
+export interface ProfileData {
+    values: string[];
+    interests: string[];
+    musicGenres: string[];
+    smoking: string | null;
+    drinking: string | null;
+    children: string | null;
+    education: string | null;
+    religion: string | null;
+    bio: string | null;
+    seeking: string | null;
+    city: string | null;
+    zodiacSign: string | null;
+}
+
+/** Dimension weights for the weighted total. */
+export const WEIGHTS = {
+    VALUES: 0.30,
+    RELATIONSHIP_GOALS: 0.20,
+    PERSONALITY: 0.15,
+    QUIZZES: 0.13,
+    INTERESTS: 0.10,
+    LIFESTYLE: 0.07,
+    DAILY_QUESTION: 0.05,
+} as const;
+
 export interface CompatibilityResult {
     totalScore: number;
     dimensions: {
@@ -111,24 +138,26 @@ function scorePersonality(bioA: string, bioB: string, interestsA: string[], inte
 /**
  * Score quiz compatibility (15% weight).
  * Reads from quiz_results table.
+ * Accepts optional pre-fetched quizzes for userA to avoid redundant queries.
  */
-async function scoreQuizzes(userIdA: string, userIdB: string): Promise<number> {
-    const [quizzesA, quizzesB] = await Promise.all([
-        prisma.quizResult.findMany({ where: { userId: userIdA } }),
-        prisma.quizResult.findMany({ where: { userId: userIdB } }),
-    ]);
+async function scoreQuizzes(userIdA: string, userIdB: string, quizzesA?: any[]): Promise<number> {
+    const [qa, qb] = quizzesA
+        ? [quizzesA, await prisma.quizResult.findMany({ where: { userId: userIdB } })]
+        : await Promise.all([
+            prisma.quizResult.findMany({ where: { userId: userIdA } }),
+            prisma.quizResult.findMany({ where: { userId: userIdB } }),
+        ]);
 
-    if (quizzesA.length === 0 || quizzesB.length === 0) return 50; // neutral if no quizzes
+    if (qa.length === 0 || qb.length === 0) return 50;
 
-    // Find shared quizzes
-    const quizIdsA = new Set(quizzesA.map(q => q.quizId));
-    const sharedQuizzes = quizzesB.filter(q => quizIdsA.has(q.quizId));
+    const quizIdsA = new Set(qa.map(q => q.quizId));
+    const sharedQuizzes = qb.filter(q => quizIdsA.has(q.quizId));
 
     if (sharedQuizzes.length === 0) return 50;
 
     let totalSimilarity = 0;
     for (const quizB of sharedQuizzes) {
-        const quizA = quizzesA.find(q => q.quizId === quizB.quizId);
+        const quizA = qa.find(q => q.quizId === quizB.quizId);
         if (!quizA) continue;
 
         // Compare answers
@@ -275,61 +304,16 @@ async function scoreRelationshipGoals(
 }
 
 /**
- * Main compatibility calculation.
- * Returns a 0-100 score with 6 dimension breakdown and explanations.
+ * Pure computation kernel — zero DB queries.
+ * Takes pre-computed async scores and two full profiles, returns the final CompatibilityResult.
  */
-export async function calculateCompatibility(
-    userIdA: string,
-    userIdB: string
-): Promise<CompatibilityResult> {
-    // Fetch both profiles in parallel
-    const [profileA, profileB] = await Promise.all([
-        prisma.profile.findUnique({
-            where: { userId: userIdA },
-            select: {
-                values: true, interests: true, musicGenres: true,
-                smoking: true, drinking: true, children: true,
-                education: true, religion: true, bio: true,
-                seeking: true, city: true, zodiacSign: true,
-            }
-        }),
-        prisma.profile.findUnique({
-            where: { userId: userIdB },
-            select: {
-                values: true, interests: true, musicGenres: true,
-                smoking: true, drinking: true, children: true,
-                education: true, religion: true, bio: true,
-                seeking: true, city: true, zodiacSign: true,
-            }
-        }),
-    ]);
-
-    if (!profileA || !profileB) {
-        return {
-            totalScore: 50,
-            dimensions: { values: 50, relationshipGoals: 50, personality: 50, quizzes: 50, interests: 50, lifestyle: 50, dailyQuestion: 50 },
-            explanations: ['Perfiles incompletos — no se puede calcular compatibilidad'],
-            sharedItems: { values: [], interests: [], music: [], lifestyle: [] },
-            differences: { values: [], lifestyle: [] },
-        };
-    }
-
-    // Calculate all dimensions
-    const [quizScore, goalsScore, latestA, latestB] = await Promise.all([
-        scoreQuizzes(userIdA, userIdB),
-        scoreRelationshipGoals(userIdA, userIdB, profileA, profileB),
-        prisma.dailyAnswer.findFirst({
-            where: { userId: userIdA },
-            orderBy: { createdAt: 'desc' },
-            select: { answer: true, question: { select: { category: true } } },
-        }),
-        prisma.dailyAnswer.findFirst({
-            where: { userId: userIdB },
-            orderBy: { createdAt: 'desc' },
-            select: { answer: true, question: { select: { category: true } } },
-        }),
-    ]);
-
+export function computeCompatibility(
+    profileA: ProfileData,
+    profileB: ProfileData,
+    quizScore: number,
+    goalsScore: number,
+    dailyScore: number,
+): CompatibilityResult {
     const valuesScore = scoreValues(profileA.values || [], profileB.values || []);
     const interestsScore = scoreInterests(profileA.interests || [], profileB.interests || []);
     const personalityScore = scorePersonality(
@@ -337,20 +321,15 @@ export async function calculateCompatibility(
         profileA.interests || [], profileB.interests || []
     );
     const lifestyleScore = scoreLifestyle(profileA, profileB);
-    const dailyScore = scoreDailyQuestion(
-        latestA?.question ?? null, latestA?.answer ?? null,
-        latestB?.question ?? null, latestB?.answer ?? null,
-    );
 
-    // Weighted total
     const totalScore = Math.round(
-        valuesScore * 0.30 +
-        goalsScore * 0.20 +
-        personalityScore * 0.15 +
-        quizScore * 0.13 +
-        interestsScore * 0.10 +
-        lifestyleScore * 0.07 +
-        dailyScore * 0.05
+        valuesScore * WEIGHTS.VALUES +
+        goalsScore * WEIGHTS.RELATIONSHIP_GOALS +
+        personalityScore * WEIGHTS.PERSONALITY +
+        quizScore * WEIGHTS.QUIZZES +
+        interestsScore * WEIGHTS.INTERESTS +
+        lifestyleScore * WEIGHTS.LIFESTYLE +
+        dailyScore * WEIGHTS.DAILY_QUESTION
     );
 
     const dimensions = {
@@ -363,7 +342,6 @@ export async function calculateCompatibility(
         dailyQuestion: Math.round(dailyScore),
     };
 
-    // Generate explanations
     const explanations = generateExplanations(dimensions, {
         valuesA: profileA.values || [],
         valuesB: profileB.values || [],
@@ -381,7 +359,6 @@ export async function calculateCompatibility(
         educationB: profileB.education || '',
     });
 
-    // Compute shared items
     const valuesA = new Set((profileA.values || []).map(v => v.toLowerCase()));
     const valuesB = new Set((profileB.values || []).map(v => v.toLowerCase()));
     const sharedValues = [...valuesA].filter(v => valuesB.has(v));
@@ -405,8 +382,7 @@ export async function calculateCompatibility(
         lifestyle.push(`Ambos: ${profileA.children === 'no' ? 'No tienen hijos' : 'Tienen hijos'}`);
     }
 
-    // Compute differences
-    const valueDiffs = [...valuesA].filter(v => !valuesB.has(v)).map(v => v);
+    const valueDiffs = [...valuesA].filter(v => !valuesB.has(v));
     const lifestyleDiffs: string[] = [];
     if (profileA.children && profileB.children && profileA.children !== profileB.children) {
         lifestyleDiffs.push(`Hijos: Tú "${profileA.children}" · Ellos "${profileB.children}"`);
@@ -415,17 +391,94 @@ export async function calculateCompatibility(
         lifestyleDiffs.push(`Alcohol: Tú "${profileA.drinking}" · Ellos "${profileB.drinking}"`);
     }
 
-    const sharedItems = {
-        values: sharedValues,
-        interests: sharedInterests,
-        music: sharedMusic,
-        lifestyle,
+    return {
+        totalScore,
+        dimensions,
+        explanations,
+        sharedItems: { values: sharedValues, interests: sharedInterests, music: sharedMusic, lifestyle },
+        differences: { values: valueDiffs, lifestyle: lifestyleDiffs },
     };
+}
 
-    const differences = {
-        values: valueDiffs,
-        lifestyle: lifestyleDiffs,
-    };
+/**
+ * Main compatibility calculation.
+ * Returns a 0-100 score with 6 dimension breakdown and explanations.
+ * Accepts optional pre-fetched viewer data (userA) to avoid redundant queries
+ * when called multiple times from the feed scoring loop.
+ */
+export async function calculateCompatibility(
+    userIdA: string,
+    userIdB: string,
+    viewerData?: {
+        profile: ProfileData;
+        quizzes: any[];
+        dailyAnswer: { answer: string; question: { category: string } } | null;
+    }
+): Promise<CompatibilityResult> {
+    const [profileA, profileB] = viewerData
+        ? [viewerData.profile, await prisma.profile.findUnique({
+            where: { userId: userIdB },
+            select: {
+                values: true, interests: true, musicGenres: true,
+                smoking: true, drinking: true, children: true,
+                education: true, religion: true, bio: true,
+                seeking: true, city: true, zodiacSign: true,
+            }
+        })]
+        : await Promise.all([
+            prisma.profile.findUnique({
+                where: { userId: userIdA },
+                select: {
+                    values: true, interests: true, musicGenres: true,
+                    smoking: true, drinking: true, children: true,
+                    education: true, religion: true, bio: true,
+                    seeking: true, city: true, zodiacSign: true,
+                }
+            }),
+            prisma.profile.findUnique({
+                where: { userId: userIdB },
+                select: {
+                    values: true, interests: true, musicGenres: true,
+                    smoking: true, drinking: true, children: true,
+                    education: true, religion: true, bio: true,
+                    seeking: true, city: true, zodiacSign: true,
+                }
+            }),
+        ]);
 
-    return { totalScore, dimensions, explanations, sharedItems, differences };
+    if (!profileA || !profileB) {
+        return {
+            totalScore: 50,
+            dimensions: { values: 50, relationshipGoals: 50, personality: 50, quizzes: 50, interests: 50, lifestyle: 50, dailyQuestion: 50 },
+            explanations: ['Perfiles incompletos — no se puede calcular compatibilidad'],
+            sharedItems: { values: [], interests: [], music: [], lifestyle: [] },
+            differences: { values: [], lifestyle: [] },
+        };
+    }
+
+    const dailyP = viewerData?.dailyAnswer
+        ? Promise.resolve(viewerData.dailyAnswer)
+        : prisma.dailyAnswer.findFirst({
+            where: { userId: userIdA },
+            orderBy: { createdAt: 'desc' },
+            select: { answer: true, question: { select: { category: true } } },
+        });
+
+    const [quizScore, goalsScore, latestA, latestB] = await Promise.all([
+        scoreQuizzes(userIdA, userIdB, viewerData?.quizzes),
+        scoreRelationshipGoals(userIdA, userIdB, profileA, profileB),
+        dailyP,
+        prisma.dailyAnswer.findFirst({
+            where: { userId: userIdB },
+            orderBy: { createdAt: 'desc' },
+            select: { answer: true, question: { select: { category: true } } },
+        }),
+    ]);
+
+    const dailyScore = scoreDailyQuestion(
+        latestA?.question ?? null, latestA?.answer ?? null,
+        latestB?.question ?? null, latestB?.answer ?? null,
+    );
+
+    return computeCompatibility(profileA, profileB, quizScore, goalsScore, dailyScore);
 }

@@ -1,4 +1,4 @@
-import { Quiz } from '@/lib/compatibility/quizzes';
+import { Quiz } from '@/types/compatibility';
 
 export const COMPATIBILITY_QUIZZES: Quiz[] = [
     {

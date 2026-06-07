@@ -248,7 +248,7 @@ export default function QuizPage() {
                                 <CardTitle className="text-xl mt-2">{question.question}</CardTitle>
                             </CardHeader>
                             <CardContent className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                {question.options.map(option => (
+                                {question.options?.map(option => (
                                     <Button
                                         key={option.id}
                                         variant="outline"
