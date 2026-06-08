@@ -65,7 +65,21 @@ const nextConfig: NextConfig = {
   },
   experimental: {
     optimizePackageImports: ['lucide-react', 'date-fns', 'framer-motion'],
-  }
+  },
+
+  async headers() {
+    return [
+      {
+        source: '/(.*)',
+        headers: [
+          {
+            key: 'Content-Security-Policy',
+            value: "frame-src 'self' https://open.spotify.com; img-src 'self' data: blob: https://i.scdn.co https://placehold.co https://picsum.photos https://firebasestorage.googleapis.com https://utfs.io https://*.googleusercontent.com;",
+          },
+        ],
+      },
+    ];
+  },
 };
 
 export default withPWA(nextConfig);

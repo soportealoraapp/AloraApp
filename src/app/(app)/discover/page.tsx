@@ -479,7 +479,7 @@ export default function DiscoverPage() {
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                 {profiles.map(({ profile: p, compatibility }: any) => (
                   <Card key={p.id} className="rounded-2xl overflow-hidden shadow-sm border">
-                    <div className="aspect-[3/4] relative cursor-pointer" onClick={() => router.push(`/profile/${p.id}?source=discover`)}>
+                    <div className="aspect-[3/4] relative cursor-pointer" onClick={() => router.push(`/profile/${p.id}?source=discover&intent=${intent}`)}>
                       <Image
                         src={p.photos?.[0] || '/placeholder.svg'}
                         alt={p.displayName || ''}

@@ -3,6 +3,7 @@
 import { useMemo } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Home, Plane, PawPrint, Palette, BookOpen, Heart, Briefcase, Coffee, Music, Camera, Dumbbell, Sparkles, Users, Compass, type LucideIcon } from 'lucide-react';
+import { BadgeChipList } from '@/components/profile/BadgeChip';
 
 interface ProfileHighlightsProps {
     bio?: string | null;
@@ -148,9 +149,7 @@ export function ProfileHighlights({ bio, interests = [], values = [], lookingFor
                 {musicGenres.length > 0 && (
                     <div className="mt-3 pt-3 border-t border-border/50">
                         <p className="text-[10px] text-muted-foreground uppercase tracking-wider mb-1.5">Escucha</p>
-                        <p className="text-xs font-medium text-foreground/80">
-                            {musicGenres.slice(0, 4).join(' · ')}
-                        </p>
+                        <BadgeChipList items={musicGenres.slice(0, 4)} type="music" />
                     </div>
                 )}
             </CardContent>

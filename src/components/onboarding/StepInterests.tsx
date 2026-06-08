@@ -7,7 +7,7 @@ import { trackEvent } from "@/lib/tracking/client";
 import { motion } from "framer-motion";
 import { UserProfile } from "@/lib/domain/types";
 import { INTEREST_CATEGORIES, VALUES, MUSIC_GENRES, MAX_INTERESTS } from "@/lib/constants/preferences";
-import { BadgeChipList } from "@/components/profile/BadgeChip";
+import { BadgeChipList, getEmoji } from "@/components/profile/BadgeChip";
 
 interface StepInterestsProps {
     userId?: string;
@@ -97,7 +97,7 @@ export function StepInterests({ data, onUpdate, onNext, onPrev, userId }: StepIn
                                                     : 'bg-background text-muted-foreground border-muted hover:border-primary/30 hover:text-foreground'
                                             }`}
                                         >
-                                            {item}
+                                            {getEmoji(item, 'interest')} {item}
                                         </button>
                                     );
                                 })}
@@ -117,6 +117,7 @@ export function StepInterests({ data, onUpdate, onNext, onPrev, userId }: StepIn
                         </div>
                         <span className="text-[10px] text-muted-foreground ml-2">{selectedInterests.length}/{MAX_INTERESTS}</span>
                     </div>
+                    {selectedInterests.length > 0 && <BadgeChipList items={selectedInterests} type="interest" className="mt-2" />}
                 </div>
 
                 <div className="space-y-3">
@@ -136,7 +137,7 @@ export function StepInterests({ data, onUpdate, onNext, onPrev, userId }: StepIn
                                             : 'bg-background text-muted-foreground border-muted hover:border-primary/30 hover:text-foreground'
                                     }`}
                                 >
-                                    {value}
+                                    {getEmoji(value, 'value')} {value}
                                 </button>
                             );
                         })}
@@ -161,7 +162,7 @@ export function StepInterests({ data, onUpdate, onNext, onPrev, userId }: StepIn
                                             : 'bg-background text-muted-foreground border-muted hover:border-primary/30 hover:text-foreground'
                                     }`}
                                 >
-                                    {genre}
+                                    {getEmoji(genre, 'music')} {genre}
                                 </button>
                             );
                         })}

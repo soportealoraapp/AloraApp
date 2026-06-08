@@ -173,5 +173,6 @@ export interface Interaction {
     fromUserId: string;
     toUserId: string;
     type: 'like' | 'pass' | 'superlike';
+    intent: ConnectionIntent;
     createdAt: Date;
 }

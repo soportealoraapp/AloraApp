@@ -85,24 +85,29 @@ export default function ProfilePage() {
 
   return (
     <div className="md:pl-60">
-        <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b bg-background/90 px-4 backdrop-blur-md sm:px-6">
-        <h1 className="text-xl font-bold md:text-2xl text-foreground">Alora</h1>
-        <div className="ml-auto flex items-center gap-2">
-          <Button size="icon" variant="ghost" asChild>
+        <header className="sticky top-0 z-30 flex h-16 items-center gap-2 border-b bg-background/90 px-3 backdrop-blur-md sm:px-6">
+        <h1 className="text-xl font-bold md:text-2xl text-foreground shrink-0">Alora</h1>
+        <div className="ml-auto flex items-center gap-1 sm:gap-2 min-w-0">
+          <Button size="icon" variant="ghost" asChild className="shrink-0">
             <Link href="/settings">
               <Settings className="h-5 w-5" />
             </Link>
           </Button>
-          <Button variant="ghost" size="sm" asChild className="mr-1">
+          <Button variant="ghost" size="sm" asChild className="hidden sm:inline-flex mr-1 shrink-0">
             <Link href={`/profile/${user?.id}?preview=1`}>
               <Eye className="h-4 w-4 mr-1" />
               Vista previa
             </Link>
           </Button>
-          <Button variant="default" asChild>
+          <Button size="icon" variant="ghost" asChild className="sm:hidden shrink-0">
+            <Link href={`/profile/${user?.id}?preview=1`}>
+              <Eye className="h-5 w-5" />
+            </Link>
+          </Button>
+          <Button variant="default" size="sm" asChild className="shrink-0 text-xs sm:text-sm px-2 sm:px-4">
             <Link href="/profile/edit">
-              <Edit className="h-4 w-4 mr-2" />
-              Editar
+              <Edit className="h-4 w-4 sm:mr-2" />
+              <span className="hidden sm:inline">Editar</span>
             </Link>
           </Button>
         </div>

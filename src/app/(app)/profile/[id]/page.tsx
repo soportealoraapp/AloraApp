@@ -46,6 +46,7 @@ export default function UserProfilePage() {
 
     const source = searchParams.get("source");
     const isPreview = searchParams.get("preview") === "1";
+    const intent = (searchParams.get("intent") as 'dating' | 'friendship' | null) || 'dating';
     const isFromNewMatch = source === "new-match";
     const isFromRejected = source === "rejected";
 
@@ -104,7 +105,7 @@ export default function UserProfilePage() {
 
         setProcessing(true);
         try {
-            const result = await sendLike(id as string, "like");
+            const result = await sendLike(id as string, "like", intent);
             setIsLiked(true);
 
             if (result.matched) {
@@ -126,7 +127,7 @@ export default function UserProfilePage() {
 
         setProcessing(true);
         try {
-            const result = await sendLike(id as string, "superlike");
+            const result = await sendLike(id as string, "superlike", intent);
             setIsSuperMatched(true);
             setIsLiked(true);
 
@@ -148,7 +149,7 @@ export default function UserProfilePage() {
     const handleAcceptMatch = async () => {
         setProcessing(true);
         try {
-            const result = await sendLike(id as string, "like");
+            const result = await sendLike(id as string, "like", intent);
 
             toast({
                 title: `¡Nuevo match con ${profile.displayName}! 🎉`,
@@ -172,7 +173,7 @@ export default function UserProfilePage() {
     const handleGiveSecondChance = async () => {
         setProcessing(true);
         try {
-            const result = await sendLike(id as string, "like");
+            const result = await sendLike(id as string, "like", intent);
 
             toast({
                 title: "¡Segunda oportunidad!",

@@ -14,6 +14,7 @@ import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
 import { allInterests, allValues, allMusicGenres, lifestyleOptions } from "@/lib/mock-data";
 import { Badge } from "@/components/ui/badge";
+import { getEmoji } from "@/components/profile/BadgeChip";
 import { ScrollArea } from "../ui/scroll-area";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
 import { Separator } from "../ui/separator";
@@ -310,11 +311,11 @@ export function DiscoverFilters({ open, onOpenChange, onApplyFilters, initialFil
 
             <div className="space-y-3">
               <Label>Intereses en Común (hasta 10)</Label>
-              <div className="flex flex-wrap gap-2">
+                <div className="flex flex-wrap gap-2">
                 {allInterests.slice(0, 20).map((interest) => (
                   <button key={interest} onClick={() => toggleSelection(interest, selectedInterests, setSelectedInterests, 10)}>
                     <Badge variant={selectedInterests.includes(interest) ? 'default' : 'secondary'} className="cursor-pointer text-sm py-1">
-                      {interest}
+                      {getEmoji(interest, 'interest')} {interest}
                     </Badge>
                   </button>
                 ))}
@@ -323,11 +324,11 @@ export function DiscoverFilters({ open, onOpenChange, onApplyFilters, initialFil
 
             <div className="space-y-3">
               <Label>Valores Compartidos (hasta 5)</Label>
-              <div className="flex flex-wrap gap-2">
+                <div className="flex flex-wrap gap-2">
                 {allValues.slice(0, 15).map((value) => (
                   <button key={value} onClick={() => toggleSelection(value, selectedValues, setSelectedValues)}>
                     <Badge variant={selectedValues.includes(value) ? 'default' : 'secondary'} className="cursor-pointer text-sm py-1">
-                      {value}
+                      {getEmoji(value, 'value')} {value}
                     </Badge>
                   </button>
                 ))}
@@ -336,11 +337,11 @@ export function DiscoverFilters({ open, onOpenChange, onApplyFilters, initialFil
 
             <div className="space-y-3">
               <Label>Géneros Musicales (hasta 5)</Label>
-              <div className="flex flex-wrap gap-2">
+                <div className="flex flex-wrap gap-2">
                 {allMusicGenres.map((genre) => (
                   <button key={genre} onClick={() => toggleSelection(genre, selectedMusicGenres, setSelectedMusicGenres, 5)}>
                     <Badge variant={selectedMusicGenres.includes(genre) ? 'default' : 'secondary'} className="cursor-pointer text-sm py-1">
-                      {genre}
+                      {getEmoji(genre, 'music')} {genre}
                     </Badge>
                   </button>
                 ))}

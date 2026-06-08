@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
+import { getEmoji } from "@/components/profile/BadgeChip";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ArrowLeft, Upload, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
@@ -487,7 +488,7 @@ export default function ProfileEditPage() {
                                     className="cursor-pointer"
                                     onClick={() => toggleInterest(interest)}
                                 >
-                                    {interest}
+                                    {getEmoji(interest, 'interest')} {interest}
                                 </Badge>
                             ))}
                         </div>
@@ -510,7 +511,7 @@ export default function ProfileEditPage() {
                                     className="cursor-pointer"
                                     onClick={() => toggleValue(value)}
                                 >
-                                    {value}
+                                    {getEmoji(value, 'value')} {value}
                                 </Badge>
                             ))}
                         </div>
@@ -533,7 +534,7 @@ export default function ProfileEditPage() {
                                     className="cursor-pointer"
                                     onClick={() => toggleMusicGenre(genre)}
                                 >
-                                    {genre}
+                                    {getEmoji(genre, 'music')} {genre}
                                 </Badge>
                             ))}
                         </div>

@@ -22,9 +22,9 @@ const MUSIC_EMOJIS: Record<string, string> = {
   'R&B': '🎵', 'Folk': '🪕',
 };
 
-type BadgeType = 'interest' | 'value' | 'music';
+export type BadgeType = 'interest' | 'value' | 'music';
 
-function getEmoji(label: string, type: BadgeType): string {
+export function getEmoji(label: string, type: BadgeType): string {
   if (type === 'interest') return INTEREST_EMOJIS[label] || '✨';
   if (type === 'value') return VALUE_EMOJIS[label] || '⭐';
   return MUSIC_EMOJIS[label] || '🎵';

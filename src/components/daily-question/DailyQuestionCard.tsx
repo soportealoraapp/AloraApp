@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
-import { MessageCircle, Loader2, Check, Send } from 'lucide-react';
+import { MessageCircle, Loader2, Check, Send, Heart, Target, MessageSquare, Link2, Sun, TrendingUp, Sparkles, Smile } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 interface DailyQuestionData {
@@ -25,6 +25,17 @@ const CATEGORY_LABELS: Record<string, string> = {
     growth: 'Crecimiento',
     dating: 'Citas',
     personality: 'Personalidad',
+};
+
+const CATEGORY_ICONS: Record<string, React.ElementType> = {
+    values: Heart,
+    goals: Target,
+    communication: MessageSquare,
+    connection: Link2,
+    lifestyle: Sun,
+    growth: TrendingUp,
+    dating: Sparkles,
+    personality: Smile,
 };
 
 export function DailyQuestionCard() {
@@ -113,7 +124,11 @@ export function DailyQuestionCard() {
                         <MessageCircle className="h-4 w-4 text-pink-500" />
                         Pregunta del día
                     </CardTitle>
-                    <Badge variant="secondary" className="text-[10px]">
+                    <Badge variant="secondary" className="text-[10px] gap-1">
+                        {(() => {
+                            const Icon = CATEGORY_ICONS[data.category];
+                            return Icon ? <Icon className="h-3 w-3" /> : null;
+                        })()}
                         {CATEGORY_LABELS[data.category] || data.category}
                     </Badge>
                 </div>
