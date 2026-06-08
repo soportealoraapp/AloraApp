@@ -31,8 +31,10 @@ export function DailyQuestionCard() {
     const { toast } = useToast();
     const [data, setData] = useState<DailyQuestionData | null>(null);
     const [loading, setLoading] = useState(true);
+    const [fetchError, setFetchError] = useState(false);
     const [answer, setAnswer] = useState('');
     const [submitting, setSubmitting] = useState(false);
+    const [editing, setEditing] = useState(false);
 
     useEffect(() => {
         fetchQuestion();
@@ -40,7 +42,9 @@ export function DailyQuestionCard() {
 
     const fetchQuestion = async () => {
         try {
+            setFetchError(false);
             const res = await fetch('/api/daily-question');
+            if (!res.ok) throw new Error('Failed to fetch');
             const result = await res.json();
             setData(result);
             if (result.userAnswer) {
@@ -48,6 +52,7 @@ export function DailyQuestionCard() {
             }
         } catch (error) {
             console.error('Error fetching daily question:', error);
+            setFetchError(true);
         } finally {
             setLoading(false);
         }
@@ -85,6 +90,19 @@ export function DailyQuestionCard() {
         );
     }
 
+    if (fetchError) {
+        return (
+            <Card>
+                <CardContent className="py-6 flex flex-col items-center gap-3">
+                    <p className="text-sm text-muted-foreground">No se pudo cargar la pregunta del día</p>
+                    <Button size="sm" variant="outline" onClick={fetchQuestion}>
+                        Reintentar
+                    </Button>
+                </CardContent>
+            </Card>
+        );
+    }
+
     if (!data) return null;
 
     return (
@@ -93,7 +111,7 @@ export function DailyQuestionCard() {
                 <div className="flex items-center justify-between">
                     <CardTitle className="text-base flex items-center gap-2">
                         <MessageCircle className="h-4 w-4 text-pink-500" />
-                        Pregunta del dia
+                        Pregunta del día
                     </CardTitle>
                     <Badge variant="secondary" className="text-[10px]">
                         {CATEGORY_LABELS[data.category] || data.category}
@@ -105,14 +123,20 @@ export function DailyQuestionCard() {
                     {data.question}
                 </p>
 
-                {data.answered ? (
+                {data.answered && !editing ? (
                     <div className="p-3 bg-green-50 rounded-xl border border-green-100">
                         <div className="flex items-start gap-2">
                             <Check className="h-4 w-4 text-green-600 mt-0.5 shrink-0" />
-                            <div>
+                            <div className="flex-1">
                                 <p className="text-xs font-medium text-green-800 mb-1">Tu respuesta:</p>
                                 <p className="text-sm text-green-700">{data.userAnswer}</p>
                             </div>
+                            <button
+                                onClick={() => setEditing(true)}
+                                className="text-[10px] font-medium text-green-600 hover:underline shrink-0 mt-0.5"
+                            >
+                                Editar
+                            </button>
                         </div>
                     </div>
                 ) : (
@@ -128,19 +152,33 @@ export function DailyQuestionCard() {
                             <span className="text-[10px] text-muted-foreground">
                                 {answer.length}/300
                             </span>
-                            <Button
-                                size="sm"
-                                onClick={handleSubmit}
-                                disabled={!answer.trim() || submitting}
-                                className="bg-gradient-to-r from-pink-500 to-rose-400"
-                            >
-                                {submitting ? (
-                                    <Loader2 className="animate-spin h-3 w-3 mr-1" />
-                                ) : (
-                                    <Send className="h-3 w-3 mr-1" />
+                            <div className="flex items-center gap-2">
+                                {editing && (
+                                    <Button
+                                        size="sm"
+                                        variant="ghost"
+                                        onClick={() => {
+                                            setEditing(false);
+                                            setAnswer(data?.userAnswer || '');
+                                        }}
+                                    >
+                                        Cancelar
+                                    </Button>
                                 )}
-                                Enviar
-                            </Button>
+                                <Button
+                                    size="sm"
+                                    onClick={handleSubmit}
+                                    disabled={!answer.trim() || submitting}
+                                    className="bg-gradient-to-r from-pink-500 to-rose-400"
+                                >
+                                    {submitting ? (
+                                        <Loader2 className="animate-spin h-3 w-3 mr-1" />
+                                    ) : (
+                                        <Send className="h-3 w-3 mr-1" />
+                                    )}
+                                    {editing ? 'Actualizar' : 'Enviar'}
+                                </Button>
+                            </div>
                         </div>
                     </div>
                 )}

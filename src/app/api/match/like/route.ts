@@ -4,6 +4,7 @@ import { withRateLimit } from '@/server/utils/api-rate-limit';
 import { notifyNewMatch, notifyLikesRestored } from '@/server/services/push';
 import { trackEvent } from '@/server/services/analytics';
 import { AnalyticsEvents } from '@/lib/tracking/events';
+import { LikeSchema } from '@/lib/schemas/validation';
 
 const FREE_DAILY_LIKES_LIMIT = 50;
 
@@ -24,12 +25,12 @@ export async function POST(request: NextRequest) {
     if (rateLimitResponse) return rateLimitResponse;
 
     try {
-        const { toUserId, type } = await request.json();
-
-        if (!toUserId) {
-            return NextResponse.json({ error: 'Missing userId' }, { status: 400 });
+        const parsed = LikeSchema.safeParse(await request.json());
+        if (!parsed.success) {
+            return NextResponse.json({ error: 'Invalid like payload', details: parsed.error.flatten().fieldErrors }, { status: 400 });
         }
 
+        const { toUserId, type, intent } = parsed.data;
         const interactionType = type || 'like';
 
         // Daily likes limit for free users (skip for passes)
@@ -98,16 +99,18 @@ export async function POST(request: NextRequest) {
         // 1. Create/Update Interaction (idempotent via upsert)
         const interaction = await prisma.interaction.upsert({
             where: {
-                fromUserId_toUserId: {
+                fromUserId_toUserId_intent: {
                     fromUserId: user.id,
-                    toUserId
+                    toUserId,
+                    intent
                 }
             },
-            update: { type: interactionType },
+            update: { type: interactionType, deletedAt: null },
             create: {
                 fromUserId: user.id,
                 toUserId,
-                type: interactionType
+                type: interactionType,
+                intent
             }
         });
 
@@ -129,37 +132,40 @@ export async function POST(request: NextRequest) {
         }
 
         if (interactionType === 'pass') {
-            return NextResponse.json({ matched: false });
+            return NextResponse.json({ matched: false, intent });
         }
 
         // 2. Atomic transaction: check reciprocal like + create match.
         type MatchResult = { matched: true; matchId: string; u1: string; u2: string } | { matched: false; matchId: null; u1?: undefined; u2?: undefined };
         const result: MatchResult = await prisma.$transaction(async (tx) => {
-            const mutual = await tx.interaction.findUnique({
+            const mutual = await tx.interaction.findFirst({
                 where: {
-                    fromUserId_toUserId: {
-                        fromUserId: toUserId,
-                        toUserId: user.id
-                    }
+                    fromUserId: toUserId,
+                    toUserId: user.id,
+                    intent,
+                    type: { in: ['like', 'superlike'] },
+                    deletedAt: null
                 }
             });
 
-            if (!mutual || !['like', 'superlike'].includes(mutual.type)) {
+            if (!mutual) {
                 return { matched: false as const, matchId: null };
             }
 
             const [u1, u2] = [user.id, toUserId].sort();
             const match = await tx.match.upsert({
                 where: {
-                    user1Id_user2Id: {
+                    user1Id_user2Id_intent: {
                         user1Id: u1,
-                        user2Id: u2
+                        user2Id: u2,
+                        intent
                     }
                 },
-                update: { isActive: true, stage: 'talking' },
+                update: { isActive: true, stage: 'talking', deletedAt: null },
                 create: {
                     user1Id: u1,
                     user2Id: u2,
+                    intent,
                     isActive: true,
                     stage: 'talking',
                     score: 0
@@ -170,7 +176,7 @@ export async function POST(request: NextRequest) {
         }, { isolationLevel: 'Serializable' });
 
         if (!result.matched) {
-            return NextResponse.json({ matched: false, matchId: null });
+            return NextResponse.json({ matched: false, matchId: null, intent });
         }
 
         // Compute and persist real compatibility score (outside critical path)
@@ -194,8 +200,8 @@ export async function POST(request: NextRequest) {
         const settled = await Promise.allSettled([
             notifyNewMatch(result.u1, partner2?.displayName || 'Alguien', result.matchId),
             notifyNewMatch(result.u2, partner1?.displayName || 'Alguien', result.matchId),
-            trackEvent(result.u1, AnalyticsEvents.FIRST_MATCH, { matchId: result.matchId }),
-            trackEvent(result.u2, AnalyticsEvents.FIRST_MATCH, { matchId: result.matchId }),
+            trackEvent(result.u1, AnalyticsEvents.FIRST_MATCH, { matchId: result.matchId, intent }),
+            trackEvent(result.u2, AnalyticsEvents.FIRST_MATCH, { matchId: result.matchId, intent }),
         ]);
         settled.forEach((s, idx) => {
             if (s.status === 'rejected') {
@@ -204,7 +210,7 @@ export async function POST(request: NextRequest) {
             }
         });
 
-        return NextResponse.json({ matched: true, matchId: result.matchId });
+        return NextResponse.json({ matched: true, matchId: result.matchId, intent });
 
     } catch (error) {
         const message = error instanceof Error ? error.message : 'Unknown error';

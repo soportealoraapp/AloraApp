@@ -17,15 +17,25 @@ export async function GET(request: NextRequest) {
     }
 
     try {
-        const profile = await prisma.profile.findUnique({
-            where: { userId: user.id }
-        });
+        const [profile, spotifyAccount] = await Promise.all([
+            prisma.profile.findUnique({ where: { userId: user.id } }),
+            prisma.spotifyAccount.findUnique({
+                where: { userId: user.id },
+                select: {
+                    topTracks: true,
+                    topArtists: true,
+                    playlistId: true,
+                    playlistUrl: true,
+                    lastSyncedAt: true,
+                },
+            }),
+        ]);
 
         if (!profile) {
             return NextResponse.json({ error: 'Profile not found' }, { status: 404 });
         }
 
-        return NextResponse.json(profile);
+        return NextResponse.json({ ...profile, spotify: spotifyAccount || null });
     } catch (error) {
         console.error('Error getting profile:', error);
         return NextResponse.json({ error: 'Internal server error' }, { status: 500 });

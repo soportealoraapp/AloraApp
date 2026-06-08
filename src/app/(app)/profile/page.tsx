@@ -4,16 +4,18 @@ import { useAuth } from "@/contexts/AuthContext";
 import { trackEvent } from "@/lib/tracking/client";
 import { calculateCompleteness } from "@/lib/utils/completeness";
 import { TrustBadge } from "@/components/ui/premium/TrustBadge";
+import { BadgeChipList } from "@/components/profile/BadgeChip";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Settings, Edit, MapPin, Briefcase, Cigarette, GlassWater, Baby, Star, BookOpen, Music, CheckCircle, AlertCircle, ShieldCheck, Shield, Sparkles, Eye, ChevronRight, Trophy } from "lucide-react";
+import { Settings, Edit, Eye, MapPin, Briefcase, Cigarette, GlassWater, Baby, Star, BookOpen, Music, CheckCircle, AlertCircle, ShieldCheck, Shield, Sparkles, ChevronRight, Trophy } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { Skeleton } from "@/components/ui/skeleton";
 import dynamic from "next/dynamic";
 import { BoostDashboard } from "@/components/premium/BoostDashboard";
+import { SpotifySection } from "@/components/profile/SpotifySection";
 import { StreakCard } from "@/components/gamification/StreakCard";
 import { FirstWeekJourney } from "@/components/gamification/FirstWeekJourney";
 import { PaywallModal } from "@/components/premium/PaywallModal";
@@ -27,7 +29,7 @@ const DynamicFirstWeekJourney = dynamic(() => import("@/components/gamification/
 const DynamicStreakCard = dynamic(() => import("@/components/gamification/StreakCard").then(m => ({ default: m.StreakCard })), { ssr: false });
 
 export default function ProfilePage() {
-  const { profile, authLoading, profileLoading } = useAuth();
+  const { user, profile, authLoading, profileLoading } = useAuth();
   const loading = authLoading || profileLoading;
   const [showPaywall, setShowPaywall] = useState(false);
   const [quizResults, setQuizResults] = useState<{ quizId: string; score: number; archetype: string }[]>([]);
@@ -89,6 +91,12 @@ export default function ProfilePage() {
           <Button size="icon" variant="ghost" asChild>
             <Link href="/settings">
               <Settings className="h-5 w-5" />
+            </Link>
+          </Button>
+          <Button variant="ghost" size="sm" asChild className="mr-1">
+            <Link href={`/profile/${user?.id}?preview=1`}>
+              <Eye className="h-4 w-4 mr-1" />
+              Vista previa
             </Link>
           </Button>
           <Button variant="default" asChild>
@@ -204,11 +212,7 @@ export default function ProfilePage() {
               <Card className="rounded-3xl">
                 <CardContent className="p-6">
                   <h3 className="font-semibold text-lg mb-3">Intereses</h3>
-                  <div className="flex flex-wrap gap-2">
-                    {profile.interests.map(i => (
-                      <Badge key={i} variant="secondary" className="rounded-full">{i}</Badge>
-                    ))}
-                  </div>
+                  <BadgeChipList items={profile.interests} type="interest" />
                 </CardContent>
               </Card>
             )}
@@ -217,11 +221,7 @@ export default function ProfilePage() {
               <Card className="rounded-3xl">
                 <CardContent className="p-6">
                   <h3 className="font-semibold text-lg mb-3">Valores</h3>
-                  <div className="flex flex-wrap gap-2">
-                    {profile.values.map(v => (
-                      <Badge key={v} variant="outline" className="rounded-full">{v}</Badge>
-                    ))}
-                  </div>
+                  <BadgeChipList items={profile.values} type="value" />
                 </CardContent>
               </Card>
             )}
@@ -234,14 +234,12 @@ export default function ProfilePage() {
                   <Music className="h-5 w-5" />
                   Gustos Musicales
                 </h3>
-                <div className="flex flex-wrap gap-2">
-                  {profile.musicGenres.map(genre => (
-                    <Badge key={genre} variant="secondary" className="rounded-full">{genre}</Badge>
-                  ))}
-                </div>
+                <BadgeChipList items={profile.musicGenres} type="music" />
               </CardContent>
             </Card>
           )}
+
+          {(profile as any).spotify && <SpotifySection spotify={(profile as any).spotify} isOwn />}
 
           {(profile as any).voiceIntro && (
             <VoiceIntro

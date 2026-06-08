@@ -1,10 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { useProfile } from "@/hooks/use-profile";
 import { useMatches } from "@/hooks/use-matches";
 import { useAuth } from "@/contexts/AuthContext";
+import { BadgeChipList } from "@/components/profile/BadgeChip";
+import { SpotifySection } from "@/components/profile/SpotifySection";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -40,12 +42,22 @@ export default function UserProfilePage() {
     const [isLiked, setIsLiked] = useState(false);
     const [isSuperMatched, setIsSuperMatched] = useState(false);
     const [processing, setProcessing] = useState(false);
+    const [hasExistingMatch, setHasExistingMatch] = useState(false);
 
     const source = searchParams.get("source");
+    const isPreview = searchParams.get("preview") === "1";
     const isFromNewMatch = source === "new-match";
     const isFromRejected = source === "rejected";
 
     const { profile, loading } = useProfile(id as string);
+
+    useEffect(() => {
+      if (!id || !user || isPreview) return;
+      fetch(`/api/match/check?targetUserId=${id}`)
+        .then(r => r.json())
+        .then(data => setHasExistingMatch(data.matched))
+        .catch(() => {});
+    }, [id, user, isPreview]);
 
     if (loading) {
         return (
@@ -343,11 +355,7 @@ export default function UserProfilePage() {
                             <Card>
                                 <CardContent className="p-6">
                                     <h3 className="font-semibold text-lg mb-3">Intereses</h3>
-                                    <div className="flex flex-wrap gap-2">
-                                        {profile.interests.map((i) => (
-                                            <Badge key={i}>{i}</Badge>
-                                        ))}
-                                    </div>
+                                    <BadgeChipList items={profile.interests} type="interest" />
                                 </CardContent>
                             </Card>
                         )}
@@ -356,13 +364,7 @@ export default function UserProfilePage() {
                             <Card>
                                 <CardContent className="p-6">
                                     <h3 className="font-semibold text-lg mb-3">Valores</h3>
-                                    <div className="flex flex-wrap gap-2">
-                                        {profile.values.map((v) => (
-                                            <Badge variant="secondary" key={v}>
-                                                {v}
-                                            </Badge>
-                                        ))}
-                                    </div>
+                                    <BadgeChipList items={profile.values} type="value" />
                                 </CardContent>
                             </Card>
                         )}
@@ -374,16 +376,12 @@ export default function UserProfilePage() {
                                 <h3 className="font-semibold text-lg flex items-center gap-2 mb-3">
                                     <Music className="h-5 w-5" /> Gustos Musicales
                                 </h3>
-                                <div className="flex flex-wrap gap-2">
-                                    {profile.musicGenres.map((genre) => (
-                                        <Badge key={genre} variant="outline">
-                                            {genre}
-                                        </Badge>
-                                    ))}
-                                </div>
+                                <BadgeChipList items={profile.musicGenres} type="music" />
                             </CardContent>
                         </Card>
                     )}
+
+                    {(profile as any).spotify && <SpotifySection spotify={(profile as any).spotify} />}
 
                     {photoGallery.length > 0 && (
                         <Card>
@@ -410,7 +408,7 @@ export default function UserProfilePage() {
                     )}
                 </div>
 
-                {id !== user?.id && (
+                {id !== user?.id && !isPreview && (
                     <div className="fixed bottom-0 left-0 right-0 z-50 p-4 bg-background/80 backdrop-blur-sm border-t pb-[env(safe-area-inset-bottom,16px)] md:relative md:bg-transparent md:border-none md:p-0 md:mt-4 md:px-4">
                         {isFromNewMatch ? (
                             <div className="flex justify-around items-center max-w-md mx-auto gap-3">
@@ -473,11 +471,13 @@ export default function UserProfilePage() {
                                     )}
                                     {isLiked ? "Liked" : "Me Gusta"}
                                 </Button>
-                                <Button asChild size="lg" variant="default" className="w-full min-h-[48px]">
-                                    <Link href={`/chat/${id}`}>
-                                        <MessageSquare className="h-5 w-5 mr-2" /> Mensaje
-                                    </Link>
-                                </Button>
+                                {hasExistingMatch && (
+                                    <Button asChild size="lg" variant="default" className="w-full min-h-[48px]">
+                                        <Link href={`/chat/${id}`}>
+                                            <MessageSquare className="h-5 w-5 mr-2" /> Mensaje
+                                        </Link>
+                                    </Button>
+                                )}
                                 <Button
                                     size="lg"
                                     variant="secondary"

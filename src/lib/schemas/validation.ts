@@ -7,6 +7,7 @@ export const ALLOWED_GENDERS = ['woman', 'man', 'non-binary'] as const;
 export type Gender = (typeof ALLOWED_GENDERS)[number];
 
 const ALLOWED_SEEKING = ['women', 'men', 'all', 'everyone'] as const;
+const ALLOWED_CONNECTION_INTENTS = ['dating', 'friendship'] as const;
 const MAX_PHOTOS = 6;
 const MAX_INTERESTS = 10;
 const MAX_VALUES = 5;
@@ -40,6 +41,7 @@ export const EditableProfileSchema = z.object({
     latitude: z.number().optional().nullable(),
     longitude: z.number().optional().nullable(),
     lookingFor: z.string().optional().default(''),
+    connectionModes: z.array(z.enum(ALLOWED_CONNECTION_INTENTS)).max(2).optional().default(['dating']),
 }).strict('Unexpected fields are not allowed');
 
 export type EditableProfile = z.infer<typeof EditableProfileSchema>;
@@ -77,6 +79,7 @@ export const MessageSchema = z.object({
 export const LikeSchema = z.object({
     toUserId: z.string().uuid(),
     type: z.enum(['like', 'superlike', 'pass']).default('like'),
+    intent: z.enum(ALLOWED_CONNECTION_INTENTS).default('dating'),
 });
 
 /**

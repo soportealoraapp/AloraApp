@@ -1,5 +1,31 @@
 export type UserId = string;
 export type Url = string;
+export type ConnectionIntent = 'dating' | 'friendship';
+
+export interface SpotifyTrackSnapshot {
+    id: string;
+    name: string;
+    artists: string[];
+    uri?: string;
+    externalUrl?: string;
+    imageUrl?: string | null;
+}
+
+export interface SpotifyArtistSnapshot {
+    id: string;
+    name: string;
+    genres?: string[];
+    externalUrl?: string;
+    imageUrl?: string | null;
+}
+
+export interface SpotifyProfileSnapshot {
+    topTracks: SpotifyTrackSnapshot[];
+    topArtists: SpotifyArtistSnapshot[];
+    playlistId?: string | null;
+    playlistUrl?: string | null;
+    lastSyncedAt?: string | Date | null;
+}
 
 // Base User (from Auth/System)
 export interface User {
@@ -43,6 +69,8 @@ export interface UserProfile extends User {
 
     // Relationship goals
     lookingFor?: string;
+    connectionModes?: ConnectionIntent[];
+    spotify?: SpotifyProfileSnapshot | null;
 
     // Status
     subscriptionStatus?: 'free' | 'plus';
@@ -109,6 +137,7 @@ export interface Match {
     updatedAt?: Date;
     lastMessage?: Message;
     stage?: string;
+    intent?: ConnectionIntent;
     compatibility?: number;
     partner?: {
         id: string;

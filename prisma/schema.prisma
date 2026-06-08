@@ -28,6 +28,7 @@ model User {
   profile      Profile?
   sessions     Session[]
   sentMessages Message[] @relation("SentMessages")
+  spotifyAccount SpotifyAccount?
 
   // Auditing
   auditLogs AuditLog[]
@@ -111,6 +112,7 @@ model Profile {
 
   // Relationship goals
   lookingFor String? // casual, serious, friendship, networking
+  connectionModes String[] @default(["dating"]) // dating, friendship
 
   // Privacy settings
   incognitoMode    Boolean @default(false)
@@ -208,6 +210,7 @@ model Match {
 
   // State
   stage String @default("talking") // talking, dating, relationship, unmatched
+  intent String @default("dating") // dating, friendship
 
   // Trust & Safety
   mutedUntil DateTime?
@@ -229,7 +232,7 @@ model Match {
   // v5.x Snapshots
   relationshipSnapshots RelationshipSnapshot[]
 
-  @@unique([user1Id, user2Id])
+  @@unique([user1Id, user2Id, intent])
   @@map("matches")
 }
 
@@ -267,12 +270,33 @@ model Interaction {
   toUser   User   @relation("InteractionReceiver", fields: [toUserId], references: [id], onDelete: Cascade)
 
   type String // like, superlike, pass
+  intent String @default("dating") // dating, friendship
 
   createdAt DateTime  @default(now())
   deletedAt DateTime?
 
-  @@unique([fromUserId, toUserId])
+  @@unique([fromUserId, toUserId, intent])
   @@map("interactions")
+}
+
+model SpotifyAccount {
+  id     String @id @default(uuid())
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  spotifyUserId         String
+  displayName           String?
+  refreshTokenEncrypted String
+  topTracks             Json @default("[]")
+  topArtists            Json @default("[]")
+  playlistId            String?
+  playlistUrl           String?
+  lastSyncedAt          DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("spotify_accounts")
 }
 
 // -----------------------------------------------------------------------------

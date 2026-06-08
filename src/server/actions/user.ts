@@ -49,6 +49,7 @@ export const getUserProfile = unstable_cache(
                 latitude: (profile as any).latitude || null,
                 longitude: (profile as any).longitude || null,
                 lookingFor: (profile as any).lookingFor || '',
+                connectionModes: (profile as any).connectionModes || ['dating'],
 
                 subscriptionStatus: profile.subscriptionStatus as any,
                 trustStatus: profile.trustStatus as any
@@ -64,7 +65,20 @@ export const getUserProfile = unstable_cache(
 
 export async function updateUserProfile(userId: string, data: Partial<UserProfile>) {
     try {
-        const { id, email, isVerified, createdAt, subscriptionStatus, trustStatus, ...profileUpdates } = data;
+        const {
+            id,
+            email,
+            isVerified,
+            createdAt,
+            subscriptionStatus,
+            trustStatus,
+            spotify,
+            latestAnswer,
+            compatibility,
+            completenessScore,
+            verificationStatus,
+            ...profileUpdates
+        } = data;
 
         await prisma.user.upsert({
             where: { id: userId },

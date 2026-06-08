@@ -13,10 +13,14 @@ export async function GET(request: NextRequest) {
     }
 
     try {
+        const intentParam = request.nextUrl.searchParams.get('intent');
+        const intent = intentParam === 'friendship' ? 'friendship' : intentParam === 'dating' ? 'dating' : undefined;
         const likes = await prisma.interaction.findMany({
             where: {
                 toUserId: user.id,
-                type: { in: ['like', 'superlike'] }
+                type: { in: ['like', 'superlike'] },
+                deletedAt: null,
+                ...(intent ? { intent } : {})
             },
             include: {
                 fromUser: { include: { profile: true } }
@@ -35,14 +39,18 @@ export async function GET(request: NextRequest) {
         // Check existing matches
         const existingMatches = await prisma.match.findMany({
             where: {
-                OR: [{ user1Id: user.id }, { user2Id: user.id }]
+                OR: [{ user1Id: user.id }, { user2Id: user.id }],
+                ...(intent ? { intent } : {})
             },
-            select: { user1Id: true, user2Id: true }
+            select: { user1Id: true, user2Id: true, intent: true }
         });
 
-        const matchUserIds = new Set(existingMatches.flatMap(m => [m.user1Id, m.user2Id]));
+        const matchKeys = new Set(existingMatches.flatMap(m => [
+            `${m.user1Id}:${m.intent}`,
+            `${m.user2Id}:${m.intent}`
+        ]));
 
-        const pendingLikes = likes.filter(like => !matchUserIds.has(like.fromUserId));
+        const pendingLikes = likes.filter(like => !matchKeys.has(`${like.fromUserId}:${like.intent}`));
 
         const formattedLikes = pendingLikes.map(like => {
             const p = like.fromUser.profile;
@@ -51,6 +59,7 @@ export async function GET(request: NextRequest) {
                 displayName: p?.displayName || 'Someone',
                 photoURL: p?.photos?.[0] || null,
                 type: like.type,
+                intent: like.intent,
                 createdAt: like.createdAt
             };
         });

@@ -13,13 +13,16 @@ export async function GET(request: NextRequest) {
     }
 
     try {
+        const intentParam = request.nextUrl.searchParams.get('intent');
+        const intent = intentParam === 'friendship' ? 'friendship' : intentParam === 'dating' ? 'dating' : undefined;
         const matches = await prisma.match.findMany({
             where: {
                 OR: [
                     { user1Id: user.id },
                     { user2Id: user.id }
                 ],
-                isActive: true
+                isActive: true,
+                ...(intent ? { intent } : {})
             },
             include: {
                 user1: { include: { profile: true } },
@@ -50,10 +53,13 @@ export async function GET(request: NextRequest) {
                     text: match.messages[0].content // Mapping content to text for frontend compat
                 } : null,
                 createdAt: match.createdAt,
+                intent: match.intent,
                 partner: {
                     id: partner.id,
                     displayName: partnerProfile?.displayName,
                     photoURL: partnerProfile?.photos?.[0] || null,
+                    photos: partnerProfile?.photos || [],
+                    isVerified: partnerProfile?.isVerified,
                 }
             };
         });

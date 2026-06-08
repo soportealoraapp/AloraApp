@@ -21,6 +21,8 @@ export async function GET(
 
     try {
         const targetUserId = params.userId;
+        const { searchParams } = new URL(request.url);
+        const isPreview = searchParams.get('preview') === '1';
 
         const profile = await prisma.profile.findUnique({
             where: { userId: targetUserId }
@@ -30,13 +32,16 @@ export async function GET(
             return NextResponse.json({ error: 'Profile not found' }, { status: 404 });
         }
 
-        // Record visit (async, don't block response)
-        recordProfileVisit(user.id, targetUserId).catch(err => {
-            console.error('Error recording visit:', err);
-        });
+        // Skip visit tracking for preview mode
+        if (!isPreview) {
+            // Record visit (async, don't block response)
+            recordProfileVisit(user.id, targetUserId).catch(err => {
+                console.error('Error recording visit:', err);
+            });
+        }
 
-        // Send visit notification (async, throttled)
-        if (user.id !== targetUserId) {
+        // Send visit notification (async, throttled) — skip for preview
+        if (user.id !== targetUserId && !isPreview) {
             const visitorProfile = await prisma.profile.findUnique({
                 where: { userId: user.id },
                 select: { displayName: true },
@@ -63,6 +68,18 @@ export async function GET(
             select: { score: true, archetype: true },
         });
 
+        // Fetch Spotify account (public data only, no tokens)
+        const spotifyAccount = await prisma.spotifyAccount.findUnique({
+            where: { userId: targetUserId },
+            select: {
+                topTracks: true,
+                topArtists: true,
+                playlistId: true,
+                playlistUrl: true,
+                lastSyncedAt: true,
+            },
+        });
+
         // Hide private fields
         const { incognitoMode, showMeInDiscover, ...safeProfile } = profile as any;
 
@@ -72,6 +89,7 @@ export async function GET(
             ...safeProfile,
             quizArchetype: quizResult?.archetype ?? null,
             quizScore: quizResult?.score ?? null,
+            spotify: spotifyAccount || null,
             latestAnswer: latestAnswer
                 ? {
                     questionId: latestAnswer.questionId,

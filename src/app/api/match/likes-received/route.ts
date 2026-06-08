@@ -14,6 +14,8 @@ export async function GET(request: NextRequest) {
         const url = new URL(request.url);
         const limit = Math.min(parseInt(url.searchParams.get('limit') || '50'), 100);
         const offset = parseInt(url.searchParams.get('offset') || '0');
+        const intentParam = url.searchParams.get('intent');
+        const intent = intentParam === 'friendship' ? 'friendship' : intentParam === 'dating' ? 'dating' : undefined;
 
         // Get blocked users (both directions)
         const blockedUsers = await prisma.block.findMany({
@@ -30,17 +32,20 @@ export async function GET(request: NextRequest) {
         // Get existing match user IDs
         const existingMatches = await prisma.match.findMany({
             where: {
-                OR: [{ user1Id: user.id }, { user2Id: user.id }]
+                OR: [{ user1Id: user.id }, { user2Id: user.id }],
+                ...(intent ? { intent } : {})
             },
-            select: { user1Id: true, user2Id: true }
+            select: { user1Id: true, user2Id: true, intent: true }
         });
-        const matchedIds = new Set(existingMatches.flatMap(m => [m.user1Id, m.user2Id]));
+        const matchedKeys = new Set(existingMatches.flatMap(m => [`${m.user1Id}:${m.intent}`, `${m.user2Id}:${m.intent}`]));
 
         // Get all incoming likes
         const likes = await prisma.interaction.findMany({
             where: {
                 toUserId: user.id,
-                type: { in: ['like', 'superlike'] }
+                type: { in: ['like', 'superlike'] },
+                deletedAt: null,
+                ...(intent ? { intent } : {})
             },
             include: {
                 fromUser: {
@@ -54,7 +59,7 @@ export async function GET(request: NextRequest) {
 
         // Filter out blocked users and already-matched users
         const filteredLikes = likes.filter(like =>
-            !blockedIds.has(like.fromUserId) && !matchedIds.has(like.fromUserId)
+            !blockedIds.has(like.fromUserId) && !matchedKeys.has(`${like.fromUserId}:${like.intent}`)
         );
 
         // Get total count for pagination
@@ -62,7 +67,9 @@ export async function GET(request: NextRequest) {
             where: {
                 toUserId: user.id,
                 type: { in: ['like', 'superlike'] },
-                fromUserId: { notIn: [...blockedIds, ...matchedIds, user.id] }
+                deletedAt: null,
+                ...(intent ? { intent } : {}),
+                fromUserId: { notIn: [...blockedIds, user.id] }
             }
         });
 
@@ -78,6 +85,7 @@ export async function GET(request: NextRequest) {
                     city: p.city,
                     isVerified: p.isVerified,
                     isPlus: p.subscriptionStatus === 'plus',
+                    intent: like.intent,
                     createdAt: like.createdAt
                 };
             })

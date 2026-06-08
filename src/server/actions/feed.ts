@@ -59,6 +59,7 @@ export interface FeedFilters {
     featuredOnly?: boolean;
     highCompatibility?: boolean;
     activeToday?: boolean;
+    intent?: 'dating' | 'friendship';
 }
 
 export async function getDynamicFeed(
@@ -176,6 +177,11 @@ export async function getDynamicFeed(
 
         if (filters?.religion) {
             dynamicFilters.religion = filters.religion;
+        }
+
+        // Connection intent filter
+        if (filters?.intent) {
+            dynamicFilters.connectionModes = { has: filters.intent };
         }
 
         // Country / state / city filters

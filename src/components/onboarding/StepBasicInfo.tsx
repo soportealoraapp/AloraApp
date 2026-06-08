@@ -7,9 +7,10 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useState, useEffect, useMemo } from "react";
 import { trackEvent } from "@/lib/tracking/client";
-import { Sparkles } from "lucide-react";
+import { Sparkles, Heart, Handshake } from "lucide-react";
 import { motion } from "framer-motion";
-import { UserProfile } from "@/lib/domain/types";
+import { UserProfile, ConnectionIntent } from "@/lib/domain/types";
+import { cn } from "@/lib/utils";
 
 const BIO_EXAMPLES = [
     "Una amante del café y los atardeceres...",
@@ -28,6 +29,8 @@ export function StepBasicInfo({ data, onUpdate, onNext, userId }: StepBasicInfoP
     const [localData, setLocalData] = useState<Partial<UserProfile>>(data);
     const [bioExample] = useState(BIO_EXAMPLES[Math.floor(Math.random() * BIO_EXAMPLES.length)]);
 
+    const selectedModes: ConnectionIntent[] = (localData.connectionModes || ['dating']) as ConnectionIntent[];
+
     useEffect(() => {
         if (data && Object.keys(data).length > 0 && Object.keys(localData).length === 0) {
             setLocalData(data);
@@ -36,6 +39,22 @@ export function StepBasicInfo({ data, onUpdate, onNext, userId }: StepBasicInfoP
 
     const handleChange = (field: keyof UserProfile, value: unknown) => {
         setLocalData((prev) => ({ ...prev, [field]: value }));
+    };
+
+    const toggleMode = (mode: ConnectionIntent) => {
+        const current = selectedModes;
+        let next: ConnectionIntent[];
+        if (current.includes(mode) && current.length > 1) {
+            next = current.filter(m => m !== mode);
+        } else if (!current.includes(mode)) {
+            next = [...current, mode];
+        } else {
+            next = current;
+        }
+        handleChange('connectionModes', next);
+        if (next.length === 1) {
+            handleChange('lookingFor', next[0] === 'dating' ? 'serious' : 'friendship');
+        }
     };
 
     const handleNext = () => {
@@ -47,8 +66,9 @@ export function StepBasicInfo({ data, onUpdate, onNext, userId }: StepBasicInfoP
     const isValid = useMemo(() =>
         Boolean(localData.displayName?.trim()) &&
         Boolean(localData.age) &&
-        Boolean(localData.gender),
-        [localData.displayName, localData.age, localData.gender]
+        Boolean(localData.gender) &&
+        selectedModes.length > 0,
+        [localData.displayName, localData.age, localData.gender, selectedModes]
     );
 
     return (
@@ -115,6 +135,48 @@ export function StepBasicInfo({ data, onUpdate, onNext, userId }: StepBasicInfoP
                             </SelectContent>
                         </Select>
                     </div>
+                </motion.div>
+
+                <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.25 }}
+                    className="space-y-2"
+                >
+                    <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                        Busco
+                    </Label>
+                    <div className="grid grid-cols-2 gap-2">
+                        <button
+                            type="button"
+                            onClick={() => toggleMode('dating')}
+                            className={cn(
+                                'flex items-center justify-center gap-2 rounded-2xl border-2 p-3 text-sm font-medium transition-all',
+                                selectedModes.includes('dating')
+                                    ? 'border-primary bg-primary/10 text-primary'
+                                    : 'border-muted text-muted-foreground hover:border-primary/30'
+                            )}
+                        >
+                            <Heart className={cn('h-4 w-4', selectedModes.includes('dating') && 'fill-current')} />
+                            Citas
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => toggleMode('friendship')}
+                            className={cn(
+                                'flex items-center justify-center gap-2 rounded-2xl border-2 p-3 text-sm font-medium transition-all',
+                                selectedModes.includes('friendship')
+                                    ? 'border-primary bg-primary/10 text-primary'
+                                    : 'border-muted text-muted-foreground hover:border-primary/30'
+                            )}
+                        >
+                            <Handshake className="h-4 w-4" />
+                            Amistad
+                        </button>
+                    </div>
+                    {selectedModes.length === 2 && (
+                        <p className="text-[10px] text-muted-foreground text-center">Buscas ambos: citas y amistad</p>
+                    )}
                 </motion.div>
 
                 <motion.div

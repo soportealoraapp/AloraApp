@@ -1,5 +1,3 @@
-
-
 "use client";
 
 import { useState } from "react";
@@ -9,20 +7,18 @@ import {
   SheetHeader,
   SheetTitle,
   SheetFooter,
-  SheetClose,
 } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
-import { allInterests, allValues, lifestyleOptions } from "@/lib/mock-data";
+import { allInterests, allValues, allMusicGenres, lifestyleOptions } from "@/lib/mock-data";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "../ui/scroll-area";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
 import { Separator } from "../ui/separator";
 import { RadioGroup, RadioGroupItem } from "../ui/radio-group";
 
-// Local type definition to avoid circular import
 export interface Filters {
   ageRange: [number, number];
   distance: number;
@@ -30,9 +26,12 @@ export interface Filters {
   verifiedOnly: boolean;
   interests: string[];
   values: string[];
+  musicGenres?: string[];
   smoking?: string;
   drinking?: string;
   children?: string;
+  education?: string;
+  religion?: string;
   userLat?: number;
   userLng?: number;
   countryCode?: string;
@@ -41,9 +40,10 @@ export interface Filters {
   withVoiceIntro?: boolean;
   withQuiz?: boolean;
   featuredOnly?: boolean;
+  highCompatibility?: boolean;
   activeToday?: boolean;
+  intent?: 'dating' | 'friendship';
 }
-
 
 interface DiscoverFiltersProps {
   open: boolean;
@@ -59,12 +59,16 @@ export function DiscoverFilters({ open, onOpenChange, onApplyFilters, initialFil
   const [verifiedOnly, setVerifiedOnly] = useState(initialFilters.verifiedOnly);
   const [selectedInterests, setSelectedInterests] = useState<string[]>(initialFilters.interests);
   const [selectedValues, setSelectedValues] = useState<string[]>(initialFilters.values);
+  const [selectedMusicGenres, setSelectedMusicGenres] = useState<string[]>(initialFilters.musicGenres || []);
   const [selectedSmoking, setSelectedSmoking] = useState<string | undefined>(initialFilters.smoking);
   const [selectedDrinking, setSelectedDrinking] = useState<string | undefined>(initialFilters.drinking);
   const [selectedChildren, setSelectedChildren] = useState<string | undefined>(initialFilters.children);
+  const [selectedEducation, setSelectedEducation] = useState<string | undefined>(initialFilters.education);
+  const [selectedReligion, setSelectedReligion] = useState<string | undefined>(initialFilters.religion);
   const [withVoiceIntro, setWithVoiceIntro] = useState(initialFilters.withVoiceIntro || false);
   const [withQuiz, setWithQuiz] = useState(initialFilters.withQuiz || false);
   const [featuredOnly, setFeaturedOnly] = useState(initialFilters.featuredOnly || false);
+  const [highCompatibility, setHighCompatibility] = useState(initialFilters.highCompatibility || false);
   const [activeToday, setActiveToday] = useState(initialFilters.activeToday || false);
 
   const toggleSelection = (
@@ -90,15 +94,22 @@ export function DiscoverFilters({ open, onOpenChange, onApplyFilters, initialFil
       verifiedOnly,
       interests: selectedInterests,
       values: selectedValues,
+      musicGenres: selectedMusicGenres,
       smoking: selectedSmoking,
       drinking: selectedDrinking,
       children: selectedChildren,
+      education: selectedEducation,
+      religion: selectedReligion,
       withVoiceIntro,
       withQuiz,
       featuredOnly,
+      highCompatibility,
       activeToday,
       userLat: initialFilters.userLat,
       userLng: initialFilters.userLng,
+      countryCode: initialFilters.countryCode,
+      stateCode: initialFilters.stateCode,
+      city: initialFilters.city,
     });
     onOpenChange(false);
   }
@@ -108,16 +119,25 @@ export function DiscoverFilters({ open, onOpenChange, onApplyFilters, initialFil
       ageRange: [18, 60],
       distance: 100,
       seeking: 'all',
-      verifiedOnly: true,
+      verifiedOnly: false,
       interests: [],
       values: [],
+      musicGenres: [],
       smoking: undefined,
       drinking: undefined,
       children: undefined,
+      education: undefined,
+      religion: undefined,
       withVoiceIntro: false,
       withQuiz: false,
       featuredOnly: false,
+      highCompatibility: false,
       activeToday: false,
+      userLat: initialFilters.userLat,
+      userLng: initialFilters.userLng,
+      countryCode: initialFilters.countryCode,
+      stateCode: initialFilters.stateCode,
+      city: initialFilters.city,
     }
     setAgeRange(defaultFilters.ageRange);
     setDistance([defaultFilters.distance]);
@@ -125,12 +145,16 @@ export function DiscoverFilters({ open, onOpenChange, onApplyFilters, initialFil
     setVerifiedOnly(defaultFilters.verifiedOnly);
     setSelectedInterests(defaultFilters.interests);
     setSelectedValues(defaultFilters.values);
+    setSelectedMusicGenres(defaultFilters.musicGenres || []);
     setSelectedSmoking(defaultFilters.smoking);
     setSelectedDrinking(defaultFilters.drinking);
     setSelectedChildren(defaultFilters.children);
+    setSelectedEducation(defaultFilters.education);
+    setSelectedReligion(defaultFilters.religion);
     setWithVoiceIntro(false);
     setWithQuiz(false);
     setFeaturedOnly(false);
+    setHighCompatibility(false);
     setActiveToday(false);
     onApplyFilters(defaultFilters);
   }
@@ -223,6 +247,14 @@ export function DiscoverFilters({ open, onOpenChange, onApplyFilters, initialFil
                   <span className="block text-[10px] text-muted-foreground">Completitud 90%+</span>
                 </Label>
               </div>
+
+              <div className="flex items-center space-x-2 rounded-lg border p-3 bg-violet-50/30">
+                <Switch id="high-compatibility" checked={highCompatibility} onCheckedChange={setHighCompatibility} />
+                <Label htmlFor="high-compatibility" className="flex-grow cursor-pointer">
+                  💜 Alta compatibilidad
+                  <span className="block text-[10px] text-muted-foreground">Coincidencia en valores e intereses</span>
+                </Label>
+              </div>
             </div>
 
             <Separator />
@@ -250,10 +282,31 @@ export function DiscoverFilters({ open, onOpenChange, onApplyFilters, initialFil
                   <SelectContent>{lifestyleOptions.children.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent>
                 </Select>
               </div>
+              <div className="space-y-2">
+                <Label>Educación</Label>
+                <Select value={selectedEducation} onValueChange={setSelectedEducation}>
+                  <SelectTrigger><SelectValue placeholder="Cualquiera" /></SelectTrigger>
+                  <SelectContent>
+                    {['Secundaria', 'Preparatoria', 'Universidad', 'Maestría', 'Doctorado'].map(e => (
+                      <SelectItem key={e} value={e}>{e}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Religión</Label>
+                <Select value={selectedReligion} onValueChange={setSelectedReligion}>
+                  <SelectTrigger><SelectValue placeholder="Cualquiera" /></SelectTrigger>
+                  <SelectContent>
+                    {['Cristiano', 'Católico', 'Ateo', 'Agnóstico', 'Otro'].map(r => (
+                      <SelectItem key={r} value={r}>{r}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
 
             <Separator />
-
 
             <div className="space-y-3">
               <Label>Intereses en Común (hasta 10)</Label>
@@ -275,6 +328,19 @@ export function DiscoverFilters({ open, onOpenChange, onApplyFilters, initialFil
                   <button key={value} onClick={() => toggleSelection(value, selectedValues, setSelectedValues)}>
                     <Badge variant={selectedValues.includes(value) ? 'default' : 'secondary'} className="cursor-pointer text-sm py-1">
                       {value}
+                    </Badge>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="space-y-3">
+              <Label>Géneros Musicales (hasta 5)</Label>
+              <div className="flex flex-wrap gap-2">
+                {allMusicGenres.map((genre) => (
+                  <button key={genre} onClick={() => toggleSelection(genre, selectedMusicGenres, setSelectedMusicGenres, 5)}>
+                    <Badge variant={selectedMusicGenres.includes(genre) ? 'default' : 'secondary'} className="cursor-pointer text-sm py-1">
+                      {genre}
                     </Badge>
                   </button>
                 ))}

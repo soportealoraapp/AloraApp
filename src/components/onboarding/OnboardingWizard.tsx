@@ -19,10 +19,10 @@ import { trackEvent } from "@/lib/tracking/client";
 const STEP_LABELS = ['Tu cuenta', 'Tu esencia', 'Tus colores', 'Tu sonrisa', 'Tu seguridad'];
 const STEP_WELCOME = [
     'Crea tu cuenta',
-    'Cuéntanos quién eres',
-    '¿Qué te hace vibrar?',
-    'Muéstranos tu mundo',
-    'Protege tu espacio',
+    'Datos e intención',
+    'Intereses, valores y música',
+    'Fotos y presentación',
+    'Seguridad y verificación',
 ];
 
 export function OnboardingWizard({ initialRef }: { initialRef?: string } = {}) {
@@ -149,7 +149,7 @@ export function OnboardingWizard({ initialRef }: { initialRef?: string } = {}) {
                             {STEP_WELCOME[step - 1]}
                         </p>
                         <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
-                            {step - 1} / {totalSteps - 1}
+                            Paso {step - 1} de {totalSteps - 1}
                         </p>
                     </div>
                 </div>

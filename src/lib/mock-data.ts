@@ -1,7 +1,8 @@
-import { INTERESTS, VALUES, LIFESTYLE_OPTIONS } from '@/lib/constants/preferences';
+import { INTERESTS, VALUES, MUSIC_GENRES, LIFESTYLE_OPTIONS } from '@/lib/constants/preferences';
 
 export const allInterests = [...INTERESTS];
 export const allValues = [...VALUES];
+export const allMusicGenres = [...MUSIC_GENRES];
 export const lifestyleOptions = {
   smoking: [...LIFESTYLE_OPTIONS.smoking],
   drinking: [...LIFESTYLE_OPTIONS.drinking],

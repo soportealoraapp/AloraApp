@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
-import { Match } from '@/lib/domain/types';
+import { ConnectionIntent, Match } from '@/lib/domain/types';
 import { useToast } from './use-toast';
 
 // Temporary local type until Like is defined in domain
@@ -16,7 +16,7 @@ export function useMatches() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
-    const fetchMatches = useCallback(async () => {
+    const fetchMatches = useCallback(async (intent?: ConnectionIntent) => {
         if (!user) {
             setLoading(false);
             return;
@@ -26,8 +26,9 @@ export function useMatches() {
             setLoading(true);
 
             // Cookie auth handles authentication automatically
-            const matchesResponse = await fetch('/api/match/feed');
-            const newMatchesResponse = await fetch('/api/match/new');
+            const suffix = intent ? `?intent=${intent}` : '';
+            const matchesResponse = await fetch(`/api/match/feed${suffix}`);
+            const newMatchesResponse = await fetch(`/api/match/new${suffix}`);
 
             if (!matchesResponse.ok || !newMatchesResponse.ok) {
                 throw new Error('Error al cargar matches');
@@ -50,7 +51,7 @@ export function useMatches() {
         fetchMatches();
     }, [fetchMatches]);
 
-    const sendLike = async (toUserId: string, type: 'like' | 'superlike' | 'pass' = 'like') => {
+    const sendLike = async (toUserId: string, type: 'like' | 'superlike' | 'pass' = 'like', intent: ConnectionIntent = 'dating') => {
         if (!user) return;
 
         try {
@@ -60,7 +61,7 @@ export function useMatches() {
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ toUserId, type }),
+                body: JSON.stringify({ toUserId, type, intent }),
             });
 
             if (!response.ok) {
@@ -75,7 +76,7 @@ export function useMatches() {
                     description: 'Ahora puedes chatear.',
                 });
                 // Refresh matches
-                await fetchMatches();
+                await fetchMatches(intent);
             } else if (type !== 'pass') {
                 toast({
                     title: type === 'superlike' ? '¡Flechado enviado! ✨' : 'Like enviado ❤️',

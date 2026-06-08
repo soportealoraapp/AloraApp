@@ -239,9 +239,14 @@ export async function analyzeMessageSafety(
 
     // Calculate unsafe escalation: progression of risk over conversations
     // Find the match between sender and receiver to get conversation history
-    const [u1, u2] = [senderId, receiverId].sort();
-    const match = await prisma.match.findUnique({
-        where: { user1Id_user2Id: { user1Id: u1, user2Id: u2 } },
+    const match = await prisma.match.findFirst({
+        where: {
+            OR: [
+                { user1Id: senderId, user2Id: receiverId },
+                { user1Id: receiverId, user2Id: senderId },
+            ],
+            isActive: true,
+        },
         select: { id: true }
     });
 

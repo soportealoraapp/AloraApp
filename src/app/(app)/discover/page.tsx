@@ -5,7 +5,8 @@ import { AnimatePresence } from "framer-motion";
 import { FloatingMatchCard } from "@/components/ui/premium/FloatingMatchCard";
 import { MatchScreen } from "@/components/ui/premium/MatchScreen";
 import { Button } from "@/components/ui/button";
-import { Filter, Loader2, RefreshCcw, Sparkles, SlidersHorizontal, RotateCcw, LayoutGrid, CreditCard, X, Heart, CheckCircle, Circle, ChevronRight } from "lucide-react";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Loader2, RefreshCcw, Sparkles, SlidersHorizontal, RotateCcw, LayoutGrid, CreditCard, Heart, Handshake, X, Heart as HeartIcon, CheckCircle, Circle, ChevronRight } from "lucide-react";
 import { DiscoverFilters, Filters } from "@/components/discover/discover-filters";
 import { Card } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
@@ -32,7 +33,9 @@ const DEFAULT_FILTERS: Filters = {
   seeking: 'all',
   verifiedOnly: false,
   interests: [],
-  values: []
+  values: [],
+  musicGenres: [],
+  highCompatibility: false,
 };
 
 const SWIPE_LIMIT = 50;
@@ -54,6 +57,7 @@ export default function DiscoverPage() {
   const [rewinding, setRewinding] = useState(false);
   const [tutorialStep, setTutorialStep] = useState<number | null>(1);
   const [browseMode, setBrowseMode] = useState<'swipe' | 'grid'>('swipe');
+  const [intent, setIntent] = useState<'dating' | 'friendship'>('dating');
 
   const lastSwipeRef = useRef<{ profileId: string; direction: string } | null>(null);
   const sentinelRef = useRef<HTMLDivElement>(null);
@@ -148,6 +152,11 @@ export default function DiscoverPage() {
 
   const currentProfile = profiles[0]?.profile;
   const profilesRef = useRef(profiles);
+
+  useEffect(() => {
+    setFilters(prev => ({ ...prev, intent }));
+    refresh();
+  }, [intent]);
   profilesRef.current = profiles;
 
   const maxRewinds = currentUserProfile?.subscriptionStatus === 'plus' ? 3 : 1;
@@ -198,17 +207,17 @@ export default function DiscoverPage() {
 
     try {
       if (direction === 'right') {
-        track(AnalyticsEvents.LIKE_SENT, { targetUserId: profileToActOn.id });
-        const result = await sendLike(profileToActOn.id, 'like');
+        track(AnalyticsEvents.LIKE_SENT, { targetUserId: profileToActOn.id, intent });
+        const result = await sendLike(profileToActOn.id, 'like', intent);
         if (result?.matched) {
-          track(AnalyticsEvents.MATCH_CREATED, { partnerId: profileToActOn.id });
+          track(AnalyticsEvents.MATCH_CREATED, { partnerId: profileToActOn.id, intent });
           setMatchedProfile(profileToActOn);
           setMatchId((result as any)?.matchId);
           setShowMatchScreen(true);
         }
       } else {
-        track(AnalyticsEvents.PASS_SENT, { targetUserId: profileToActOn.id });
-        await sendLike(profileToActOn.id, 'pass');
+        track(AnalyticsEvents.PASS_SENT, { targetUserId: profileToActOn.id, intent });
+        await sendLike(profileToActOn.id, 'pass', intent);
       }
     } catch (error) {
       console.error("Action failed", error);
@@ -229,8 +238,8 @@ export default function DiscoverPage() {
     setProfiles(remainingProfiles as any);
 
     try {
-      track(AnalyticsEvents.LIKE_SENT, { targetUserId: profileToActOn.id });
-      const result = await sendLike(profileToActOn.id, 'superlike');
+      track(AnalyticsEvents.LIKE_SENT, { targetUserId: profileToActOn.id, intent });
+      const result = await sendLike(profileToActOn.id, 'superlike', intent);
       if (result?.matched) {
         track(AnalyticsEvents.MATCH_CREATED, { partnerId: profileToActOn.id });
         setMatchedProfile(profileToActOn);
@@ -276,7 +285,7 @@ export default function DiscoverPage() {
   };
 
   const handleApplyFilters = (newFilters: Filters) => {
-    setFilters(newFilters);
+    setFilters({ ...newFilters, intent });
     setFilterOpen(false);
     refresh();
   };
@@ -325,14 +334,27 @@ export default function DiscoverPage() {
               subscriptionStatus={currentUserProfile?.subscriptionStatus ?? 'free'}
             />
           </div>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => setBrowseMode(b => b === 'swipe' ? 'grid' : 'swipe')}
-            title={browseMode === 'swipe' ? 'Vista exploración' : 'Vista swipe'}
-          >
-            {browseMode === 'swipe' ? <LayoutGrid className="h-5 w-5 text-muted-foreground" /> : <CreditCard className="h-5 w-5 text-muted-foreground" />}
-          </Button>
+          <Tabs value={browseMode} onValueChange={(v) => setBrowseMode(v as 'swipe' | 'grid')} className="hidden md:block">
+            <TabsList className="h-8">
+              <TabsTrigger value="swipe" className="text-xs px-3 h-7 gap-1">
+                <CreditCard className="h-3.5 w-3.5" /> Swipe
+              </TabsTrigger>
+              <TabsTrigger value="grid" className="text-xs px-3 h-7 gap-1">
+                <LayoutGrid className="h-3.5 w-3.5" /> Explorar
+              </TabsTrigger>
+            </TabsList>
+          </Tabs>
+          <div className="md:hidden flex">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setBrowseMode(b => b === 'swipe' ? 'grid' : 'swipe')}
+              title={browseMode === 'swipe' ? 'Vista exploración' : 'Vista swipe'}
+              className="h-8 w-8"
+            >
+              {browseMode === 'swipe' ? <LayoutGrid className="h-4 w-4 text-muted-foreground" /> : <CreditCard className="h-4 w-4 text-muted-foreground" />}
+            </Button>
+          </div>
           <div className="flex items-center">
             <Button variant="ghost" size="icon" onClick={handleRewind} disabled={!lastSwipeRef.current || rewinding} title={`Rewind: deshace el último swipe (${rewindsRemaining}/${maxRewinds} disponibles)`}>
               <RotateCcw className="h-5 w-5 text-muted-foreground" />
@@ -359,6 +381,19 @@ export default function DiscoverPage() {
           }
           subscriptionStatus={currentUserProfile?.subscriptionStatus ?? 'free'}
         />
+      </div>
+
+      <div className="px-4 pt-2">
+        <Tabs value={intent} onValueChange={(v) => setIntent(v as 'dating' | 'friendship')}>
+          <TabsList className="w-full h-10">
+            <TabsTrigger value="dating" className="flex-1 text-sm gap-1.5 h-8">
+              <HeartIcon className="h-4 w-4" /> Citas
+            </TabsTrigger>
+            <TabsTrigger value="friendship" className="flex-1 text-sm gap-1.5 h-8">
+              <Handshake className="h-4 w-4" /> Amistad
+            </TabsTrigger>
+          </TabsList>
+        </Tabs>
       </div>
 
       {!currentUserProfile?.isVerified && (
@@ -463,10 +498,24 @@ export default function DiscoverPage() {
                       </div>
                     </div>
                     <div className="flex gap-1 p-1.5">
-                      <Button size="sm" variant="ghost" className="flex-1 h-8" onClick={() => handleSwipe('left')}>
+                      <Button size="sm" variant="ghost" className="flex-1 h-8" onClick={async () => {
+                        track(AnalyticsEvents.PASS_SENT, { targetUserId: p.id, intent });
+                        await sendLike(p.id, 'pass', intent);
+                        setProfiles(prev => prev.filter(item => item.profile.id !== p.id));
+                      }}>
                         <X className="h-4 w-4 text-red-500" />
                       </Button>
-                      <Button size="sm" variant="ghost" className="flex-1 h-8" onClick={() => handleSwipe('right')}>
+                      <Button size="sm" variant="ghost" className="flex-1 h-8" onClick={async () => {
+                        track(AnalyticsEvents.LIKE_SENT, { targetUserId: p.id, intent });
+                        const result = await sendLike(p.id, 'like', intent);
+                        setProfiles(prev => prev.filter(item => item.profile.id !== p.id));
+                        if (result?.matched) {
+                          track(AnalyticsEvents.MATCH_CREATED, { partnerId: p.id, intent });
+                          setMatchedProfile(p);
+                          setMatchId((result as any)?.matchId);
+                          setShowMatchScreen(true);
+                        }
+                      }}>
                         <Heart className="h-4 w-4 text-green-500" />
                       </Button>
                     </div>

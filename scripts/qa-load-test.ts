@@ -48,9 +48,9 @@ async function main() {
         for (let i = 0; i < testUserIds.length; i += 2) {
             if (i + 1 < testUserIds.length) {
                 const match = await prisma.match.upsert({
-                    where: { user1Id_user2Id: { user1Id: testUserIds[i], user2Id: testUserIds[i + 1] } },
+                    where: { user1Id_user2Id_intent: { user1Id: testUserIds[i], user2Id: testUserIds[i + 1], intent: 'dating' } },
                     update: {},
-                    create: { user1Id: testUserIds[i], user2Id: testUserIds[i + 1], isActive: true, stage: 'talking', score: 50 },
+                    create: { user1Id: testUserIds[i], user2Id: testUserIds[i + 1], intent: 'dating', isActive: true, stage: 'talking', score: 50 },
                 });
                 testMatchIds.push(match.id);
             }
@@ -99,9 +99,9 @@ async function main() {
                 // Upsert to avoid duplicates
                 for (const item of batch) {
                     await prisma.interaction.upsert({
-                        where: { fromUserId_toUserId: { fromUserId: item.fromUserId, toUserId: item.toUserId } },
+                        where: { fromUserId_toUserId_intent: { fromUserId: item.fromUserId, toUserId: item.toUserId, intent: 'dating' } },
                         update: { type: item.type },
-                        create: item,
+                        create: { ...item, intent: 'dating' },
                     });
                 }
             }
