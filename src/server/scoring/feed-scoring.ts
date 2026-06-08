@@ -14,6 +14,7 @@ export interface ScoredCandidate {
         sharedInterests: number;
         messageResponseRate: number | null;
         lastActiveHours: number | null;
+        highCompatibility: boolean;
     };
 }
 
@@ -117,6 +118,8 @@ export function scoreCandidate(params: ScoreParams): ScoredCandidate {
         totalScore += 15;
     }
 
+    const highCompatibility = totalScore >= 60;
+
     return {
         profile: { ...profile, completenessScore: completeness },
         score: {
@@ -130,6 +133,7 @@ export function scoreCandidate(params: ScoreParams): ScoredCandidate {
             sharedInterests,
             messageResponseRate,
             lastActiveHours: lastActive ? Math.round((now.getTime() - lastActive.getTime()) / (1000 * 60 * 60)) : null,
+            highCompatibility,
         },
     };
 }

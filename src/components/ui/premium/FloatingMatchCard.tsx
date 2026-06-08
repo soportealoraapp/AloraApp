@@ -154,6 +154,15 @@ export function FloatingMatchCard({ profile, onSwipe, onFlechado, compatibility,
                             <Music className="h-3 w-3" /> Voz
                         </motion.div>
                     )}
+                    {(profile as any).latestAnswer && (
+                        <motion.div
+                            initial={{ scale: 0.8, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            className="bg-amber-500/90 backdrop-blur-md text-white px-3 py-1 rounded-full text-[10px] font-bold flex items-center gap-1 border border-amber-300/30 shadow-lg"
+                        >
+                            <MessageCircle className="h-3 w-3" /> Respuesta del día
+                        </motion.div>
+                    )}
                     {!profile.activeNow && profile.lastActiveHours !== null && profile.lastActiveHours !== undefined && (
                         <motion.div
                             initial={{ scale: 0.8, opacity: 0 }}
@@ -179,6 +188,17 @@ export function FloatingMatchCard({ profile, onSwipe, onFlechado, compatibility,
                         {profile.isVerified && <TrustBadge type="verified" />}
                         {(profile.completenessScore ?? 0) >= 90 && <TrustBadge type="complete" />}
                     </div>
+
+                    {(profile as any).latestAnswer && (
+                        <div className="mb-2 bg-white/10 backdrop-blur-sm rounded-xl p-2.5">
+                            <p className="text-[10px] text-white/60 uppercase tracking-wider mb-0.5">
+                                {(profile as any).latestAnswer.category || 'Pregunta del día'}
+                            </p>
+                            <p className="text-white/90 text-xs leading-tight line-clamp-2">
+                                {(profile as any).latestAnswer.answer}
+                            </p>
+                        </div>
+                    )}
 
                     {explanations && explanations.length > 0 && (
                         <div className="mb-3 space-y-0.5">

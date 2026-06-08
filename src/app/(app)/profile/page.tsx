@@ -9,7 +9,7 @@ import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Settings, Edit, Eye, MapPin, Briefcase, Cigarette, GlassWater, Baby, Star, BookOpen, Music, CheckCircle, AlertCircle, ShieldCheck, Shield, Sparkles, ChevronRight, Trophy } from "lucide-react";
+import { Settings, Edit, Eye, MapPin, Briefcase, Cigarette, GlassWater, Baby, Star, BookOpen, Music, CheckCircle, AlertCircle, ShieldCheck, Shield, Sparkles, ChevronRight, Trophy, MessageCircle } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -168,6 +168,25 @@ export default function ProfilePage() {
             <Card className="rounded-3xl border-none shadow-sm bg-muted/30">
               <CardContent className="p-6">
                 <p className="text-foreground leading-relaxed whitespace-pre-wrap">{profile.bio}</p>
+              </CardContent>
+            </Card>
+          )}
+
+          {(profile as any).latestAnswer && (
+            <Card className="rounded-3xl border shadow-sm bg-amber-50/30">
+              <CardContent className="p-5">
+                <div className="flex items-center gap-2 mb-2">
+                  <MessageCircle className="h-4 w-4 text-amber-600" />
+                  <h3 className="font-semibold text-sm text-amber-800">
+                    {(profile as any).latestAnswer.category || 'Respuesta del día'}
+                  </h3>
+                </div>
+                <p className="text-sm text-foreground leading-relaxed">
+                  {(profile as any).latestAnswer.answer}
+                </p>
+                <p className="text-[10px] text-muted-foreground mt-2">
+                  {new Date((profile as any).latestAnswer.createdAt).toLocaleDateString()}
+                </p>
               </CardContent>
             </Card>
           )}

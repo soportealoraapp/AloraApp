@@ -66,8 +66,9 @@ export default function ProfileEditPage() {
     const [lookingFor, setLookingFor] = useState("");
     const [cropIndex, setCropIndex] = useState<number | null>(null);
     const [cropImageSrc, setCropImageSrc] = useState<string | null>(null);
-    const [voiceIntroUrl, setVoiceIntroUrl] = useState<string | null>(null);
-    const [voiceIntroDuration, setVoiceIntroDuration] = useState<number | null>(null);
+    const [voiceIntroUrl, setVoiceIntroUrl] = useState<string | undefined>(undefined);
+    const [voiceIntroDuration, setVoiceIntroDuration] = useState<number | undefined>(undefined);
+    const [voiceIntroChanged, setVoiceIntroChanged] = useState(false);
 
     useEffect(() => {
         if (currentProfile) {
@@ -91,6 +92,9 @@ export default function ProfileEditPage() {
             setLatitude((currentProfile as any).latitude || null);
             setLongitude((currentProfile as any).longitude || null);
             setLookingFor((currentProfile as any).lookingFor || "");
+            setVoiceIntroUrl((currentProfile as any).voiceIntro ?? undefined);
+            setVoiceIntroDuration((currentProfile as any).voiceIntroDuration ?? undefined);
+            setVoiceIntroChanged(false);
         }
     }, [currentProfile]);
 
@@ -141,14 +145,26 @@ export default function ProfileEditPage() {
         setCropImageSrc(photos[index]);
     };
 
-    const handleCropComplete = (blob: Blob) => {
+    const handleCropComplete = async (blob: Blob) => {
         if (cropIndex === null) return;
-        const url = URL.createObjectURL(blob);
-        const newPhotos = [...photos];
-        newPhotos[cropIndex] = url;
-        setPhotos(newPhotos);
-        setCropIndex(null);
-        setCropImageSrc(null);
+        try {
+            const { uploadFiles } = await import('@/utils/uploadthing');
+            const file = new File([blob], `crop-${Date.now()}.jpg`, { type: 'image/jpeg' });
+            const result = await uploadFiles('imageUploader', { files: [file] });
+            const permanentUrl = (result as any)[0]?.url;
+            if (permanentUrl) {
+                const newPhotos = [...photos];
+                newPhotos[cropIndex] = permanentUrl;
+                setPhotos(newPhotos);
+                toast({ title: "Foto recortada", description: "El cambio se guardará al confirmar" });
+            }
+        } catch (error) {
+            console.error("Error uploading cropped photo:", error);
+            toast({ title: "Error al recortar", description: "No se pudo procesar el recorte", variant: "destructive" });
+        } finally {
+            setCropIndex(null);
+            setCropImageSrc(null);
+        }
     };
 
     const toggleInterest = (interest: string) => {
@@ -207,8 +223,10 @@ export default function ProfileEditPage() {
                 latitude: latitude ?? undefined,
                 longitude: longitude ?? undefined,
                 lookingFor,
-                ...(voiceIntroUrl !== null ? { voiceIntro: voiceIntroUrl } : {}),
-                ...(voiceIntroDuration !== null ? { voiceIntroDuration } : {}),
+                ...(voiceIntroChanged ? {
+                    ...(voiceIntroUrl !== undefined ? { voiceIntro: voiceIntroUrl } : { voiceIntro: undefined }),
+                    ...(voiceIntroDuration !== undefined ? { voiceIntroDuration } : { voiceIntroDuration: undefined }),
+                } : {}),
             });
 
             await refreshProfile();
@@ -553,16 +571,18 @@ export default function ProfileEditPage() {
                             Graba una presentación de máximo 30 segundos para que otros te conozcan
                         </p>
                         <VoiceIntro
-                            audioUrl={(currentProfile as any)?.voiceIntro}
-                            duration={(currentProfile as any)?.voiceIntroDuration}
+                            audioUrl={voiceIntroUrl}
+                            duration={voiceIntroDuration}
                             onSave={(url, dur) => {
                                 setVoiceIntroUrl(url);
                                 setVoiceIntroDuration(dur);
+                                setVoiceIntroChanged(true);
                                 trackEvent('voice_intro_saved', { duration: dur });
                             }}
                             onDelete={() => {
-                                setVoiceIntroUrl(null);
-                                setVoiceIntroDuration(null);
+                                setVoiceIntroUrl(undefined);
+                                setVoiceIntroDuration(undefined);
+                                setVoiceIntroChanged(true);
                             }}
                         />
                     </CardContent>

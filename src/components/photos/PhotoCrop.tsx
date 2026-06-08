@@ -29,6 +29,7 @@ export function PhotoCrop({ isOpen, onClose, imageSrc, onCrop }: PhotoCropProps)
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const imageRef = useRef<HTMLImageElement | null>(null);
     const containerRef = useRef<HTMLDivElement>(null);
+    const displayInfoRef = useRef({ offsetX: 0, offsetY: 0, scale: 1 });
 
     const currentRatio = ASPECT_RATIOS.find(r => r.value === aspectRatio);
 
@@ -46,6 +47,10 @@ export function PhotoCrop({ isOpen, onClose, imageSrc, onCrop }: PhotoCropProps)
             const scale = Math.min(containerW / img.width, containerH / img.height);
             const displayW = img.width * scale;
             const displayH = img.height * scale;
+            const offsetX = (containerW - displayW) / 2;
+            const offsetY = (containerH - displayH) / 2;
+
+            displayInfoRef.current = { offsetX, offsetY, scale };
 
             let cropW: number, cropH: number;
             if (currentRatio?.ratio) {
@@ -62,8 +67,8 @@ export function PhotoCrop({ isOpen, onClose, imageSrc, onCrop }: PhotoCropProps)
             }
 
             setCropBox({
-                x: (containerW - cropW) / 2,
-                y: (containerH - cropH) / 2,
+                x: offsetX + (displayW - cropW) / 2,
+                y: offsetY + (displayH - cropH) / 2,
                 width: cropW,
                 height: cropH,
             });
@@ -83,9 +88,11 @@ export function PhotoCrop({ isOpen, onClose, imageSrc, onCrop }: PhotoCropProps)
 
         let newX = e.clientX - dragStart.x;
         let newY = e.clientY - dragStart.y;
+        const containerW = container.clientWidth;
+        const containerH = 300;
 
-        newX = Math.max(0, Math.min(newX, container.clientWidth - cropBox.width));
-        newY = Math.max(0, Math.min(newY, 300 - cropBox.height));
+        newX = Math.max(0, Math.min(newX, containerW - cropBox.width));
+        newY = Math.max(0, Math.min(newY, containerH - cropBox.height));
 
         setCropBox(prev => ({ ...prev, x: newX, y: newY }));
     }, [isDragging, dragStart, cropBox.width, cropBox.height]);
@@ -101,26 +108,25 @@ export function PhotoCrop({ isOpen, onClose, imageSrc, onCrop }: PhotoCropProps)
 
         setLoading(true);
 
-        const container = containerRef.current;
-        if (!container) return;
+        const { offsetX, offsetY, scale } = displayInfoRef.current;
 
-        const containerW = container.clientWidth;
-        const containerH = 300;
-        const scaleX = img.width / containerW;
-        const scaleY = img.height / containerH;
+        const actualX = (cropBox.x - offsetX) / scale;
+        const actualY = (cropBox.y - offsetY) / scale;
+        const actualW = cropBox.width / scale;
+        const actualH = cropBox.height / scale;
 
-        canvas.width = cropBox.width * scaleX;
-        canvas.height = cropBox.height * scaleY;
+        canvas.width = actualW;
+        canvas.height = actualH;
 
         const ctx = canvas.getContext('2d');
         if (!ctx) return;
 
         ctx.drawImage(
             img,
-            cropBox.x * scaleX,
-            cropBox.y * scaleY,
-            cropBox.width * scaleX,
-            cropBox.height * scaleY,
+            actualX,
+            actualY,
+            actualW,
+            actualH,
             0,
             0,
             canvas.width,

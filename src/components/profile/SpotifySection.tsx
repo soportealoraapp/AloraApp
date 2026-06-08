@@ -2,7 +2,7 @@
 
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Music, ExternalLink, Headphones, Disc3 } from 'lucide-react';
+import { Music, ExternalLink, Headphones, Disc3, RefreshCw } from 'lucide-react';
 import { useState } from 'react';
 import Image from 'next/image';
 
@@ -38,6 +38,7 @@ interface SpotifySectionProps {
 
 export function SpotifySection({ spotify, isOwn }: SpotifySectionProps) {
   const [showEmbed, setShowEmbed] = useState(false);
+  const [syncing, setSyncing] = useState(false);
 
   if (!spotify || (!spotify.topTracks?.length && !spotify.topArtists?.length)) {
     if (!isOwn) return null;
@@ -77,6 +78,26 @@ export function SpotifySection({ spotify, isOwn }: SpotifySectionProps) {
             <span className="text-[10px] text-muted-foreground ml-auto">
               Sincronizado {new Date(spotify.lastSyncedAt).toLocaleDateString()}
             </span>
+          )}
+          {isOwn && (
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-6 w-6"
+              onClick={async () => {
+                setSyncing(true);
+                try {
+                  const res = await fetch('/api/spotify/sync', { method: 'POST' });
+                  if (res.ok) {
+                    window.location.reload();
+                  }
+                } catch {}
+                setSyncing(false);
+              }}
+              disabled={syncing}
+            >
+              <RefreshCw className={`h-3.5 w-3.5 ${syncing ? 'animate-spin' : ''}`} />
+            </Button>
           )}
         </div>
 

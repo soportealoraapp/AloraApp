@@ -22,6 +22,7 @@ export interface FeedItem {
         sharedInterests: number;
         messageResponseRate: number | null;
         lastActiveHours: number | null;
+        highCompatibility: boolean;
     };
 }
 
@@ -354,6 +355,18 @@ export async function getDynamicFeed(
             }
         }
 
+        const candidateDailyAnswers = resultCandidateIds.length > 0 ? await prisma.dailyAnswer.findMany({
+            where: { userId: { in: resultCandidateIds } },
+            orderBy: { createdAt: 'desc' },
+            include: { question: { select: { question: true, category: true } } },
+        }) : [];
+        const latestAnswerMap = new Map<string, typeof candidateDailyAnswers[0]>();
+        for (const da of candidateDailyAnswers) {
+            if (!latestAnswerMap.has(da.userId)) {
+                latestAnswerMap.set(da.userId, da);
+            }
+        }
+
         const currentUserInterests = currentUser.profile.interests || [];
         const now = new Date();
         const fiveMinutesAgo = new Date(now.getTime() - 5 * 60 * 1000);
@@ -423,6 +436,16 @@ export async function getDynamicFeed(
                 const completeness = calculateCompleteness(profile);
                 const deepScore = await getCompatibilityScore(currentUserId, profile.id, viewerData);
                 const messagesSent = messagesSentMap.get(cp.userId) || 0;
+                const dailyAnswer = latestAnswerMap.get(cp.userId);
+                if (dailyAnswer) {
+                    (profile as any).latestAnswer = {
+                        questionId: dailyAnswer.questionId,
+                        question: dailyAnswer.question.question,
+                        category: dailyAnswer.question.category,
+                        answer: dailyAnswer.answer,
+                        createdAt: dailyAnswer.createdAt.toISOString(),
+                    };
+                }
 
                 return scoreCandidate({
                     cp: cp as any,
@@ -440,12 +463,16 @@ export async function getDynamicFeed(
             })
         );
 
-        const visible = scoredItems.filter(item =>
+        let visible = scoredItems.filter(item =>
             item.profile.photos &&
             item.profile.photos.length >= 1 &&
             !(item.profile as any).incomplete_media &&
             (item.profile.completenessScore ?? 0) >= 40
         );
+
+        if (filters?.highCompatibility) {
+            visible = visible.filter(item => item.signals.highCompatibility);
+        }
 
         visible.sort((a, b) => b.score.total - a.score.total);
 

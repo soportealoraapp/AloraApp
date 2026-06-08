@@ -1,4 +1,4 @@
-import { Badge } from '@/components/ui/badge';
+import { badgeVariants } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 
 const INTEREST_EMOJIS: Record<string, string> = {
@@ -39,20 +39,21 @@ interface BadgeChipProps {
 }
 
 export function BadgeChip({ label, type, variant, className, onClick }: BadgeChipProps) {
+  const Tag = onClick ? 'button' : 'span';
   return (
-    <button key={label} onClick={onClick} disabled={!onClick} type="button">
-      <Badge
-        variant={variant ?? (type === 'value' ? 'outline' : 'secondary')}
-        className={cn(
-          'rounded-full text-sm py-1 gap-1',
-          onClick && 'cursor-pointer',
-          className
-        )}
-      >
-        <span className="text-xs">{getEmoji(label, type)}</span>
-        {label}
-      </Badge>
-    </button>
+    <Tag
+      onClick={onClick}
+      type={onClick ? 'button' : undefined}
+      className={cn(
+        badgeVariants({ variant: variant ?? (type === 'value' ? 'outline' : 'secondary') }),
+        'rounded-full text-sm py-1 gap-1 inline-flex items-center',
+        onClick && 'cursor-pointer hover:opacity-80',
+        className
+      )}
+    >
+      <span className="text-xs">{getEmoji(label, type)}</span>
+      {label}
+    </Tag>
   );
 }
 

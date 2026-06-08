@@ -19,8 +19,8 @@ interface DailyQuestionData {
 const CATEGORY_LABELS: Record<string, string> = {
     values: 'Valores',
     goals: 'Metas',
-    communication: 'Comunicacion',
-    connection: 'Conexion',
+    communication: 'Comunicación',
+    connection: 'Conexión',
     lifestyle: 'Estilo de vida',
     growth: 'Crecimiento',
     dating: 'Citas',

@@ -40,6 +40,28 @@ const DEFAULT_FILTERS: Filters = {
 
 const SWIPE_LIMIT = 50;
 
+function countActiveFilters(f: Filters): number {
+  let count = 0;
+  if (f.ageRange && (f.ageRange[0] !== 18 || f.ageRange[1] !== 60)) count++;
+  if (f.distance && f.distance !== 100) count++;
+  if (f.seeking && f.seeking !== 'all') count++;
+  if (f.verifiedOnly) count++;
+  if (f.interests && f.interests.length > 0) count++;
+  if (f.values && f.values.length > 0) count++;
+  if (f.musicGenres && f.musicGenres.length > 0) count++;
+  if (f.smoking) count++;
+  if (f.drinking) count++;
+  if (f.children) count++;
+  if (f.education) count++;
+  if (f.religion) count++;
+  if (f.withVoiceIntro) count++;
+  if (f.withQuiz) count++;
+  if (f.featuredOnly) count++;
+  if (f.highCompatibility) count++;
+  if (f.activeToday) count++;
+  return count;
+}
+
 export default function DiscoverPage() {
   const { profile: currentUserProfile } = useAuth();
   const [filters, setFilters] = useState<Filters>(DEFAULT_FILTERS);
@@ -155,7 +177,6 @@ export default function DiscoverPage() {
 
   useEffect(() => {
     setFilters(prev => ({ ...prev, intent }));
-    refresh();
   }, [intent]);
   profilesRef.current = profiles;
 
@@ -202,7 +223,8 @@ export default function DiscoverPage() {
     setSwipeCount(prev => prev + 1);
     toast({ title: direction === 'right' ? 'Like enviado' : 'Descartado', description: direction === 'right' ? `Le gustas a ${profileToActOn.displayName}?` : 'Perfil descartado.' });
 
-    const remainingProfiles = profiles.slice(1);
+    const currentProfiles = profilesRef.current;
+    const remainingProfiles = currentProfiles.slice(1);
     setProfiles(remainingProfiles as any);
 
     try {
@@ -361,8 +383,13 @@ export default function DiscoverPage() {
             </Button>
             <span className="text-[10px] text-muted-foreground font-bold -ml-1.5">{rewindsRemaining}</span>
           </div>
-          <Button variant="ghost" size="icon" onClick={() => setFilterOpen(true)} title="Filtros de búsqueda">
+          <Button variant="ghost" size="icon" onClick={() => setFilterOpen(true)} title="Filtros de búsqueda" className="relative">
             <SlidersHorizontal className="h-5 w-5 text-muted-foreground" />
+            {countActiveFilters(filters) > 0 && (
+              <span className="absolute -top-0.5 -right-0.5 bg-primary text-primary-foreground text-[9px] font-bold rounded-full w-4 h-4 flex items-center justify-center shadow-sm border border-background">
+                {countActiveFilters(filters)}
+              </span>
+            )}
           </Button>
           <Button variant="ghost" size="icon" onClick={() => refresh()} title="Refrescar perfiles">
             <RefreshCcw className="h-5 w-5 text-muted-foreground" />
