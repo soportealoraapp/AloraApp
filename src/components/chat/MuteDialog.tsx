@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { BellOff, Clock } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -41,6 +41,7 @@ export function MuteDialog({ isOpen, onClose, onMute, isMuted }: MuteDialogProps
                         <BellOff className="h-5 w-5" />
                         {isMuted ? 'Gestionar silencio' : 'Silenciar conversación'}
                     </DialogTitle>
+                    <DialogDescription className="sr-only">Silenciar notificaciones de esta conversación</DialogDescription>
                 </DialogHeader>
 
                 {isMuted ? (

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef, useCallback, useEffect } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Loader2, ZoomIn, ZoomOut } from 'lucide-react';
 
@@ -319,6 +319,7 @@ export function PhotoCrop({ isOpen, onClose, imageSrc, onCrop }: PhotoCropProps)
             <DialogContent className="sm:max-w-md">
                 <DialogHeader>
                     <DialogTitle>Recortar foto</DialogTitle>
+                    <DialogDescription className="sr-only">Ajusta el área de recorte de tu foto</DialogDescription>
                 </DialogHeader>
 
                 <div className="space-y-4">

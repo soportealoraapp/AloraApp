@@ -7,6 +7,7 @@ import {
   SheetContent,
   SheetHeader,
   SheetTitle,
+  SheetDescription,
   SheetFooter,
 } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
@@ -168,6 +169,7 @@ export function DiscoverFilters({ open, onOpenChange, onApplyFilters, initialFil
       <SheetContent className="flex flex-col">
         <SheetHeader>
           <SheetTitle className="font-headline">Filtros de Búsqueda</SheetTitle>
+          <SheetDescription className="sr-only">Ajusta los filtros para encontrar personas compatibles</SheetDescription>
         </SheetHeader>
         <ScrollArea className="flex-1 -mx-6 px-6">
           <div className="space-y-8 py-4">

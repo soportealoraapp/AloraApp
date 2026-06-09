@@ -170,7 +170,10 @@ export default function DiscoverPage() {
             userLng: pos.coords.longitude
           }));
         },
-        () => { /* User denied geolocation */ },
+        () => {
+          console.warn('Geolocation denied or unavailable — using default distance filter');
+          toast({ title: 'Ubicación no disponible', description: 'Usando distancia predeterminada de 100 km' });
+        },
         { enableHighAccuracy: false, timeout: 10000 }
       );
     }
