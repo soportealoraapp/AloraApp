@@ -48,6 +48,7 @@ next-env.d.ts
 .env.production
 .env.development
 .env.test
+.env.example
 
 # Firebase / service account keys
 service-account*.json
