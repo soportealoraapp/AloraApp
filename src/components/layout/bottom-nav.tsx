@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { MessageSquare, User, Compass, Bell, Heart } from 'lucide-react';
+import { MessageSquare, User, Compass, Bell } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { motion } from 'framer-motion';
 import { Logo } from '../logo';
@@ -10,8 +10,7 @@ import { useNotifications } from '@/hooks/use-notifications';
 
 const navItems = [
   { href: '/discover', icon: Compass, label: 'Descubrir' },
-  { href: '/matches', icon: Heart, label: 'Matches' },
-  { href: '/chat', icon: MessageSquare, label: 'Chat' },
+  { href: '/chat', icon: MessageSquare, label: 'Mensajes' },
   { href: '/notifications', icon: Bell, label: 'Actividad' },
   { href: '/profile', icon: User, label: 'Perfil' },
 ];

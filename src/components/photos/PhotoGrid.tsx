@@ -19,6 +19,16 @@ export function PhotoGrid({ photos, onReorder, onRemove, onCrop, maxPhotos = 6 }
     const [dragIndex, setDragIndex] = useState<number | null>(null);
     const [overIndex, setOverIndex] = useState<number | null>(null);
     const dragRef = useRef<number | null>(null);
+    const touchStartRef = useRef<{ x: number; y: number; index: number } | null>(null);
+    const longPressTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+    const swapPhotos = useCallback((from: number, to: number) => {
+        if (from === to) return;
+        const newPhotos = [...photos];
+        const [removed] = newPhotos.splice(from, 1);
+        newPhotos.splice(to, 0, removed);
+        onReorder(newPhotos);
+    }, [photos, onReorder]);
 
     const handleDragStart = useCallback((e: React.DragEvent, index: number) => {
         dragRef.current = index;
@@ -37,18 +47,55 @@ export function PhotoGrid({ photos, onReorder, onRemove, onCrop, maxPhotos = 6 }
         e.preventDefault();
         const fromIndex = dragRef.current;
         if (fromIndex === null || fromIndex === toIndex) return;
-
-        const newPhotos = [...photos];
-        const [removed] = newPhotos.splice(fromIndex, 1);
-        newPhotos.splice(toIndex, 0, removed);
-        onReorder(newPhotos);
-
+        swapPhotos(fromIndex, toIndex);
         setDragIndex(null);
         setOverIndex(null);
         dragRef.current = null;
-    }, [photos, onReorder]);
+    }, [swapPhotos]);
 
     const handleDragEnd = useCallback(() => {
+        setDragIndex(null);
+        setOverIndex(null);
+        dragRef.current = null;
+    }, []);
+
+    const handleTouchStart = useCallback((e: React.TouchEvent, index: number) => {
+        const touch = e.touches[0];
+        touchStartRef.current = { x: touch.clientX, y: touch.clientY, index };
+        longPressTimer.current = setTimeout(() => {
+            if (touchStartRef.current) {
+                setDragIndex(touchStartRef.current.index);
+                dragRef.current = touchStartRef.current.index;
+            }
+        }, 200);
+    }, []);
+
+    const handleTouchMove = useCallback((e: React.TouchEvent) => {
+        if (dragIndex === null || !touchStartRef.current) return;
+        e.preventDefault();
+        const touch = e.touches[0];
+        const touchEl = document.elementFromPoint(touch.clientX, touch.clientY);
+        if (touchEl) {
+            const photoEl = touchEl.closest('[data-photo-index]');
+            if (photoEl) {
+                const idx = parseInt(photoEl.getAttribute('data-photo-index') || '', 10);
+                if (!isNaN(idx) && idx !== dragIndex) {
+                    setOverIndex(idx);
+                    swapPhotos(dragIndex, idx);
+                    setDragIndex(idx);
+                    dragRef.current = idx;
+                    setOverIndex(null);
+                }
+            }
+        }
+    }, [dragIndex, swapPhotos]);
+
+    const handleTouchEnd = useCallback(() => {
+        if (longPressTimer.current) {
+            clearTimeout(longPressTimer.current);
+            longPressTimer.current = null;
+        }
+        touchStartRef.current = null;
         setDragIndex(null);
         setOverIndex(null);
         dragRef.current = null;
@@ -59,20 +106,24 @@ export function PhotoGrid({ photos, onReorder, onRemove, onCrop, maxPhotos = 6 }
             {photos.map((photo, index) => (
                 <div
                     key={`${photo}-${index}`}
+                    data-photo-index={index}
                     draggable
                     onDragStart={(e) => handleDragStart(e, index)}
                     onDragOver={(e) => handleDragOver(e, index)}
                     onDrop={(e) => handleDrop(e, index)}
                     onDragEnd={handleDragEnd}
+                    onTouchStart={(e) => handleTouchStart(e, index)}
+                    onTouchMove={handleTouchMove}
+                    onTouchEnd={handleTouchEnd}
                     className={cn(
-                        "relative aspect-square rounded-lg overflow-hidden group cursor-grab active:cursor-grabbing transition-all",
-                        dragIndex === index && "opacity-50 scale-95",
+                        "relative aspect-square rounded-lg overflow-hidden group transition-all",
+                        dragIndex === index ? "opacity-50 scale-95 z-10" : "cursor-grab active:cursor-grabbing",
                         overIndex === index && dragIndex !== index && "ring-2 ring-primary ring-offset-2"
                     )}
                 >
-                    <Image src={photo} alt={`Foto ${index + 1}`} fill className="object-cover" />
+                    <Image src={photo} alt={`Foto ${index + 1}`} fill className="object-cover pointer-events-none" />
 
-                    <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-1">
+                    <div className="absolute inset-0 bg-black/50 md:opacity-0 md:group-hover:opacity-100 transition-opacity flex items-center justify-center gap-1">
                         <Button
                             size="sm"
                             variant="secondary"
@@ -108,7 +159,7 @@ export function PhotoGrid({ photos, onReorder, onRemove, onCrop, maxPhotos = 6 }
                     )}
 
                     {index > 0 && (
-                        <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity md:group-hover:opacity-100">
                             <Badge variant="secondary" className="text-[10px] py-0 px-1.5">
                                 {index + 1}
                             </Badge>

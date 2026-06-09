@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
 import { useProfile } from "@/hooks/use-profile";
@@ -44,6 +44,11 @@ export default function ProfileEditPage() {
 
     const [loading, setLoading] = useState(false);
     const [uploading, setUploading] = useState(false);
+    const swipeBackRef = useRef({ startX: 0, startY: 0 });
+    const goBack = useCallback(() => {
+        if (isDirtyRef.current && !window.confirm('Tienes cambios sin guardar. ¿Estás seguro de salir?')) return;
+        router.back();
+    }, [router]);
     const [displayName, setDisplayName] = useState("");
     const [city, setCity] = useState("");
     const [bio, setBio] = useState("");
@@ -69,6 +74,7 @@ export default function ProfileEditPage() {
     const [voiceIntroUrl, setVoiceIntroUrl] = useState<string | undefined>(undefined);
     const [voiceIntroDuration, setVoiceIntroDuration] = useState<number | undefined>(undefined);
     const [voiceIntroChanged, setVoiceIntroChanged] = useState(false);
+    const isDirtyRef = useRef(false);
 
     useEffect(() => {
         if (currentProfile) {
@@ -98,6 +104,17 @@ export default function ProfileEditPage() {
         }
     }, [currentProfile]);
 
+    useEffect(() => {
+        const handler = (e: BeforeUnloadEvent) => {
+            if (isDirtyRef.current) {
+                e.preventDefault();
+                e.returnValue = '';
+            }
+        };
+        window.addEventListener('beforeunload', handler);
+        return () => window.removeEventListener('beforeunload', handler);
+    }, []);
+
     const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const files = e.target.files;
         if (!files || !user) return;
@@ -119,6 +136,7 @@ export default function ProfileEditPage() {
             });
             const newUrls = result.map((r: any) => r.url);
             setPhotos([...photos, ...newUrls]);
+            markDirty();
 
             toast({
                 title: "Fotos subidas",
@@ -136,7 +154,10 @@ export default function ProfileEditPage() {
         }
     };
 
+    const markDirty = () => { isDirtyRef.current = true; };
+
     const removePhoto = (index: number) => {
+        markDirty();
         setPhotos(photos.filter((_, i) => i !== index));
     };
 
@@ -156,6 +177,7 @@ export default function ProfileEditPage() {
                 const newPhotos = [...photos];
                 newPhotos[cropIndex] = permanentUrl;
                 setPhotos(newPhotos);
+                markDirty();
                 toast({ title: "Foto recortada", description: "El cambio se guardará al confirmar" });
             }
         } catch (error) {
@@ -224,12 +246,13 @@ export default function ProfileEditPage() {
                 longitude: longitude ?? undefined,
                 lookingFor,
                 ...(voiceIntroChanged ? {
-                    ...(voiceIntroUrl !== undefined ? { voiceIntro: voiceIntroUrl } : { voiceIntro: undefined }),
-                    ...(voiceIntroDuration !== undefined ? { voiceIntroDuration } : { voiceIntroDuration: undefined }),
+                    voiceIntro: voiceIntroUrl ?? null,
+                    voiceIntroDuration: voiceIntroDuration ?? null,
                 } : {}),
-            });
+            } as any);
 
             await refreshProfile();
+            isDirtyRef.current = false;
 
             toast({
                 title: "Perfil actualizado",
@@ -262,10 +285,22 @@ export default function ProfileEditPage() {
         );
     }
 
+    const handleTouchStart = (e: React.TouchEvent) => {
+        swipeBackRef.current = { startX: e.touches[0].clientX, startY: e.touches[0].clientY };
+    };
+
+    const handleTouchEnd = (e: React.TouchEvent) => {
+        const dx = e.changedTouches[0].clientX - swipeBackRef.current.startX;
+        const dy = e.changedTouches[0].clientY - swipeBackRef.current.startY;
+        if (dx > 80 && Math.abs(dy) < 60) {
+            goBack();
+        }
+    };
+
     return (
-        <div className="md:pl-60">
+        <div className="md:pl-60" onTouchStart={handleTouchStart} onTouchEnd={handleTouchEnd}>
             <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b bg-background/80 px-4 backdrop-blur-sm sm:px-6">
-                <Button variant="ghost" size="icon" onClick={() => router.back()}>
+                <Button variant="ghost" size="icon" onClick={goBack}>
                     <ArrowLeft className="h-5 w-5" />
                 </Button>
                 <h1 className="text-xl font-semibold md:text-2xl font-headline">Editar Perfil</h1>
@@ -577,12 +612,14 @@ export default function ProfileEditPage() {
                                 setVoiceIntroUrl(url);
                                 setVoiceIntroDuration(dur);
                                 setVoiceIntroChanged(true);
+                                markDirty();
                                 trackEvent('voice_intro_saved', { duration: dur });
                             }}
                             onDelete={() => {
                                 setVoiceIntroUrl(undefined);
                                 setVoiceIntroDuration(undefined);
                                 setVoiceIntroChanged(true);
+                                markDirty();
                             }}
                         />
                     </CardContent>

@@ -80,11 +80,15 @@ export default function DiscoverPage() {
   const [tutorialStep, setTutorialStep] = useState<number | null>(1);
   const [browseMode, setBrowseMode] = useState<'swipe' | 'grid'>('swipe');
   const [intent, setIntent] = useState<'dating' | 'friendship'>('dating');
+  const [intentChanging, setIntentChanging] = useState(false);
 
   const lastSwipeRef = useRef<{ profileId: string; direction: string } | null>(null);
   const sentinelRef = useRef<HTMLDivElement>(null);
   const geoRequestedRef = useRef(false);
   const dailyQuestionRef = useRef<HTMLDivElement>(null);
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const [pullToRefresh, setPullToRefresh] = useState(0);
+  const pullStartRef = useRef(0);
 
   const [activationScore, setActivationScore] = useState<number | null>(null);
   const [activationTasks, setActivationTasks] = useState<{ id: string; title: string; completed: boolean; rewardText: string }[]>([]);
@@ -178,6 +182,13 @@ export default function DiscoverPage() {
   useEffect(() => {
     setFilters(prev => ({ ...prev, intent }));
   }, [intent]);
+
+  useEffect(() => {
+    if (!loading && intentChanging) {
+      setIntentChanging(false);
+    }
+  }, [loading, intentChanging]);
+
   profilesRef.current = profiles;
 
   const maxRewinds = currentUserProfile?.subscriptionStatus === 'plus' ? 3 : 1;
@@ -205,7 +216,8 @@ export default function DiscoverPage() {
   }, [hasMore, loadingMore, loading, loadMore]);
 
   const handleSwipe = async (direction: 'left' | 'right') => {
-    if (!currentProfile || !currentUserProfile) return;
+    const profileToActOn = profilesRef.current[0]?.profile;
+    if (!profileToActOn || !currentUserProfile) return;
 
     if (swipeCount >= SWIPE_LIMIT) {
       toast({
@@ -216,12 +228,9 @@ export default function DiscoverPage() {
       return;
     }
 
-    const profileToActOn = currentProfile;
     const previousProfiles = profilesRef.current;
 
-    lastSwipeRef.current = { profileId: profileToActOn.id, direction };
     setSwipeCount(prev => prev + 1);
-    toast({ title: direction === 'right' ? 'Like enviado' : 'Descartado', description: direction === 'right' ? `Le gustas a ${profileToActOn.displayName}?` : 'Perfil descartado.' });
 
     const currentProfiles = profilesRef.current;
     const remainingProfiles = currentProfiles.slice(1);
@@ -231,6 +240,8 @@ export default function DiscoverPage() {
       if (direction === 'right') {
         track(AnalyticsEvents.LIKE_SENT, { targetUserId: profileToActOn.id, intent });
         const result = await sendLike(profileToActOn.id, 'like', intent);
+        lastSwipeRef.current = { profileId: profileToActOn.id, direction };
+        toast({ title: 'Like enviado', description: `Le gustas a ${profileToActOn.displayName}?` });
         if (result?.matched) {
           track(AnalyticsEvents.MATCH_CREATED, { partnerId: profileToActOn.id, intent });
           setMatchedProfile(profileToActOn);
@@ -240,28 +251,32 @@ export default function DiscoverPage() {
       } else {
         track(AnalyticsEvents.PASS_SENT, { targetUserId: profileToActOn.id, intent });
         await sendLike(profileToActOn.id, 'pass', intent);
+        lastSwipeRef.current = { profileId: profileToActOn.id, direction };
+        toast({ title: 'Descartado', description: 'Perfil descartado.' });
       }
     } catch (error) {
       console.error("Action failed", error);
       setProfiles(previousProfiles as any);
+      lastSwipeRef.current = null;
       toast({ title: "Error", description: "No se pudo procesar la acción. Perfil restaurado.", variant: "destructive" });
     }
   };
 
   const handleFlechado = async () => {
-    if (!currentProfile || !currentUserProfile) return;
+    const profileToActOn = profilesRef.current[0]?.profile;
+    if (!profileToActOn || !currentUserProfile) return;
 
-    const profileToActOn = currentProfile;
-    lastSwipeRef.current = { profileId: profileToActOn.id, direction: 'flechado' };
+    const previousProfiles = profilesRef.current;
     setSwipeCount(prev => prev + 1);
-    toast({ title: '¡Flechado enviado!', description: `${profileToActOn.displayName} lo recibirá como superlike.` });
 
-    const remainingProfiles = profiles.slice(1);
+    const remainingProfiles = profilesRef.current.slice(1);
     setProfiles(remainingProfiles as any);
 
     try {
       track(AnalyticsEvents.LIKE_SENT, { targetUserId: profileToActOn.id, intent });
       const result = await sendLike(profileToActOn.id, 'superlike', intent);
+      lastSwipeRef.current = { profileId: profileToActOn.id, direction: 'flechado' };
+      toast({ title: '¡Flechado enviado!', description: `${profileToActOn.displayName} lo recibirá como superlike.` });
       if (result?.matched) {
         track(AnalyticsEvents.MATCH_CREATED, { partnerId: profileToActOn.id });
         setMatchedProfile(profileToActOn);
@@ -270,6 +285,8 @@ export default function DiscoverPage() {
       }
     } catch (error) {
       console.error("Flechado failed", error);
+      setProfiles(previousProfiles as any);
+      lastSwipeRef.current = null;
       toast({ title: "Error", description: "No se pudo enviar el Flechado.", variant: "destructive" });
     }
   };
@@ -309,7 +326,6 @@ export default function DiscoverPage() {
   const handleApplyFilters = (newFilters: Filters) => {
     setFilters({ ...newFilters, intent });
     setFilterOpen(false);
-    refresh();
   };
 
   const handleChat = () => {
@@ -317,23 +333,48 @@ export default function DiscoverPage() {
     router.push('/chat');
   };
 
-  if (showMatchScreen && matchedProfile && currentUserProfile) {
-    return (
-      <MatchScreen
-        userProfile={currentUserProfile as unknown as UserProfile}
-        matchedProfile={matchedProfile}
-        matchId={matchId}
-        onChat={handleChat}
-        onKeepSwiping={() => {
-          setShowMatchScreen(false);
-          setMatchId(undefined);
-        }}
-      />
-    );
-  }
+  const handlePullTouchStart = useCallback((e: React.TouchEvent) => {
+    if (scrollRef.current && scrollRef.current.scrollTop <= 0 && !loading) {
+      pullStartRef.current = e.touches[0].clientY;
+    }
+  }, [loading]);
+
+  const handlePullTouchMove = useCallback((e: React.TouchEvent) => {
+    if (pullStartRef.current === 0) return;
+    const pull = e.touches[0].clientY - pullStartRef.current;
+    if (pull > 0) {
+      setPullToRefresh(Math.min(pull / 300, 1));
+      if (pull > 100) {
+        e.preventDefault();
+      }
+    }
+  }, []);
+
+  const handlePullTouchEnd = useCallback(() => {
+    if (pullToRefresh >= 1) {
+      refresh();
+    }
+    setPullToRefresh(0);
+    pullStartRef.current = 0;
+  }, [pullToRefresh, refresh]);
 
   return (
-    <div className="md:pl-60 h-screen flex flex-col overflow-y-auto bg-gradient-to-br from-background to-muted/30">
+    <div
+      ref={scrollRef}
+      className="md:pl-60 h-screen flex flex-col overflow-y-auto bg-gradient-to-br from-background to-muted/30"
+      style={{ overscrollBehavior: 'contain' } as React.CSSProperties}
+      onTouchStart={handlePullTouchStart}
+      onTouchMove={handlePullTouchMove}
+      onTouchEnd={handlePullTouchEnd}
+    >
+      {pullToRefresh > 0 && (
+        <div className="flex items-center justify-center py-2 -mb-2">
+          <div className="flex items-center gap-2 text-xs text-muted-foreground">
+            <Loader2 className={`h-3.5 w-3.5 ${pullToRefresh >= 1 ? 'animate-spin' : ''}`} style={{ transform: `rotate(${pullToRefresh * 180}deg)` }} />
+            {pullToRefresh >= 1 ? 'Actualizando...' : 'Suelta para actualizar'}
+          </div>
+        </div>
+      )}
       <header className="flex h-16 items-center justify-between px-4 z-10">
         <div className="flex items-center gap-2">
           <h1 className="text-2xl font-bold tracking-tight text-foreground">Alora</h1>
@@ -372,18 +413,19 @@ export default function DiscoverPage() {
               size="icon"
               onClick={() => setBrowseMode(b => b === 'swipe' ? 'grid' : 'swipe')}
               title={browseMode === 'swipe' ? 'Vista exploración' : 'Vista swipe'}
+              aria-label={browseMode === 'swipe' ? 'Vista exploración' : 'Vista swipe'}
               className="h-8 w-8"
             >
               {browseMode === 'swipe' ? <LayoutGrid className="h-4 w-4 text-muted-foreground" /> : <CreditCard className="h-4 w-4 text-muted-foreground" />}
             </Button>
           </div>
           <div className="flex items-center">
-            <Button variant="ghost" size="icon" onClick={handleRewind} disabled={!lastSwipeRef.current || rewinding} title={`Rewind: deshace el último swipe (${rewindsRemaining}/${maxRewinds} disponibles)`}>
+            <Button variant="ghost" size="icon" onClick={handleRewind} disabled={!lastSwipeRef.current || rewinding} title={`Rewind: deshace el último swipe (${rewindsRemaining}/${maxRewinds} disponibles)`} aria-label="Deshacer último swipe">
               <RotateCcw className="h-5 w-5 text-muted-foreground" />
             </Button>
             <span className="text-[10px] text-muted-foreground font-bold -ml-1.5">{rewindsRemaining}</span>
           </div>
-          <Button variant="ghost" size="icon" onClick={() => setFilterOpen(true)} title="Filtros de búsqueda" className="relative">
+          <Button variant="ghost" size="icon" onClick={() => setFilterOpen(true)} title="Filtros de búsqueda" aria-label="Filtros de búsqueda" className="relative">
             <SlidersHorizontal className="h-5 w-5 text-muted-foreground" />
             {countActiveFilters(filters) > 0 && (
               <span className="absolute -top-0.5 -right-0.5 bg-primary text-primary-foreground text-[9px] font-bold rounded-full w-4 h-4 flex items-center justify-center shadow-sm border border-background">
@@ -391,7 +433,7 @@ export default function DiscoverPage() {
               </span>
             )}
           </Button>
-          <Button variant="ghost" size="icon" onClick={() => refresh()} title="Refrescar perfiles">
+          <Button variant="ghost" size="icon" onClick={() => refresh()} title="Refrescar perfiles" aria-label="Refrescar perfiles">
             <RefreshCcw className="h-5 w-5 text-muted-foreground" />
           </Button>
         </div>
@@ -411,7 +453,7 @@ export default function DiscoverPage() {
       </div>
 
       <div className="px-4 pt-2">
-        <Tabs value={intent} onValueChange={(v) => setIntent(v as 'dating' | 'friendship')}>
+        <Tabs value={intent} onValueChange={(v) => { setIntentChanging(true); setIntent(v as 'dating' | 'friendship'); }}>
           <TabsList className="w-full h-10">
             <TabsTrigger value="dating" className="flex-1 text-sm gap-1.5 h-8">
               <HeartIcon className="h-4 w-4" /> Citas
@@ -493,7 +535,7 @@ export default function DiscoverPage() {
         )}
 
         <AnimatePresence>
-          {loading && profiles.length === 0 ? (
+          {(loading && (profiles.length === 0 || intentChanging)) ? (
             <div className="w-full max-w-sm space-y-4">
               <Skeleton className="h-[500px] w-full rounded-3xl" />
               <div className="flex justify-center gap-4">
@@ -506,7 +548,14 @@ export default function DiscoverPage() {
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                 {profiles.map(({ profile: p, compatibility }: any) => (
                   <Card key={p.id} className="rounded-2xl overflow-hidden shadow-sm border">
-                    <div className="aspect-[3/4] relative cursor-pointer" onClick={() => router.push(`/profile/${p.id}?source=discover&intent=${intent}`)}>
+                    <div
+                      className="aspect-[3/4] relative cursor-pointer"
+                      onClick={() => router.push(`/profile/${p.id}?source=discover&intent=${intent}`)}
+                      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') router.push(`/profile/${p.id}?source=discover&intent=${intent}`); }}
+                      tabIndex={0}
+                      role="button"
+                      aria-label={`Ver perfil de ${p.displayName || ''}`}
+                    >
                       <Image
                         src={p.photos?.[0] || '/placeholder.svg'}
                         alt={p.displayName || ''}
@@ -525,14 +574,14 @@ export default function DiscoverPage() {
                       </div>
                     </div>
                     <div className="flex gap-1 p-1.5">
-                      <Button size="sm" variant="ghost" className="flex-1 h-8" onClick={async () => {
+                      <Button size="sm" variant="ghost" className="flex-1 h-8" aria-label={`Descartar a ${p.displayName || ''}`} onClick={async () => {
                         track(AnalyticsEvents.PASS_SENT, { targetUserId: p.id, intent });
                         await sendLike(p.id, 'pass', intent);
                         setProfiles(prev => prev.filter(item => item.profile.id !== p.id));
                       }}>
                         <X className="h-4 w-4 text-red-500" />
                       </Button>
-                      <Button size="sm" variant="ghost" className="flex-1 h-8" onClick={async () => {
+                      <Button size="sm" variant="ghost" className="flex-1 h-8" aria-label={`Dar like a ${p.displayName || ''}`} onClick={async () => {
                         track(AnalyticsEvents.LIKE_SENT, { targetUserId: p.id, intent });
                         const result = await sendLike(p.id, 'like', intent);
                         setProfiles(prev => prev.filter(item => item.profile.id !== p.id));
@@ -632,6 +681,19 @@ export default function DiscoverPage() {
         onApplyFilters={handleApplyFilters}
         initialFilters={filters}
       />
+
+      {showMatchScreen && matchedProfile && currentUserProfile && (
+        <MatchScreen
+          userProfile={currentUserProfile as unknown as UserProfile}
+          matchedProfile={matchedProfile}
+          matchId={matchId}
+          onChat={handleChat}
+          onKeepSwiping={() => {
+            setShowMatchScreen(false);
+            setMatchId(undefined);
+          }}
+        />
+      )}
     </div>
   );
 }

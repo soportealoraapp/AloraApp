@@ -26,6 +26,7 @@ export function PhotoCrop({ isOpen, onClose, imageSrc, onCrop }: PhotoCropProps)
     const [isDragging, setIsDragging] = useState(false);
     const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
     const [loading, setLoading] = useState(false);
+    const [touchId, setTouchId] = useState<number | null>(null);
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const imageRef = useRef<HTMLImageElement | null>(null);
     const containerRef = useRef<HTMLDivElement>(null);
@@ -76,18 +77,27 @@ export function PhotoCrop({ isOpen, onClose, imageSrc, onCrop }: PhotoCropProps)
         img.src = imageSrc;
     }, [isOpen, imageSrc, aspectRatio, currentRatio]);
 
-    const handleMouseDown = useCallback((e: React.MouseEvent) => {
+    const getClientPos = (e: React.MouseEvent | React.TouchEvent): { clientX: number; clientY: number } | null => {
+        if ('touches' in e) {
+            const touch = e.touches[0] || (e as React.TouchEvent).changedTouches[0];
+            if (!touch) return null;
+            return { clientX: touch.clientX, clientY: touch.clientY };
+        }
+        return { clientX: (e as React.MouseEvent).clientX, clientY: (e as React.MouseEvent).clientY };
+    };
+
+    const handleDragStart = useCallback((clientX: number, clientY: number) => {
         setIsDragging(true);
-        setDragStart({ x: e.clientX - cropBox.x, y: e.clientY - cropBox.y });
+        setDragStart({ x: clientX - cropBox.x, y: clientY - cropBox.y });
     }, [cropBox]);
 
-    const handleMouseMove = useCallback((e: React.MouseEvent) => {
+    const handleDragMove = useCallback((clientX: number, clientY: number) => {
         if (!isDragging) return;
         const container = containerRef.current;
         if (!container) return;
 
-        let newX = e.clientX - dragStart.x;
-        let newY = e.clientY - dragStart.y;
+        let newX = clientX - dragStart.x;
+        let newY = clientY - dragStart.y;
         const containerW = container.clientWidth;
         const containerH = 300;
 
@@ -97,9 +107,46 @@ export function PhotoCrop({ isOpen, onClose, imageSrc, onCrop }: PhotoCropProps)
         setCropBox(prev => ({ ...prev, x: newX, y: newY }));
     }, [isDragging, dragStart, cropBox.width, cropBox.height]);
 
-    const handleMouseUp = useCallback(() => {
+    const handleDragEnd = useCallback(() => {
         setIsDragging(false);
+        setTouchId(null);
     }, []);
+
+    const handleMouseDown = useCallback((e: React.MouseEvent) => {
+        const pos = getClientPos(e);
+        if (pos) handleDragStart(pos.clientX, pos.clientY);
+    }, [handleDragStart]);
+
+    const handleMouseMove = useCallback((e: React.MouseEvent) => {
+        const pos = getClientPos(e);
+        if (pos) handleDragMove(pos.clientX, pos.clientY);
+    }, [handleDragMove]);
+
+    const handleMouseUp = useCallback(() => {
+        handleDragEnd();
+    }, [handleDragEnd]);
+
+    const handleTouchStart = useCallback((e: React.TouchEvent) => {
+        const pos = getClientPos(e);
+        if (pos) {
+            setTouchId(e.touches[0].identifier);
+            handleDragStart(pos.clientX, pos.clientY);
+        }
+    }, [handleDragStart]);
+
+    const handleTouchMove = useCallback((e: React.TouchEvent) => {
+        if (touchId === null) return;
+        for (let i = 0; i < e.touches.length; i++) {
+            if (e.touches[i].identifier === touchId) {
+                handleDragMove(e.touches[i].clientX, e.touches[i].clientY);
+                break;
+            }
+        }
+    }, [handleDragMove, touchId]);
+
+    const handleTouchEnd = useCallback((e: React.TouchEvent) => {
+        handleDragEnd();
+    }, [handleDragEnd]);
 
     const handleCrop = useCallback(async () => {
         const img = imageRef.current;
@@ -165,11 +212,14 @@ export function PhotoCrop({ isOpen, onClose, imageSrc, onCrop }: PhotoCropProps)
 
                     <div
                         ref={containerRef}
-                        className="relative bg-black rounded-lg overflow-hidden select-none"
+                        className="relative bg-black rounded-lg overflow-hidden select-none touch-none"
                         style={{ height: 300 }}
                         onMouseMove={handleMouseMove}
                         onMouseUp={handleMouseUp}
                         onMouseLeave={handleMouseUp}
+                        onTouchStart={handleTouchStart}
+                        onTouchMove={handleTouchMove}
+                        onTouchEnd={handleTouchEnd}
                     >
                         {imageSrc && (
                             // eslint-disable-next-line @next/next/no-img-element
@@ -189,6 +239,7 @@ export function PhotoCrop({ isOpen, onClose, imageSrc, onCrop }: PhotoCropProps)
                                 height: cropBox.height,
                             }}
                             onMouseDown={handleMouseDown}
+                            onTouchStart={(e) => { e.stopPropagation(); handleTouchStart(e); }}
                         >
                             <div className="absolute inset-0 border border-white/30" />
                             <div className="absolute top-0 left-0 w-4 h-4 border-t-2 border-l-2 border-white -translate-x-1 -translate-y-1" />

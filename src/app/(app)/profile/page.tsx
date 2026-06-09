@@ -33,6 +33,13 @@ export default function ProfilePage() {
   const loading = authLoading || profileLoading;
   const [showPaywall, setShowPaywall] = useState(false);
   const [quizResults, setQuizResults] = useState<{ quizId: string; score: number; archetype: string }[]>([]);
+  const [latestAnswer, setLatestAnswer] = useState<{
+    questionId: string;
+    question: string | null;
+    category: string | null;
+    answer: string;
+    createdAt: string;
+  } | null>(null);
 
   useEffect(() => {
     fetch('/api/compatibility/list')
@@ -42,6 +49,25 @@ export default function ProfilePage() {
       })
       .catch(() => logger.warn('Failed to fetch quiz results'));
   }, []);
+
+  useEffect(() => {
+    if (!user?.id) return;
+    fetch('/api/daily-question')
+      .then(r => r.json())
+      .then(data => {
+        if (data.answered && data.userAnswer) {
+          const latestAnswerData = {
+            questionId: data.questionId,
+            question: data.question,
+            category: data.category,
+            answer: data.userAnswer,
+            createdAt: new Date().toISOString(),
+          };
+          setLatestAnswer(latestAnswerData);
+        }
+      })
+      .catch(() => logger.warn('Failed to fetch daily answer for own profile'));
+  }, [user?.id]);
 
   if (loading) {
     return (
@@ -172,20 +198,21 @@ export default function ProfilePage() {
             </Card>
           )}
 
-          {(profile as any).latestAnswer && (
+          {latestAnswer && (
             <Card className="rounded-3xl border shadow-sm bg-amber-50/30">
               <CardContent className="p-5">
                 <div className="flex items-center gap-2 mb-2">
                   <MessageCircle className="h-4 w-4 text-amber-600" />
                   <h3 className="font-semibold text-sm text-amber-800">
-                    {(profile as any).latestAnswer.category || 'Respuesta del día'}
+                    {latestAnswer.category || 'Respuesta del día'}
                   </h3>
                 </div>
+                <p className="text-xs text-muted-foreground mb-1">{latestAnswer.question}</p>
                 <p className="text-sm text-foreground leading-relaxed">
-                  {(profile as any).latestAnswer.answer}
+                  "{latestAnswer.answer}"
                 </p>
                 <p className="text-[10px] text-muted-foreground mt-2">
-                  {new Date((profile as any).latestAnswer.createdAt).toLocaleDateString()}
+                  {new Date(latestAnswer.createdAt).toLocaleDateString()}
                 </p>
               </CardContent>
             </Card>

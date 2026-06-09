@@ -214,6 +214,25 @@ export function FloatingMatchCard({ profile, onSwipe, onFlechado, compatibility,
                     <p className="text-white/80 text-sm line-clamp-2 leading-relaxed">{profile.bio}</p>
                 </div>
             </SoftCard>
+
+            <div className="absolute -bottom-16 left-0 right-0 flex items-center justify-center gap-6 z-20">
+                <button
+                    onClick={(e) => { e.stopPropagation(); onSwipe('left'); }}
+                    className="bg-white hover:bg-gray-100 text-red-500 rounded-full w-14 h-14 flex items-center justify-center shadow-xl transition-transform hover:scale-110 active:scale-95 border border-gray-200"
+                    aria-label="Descartar perfil"
+                    title="Pasar (deslizar a la izquierda)"
+                >
+                    <X className="h-7 w-7" />
+                </button>
+                <button
+                    onClick={(e) => { e.stopPropagation(); onSwipe('right'); }}
+                    className="bg-white hover:bg-gray-100 text-green-500 rounded-full w-14 h-14 flex items-center justify-center shadow-xl transition-transform hover:scale-110 active:scale-95 border border-gray-200"
+                    aria-label="Dar like al perfil"
+                    title="Like (deslizar a la derecha)"
+                >
+                    <Heart className="h-7 w-7" />
+                </button>
+            </div>
         </motion.div>
     );
 }
