@@ -7,6 +7,7 @@ import { cn } from '@/lib/utils';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
+import { Skeleton } from '@/components/ui/skeleton';
 
 function NotificationItem({ notification, onRead }: { notification: any; onRead: () => void }) {
   const isUnread = !notification.readAt;
@@ -37,8 +38,19 @@ export default function NotificationsPage() {
 
   if (loading) {
     return (
-      <div className="md:pl-60 min-h-screen flex items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+      <div className="md:pl-60 min-h-screen">
+        <header className="sticky top-0 z-30 flex h-16 items-center border-b bg-background/90 px-4 backdrop-blur-md">
+          <Skeleton className="h-6 w-32" />
+        </header>
+        <main className="max-w-xl mx-auto">
+          {[1, 2, 3, 4, 5].map(i => (
+            <div key={i} className="p-4 border-b space-y-2">
+              <Skeleton className="h-4 w-3/4" />
+              <Skeleton className="h-3 w-1/2" />
+              <Skeleton className="h-2 w-20" />
+            </div>
+          ))}
+        </main>
       </div>
     );
   }

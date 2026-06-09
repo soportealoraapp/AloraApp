@@ -8,6 +8,8 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { ArrowLeft, Heart, Trash2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import Image from 'next/image';
+import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
 import { PlusBadge } from '@/components/premium/PlusBadge';
 
@@ -116,16 +118,4 @@ export default function FavoritesPage() {
     );
 }
 
-function Image({ src, alt, fill, className }: { src: string; alt: string; fill?: boolean; className?: string }) {
-    return (
-        <img
-            src={src}
-            alt={alt}
-            className={cn("object-cover", fill && "absolute inset-0 w-full h-full", className)}
-        />
-    );
-}
 
-function cn(...classes: (string | undefined | false)[]) {
-    return classes.filter(Boolean).join(' ');
-}

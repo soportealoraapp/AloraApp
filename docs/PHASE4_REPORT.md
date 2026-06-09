@@ -6,7 +6,7 @@ Se implementó un sistema de monetización "Free-First" que potencia la experien
 ## 🏗️ Backend de Suscripciones
 - **Archivos**: `src/server/actions/subscriptions.ts`, `src/lib/domain/subscription.ts`
 - **Funcionalidad**: Creación, cancelación y consulta de planes (`FREE`, `PLUS`, `PREMIUM`).
-- **Integración**: Modelo preparado para **Stripe** (`/api/stripe/session` y webhook).
+- **Integración**: Modelo preparado para **LemonSqueezy** (`/api/lemonsqueezy/checkout` y webhook).
 
 ## 🚀 Dynamic Feed con Boost
 - **Mejora**: El algoritmo `getDynamicFeed` ahora aplica multiplicadores de visibilidad según el plan:

@@ -22,7 +22,26 @@ export function SecondChanceSection() {
       .finally(() => setLoading(false));
   }, []);
 
-  if (loading || passedProfiles.length === 0) return null;
+  if (loading) {
+    return (
+      <Card className="rounded-3xl border-dashed border-2 border-muted-foreground/20 bg-muted/10">
+        <CardContent className="p-6">
+          <div className="flex items-center gap-2 mb-4">
+            <div className="h-5 w-5 bg-muted-foreground/20 rounded-full animate-pulse" />
+            <div className="h-5 w-40 bg-muted-foreground/20 rounded animate-pulse" />
+          </div>
+          <div className="h-4 w-64 bg-muted-foreground/20 rounded animate-pulse mb-4" />
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+            {[1, 2, 3].map(i => (
+              <div key={i} className="aspect-[3/4] bg-muted-foreground/10 rounded-2xl animate-pulse" />
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  if (passedProfiles.length === 0) return null;
 
   const handleLike = async (profileId: string) => {
     try {

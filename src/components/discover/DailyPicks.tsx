@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Sparkles, ChevronRight, Check } from 'lucide-react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { cn } from '@/lib/utils';
 import { PlusBadge } from '@/components/premium/PlusBadge';
 import { logger } from '@/lib/logger';
@@ -108,13 +109,4 @@ export function DailyPicks() {
     );
 }
 
-function Image({ src, alt, fill, className }: { src: string; alt: string; fill?: boolean; className?: string }) {
-    return (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img
-            src={src}
-            alt={alt}
-            className={cn("object-cover", fill && "absolute inset-0 w-full h-full", className)}
-        />
-    );
-}
+

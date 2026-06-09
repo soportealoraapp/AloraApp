@@ -545,6 +545,14 @@ export default function ProfilePage() {
       </main>
 
       <PaywallModal isOpen={showPaywall} onClose={() => setShowPaywall(false)} />
+
+      <button
+        onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+        className="fixed bottom-24 right-4 z-40 bg-primary text-primary-foreground rounded-full w-10 h-10 flex items-center justify-center shadow-lg hover:shadow-xl transition-all hover:scale-110 active:scale-95 md:bottom-6"
+        aria-label="Volver arriba"
+      >
+        <ChevronRight className="h-5 w-5 rotate-[-90deg]" />
+      </button>
     </div>
   );
 }

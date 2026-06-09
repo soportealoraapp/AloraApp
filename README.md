@@ -23,7 +23,7 @@ Dating app con IA integrada — conexiones reales con inteligencia artificial.
 - **Admin** — Panel con analíticas, go/no-go, moderación
 - **Economía** — Sistema de boost, super likes, streaks
 - **Seguridad** — CSP, rate limiting, bloqueo/reporte, shadowban
-- **Pagos** — Stripe + LemonSqueezy integrados
+- **Pagos** — LemonSqueezy integrado
 
 ## Empezar
 
@@ -72,7 +72,7 @@ src/
 ├── server/         # Server actions, servicios, AI
 │   ├── actions/    # Server Actions
 │   └── services/   # Lógica de negocio
-├── lib/            # Config (prisma, supabase, stripe, etc.)
+├── lib/            # Config (prisma, supabase, lemonsqueezy, etc.)
 ├── ai/             # Genkit flows (coach, wingman, moderación)
 ├── contexts/       # React context providers
 ├── types/          # TypeScript types
@@ -101,7 +101,7 @@ Conecta el repo de GitHub a Vercel. Variables requeridas:
 - `UPLOADTHING_TOKEN` / `UPLOADTHING_APP_ID`
 - `GOOGLE_GENAI_API_KEY`
 - `NEXT_PUBLIC_APP_URL`
-- `STRIPE_SECRET_KEY` / `LEMONSQUEEZY_API_KEY`
+- `LEMONSQUEEZY_API_KEY`
 
 Construir: `npm run build`
 

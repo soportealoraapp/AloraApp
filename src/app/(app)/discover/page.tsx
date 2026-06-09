@@ -547,7 +547,7 @@ export default function DiscoverPage() {
             <div className="w-full">
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                 {profiles.map(({ profile: p, compatibility }: any) => (
-                  <Card key={p.id} className="rounded-2xl overflow-hidden shadow-sm border">
+                  <Card key={p.id} className="rounded-2xl overflow-hidden shadow-sm border group">
                     <div
                       className="aspect-[3/4] relative cursor-pointer"
                       onClick={() => router.push(`/profile/${p.id}?source=discover&intent=${intent}`)}
@@ -563,9 +563,31 @@ export default function DiscoverPage() {
                         className="object-cover"
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
+                      {p.activeNow && (
+                        <div className="absolute top-2 left-2 bg-green-500/90 backdrop-blur-sm text-white text-[8px] font-bold px-1.5 py-0.5 rounded-full flex items-center gap-1 border border-green-300/30">
+                          <span className="relative flex h-1.5 w-1.5">
+                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75" />
+                            <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-green-200" />
+                          </span>
+                          Activa
+                        </div>
+                      )}
+                      {(p as any).latestAnswer && (
+                        <div className="absolute top-2 right-2 bg-amber-500/90 backdrop-blur-sm text-white text-[8px] font-bold px-1.5 py-0.5 rounded-full">
+                          💬 Resp.
+                        </div>
+                      )}
+                      {p.voiceIntro && (
+                        <div className="absolute top-8 left-2 bg-indigo-500/90 backdrop-blur-sm text-white text-[8px] font-bold px-1.5 py-0.5 rounded-full">
+                          🎵 Voz
+                        </div>
+                      )}
                       <div className="absolute bottom-2 left-2 right-2">
                         <div className="text-white text-xs font-bold leading-tight">{p.displayName}, {p.age}</div>
                         {p.city && <div className="text-white/70 text-[10px]">{p.city}</div>}
+                        {p.sharedInterests !== undefined && p.sharedInterests > 0 && (
+                          <div className="text-purple-200 text-[9px] mt-0.5">{p.sharedInterests} interés(es) en común</div>
+                        )}
                         {compatibility != null && (
                           <div className="inline-block bg-primary/80 text-white text-[10px] px-1.5 py-0.5 rounded mt-1">
                             {Math.round(compatibility)}% compatibles

@@ -3,7 +3,7 @@
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Music, ExternalLink, Headphones, Disc3, RefreshCw } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Image from 'next/image';
 
 interface Track {
@@ -39,6 +39,37 @@ interface SpotifySectionProps {
 export function SpotifySection({ spotify, isOwn }: SpotifySectionProps) {
   const [showEmbed, setShowEmbed] = useState(false);
   const [syncing, setSyncing] = useState(false);
+  const [loading, setLoading] = useState(spotify === undefined);
+
+  useEffect(() => {
+    if (spotify !== undefined) setLoading(false);
+  }, [spotify]);
+
+  if (loading) {
+    return (
+      <Card className="rounded-3xl">
+        <CardContent className="p-6">
+          <div className="flex items-center gap-2 mb-4">
+            <div className="h-5 w-5 bg-muted-foreground/20 rounded animate-pulse" />
+            <div className="h-5 w-24 bg-muted-foreground/20 rounded animate-pulse" />
+          </div>
+          <div className="flex flex-wrap gap-2 mb-4">
+            {[1, 2, 3].map(i => (
+              <div key={i} className="h-8 w-24 bg-muted-foreground/10 rounded-full animate-pulse" />
+            ))}
+          </div>
+          <div className="space-y-2">
+            {[1, 2, 3].map(i => (
+              <div key={i} className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-muted-foreground/10 rounded-lg animate-pulse" />
+                <div className="flex-1 h-4 bg-muted-foreground/10 rounded animate-pulse" />
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
 
   if (!spotify || (!spotify.topTracks?.length && !spotify.topArtists?.length)) {
     if (!isOwn) return null;

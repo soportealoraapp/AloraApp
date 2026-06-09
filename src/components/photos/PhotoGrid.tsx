@@ -116,7 +116,7 @@ export function PhotoGrid({ photos, onReorder, onRemove, onCrop, maxPhotos = 6 }
                     onTouchMove={handleTouchMove}
                     onTouchEnd={handleTouchEnd}
                     className={cn(
-                        "relative aspect-square rounded-lg overflow-hidden group transition-all",
+                        "relative aspect-square rounded-lg overflow-hidden group transition-all bg-muted",
                         dragIndex === index ? "opacity-50 scale-95 z-10" : "cursor-grab active:cursor-grabbing",
                         overIndex === index && dragIndex !== index && "ring-2 ring-primary ring-offset-2"
                     )}

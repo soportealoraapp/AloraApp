@@ -67,7 +67,7 @@ export function DailyCompatibilityCard() {
             <CardHeader className="pb-3">
                 <CardTitle className="text-base flex items-center gap-2">
                     <Sparkles className="h-4 w-4 text-pink-500" />
-                    Tu conexion destacada
+                    Tu conexión destacada
                 </CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">

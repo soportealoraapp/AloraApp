@@ -8,7 +8,6 @@ export interface Subscription {
     endDate: Date;
     status: 'active' | 'expired' | 'canceled';
     autoRenew: boolean;
-    stripeSubscriptionId?: string;
 }
 
 export interface Payment {
@@ -16,7 +15,7 @@ export interface Payment {
     userId: string;
     amount: number;
     currency: string;
-    provider: 'stripe' | 'lemonsqueezy';
+    provider: 'lemonsqueezy';
     timestamp: Date;
     metadata?: Record<string, unknown>;
 }

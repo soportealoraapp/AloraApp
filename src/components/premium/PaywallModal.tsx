@@ -1,19 +1,15 @@
 'use client';
 
-import { useState } from 'react';
 import {
     Dialog,
     DialogContent,
     DialogHeader,
     DialogTitle,
     DialogDescription,
-    DialogFooter
 } from '@/components/ui/dialog';
 import { VisuallyHidden } from '@radix-ui/react-visually-hidden';
 import { Button } from '@/components/ui/button';
-import { Check, Sparkles, Heart, Zap, ShieldCheck, Loader2, RotateCcw, Globe, Eye } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
-import { useAuth } from '@/contexts/AuthContext';
+import { Check, Sparkles, Heart, Zap, ShieldCheck, RotateCcw, Globe, Eye } from 'lucide-react';
 
 interface PaywallModalProps {
     isOpen: boolean;
@@ -21,43 +17,6 @@ interface PaywallModalProps {
 }
 
 export function PaywallModal({ isOpen, onClose }: PaywallModalProps) {
-    const [isSubmitting, setIsSubmitting] = useState(false);
-    const { toast } = useToast();
-    const { user, refreshProfile } = useAuth();
-
-    const handleSubscribe = async () => {
-        setIsSubmitting(true);
-        try {
-            const response = await fetch('/api/stripe/session', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ plan: 'plus', userId: user?.id })
-            });
-
-            if (!response.ok) throw new Error('Error en la suscripción');
-
-            const data = await response.json();
-            if (data.url) {
-                window.location.href = data.url;
-            } else {
-                toast({
-                    title: "¡Bienvenido a Alora+!",
-                    description: "Tus beneficios premium ya están activos.",
-                });
-                await refreshProfile();
-                onClose();
-            }
-        } catch (error: any) {
-            toast({
-                title: "Error",
-                description: error.message,
-                variant: "destructive"
-            });
-        } finally {
-            setIsSubmitting(false);
-        }
-    };
-
     const features = [
         { icon: <Heart className="text-pink-500 h-5 w-5" />, title: "Likes ilimitados", subtitle: "Sin límite diario para conectar" },
         { icon: <Sparkles className="text-amber-500 h-5 w-5" />, title: "Prioridad en Discover", subtitle: "Tus perfiles aparecen primero" },
@@ -107,10 +66,8 @@ export function PaywallModal({ isOpen, onClose }: PaywallModalProps) {
 
                     <Button
                         className="w-full bg-gradient-to-r from-pink-600 to-rose-500 text-white py-7 rounded-2xl text-lg font-bold shadow-lg hover:shadow-pink-200"
-                        onClick={handleSubscribe}
-                        disabled={isSubmitting}
+                        onClick={() => window.location.href = 'https://alora-app.lemonsqueezy.com/checkout/buy/67dd777a-6ae1-4169-a2a1-8a1f105899e7'}
                     >
-                        {isSubmitting ? <Loader2 className="animate-spin mr-2" /> : null}
                         Suscribirme Ahora
                     </Button>
 

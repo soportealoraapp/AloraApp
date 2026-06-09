@@ -163,6 +163,15 @@ export function FloatingMatchCard({ profile, onSwipe, onFlechado, compatibility,
                             <MessageCircle className="h-3 w-3" /> Respuesta del día
                         </motion.div>
                     )}
+                    {(profile as any).spotify?.topArtists?.length > 0 && (
+                        <motion.div
+                            initial={{ scale: 0.8, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            className="bg-green-500/90 backdrop-blur-md text-white px-3 py-1 rounded-full text-[10px] font-bold flex items-center gap-1 border border-green-300/30 shadow-lg"
+                        >
+                            <Music className="h-3 w-3" /> {(profile as any).spotify.topArtists[0]?.name || 'Spotify'}
+                        </motion.div>
+                    )}
                     {!profile.activeNow && profile.lastActiveHours !== null && profile.lastActiveHours !== undefined && (
                         <motion.div
                             initial={{ scale: 0.8, opacity: 0 }}

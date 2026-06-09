@@ -93,8 +93,6 @@ export function BottomNav() {
         </div>
       </nav>
 
-      {/* Main content offset for desktop sidebar */}
-      <div className="hidden md:block md:pl-60" />
     </>
   );
 }

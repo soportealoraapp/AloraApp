@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { BackToHome } from '@/components/nav/BackToHome';
 
 export default function TermsPage() {
     return (
@@ -48,7 +49,7 @@ export default function TermsPage() {
                 </section>
 
                 <div className="pt-4 border-t">
-                    <Link href="/" className="text-primary hover:underline">Volver al inicio</Link>
+                    <BackToHome />
                 </div>
             </div>
         </div>

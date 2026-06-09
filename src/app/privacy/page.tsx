@@ -1,3 +1,4 @@
+import { BackToHome } from '@/components/nav/BackToHome';
 import Link from 'next/link';
 
 export default function PrivacyPage() {
@@ -48,7 +49,7 @@ export default function PrivacyPage() {
                 </section>
 
                 <div className="pt-4 border-t space-x-4">
-                    <Link href="/" className="text-primary hover:underline">Volver al inicio</Link>
+                    <BackToHome />
                     <Link href="/terms" className="text-primary hover:underline">Ver Términos y Condiciones</Link>
                 </div>
             </div>

@@ -24,7 +24,6 @@ export async function getUserSubscription(userId: string): Promise<Subscription 
             endDate: profile?.subscriptionExpiresAt || new Date(),
             status: 'active',
             autoRenew: true,
-            stripeSubscriptionId: 'stripe_' + userId,
         };
     } catch (e) {
         console.error(e);
@@ -32,7 +31,7 @@ export async function getUserSubscription(userId: string): Promise<Subscription 
     }
 }
 
-export async function createSubscription(userId: string, plan: PlanTier, stripeId?: string) {
+export async function createSubscription(userId: string, plan: PlanTier) {
     try {
         await grantPlus(userId, 30);
 
