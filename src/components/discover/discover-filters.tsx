@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { CreditCard, LayoutGrid } from "lucide-react";
 import {
   Sheet,
   SheetContent,
@@ -51,9 +52,11 @@ interface DiscoverFiltersProps {
   onOpenChange: (open: boolean) => void;
   onApplyFilters: (filters: Filters) => void;
   initialFilters: Filters;
+  browseMode?: 'swipe' | 'grid';
+  onBrowseModeChange?: (mode: 'swipe' | 'grid') => void;
 }
 
-export function DiscoverFilters({ open, onOpenChange, onApplyFilters, initialFilters }: DiscoverFiltersProps) {
+export function DiscoverFilters({ open, onOpenChange, onApplyFilters, initialFilters, browseMode, onBrowseModeChange }: DiscoverFiltersProps) {
   const [ageRange, setAgeRange] = useState<[number, number]>(initialFilters.ageRange);
   const [distance, setDistance] = useState([initialFilters.distance]);
   const [seeking, setSeeking] = useState(initialFilters.seeking);
@@ -190,6 +193,24 @@ export function DiscoverFilters({ open, onOpenChange, onApplyFilters, initialFil
                   </Label>
                 </div>
               </RadioGroup>
+            </div>
+
+            <div className="space-y-3">
+              <Label>Modo de exploración</Label>
+              <div className="grid grid-cols-2 gap-2">
+                <button
+                  onClick={() => onBrowseModeChange?.('swipe')}
+                  className={`flex items-center justify-center gap-2 rounded-lg border-2 p-3 text-sm font-medium transition-all ${browseMode === 'swipe' ? 'border-primary bg-primary/5' : 'border-muted bg-transparent hover:bg-accent'}`}
+                >
+                  <CreditCard className="h-4 w-4" /> Swipe
+                </button>
+                <button
+                  onClick={() => onBrowseModeChange?.('grid')}
+                  className={`flex items-center justify-center gap-2 rounded-lg border-2 p-3 text-sm font-medium transition-all ${browseMode === 'grid' ? 'border-primary bg-primary/5' : 'border-muted bg-transparent hover:bg-accent'}`}
+                >
+                  <LayoutGrid className="h-4 w-4" /> Explorar
+                </button>
+              </div>
             </div>
 
             <div className="space-y-4">

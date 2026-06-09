@@ -9,7 +9,7 @@ import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Settings, Edit, Eye, MapPin, Briefcase, Cigarette, GlassWater, Baby, Star, BookOpen, Music, CheckCircle, AlertCircle, ShieldCheck, Shield, Sparkles, ChevronRight, Trophy, MessageCircle } from "lucide-react";
+import { Settings, Edit, Eye, MapPin, Briefcase, Cigarette, GlassWater, Baby, Star, BookOpen, Music, CheckCircle, AlertCircle, ShieldCheck, Shield, Sparkles, ChevronRight, ChevronDown, Trophy, MessageCircle } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -24,6 +24,7 @@ import { VoiceIntro } from "@/components/audio/VoiceIntro";
 import { useState, useEffect } from "react";
 import { logger } from "@/lib/logger";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 
 const DynamicFirstWeekJourney = dynamic(() => import("@/components/gamification/FirstWeekJourney").then(m => ({ default: m.FirstWeekJourney })), { ssr: false });
 const DynamicStreakCard = dynamic(() => import("@/components/gamification/StreakCard").then(m => ({ default: m.StreakCard })), { ssr: false });
@@ -32,6 +33,7 @@ export default function ProfilePage() {
   const { user, profile, authLoading, profileLoading } = useAuth();
   const loading = authLoading || profileLoading;
   const [showPaywall, setShowPaywall] = useState(false);
+  const [voiceIntroDeleted, setVoiceIntroDeleted] = useState(false);
   const [quizResults, setQuizResults] = useState<{ quizId: string; score: number; archetype: string }[]>([]);
   const [latestAnswer, setLatestAnswer] = useState<{
     questionId: string;
@@ -88,6 +90,21 @@ export default function ProfilePage() {
   if (!profile) return null;
 
   const completenessScore = calculateCompleteness(profile);
+
+  const handleDeleteVoiceIntro = async () => {
+    if (!user?.id) return;
+    try {
+      const res = await fetch('/api/user/delete-voice-data', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: user.id }),
+      });
+      if (res.ok) setVoiceIntroDeleted(true);
+    } catch {
+      // fallback: hide locally
+      setVoiceIntroDeleted(true);
+    }
+  };
 
   const detailIcons: { [key: string]: React.ElementType } = {
     city: MapPin,
@@ -292,37 +309,23 @@ export default function ProfilePage() {
 
           {(profile as any).spotify && <SpotifySection spotify={(profile as any).spotify} isOwn />}
 
-          {(profile as any).voiceIntro && (
+          {(profile as any).voiceIntro && !voiceIntroDeleted && (
             <VoiceIntro
               audioUrl={(profile as any).voiceIntro}
               duration={(profile as any).voiceIntroDuration}
               onSave={() => {}}
-              onDelete={() => {}}
+              onDelete={handleDeleteVoiceIntro}
               isOwn={true}
             />
           )}
 
-          {profile.photos && profile.photos.length > 1 && (
-            <Card className="rounded-3xl">
-              <CardContent className="p-5">
-                <h3 className="font-bold text-lg mb-4">Galería ({profile.photos.slice(1).length} fotos)</h3>
-                <div className="grid grid-cols-3 gap-2">
-                  {profile.photos.slice(1).map((photo, index) => (
-                    <div key={index} className="aspect-square relative rounded-2xl overflow-hidden shadow-sm">
-                      <Image
-                        src={photo}
-                        alt={`Galería ${index + 1}`}
-                        fill
-                        className="object-cover"
-                        
-                      />
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          )}
-
+          <Collapsible defaultOpen={false}>
+            <CollapsibleTrigger className="flex items-center gap-2 w-full mb-2 group">
+              <Shield className="h-4 w-4 text-muted-foreground" />
+              <span className="text-sm font-bold text-muted-foreground uppercase tracking-wider flex-1 text-left">Configuración</span>
+              <ChevronDown className="h-4 w-4 text-muted-foreground transition-transform group-data-[state=open]:rotate-180" />
+            </CollapsibleTrigger>
+            <CollapsibleContent className="space-y-4">
           {completenessScore < 100 && (
             <Card className="rounded-3xl border shadow-sm">
               <CardContent className="p-5">
@@ -394,7 +397,16 @@ export default function ProfilePage() {
               </Card>
             </Link>
           )}
+            </CollapsibleContent>
+          </Collapsible>
 
+          <Collapsible defaultOpen={quizResults.length > 0}>
+            <CollapsibleTrigger className="flex items-center gap-2 w-full mb-2 group">
+              <Trophy className="h-4 w-4 text-muted-foreground" />
+              <span className="text-sm font-bold text-muted-foreground uppercase tracking-wider flex-1 text-left">Compatibilidad</span>
+              <ChevronDown className="h-4 w-4 text-muted-foreground transition-transform group-data-[state=open]:rotate-180" />
+            </CollapsibleTrigger>
+            <CollapsibleContent className="space-y-4">
           {quizResults.length > 0 ? (
             <Card className="rounded-3xl border shadow-sm">
               <CardContent className="p-5">
@@ -444,7 +456,16 @@ export default function ProfilePage() {
               </Card>
             </Link>
           )}
+            </CollapsibleContent>
+          </Collapsible>
 
+          <Collapsible defaultOpen={false}>
+            <CollapsibleTrigger className="flex items-center gap-2 w-full mb-2 group">
+              <Star className="h-4 w-4 text-muted-foreground" />
+              <span className="text-sm font-bold text-muted-foreground uppercase tracking-wider flex-1 text-left">Actividad</span>
+              <ChevronDown className="h-4 w-4 text-muted-foreground transition-transform group-data-[state=open]:rotate-180" />
+            </CollapsibleTrigger>
+            <CollapsibleContent className="space-y-4">
           <Card className="rounded-3xl border">
             <CardContent className="p-4">
               <LikesCounter
@@ -456,20 +477,12 @@ export default function ProfilePage() {
             </CardContent>
           </Card>
 
-          <div className="pt-2">
-            <div className="flex items-center gap-2 mb-1">
-              <span className="h-px flex-1 bg-border/50" />
-              <span className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest">Tu actividad</span>
-              <span className="h-px flex-1 bg-border/50" />
-            </div>
-          </div>
-
           <div className="space-y-2">
             <Link href="/profile/favorites">
               <Card className="rounded-2xl border bg-muted/20 hover:bg-muted/40 transition-colors cursor-pointer">
                 <CardContent className="p-3.5 flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <div className="p-1.5 rounded-lg bg-primary/10">
+                    <div className="p-1.5 rounded-xl bg-primary/10">
                       <Star className="h-4 w-4 text-primary" />
                     </div>
                     <div>
@@ -486,7 +499,7 @@ export default function ProfilePage() {
               <Card className="rounded-2xl border bg-muted/20 hover:bg-muted/40 transition-colors cursor-pointer">
                 <CardContent className="p-3.5 flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <div className="p-1.5 rounded-lg bg-primary/10">
+                    <div className="p-1.5 rounded-xl bg-primary/10">
                       <Shield className="h-4 w-4 text-primary" />
                     </div>
                     <div>
@@ -503,7 +516,7 @@ export default function ProfilePage() {
               <Card className="rounded-2xl border bg-muted/20 hover:bg-muted/40 transition-colors cursor-pointer">
                 <CardContent className="p-3.5 flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <div className="p-1.5 rounded-lg bg-primary/10">
+                    <div className="p-1.5 rounded-xl bg-primary/10">
                       <Sparkles className="h-4 w-4 text-primary" />
                     </div>
                     <div>
@@ -520,7 +533,7 @@ export default function ProfilePage() {
               <Card className="rounded-2xl border bg-muted/20 hover:bg-muted/40 transition-colors cursor-pointer">
                 <CardContent className="p-3.5 flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <div className="p-1.5 rounded-lg bg-primary/10">
+                    <div className="p-1.5 rounded-xl bg-primary/10">
                       <Eye className="h-4 w-4 text-primary" />
                     </div>
                     <div>
@@ -551,6 +564,8 @@ export default function ProfilePage() {
           <DynamicStreakCard />
 
           <DynamicFirstWeekJourney />
+            </CollapsibleContent>
+          </Collapsible>
         </div>
       </main>
 

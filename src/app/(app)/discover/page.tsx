@@ -408,16 +408,6 @@ export default function DiscoverPage() {
             </TabsList>
           </Tabs>
           <div className="md:hidden flex items-center gap-0.5">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => setBrowseMode(b => b === 'swipe' ? 'grid' : 'swipe')}
-              title={browseMode === 'swipe' ? 'Vista exploración' : 'Vista swipe'}
-              aria-label={browseMode === 'swipe' ? 'Vista exploración' : 'Vista swipe'}
-              className="h-8 w-8"
-            >
-              {browseMode === 'swipe' ? <LayoutGrid className="h-4 w-4 text-muted-foreground" /> : <CreditCard className="h-4 w-4 text-muted-foreground" />}
-            </Button>
             <div className="flex items-center">
               <Button variant="ghost" size="icon" onClick={handleRewind} disabled={!lastSwipeRef.current || rewinding} title={`Rewind: deshace el último swipe (${rewindsRemaining}/${maxRewinds} disponibles)`} aria-label="Deshacer último swipe" className="h-8 w-8">
                 <RotateCcw className="h-4 w-4 text-muted-foreground" />
@@ -432,9 +422,6 @@ export default function DiscoverPage() {
                 </span>
               )}
             </Button>
-            <Button variant="ghost" size="icon" onClick={() => refresh()} title="Refrescar perfiles" aria-label="Refrescar perfiles" className="h-8 w-8">
-              <RefreshCcw className="h-4 w-4 text-muted-foreground" />
-            </Button>
           </div>
           <div className="hidden md:flex items-center gap-1">
             <Button variant="ghost" size="icon" onClick={handleRewind} disabled={!lastSwipeRef.current || rewinding} title={`Rewind: deshace el último swipe (${rewindsRemaining}/${maxRewinds} disponibles)`} aria-label="Deshacer último swipe">
@@ -448,9 +435,6 @@ export default function DiscoverPage() {
                   {countActiveFilters(filters)}
                 </span>
               )}
-            </Button>
-            <Button variant="ghost" size="icon" onClick={() => refresh()} title="Refrescar perfiles" aria-label="Refrescar perfiles">
-              <RefreshCcw className="h-5 w-5 text-muted-foreground" />
             </Button>
           </div>
         </div>
@@ -717,6 +701,8 @@ export default function DiscoverPage() {
         onOpenChange={setFilterOpen}
         onApplyFilters={handleApplyFilters}
         initialFilters={filters}
+        browseMode={browseMode}
+        onBrowseModeChange={setBrowseMode}
       />
 
       {showMatchScreen && matchedProfile && currentUserProfile && (

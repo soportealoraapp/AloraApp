@@ -68,7 +68,7 @@ export function FloatingMatchCard({ profile, onSwipe, onFlechado, compatibility,
             whileHover={{ scale: 1.01 }}
             whileTap={{ scale: 0.98 }}
         >
-            <SoftCard className="min-h-[500px] max-h-[calc(100vh-200px)] h-full overflow-hidden relative border-none shadow-xl rounded-3xl bg-card">
+            <SoftCard className="min-h-[500px] max-h-[calc(100vh-160px)] h-full overflow-hidden relative border-none shadow-xl rounded-3xl bg-card">
                 <Image
                     src={profile.photos?.[0] || '/placeholder.svg'}
                     alt={profile.displayName}
@@ -113,74 +113,58 @@ export function FloatingMatchCard({ profile, onSwipe, onFlechado, compatibility,
                 )}
 
                 {/* Retention signals */}
-                <div className="absolute top-4 left-4 z-10 flex flex-col gap-2 max-h-[40%] overflow-y-auto pointer-events-none" style={{ marginTop: onFlechado ? '3.5rem' : '0' }}>
-                    {profile.activeNow && (
-                        <motion.div
-                            initial={{ scale: 0.8, opacity: 0 }}
-                            animate={{ scale: 1, opacity: 1 }}
-                            className="bg-green-500/90 backdrop-blur-md text-white px-3 py-1 rounded-full text-[10px] font-bold flex items-center gap-1 border border-green-300/30 shadow-lg"
-                        >
-                            <span className="relative flex h-2 w-2">
-                                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75" />
-                                <span className="relative inline-flex rounded-full h-2 w-2 bg-green-200" />
-                            </span>
-                            Activa ahora
-                        </motion.div>
-                    )}
-                    {profile.highResponseRate && (
-                        <motion.div
-                            initial={{ scale: 0.8, opacity: 0 }}
-                            animate={{ scale: 1, opacity: 1 }}
-                            className="bg-blue-500/90 backdrop-blur-md text-white px-3 py-1 rounded-full text-[10px] font-bold flex items-center gap-1 border border-blue-300/30 shadow-lg"
-                        >
-                            <MessageCircle className="h-3 w-3" /> Responde rápido
-                        </motion.div>
-                    )}
-                    {profile.sharedInterests !== undefined && profile.sharedInterests > 0 && (
-                        <motion.div
-                            initial={{ scale: 0.8, opacity: 0 }}
-                            animate={{ scale: 1, opacity: 1 }}
-                            className="bg-purple-500/90 backdrop-blur-md text-white px-3 py-1 rounded-full text-[10px] font-bold flex items-center gap-1 border border-purple-300/30 shadow-lg"
-                        >
-                            <Heart className="h-3 w-3" fill="white" /> {profile.sharedInterests} interés{profile.sharedInterests > 1 ? 'es' : ''} en común
-                        </motion.div>
-                    )}
-                    {profile.voiceIntro && (
-                        <motion.div
-                            initial={{ scale: 0.8, opacity: 0 }}
-                            animate={{ scale: 1, opacity: 1 }}
-                            className="bg-indigo-500/90 backdrop-blur-md text-white px-3 py-1 rounded-full text-[10px] font-bold flex items-center gap-1 border border-indigo-300/30 shadow-lg"
-                        >
-                            <Music className="h-3 w-3" /> Voz
-                        </motion.div>
-                    )}
-                    {(profile as any).latestAnswer && (
-                        <motion.div
-                            initial={{ scale: 0.8, opacity: 0 }}
-                            animate={{ scale: 1, opacity: 1 }}
-                            className="bg-amber-500/90 backdrop-blur-md text-white px-3 py-1 rounded-full text-[10px] font-bold flex items-center gap-1 border border-amber-300/30 shadow-lg"
-                        >
-                            <MessageCircle className="h-3 w-3" /> Respuesta del día
-                        </motion.div>
-                    )}
-                    {(profile as any).spotify?.topArtists?.length > 0 && (
-                        <motion.div
-                            initial={{ scale: 0.8, opacity: 0 }}
-                            animate={{ scale: 1, opacity: 1 }}
-                            className="bg-green-500/90 backdrop-blur-md text-white px-3 py-1 rounded-full text-[10px] font-bold flex items-center gap-1 border border-green-300/30 shadow-lg"
-                        >
-                            <Music className="h-3 w-3" /> {(profile as any).spotify.topArtists[0]?.name || 'Spotify'}
-                        </motion.div>
-                    )}
-                    {!profile.activeNow && profile.lastActiveHours !== null && profile.lastActiveHours !== undefined && (
-                        <motion.div
-                            initial={{ scale: 0.8, opacity: 0 }}
-                            animate={{ scale: 1, opacity: 1 }}
-                            className="bg-gray-600/80 backdrop-blur-md text-white/90 px-3 py-1 rounded-full text-[10px] font-medium flex items-center gap-1 border border-white/10 shadow-lg"
-                        >
-                            <Clock className="h-3 w-3" /> {formatLastActive(profile.lastActiveHours)}
-                        </motion.div>
-                    )}
+                <div className="absolute top-4 left-4 z-10 flex flex-col gap-[3px] pointer-events-none" style={{ marginTop: onFlechado ? '3.5rem' : '0' }}>
+                    {(() => {
+                        const badges: React.ReactNode[] = [];
+                        if (profile.activeNow) badges.push(
+                            <motion.div key="active" initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="bg-green-500/90 backdrop-blur-md text-white px-2.5 py-1 rounded-full text-[11px] font-bold flex items-center gap-1 border border-green-300/30 shadow-sm">
+                                <span className="relative flex h-2 w-2"><span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75" /><span className="relative inline-flex rounded-full h-2 w-2 bg-green-200" /></span>
+                                Activa ahora
+                            </motion.div>
+                        );
+                        if (profile.highResponseRate) badges.push(
+                            <motion.div key="response" initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="bg-blue-500/90 backdrop-blur-md text-white px-2.5 py-1 rounded-full text-[11px] font-bold flex items-center gap-1 border border-blue-300/30 shadow-sm">
+                                <MessageCircle className="h-3 w-3" /> Responde rápido
+                            </motion.div>
+                        );
+                        if (profile.sharedInterests !== undefined && profile.sharedInterests > 0) badges.push(
+                            <motion.div key="interests" initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="bg-purple-500/90 backdrop-blur-md text-white px-2.5 py-1 rounded-full text-[11px] font-bold flex items-center gap-1 border border-purple-300/30 shadow-sm">
+                                <Heart className="h-3 w-3" fill="white" /> {profile.sharedInterests} interés{profile.sharedInterests > 1 ? 'es' : ''} en común
+                            </motion.div>
+                        );
+                        if (profile.voiceIntro) badges.push(
+                            <motion.div key="voice" initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="bg-indigo-500/90 backdrop-blur-md text-white px-2.5 py-1 rounded-full text-[11px] font-bold flex items-center gap-1 border border-indigo-300/30 shadow-sm">
+                                <Music className="h-3 w-3" /> Voz
+                            </motion.div>
+                        );
+                        if ((profile as any).latestAnswer) badges.push(
+                            <motion.div key="answer" initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="bg-amber-500/90 backdrop-blur-md text-white px-2.5 py-1 rounded-full text-[11px] font-bold flex items-center gap-1 border border-amber-300/30 shadow-sm">
+                                <MessageCircle className="h-3 w-3" /> Respuesta del día
+                            </motion.div>
+                        );
+                        if ((profile as any).spotify?.topArtists?.length > 0) badges.push(
+                            <motion.div key="spotify" initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="bg-green-500/90 backdrop-blur-md text-white px-2.5 py-1 rounded-full text-[11px] font-bold flex items-center gap-1 border border-green-300/30 shadow-sm">
+                                <Music className="h-3 w-3" /> {(profile as any).spotify.topArtists[0]?.name || 'Spotify'}
+                            </motion.div>
+                        );
+                        if (!profile.activeNow && profile.lastActiveHours !== null && profile.lastActiveHours !== undefined) badges.push(
+                            <motion.div key="lastActive" initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="bg-gray-600/80 backdrop-blur-md text-white/90 px-2.5 py-1 rounded-full text-[11px] font-medium flex items-center gap-1 border border-white/10 shadow-sm">
+                                <Clock className="h-3 w-3" /> {formatLastActive(profile.lastActiveHours)}
+                            </motion.div>
+                        );
+                        const visible = badges.slice(0, 3);
+                        const remaining = badges.length - 3;
+                        return (
+                            <>
+                                {visible}
+                                {remaining > 0 && (
+                                    <motion.div key="more" initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="bg-white/20 backdrop-blur-md text-white px-2.5 py-1 rounded-full text-[11px] font-bold border border-white/20 shadow-sm">
+                                        +{remaining} más
+                                    </motion.div>
+                                )}
+                            </>
+                        );
+                    })()}
                 </div>
 
                 <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent p-6 text-white min-h-[180px] flex flex-col justify-end">
