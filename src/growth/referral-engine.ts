@@ -7,7 +7,7 @@ export interface ReferralConfig {
 }
 
 export const REFERRAL_PROGRAM: ReferralConfig = {
-    reward: '1_WEEK_PREMIUM',
+    reward: '1_WEEK_PLUS',
     maxReferrals: 5
 };
 

@@ -21,7 +21,7 @@ Hemos introducido mecánicas que premian la calidad de la conexión, no la adicc
 - **IA**: `src/ai/emotion/companion.ts` genera insights semanales sobre el comportamiento del usuario ("Tu energía es positiva", "Mejor hora de conexión").
 
 ### 5. Ethical Boost (LTV) 📈
-- **Gentle Boost**: Los usuarios Plus/Premium reciben un empuje aleatorio adicional de visibilidad (+2-3%) en el `getDynamicFeed`, simulando un algoritmo que "cuida" su inversión sin garantizar resultados falsos.
+- **Gentle Boost**: Los usuarios Plus reciben un empuje aleatorio adicional de visibilidad (+2-3%) en el `getDynamicFeed`, simulando un algoritmo que "cuida" su inversión sin garantizar resultados falsos.
 
 ## ✅ Estado Final
 - Tests de gamificación creados (`gamification.test.ts`).

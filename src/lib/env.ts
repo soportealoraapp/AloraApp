@@ -1,4 +1,17 @@
 /**
+ * Alora
+ * © 2026 Alora Team. All rights reserved.
+ *
+ * Soporte: soporte.alora.app@gmail.com
+ *
+ * Desarrollado por:
+ * - Alejandro Pérez Vázquez (CEO y fundador)
+ * - Caleb Zacarías García
+ * - Juan Carlos Moreno López
+ * - Erik Barrera Barrera
+ */
+
+/**
  * Environment variable validation for Alora.
  * Validates required variables at server startup.
  * FAILS EXPLICITLY if critical variables are missing.
@@ -17,8 +30,8 @@ const REQUIRED_CLIENT_VARS = [
 ] as const;
 
 const OPTIONAL_VARS = [
-  'STRIPE_SECRET_KEY',
-  'STRIPE_WEBHOOK_SECRET',
+  'LEMON_SQUEEZY_API_KEY',
+  'LEMON_SQUEEZY_WEBHOOK_SECRET',
   'MEMORY_ENCRYPTION_KEY',
   'FIREBASE_CLIENT_EMAIL',
   'FIREBASE_PRIVATE_KEY',

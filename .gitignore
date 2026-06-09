@@ -42,7 +42,20 @@ yarn-error.log*
 next-env.d.ts
 
 .genkit/*
-.env*
+# Env files (track .env.example, ignore actual env vars)
+.env
+.env.local
+.env.production
+.env.development
+.env.test
+
+# Firebase / service account keys
+service-account*.json
+
+# Private keys
+*.key
+*.p12
+*.pfx
 
 # firebase
 firebase-debug.log

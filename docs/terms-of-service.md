@@ -8,7 +8,7 @@ By using Alora, you agree to these terms. Must be 18+.
 - **Zero Tolerance**: Violators are banned instantly.
 
 ## 3. Premium Services
-- Subscriptions are billed via Google Play / Stripe.
+- Subscriptions are billed via Lemon Squeezy.
 - No refunds for partial months.
 
 ## 4. Liability

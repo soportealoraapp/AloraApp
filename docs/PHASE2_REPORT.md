@@ -6,8 +6,8 @@
 - **Image Optimization**: Configuración de `next/image` y dominios remotos en `next.config.ts`.
 - **Estructura de Dominio**: Interfaces tipadas en `src/lib/domain/types.ts`.
 
-## ✅ 2. UI Premium & Micro-interacciones
-- **Premium Components**:
+## ✅ 2. UI & Micro-interacciones
+- **Componentes destacados**:
   - `FloatingMatchCard`: Animaciones fluidas con `framer-motion` (Swipe Tinder-style).
   - `MatchScreen`: Pantalla completa de "It's a Match!" con confetti y animaciones.
   - `SoftModal` y `GlowInput`: Elementos de UI pulidos con glassmorphism.

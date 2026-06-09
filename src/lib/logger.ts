@@ -1,3 +1,16 @@
+/**
+ * Alora
+ * © 2026 Alora Team. All rights reserved.
+ *
+ * Soporte: soporte.alora.app@gmail.com
+ *
+ * Desarrollado por:
+ * - Alejandro Pérez Vázquez (CEO y fundador)
+ * - Caleb Zacarías García
+ * - Juan Carlos Moreno López
+ * - Erik Barrera Barrera
+ */
+
 type LogLevel = 'info' | 'warn' | 'error' | 'debug';
 
 interface LogEntry {

@@ -5,7 +5,7 @@
 - **Failover Status**: Status of Multi-Region replicas.
 
 ## 💰 Business Metrics
-- **ARR (Annual Recurring Revenue)**: Real-time via Stripe webhook.
+- **ARR (Annual Recurring Revenue)**: Real-time via Lemon Squeezy webhook.
 - **HeartTokens Velocity**: Rate of earn vs burn.
 
 ## 🚨 Predictive Alerts

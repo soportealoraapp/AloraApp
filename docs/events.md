@@ -14,5 +14,5 @@ Fomentamos la conexión humana a través de experiencias compartidas en vivo y m
 - **Women First**: En eventos de Speed Dating, mantenemos las reglas de quién inicia el contacto posterior.
 
 ## 3. Monetización Ética
-- **Entradas**: Algunos eventos pueden tener costo. Procesado vía Stripe.
+- **Entradas**: Algunos eventos pueden tener costo. Procesado vía Lemon Squeezy.
 - **Reembolsos**: Claramente estipulados en la descripción del evento.

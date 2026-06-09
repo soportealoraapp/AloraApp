@@ -105,6 +105,19 @@ Conecta el repo de GitHub a Vercel. Variables requeridas:
 
 Construir: `npm run build`
 
+## Equipo
+
+| Rol | Nombre |
+|-----|--------|
+| CEO y Fundador | Alejandro Pérez Vázquez |
+| Desarrollo | Caleb Zacarías García |
+| Desarrollo | Juan Carlos Moreno López |
+| Desarrollo | Erik Barrera Barrera |
+
+**Soporte**: soporte.alora.app@gmail.com
+
+© 2026 Alora Team. Todos los derechos reservados.
+
 ## Licencia
 
 Privada — Alora App
