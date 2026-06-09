@@ -146,7 +146,7 @@ export default function ProfilePage() {
               <CarouselContent>
                 {profile.photos?.map((photo, index) => (
                   <CarouselItem key={index}>
-                    <div className="w-full aspect-[3/4] relative">
+                    <div className="w-full aspect-[4/5] relative">
                       <Image
                         src={photo}
                         alt={`${profile.displayName} ${index + 1}`}
@@ -168,7 +168,7 @@ export default function ProfilePage() {
               alt={profile.displayName}
               width={600}
               height={800}
-              className="w-full aspect-[3/4] object-cover"
+              className="w-full aspect-[4/5] object-cover"
               
               priority
             />
@@ -192,7 +192,7 @@ export default function ProfilePage() {
 
           {profile.bio && (
             <Card className="rounded-3xl border-none shadow-sm bg-muted/30">
-              <CardContent className="p-6">
+              <CardContent className="p-5">
                 <p className="text-foreground leading-relaxed whitespace-pre-wrap">{profile.bio}</p>
               </CardContent>
             </Card>
@@ -220,7 +220,7 @@ export default function ProfilePage() {
 
           {profile.personalGuide && profile.personalGuide.length > 0 && (
             <Card className="rounded-3xl border shadow-sm">
-              <CardContent className="p-6 space-y-3">
+              <CardContent className="p-5 space-y-3">
                 <h3 className="font-bold text-lg text-primary">Guía Personal</h3>
                 <div className="space-y-2">
                   {profile.personalGuide.map((guide, index) => (
@@ -236,7 +236,7 @@ export default function ProfilePage() {
 
           {details.length > 0 && (
             <Card className="rounded-3xl">
-              <CardContent className="p-6">
+              <CardContent className="p-5">
                 <h3 className="font-bold text-lg mb-4">Más sobre mí</h3>
                 <div className="grid grid-cols-2 gap-y-6 gap-x-4">
                   {details.map(detail => {
@@ -261,7 +261,7 @@ export default function ProfilePage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {profile.interests && profile.interests.length > 0 && (
               <Card className="rounded-3xl">
-                <CardContent className="p-6">
+                <CardContent className="p-5">
                   <h3 className="font-semibold text-lg mb-3">Intereses</h3>
                   <BadgeChipList items={profile.interests} type="interest" />
                 </CardContent>
@@ -270,7 +270,7 @@ export default function ProfilePage() {
 
             {profile.values && profile.values.length > 0 && (
               <Card className="rounded-3xl">
-                <CardContent className="p-6">
+                <CardContent className="p-5">
                   <h3 className="font-semibold text-lg mb-3">Valores</h3>
                   <BadgeChipList items={profile.values} type="value" />
                 </CardContent>
@@ -280,7 +280,7 @@ export default function ProfilePage() {
 
           {profile.musicGenres && profile.musicGenres.length > 0 && (
             <Card className="rounded-3xl">
-              <CardContent className="p-6">
+              <CardContent className="p-5">
                 <h3 className="font-semibold text-lg flex items-center gap-2 mb-3">
                   <Music className="h-5 w-5" />
                   Gustos Musicales
@@ -298,14 +298,14 @@ export default function ProfilePage() {
               duration={(profile as any).voiceIntroDuration}
               onSave={() => {}}
               onDelete={() => {}}
-              isOwn={false}
+              isOwn={true}
             />
           )}
 
           {profile.photos && profile.photos.length > 1 && (
             <Card className="rounded-3xl">
-              <CardContent className="p-6">
-                <h3 className="font-bold text-lg mb-4">Galería</h3>
+              <CardContent className="p-5">
+                <h3 className="font-bold text-lg mb-4">Galería ({profile.photos.slice(1).length} fotos)</h3>
                 <div className="grid grid-cols-3 gap-2">
                   {profile.photos.slice(1).map((photo, index) => (
                     <div key={index} className="aspect-square relative rounded-2xl overflow-hidden shadow-sm">
@@ -352,7 +352,7 @@ export default function ProfilePage() {
                       ) : (
                         <div className="h-4 w-4 rounded-full border-2 border-muted-foreground/30" />
                       )}
-                      <span className={item.done ? 'text-muted-foreground line-through' : ''}>{item.label}</span>
+                      <span className={item.done ? 'text-muted-foreground opacity-60' : ''}>{item.label}</span>
                     </div>
                   ))}
                 </div>
@@ -456,73 +456,83 @@ export default function ProfilePage() {
             </CardContent>
           </Card>
 
-          <Link href="/profile/favorites">
-            <Card className="rounded-3xl border hover:shadow-md transition-shadow cursor-pointer">
-              <CardContent className="p-4 flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 bg-primary/10 rounded-xl">
-                    <Star className="h-5 w-5 text-primary" />
-                  </div>
-                  <div>
-                    <h4 className="font-bold text-foreground">Perfiles guardados</h4>
-                    <p className="text-xs text-muted-foreground">Tus favoritos</p>
-                  </div>
-                </div>
-                <ChevronRight className="h-5 w-5 text-muted-foreground" />
-              </CardContent>
-            </Card>
-          </Link>
+          <div className="pt-2">
+            <div className="flex items-center gap-2 mb-1">
+              <span className="h-px flex-1 bg-border/50" />
+              <span className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest">Tu actividad</span>
+              <span className="h-px flex-1 bg-border/50" />
+            </div>
+          </div>
 
-          <Link href="/profile/trust">
-            <Card className="rounded-3xl border hover:shadow-md transition-shadow cursor-pointer">
-              <CardContent className="p-4 flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 bg-primary/10 rounded-xl">
-                    <Shield className="h-5 w-5 text-primary" />
+          <div className="space-y-2">
+            <Link href="/profile/favorites">
+              <Card className="rounded-2xl border bg-muted/20 hover:bg-muted/40 transition-colors cursor-pointer">
+                <CardContent className="p-3.5 flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="p-1.5 rounded-lg bg-primary/10">
+                      <Star className="h-4 w-4 text-primary" />
+                    </div>
+                    <div>
+                      <h4 className="font-bold text-sm text-foreground">Perfiles guardados</h4>
+                      <p className="text-xs text-muted-foreground">Tus favoritos</p>
+                    </div>
                   </div>
-                  <div>
-                    <h4 className="font-bold text-foreground">Score de confianza</h4>
-                    <p className="text-xs text-muted-foreground">Tu reputación en la comunidad</p>
-                  </div>
-                </div>
-                <ChevronRight className="h-5 w-5 text-muted-foreground" />
-              </CardContent>
-            </Card>
-          </Link>
+                  <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                </CardContent>
+              </Card>
+            </Link>
 
-          <Link href="/profile/review">
-            <Card className="rounded-3xl border hover:shadow-md transition-shadow cursor-pointer bg-gradient-to-r from-primary/5 to-primary/5">
-              <CardContent className="p-4 flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 bg-primary/10 rounded-xl">
-                    <Sparkles className="h-5 w-5 text-primary" />
+            <Link href="/profile/trust">
+              <Card className="rounded-2xl border bg-muted/20 hover:bg-muted/40 transition-colors cursor-pointer">
+                <CardContent className="p-3.5 flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="p-1.5 rounded-lg bg-primary/10">
+                      <Shield className="h-4 w-4 text-primary" />
+                    </div>
+                    <div>
+                      <h4 className="font-bold text-sm text-foreground">Score de confianza</h4>
+                      <p className="text-xs text-muted-foreground">Tu reputación en la comunidad</p>
+                    </div>
                   </div>
-                  <div>
-                    <h4 className="font-bold text-foreground">Revisión de tu perfil</h4>
-                    <p className="text-xs text-muted-foreground">Consejos para mejorar tu perfil</p>
-                  </div>
-                </div>
-                <ChevronRight className="h-5 w-5 text-muted-foreground" />
-              </CardContent>
-            </Card>
-          </Link>
+                  <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                </CardContent>
+              </Card>
+            </Link>
 
-          <Link href="/profile/visitors">
-            <Card className="rounded-3xl border hover:shadow-md transition-shadow cursor-pointer">
-              <CardContent className="p-4 flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 bg-primary/10 rounded-xl">
-                    <Eye className="h-5 w-5 text-primary" />
+            <Link href="/profile/review">
+              <Card className="rounded-2xl border bg-muted/20 hover:bg-muted/40 transition-colors cursor-pointer">
+                <CardContent className="p-3.5 flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="p-1.5 rounded-lg bg-primary/10">
+                      <Sparkles className="h-4 w-4 text-primary" />
+                    </div>
+                    <div>
+                      <h4 className="font-bold text-sm text-foreground">Revisión de tu perfil</h4>
+                      <p className="text-xs text-muted-foreground">Consejos para mejorar tu perfil</p>
+                    </div>
                   </div>
-                  <div>
-                    <h4 className="font-bold text-foreground">Visitantes del perfil</h4>
-                    <p className="text-xs text-muted-foreground">¿Quién vio tu perfil?</p>
+                  <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                </CardContent>
+              </Card>
+            </Link>
+
+            <Link href="/profile/visitors">
+              <Card className="rounded-2xl border bg-muted/20 hover:bg-muted/40 transition-colors cursor-pointer">
+                <CardContent className="p-3.5 flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="p-1.5 rounded-lg bg-primary/10">
+                      <Eye className="h-4 w-4 text-primary" />
+                    </div>
+                    <div>
+                      <h4 className="font-bold text-sm text-foreground">Visitantes del perfil</h4>
+                      <p className="text-xs text-muted-foreground">¿Quién vio tu perfil?</p>
+                    </div>
                   </div>
-                </div>
-                <ChevronRight className="h-5 w-5 text-muted-foreground" />
-              </CardContent>
-            </Card>
-          </Link>
+                  <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                </CardContent>
+              </Card>
+            </Link>
+          </div>
 
           <BoostDashboard />
 

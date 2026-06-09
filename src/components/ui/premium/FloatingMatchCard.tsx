@@ -68,7 +68,7 @@ export function FloatingMatchCard({ profile, onSwipe, onFlechado, compatibility,
             whileHover={{ scale: 1.01 }}
             whileTap={{ scale: 0.98 }}
         >
-            <SoftCard className="h-[600px] overflow-hidden relative border-none shadow-xl rounded-[2.5rem] bg-card">
+            <SoftCard className="min-h-[500px] max-h-[calc(100vh-200px)] h-full overflow-hidden relative border-none shadow-xl rounded-3xl bg-card">
                 <Image
                     src={profile.photos?.[0] || '/placeholder.svg'}
                     alt={profile.displayName}
@@ -106,14 +106,14 @@ export function FloatingMatchCard({ profile, onSwipe, onFlechado, compatibility,
                         title={`Flechado: envío prioritario (${superlikesRemaining ?? 3}/día). Le llegará como superlike destacado.`}
                     >
                         <Star className="h-5 w-5 fill-white" />
-                        <span className="absolute -top-1 -right-1 bg-white text-blue-600 text-[9px] font-bold rounded-full w-4.5 h-4.5 flex items-center justify-center shadow-sm border border-blue-200" style={{ width: '18px', height: '18px' }}>
+                        <span className="absolute -top-1 -right-1 bg-white text-blue-600 text-[10px] font-bold rounded-full w-[18px] h-[18px] flex items-center justify-center shadow-sm border border-blue-200">
                             {superlikesRemaining ?? 3}
                         </span>
                     </button>
                 )}
 
                 {/* Retention signals */}
-                <div className="absolute top-4 left-4 z-10 flex flex-col gap-2" style={{ marginTop: onFlechado ? '3.5rem' : '0' }}>
+                <div className="absolute top-4 left-4 z-10 flex flex-col gap-2 max-h-[40%] overflow-y-auto pointer-events-none" style={{ marginTop: onFlechado ? '3.5rem' : '0' }}>
                     {profile.activeNow && (
                         <motion.div
                             initial={{ scale: 0.8, opacity: 0 }}

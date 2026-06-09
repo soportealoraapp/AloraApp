@@ -71,9 +71,9 @@ export function LikesCounter({
                         </span>
                     </div>
                     {timeUntilReset && (
-                        <span className="text-[10px] text-muted-foreground">
-                            Se restauran en {timeUntilReset}
-                        </span>
+                    <span className="text-[11px] text-muted-foreground">
+                        Se restauran en {timeUntilReset}
+                    </span>
                     )}
                 </div>
                 <Progress
@@ -92,6 +92,7 @@ export function LikesCounter({
                 onClose={() => setShowModal(false)}
                 remaining={remaining}
                 dailyLikesLimit={dailyLikesLimit}
+                resetAt={resetAt}
             />
         </>
     );

@@ -379,7 +379,7 @@ export default function DiscoverPage() {
         <div className="flex items-center gap-2">
           <h1 className="text-2xl font-bold tracking-tight text-foreground">Alora</h1>
           {(currentUserProfile as any)?.travelModeEnabled && (
-            <span className="text-[10px] bg-primary/10 text-primary px-2 py-0.5 rounded-full font-medium flex items-center gap-1">
+            <span className="text-[11px] bg-primary/10 text-primary px-2 py-0.5 rounded-full font-medium flex items-center gap-1">
               ✈️ Explorando: {(currentUserProfile as any).travelCity}
             </span>
           )}
@@ -407,7 +407,7 @@ export default function DiscoverPage() {
               </TabsTrigger>
             </TabsList>
           </Tabs>
-          <div className="md:hidden flex">
+          <div className="md:hidden flex items-center gap-0.5">
             <Button
               variant="ghost"
               size="icon"
@@ -418,24 +418,41 @@ export default function DiscoverPage() {
             >
               {browseMode === 'swipe' ? <LayoutGrid className="h-4 w-4 text-muted-foreground" /> : <CreditCard className="h-4 w-4 text-muted-foreground" />}
             </Button>
+            <div className="flex items-center">
+              <Button variant="ghost" size="icon" onClick={handleRewind} disabled={!lastSwipeRef.current || rewinding} title={`Rewind: deshace el último swipe (${rewindsRemaining}/${maxRewinds} disponibles)`} aria-label="Deshacer último swipe" className="h-8 w-8">
+                <RotateCcw className="h-4 w-4 text-muted-foreground" />
+              </Button>
+              <span className="text-[11px] text-muted-foreground font-bold">{rewindsRemaining}</span>
+            </div>
+            <Button variant="ghost" size="icon" onClick={() => setFilterOpen(true)} title="Filtros de búsqueda" aria-label="Filtros de búsqueda" className="relative h-8 w-8">
+              <SlidersHorizontal className="h-4 w-4 text-muted-foreground" />
+              {countActiveFilters(filters) > 0 && (
+                <span className="absolute -top-0.5 -right-0.5 bg-primary text-primary-foreground text-[10px] font-bold rounded-full min-w-[18px] h-[18px] flex items-center justify-center shadow-sm border border-background">
+                  {countActiveFilters(filters)}
+                </span>
+              )}
+            </Button>
+            <Button variant="ghost" size="icon" onClick={() => refresh()} title="Refrescar perfiles" aria-label="Refrescar perfiles" className="h-8 w-8">
+              <RefreshCcw className="h-4 w-4 text-muted-foreground" />
+            </Button>
           </div>
-          <div className="flex items-center">
+          <div className="hidden md:flex items-center gap-1">
             <Button variant="ghost" size="icon" onClick={handleRewind} disabled={!lastSwipeRef.current || rewinding} title={`Rewind: deshace el último swipe (${rewindsRemaining}/${maxRewinds} disponibles)`} aria-label="Deshacer último swipe">
               <RotateCcw className="h-5 w-5 text-muted-foreground" />
             </Button>
-            <span className="text-[10px] text-muted-foreground font-bold -ml-1.5">{rewindsRemaining}</span>
+            <span className="text-[11px] text-muted-foreground font-bold -ml-1">{rewindsRemaining}</span>
+            <Button variant="ghost" size="icon" onClick={() => setFilterOpen(true)} title="Filtros de búsqueda" aria-label="Filtros de búsqueda" className="relative">
+              <SlidersHorizontal className="h-5 w-5 text-muted-foreground" />
+              {countActiveFilters(filters) > 0 && (
+                <span className="absolute -top-0.5 -right-0.5 bg-primary text-primary-foreground text-[10px] font-bold rounded-full min-w-[18px] h-[18px] flex items-center justify-center shadow-sm border border-background">
+                  {countActiveFilters(filters)}
+                </span>
+              )}
+            </Button>
+            <Button variant="ghost" size="icon" onClick={() => refresh()} title="Refrescar perfiles" aria-label="Refrescar perfiles">
+              <RefreshCcw className="h-5 w-5 text-muted-foreground" />
+            </Button>
           </div>
-          <Button variant="ghost" size="icon" onClick={() => setFilterOpen(true)} title="Filtros de búsqueda" aria-label="Filtros de búsqueda" className="relative">
-            <SlidersHorizontal className="h-5 w-5 text-muted-foreground" />
-            {countActiveFilters(filters) > 0 && (
-              <span className="absolute -top-0.5 -right-0.5 bg-primary text-primary-foreground text-[9px] font-bold rounded-full w-4 h-4 flex items-center justify-center shadow-sm border border-background">
-                {countActiveFilters(filters)}
-              </span>
-            )}
-          </Button>
-          <Button variant="ghost" size="icon" onClick={() => refresh()} title="Refrescar perfiles" aria-label="Refrescar perfiles">
-            <RefreshCcw className="h-5 w-5 text-muted-foreground" />
-          </Button>
         </div>
       </header>
 
@@ -481,7 +498,7 @@ export default function DiscoverPage() {
           <Card className="p-4 bg-gradient-to-br from-primary/5 to-primary/10 border-primary/20">
             <div className="flex items-center justify-between mb-3">
               <p className="text-sm font-bold">Tu perfil está al {activationScore}%</p>
-              <span className="text-[10px] text-muted-foreground">Completa estas acciones</span>
+              <span className="text-xs text-muted-foreground">Completa estas acciones</span>
             </div>
             <Progress value={activationScore} className="h-2 mb-3" />
             <div className="space-y-1.5">
@@ -511,7 +528,7 @@ export default function DiscoverPage() {
                 >
                   <Circle className="h-3 w-3 text-muted-foreground shrink-0" />
                   <span className="flex-1">{task.title}</span>
-                  <span className="text-[9px] text-primary font-medium">{task.rewardText}</span>
+                  <span className="text-[10px] text-primary font-medium">{task.rewardText}</span>
                 </button>
               ))}
             </div>
@@ -564,7 +581,7 @@ export default function DiscoverPage() {
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
                       {p.activeNow && (
-                        <div className="absolute top-2 left-2 bg-green-500/90 backdrop-blur-sm text-white text-[8px] font-bold px-1.5 py-0.5 rounded-full flex items-center gap-1 border border-green-300/30">
+                        <div className="absolute top-2 left-2 bg-green-500/90 backdrop-blur-sm text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full flex items-center gap-1 border border-green-300/30">
                           <span className="relative flex h-1.5 w-1.5">
                             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75" />
                             <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-green-200" />
@@ -573,23 +590,23 @@ export default function DiscoverPage() {
                         </div>
                       )}
                       {(p as any).latestAnswer && (
-                        <div className="absolute top-2 right-2 bg-amber-500/90 backdrop-blur-sm text-white text-[8px] font-bold px-1.5 py-0.5 rounded-full">
+                        <div className="absolute top-2 right-2 bg-amber-500/90 backdrop-blur-sm text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">
                           💬 Resp.
                         </div>
                       )}
                       {p.voiceIntro && (
-                        <div className="absolute top-8 left-2 bg-indigo-500/90 backdrop-blur-sm text-white text-[8px] font-bold px-1.5 py-0.5 rounded-full">
+                        <div className="absolute top-8 left-2 bg-indigo-500/90 backdrop-blur-sm text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">
                           🎵 Voz
                         </div>
                       )}
                       <div className="absolute bottom-2 left-2 right-2">
                         <div className="text-white text-xs font-bold leading-tight">{p.displayName}, {p.age}</div>
-                        {p.city && <div className="text-white/70 text-[10px]">{p.city}</div>}
+                        {p.city && <div className="text-white/70 text-xs">{p.city}</div>}
                         {p.sharedInterests !== undefined && p.sharedInterests > 0 && (
-                          <div className="text-purple-200 text-[9px] mt-0.5">{p.sharedInterests} interés(es) en común</div>
+                          <div className="text-purple-200 text-[10px] mt-0.5">{p.sharedInterests} interés(es) en común</div>
                         )}
                         {compatibility != null && (
-                          <div className="inline-block bg-primary/80 text-white text-[10px] px-1.5 py-0.5 rounded mt-1">
+                          <div className="inline-block bg-primary/80 text-white text-xs px-1.5 py-0.5 rounded mt-1">
                             {Math.round(compatibility)}% compatibles
                           </div>
                         )}
@@ -620,10 +637,9 @@ export default function DiscoverPage() {
                   </Card>
                 ))}
               </div>
-              <SecondChanceSection />
             </div>
           ) : currentProfile ? (
-            <div className="w-full max-w-sm h-[600px] relative">
+            <div className="w-full max-w-sm min-h-[500px] max-h-[calc(100vh-180px)] h-full relative">
               {/* Tutorial de swipe — primera vez */}
               {tutorialStep !== null && (
                 <div className="absolute -top-14 left-0 right-0 flex justify-center z-30">
@@ -632,7 +648,7 @@ export default function DiscoverPage() {
                     {tutorialStep === 2 && <p>👈 Desliza a la izquierda para <strong>Pasar</strong></p>}
                     {tutorialStep === 3 && <p>⭐ Toca la estrella para <strong>Flechado</strong> (superlike)</p>}
                     <div className="flex justify-between items-center mt-2.5">
-                      <span className="text-[10px] opacity-50">{tutorialStep}/3</span>
+                      <span className="text-xs opacity-50">{tutorialStep}/3</span>
                       <button onClick={tutorialStep === 3 ? dismissTutorial : nextTutorialStep} className="text-[11px] font-bold underline">
                         {tutorialStep === 3 ? 'Cerrar' : 'Siguiente →'}
                       </button>
@@ -667,7 +683,6 @@ export default function DiscoverPage() {
                   Explorar de nuevo
                 </Button>
               </div>
-              <SecondChanceSection />
             </div>
           )}
         </AnimatePresence>

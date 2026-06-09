@@ -39,12 +39,12 @@ export function BottomNav() {
                   <div className="relative">
                     <Icon className={cn("h-6 w-6 transition-all", isActive ? "scale-110" : "")} />
                     {showBadge && (
-                      <span className="absolute -top-1 -right-1 bg-destructive text-destructive-foreground text-[9px] font-bold rounded-full min-w-[16px] h-4 flex items-center justify-center px-1 shadow-lg">
+                      <span className="absolute -top-1 -right-1 bg-destructive text-destructive-foreground text-[10px] font-bold rounded-full min-w-[16px] h-4 flex items-center justify-center px-1 shadow-lg">
                         {unreadCount > 99 ? '99+' : unreadCount}
                       </span>
                     )}
                   </div>
-                  <span className={cn("text-[10px] font-bold tracking-tight uppercase", isActive ? "opacity-100" : "opacity-70")}>
+                    <span className={cn("text-xs font-bold tracking-tight uppercase", isActive ? "opacity-100" : "opacity-70")}>
                     {label}
                   </span>
                 </motion.div>
@@ -79,7 +79,7 @@ export function BottomNav() {
                     <div className="relative">
                       <Icon className="h-5 w-5" />
                       {showBadge && (
-                        <span className="absolute -top-1.5 -right-1.5 bg-destructive text-destructive-foreground text-[9px] font-bold rounded-full min-w-[14px] h-3.5 flex items-center justify-center px-0.5 shadow-lg">
+                        <span className="absolute -top-1.5 -right-1.5 bg-destructive text-destructive-foreground text-[10px] font-bold rounded-full min-w-[14px] h-3.5 flex items-center justify-center px-0.5 shadow-lg">
                           {unreadCount > 99 ? '99+' : unreadCount}
                         </span>
                       )}

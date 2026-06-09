@@ -17,9 +17,10 @@ interface LikesCounterModalProps {
     onClose: () => void;
     remaining: number;
     dailyLikesLimit: number;
+    resetAt?: Date | string;
 }
 
-export function LikesCounterModal({ isOpen, onClose, remaining, dailyLikesLimit }: LikesCounterModalProps) {
+export function LikesCounterModal({ isOpen, onClose, remaining, dailyLikesLimit, resetAt }: LikesCounterModalProps) {
     const [timeUntilReset, setTimeUntilReset] = useState('');
 
     useEffect(() => {
@@ -27,9 +28,8 @@ export function LikesCounterModal({ isOpen, onClose, remaining, dailyLikesLimit 
 
         const updateTimer = () => {
             const now = new Date();
-            const midnight = new Date(now);
-            midnight.setHours(24, 0, 0, 0);
-            const diff = midnight.getTime() - now.getTime();
+            const targetDate = resetAt ? new Date(resetAt) : new Date(new Date().setHours(24, 0, 0, 0));
+            const diff = targetDate.getTime() - now.getTime();
 
             if (diff <= 0) {
                 setTimeUntilReset('00:00:00');
@@ -48,7 +48,7 @@ export function LikesCounterModal({ isOpen, onClose, remaining, dailyLikesLimit 
         updateTimer();
         const interval = setInterval(updateTimer, 1000);
         return () => clearInterval(interval);
-    }, [isOpen]);
+    }, [isOpen, resetAt]);
 
     const isLow = remaining <= 10;
     const isEmpty = remaining === 0;
