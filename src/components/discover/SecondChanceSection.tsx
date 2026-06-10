@@ -82,11 +82,11 @@ export function SecondChanceSection() {
                 </div>
               </div>
               <div className="flex gap-1 p-1.5">
-                <Button size="sm" variant="ghost" className="flex-1 h-8" onClick={() => handleLike(profile.id)}>
-                  <Heart className="h-4 w-4 text-green-500" />
+                <Button size="sm" variant="ghost" className="flex-1 h-11" onClick={() => handleLike(profile.id)}>
+                  <Heart className="h-4 w-4 text-primary" />
                 </Button>
-                <Button size="sm" variant="ghost" className="flex-1 h-8" onClick={() => handleDefinitivePass(profile.id)}>
-                  <UserX className="h-4 w-4 text-red-500" />
+                <Button size="sm" variant="ghost" className="flex-1 h-11" onClick={() => handleDefinitivePass(profile.id)}>
+                  <UserX className="h-4 w-4 text-destructive" />
                 </Button>
               </div>
             </Card>

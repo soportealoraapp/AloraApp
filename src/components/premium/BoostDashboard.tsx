@@ -104,7 +104,7 @@ export function BoostDashboard() {
         return (
             <Card>
                 <CardContent className="py-8 flex justify-center">
-                    <Loader2 className="animate-spin text-pink-500 h-6 w-6" />
+                    <Loader2 className="animate-spin text-primary h-6 w-6" />
                 </CardContent>
             </Card>
         );
@@ -116,7 +116,7 @@ export function BoostDashboard() {
         <Card className="overflow-hidden">
             <CardHeader className="pb-4">
                 <CardTitle className="text-lg flex items-center gap-2">
-                    <Zap className="h-5 w-5 text-amber-500" />
+                    <Zap className="h-5 w-5 text-warning" />
                     Mis Boosts
                 </CardTitle>
             </CardHeader>
@@ -149,7 +149,7 @@ export function BoostDashboard() {
                         <Button
                             onClick={handleActivate}
                             disabled={activating || (!!stats.nextAvailableAt && new Date(stats.nextAvailableAt) > new Date())}
-                            className="w-full bg-gradient-to-r from-pink-500 to-rose-400 text-white py-6 rounded-2xl font-bold"
+                            className="w-full bg-gradient-to-r from-primary to-primary/80 text-white py-6 rounded-2xl font-bold"
                         >
                             {activating ? (
                                 <Loader2 className="animate-spin h-5 w-5" />
@@ -173,18 +173,18 @@ export function BoostDashboard() {
 
                 {/* Stats Grid */}
                 <div className="grid grid-cols-3 gap-3">
-                    <div className="text-center p-3 bg-pink-50 rounded-xl">
-                        <Heart className="h-4 w-4 text-pink-500 mx-auto mb-1" />
+                    <div className="text-center p-3 bg-primary/10 rounded-xl">
+                        <Heart className="h-4 w-4 text-primary mx-auto mb-1" />
                         <p className="text-lg font-bold">{stats.stats.likesReceived7d}</p>
                         <p className="text-xs text-muted-foreground">Likes (7d)</p>
                     </div>
-                    <div className="text-center p-3 bg-purple-50 rounded-xl">
-                        <Users className="h-4 w-4 text-purple-500 mx-auto mb-1" />
+                    <div className="text-center p-3 bg-accent/30 rounded-xl">
+                        <Users className="h-4 w-4 text-accent mx-auto mb-1" />
                         <p className="text-lg font-bold">{stats.stats.matchesCreated7d}</p>
                         <p className="text-xs text-muted-foreground">Matches (7d)</p>
                     </div>
-                    <div className="text-center p-3 bg-amber-50 rounded-xl">
-                        <TrendingUp className="h-4 w-4 text-amber-500 mx-auto mb-1" />
+                    <div className="text-center p-3 bg-warning/10 rounded-xl">
+                        <TrendingUp className="h-4 w-4 text-warning mx-auto mb-1" />
                         <p className="text-lg font-bold">{stats.totalBoosts}</p>
                         <p className="text-xs text-muted-foreground">Total boosts</p>
                     </div>
@@ -200,10 +200,10 @@ export function BoostDashboard() {
                                 <p className="text-sm font-bold">{stats.boostComparison.before.likes} likes</p>
                                 <p className="text-xs text-muted-foreground">{stats.boostComparison.before.matches} matches</p>
                             </div>
-                            <div className="p-2 bg-blue-50 rounded-lg">
-                                <p className="text-xs text-blue-600 mb-1 font-medium">Durante</p>
-                                <p className="text-sm font-bold text-blue-700">{stats.boostComparison.during.likes} likes</p>
-                                <p className="text-xs text-blue-600">{stats.boostComparison.during.matches} matches</p>
+                            <div className="p-2 bg-accent/30 rounded-lg">
+                                <p className="text-xs text-accent mb-1 font-medium">Durante</p>
+                                <p className="text-sm font-bold text-accent">{stats.boostComparison.during.likes} likes</p>
+                                <p className="text-xs text-accent">{stats.boostComparison.during.matches} matches</p>
                             </div>
                             <div className="p-2 bg-muted/30 rounded-lg">
                                 <p className="text-xs text-muted-foreground mb-1">Despues</p>
@@ -212,7 +212,7 @@ export function BoostDashboard() {
                             </div>
                         </div>
                         {stats.boostComparison.before.likes > 0 && (
-                            <p className="text-xs text-center text-green-600">
+                            <p className="text-xs text-center text-primary">
                                 +{Math.round(((stats.boostComparison.during.likes - stats.boostComparison.before.likes) / stats.boostComparison.before.likes) * 100)}% likes durante boost
                             </p>
                         )}

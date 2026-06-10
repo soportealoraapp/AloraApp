@@ -115,13 +115,13 @@ export default function TravelModePage() {
     if (loading) {
         return (
             <div className="md:pl-60 p-6 flex justify-center py-20">
-                <Loader2 className="animate-spin text-pink-500 h-8 w-8" />
+                <Loader2 className="animate-spin text-primary h-8 w-8" />
             </div>
         );
     }
 
     return (
-        <div className="md:pl-60 p-6 space-y-6 bg-gray-50 min-h-screen">
+        <div className="md:pl-60 p-6 space-y-6 bg-muted/50 min-h-screen">
             <div className="flex items-center gap-4">
                 <Button variant="ghost" size="icon" onClick={() => router.back()}>
                     <ArrowLeft className="h-5 w-5" />
@@ -139,8 +139,8 @@ export default function TravelModePage() {
                 <CardHeader>
                     <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
-                            <div className="p-2 bg-blue-100 rounded-xl">
-                                <Plane className="h-5 w-5 text-blue-600" />
+                            <div className="p-2 bg-accent rounded-xl">
+                                <Plane className="h-5 w-5 text-accent-foreground" />
                             </div>
                             <div>
                                 <CardTitle className="text-lg">Activar Modo Viaje</CardTitle>
@@ -158,9 +158,9 @@ export default function TravelModePage() {
                 </CardHeader>
                 <CardContent className="space-y-4">
                     {enabled && (
-                        <div className="flex items-center gap-2 p-3 bg-blue-50 rounded-xl">
-                            <MapPin className="h-4 w-4 text-blue-600" />
-                            <span className="text-sm font-medium text-blue-800">
+                        <div className="flex items-center gap-2 p-3 bg-accent/50 rounded-xl">
+                            <MapPin className="h-4 w-4 text-accent-foreground" />
+                            <span className="text-sm font-medium text-accent-foreground">
                                 Explorando: {city}, {countryCode}
                             </span>
                             {startedAt && (

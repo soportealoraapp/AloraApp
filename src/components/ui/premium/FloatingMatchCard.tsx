@@ -6,226 +6,231 @@ import { UserProfile } from '@/lib/domain/types';
 import Image from 'next/image';
 import { TrustBadge } from './TrustBadge';
 import { ProfileActions } from '../../match/ProfileActions';
-import { Clock, Zap, MessageCircle, Heart, X, Star, Music } from 'lucide-react';
-import { useState } from 'react';
+import { Clock, MessageCircle, Heart, X, Star, Music } from 'lucide-react';
+import { useState, useCallback } from 'react';
 
 interface FloatingMatchCardProps {
-    profile: UserProfile;
-    onSwipe: (direction: 'left' | 'right') => void;
-    onFlechado?: () => void;
-    compatibility?: number | null;
-    compatibilityDetails?: {
-        sharedValues?: string[];
-        sharedInterests?: string[];
-        sharedMusic?: string[];
-    };
-    superlikesRemaining?: number;
-    explanations?: string[];
+  profile: UserProfile;
+  onSwipe: (direction: 'left' | 'right') => void;
+  onFlechado?: () => void;
+  compatibility?: number | null;
+  compatibilityDetails?: {
+    sharedValues?: string[];
+    sharedInterests?: string[];
+    sharedMusic?: string[];
+  };
+  superlikesRemaining?: number;
+  explanations?: string[];
 }
 
 export function FloatingMatchCard({ profile, onSwipe, onFlechado, compatibility, compatibilityDetails, superlikesRemaining, explanations }: FloatingMatchCardProps) {
-    const controls = useAnimation();
-    const [dragX, setDragX] = useState(0);
+  const controls = useAnimation();
+  const [dragX, setDragX] = useState(0);
+  const [likeBurst, setLikeBurst] = useState(false);
 
-    const handleDrag = (event: any, info: PanInfo) => {
-        setDragX(info.offset.x);
-    };
+  const handleLike = useCallback((e: React.MouseEvent) => {
+    e.stopPropagation();
+    setLikeBurst(true);
+    setTimeout(() => {
+      setLikeBurst(false);
+      onSwipe('right');
+    }, 400);
+  }, [onSwipe]);
 
-    const handleDragEnd = async (event: any, info: PanInfo) => {
-        setDragX(0);
-        const threshold = 100;
-        if (info.offset.x > threshold) {
-            await controls.start({ x: 500, opacity: 0, rotate: 20 });
-            onSwipe('right');
-        } else if (info.offset.x < -threshold) {
-            await controls.start({ x: -500, opacity: 0, rotate: -20 });
-            onSwipe('left');
-        } else {
-            controls.start({ x: 0, opacity: 1, rotate: 0 });
-        }
-    };
+  const handleDrag = (event: any, info: PanInfo) => {
+    setDragX(info.offset.x);
+  };
 
-    const formatLastActive = (hours: number | null | undefined): string | null => {
-        if (hours === null || hours === undefined) return null;
-        if (hours < 1) return 'Activa ahora';
-        if (hours < 2) return 'Activa hace 1 hora';
-        if (hours < 24) return `Activa hace ${hours} horas`;
-        const days = Math.floor(hours / 24);
-        return `Activa hace ${days} día${days > 1 ? 's' : ''}`;
-    };
+  const handleDragEnd = async (event: any, info: PanInfo) => {
+    setDragX(0);
+    const threshold = 100;
+    if (info.offset.x > threshold) {
+      await controls.start({ x: 500, opacity: 0, rotate: 20 });
+      onSwipe('right');
+    } else if (info.offset.x < -threshold) {
+      await controls.start({ x: -500, opacity: 0, rotate: -20 });
+      onSwipe('left');
+    } else {
+      controls.start({ x: 0, opacity: 1, rotate: 0 });
+    }
+  };
 
-    return (
-        <motion.div
-            drag="x"
-            dragConstraints={{ left: 0, right: 0 }}
-            onDrag={handleDrag}
-            onDragEnd={handleDragEnd}
-            animate={controls}
-            initial={{ scale: 0.95, opacity: 0 }}
-            whileInView={{ scale: 1, opacity: 1 }}
-            transition={{ type: "spring", stiffness: 180, damping: 35 }}
-            className="absolute w-full h-full max-w-sm cursor-grab active:cursor-grabbing"
-            whileHover={{ scale: 1.01 }}
-            whileTap={{ scale: 0.98 }}
-        >
-            <SoftCard className="min-h-[400px] max-h-[calc(100dvh-180px)] h-full overflow-hidden relative border-none shadow-xl rounded-3xl bg-card">
-                <Image
-                    src={profile.photos?.[0] || '/placeholder.svg'}
-                    alt={profile.displayName}
-                    fill
-                    className="object-cover pointer-events-none"
-                    priority
-                />
+  const formatLastActive = (hours: number | null | undefined): string | null => {
+    if (hours === null || hours === undefined) return null;
+    if (hours < 1) return 'Activa ahora';
+    if (hours < 2) return 'Activa hace 1 hora';
+    if (hours < 24) return `Activa hace ${hours} horas`;
+    const days = Math.floor(hours / 24);
+    return `Activa hace ${days} día${days > 1 ? 's' : ''}`;
+  };
 
-                {/* Swipe indicators during drag */}
-                {dragX > 50 && (
-                    <div className="absolute inset-0 z-30 bg-green-500/20 flex items-center justify-start p-8">
-                        <div className="bg-white rounded-full p-4 shadow-xl">
-                            <Heart className="h-10 w-10 text-green-500 fill-green-500" />
-                        </div>
-                    </div>
-                )}
-                {dragX < -50 && (
-                    <div className="absolute inset-0 z-30 bg-red-500/20 flex items-center justify-end p-8">
-                        <div className="bg-white rounded-full p-4 shadow-xl">
-                            <X className="h-10 w-10 text-red-500" />
-                        </div>
-                    </div>
-                )}
+  return (
+    <motion.div
+      drag="x"
+      dragConstraints={{ left: 0, right: 0 }}
+      onDrag={handleDrag}
+      onDragEnd={handleDragEnd}
+      animate={controls}
+      initial={{ scale: 0.95, opacity: 0 }}
+      whileInView={{ scale: 1, opacity: 1 }}
+      transition={{ type: "spring", stiffness: 180, damping: 35 }}
+      className="absolute w-full h-full max-w-sm cursor-grab active:cursor-grabbing"
+      whileHover={{ scale: 1.01 }}
+      whileTap={{ scale: 0.98 }}
+    >
+      <SoftCard className="min-h-[400px] max-h-[calc(100dvh-180px)] h-full overflow-hidden relative border-none shadow-xl rounded-3xl bg-card">
+        <Image
+          src={profile.photos?.[0] || '/placeholder.svg'}
+          alt={profile.displayName}
+          fill
+          className="object-cover pointer-events-none"
+          priority
+        />
 
-                <div className="absolute top-4 right-4 z-20">
-                    <ProfileActions userId={profile.id} userName={profile.displayName} />
-                </div>
-
-                {/* Flechado button */}
-                {onFlechado && (
-                    <button
-                        onClick={(e) => { e.stopPropagation(); onFlechado(); }}
-                        className="absolute top-4 left-4 z-20 bg-blue-500 hover:bg-blue-600 text-white rounded-full w-12 h-12 flex items-center justify-center shadow-lg transition-transform hover:scale-110 active:scale-95 relative"
-                        aria-label="Flechado (superlike)"
-                        title={`Flechado: envío prioritario (${superlikesRemaining ?? 3}/día). Le llegará como superlike destacado.`}
-                    >
-                        <Star className="h-5 w-5 fill-white" />
-                        <span className="absolute -top-1 -right-1 bg-white text-blue-600 text-[11px] font-bold rounded-full w-[18px] h-[18px] flex items-center justify-center shadow-sm border border-blue-200">
-                            {superlikesRemaining ?? 3}
-                        </span>
-                    </button>
-                )}
-
-                {/* Retention signals */}
-                <div className="absolute top-4 left-4 z-10 flex flex-col gap-[3px] pointer-events-none" style={{ marginTop: onFlechado ? '3.5rem' : '0' }}>
-                    {(() => {
-                        const badges: React.ReactNode[] = [];
-                        if (profile.activeNow) badges.push(
-                            <motion.div key="active" initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="bg-green-500/90 backdrop-blur-md text-white px-2.5 py-1 rounded-full text-[11px] font-bold flex items-center gap-1 border border-green-300/30 shadow-sm">
-                                <span className="relative flex h-2 w-2"><span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75" /><span className="relative inline-flex rounded-full h-2 w-2 bg-green-200" /></span>
-                                Activa ahora
-                            </motion.div>
-                        );
-                        if (profile.highResponseRate) badges.push(
-                            <motion.div key="response" initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="bg-blue-500/90 backdrop-blur-md text-white px-2.5 py-1 rounded-full text-[11px] font-bold flex items-center gap-1 border border-blue-300/30 shadow-sm">
-                                <MessageCircle className="h-3 w-3" /> Responde rápido
-                            </motion.div>
-                        );
-                        if (profile.sharedInterests !== undefined && profile.sharedInterests > 0) badges.push(
-                            <motion.div key="interests" initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="bg-purple-500/90 backdrop-blur-md text-white px-2.5 py-1 rounded-full text-[11px] font-bold flex items-center gap-1 border border-purple-300/30 shadow-sm">
-                                <Heart className="h-3 w-3" fill="white" /> {profile.sharedInterests} interés{profile.sharedInterests > 1 ? 'es' : ''} en común
-                            </motion.div>
-                        );
-                        if (profile.voiceIntro) badges.push(
-                            <motion.div key="voice" initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="bg-indigo-500/90 backdrop-blur-md text-white px-2.5 py-1 rounded-full text-[11px] font-bold flex items-center gap-1 border border-indigo-300/30 shadow-sm">
-                                <Music className="h-3 w-3" /> Voz
-                            </motion.div>
-                        );
-                        if ((profile as any).latestAnswer) badges.push(
-                            <motion.div key="answer" initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="bg-amber-500/90 backdrop-blur-md text-white px-2.5 py-1 rounded-full text-[11px] font-bold flex items-center gap-1 border border-amber-300/30 shadow-sm">
-                                <MessageCircle className="h-3 w-3" /> Respuesta del día
-                            </motion.div>
-                        );
-                        if ((profile as any).spotify?.topArtists?.length > 0) badges.push(
-                            <motion.div key="spotify" initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="bg-green-500/90 backdrop-blur-md text-white px-2.5 py-1 rounded-full text-[11px] font-bold flex items-center gap-1 border border-green-300/30 shadow-sm">
-                                <Music className="h-3 w-3" /> {(profile as any).spotify.topArtists[0]?.name || 'Spotify'}
-                            </motion.div>
-                        );
-                        if (!profile.activeNow && profile.lastActiveHours !== null && profile.lastActiveHours !== undefined) badges.push(
-                            <motion.div key="lastActive" initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="bg-gray-600/80 backdrop-blur-md text-white/90 px-2.5 py-1 rounded-full text-[11px] font-medium flex items-center gap-1 border border-white/10 shadow-sm">
-                                <Clock className="h-3 w-3" /> {formatLastActive(profile.lastActiveHours)}
-                            </motion.div>
-                        );
-                        const visible = badges.slice(0, 3);
-                        const remaining = badges.length - 3;
-                        return (
-                            <>
-                                {visible}
-                                {remaining > 0 && (
-                                    <motion.div key="more" initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="bg-white/20 backdrop-blur-md text-white px-2.5 py-1 rounded-full text-[11px] font-bold border border-white/20 shadow-sm">
-                                        +{remaining} más
-                                    </motion.div>
-                                )}
-                            </>
-                        );
-                    })()}
-                </div>
-
-                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent p-6 text-white min-h-[180px] flex flex-col justify-end">
-                    <div className="flex flex-wrap gap-2 mb-3">
-                        {compatibility !== null && compatibility !== undefined && (
-                            <motion.div
-                                initial={{ scale: 0.8, opacity: 0 }}
-                                animate={{ scale: 1, opacity: 1 }}
-                                className="bg-pink-500/90 backdrop-blur-md text-white px-3 py-1 rounded-full text-xs font-bold w-fit flex items-center gap-1 border border-pink-300/30 shadow-lg"
-                            >
-                                <Zap className="h-3 w-3" /> {compatibility}% Compatible
-                            </motion.div>
-                        )}
-                        {profile.isVerified && <TrustBadge type="verified" />}
-                        {(profile.completenessScore ?? 0) >= 90 && <TrustBadge type="complete" />}
-                    </div>
-
-                    {(profile as any).latestAnswer && (
-                        <div className="mb-2 bg-white/10 backdrop-blur-sm rounded-xl p-2.5">
-                            <p className="text-xs text-white/60 uppercase tracking-wider mb-0.5">
-                                {(profile as any).latestAnswer.category || 'Pregunta del día'}
-                            </p>
-                            <p className="text-white/90 text-xs leading-tight line-clamp-2">
-                                {(profile as any).latestAnswer.answer}
-                            </p>
-                        </div>
-                    )}
-
-                    {explanations && explanations.length > 0 && (
-                        <div className="mb-3 space-y-0.5">
-                            {explanations.slice(0, 2).map((exp, i) => (
-                                <div key={i} className="text-white/80 text-[11px] leading-tight">
-                                    • {exp}
-                                </div>
-                            ))}
-                        </div>
-                    )}
-
-                    <h2 className="text-3xl font-bold tracking-tight mb-1">{profile.displayName}, {profile.age}</h2>
-                    <p className="text-white/80 text-sm line-clamp-2 leading-relaxed">{profile.bio}</p>
-                </div>
-            </SoftCard>
-
-            <div className="absolute -bottom-16 left-0 right-0 flex items-center justify-center gap-6 z-20">
-                <button
-                    onClick={(e) => { e.stopPropagation(); onSwipe('left'); }}
-                    className="bg-card hover:bg-accent text-red-500 rounded-full w-14 h-14 flex items-center justify-center shadow-xl transition-transform hover:scale-110 active:scale-95 border border-border focus-visible:ring-2 focus-visible:ring-primary/70"
-                    aria-label="Descartar perfil"
-                    title="Pasar (deslizar a la izquierda)"
-                >
-                    <X className="h-7 w-7" />
-                </button>
-                <button
-                    onClick={(e) => { e.stopPropagation(); onSwipe('right'); }}
-                    className="bg-card hover:bg-accent text-green-500 rounded-full w-14 h-14 flex items-center justify-center shadow-xl transition-transform hover:scale-110 active:scale-95 border border-border focus-visible:ring-2 focus-visible:ring-primary/70"
-                    aria-label="Dar like al perfil"
-                    title="Like (deslizar a la derecha)"
-                >
-                    <Heart className="h-7 w-7" />
-                </button>
+        {/* Swipe indicators during drag */}
+        {dragX > 50 && (
+          <div className="absolute inset-0 z-30 bg-primary/20 flex items-center justify-start p-8">
+            <div className="bg-card rounded-full p-4 shadow-xl">
+              <Heart className="h-10 w-10 text-primary fill-primary" />
             </div>
-        </motion.div>
-    );
+          </div>
+        )}
+        {dragX < -50 && (
+          <div className="absolute inset-0 z-30 bg-destructive/20 flex items-center justify-end p-8">
+            <div className="bg-card rounded-full p-4 shadow-xl">
+              <X className="h-10 w-10 text-destructive" />
+            </div>
+          </div>
+        )}
+
+        <div className="absolute top-4 right-4 z-20">
+          <ProfileActions userId={profile.id} userName={profile.displayName} />
+        </div>
+
+        {/* Single priority badge - top left */}
+        {(() => {
+          // Only show the most important badge (max 1)
+          if (profile.activeNow) {
+            return (
+              <motion.div
+                initial={{ scale: 0.8, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                className="absolute top-4 left-4 z-10 bg-primary/90 backdrop-blur-md text-primary-foreground px-2.5 py-1 rounded-full text-[11px] font-bold flex items-center gap-1 border border-primary/30 shadow-sm"
+              >
+                <span className="relative flex h-2 w-2"><span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary/75 opacity-75" /><span className="relative inline-flex rounded-full h-2 w-2 bg-primary" /></span>
+                Activa ahora
+              </motion.div>
+            );
+          }
+          if (profile.sharedInterests !== undefined && profile.sharedInterests > 0) {
+            return (
+              <motion.div
+                initial={{ scale: 0.8, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                className="absolute top-4 left-4 z-10 bg-accent/90 backdrop-blur-md text-accent-foreground px-2.5 py-1 rounded-full text-[11px] font-bold flex items-center gap-1 border border-accent/30 shadow-sm"
+              >
+                <Heart className="h-3 w-3" fill="currentColor" /> {profile.sharedInterests} interés{profile.sharedInterests > 1 ? 'es' : ''} en común
+              </motion.div>
+            );
+          }
+          if ((profile as any).latestAnswer) {
+            return (
+              <motion.div
+                initial={{ scale: 0.8, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                className="absolute top-4 left-4 z-10 bg-warning/90 backdrop-blur-md text-warning-foreground px-2.5 py-1 rounded-full text-[11px] font-bold flex items-center gap-1 border border-warning/30 shadow-sm"
+              >
+                <MessageCircle className="h-3 w-3" /> Respuesta del día
+              </motion.div>
+            );
+          }
+          if (!profile.activeNow && profile.lastActiveHours !== null && profile.lastActiveHours !== undefined) {
+            return (
+              <motion.div
+                initial={{ scale: 0.8, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                className="absolute top-4 left-4 z-10 bg-muted/80 backdrop-blur-md text-muted-foreground px-2.5 py-1 rounded-full text-[11px] font-medium flex items-center gap-1 border border-border/30 shadow-sm"
+              >
+                <Clock className="h-3 w-3" /> {formatLastActive(profile.lastActiveHours)}
+              </motion.div>
+            );
+          }
+          return null;
+        })()}
+
+        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent p-6 text-white min-h-[180px] flex flex-col justify-end">
+          {/* Shared interests as content chips - not percentage */}
+          <div className="flex flex-wrap gap-1.5 mb-3">
+            {profile.isVerified && <TrustBadge type="verified" />}
+            {(profile.completenessScore ?? 0) >= 90 && <TrustBadge type="complete" />}
+          </div>
+
+          {(profile as any).latestAnswer && (
+            <div className="mb-2 bg-white/10 backdrop-blur-sm rounded-xl p-2.5">
+              <p className="text-xs text-white/60 uppercase tracking-wider mb-0.5">
+                {(profile as any).latestAnswer.category || 'Pregunta del día'}
+              </p>
+              <p className="text-white/90 text-xs leading-tight line-clamp-2">
+                &ldquo;{(profile as any).latestAnswer.answer}&rdquo;
+              </p>
+            </div>
+          )}
+
+          <h2 className="text-3xl font-bold tracking-tight mb-1">{profile.displayName}, {profile.age}</h2>
+          <p className="text-white/80 text-sm line-clamp-2 leading-relaxed">{profile.bio}</p>
+        </div>
+      </SoftCard>
+
+      {/* Action buttons: Pass (left), Flechado (center, larger), Like (right) */}
+      <div className="absolute -bottom-16 left-0 right-0 flex items-center justify-center gap-4 z-20">
+        <button
+          onClick={(e) => { e.stopPropagation(); onSwipe('left'); }}
+          className="bg-card hover:bg-accent text-destructive rounded-full w-14 h-14 flex items-center justify-center shadow-xl transition-transform hover:scale-110 active:scale-95 border border-border focus-visible:ring-2 focus-visible:ring-primary/70"
+          aria-label="Descartar perfil"
+          title="Pasar (deslizar a la izquierda)"
+        >
+          <X className="h-7 w-7" />
+        </button>
+        {onFlechado && (
+          <button
+            onClick={(e) => { e.stopPropagation(); onFlechado(); }}
+            className="bg-accent hover:bg-accent/80 text-accent-foreground rounded-full w-16 h-16 flex items-center justify-center shadow-xl transition-transform hover:scale-110 active:scale-95 border border-accent/30 focus-visible:ring-2 focus-visible:ring-primary/70 relative"
+            aria-label="Flechado (superlike)"
+            title={`Flechado: envío prioritario (${superlikesRemaining ?? 3}/día)`}
+          >
+            <Star className="h-7 w-7 fill-current" />
+            <span className="absolute -top-1 -right-1 bg-primary text-primary-foreground text-[11px] font-bold rounded-full min-w-[20px] h-5 flex items-center justify-center px-1 shadow-sm border border-background">
+              {superlikesRemaining ?? 3}
+            </span>
+          </button>
+        )}
+        <button
+          onClick={handleLike}
+          className="bg-card hover:bg-accent text-primary rounded-full w-14 h-14 flex items-center justify-center shadow-xl transition-all hover:scale-110 active:scale-95 border border-border focus-visible:ring-2 focus-visible:ring-primary/70 relative overflow-visible"
+          aria-label="Dar like al perfil"
+          title="Like (deslizar a la derecha)"
+        >
+          <Heart className={`h-7 w-7 fill-primary transition-transform ${likeBurst ? 'scale-125' : ''}`} />
+          {likeBurst && (
+            <>
+              {[...Array(6)].map((_, i) => (
+                <motion.div
+                  key={i}
+                  className="absolute w-2 h-2 rounded-full bg-primary"
+                  initial={{ scale: 0, x: 0, y: 0, opacity: 1 }}
+                  animate={{
+                    scale: [0, 1, 0],
+                    x: Math.cos((i * 60) * Math.PI / 180) * 28,
+                    y: Math.sin((i * 60) * Math.PI / 180) * 28,
+                    opacity: [1, 1, 0],
+                  }}
+                  transition={{ duration: 0.4, ease: "easeOut" }}
+                />
+              ))}
+            </>
+          )}
+        </button>
+      </div>
+    </motion.div>
+  );
 }

@@ -86,7 +86,7 @@ export function DailyPicks({ subscriptionStatus = 'free' }: DailyPicksProps) {
                                     <p className="text-white/70 text-xs">{pick.city || ''}</p>
                                 </div>
                                 {pick.isVerified && (
-                                    <Badge className="absolute top-2 right-2 bg-blue-500 text-white text-[8px] px-1.5 py-0">
+                                    <Badge className="absolute top-2 right-2 bg-primary text-primary-foreground text-[8px] px-1.5 py-0">
                                         ✓ Verificado
                                     </Badge>
                                 )}

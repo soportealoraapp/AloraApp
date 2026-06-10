@@ -95,7 +95,7 @@ export function DailyQuestionCard() {
         return (
             <Card>
                 <CardContent className="py-8 flex justify-center">
-                    <Loader2 className="animate-spin text-pink-500 h-6 w-6" />
+                    <Loader2 className="animate-spin text-primary h-6 w-6" />
                 </CardContent>
             </Card>
         );
@@ -121,7 +121,7 @@ export function DailyQuestionCard() {
             <CardHeader className="pb-3">
                 <div className="flex items-center justify-between">
                     <CardTitle className="text-base flex items-center gap-2">
-                        <MessageCircle className="h-4 w-4 text-pink-500" />
+                        <MessageCircle className="h-4 w-4 text-primary" />
                         Pregunta del día
                     </CardTitle>
                     <Badge variant="secondary" className="text-xs gap-1">
@@ -139,16 +139,16 @@ export function DailyQuestionCard() {
                 </p>
 
                 {data.answered && !editing ? (
-                    <div className="p-3 bg-green-50 rounded-xl border border-green-100">
+                    <div className="p-3 bg-primary/10 rounded-xl border border-primary/20">
                         <div className="flex items-start gap-2">
-                            <Check className="h-4 w-4 text-green-600 mt-0.5 shrink-0" />
+                            <Check className="h-4 w-4 text-primary mt-0.5 shrink-0" />
                             <div className="flex-1">
-                                <p className="text-xs font-medium text-green-800 mb-1">Tu respuesta:</p>
-                                <p className="text-sm text-green-700">{data.userAnswer}</p>
+                                <p className="text-xs font-medium text-foreground mb-1">Tu respuesta:</p>
+                                <p className="text-sm text-foreground">{data.userAnswer}</p>
                             </div>
                             <button
                                 onClick={() => setEditing(true)}
-                                className="text-xs font-medium text-green-600 hover:underline shrink-0 mt-0.5"
+                                className="text-xs font-medium text-primary hover:underline shrink-0 mt-0.5"
                             >
                                 Editar
                             </button>
@@ -184,7 +184,7 @@ export function DailyQuestionCard() {
                                     size="sm"
                                     onClick={handleSubmit}
                                     disabled={!answer.trim() || submitting}
-                                    className="bg-gradient-to-r from-pink-500 to-rose-400"
+                                    className="bg-gradient-to-r from-primary to-primary/80"
                                 >
                                     {submitting ? (
                                         <Loader2 className="animate-spin h-3 w-3 mr-1" />

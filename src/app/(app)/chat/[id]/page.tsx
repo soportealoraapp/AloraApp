@@ -101,6 +101,7 @@ export default function ChatWindowPage() {
     const [autoScroll, setAutoScroll] = useState(true);
     const { track } = useAnalytics();
     const messageCountRef = useRef(0);
+    const icebreakersFetchedRef = useRef(false);
 
     // Auto-scroll to bottom on new messages (if user is near bottom)
     useEffect(() => {
@@ -108,6 +109,14 @@ export default function ChatWindowPage() {
             messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
         }
     }, [messages.length, autoScroll]);
+
+    // Auto-fetch icebreakers on empty or short conversation
+    useEffect(() => {
+        if (!loading && !icebreakersFetchedRef.current && messages.length <= 2 && messages.length >= 0) {
+            icebreakersFetchedRef.current = true;
+            fetchIcebreakers();
+        }
+    }, [loading, messages.length]);
 
     // Mark messages as read when component mounts
     useEffect(() => {
@@ -332,7 +341,7 @@ export default function ChatWindowPage() {
                     <div className="relative h-10 w-10 rounded-full overflow-hidden flex-shrink-0 border-2 border-muted">
                         <Image src={partnerPhoto} alt={partnerName} fill className="object-cover" />
                         {isPartnerOnline && (
-                            <span className="absolute bottom-0 right-0 h-3 w-3 rounded-full bg-green-500 border-2 border-background" />
+                            <span className="absolute bottom-0 right-0 h-3 w-3 rounded-full bg-primary border-2 border-background" />
                         )}
                     </div>
                     <div className="flex flex-col truncate">
@@ -348,7 +357,7 @@ export default function ChatWindowPage() {
                             <span className="text-xs text-muted-foreground flex items-center gap-1">
                                 {isPartnerOnline ? (
                                     <span className="flex items-center gap-1">
-                                        <Circle className="h-2 w-2 fill-green-500 text-green-500" />
+                                        <Circle className="h-2 w-2 fill-primary text-primary" />
                                         En línea
                                     </span>
                                 ) : (
@@ -360,15 +369,15 @@ export default function ChatWindowPage() {
                                 {matchHealth > 0 && (
                                     <span className={cn(
                                         "ml-1",
-                                        matchHealth >= 80 ? "text-green-500" :
-                                        matchHealth >= 60 ? "text-yellow-500" :
-                                        matchHealth >= 40 ? "text-orange-500" :
-                                        "text-red-500"
+                                        matchHealth >= 80 ? "text-primary" :
+                                        matchHealth >= 60 ? "text-muted-foreground" :
+                                        matchHealth >= 40 ? "text-muted-foreground" :
+                                        "text-destructive"
                                     )}>
-                                        {matchHealth >= 80 ? "🟢 Excelente" :
-                                         matchHealth >= 60 ? "🟡 Buena" :
-                                         matchHealth >= 40 ? "🟠 Temprana" :
-                                         "🔴 Necesita interacción"}
+                                        {matchHealth >= 80 ? "Excelente" :
+                                         matchHealth >= 60 ? "Buena" :
+                                         matchHealth >= 40 ? "Temprana" :
+                                         "Necesita interacción"}
                                     </span>
                                 )}
                             </span>
@@ -448,7 +457,7 @@ export default function ChatWindowPage() {
                             <Button
                                 onClick={fetchIcebreakers}
                                 disabled={loadingIcebreakers}
-                                className="rounded-full bg-gradient-to-r from-pink-500 to-rose-400 text-white"
+                                className="rounded-full bg-gradient-to-r from-primary to-accent text-primary-foreground"
                             >
                                 {loadingIcebreakers ? <Loader2 className="animate-spin mr-2" /> : <Sparkles className="mr-2 h-4 w-4" />}
                                 Sugerir rompehielos
@@ -531,9 +540,9 @@ export default function ChatWindowPage() {
                             exit={{ opacity: 0, y: 50 }}
                             className="absolute bottom-4 left-4 right-4 z-30"
                         >
-                            <Card className="p-4 shadow-2xl border-pink-100 bg-white/95 backdrop-blur-sm rounded-3xl">
+                            <Card className="p-4 shadow-2xl border-primary/20 bg-card/95 backdrop-blur-sm rounded-3xl">
                                 <div className="flex justify-between items-center mb-4">
-                                    <h4 className="font-bold text-pink-700 flex items-center gap-2">
+                                    <h4 className="font-bold text-primary flex items-center gap-2">
                                         <Sparkles className="w-4 h-4" /> Ideas para empezar
                                     </h4>
                                     <Button variant="ghost" size="sm" onClick={() => setShowIcebreakers(false)} className="rounded-full">
@@ -562,24 +571,14 @@ export default function ChatWindowPage() {
 
             {/* Chat input area */}
             <div className="border-t bg-background p-4 pb-safe">
-                <div className="flex items-center gap-2 mb-2">
-                    <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={fetchIcebreakers}
-                        disabled={loadingIcebreakers}
-                        className="text-xs text-pink-500 rounded-full h-8 px-3 hover:bg-pink-50"
-                    >
-                        {loadingIcebreakers ? <Loader2 className="animate-spin mr-1 h-3 w-3" /> : <Sparkles className="mr-1 h-3 w-3" />}
-                        Sugerir mensaje
-                    </Button>
-                    {isPartnerOnline && (
-                        <span className="text-xs text-green-600 flex items-center gap-1 ml-auto">
-                            <span className="h-1.5 w-1.5 rounded-full bg-green-500" />
+                {isPartnerOnline && (
+                    <div className="flex items-center gap-2 mb-2">
+                        <span className="text-xs text-primary flex items-center gap-1 ml-auto">
+                            <span className="h-1.5 w-1.5 rounded-full bg-primary" />
                             En línea
                         </span>
-                    )}
-                </div>
+                    </div>
+                )}
                 {messages.length === 0 && profile?.gender !== 'woman' ? (
                     <p className="text-xs text-center text-muted-foreground mb-2">
                         💡 Ella da el primer paso, pero puedes enviar un mensaje amable para romper el hielo.
@@ -589,14 +588,28 @@ export default function ChatWindowPage() {
                     onSend={handleSendMessage}
                     disabled={sending || !otherUserId}
                 />
-                <ChatInput
-                    onSend={handleSendMessage}
-                    onSendImage={handleSendImage}
-                    onSendVoice={handleSendVoice}
-                    onTyping={emitTyping}
-                    disabled={sending || !otherUserId}
-                    placeholder="Escribe un mensaje..."
-                />
+                <div className="flex items-center gap-2">
+                    <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={fetchIcebreakers}
+                        disabled={loadingIcebreakers}
+                        className="shrink-0 h-10 w-10 rounded-full text-primary hover:bg-primary/10"
+                        title="Sugerir rompehielos"
+                    >
+                        {loadingIcebreakers ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
+                    </Button>
+                    <div className="flex-1">
+                        <ChatInput
+                            onSend={handleSendMessage}
+                            onSendImage={handleSendImage}
+                            onSendVoice={handleSendVoice}
+                            onTyping={emitTyping}
+                            disabled={sending || !otherUserId}
+                            placeholder="Escribe un mensaje..."
+                        />
+                    </div>
+                </div>
                 {sending && (
                     <div className="flex items-center justify-center mt-2 text-xs text-muted-foreground">
                         <Loader2 className="h-3 w-3 animate-spin mr-1" />

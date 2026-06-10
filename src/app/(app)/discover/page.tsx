@@ -6,10 +6,9 @@ import { FloatingMatchCard } from "@/components/ui/premium/FloatingMatchCard";
 import { MatchScreen } from "@/components/ui/premium/MatchScreen";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Loader2, RefreshCcw, Sparkles, SlidersHorizontal, RotateCcw, LayoutGrid, CreditCard, Heart, Handshake, X, Heart as HeartIcon, CheckCircle, Circle, ChevronRight } from "lucide-react";
+import { Loader2, RefreshCcw, Sparkles, SlidersHorizontal, RotateCcw, LayoutGrid, CreditCard, Heart, X } from "lucide-react";
 import { DiscoverFilters, Filters } from "@/components/discover/discover-filters";
 import { Card } from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
 import Image from "next/image";
 import { useDiscover } from "@/hooks/use-discover";
 import { useAuth } from "@/contexts/AuthContext";
@@ -24,8 +23,8 @@ import { DailyCompatibilityCard } from "@/components/compatibility/DailyCompatib
 import { useAnalytics, AnalyticsEvents } from "@/hooks/use-analytics";
 import { LikesCounter } from "@/components/discover/LikesCounter";
 import { DailyPicks } from "@/components/discover/DailyPicks";
-import { SecondChanceSection } from "@/components/discover/SecondChanceSection";
-import { logger } from "@/lib/logger";
+
+
 
 const DEFAULT_FILTERS: Filters = {
   ageRange: [18, 60],
@@ -85,62 +84,11 @@ export default function DiscoverPage() {
   const lastSwipeRef = useRef<{ profileId: string; direction: string } | null>(null);
   const sentinelRef = useRef<HTMLDivElement>(null);
   const geoRequestedRef = useRef(false);
-  const dailyQuestionRef = useRef<HTMLDivElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const [pullToRefresh, setPullToRefresh] = useState(0);
   const pullStartRef = useRef(0);
 
-  const [activationScore, setActivationScore] = useState<number | null>(null);
-  const [activationTasks, setActivationTasks] = useState<{ id: string; title: string; completed: boolean; rewardText: string }[]>([]);
-  const [activationCardEnabled, setActivationCardEnabled] = useState(true);
 
-  const handleTaskClick = (title: string) => {
-    switch (title) {
-      case "Completa tu registro":
-      case "Escribe tu biografía":
-      case "Elige 3 intereses":
-      case "Define tus valores":
-      case "Sube 3 fotos":
-      case "Graba tu voz":
-        router.push('/profile/edit');
-        break;
-      case "Haz un quiz":
-        router.push('/compatibility');
-        break;
-      case "Responde la pregunta diaria":
-        dailyQuestionRef.current?.scrollIntoView({ behavior: 'smooth' });
-        break;
-      case "Verifícate":
-        router.push('/settings/verification');
-        break;
-      case "Da tu primer like":
-        break;
-      case "Consigue tu primer match":
-      case "Envía tu primer mensaje":
-        router.push('/chat');
-        break;
-    }
-  };
-
-  useEffect(() => {
-    fetch('/api/discover/activation')
-      .then(r => r.json())
-      .then(data => {
-        if (data.score) {
-          setActivationScore(data.score.score);
-          setActivationTasks(data.tasks || []);
-        }
-      })
-      .catch(() => logger.warn('Failed to fetch activation data'));
-    fetch('/api/experiments/flags')
-      .then(r => r.json())
-      .then(data => {
-        if (data.activationCardEnabled !== undefined) {
-          setActivationCardEnabled(data.activationCardEnabled);
-        }
-      })
-      .catch(() => logger.warn('Failed to fetch experiment flags'));
-  }, []);
 
   useEffect(() => {
     const tutorialDone = localStorage.getItem('swipeTutorialDone');
@@ -469,78 +417,6 @@ export default function DiscoverPage() {
         />
       </div>
 
-      <div className="px-4 pt-2">
-        <Tabs value={intent} onValueChange={(v) => { setIntentChanging(true); setIntent(v as 'dating' | 'friendship'); }}>
-          <TabsList className="w-full h-10">
-            <TabsTrigger value="dating" className="flex-1 text-sm gap-1.5 h-8">
-              <HeartIcon className="h-4 w-4" /> Citas
-            </TabsTrigger>
-            <TabsTrigger value="friendship" className="flex-1 text-sm gap-1.5 h-8">
-              <Handshake className="h-4 w-4" /> Amistad
-            </TabsTrigger>
-          </TabsList>
-        </Tabs>
-      </div>
-
-      {!currentUserProfile?.isVerified && (
-        <div className="px-4 pt-2">
-          <div className="bg-warning/10 border border-warning/20 rounded-xl p-3 flex items-center justify-between">
-            <p className="text-xs text-warning-foreground font-medium">Los perfiles verificados aparecen primero en Discover</p>
-            <Button size="sm" variant="outline" className="text-xs h-7" onClick={() => router.push('/settings/verification')}>
-              Verificar
-            </Button>
-          </div>
-        </div>
-      )}
-
-      {activationScore !== null && activationScore < 80 && activationCardEnabled && (
-        <div className="px-4 pt-2">
-          <Card className="p-4 bg-gradient-to-br from-primary/5 to-primary/10 border-primary/20">
-            <div className="flex items-center justify-between mb-3">
-              <p className="text-sm font-bold">Tu perfil está al {activationScore}%</p>
-              <span className="text-xs text-muted-foreground">Completa estas acciones</span>
-            </div>
-            <Progress value={activationScore} className="h-2 mb-3" />
-            <div className="space-y-1.5">
-              {activationTasks
-                .filter(t => !t.completed)
-                .sort((a, b) => {
-                  const priority: Record<string, number> = {
-                    'Verifícate': 0,
-                    'Graba tu voz': 1,
-                    'Haz un quiz': 2,
-                    'Responde la pregunta diaria': 3,
-                    'Escribe tu biografía': 4,
-                    'Elige 3 intereses': 5,
-                    'Define tus valores': 6,
-                    'Sube 3 fotos': 7,
-                    'Da tu primer like': 8,
-                    'Consigue tu primer match': 9,
-                    'Envía tu primer mensaje': 10,
-                  };
-                  return (priority[a.title] ?? 99) - (priority[b.title] ?? 99);
-                })
-                .slice(0, 4).map(task => (
-                <button
-                  key={task.id}
-                  onClick={() => handleTaskClick(task.title)}
-                  className="w-full flex items-center gap-2 text-xs text-left"
-                >
-                  <Circle className="h-3 w-3 text-muted-foreground shrink-0" />
-                  <span className="flex-1">{task.title}</span>
-                  <span className="text-xs text-primary font-medium">{task.rewardText}</span>
-                </button>
-              ))}
-            </div>
-            {activationTasks.filter(t => !t.completed).length > 4 && (
-              <button onClick={() => router.push('/profile/edit')} className="text-xs text-primary font-medium mt-2 flex items-center gap-1">
-                Ver más <ChevronRight className="h-3 w-3" />
-              </button>
-            )}
-          </Card>
-        </div>
-      )}
-
       <main className="flex-1 flex flex-col items-center justify-center p-4 relative">
         {error && !loading && profiles.length === 0 && (
           <div className="text-center px-8 mb-4">
@@ -581,21 +457,21 @@ export default function DiscoverPage() {
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
                       {p.activeNow && (
-                        <div className="absolute top-2 left-2 bg-green-500/90 backdrop-blur-sm text-white text-[11px] font-bold px-1.5 py-0.5 rounded-full flex items-center gap-1 border border-green-300/30">
+                        <div className="absolute top-2 left-2 bg-primary/90 backdrop-blur-sm text-primary-foreground text-[11px] font-bold px-1.5 py-0.5 rounded-full flex items-center gap-1 border border-primary/30">
                           <span className="relative flex h-1.5 w-1.5">
-                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75" />
-                            <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-green-200" />
+                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary/75 opacity-75" />
+                            <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-primary-foreground" />
                           </span>
                           Activa
                         </div>
                       )}
                       {(p as any).latestAnswer && (
-                        <div className="absolute top-2 right-2 bg-amber-500/90 backdrop-blur-sm text-white text-[11px] font-bold px-1.5 py-0.5 rounded-full">
+                        <div className="absolute top-2 right-2 bg-accent/90 backdrop-blur-sm text-accent-foreground text-[11px] font-bold px-1.5 py-0.5 rounded-full">
                           💬 Resp.
                         </div>
                       )}
                       {p.voiceIntro && (
-                        <div className="absolute top-8 left-2 bg-indigo-500/90 backdrop-blur-sm text-white text-[11px] font-bold px-1.5 py-0.5 rounded-full">
+                        <div className="absolute top-8 left-2 bg-muted/90 backdrop-blur-sm text-muted-foreground text-[11px] font-bold px-1.5 py-0.5 rounded-full">
                           🎵 Voz
                         </div>
                       )}
@@ -603,24 +479,19 @@ export default function DiscoverPage() {
                         <div className="text-white text-xs font-bold leading-tight">{p.displayName}, {p.age}</div>
                         {p.city && <div className="text-white/70 text-xs">{p.city}</div>}
                         {p.sharedInterests !== undefined && p.sharedInterests > 0 && (
-                          <div className="text-purple-200 text-xs mt-0.5">{p.sharedInterests} interés(es) en común</div>
-                        )}
-                        {compatibility != null && (
-                          <div className="inline-block bg-primary/80 text-white text-xs px-1.5 py-0.5 rounded mt-1">
-                            {Math.round(compatibility)}% compatibles
-                          </div>
+                          <div className="text-primary-foreground/80 text-xs mt-0.5">{p.sharedInterests} interés(es) en común</div>
                         )}
                       </div>
                     </div>
                     <div className="flex gap-1 p-1.5">
-                      <Button size="sm" variant="ghost" className="flex-1 h-8" aria-label={`Descartar a ${p.displayName || ''}`} onClick={async () => {
+                      <Button size="sm" variant="ghost" className="flex-1 h-11" aria-label={`Descartar a ${p.displayName || ''}`} onClick={async () => {
                         track(AnalyticsEvents.PASS_SENT, { targetUserId: p.id, intent });
                         await sendLike(p.id, 'pass', intent);
                         setProfiles(prev => prev.filter(item => item.profile.id !== p.id));
                       }}>
-                        <X className="h-4 w-4 text-red-500" />
+                        <X className="h-5 w-5 text-destructive" />
                       </Button>
-                      <Button size="sm" variant="ghost" className="flex-1 h-8" aria-label={`Dar like a ${p.displayName || ''}`} onClick={async () => {
+                      <Button size="sm" variant="ghost" className="flex-1 h-11" aria-label={`Dar like a ${p.displayName || ''}`} onClick={async () => {
                         track(AnalyticsEvents.LIKE_SENT, { targetUserId: p.id, intent });
                         const result = await sendLike(p.id, 'like', intent);
                         setProfiles(prev => prev.filter(item => item.profile.id !== p.id));
@@ -631,7 +502,7 @@ export default function DiscoverPage() {
                           setShowMatchScreen(true);
                         }
                       }}>
-                        <Heart className="h-4 w-4 text-green-500" />
+                        <Heart className="h-5 w-5 text-primary fill-primary" />
                       </Button>
                     </div>
                   </Card>
@@ -698,18 +569,15 @@ export default function DiscoverPage() {
         )}
       </main>
 
-      {/* Daily Picks - below the feed */}
-      <div className="px-4 pb-2">
+      {/* Daily Picks - above the feed as horizontal carousel */}
+      <div className="px-4 pb-3 max-w-sm mx-auto w-full">
         <DailyPicks subscriptionStatus={currentUserProfile?.subscriptionStatus ?? 'free'} />
       </div>
 
-      {/* Daily Question and Compatibility - shown below the feed */}
+      {/* Daily Question and Compatibility - below the feed */}
       <div className="px-4 pb-4 max-w-sm mx-auto w-full space-y-3">
-        <SecondChanceSection />
         <DailyCompatibilityCard />
-        <div ref={dailyQuestionRef}>
-          <DailyQuestionCard />
-        </div>
+        <DailyQuestionCard />
       </div>
 
       <DiscoverFilters

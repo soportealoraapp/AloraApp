@@ -38,14 +38,14 @@ export default function SuccessStoriesPage() {
     }
 
     return (
-        <div className="md:pl-60 p-6 space-y-6 bg-gray-50 min-h-screen">
+        <div className="md:pl-60 p-6 space-y-6 bg-muted/50 min-h-screen">
             <div className="flex items-center gap-4">
                 <Button variant="ghost" size="icon" onClick={() => router.back()}>
                     <ArrowLeft className="h-5 w-5" />
                 </Button>
                 <div>
                     <h1 className="text-2xl font-bold flex items-center gap-2">
-                        <Heart className="h-6 w-6 text-pink-500 fill-pink-500" />
+                        <Heart className="h-6 w-6 text-primary fill-primary" />
                         Historias de éxito
                     </h1>
                     <p className="text-sm text-muted-foreground">Parejas que se encontraron en Alora</p>
@@ -108,7 +108,7 @@ export default function SuccessStoriesPage() {
                 </div>
             )}
 
-            <Card className="rounded-3xl border-none shadow-sm bg-gradient-to-r from-primary/5 to-pink-500/5">
+            <Card className="rounded-3xl border-none shadow-sm bg-gradient-to-r from-primary/5 to-primary/10">
                 <CardContent className="p-6 text-center space-y-3">
                     <p className="text-2xl">💕</p>
                     <p className="font-bold">¿Tienes una historia que contar?</p>

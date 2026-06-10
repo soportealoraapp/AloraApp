@@ -218,15 +218,14 @@ export default function UserProfilePage() {
                             <CarouselContent>
                                 {profile.photos.map((photo, index) => (
                                     <CarouselItem key={index}>
-<div className="w-full aspect-[4/5] relative">
-                                              <Image
-                                                  src={photo}
-                                                  alt={`Foto de ${profile.displayName} ${index + 1}`}
-                                                  fill
-                                                  className="object-cover"
-                                                  
-                                                  priority={index === 0}
-                                              />
+                                        <div className="w-full aspect-[4/5] relative">
+                                            <Image
+                                                src={photo}
+                                                alt={`Foto de ${profile.displayName} ${index + 1}`}
+                                                fill
+                                                className="object-cover"
+                                                priority={index === 0}
+                                            />
                                         </div>
                                     </CarouselItem>
                                 ))}
@@ -241,7 +240,6 @@ export default function UserProfilePage() {
                             width={600}
                             height={800}
                             className="w-full aspect-[4/5] object-cover"
-                            
                             priority
                         />
                     )}
@@ -269,20 +267,7 @@ export default function UserProfilePage() {
                                 <MapPin className="h-4 w-4" /> {profile.city}
                             </p>
                         </div>
-                        {profile.status && (
-                            <p className="text-muted-foreground mt-2 text-lg">
-                                "{profile.status}"
-                            </p>
-                        )}
                     </div>
-
-                    {profile.bio && (
-                        <Card>
-                            <CardContent className="p-6">
-                                <p className="text-foreground whitespace-pre-wrap">{profile.bio}</p>
-                            </CardContent>
-                        </Card>
-                    )}
 
                     {profile.latestAnswer?.question && profile.latestAnswer?.answer && (
                         <Card className="rounded-3xl border border-primary/10 bg-primary/5">
@@ -292,7 +277,7 @@ export default function UserProfilePage() {
                                     <p className="text-xs font-bold text-primary uppercase tracking-wider">Pregunta del día</p>
                                 </div>
                                 <p className="text-sm font-medium text-foreground mb-2">{profile.latestAnswer.question}</p>
-                                <div className="bg-white/50 rounded-xl p-3 border border-primary/10">
+                                <div className="bg-card/50 rounded-xl p-3 border border-primary/10">
                                     <p className="text-sm text-foreground leading-relaxed">&ldquo;{profile.latestAnswer.answer}&rdquo;</p>
                                 </div>
                                 <p className="text-xs text-muted-foreground mt-2">Usa esta respuesta para iniciar una conversación</p>
@@ -308,22 +293,30 @@ export default function UserProfilePage() {
                         musicGenres={profile.musicGenres}
                     />
 
-                    {profile.personalGuide && profile.personalGuide.length > 0 && (
+                    {profile.bio && (
                         <Card>
-                            <CardContent className="p-6 space-y-2">
-                                <h3 className="font-semibold text-lg flex items-center gap-2 mb-3">
-                                    <UserCheck className="h-5 w-5" /> Guía Personal
-                                </h3>
-                                {profile.personalGuide.map((guide, index) => (
-                                    <div key={index} className="p-3 rounded-lg bg-secondary">
-                                        <p className="font-semibold text-sm">{guide.title}</p>
-                                        <p className="text-xs text-muted-foreground">
-                                            {guide.description}
-                                        </p>
-                                    </div>
-                                ))}
+                            <CardContent className="p-6">
+                                <p className="text-foreground whitespace-pre-wrap">{profile.bio}</p>
                             </CardContent>
                         </Card>
+                    )}
+
+                    {profile.interests && profile.interests.length > 0 && (
+                        <div className="flex items-start gap-3">
+                            <div className="flex-1 min-w-0">
+                                <h3 className="text-sm font-semibold text-muted-foreground mb-2">Intereses</h3>
+                                <BadgeChipList items={profile.interests} type="interest" />
+                            </div>
+                        </div>
+                    )}
+
+                    {profile.values && profile.values.length > 0 && (
+                        <div className="flex items-start gap-3">
+                            <div className="flex-1 min-w-0">
+                                <h3 className="text-sm font-semibold text-muted-foreground mb-2">Valores</h3>
+                                <BadgeChipList items={profile.values} type="value" />
+                            </div>
+                        </div>
                     )}
 
                     {details.length > 0 && (
@@ -355,38 +348,25 @@ export default function UserProfilePage() {
                         </Card>
                     )}
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        {profile.interests && profile.interests.length > 0 && (
-                            <Card>
-                                <CardContent className="p-6">
-                                    <h3 className="font-semibold text-lg mb-3">Intereses</h3>
-                                    <BadgeChipList items={profile.interests} type="interest" />
-                                </CardContent>
-                            </Card>
-                        )}
+                    {(profile as any).spotify && <SpotifySection spotify={(profile as any).spotify} />}
 
-                        {profile.values && profile.values.length > 0 && (
-                            <Card>
-                                <CardContent className="p-6">
-                                    <h3 className="font-semibold text-lg mb-3">Valores</h3>
-                                    <BadgeChipList items={profile.values} type="value" />
-                                </CardContent>
-                            </Card>
-                        )}
-                    </div>
-
-                    {profile.musicGenres && profile.musicGenres.length > 0 && (
+                    {profile.personalGuide && profile.personalGuide.length > 0 && (
                         <Card>
-                            <CardContent className="p-6">
+                            <CardContent className="p-6 space-y-2">
                                 <h3 className="font-semibold text-lg flex items-center gap-2 mb-3">
-                                    <Music className="h-5 w-5" /> Gustos Musicales
+                                    <UserCheck className="h-5 w-5" /> Guía Personal
                                 </h3>
-                                <BadgeChipList items={profile.musicGenres} type="music" />
+                                {profile.personalGuide.map((guide, index) => (
+                                    <div key={index} className="p-3 rounded-lg bg-secondary">
+                                        <p className="font-semibold text-sm">{guide.title}</p>
+                                        <p className="text-xs text-muted-foreground">
+                                            {guide.description}
+                                        </p>
+                                    </div>
+                                ))}
                             </CardContent>
                         </Card>
                     )}
-
-                    {(profile as any).spotify && <SpotifySection spotify={(profile as any).spotify} />}
                 </div>
 
                 {id !== user?.id && !isPreview && (
@@ -450,7 +430,7 @@ export default function UserProfilePage() {
                                             className={cn("h-5 w-5 mr-2", isLiked && "fill-current")}
                                         />
                                     )}
-                                    {isLiked ? "Liked" : "Me Gusta"}
+                                    {isLiked ? "Ya te gusta" : "Me Gusta"}
                                 </Button>
                                 {hasExistingMatch && (
                                     <Button asChild size="lg" variant="default" className="w-full min-h-[48px]">
@@ -463,7 +443,7 @@ export default function UserProfilePage() {
                                     size="lg"
                                     variant="secondary"
                                     className={cn(
-                                        "w-full min-h-[48px] bg-gradient-to-r from-pink-500 to-violet-500 text-white",
+                                        "w-full min-h-[48px] bg-gradient-to-r from-primary to-accent text-white",
                                         isSuperMatched && "animate-pulse"
                                     )}
                                     onClick={handleSuperMatch}

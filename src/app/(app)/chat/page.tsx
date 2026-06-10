@@ -31,12 +31,37 @@ export default function ChatPage() {
         }
         return new Set();
     });
+    const [showStaleOnly, setShowStaleOnly] = useState(false);
 
     const filteredMatches = matches.filter((match) => {
         if (hiddenMatches.has(match.id)) return false;
-        if (!searchTerm.trim()) return true;
-        const partnerName = match.partner?.displayName || '';
-        return partnerName.toLowerCase().includes(searchTerm.toLowerCase());
+        if (searchTerm.trim()) {
+            const partnerName = match.partner?.displayName || '';
+            if (!partnerName.toLowerCase().includes(searchTerm.toLowerCase())) return false;
+        }
+        if (showStaleOnly) {
+            const lastMsg = match.lastMessage?.createdAt;
+            if (!lastMsg) return false;
+            const hours = (Date.now() - new Date(lastMsg).getTime()) / (1000 * 60 * 60);
+            if (hours < 72) return false;
+        }
+        return true;
+    });
+
+    const staleMatches = matches.filter((match) => {
+        if (hiddenMatches.has(match.id)) return false;
+        const lastMsg = match.lastMessage?.createdAt;
+        if (!lastMsg) return false;
+        const hours = (Date.now() - new Date(lastMsg).getTime()) / (1000 * 60 * 60);
+        return hours >= 72;
+    });
+
+    const recentStaleMatches = matches.filter((match) => {
+        if (hiddenMatches.has(match.id)) return false;
+        const lastMsg = match.lastMessage?.createdAt;
+        if (!lastMsg) return false;
+        const hours = (Date.now() - new Date(lastMsg).getTime()) / (1000 * 60 * 60);
+        return hours >= 72 && hours <= 168;
     });
 
     const handleAcceptMatch = async (like: any) => {
@@ -128,6 +153,38 @@ export default function ChatPage() {
                     />
                 </div>
 
+                {recentStaleMatches.length > 0 && !showStaleOnly && (
+                    <div className="rounded-2xl border bg-muted/30 p-4 flex items-center justify-between gap-3">
+                        <p className="text-sm text-muted-foreground font-medium">
+                            Hay conversaciones esperando una respuesta
+                        </p>
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            className="rounded-full text-xs whitespace-nowrap"
+                            onClick={() => setShowStaleOnly(true)}
+                        >
+                            Ver conversaciones inactivas
+                        </Button>
+                    </div>
+                )}
+
+                {showStaleOnly && (
+                    <div className="flex items-center justify-between">
+                        <p className="text-sm text-muted-foreground">
+                            Mostrando conversaciones inactivas ({staleMatches.length})
+                        </p>
+                        <Button
+                            variant="ghost"
+                            size="sm"
+                            className="text-xs"
+                            onClick={() => setShowStaleOnly(false)}
+                        >
+                            Ver todas
+                        </Button>
+                    </div>
+                )}
+
                 <Tabs defaultValue="conversations" className="w-full">
                     <TabsList className="grid w-full grid-cols-2">
                         <TabsTrigger value="conversations">
@@ -190,24 +247,33 @@ export default function ChatPage() {
                                                                 <div className="flex-1 min-w-0">
                                                                     <div className="flex items-center justify-between mb-1">
                                                                         <p className="font-bold text-foreground truncate">{partnerName}</p>
-                                                                        <Badge variant="secondary" className="text-xs uppercase font-bold tracking-wider">
-                                                                            {match.compatibility}% compatible
-                                                                        </Badge>
+                                                                        {match.lastMessage?.createdAt && (() => {
+                                                                            const hours = (Date.now() - new Date(match.lastMessage.createdAt).getTime()) / (1000 * 60 * 60);
+                                                                            if (hours >= 72) {
+                                                                                return (
+                                                                                    <Badge variant="outline" className="ml-2 text-[10px] px-1.5 py-0 border-amber-500/50 text-amber-600 dark:text-amber-400 whitespace-nowrap">
+                                                                                        Esperando respuesta
+                                                                                    </Badge>
+                                                                                );
+                                                                            }
+                                                                            return null;
+                                                                        })()}
                                                                     </div>
                                                                     <p className="text-xs text-muted-foreground truncate italic">
                                                                         {match.lastMessage?.content || `¡Es un match! ${BRAND_VOICE.nudges.newMatch}`}
                                                                     </p>
-                                                                    {match.lastMessage?.createdAt && (() => {
-                                                                        const hours = (Date.now() - new Date(match.lastMessage.createdAt).getTime()) / (1000 * 60 * 60);
-                                                                        if (hours > 72) {
-                                                                            return (
-                                                                                <p className="text-xs text-orange-500 mt-1">
-                                                                                    ❄️ Sin respuesta por {Math.round(hours / 24)} día(s)
-                                                                                </p>
-                                                                            );
-                                                                        }
-                                                                        return null;
-                                                                    })()}
+                                                                        {match.lastMessage?.createdAt && (() => {
+                                                                         const hours = (Date.now() - new Date(match.lastMessage.createdAt).getTime()) / (1000 * 60 * 60);
+                                                                         if (hours > 72) {
+                                                                             return (
+                                                                                 <p className="text-xs text-muted-foreground mt-1 flex items-center gap-1">
+                                                                                     <span className="inline-block h-1.5 w-1.5 rounded-full bg-muted-foreground/50" />
+                                                                                     Sin respuesta por {Math.round(hours / 24)} día(s)
+                                                                                 </p>
+                                                                             );
+                                                                         }
+                                                                         return null;
+                                                                     })()}
                                                                 </div>
                                                             </CardContent>
                                                         </Card>
@@ -261,11 +327,11 @@ export default function ChatPage() {
                                                     <div className="flex-1 min-w-0">
                                                         <div className="flex items-center gap-2">
                                                             <p className="font-semibold truncate">{like.displayName || `Usuario #${(like.fromUserId || like.id).slice(0, 8)}`}</p>
-                                                            {like.type === 'superlike' && (
-                                                                 <Badge className="bg-gradient-to-r from-pink-500 to-violet-500 text-white">
-                                                                     Flechado
-                                                                 </Badge>
-                                                             )}
+                                                             {like.type === 'superlike' && (
+                                                                  <Badge className="bg-gradient-to-r from-primary to-accent text-primary-foreground">
+                                                                      Flechado
+                                                                  </Badge>
+                                                              )}
                                                         </div>
                                                         <p className="text-sm text-muted-foreground">
                                                             Match mutuo • Chatea ahora
@@ -273,21 +339,21 @@ export default function ChatPage() {
                                                     </div>
                                                 </Link>
                                                 <div className="flex gap-2">
-                                                    <Button
-                                                        size="icon"
-                                                        variant="ghost"
-                                                        className="text-muted-foreground hover:text-red-500"
-                                                        onClick={(e) => {
-                                                            e.preventDefault();
-                                                            handleRejectMatch(like);
-                                                        }}
-                                                        disabled={processingMatch === like.fromUserId}
-                                                    >
-                                                        <X className="h-4 w-4" />
-                                                    </Button>
-                                                    <Button
-                                                        size="icon"
-                                                        className="bg-pink-500 text-white rounded-full"
+                                                     <Button
+                                                         size="icon"
+                                                         variant="ghost"
+                                                         className="text-muted-foreground hover:text-destructive"
+                                                         onClick={(e) => {
+                                                             e.preventDefault();
+                                                             handleRejectMatch(like);
+                                                         }}
+                                                         disabled={processingMatch === like.fromUserId}
+                                                     >
+                                                         <X className="h-4 w-4" />
+                                                     </Button>
+                                                     <Button
+                                                         size="icon"
+                                                         className="bg-primary text-primary-foreground rounded-full"
                                                         onClick={(e) => {
                                                             e.preventDefault();
                                                             handleAcceptMatch(like);

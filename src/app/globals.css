@@ -116,14 +116,14 @@ html {
     --radius-md: 0.75rem;
     --radius-lg: 1rem;
     --radius-xl: 1.5rem;
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
+    --sidebar-background: 340 10% 13%;
+    --sidebar-foreground: 336 100% 97%;
+    --sidebar-primary: 340 82% 73%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --sidebar-accent: 340 10% 18%;
+    --sidebar-accent-foreground: 336 100% 97%;
+    --sidebar-border: 340 10% 20%;
+    --sidebar-ring: 340 82% 73%;
   }
 }
 
@@ -139,13 +139,13 @@ html {
     outline-style: solid;
   }
 
-  /* Large touch targets for mobile (44x44 minimum) */
-  button, a, [role="button"], input, select, textarea {
-    @apply min-h-[44px] min-w-[44px];
+  /* Large touch targets for interactive elements (44x44 minimum) */
+  button, [role="button"] {
+    @apply min-h-[44px];
   }
 
-  /* But smaller padding elements within */
-  button.btn-sm, a.btn-sm, .btn-sm {
+  /* But smaller elements within buttons */
+  button.btn-sm, .btn-sm {
     @apply min-h-0 min-w-0;
   }
 
@@ -166,7 +166,10 @@ html {
 
 @layer utilities {
   .glass {
-    @apply bg-background/70 backdrop-blur-md border border-border/20 shadow-xl;
+    @apply bg-card/90 backdrop-blur-md border border-border/20 shadow-xl;
+  }
+  .dark .glass {
+    @apply bg-card/95 backdrop-blur-lg border-border/30;
   }
 
   /* Screen-reader only utility */
@@ -202,6 +205,13 @@ html {
 
   .animate-confetti {
     animation: confetti-fall 3s ease-out infinite;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .animate-confetti {
+      animation: none;
+      opacity: 0;
+    }
   }
 
   @keyframes confetti-fall {

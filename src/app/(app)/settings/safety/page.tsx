@@ -78,14 +78,14 @@ export default function SafetyCenterPage() {
             <main className="p-4 space-y-6 max-w-2xl mx-auto">
                 {/* Trust Status */}
                 {profile && (
-                    <Card className="border-green-100 bg-green-50/50">
+                    <Card className="border-primary/20 bg-primary/10">
                         <CardContent className="flex items-center gap-4 p-6">
-                            <div className="rounded-full bg-green-100 p-3">
-                                <ShieldCheck className="h-6 w-6 text-green-600" />
+                            <div className="rounded-full bg-primary/20 p-3">
+                                <ShieldCheck className="h-6 w-6 text-primary" />
                             </div>
                             <div>
-                                <p className="font-bold text-green-800">Tu cuenta está segura</p>
-                                <p className="text-sm text-green-600">
+                                <p className="font-bold text-foreground">Tu cuenta está segura</p>
+                                <p className="text-sm text-primary">
                                     {(profile as any).isVerified
                                         ? '✓ Identidad verificada'
                                         : 'Verifica tu identidad para mayor confianza'}
@@ -115,7 +115,7 @@ export default function SafetyCenterPage() {
                         </Link>
                         <Link href="/settings/verification">
                             <Button variant="outline" className="w-full justify-start h-auto py-4 gap-3">
-                                <CheckCircle className="h-5 w-5 text-blue-500" />
+                                <CheckCircle className="h-5 w-5 text-accent-foreground" />
                                 <div className="text-left">
                                     <p className="font-medium">Verificar identidad</p>
                                     <p className="text-xs text-muted-foreground">Obtén tu badge de verificación</p>
@@ -159,9 +159,9 @@ export default function SafetyCenterPage() {
                                             </p>
                                         </div>
                                         <span className={`text-xs px-2 py-1 rounded-full ${
-                                            report.status === 'reviewed' ? 'bg-green-100 text-green-700' :
-                                            report.status === 'pending' ? 'bg-yellow-100 text-yellow-700' :
-                                            'bg-gray-100 text-gray-700'
+                                            report.status === 'reviewed' ? 'bg-primary/20 text-primary' :
+                                            report.status === 'pending' ? 'bg-warning/20 text-foreground' :
+                                            'bg-muted text-muted-foreground'
                                         }`}>
                                             {report.status === 'reviewed' ? 'Revisado' :
                                              report.status === 'pending' ? 'Pendiente' : report.status}
@@ -197,9 +197,9 @@ export default function SafetyCenterPage() {
                 </Card>
 
                 {/* Emergency Resources */}
-                <Card className="border-red-100">
+                <Card className="border-destructive/20">
                     <CardHeader>
-                        <CardTitle className="flex items-center gap-2 text-red-600">
+                        <CardTitle className="flex items-center gap-2 text-destructive">
                             <Phone className="h-5 w-5" />
                             Recursos de emergencia
                         </CardTitle>
@@ -212,13 +212,13 @@ export default function SafetyCenterPage() {
                             <a
                                 key={i}
                                 href={`tel:${contact.number}`}
-                                className="flex items-center justify-between p-3 rounded-lg bg-red-50 hover:bg-red-100 transition-colors"
+                                className="flex items-center justify-between p-3 rounded-lg bg-destructive/10 hover:bg-destructive/20 transition-colors"
                             >
                                 <div>
                                     <p className="font-medium text-sm">{contact.name}</p>
                                     <p className="text-xs text-muted-foreground">{contact.number}</p>
                                 </div>
-                                <Phone className="h-4 w-4 text-red-500" />
+                                <Phone className="h-4 w-4 text-destructive" />
                             </a>
                         ))}
                         <p className="text-xs text-center text-muted-foreground pt-2">

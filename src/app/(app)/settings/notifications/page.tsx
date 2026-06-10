@@ -64,7 +64,7 @@ export default function NotificationsPage() {
     if (loading) {
         return (
             <div className="md:pl-60 p-6 flex justify-center py-20">
-                <Loader2 className="animate-spin text-pink-500 h-8 w-8" />
+                <Loader2 className="animate-spin text-primary h-8 w-8" />
             </div>
         );
     }

@@ -47,7 +47,7 @@ export function DailyCompatibilityCard() {
         return (
             <Card>
                 <CardContent className="py-8 flex justify-center">
-                    <Loader2 className="animate-spin text-pink-500 h-6 w-6" />
+                    <Loader2 className="animate-spin text-primary h-6 w-6" />
                 </CardContent>
             </Card>
         );
@@ -56,17 +56,17 @@ export function DailyCompatibilityCard() {
     if (!data?.found || !data.profile) return null;
 
     const getScoreColor = (score: number) => {
-        if (score >= 80) return 'text-green-600';
-        if (score >= 60) return 'text-blue-600';
-        if (score >= 40) return 'text-yellow-600';
-        return 'text-orange-600';
+        if (score >= 80) return 'text-primary';
+        if (score >= 60) return 'text-accent';
+        if (score >= 40) return 'text-warning';
+        return 'text-warning';
     };
 
     return (
         <Card className="overflow-hidden">
             <CardHeader className="pb-3">
                 <CardTitle className="text-base flex items-center gap-2">
-                    <Sparkles className="h-4 w-4 text-pink-500" />
+                    <Sparkles className="h-4 w-4 text-primary" />
                     Tu conexión destacada
                 </CardTitle>
             </CardHeader>
@@ -134,7 +134,7 @@ export function DailyCompatibilityCard() {
                 {/* Differences */}
                 {data.differences && data.differences.length > 0 && (
                     <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                        <Heart className="h-3 w-3 text-pink-400" />
+                        <Heart className="h-3 w-3 text-primary" />
                         <span>Diferencias interesantes: {data.differences.join(', ')}</span>
                     </div>
                 )}

@@ -208,6 +208,25 @@ export default function ProfilePage() {
             </div>
           </div>
 
+          {!profile.isVerified && (
+            <Link href="/settings/verification">
+              <Card className="rounded-3xl border border-primary/20 bg-primary/10 hover:shadow-md transition-shadow cursor-pointer">
+                <CardContent className="p-4 flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 bg-primary/20 rounded-xl">
+                      <ShieldCheck className="h-5 w-5 text-primary" />
+                    </div>
+                    <div>
+                      <h4 className="font-bold text-foreground text-sm">Verifica tu identidad</h4>
+                      <p className="text-xs text-muted-foreground">Los perfiles verificados aparecen primero en Discover</p>
+                    </div>
+                  </div>
+                  <ChevronRight className="h-5 w-5 text-muted-foreground" />
+                </CardContent>
+              </Card>
+            </Link>
+          )}
+
           {profile.bio && (
             <Card className="rounded-3xl border-none shadow-sm bg-muted/30">
               <CardContent className="p-5">
@@ -217,11 +236,11 @@ export default function ProfilePage() {
           )}
 
           {latestAnswer && (
-            <Card className="rounded-3xl border shadow-sm bg-amber-50/30">
+            <Card className="rounded-3xl border shadow-sm bg-muted/30">
               <CardContent className="p-5">
                 <div className="flex items-center gap-2 mb-2">
-                  <MessageCircle className="h-4 w-4 text-amber-600" />
-                  <h3 className="font-semibold text-sm text-amber-800">
+                  <MessageCircle className="h-4 w-4 text-primary" />
+                  <h3 className="font-semibold text-sm text-foreground">
                     {latestAnswer.category || 'Respuesta del día'}
                   </h3>
                 </div>
@@ -331,11 +350,10 @@ export default function ProfilePage() {
                 <div className="flex items-center justify-between mb-3">
                   <div className="flex items-center gap-2">
                     <Sparkles className="h-4 w-4 text-primary" />
-                    <span className="font-bold text-sm text-foreground">Completa tu perfil — 2.4x más matches</span>
+                    <span className="font-bold text-sm text-foreground">Tu perfil se ve bien</span>
                   </div>
-                  <span className="text-xs font-bold text-muted-foreground">{completenessScore}%</span>
                 </div>
-                <Progress value={completenessScore} className="h-2 mb-3" />
+                <Progress value={completenessScore} className="h-1.5 mb-3" />
 
                 <div className="space-y-2 text-sm">
                   {[
@@ -367,34 +385,15 @@ export default function ProfilePage() {
           )}
 
           {completenessScore >= 90 && (
-            <Card className="rounded-3xl border-warning bg-warning/10">
+            <Card className="rounded-3xl border-primary/20 bg-primary/10">
               <CardContent className="p-4 flex items-center gap-3">
                 <span className="text-2xl">⭐</span>
                 <div>
-                  <p className="font-bold text-sm text-warning-foreground">Perfil destacado</p>
-                  <p className="text-xs text-warning-foreground/80">Tu perfil está en el top 10% de completitud</p>
+                  <p className="font-bold text-sm text-primary">Perfil destacado</p>
+                  <p className="text-xs text-muted-foreground">Tu perfil está en el top 10% de completitud</p>
                 </div>
               </CardContent>
             </Card>
-          )}
-
-          {!profile.isVerified && (
-            <Link href="/settings/verification">
-              <Card className="rounded-3xl border border-warning/20 bg-warning/10 hover:shadow-md transition-shadow cursor-pointer">
-                <CardContent className="p-4 flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 bg-warning/20 rounded-xl">
-                      <ShieldCheck className="h-5 w-5 text-warning-foreground" />
-                    </div>
-                    <div>
-                      <h4 className="font-bold text-foreground text-sm">Verifica tu identidad</h4>
-                      <p className="text-xs text-muted-foreground">Los perfiles verificados aparecen primero en Discover</p>
-                    </div>
-                  </div>
-                  <ChevronRight className="h-5 w-5 text-muted-foreground" />
-                </CardContent>
-              </Card>
-            </Link>
           )}
             </CollapsibleContent>
           </Collapsible>
@@ -530,6 +529,19 @@ export default function ProfilePage() {
             </Link>
           </div>
 
+          <DynamicStreakCard />
+
+          <DynamicFirstWeekJourney />
+            </CollapsibleContent>
+          </Collapsible>
+
+          <Collapsible defaultOpen={false}>
+            <CollapsibleTrigger className="flex items-center gap-2 w-full mb-2 group">
+              <Sparkles className="h-4 w-4 text-muted-foreground" />
+              <span className="text-sm font-bold text-muted-foreground uppercase tracking-wider flex-1 text-left">Premium</span>
+              <ChevronDown className="h-4 w-4 text-muted-foreground transition-transform group-data-[state=open]:rotate-180" />
+            </CollapsibleTrigger>
+            <CollapsibleContent className="space-y-4">
           <BoostDashboard />
 
           <Card className="rounded-3xl border">
@@ -543,10 +555,6 @@ export default function ProfilePage() {
               </Button>
             </CardContent>
           </Card>
-
-          <DynamicStreakCard />
-
-          <DynamicFirstWeekJourney />
             </CollapsibleContent>
           </Collapsible>
         </div>
@@ -556,7 +564,7 @@ export default function ProfilePage() {
 
       <button
         onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-        className="fixed bottom-20 right-4 z-50 bg-primary text-primary-foreground rounded-full w-10 h-10 flex items-center justify-center shadow-lg hover:shadow-xl transition-all hover:scale-110 active:scale-95 md:bottom-6 pb-safe"
+        className="fixed bottom-20 right-4 z-50 bg-primary text-primary-foreground rounded-full w-11 h-11 flex items-center justify-center shadow-lg hover:shadow-xl transition-all hover:scale-110 active:scale-95 md:bottom-6 pb-safe"
         aria-label="Volver arriba"
       >
         <ChevronRight className="h-5 w-5 rotate-[-90deg]" />

@@ -8,7 +8,6 @@ import { updateUserProfile } from "@/server/actions/user";
 import { useRouter } from "next/navigation";
 import { StepBasicInfo } from "./StepBasicInfo";
 import { StepInterests } from "./StepInterests";
-import { StepPhotos } from "./StepPhotos";
 import { StepVerification } from "./StepVerification";
 import { StepCreateAccount } from "./StepCreateAccount";
 import { UserProfile } from "@/lib/domain/types";
@@ -16,12 +15,11 @@ import { Heart, Cloud } from "lucide-react";
 import { REFERRAL_COOKIE, REFERRAL_SESSION_KEY, REFERRAL_CODE_PATTERN } from "@/lib/referral/constants";
 import { trackEvent } from "@/lib/tracking/client";
 
-const STEP_LABELS = ['Tu cuenta', 'Tu esencia', 'Tus colores', 'Tu sonrisa', 'Tu seguridad'];
+const STEP_LABELS = ['Tu cuenta', 'Tu esencia', 'Tus colores', 'Tu seguridad'];
 const STEP_WELCOME = [
     'Crea tu cuenta',
     'Datos e intención',
     'Intereses, valores y música',
-    'Fotos y presentación',
     'Seguridad y verificación',
 ];
 
@@ -29,7 +27,7 @@ export function OnboardingWizard({ initialRef }: { initialRef?: string } = {}) {
     const { user, profile, authLoading, profileLoading } = useAuth();
     const router = useRouter();
     const [step, setStep] = useState(1);
-    const totalSteps = 5;
+    const totalSteps = 4;
     const [formData, setFormData] = useState<Partial<UserProfile>>({});
     const [isInitialized, setIsInitialized] = useState(false);
     const [syncStatus, setSyncStatus] = useState<'idle' | 'syncing' | 'saved' | 'error'>('idle');
@@ -137,7 +135,7 @@ export function OnboardingWizard({ initialRef }: { initialRef?: string } = {}) {
                             </span>
                         )}
                         {syncStatus === 'saved' && (
-                            <span className="text-xs text-green-500">Guardado</span>
+                            <span className="text-xs text-primary">Guardado</span>
                         )}
                         {syncStatus === 'error' && (
                             <span className="text-xs text-destructive">Error al guardar</span>
@@ -170,8 +168,7 @@ export function OnboardingWizard({ initialRef }: { initialRef?: string } = {}) {
                         )}
                         {step === 2 && <StepBasicInfo userId={effectiveUserId} data={formData} onUpdate={saveProgress} onNext={nextStep} />}
                         {step === 3 && <StepInterests userId={effectiveUserId} data={formData} onUpdate={saveProgress} onNext={nextStep} onPrev={prevStep} />}
-                        {step === 4 && <StepPhotos userId={effectiveUserId} data={formData} onUpdate={saveProgress} onNext={nextStep} onPrev={prevStep} />}
-                        {step === 5 && (
+                        {step === 4 && (
                             <div className="flex-1 flex flex-col">
                                 <StepVerification onComplete={completeOnboarding} />
                             </div>

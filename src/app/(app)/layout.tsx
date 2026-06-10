@@ -7,7 +7,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       <a href="#main-content" className="skip-to-content">
         Saltar al contenido
       </a>
-      <main id="main-content" className="pb-20 md:pb-0">
+      <main id="main-content" className="pb-20 md:pb-0 md:pl-60">
         <ErrorBoundary>{children}</ErrorBoundary>
       </main>
       <BottomNav />

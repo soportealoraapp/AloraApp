@@ -20,7 +20,7 @@ export default async function RootLayout({
       <head>
         {/* ... fonts */}
       </head>
-      <body className={cn('font-body antialiased', 'min-h-screen bg-background font-sans')}>
+      <body className="font-body antialiased min-h-screen bg-background">
         <ThemeProvider
           attribute="class"
           defaultTheme="system"

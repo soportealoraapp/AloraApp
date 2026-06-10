@@ -62,7 +62,7 @@ export function MessageReactions({ reactions, currentUserId, onReact }: MessageR
                                 initial={{ opacity: 0, scale: 0.8, y: 5 }}
                                 animate={{ opacity: 1, scale: 1, y: 0 }}
                                 exit={{ opacity: 0, scale: 0.8, y: 5 }}
-                                className="absolute bottom-full left-0 mb-1 z-50 bg-white dark:bg-gray-800 border rounded-full shadow-lg px-2 py-1 flex gap-1"
+                                className="absolute bottom-full left-0 mb-1 z-50 bg-card border border-border rounded-full shadow-lg px-2 py-1 flex gap-1"
                             >
                                 {AVAILABLE_REACTIONS.map((emoji) => (
                                     <button
