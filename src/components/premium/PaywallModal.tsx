@@ -7,7 +7,6 @@ import {
     DialogTitle,
     DialogDescription,
 } from '@/components/ui/dialog';
-import { VisuallyHidden } from '@radix-ui/react-visually-hidden';
 import { Button } from '@/components/ui/button';
 import { Check, Sparkles, Heart, Zap, ShieldCheck, RotateCcw, Globe, Eye } from 'lucide-react';
 
@@ -30,13 +29,11 @@ export function PaywallModal({ isOpen, onClose }: PaywallModalProps) {
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>
             <DialogContent className="sm:max-w-[450px] p-0 overflow-hidden border-none rounded-3xl shadow-2xl">
-                <VisuallyHidden>
-                    <DialogHeader>
-                        <DialogTitle>Alora Plus</DialogTitle>
-                        <DialogDescription>Suscripción premium para desbloquear beneficios</DialogDescription>
-                    </DialogHeader>
-                </VisuallyHidden>
-                <div className="bg-gradient-to-br from-pink-600 via-rose-500 to-orange-400 p-8 text-white text-center">
+                <DialogHeader>
+                    <DialogTitle className="sr-only">Alora Plus</DialogTitle>
+                    <DialogDescription className="sr-only">Suscripción premium para desbloquear beneficios</DialogDescription>
+                </DialogHeader>
+                <div className="bg-gradient-to-br from-pink-600 to-rose-500 p-8 text-white text-center">
                     <div className="bg-white/20 w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4 backdrop-blur-md">
                         <Sparkles className="h-10 w-10 text-white fill-white" />
                     </div>
@@ -71,7 +68,7 @@ export function PaywallModal({ isOpen, onClose }: PaywallModalProps) {
                         Suscribirme Ahora
                     </Button>
 
-                    <p className="text-[10px] text-center text-muted-foreground">
+                    <p className="text-xs text-center text-muted-foreground">
                         Suscripción recurrente. Cancela en cualquier momento. Al suscribirte aceptas nuestros Términos de Uso.
                     </p>
                 </div>

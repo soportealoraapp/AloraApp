@@ -81,7 +81,7 @@ export function StepInterests({ data, onUpdate, onNext, onPrev, userId }: StepIn
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ delay: catIdx * 0.05 }}
                         >
-                            <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-2">
+                            <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-2">
                                 {category.name}
                             </p>
                             <div className="flex flex-wrap gap-2">
@@ -115,7 +115,7 @@ export function StepInterests({ data, onUpdate, onNext, onPrev, userId }: StepIn
                                 />
                             ))}
                         </div>
-                        <span className="text-[10px] text-muted-foreground ml-2">{selectedInterests.length}/{MAX_INTERESTS}</span>
+                        <span className="text-xs text-muted-foreground ml-2">{selectedInterests.length}/{MAX_INTERESTS}</span>
                     </div>
                     {selectedInterests.length > 0 && <BadgeChipList items={selectedInterests} type="interest" className="mt-2" />}
                 </div>

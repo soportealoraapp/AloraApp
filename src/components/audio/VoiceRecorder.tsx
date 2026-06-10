@@ -81,7 +81,7 @@ export function VoiceRecorder({ onStop, onCancel }: { onStop: (blob: Blob, durat
                 </div>
             ) : (
                 <div className="w-full space-y-2">
-                    <p className="text-[10px] text-muted-foreground leading-tight">Tu voz ayuda a encontrar personas compatibles. Los perfiles con audio reciben 2× más visitas.</p>
+                    <p className="text-xs text-muted-foreground leading-tight">Tu voz ayuda a encontrar personas compatibles. Los perfiles con audio reciben 2× más visitas.</p>
                     <Button variant="ghost" className="text-muted-foreground hover:text-primary hover:bg-primary/5 w-full justify-start gap-2" onClick={startRecording}>
                         <Mic className="w-5 h-5" />
                         <span className="text-xs">Grabar Audio</span>

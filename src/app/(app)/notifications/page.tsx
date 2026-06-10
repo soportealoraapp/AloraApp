@@ -24,7 +24,7 @@ function NotificationItem({ notification, onRead }: { notification: any; onRead:
       {notification.body && (
         <p className="text-xs text-muted-foreground mt-1">{notification.body}</p>
       )}
-      <p className="text-[10px] text-muted-foreground/60 mt-1">
+      <p className="text-xs text-muted-foreground/60 mt-1">
         {new Date(notification.createdAt).toLocaleDateString('es-MX', {
           day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit'
         })}

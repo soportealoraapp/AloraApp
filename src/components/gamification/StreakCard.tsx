@@ -105,7 +105,7 @@ export function StreakCard() {
                                 }`}>
                                     {active ? '✓' : '·'}
                                 </div>
-                                <span className="text-[10px] text-muted-foreground">
+                                <span className="text-xs text-muted-foreground">
                                     {dayLabels[(adjustedToday - 6 + i + 7) % 7]}
                                 </span>
                             </div>

@@ -61,7 +61,7 @@ export function DailyPicks() {
                     <span className="font-bold text-sm">Para ti hoy</span>
                     <PlusBadge label="Avanzado" />
                 </div>
-                <span className="text-[10px] text-muted-foreground">Basado en compatibilidad</span>
+                <span className="text-xs text-muted-foreground">Basado en compatibilidad</span>
             </div>
             <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
                 {picks.filter(p => p.id && typeof p.id === 'string').map(pick => (
@@ -77,7 +77,7 @@ export function DailyPicks() {
                                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
                                 <div className="absolute bottom-2 left-2 right-2">
                                     <p className="text-white font-bold text-sm">{pick.displayName || 'Usuario'}, {pick.age || '?'}</p>
-                                    <p className="text-white/70 text-[10px]">{pick.city || ''}</p>
+                                    <p className="text-white/70 text-xs">{pick.city || ''}</p>
                                 </div>
                                 {pick.isVerified && (
                                     <Badge className="absolute top-2 right-2 bg-blue-500 text-white text-[8px] px-1.5 py-0">
@@ -88,7 +88,7 @@ export function DailyPicks() {
                             <CardContent className="p-3">
                                 <div className="flex flex-wrap gap-1 mb-2">
                                     {(pick.reason || '').split(' · ').slice(0, 2).map((r, i) => (
-                                        <span key={i} className="text-[9px] bg-primary/10 text-primary px-1.5 py-0.5 rounded-full font-medium leading-tight">{r}</span>
+                                        <span key={i} className="text-[11px] bg-primary/10 text-primary px-1.5 py-0.5 rounded-full font-medium leading-tight">{r}</span>
                                     ))}
                                 </div>
                                 <div className="flex items-center gap-1">
@@ -98,7 +98,7 @@ export function DailyPicks() {
                                             style={{ width: `${Math.min(100, pick.score || 0)}%` }}
                                         />
                                     </div>
-                                    <span className="text-[10px] font-bold text-primary">{pick.score || 0}</span>
+                                    <span className="text-xs font-bold text-primary">{pick.score || 0}</span>
                                 </div>
                             </CardContent>
                         </Card>

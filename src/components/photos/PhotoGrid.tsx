@@ -153,14 +153,14 @@ export function PhotoGrid({ photos, onReorder, onRemove, onCrop, maxPhotos = 6 }
                     </div>
 
                     {index === 0 && (
-                        <Badge className="absolute top-2 left-2 text-[10px] py-0 px-1.5">
+                        <Badge className="absolute top-2 left-2 text-xs py-0 px-1.5">
                             <Star className="h-3 w-3 mr-0.5 fill-current" /> Principal
                         </Badge>
                     )}
 
                     {index > 0 && (
                         <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity md:group-hover:opacity-100">
-                            <Badge variant="secondary" className="text-[10px] py-0 px-1.5">
+                            <Badge variant="secondary" className="text-xs py-0 px-1.5">
                                 {index + 1}
                             </Badge>
                         </div>

@@ -306,8 +306,8 @@ export default function QADashboard() {
                                 </div>
                                 <div className="bg-muted/50 p-3 flex justify-between items-center px-6">
                                     <div className="flex items-center gap-4 text-xs font-medium text-muted-foreground">
-                                        <span className="flex items-center gap-1"><Badge variant="outline" className="text-[9px] h-4">Virtualization</Badge> Enabled</span>
-                                        <span className="flex items-center gap-1"><Badge variant="outline" className="text-[9px] h-4">History</Badge> 500+ Messages</span>
+                                        <span className="flex items-center gap-1"><Badge variant="outline" className="text-[11px] h-4">Virtualization</Badge> Enabled</span>
+                                        <span className="flex items-center gap-1"><Badge variant="outline" className="text-[11px] h-4">History</Badge> 500+ Messages</span>
                                     </div>
                                     <Button variant="ghost" size="sm" className="text-xs">
                                         Simulate Load More
@@ -361,7 +361,7 @@ export default function QADashboard() {
                                 key={event.id}
                                 initial={{ opacity: 0, x: 10 }}
                                 animate={{ opacity: 1, x: 0 }}
-                                className="p-3 bg-muted/50 rounded-xl text-[10px] border border-transparent hover:border-primary/20 transition-colors"
+                                className="p-3 bg-muted/50 rounded-xl text-xs border border-transparent hover:border-primary/20 transition-colors"
                             >
                                 <div className="flex justify-between font-black text-primary uppercase mb-1">
                                     <span>{event.name}</span>
@@ -374,7 +374,7 @@ export default function QADashboard() {
                         ))}
                     </div>
                     <div className="p-4 border-t bg-muted/20">
-                        <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-widest text-center">QA Automation Ready</p>
+                        <p className="text-xs text-muted-foreground uppercase font-bold tracking-widest text-center">QA Automation Ready</p>
                     </div>
                 </aside>
             </div>

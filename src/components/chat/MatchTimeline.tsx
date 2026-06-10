@@ -70,7 +70,7 @@ export function MatchTimeline({ matchId, open, onClose }: MatchTimelineProps) {
                                         {event.description && (
                                             <p className="text-xs text-muted-foreground mt-0.5">{event.description}</p>
                                         )}
-                                        <p className="text-[10px] text-muted-foreground mt-1">
+                                        <p className="text-xs text-muted-foreground mt-1">
                                             {new Date(event.createdAt).toLocaleString('es-MX', {
                                                 day: 'numeric',
                                                 month: 'short',

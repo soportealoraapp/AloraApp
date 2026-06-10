@@ -136,7 +136,7 @@ export default function ChatPage() {
                         <TabsTrigger value="new">
                             Nuevos
                             {newMatches.length > 0 && (
-                                <Badge variant="default" className="ml-2 rounded-full h-5 w-5 flex items-center justify-center p-0 text-[10px]">
+                                <Badge variant="default" className="ml-2 rounded-full h-5 w-5 flex items-center justify-center p-0 text-xs">
                                     {newMatches.length}
                                 </Badge>
                             )}
@@ -190,7 +190,7 @@ export default function ChatPage() {
                                                                 <div className="flex-1 min-w-0">
                                                                     <div className="flex items-center justify-between mb-1">
                                                                         <p className="font-bold text-foreground truncate">{partnerName}</p>
-                                                                        <Badge variant="secondary" className="text-[10px] uppercase font-bold tracking-wider">
+                                                                        <Badge variant="secondary" className="text-xs uppercase font-bold tracking-wider">
                                                                             {match.compatibility}% compatible
                                                                         </Badge>
                                                                     </div>
@@ -201,7 +201,7 @@ export default function ChatPage() {
                                                                         const hours = (Date.now() - new Date(match.lastMessage.createdAt).getTime()) / (1000 * 60 * 60);
                                                                         if (hours > 72) {
                                                                             return (
-                                                                                <p className="text-[10px] text-orange-500 mt-1">
+                                                                                <p className="text-xs text-orange-500 mt-1">
                                                                                     ❄️ Sin respuesta por {Math.round(hours / 24)} día(s)
                                                                                 </p>
                                                                             );

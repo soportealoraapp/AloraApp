@@ -136,7 +136,7 @@ export default function AdminActivationPage() {
                                     </div>
                                 </div>
                                 {c.conversion !== undefined && (
-                                    <p className="text-[10px] text-muted-foreground mt-2">
+                                    <p className="text-xs text-muted-foreground mt-2">
                                         {c.conversion.toFixed(1)}% conversión
                                     </p>
                                 )}
@@ -225,7 +225,7 @@ export default function AdminActivationPage() {
                                         <div className="flex items-center gap-2">
                                             <span className="font-bold">{step.count}</span>
                                             {i > 0 && (
-                                                <span className="text-[10px] text-muted-foreground">
+                                                <span className="text-xs text-muted-foreground">
                                                     ({step.conversionFromPrevious.toFixed(1)}%)
                                                 </span>
                                             )}

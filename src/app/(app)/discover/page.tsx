@@ -244,7 +244,7 @@ export default function DiscoverPage() {
         track(AnalyticsEvents.LIKE_SENT, { targetUserId: profileToActOn.id, intent });
         const result = await sendLike(profileToActOn.id, 'like', intent);
         lastSwipeRef.current = { profileId: profileToActOn.id, direction };
-        toast({ title: 'Like enviado', description: `Le gustas a ${profileToActOn.displayName}?` });
+        toast({ title: 'Like enviado', description: `¡Esperamos que sea mutuo!` });
         if (result?.matched) {
           track(AnalyticsEvents.MATCH_CREATED, { partnerId: profileToActOn.id, intent });
           setMatchedProfile(profileToActOn);
@@ -420,7 +420,7 @@ export default function DiscoverPage() {
             <Button variant="ghost" size="icon" onClick={() => setFilterOpen(true)} title="Filtros de búsqueda" aria-label="Filtros de búsqueda" className="relative h-8 w-8">
               <SlidersHorizontal className="h-4 w-4 text-muted-foreground" />
               {countActiveFilters(filters) > 0 && (
-                <span className="absolute -top-0.5 -right-0.5 bg-primary text-primary-foreground text-[10px] font-bold rounded-full min-w-[18px] h-[18px] flex items-center justify-center shadow-sm border border-background">
+                <span className="absolute -top-0.5 -right-0.5 bg-primary text-primary-foreground text-[11px] font-bold rounded-full min-w-[18px] h-[18px] flex items-center justify-center shadow-sm border border-background">
                   {countActiveFilters(filters)}
                 </span>
               )}
@@ -434,7 +434,7 @@ export default function DiscoverPage() {
             <Button variant="ghost" size="icon" onClick={() => setFilterOpen(true)} title="Filtros de búsqueda" aria-label="Filtros de búsqueda" className="relative">
               <SlidersHorizontal className="h-5 w-5 text-muted-foreground" />
               {countActiveFilters(filters) > 0 && (
-                <span className="absolute -top-0.5 -right-0.5 bg-primary text-primary-foreground text-[10px] font-bold rounded-full min-w-[18px] h-[18px] flex items-center justify-center shadow-sm border border-background">
+                <span className="absolute -top-0.5 -right-0.5 bg-primary text-primary-foreground text-[11px] font-bold rounded-full min-w-[18px] h-[18px] flex items-center justify-center shadow-sm border border-background">
                   {countActiveFilters(filters)}
                 </span>
               )}
@@ -515,12 +515,12 @@ export default function DiscoverPage() {
                 >
                   <Circle className="h-3 w-3 text-muted-foreground shrink-0" />
                   <span className="flex-1">{task.title}</span>
-                  <span className="text-[10px] text-primary font-medium">{task.rewardText}</span>
+                  <span className="text-xs text-primary font-medium">{task.rewardText}</span>
                 </button>
               ))}
             </div>
             {activationTasks.filter(t => !t.completed).length > 4 && (
-              <button onClick={() => router.push('/profile/edit')} className="text-[10px] text-primary font-medium mt-2 flex items-center gap-1">
+              <button onClick={() => router.push('/profile/edit')} className="text-xs text-primary font-medium mt-2 flex items-center gap-1">
                 Ver más <ChevronRight className="h-3 w-3" />
               </button>
             )}
@@ -568,7 +568,7 @@ export default function DiscoverPage() {
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
                       {p.activeNow && (
-                        <div className="absolute top-2 left-2 bg-green-500/90 backdrop-blur-sm text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full flex items-center gap-1 border border-green-300/30">
+                        <div className="absolute top-2 left-2 bg-green-500/90 backdrop-blur-sm text-white text-[11px] font-bold px-1.5 py-0.5 rounded-full flex items-center gap-1 border border-green-300/30">
                           <span className="relative flex h-1.5 w-1.5">
                             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75" />
                             <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-green-200" />
@@ -577,12 +577,12 @@ export default function DiscoverPage() {
                         </div>
                       )}
                       {(p as any).latestAnswer && (
-                        <div className="absolute top-2 right-2 bg-amber-500/90 backdrop-blur-sm text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">
+                        <div className="absolute top-2 right-2 bg-amber-500/90 backdrop-blur-sm text-white text-[11px] font-bold px-1.5 py-0.5 rounded-full">
                           💬 Resp.
                         </div>
                       )}
                       {p.voiceIntro && (
-                        <div className="absolute top-8 left-2 bg-indigo-500/90 backdrop-blur-sm text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">
+                        <div className="absolute top-8 left-2 bg-indigo-500/90 backdrop-blur-sm text-white text-[11px] font-bold px-1.5 py-0.5 rounded-full">
                           🎵 Voz
                         </div>
                       )}
@@ -590,7 +590,7 @@ export default function DiscoverPage() {
                         <div className="text-white text-xs font-bold leading-tight">{p.displayName}, {p.age}</div>
                         {p.city && <div className="text-white/70 text-xs">{p.city}</div>}
                         {p.sharedInterests !== undefined && p.sharedInterests > 0 && (
-                          <div className="text-purple-200 text-[10px] mt-0.5">{p.sharedInterests} interés(es) en común</div>
+                          <div className="text-purple-200 text-xs mt-0.5">{p.sharedInterests} interés(es) en común</div>
                         )}
                         {compatibility != null && (
                           <div className="inline-block bg-primary/80 text-white text-xs px-1.5 py-0.5 rounded mt-1">

@@ -227,7 +227,7 @@ export function MatchScreen({ userProfile, matchedProfile, onChat, onKeepSwiping
                     <MessageCircle className="h-5 w-5 mr-2" />
                     Enviar Mensaje
                 </PinkButton>
-                <button onClick={onKeepSwiping} className="text-white/70 hover:text-white transition-colors underline text-sm">
+                <button onClick={onKeepSwiping} className="text-white/90 hover:text-white transition-all underline text-sm bg-white/10 px-5 py-2.5 rounded-full">
                     Seguir explorando
                 </button>
             </div>

@@ -214,15 +214,15 @@ export default function UserProfilePage() {
                             <CarouselContent>
                                 {profile.photos.map((photo, index) => (
                                     <CarouselItem key={index}>
-                                        <div className="w-full aspect-[3/4] relative">
-                                            <Image
-                                                src={photo}
-                                                alt={`Foto de ${profile.displayName} ${index + 1}`}
-                                                fill
-                                                className="object-cover"
-                                                
-                                                priority={index === 0}
-                                            />
+<div className="w-full aspect-[4/5] relative">
+                                              <Image
+                                                  src={photo}
+                                                  alt={`Foto de ${profile.displayName} ${index + 1}`}
+                                                  fill
+                                                  className="object-cover"
+                                                  
+                                                  priority={index === 0}
+                                              />
                                         </div>
                                     </CarouselItem>
                                 ))}
@@ -236,7 +236,7 @@ export default function UserProfilePage() {
                             alt={`Foto de ${profile.displayName}`}
                             width={600}
                             height={800}
-                            className="w-full aspect-[3/4] object-cover"
+                            className="w-full aspect-[4/5] object-cover"
                             
                             priority
                         />
@@ -253,7 +253,7 @@ export default function UserProfilePage() {
                                 <CheckCircle className="h-6 w-6 text-primary" />
                             )}
                             {(profile as any).quizArchetype && (
-                                <Badge variant="secondary" className="rounded-full text-[10px] gap-1">
+                                <Badge variant="secondary" className="rounded-full text-xs gap-1">
                                     <Sparkles className="h-3 w-3 text-primary" />
                                     {(profile as any).quizArchetype}
                                     {(profile as any).quizScore && ` · ${(profile as any).quizScore}`}
@@ -291,7 +291,7 @@ export default function UserProfilePage() {
                                 <div className="bg-white/50 rounded-xl p-3 border border-primary/10">
                                     <p className="text-sm text-foreground leading-relaxed">&ldquo;{profile.latestAnswer.answer}&rdquo;</p>
                                 </div>
-                                <p className="text-[10px] text-muted-foreground mt-2">Usa esta respuesta para iniciar una conversación</p>
+                                <p className="text-xs text-muted-foreground mt-2">Usa esta respuesta para iniciar una conversación</p>
                             </CardContent>
                         </Card>
                     )}

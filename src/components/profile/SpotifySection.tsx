@@ -106,7 +106,7 @@ export function SpotifySection({ spotify, isOwn }: SpotifySectionProps) {
           <Music className="h-5 w-5 text-green-500" />
           <h3 className="font-semibold text-lg">Spotify</h3>
           {spotify.lastSyncedAt && (
-            <span className="text-[10px] text-muted-foreground ml-auto">
+            <span className="text-xs text-muted-foreground ml-auto">
               Sincronizado {new Date(spotify.lastSyncedAt).toLocaleDateString()}
             </span>
           )}

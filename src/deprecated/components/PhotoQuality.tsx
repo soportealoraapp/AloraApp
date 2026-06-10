@@ -106,7 +106,7 @@ export function PhotoQuality({ src, onQualityDetected }: PhotoQualityProps) {
     const Icon = config.icon;
 
     return (
-        <Badge variant="secondary" className={`text-[10px] py-0 px-1.5 ${config.color}`}>
+        <Badge variant="secondary" className={`text-xs py-0 px-1.5 ${config.color}`}>
             <Icon className="h-3 w-3 mr-0.5" />
             {config.label}
         </Badge>

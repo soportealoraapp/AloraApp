@@ -105,7 +105,7 @@ export function VoiceMessage({ audioUrl, duration: propDuration, isOwn = false }
                     })}
                 </div>
                 <div className={cn(
-                    "text-[10px] mt-0.5",
+                    "text-xs mt-0.5",
                     isOwn ? "text-primary-foreground/70" : "text-muted-foreground"
                 )}>
                     {formatTime(currentTime)} / {formatTime(duration)}

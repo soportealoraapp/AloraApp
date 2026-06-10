@@ -89,7 +89,7 @@ export default function SettingsPage() {
                                 <Plane className="w-5 h-5 text-blue-500" />
                                 <span>Modo Viaje</span>
                                 </div>
-                                <Badge variant="secondary" className="text-[10px]">Plus</Badge>
+                                <Badge variant="secondary" className="text-xs">Plus</Badge>
                             </div>
                         </Link>
                     </CardContent>

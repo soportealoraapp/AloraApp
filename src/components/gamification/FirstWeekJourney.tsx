@@ -62,7 +62,7 @@ export function FirstWeekJourney() {
                         <Sparkles className="h-4 w-4 text-primary" />
                         Tu primera semana
                     </CardTitle>
-                    <span className="text-[10px] font-bold text-muted-foreground">
+                    <span className="text-xs font-bold text-muted-foreground">
                         Día {currentDay}/7
                     </span>
                 </div>
@@ -110,12 +110,12 @@ export function FirstWeekJourney() {
                                     <p className={`text-sm font-semibold leading-tight ${task.completed ? 'line-through text-muted-foreground' : ''}`}>
                                         {task.title}
                                     </p>
-                                    <span className="text-[9px] text-muted-foreground uppercase tracking-wider">
+                                    <span className="text-[11px] text-muted-foreground uppercase tracking-wider">
                                         D{task.day}
                                     </span>
                                 </div>
                                 <div className="flex items-center gap-1.5 mt-0.5">
-                                    <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-bold ${REWARD_COLORS[task.rewardType]}`}>
+                                    <span className={`text-xs px-1.5 py-0.5 rounded-full font-bold ${REWARD_COLORS[task.rewardType]}`}>
                                         {task.reward}
                                     </span>
                                 </div>

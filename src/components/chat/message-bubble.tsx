@@ -74,7 +74,7 @@ export function MessageBubble({ message, isMe, currentUserId, onReact }: Message
               isMe ? 'bg-primary' : 'bg-secondary'
             )}>
               <span className={cn(
-                'text-[10px] leading-none',
+                'text-xs leading-none',
                 isMe ? 'text-primary-foreground/60' : 'text-muted-foreground'
               )}>
                 {formatTime(message.createdAt)}
@@ -99,7 +99,7 @@ export function MessageBubble({ message, isMe, currentUserId, onReact }: Message
             <motion.div
               initial={{ opacity: 0, y: -4 }}
               animate={{ opacity: 1, y: 0 }}
-              className="flex items-center gap-1 text-[10px] text-destructive px-1 mt-1"
+              className="flex items-center gap-1 text-xs text-destructive px-1 mt-1"
             >
               <AlertCircle className="h-3 w-3" />
               <span>Imagen bloqueada por moderación</span>
@@ -123,7 +123,7 @@ export function MessageBubble({ message, isMe, currentUserId, onReact }: Message
 
             <div className="flex items-center justify-end gap-1.5 mt-1">
               <span className={cn(
-                'text-[10px] leading-none',
+                'text-xs leading-none',
                 isMe ? 'text-primary-foreground/60' : 'text-muted-foreground'
               )}>
                 {formatTime(message.createdAt)}

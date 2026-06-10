@@ -129,7 +129,7 @@ export default function ProfileReviewPage() {
                                         <div className="h-2 w-2 rounded-full bg-warning shrink-0" />
                                         <span className="text-muted-foreground">{item.label}</span>
                                     </div>
-                                    <Badge variant="outline" className="text-[10px]">+{item.weight} pts</Badge>
+                                    <Badge variant="outline" className="text-xs">+{item.weight} pts</Badge>
                                 </li>
                             ))}
                         </ul>

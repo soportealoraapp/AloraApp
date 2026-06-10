@@ -203,7 +203,7 @@ export default function VerificationPage() {
                                     Tomar selfie
                                 </Button>
 
-                                <p className="text-[10px] text-center text-muted-foreground">
+                                <p className="text-xs text-center text-muted-foreground">
                                     Tu selfie nunca se muestra en tu perfil. Solo se usa para verificación.
                                 </p>
                             </CardContent>

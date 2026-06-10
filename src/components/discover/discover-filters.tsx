@@ -268,7 +268,7 @@ export function DiscoverFilters({ open, onOpenChange, onApplyFilters, initialFil
                 <Switch id="featured" checked={featuredOnly} onCheckedChange={setFeaturedOnly} />
                 <Label htmlFor="featured" className="flex-grow cursor-pointer">
                   ⭐ Perfil destacado
-                  <span className="block text-[10px] text-muted-foreground">Completitud 90%+</span>
+                  <span className="block text-xs text-muted-foreground">Completitud 90%+</span>
                 </Label>
               </div>
 
@@ -276,7 +276,7 @@ export function DiscoverFilters({ open, onOpenChange, onApplyFilters, initialFil
                 <Switch id="high-compatibility" checked={highCompatibility} onCheckedChange={setHighCompatibility} />
                 <Label htmlFor="high-compatibility" className="flex-grow cursor-pointer">
                   💜 Alta compatibilidad
-                  <span className="block text-[10px] text-muted-foreground">Coincidencia en valores e intereses</span>
+                  <span className="block text-xs text-muted-foreground">Coincidencia en valores e intereses</span>
                 </Label>
               </div>
             </div>

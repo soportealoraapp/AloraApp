@@ -36,7 +36,7 @@ export default function WelcomePage() {
         <p className="flex items-center justify-center gap-2 text-muted-foreground">
           Hecho con <Heart className="h-4 w-4 text-primary" /> para una comunidad más segura.
         </p>
-        <div className="text-[10px] text-muted-foreground space-x-3">
+        <div className="text-xs text-muted-foreground space-x-3">
           <a href="/terms" className="hover:underline">Términos</a>
           <a href="/privacy" className="hover:underline">Privacidad</a>
           <Link href="/support" className="hover:underline">Ayuda</Link>

@@ -42,17 +42,17 @@ export default function BadgesPage() {
                             <CardContent className="pt-6 flex flex-col items-center gap-2">
                                 <div className="text-4xl mb-2">{def.icon}</div>
                                 <h4 className="font-bold text-foreground text-sm">{def.name}</h4>
-                                <p className="text-[10px] text-muted-foreground leading-tight">{def.description}</p>
+                                <p className="text-xs text-muted-foreground leading-tight">{def.description}</p>
                                 {def.reward && (
-                                    <div className="flex items-center gap-1 mt-1 text-[10px] text-primary bg-primary/10 px-2 py-1 rounded-full">
+                                    <div className="flex items-center gap-1 mt-1 text-xs text-primary bg-primary/10 px-2 py-1 rounded-full">
                                         <Gift className="h-3 w-3" />
                                         {def.reward.description}
                                     </div>
                                 )}
                                 {isUnlocked ? (
-                                    <span className="text-[10px] bg-primary/10 text-primary px-2 py-0.5 rounded-full mt-1">Desbloqueado</span>
+                                    <span className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-full mt-1">Desbloqueado</span>
                                 ) : (
-                                    <span className="text-[10px] bg-muted text-muted-foreground px-2 py-0.5 rounded-full mt-1">Bloqueado</span>
+                                    <span className="text-xs bg-muted text-muted-foreground px-2 py-0.5 rounded-full mt-1">Bloqueado</span>
                                 )}
                             </CardContent>
                         </Card>

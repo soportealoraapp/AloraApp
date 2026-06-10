@@ -94,7 +94,7 @@ export function DailyCompatibilityCard() {
                             <p className={`text-2xl font-bold ${getScoreColor(data.score || 0)}`}>
                                 {data.score}%
                             </p>
-                            <p className="text-[10px] text-muted-foreground">compatible</p>
+                            <p className="text-xs text-muted-foreground">compatible</p>
                         </div>
                     </div>
                 </Link>
@@ -102,12 +102,12 @@ export function DailyCompatibilityCard() {
                 {/* Shared values */}
                 {data.sharedValues && data.sharedValues.length > 0 && (
                     <div>
-                        <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider mb-1">
+                        <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-1">
                             Valores compartidos
                         </p>
                         <div className="flex flex-wrap gap-1">
                             {data.sharedValues.slice(0, 3).map(v => (
-                                <Badge key={v} variant="secondary" className="text-[10px] py-0">
+                                <Badge key={v} variant="secondary" className="text-xs py-0">
                                     {v}
                                 </Badge>
                             ))}
@@ -118,12 +118,12 @@ export function DailyCompatibilityCard() {
                 {/* Shared interests */}
                 {data.sharedInterests && data.sharedInterests.length > 0 && (
                     <div>
-                        <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider mb-1">
+                        <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-1">
                             Intereses en comun
                         </p>
                         <div className="flex flex-wrap gap-1">
                             {data.sharedInterests.slice(0, 3).map(i => (
-                                <Badge key={i} variant="outline" className="text-[10px] py-0">
+                                <Badge key={i} variant="outline" className="text-xs py-0">
                                     {i}
                                 </Badge>
                             ))}
@@ -133,7 +133,7 @@ export function DailyCompatibilityCard() {
 
                 {/* Differences */}
                 {data.differences && data.differences.length > 0 && (
-                    <div className="flex items-center gap-1 text-[10px] text-muted-foreground">
+                    <div className="flex items-center gap-1 text-xs text-muted-foreground">
                         <Heart className="h-3 w-3 text-pink-400" />
                         <span>Diferencias interesantes: {data.differences.join(', ')}</span>
                     </div>

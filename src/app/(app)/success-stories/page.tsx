@@ -94,7 +94,7 @@ export default function SuccessStoriesPage() {
                                             {isExpanded ? 'Ver menos' : 'Leer más →'}
                                         </Button>
                                     )}
-                                    <p className="text-[10px] text-muted-foreground pt-2 border-t">
+                                    <p className="text-xs text-muted-foreground pt-2 border-t">
                                         {new Date(s.createdAt).toLocaleDateString('es-MX', {
                                             day: 'numeric',
                                             month: 'long',

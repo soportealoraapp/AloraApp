@@ -40,7 +40,7 @@ export function MessageReactions({ reactions, currentUserId, onReact }: MessageR
                             )}
                         >
                             <span>{emoji}</span>
-                            {count > 1 && <span className="text-[10px] text-muted-foreground">{count}</span>}
+                            {count > 1 && <span className="text-xs text-muted-foreground">{count}</span>}
                         </button>
                     ))}
                 </div>
@@ -49,7 +49,7 @@ export function MessageReactions({ reactions, currentUserId, onReact }: MessageR
             <div className="relative">
                 <button
                     onClick={() => setShowPicker(!showPicker)}
-                    className="text-[10px] text-muted-foreground hover:text-foreground transition-colors mt-0.5"
+                    className="text-xs text-muted-foreground hover:text-foreground transition-colors mt-0.5"
                 >
                     {reactionEntries.length === 0 ? '+' : ''}
                 </button>

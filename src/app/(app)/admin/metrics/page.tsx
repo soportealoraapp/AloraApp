@@ -198,7 +198,7 @@ export default function AdminMetricsPage() {
                                                     className="h-full bg-gradient-to-r from-blue-500 to-blue-400 rounded-full transition-all"
                                                     style={{ width: `${Math.min(100, (step.count / Math.max(1, funnel[0]?.count)) * 100)}%` }}
                                                 />
-                                                <span className="absolute inset-0 flex items-center justify-center text-[10px] font-medium text-white">
+                                                <span className="absolute inset-0 flex items-center justify-center text-xs font-medium text-white">
                                                     {step.count.toLocaleString()}
                                                 </span>
                                             </div>

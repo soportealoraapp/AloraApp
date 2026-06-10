@@ -163,7 +163,7 @@ export default function ReferralPage() {
                                     style={{ width: `${progressToNext}%` }}
                                 />
                             </div>
-                            <p className="text-[10px] text-muted-foreground mt-1">
+                            <p className="text-xs text-muted-foreground mt-1">
                                 Faltan {stats.nextMilestone.count - stats.totalCompleted} para {stats.nextMilestone.label}
                             </p>
                         </div>
@@ -197,10 +197,10 @@ export default function ReferralPage() {
                                     </div>
                                     <div className="flex-1 min-w-0">
                                         <p className="text-sm font-semibold">{tier.label}</p>
-                                        <p className="text-[10px] text-muted-foreground">{tier.description}</p>
+                                        <p className="text-xs text-muted-foreground">{tier.description}</p>
                                     </div>
                                     {achieved && (
-                                        <span className="text-[10px] font-bold bg-green-500 text-white px-2 py-0.5 rounded-full">
+                                        <span className="text-xs font-bold bg-green-500 text-white px-2 py-0.5 rounded-full">
                                           Conseguido
                                         </span>
                                     )}
@@ -252,7 +252,7 @@ export default function ReferralPage() {
                                     />
                                     <div className="flex-1 min-w-0">
                                         <p className="text-sm font-semibold truncate">{person.name}</p>
-                                        <p className="text-[10px] text-muted-foreground">
+                                        <p className="text-xs text-muted-foreground">
                                             {person.completedAt
                                                 ? `Se unió ${new Date(person.completedAt).toLocaleDateString('es-MX')}`
                                                 : 'Pendiente'}

@@ -124,7 +124,7 @@ export function DailyQuestionCard() {
                         <MessageCircle className="h-4 w-4 text-pink-500" />
                         Pregunta del día
                     </CardTitle>
-                    <Badge variant="secondary" className="text-[10px] gap-1">
+                    <Badge variant="secondary" className="text-xs gap-1">
                         {(() => {
                             const Icon = CATEGORY_ICONS[data.category];
                             return Icon ? <Icon className="h-3 w-3" /> : null;
@@ -148,7 +148,7 @@ export function DailyQuestionCard() {
                             </div>
                             <button
                                 onClick={() => setEditing(true)}
-                                className="text-[10px] font-medium text-green-600 hover:underline shrink-0 mt-0.5"
+                                className="text-xs font-medium text-green-600 hover:underline shrink-0 mt-0.5"
                             >
                                 Editar
                             </button>
@@ -164,7 +164,7 @@ export function DailyQuestionCard() {
                             maxLength={300}
                         />
                         <div className="flex items-center justify-between">
-                            <span className="text-[10px] text-muted-foreground">
+                            <span className="text-xs text-muted-foreground">
                                 {answer.length}/300
                             </span>
                             <div className="flex items-center gap-2">

@@ -196,7 +196,7 @@ export function StepPhotos({ userId, data, onUpdate, onNext, onPrev }: any) {
                     </Button>
                 </div>
                 {photos.length === 0 && (
-                    <p className="text-[10px] text-center text-muted-foreground px-4">
+                    <p className="text-xs text-center text-muted-foreground px-4">
                         * Podrás añadir fotos más tarde desde tu perfil para empezar a recibir matches.
                     </p>
                 )}

@@ -94,7 +94,7 @@ export default function ForgotPasswordPage() {
                 </CardFooter>
             </form>
         </Card>
-        <div className="text-center text-[10px] text-muted-foreground space-x-3 mt-4">
+        <div className="text-center text-xs text-muted-foreground space-x-3 mt-4">
             <a href="/terms" className="hover:underline">Términos</a>
             <a href="/privacy" className="hover:underline">Privacidad</a>
             <Link href="/support" className="hover:underline">Ayuda</Link>

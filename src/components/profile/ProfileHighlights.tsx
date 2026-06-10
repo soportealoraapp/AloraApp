@@ -148,7 +148,7 @@ export function ProfileHighlights({ bio, interests = [], values = [], lookingFor
 
                 {musicGenres.length > 0 && (
                     <div className="mt-3 pt-3 border-t border-border/50">
-                        <p className="text-[10px] text-muted-foreground uppercase tracking-wider mb-1.5">Escucha</p>
+                        <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1.5">Escucha</p>
                         <BadgeChipList items={musicGenres.slice(0, 4)} type="music" />
                     </div>
                 )}

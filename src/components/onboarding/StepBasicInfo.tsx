@@ -175,7 +175,7 @@ export function StepBasicInfo({ data, onUpdate, onNext, userId }: StepBasicInfoP
                         </button>
                     </div>
                     {selectedModes.length === 2 && (
-                        <p className="text-[10px] text-muted-foreground text-center">Buscas ambos: citas y amistad</p>
+                        <p className="text-xs text-muted-foreground text-center">Buscas ambos: citas y amistad</p>
                     )}
                 </motion.div>
 
@@ -196,7 +196,7 @@ export function StepBasicInfo({ data, onUpdate, onNext, userId }: StepBasicInfoP
                         className="min-h-[100px] rounded-2xl resize-none"
                         maxLength={500}
                     />
-                    <p className="text-[10px] text-right text-muted-foreground">
+                    <p className="text-xs text-right text-muted-foreground">
                         {(localData.bio || '').length}/500
                     </p>
                 </motion.div>

@@ -213,7 +213,7 @@ export default function AnalyticsPage() {
                                     <div className="flex-1 min-w-0">
                                         <div className="flex items-center gap-2">
                                             <p className="text-sm font-medium">{f.label}</p>
-                                            <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-medium ${
+                                            <span className={`text-xs px-1.5 py-0.5 rounded-full font-medium ${
                                                 f.impact === 'Alta' ? 'bg-green-100 text-green-700' :
                                                 f.impact === 'Media' ? 'bg-yellow-100 text-yellow-700' :
                                                 'bg-gray-100 text-gray-500'

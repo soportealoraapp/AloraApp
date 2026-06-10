@@ -71,7 +71,7 @@ export function LikesReceivedList() {
                                                 <p className="font-bold text-sm tracking-tight">{liker.displayName}, {liker.age}</p>
                                                 {liker.isVerified && <TrustBadge type="verified" />}
                                             </div>
-                                            <p className="text-[10px] opacity-80 font-medium">{liker.city}</p>
+                                            <p className="text-xs opacity-80 font-medium">{liker.city}</p>
                                         </div>
                                     </div>
                                 </Card>

@@ -211,7 +211,7 @@ export default function QuizPage() {
                                                         <p className="font-semibold truncate">{profile.name}, {profile.age}</p>
                                                         <p className="text-xs text-muted-foreground truncate">{profile.city}</p>
                                                         {(profile.sharedValues?.length || profile.sharedInterests?.length) ? (
-                                                            <p className="text-[10px] text-primary truncate">
+                                                            <p className="text-xs text-primary truncate">
                                                                 {[...(profile.sharedValues || []), ...(profile.sharedInterests || [])].slice(0, 2).join(' · ')}
                                                             </p>
                                                         ) : null}

@@ -147,7 +147,7 @@ export function CityAutocomplete({ value, onSelect, placeholder = "Buscar ciudad
                                 </div>
                             </div>
                             {source === 'nominatim' && index === 0 && (
-                                <span className="text-[9px] text-muted-foreground bg-muted px-1.5 py-0.5 rounded-full flex-shrink-0">Global</span>
+                                <span className="text-[11px] text-muted-foreground bg-muted px-1.5 py-0.5 rounded-full flex-shrink-0">Global</span>
                             )}
                         </button>
                     ))}

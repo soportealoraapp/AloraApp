@@ -127,28 +127,28 @@ export function OnboardingWizard({ initialRef }: { initialRef?: string } = {}) {
                     <div className="flex items-center justify-between mb-4">
                         <div className="flex items-center gap-2">
                             <Heart className="h-4 w-4 text-primary" />
-                            <span className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground font-bold">
+                            <span className="text-xs uppercase tracking-[0.2em] text-muted-foreground font-bold">
                                 {STEP_LABELS[step - 1]}
                             </span>
                         </div>
                         {syncStatus === 'syncing' && (
-                            <span className="flex items-center gap-1 text-[10px] text-muted-foreground">
+                            <span className="flex items-center gap-1 text-xs text-muted-foreground">
                                 <Cloud className="h-3 w-3 animate-pulse" /> Guardando...
                             </span>
                         )}
                         {syncStatus === 'saved' && (
-                            <span className="text-[10px] text-green-500">Guardado</span>
+                            <span className="text-xs text-green-500">Guardado</span>
                         )}
                         {syncStatus === 'error' && (
-                            <span className="text-[10px] text-destructive">Error al guardar</span>
+                            <span className="text-xs text-destructive">Error al guardar</span>
                         )}
                     </div>
                     <Progress value={((step - 1) / (totalSteps - 1)) * 100} className="h-1.5" />
                     <div className="flex justify-between items-center mt-2">
-                        <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+                        <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
                             {STEP_WELCOME[step - 1]}
                         </p>
-                        <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+                        <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
                             Paso {step - 1} de {totalSteps - 1}
                         </p>
                     </div>

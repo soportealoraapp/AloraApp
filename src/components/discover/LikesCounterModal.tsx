@@ -8,7 +8,6 @@ import {
     DialogTitle,
     DialogDescription,
 } from '@/components/ui/dialog';
-import { VisuallyHidden } from '@radix-ui/react-visually-hidden';
 import { Button } from '@/components/ui/button';
 import { Heart, Sparkles, Clock } from 'lucide-react';
 
@@ -56,21 +55,19 @@ export function LikesCounterModal({ isOpen, onClose, remaining, dailyLikesLimit,
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>
             <DialogContent className="sm:max-w-[380px]">
-                <VisuallyHidden>
-                    <DialogHeader>
-                        <DialogTitle>Likes disponibles</DialogTitle>
-                        <DialogDescription>Control de likes diarios</DialogDescription>
-                    </DialogHeader>
-                </VisuallyHidden>
+                <DialogHeader>
+                    <DialogTitle className="sr-only">Likes disponibles</DialogTitle>
+                    <DialogDescription className="sr-only">Control de likes diarios</DialogDescription>
+                </DialogHeader>
 
                 <div className="p-6 space-y-6">
                     <div className="text-center">
                         <div className="mx-auto w-16 h-16 rounded-full bg-gradient-to-br from-pink-100 to-pink-200 flex items-center justify-center mb-4">
                             <Heart className={isEmpty ? "h-8 w-8 text-muted-foreground" : "h-8 w-8 text-pink-500 fill-pink-500"} />
                         </div>
-                        <h3 className="text-lg font-bold text-foreground">
+                        <h2 className="text-lg font-bold text-foreground" id="likes-modal-title">
                             {isEmpty ? 'Likes agotados' : 'Likes disponibles'}
-                        </h3>
+                        </h2>
                         <p className="text-3xl font-bold mt-2">
                             <span className={isEmpty ? "text-muted-foreground" : isLow ? "text-orange-500" : "text-pink-500"}>
                                 {remaining}
@@ -90,15 +87,17 @@ export function LikesCounterModal({ isOpen, onClose, remaining, dailyLikesLimit,
                     </div>
 
                     <div className="space-y-3">
-                        <Button
-                            className="w-full bg-gradient-to-r from-pink-600 to-rose-500 text-white py-6 rounded-2xl text-base font-bold shadow-lg"
-                            onClick={() => {
-                                window.location.href = 'https://alora-app.lemonsqueezy.com/checkout/buy/67dd777a-6ae1-4169-a2a1-8a1f105899e7';
-                            }}
-                        >
-                            <Sparkles className="h-4 w-4 mr-2" />
-                            ¿Quieres más likes? Suscríbete a Alora Plus
-                        </Button>
+                        {isLow && (
+                            <Button
+                                className="w-full bg-gradient-to-r from-pink-600 to-rose-500 text-white py-6 rounded-2xl text-base font-bold shadow-lg"
+                                onClick={() => {
+                                    window.location.href = 'https://alora-app.lemonsqueezy.com/checkout/buy/67dd777a-6ae1-4169-a2a1-8a1f105899e7';
+                                }}
+                            >
+                                <Sparkles className="h-4 w-4 mr-2" />
+                                ¿Quieres más likes? Suscríbete a Alora Plus
+                            </Button>
+                        )}
                         <Button variant="outline" className="w-full rounded-2xl" onClick={onClose}>
                             Cerrar
                         </Button>

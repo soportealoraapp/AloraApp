@@ -159,23 +159,23 @@ export default function NorthStarDashboard() {
             <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-4">
               <div className="text-center p-2">
                 <p className="text-lg font-bold text-green-600">{activationInsights.activation.rate}%</p>
-                <p className="text-[10px] text-muted-foreground">Tasa activación</p>
+                <p className="text-xs text-muted-foreground">Tasa activación</p>
               </div>
               <div className="text-center p-2">
                 <p className="text-lg font-bold">{activationInsights.activation.profilesWithPhotos}</p>
-                <p className="text-[10px] text-muted-foreground">Con fotos</p>
+                <p className="text-xs text-muted-foreground">Con fotos</p>
               </div>
               <div className="text-center p-2">
                 <p className="text-lg font-bold">{activationInsights.activation.profilesWithBio}</p>
-                <p className="text-[10px] text-muted-foreground">Con bio</p>
+                <p className="text-xs text-muted-foreground">Con bio</p>
               </div>
               <div className="text-center p-2">
                 <p className="text-lg font-bold">{activationInsights.activation.profilesWithInterest}</p>
-                <p className="text-[10px] text-muted-foreground">Con intereses</p>
+                <p className="text-xs text-muted-foreground">Con intereses</p>
               </div>
               <div className="text-center p-2">
                 <p className="text-lg font-bold">{activationInsights.activation.profilesWithValues}</p>
-                <p className="text-[10px] text-muted-foreground">Con valores</p>
+                <p className="text-xs text-muted-foreground">Con valores</p>
               </div>
             </div>
           </CardContent>
@@ -206,7 +206,7 @@ export default function NorthStarDashboard() {
                       <Icon className={`h-4 w-4 ${f.color}`} />
                     </div>
                     <p className="text-xl font-bold">{f.value}%</p>
-                    <p className="text-[10px] text-muted-foreground">{f.label}</p>
+                    <p className="text-xs text-muted-foreground">{f.label}</p>
                   </div>
                 );
               })}
@@ -268,11 +268,11 @@ export default function NorthStarDashboard() {
                   <div key={exp.id} className="p-3 rounded-xl bg-purple-50 border border-purple-100">
                     <div className="flex items-center justify-between mb-2">
                       <p className="text-sm font-bold">{exp.name}</p>
-                      <span className="text-[10px] bg-green-100 text-green-700 px-2 py-0.5 rounded-full font-medium">
+                      <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full font-medium">
                         {exp._count.assignments} users
                       </span>
                     </div>
-                    <p className="text-[10px] text-muted-foreground mb-1">Métrica: {exp.metric}</p>
+                    <p className="text-xs text-muted-foreground mb-1">Métrica: {exp.metric}</p>
                     {best && (
                       <div className="flex items-center gap-2 text-xs">
                         <span className="text-purple-600 font-medium">Lider: {best.variantName}</span>
@@ -327,7 +327,7 @@ export default function NorthStarDashboard() {
                       <p className={`text-2xl font-bold bg-gradient-to-r ${colors[i]} bg-clip-text text-transparent`}>
                         {val.rate}%
                       </p>
-                      <p className="text-[10px] text-muted-foreground">{val.active} users</p>
+                      <p className="text-xs text-muted-foreground">{val.active} users</p>
                     </div>
                   );
                 })}
@@ -440,7 +440,7 @@ function MetricComparisonCard({
                 <p className={`text-lg font-bold ${isPositive ? 'text-green-600' : d.val < 0 ? 'text-red-500' : 'text-muted-foreground'}`}>
                   {d.val === Infinity ? '∞' : isPositive ? `+${d.val}%` : `${d.val}%`}
                 </p>
-                <p className="text-[10px] text-muted-foreground">{d.label}</p>
+                <p className="text-xs text-muted-foreground">{d.label}</p>
               </div>
             );
           })}

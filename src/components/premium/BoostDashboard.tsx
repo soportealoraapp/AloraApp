@@ -176,17 +176,17 @@ export function BoostDashboard() {
                     <div className="text-center p-3 bg-pink-50 rounded-xl">
                         <Heart className="h-4 w-4 text-pink-500 mx-auto mb-1" />
                         <p className="text-lg font-bold">{stats.stats.likesReceived7d}</p>
-                        <p className="text-[10px] text-muted-foreground">Likes (7d)</p>
+                        <p className="text-xs text-muted-foreground">Likes (7d)</p>
                     </div>
                     <div className="text-center p-3 bg-purple-50 rounded-xl">
                         <Users className="h-4 w-4 text-purple-500 mx-auto mb-1" />
                         <p className="text-lg font-bold">{stats.stats.matchesCreated7d}</p>
-                        <p className="text-[10px] text-muted-foreground">Matches (7d)</p>
+                        <p className="text-xs text-muted-foreground">Matches (7d)</p>
                     </div>
                     <div className="text-center p-3 bg-amber-50 rounded-xl">
                         <TrendingUp className="h-4 w-4 text-amber-500 mx-auto mb-1" />
                         <p className="text-lg font-bold">{stats.totalBoosts}</p>
-                        <p className="text-[10px] text-muted-foreground">Total boosts</p>
+                        <p className="text-xs text-muted-foreground">Total boosts</p>
                     </div>
                 </div>
 
@@ -196,23 +196,23 @@ export function BoostDashboard() {
                         <p className="text-xs font-medium text-muted-foreground">Impacto del ultimo boost</p>
                         <div className="grid grid-cols-3 gap-2 text-center">
                             <div className="p-2 bg-muted/30 rounded-lg">
-                                <p className="text-[10px] text-muted-foreground mb-1">Antes</p>
+                                <p className="text-xs text-muted-foreground mb-1">Antes</p>
                                 <p className="text-sm font-bold">{stats.boostComparison.before.likes} likes</p>
-                                <p className="text-[10px] text-muted-foreground">{stats.boostComparison.before.matches} matches</p>
+                                <p className="text-xs text-muted-foreground">{stats.boostComparison.before.matches} matches</p>
                             </div>
                             <div className="p-2 bg-blue-50 rounded-lg">
-                                <p className="text-[10px] text-blue-600 mb-1 font-medium">Durante</p>
+                                <p className="text-xs text-blue-600 mb-1 font-medium">Durante</p>
                                 <p className="text-sm font-bold text-blue-700">{stats.boostComparison.during.likes} likes</p>
-                                <p className="text-[10px] text-blue-600">{stats.boostComparison.during.matches} matches</p>
+                                <p className="text-xs text-blue-600">{stats.boostComparison.during.matches} matches</p>
                             </div>
                             <div className="p-2 bg-muted/30 rounded-lg">
-                                <p className="text-[10px] text-muted-foreground mb-1">Despues</p>
+                                <p className="text-xs text-muted-foreground mb-1">Despues</p>
                                 <p className="text-sm font-bold">{stats.boostComparison.after.likes} likes</p>
-                                <p className="text-[10px] text-muted-foreground">{stats.boostComparison.after.matches} matches</p>
+                                <p className="text-xs text-muted-foreground">{stats.boostComparison.after.matches} matches</p>
                             </div>
                         </div>
                         {stats.boostComparison.before.likes > 0 && (
-                            <p className="text-[10px] text-center text-green-600">
+                            <p className="text-xs text-center text-green-600">
                                 +{Math.round(((stats.boostComparison.during.likes - stats.boostComparison.before.likes) / stats.boostComparison.before.likes) * 100)}% likes durante boost
                             </p>
                         )}

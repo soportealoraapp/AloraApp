@@ -95,14 +95,14 @@ export default function AdminUsersPage() {
                                 <div className="flex items-center gap-2">
                                     <span className="font-semibold truncate">{u.profile?.displayName || u.email}</span>
                                     {u.role !== 'user' && (
-                                        <Badge className="bg-emerald-500/10 text-emerald-400 border-emerald-500/20 text-[10px]">
+                                        <Badge className="bg-emerald-500/10 text-emerald-400 border-emerald-500/20 text-xs">
                                             {u.role}
                                         </Badge>
                                     )}
                                     {u.profile?.isVerified && (
                                         <CheckCircle className="h-3.5 w-3.5 text-emerald-400" />
                                     )}
-                                    <Badge variant="outline" className={`text-[10px] ${u.profile?.trustStatus === 'clean' ? 'border-green-500/30 text-green-400' : u.profile?.trustStatus === 'watchlist' ? 'border-amber-500/30 text-amber-400' : 'border-red-500/30 text-red-400'}`}>
+                                    <Badge variant="outline" className={`text-xs ${u.profile?.trustStatus === 'clean' ? 'border-green-500/30 text-green-400' : u.profile?.trustStatus === 'watchlist' ? 'border-amber-500/30 text-amber-400' : 'border-red-500/30 text-red-400'}`}>
                                         {u.profile?.trustStatus}
                                     </Badge>
                                 </div>

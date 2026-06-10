@@ -44,7 +44,7 @@ function WellbeingDashboardComponent({ stats, onRefresh, userId }: { stats: Well
                         <div className="space-y-1">
                             <h2 className="text-xl font-bold tracking-tight flex items-center gap-2">
                                 Wellbeing Monitor
-                                <Badge variant="outline" className="text-[10px] font-bold bg-background/50 border-primary/20 text-primary">Live</Badge>
+                                <Badge variant="outline" className="text-xs font-bold bg-background/50 border-primary/20 text-primary">Live</Badge>
                             </h2>
                             <p className="text-xs text-muted-foreground font-medium">Real-time emotional and social health tracking.</p>
                         </div>

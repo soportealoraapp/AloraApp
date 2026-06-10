@@ -235,7 +235,7 @@ export default function AdminExperimentsPage() {
                     <div className="flex-1">
                       <div className="flex items-center gap-2 mb-1">
                         <h3 className="font-bold">{exp.name}</h3>
-                        <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${
+                        <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
                           exp.status === 'running' ? 'bg-green-100 text-green-700' :
                           exp.status === 'completed' ? 'bg-blue-100 text-blue-700' :
                           exp.status === 'draft' ? 'bg-gray-100 text-gray-600' :
@@ -252,7 +252,7 @@ export default function AdminExperimentsPage() {
                       </div>
                       <div className="flex gap-3 mt-2">
                         {exp.variants.map(v => (
-                          <span key={v.id} className="text-[10px] bg-muted px-2 py-1 rounded-full">
+                          <span key={v.id} className="text-xs bg-muted px-2 py-1 rounded-full">
                             {v.name}: {v.trafficPct}%
                           </span>
                         ))}
@@ -290,11 +290,11 @@ export default function AdminExperimentsPage() {
                       <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
                         {exp.results.variants.map((v: VariantResult) => (
                           <div key={v.variantName} className={`p-2 rounded-lg ${v.variantName === exp.results?.winner ? 'bg-green-50 border border-green-200' : 'bg-muted/50'}`}>
-                            <p className="text-[10px] font-bold uppercase">{v.variantName}</p>
+                            <p className="text-xs font-bold uppercase">{v.variantName}</p>
                             <p className="text-lg font-bold">{v.metricValue}</p>
-                            <p className="text-[10px] text-muted-foreground">{v.userCount} users</p>
+                            <p className="text-xs text-muted-foreground">{v.userCount} users</p>
                             {v.variantName === exp.results?.winner && (
-                              <span className="text-[9px] text-green-600 font-bold">🏆 Ganador ({exp.results.confidence}%)</span>
+                              <span className="text-[11px] text-green-600 font-bold">🏆 Ganador ({exp.results.confidence}%)</span>
                             )}
                           </div>
                         ))}

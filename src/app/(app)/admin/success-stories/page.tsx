@@ -194,17 +194,17 @@ export default function AdminSuccessStoriesPage() {
                                         <div className="flex items-center gap-2 mb-1">
                                             <h3 className="font-bold truncate">{s.title}</h3>
                                             {s.approved ? (
-                                                <span className="text-[10px] font-bold bg-green-100 text-green-700 px-2 py-0.5 rounded-full">
+                                                <span className="text-xs font-bold bg-green-100 text-green-700 px-2 py-0.5 rounded-full">
                                                     Aprobada
                                                 </span>
                                             ) : (
-                                                <span className="text-[10px] font-bold bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full">
+                                                <span className="text-xs font-bold bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full">
                                                     Pendiente
                                                 </span>
                                             )}
                                         </div>
                                         <p className="text-sm text-muted-foreground line-clamp-2">{s.story}</p>
-                                        <p className="text-[10px] text-muted-foreground mt-1">
+                                        <p className="text-xs text-muted-foreground mt-1">
                                             {new Date(s.createdAt).toLocaleDateString('es-MX')}
                                         </p>
                                     </div>

@@ -106,7 +106,7 @@ export function FloatingMatchCard({ profile, onSwipe, onFlechado, compatibility,
                         title={`Flechado: envío prioritario (${superlikesRemaining ?? 3}/día). Le llegará como superlike destacado.`}
                     >
                         <Star className="h-5 w-5 fill-white" />
-                        <span className="absolute -top-1 -right-1 bg-white text-blue-600 text-[10px] font-bold rounded-full w-[18px] h-[18px] flex items-center justify-center shadow-sm border border-blue-200">
+                        <span className="absolute -top-1 -right-1 bg-white text-blue-600 text-[11px] font-bold rounded-full w-[18px] h-[18px] flex items-center justify-center shadow-sm border border-blue-200">
                             {superlikesRemaining ?? 3}
                         </span>
                     </button>
@@ -173,7 +173,7 @@ export function FloatingMatchCard({ profile, onSwipe, onFlechado, compatibility,
                             <motion.div
                                 initial={{ scale: 0.8, opacity: 0 }}
                                 animate={{ scale: 1, opacity: 1 }}
-                                className="bg-pink-500/90 backdrop-blur-md text-white px-3 py-1 rounded-full text-[10px] font-bold w-fit flex items-center gap-1 border border-pink-300/30 shadow-lg"
+                                className="bg-pink-500/90 backdrop-blur-md text-white px-3 py-1 rounded-full text-xs font-bold w-fit flex items-center gap-1 border border-pink-300/30 shadow-lg"
                             >
                                 <Zap className="h-3 w-3" /> {compatibility}% Compatible
                             </motion.div>
@@ -184,7 +184,7 @@ export function FloatingMatchCard({ profile, onSwipe, onFlechado, compatibility,
 
                     {(profile as any).latestAnswer && (
                         <div className="mb-2 bg-white/10 backdrop-blur-sm rounded-xl p-2.5">
-                            <p className="text-[10px] text-white/60 uppercase tracking-wider mb-0.5">
+                            <p className="text-xs text-white/60 uppercase tracking-wider mb-0.5">
                                 {(profile as any).latestAnswer.category || 'Pregunta del día'}
                             </p>
                             <p className="text-white/90 text-xs leading-tight line-clamp-2">

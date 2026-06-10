@@ -255,15 +255,15 @@ export function StepCreateAccount({ onAccountCreated, initialRef }: StepCreateAc
                         <div className="space-y-1 pt-1">
                             <div className="flex items-center gap-1.5">
                                 {passwordChecks.minLength ? <Check className="h-3 w-3 text-green-500" /> : <X className="h-3 w-3 text-muted-foreground" />}
-                                <span className="text-[10px] text-muted-foreground">Mínimo 6 caracteres</span>
+                                <span className="text-xs text-muted-foreground">Mínimo 6 caracteres</span>
                             </div>
                             <div className="flex items-center gap-1.5">
                                 {passwordChecks.hasLetter ? <Check className="h-3 w-3 text-green-500" /> : <X className="h-3 w-3 text-muted-foreground" />}
-                                <span className="text-[10px] text-muted-foreground">Al menos una letra</span>
+                                <span className="text-xs text-muted-foreground">Al menos una letra</span>
                             </div>
                             <div className="flex items-center gap-1.5">
                                 {passwordChecks.hasNumber ? <Check className="h-3 w-3 text-green-500" /> : <X className="h-3 w-3 text-muted-foreground" />}
-                                <span className="text-[10px] text-muted-foreground">Al menos un número</span>
+                                <span className="text-xs text-muted-foreground">Al menos un número</span>
                             </div>
                         </div>
                     )}
@@ -299,7 +299,7 @@ export function StepCreateAccount({ onAccountCreated, initialRef }: StepCreateAc
                         </button>
                     </div>
                     {confirmPassword.length > 0 && (
-                        <p className={`text-[10px] ${passwordChecks.matches ? 'text-green-500' : 'text-destructive'}`}>
+                        <p className={`text-xs ${passwordChecks.matches ? 'text-green-500' : 'text-destructive'}`}>
                             {passwordChecks.matches ? 'Las contraseñas coinciden' : 'Las contraseñas no coinciden'}
                         </p>
                     )}

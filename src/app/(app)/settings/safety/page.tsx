@@ -221,7 +221,7 @@ export default function SafetyCenterPage() {
                                 <Phone className="h-4 w-4 text-red-500" />
                             </a>
                         ))}
-                        <p className="text-[10px] text-center text-muted-foreground pt-2">
+                        <p className="text-xs text-center text-muted-foreground pt-2">
                             Alora no es un servicio de emergencia. Para emergencias, contacta siempre a las autoridades locales.
                         </p>
                     </CardContent>

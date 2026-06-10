@@ -348,7 +348,7 @@ export function PhotoCrop({ isOpen, onClose, imageSrc, onCrop }: PhotoCropProps)
                             className="w-32 accent-primary"
                         />
                         <ZoomIn className="h-4 w-4 text-muted-foreground" />
-                        <span className="text-[10px] text-muted-foreground w-8 text-right">{Math.round(zoom * 100)}%</span>
+                        <span className="text-xs text-muted-foreground w-8 text-right">{Math.round(zoom * 100)}%</span>
                     </div>
 
                     <div

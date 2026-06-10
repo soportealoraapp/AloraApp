@@ -99,7 +99,7 @@ export function ConversationRoulette({ onSend, disabled }: ConversationRouletteP
                             <div className="flex-1 min-w-0">
                                 <div className="flex items-center gap-1.5 mb-1">
                                     <Sparkles className={cn("h-3 w-3", CATEGORY_LABELS[currentCategory].color)} />
-                                    <span className={cn("text-[10px] font-bold uppercase", CATEGORY_LABELS[currentCategory].color)}>
+                                    <span className={cn("text-xs font-bold uppercase", CATEGORY_LABELS[currentCategory].color)}>
                                         {CATEGORY_LABELS[currentCategory].label}
                                     </span>
                                 </div>

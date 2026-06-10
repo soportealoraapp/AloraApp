@@ -90,7 +90,7 @@ export function ConversationHealthCard({ status, score, indicators, suggestions,
                                 <p className="text-xs text-muted-foreground mb-1">Temas frecuentes</p>
                                 <div className="flex flex-wrap gap-1">
                                     {topics.map((topic, i) => (
-                                        <span key={i} className="text-[10px] bg-primary/10 text-primary px-2 py-0.5 rounded-full">
+                                        <span key={i} className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-full">
                                             {topic}
                                         </span>
                                     ))}

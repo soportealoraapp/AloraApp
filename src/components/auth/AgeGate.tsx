@@ -97,7 +97,7 @@ export function AgeGate() {
                         </Button>
                     </div>
 
-                    <p className="mt-6 text-[10px] text-muted-foreground uppercase tracking-widest font-medium">
+                    <p className="mt-6 text-xs text-muted-foreground uppercase tracking-widest font-medium">
                         Safety First • Community Driven
                     </p>
                 </Card>

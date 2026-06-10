@@ -345,7 +345,7 @@ export default function ChatWindowPage() {
                             )}
                         </span>
                         {!partnerTyping && (
-                            <span className="text-[10px] text-muted-foreground flex items-center gap-1">
+                            <span className="text-xs text-muted-foreground flex items-center gap-1">
                                 {isPartnerOnline ? (
                                     <span className="flex items-center gap-1">
                                         <Circle className="h-2 w-2 fill-green-500 text-green-500" />
@@ -421,7 +421,7 @@ export default function ChatWindowPage() {
             >
                 {partnerAnswer && (
                     <div className="bg-primary/5 border border-primary/10 rounded-2xl p-4 mb-4 mx-auto max-w-sm">
-                        <p className="text-[10px] font-bold text-primary uppercase tracking-wider mb-1">Su respuesta del día</p>
+                        <p className="text-xs font-bold text-primary uppercase tracking-wider mb-1">Su respuesta del día</p>
                         <p className="text-xs text-muted-foreground mb-2 italic">&ldquo;{partnerAnswer.question}&rdquo;</p>
                         <p className="text-sm font-medium text-foreground leading-relaxed">&ldquo;{partnerAnswer.answer}&rdquo;</p>
                     </div>
@@ -460,7 +460,7 @@ export default function ChatWindowPage() {
                         {groupedMessages.map((group) => (
                             <div key={group.date}>
                                 <div className="flex justify-center my-4">
-                                    <span className="text-[10px] uppercase tracking-wider text-muted-foreground bg-muted/50 px-3 py-1 rounded-full">
+                                    <span className="text-xs uppercase tracking-wider text-muted-foreground bg-muted/50 px-3 py-1 rounded-full">
                                         {getDateLabel(group.date)}
                                     </span>
                                 </div>
@@ -574,7 +574,7 @@ export default function ChatWindowPage() {
                         Sugerir mensaje
                     </Button>
                     {isPartnerOnline && (
-                        <span className="text-[10px] text-green-600 flex items-center gap-1 ml-auto">
+                        <span className="text-xs text-green-600 flex items-center gap-1 ml-auto">
                             <span className="h-1.5 w-1.5 rounded-full bg-green-500" />
                             En línea
                         </span>
