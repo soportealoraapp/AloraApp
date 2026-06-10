@@ -68,7 +68,7 @@ export function FloatingMatchCard({ profile, onSwipe, onFlechado, compatibility,
             whileHover={{ scale: 1.01 }}
             whileTap={{ scale: 0.98 }}
         >
-            <SoftCard className="min-h-[500px] max-h-[calc(100vh-160px)] h-full overflow-hidden relative border-none shadow-xl rounded-3xl bg-card">
+            <SoftCard className="min-h-[400px] max-h-[calc(100dvh-180px)] h-full overflow-hidden relative border-none shadow-xl rounded-3xl bg-card">
                 <Image
                     src={profile.photos?.[0] || '/placeholder.svg'}
                     alt={profile.displayName}
@@ -211,7 +211,7 @@ export function FloatingMatchCard({ profile, onSwipe, onFlechado, compatibility,
             <div className="absolute -bottom-16 left-0 right-0 flex items-center justify-center gap-6 z-20">
                 <button
                     onClick={(e) => { e.stopPropagation(); onSwipe('left'); }}
-                    className="bg-white hover:bg-gray-100 text-red-500 rounded-full w-14 h-14 flex items-center justify-center shadow-xl transition-transform hover:scale-110 active:scale-95 border border-gray-200"
+                    className="bg-card hover:bg-accent text-red-500 rounded-full w-14 h-14 flex items-center justify-center shadow-xl transition-transform hover:scale-110 active:scale-95 border border-border focus-visible:ring-2 focus-visible:ring-primary/70"
                     aria-label="Descartar perfil"
                     title="Pasar (deslizar a la izquierda)"
                 >
@@ -219,7 +219,7 @@ export function FloatingMatchCard({ profile, onSwipe, onFlechado, compatibility,
                 </button>
                 <button
                     onClick={(e) => { e.stopPropagation(); onSwipe('right'); }}
-                    className="bg-white hover:bg-gray-100 text-green-500 rounded-full w-14 h-14 flex items-center justify-center shadow-xl transition-transform hover:scale-110 active:scale-95 border border-gray-200"
+                    className="bg-card hover:bg-accent text-green-500 rounded-full w-14 h-14 flex items-center justify-center shadow-xl transition-transform hover:scale-110 active:scale-95 border border-border focus-visible:ring-2 focus-visible:ring-primary/70"
                     aria-label="Dar like al perfil"
                     title="Like (deslizar a la derecha)"
                 >

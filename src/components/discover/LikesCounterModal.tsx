@@ -20,7 +20,7 @@ interface LikesCounterModalProps {
 }
 
 export function LikesCounterModal({ isOpen, onClose, remaining, dailyLikesLimit, resetAt }: LikesCounterModalProps) {
-    const [timeUntilReset, setTimeUntilReset] = useState('');
+    const [timeUntilReset, setTimeUntilReset] = useState<string | null>(null);
 
     useEffect(() => {
         if (!isOpen) return;
@@ -54,10 +54,10 @@ export function LikesCounterModal({ isOpen, onClose, remaining, dailyLikesLimit,
 
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>
-            <DialogContent className="sm:max-w-[380px]">
+            <DialogContent className="sm:max-w-[380px]" aria-labelledby="likes-modal-title" aria-describedby="likes-modal-desc">
                 <DialogHeader>
                     <DialogTitle className="sr-only">Likes disponibles</DialogTitle>
-                    <DialogDescription className="sr-only">Control de likes diarios</DialogDescription>
+                    <DialogDescription className="sr-only" id="likes-modal-desc">Control de likes diarios</DialogDescription>
                 </DialogHeader>
 
                 <div className="p-6 space-y-6">
@@ -82,20 +82,20 @@ export function LikesCounterModal({ isOpen, onClose, remaining, dailyLikesLimit,
                             <span className="text-sm font-medium">Se reinician en</span>
                         </div>
                         <p className="text-2xl font-mono font-bold text-foreground tracking-wider">
-                            {timeUntilReset || '00:00:00'}
+                            {timeUntilReset || '...'}
                         </p>
                     </div>
 
                     <div className="space-y-3">
-                        {isLow && (
+                        {(isLow || isEmpty) && (
                             <Button
                                 className="w-full bg-gradient-to-r from-pink-600 to-rose-500 text-white py-6 rounded-2xl text-base font-bold shadow-lg"
                                 onClick={() => {
-                                    window.location.href = 'https://alora-app.lemonsqueezy.com/checkout/buy/67dd777a-6ae1-4169-a2a1-8a1f105899e7';
+                                    window.open('https://alora-app.lemonsqueezy.com/checkout/buy/67dd777a-6ae1-4169-a2a1-8a1f105899e7', '_blank');
                                 }}
                             >
                                 <Sparkles className="h-4 w-4 mr-2" />
-                                ¿Quieres más likes? Suscríbete a Alora Plus
+                                {isEmpty ? 'Obtener más likes — Alora Plus' : '¿Quieres más likes? Suscríbete a Alora Plus'}
                             </Button>
                         )}
                         <Button variant="outline" className="w-full rounded-2xl" onClick={onClose}>

@@ -10,9 +10,10 @@ import { SpotifySection } from "@/components/profile/SpotifySection";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, CheckCircle, Heart, MessageSquare, Sparkles, MapPin, Briefcase, Cigarette, GlassWater, Baby, Star, BookOpen, Music, X, Undo, UserCheck, Loader2, ChevronLeft, ChevronRight } from "lucide-react";
+import { ArrowLeft, Heart, MessageSquare, Sparkles, MapPin, Briefcase, Cigarette, GlassWater, Baby, Star, BookOpen, Music, X, Undo, UserCheck, Loader2, ChevronLeft, ChevronRight } from "lucide-react";
 import { ProfileHighlights } from "@/components/profile/ProfileHighlights";
 import { FavoriteButton } from "@/components/profile/FavoriteButton";
+import { TrustBadge } from "@/components/ui/premium/TrustBadge";
 import Image from "next/image";
 import Link from "next/link";
 import { useToast } from "@/hooks/use-toast";
@@ -88,7 +89,6 @@ export default function UserProfilePage() {
     }
 
     const mainPhoto = profile.photos?.[0] || "/placeholder.svg";
-    const photoGallery = profile.photos?.slice(1) || [];
 
     const details = [
         { label: "Ubicación", value: profile.city, icon: "city" },
@@ -117,6 +117,7 @@ export default function UserProfilePage() {
             }
         } catch (error) {
             console.error("Error sending like:", error);
+            toast({ title: "Error", description: "No se pudo enviar el like. Intenta de nuevo.", variant: "destructive" });
         } finally {
             setProcessing(false);
         }
@@ -141,6 +142,7 @@ export default function UserProfilePage() {
             }
         } catch (error) {
             console.error("Error enviando flechado:", error);
+            toast({ title: "Error", description: "No se pudo enviar el Flechado. Intenta de nuevo.", variant: "destructive" });
         } finally {
             setProcessing(false);
         }
@@ -161,6 +163,7 @@ export default function UserProfilePage() {
             }
         } catch (error) {
             console.error("Error accepting match:", error);
+            toast({ title: "Error", description: "No se pudo aceptar el match. Intenta de nuevo.", variant: "destructive" });
         } finally {
             setProcessing(false);
         }
@@ -185,6 +188,7 @@ export default function UserProfilePage() {
             }
         } catch (error) {
             console.error("Error giving second chance:", error);
+            toast({ title: "Error", description: "No se pudo dar segunda oportunidad. Intenta de nuevo.", variant: "destructive" });
         } finally {
             setProcessing(false);
         }
@@ -200,7 +204,7 @@ export default function UserProfilePage() {
                     <h1 className="text-xl font-semibold md:text-2xl font-headline">
                         {profile.displayName}
                     </h1>
-                    {profile.isVerified && <CheckCircle className="h-5 w-5 text-primary" />}
+                    {profile.isVerified && <TrustBadge type="verified" />}
                 </div>
                 <div className="ml-auto">
                     {user?.id !== id && <FavoriteButton profileId={id as string} />}
@@ -227,8 +231,8 @@ export default function UserProfilePage() {
                                     </CarouselItem>
                                 ))}
                             </CarouselContent>
-                            <CarouselPrevious className="left-2" />
-                            <CarouselNext className="right-2" />
+                            <CarouselPrevious className="left-2 z-10 shadow-lg" />
+                            <CarouselNext className="right-2 z-10 shadow-lg" />
                         </Carousel>
                     ) : (
                         <Image
@@ -250,7 +254,7 @@ export default function UserProfilePage() {
                                 {profile.displayName}, {profile.age}
                             </h2>
                             {profile.isVerified && (
-                                <CheckCircle className="h-6 w-6 text-primary" />
+                                <TrustBadge type="verified" />
                             )}
                             {(profile as any).quizArchetype && (
                                 <Badge variant="secondary" className="rounded-full text-xs gap-1">
@@ -328,7 +332,7 @@ export default function UserProfilePage() {
                                 <h3 className="font-semibold text-lg mb-4">
                                     Más sobre {profile.displayName.split(" ")[0]}
                                 </h3>
-                                <div className="grid grid-cols-2 gap-4">
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                     {details.map((detail) => {
                                         const Icon = detailIcons[detail.icon];
                                         return (
@@ -383,34 +387,10 @@ export default function UserProfilePage() {
                     )}
 
                     {(profile as any).spotify && <SpotifySection spotify={(profile as any).spotify} />}
-
-                    {photoGallery.length > 0 && (
-                        <Card>
-                            <CardContent className="p-6">
-                                <h3 className="font-semibold text-lg mb-3">Galería</h3>
-                                <div className="grid grid-cols-3 gap-2">
-                                    {photoGallery.map((photo, index) => (
-                                        <div
-                                            key={index}
-                                            className="aspect-square relative rounded-lg overflow-hidden"
-                                        >
-                                            <Image
-                                                src={photo}
-                                                alt={`Galería de ${profile.displayName} ${index + 1}`}
-                                                fill
-                                                className="object-cover"
-                                                
-                                            />
-                                        </div>
-                                    ))}
-                                </div>
-                            </CardContent>
-                        </Card>
-                    )}
                 </div>
 
                 {id !== user?.id && !isPreview && (
-                    <div className="fixed bottom-0 left-0 right-0 z-50 p-4 bg-background/80 backdrop-blur-sm border-t pb-[env(safe-area-inset-bottom,16px)] md:relative md:bg-transparent md:border-none md:p-0 md:mt-4 md:px-4">
+                    <div className="fixed bottom-16 left-0 right-0 z-40 p-4 bg-background/80 backdrop-blur-sm border-t pb-[env(safe-area-inset-bottom,0px)] md:sticky md:bottom-0 md:z-auto md:bg-transparent md:border-none md:p-0 md:mt-4 md:px-4 md:pb-0">
                         {isFromNewMatch ? (
                             <div className="flex justify-around items-center max-w-md mx-auto gap-3">
                                 <Button

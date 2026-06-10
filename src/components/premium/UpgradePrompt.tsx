@@ -69,7 +69,7 @@ export function UpgradePrompt({ trigger, className }: UpgradePromptProps) {
                     </div>
                     <div className="flex items-center gap-1 flex-shrink-0">
                         <Button size="sm" variant="default" onClick={() => setShowPaywall(true)}>
-                            Probar
+                            Ver planes
                         </Button>
                         <Button size="icon" variant="ghost" className="h-8 w-8" onClick={handleDismiss}>
                             <X className="h-4 w-4" />

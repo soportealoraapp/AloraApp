@@ -130,7 +130,7 @@ export default function ProfilePage() {
   return (
     <div className="md:pl-60">
         <header className="sticky top-0 z-30 flex h-16 items-center gap-2 border-b bg-background/90 px-3 backdrop-blur-md sm:px-6">
-        <h1 className="text-xl font-bold md:text-2xl text-foreground shrink-0">Alora</h1>
+        <h1 className="text-xl font-bold md:text-2xl text-foreground shrink-0">Mi Perfil</h1>
         <div className="ml-auto flex items-center gap-1 sm:gap-2 min-w-0">
           <Button size="icon" variant="ghost" asChild className="shrink-0">
             <Link href="/settings">
@@ -177,8 +177,8 @@ export default function ProfilePage() {
                   </CarouselItem>
                 ))}
               </CarouselContent>
-              <CarouselPrevious className="left-2" />
-              <CarouselNext className="right-2" />
+               <CarouselPrevious className="left-2 z-10 shadow-lg" />
+              <CarouselNext className="right-2 z-10 shadow-lg" />
             </Carousel>
           ) : (
             <Image
@@ -256,7 +256,7 @@ export default function ProfilePage() {
             <Card className="rounded-3xl">
               <CardContent className="p-5">
                 <h3 className="font-bold text-lg mb-4">Más sobre mí</h3>
-                <div className="grid grid-cols-2 gap-y-6 gap-x-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-6 gap-x-4">
                   {details.map(detail => {
                     const Icon = detailIcons[detail.icon];
                     return (
@@ -458,7 +458,7 @@ export default function ProfilePage() {
             </CollapsibleContent>
           </Collapsible>
 
-          <Collapsible defaultOpen={false}>
+          <Collapsible defaultOpen={true}>
             <CollapsibleTrigger className="flex items-center gap-2 w-full mb-2 group">
               <Star className="h-4 w-4 text-muted-foreground" />
               <span className="text-sm font-bold text-muted-foreground uppercase tracking-wider flex-1 text-left">Actividad</span>
@@ -556,7 +556,7 @@ export default function ProfilePage() {
 
       <button
         onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-        className="fixed bottom-28 right-4 z-50 bg-primary text-primary-foreground rounded-full w-10 h-10 flex items-center justify-center shadow-lg hover:shadow-xl transition-all hover:scale-110 active:scale-95 md:bottom-6"
+        className="fixed bottom-20 right-4 z-50 bg-primary text-primary-foreground rounded-full w-10 h-10 flex items-center justify-center shadow-lg hover:shadow-xl transition-all hover:scale-110 active:scale-95 md:bottom-6 pb-safe"
         aria-label="Volver arriba"
       >
         <ChevronRight className="h-5 w-5 rotate-[-90deg]" />

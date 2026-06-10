@@ -218,9 +218,11 @@ export default function DiscoverPage() {
     return () => observer.disconnect();
   }, [hasMore, loadingMore, loading, loadMore]);
 
+  const [pendingSwipe, setPendingSwipe] = useState(false);
+
   const handleSwipe = async (direction: 'left' | 'right') => {
     const profileToActOn = profilesRef.current[0]?.profile;
-    if (!profileToActOn || !currentUserProfile) return;
+    if (!profileToActOn || !currentUserProfile || pendingSwipe) return;
 
     if (swipeCount >= SWIPE_LIMIT) {
       toast({
@@ -232,11 +234,10 @@ export default function DiscoverPage() {
     }
 
     const previousProfiles = profilesRef.current;
-
+    setPendingSwipe(true);
     setSwipeCount(prev => prev + 1);
 
-    const currentProfiles = profilesRef.current;
-    const remainingProfiles = currentProfiles.slice(1);
+    const remainingProfiles = previousProfiles.slice(1);
     setProfiles(remainingProfiles as any);
 
     try {
@@ -260,19 +261,28 @@ export default function DiscoverPage() {
     } catch (error) {
       console.error("Action failed", error);
       setProfiles(previousProfiles as any);
+      setSwipeCount(prev => prev - 1);
       lastSwipeRef.current = null;
       toast({ title: "Error", description: "No se pudo procesar la acción. Perfil restaurado.", variant: "destructive" });
+    } finally {
+      setPendingSwipe(false);
     }
   };
 
   const handleFlechado = async () => {
     const profileToActOn = profilesRef.current[0]?.profile;
-    if (!profileToActOn || !currentUserProfile) return;
+    if (!profileToActOn || !currentUserProfile || pendingSwipe) return;
+
+    const remaining = (currentUserProfile as any)?.superlikesRemaining ?? 3;
+    if (!window.confirm(`Flechado enviado a ${profileToActOn.displayName}. Te quedan ${remaining - 1} flechados hoy. ¿Continuar?`)) {
+      return;
+    }
 
     const previousProfiles = profilesRef.current;
+    setPendingSwipe(true);
     setSwipeCount(prev => prev + 1);
 
-    const remainingProfiles = profilesRef.current.slice(1);
+    const remainingProfiles = previousProfiles.slice(1);
     setProfiles(remainingProfiles as any);
 
     try {
@@ -289,8 +299,11 @@ export default function DiscoverPage() {
     } catch (error) {
       console.error("Flechado failed", error);
       setProfiles(previousProfiles as any);
+      setSwipeCount(prev => prev - 1);
       lastSwipeRef.current = null;
       toast({ title: "Error", description: "No se pudo enviar el Flechado.", variant: "destructive" });
+    } finally {
+      setPendingSwipe(false);
     }
   };
 
@@ -412,12 +425,12 @@ export default function DiscoverPage() {
           </Tabs>
           <div className="md:hidden flex items-center gap-0.5">
             <div className="flex items-center">
-              <Button variant="ghost" size="icon" onClick={handleRewind} disabled={!lastSwipeRef.current || rewinding} title={`Rewind: deshace el último swipe (${rewindsRemaining}/${maxRewinds} disponibles)`} aria-label="Deshacer último swipe" className="h-8 w-8">
+              <Button variant="ghost" size="icon" onClick={handleRewind} disabled={!lastSwipeRef.current || rewinding} title={`Rewind: deshace el último swipe (${rewindsRemaining}/${maxRewinds} disponibles)`} aria-label="Deshacer último swipe" className="touch-target">
                 <RotateCcw className="h-4 w-4 text-muted-foreground" />
               </Button>
               <span className="text-[11px] text-muted-foreground font-bold">{rewindsRemaining}</span>
             </div>
-            <Button variant="ghost" size="icon" onClick={() => setFilterOpen(true)} title="Filtros de búsqueda" aria-label="Filtros de búsqueda" className="relative h-8 w-8">
+            <Button variant="ghost" size="icon" onClick={() => setFilterOpen(true)} title="Filtros de búsqueda" aria-label="Filtros de búsqueda" className="relative touch-target">
               <SlidersHorizontal className="h-4 w-4 text-muted-foreground" />
               {countActiveFilters(filters) > 0 && (
                 <span className="absolute -top-0.5 -right-0.5 bg-primary text-primary-foreground text-[11px] font-bold rounded-full min-w-[18px] h-[18px] flex items-center justify-center shadow-sm border border-background">
@@ -644,7 +657,7 @@ export default function DiscoverPage() {
                 </div>
               )}
               {profiles[1] && (
-                <div className="absolute inset-0 top-4 scale-95 opacity-50 bg-white rounded-3xl shadow-xl z-0 transform translate-y-2" />
+                <div className="absolute inset-0 top-4 scale-95 opacity-50 bg-card rounded-3xl shadow-xl z-0 transform translate-y-2" />
               )}
               <div className="relative z-10 h-full">
                 <FloatingMatchCard
@@ -654,7 +667,7 @@ export default function DiscoverPage() {
                   explanations={profiles[0]?.score?.explanation}
                   onSwipe={handleSwipe}
                   onFlechado={handleFlechado}
-                  superlikesRemaining={3}
+                  superlikesRemaining={(currentUserProfile as any)?.superlikesRemaining ?? 3}
                 />
               </div>
             </div>
@@ -687,7 +700,7 @@ export default function DiscoverPage() {
 
       {/* Daily Picks - below the feed */}
       <div className="px-4 pb-2">
-        <DailyPicks />
+        <DailyPicks subscriptionStatus={currentUserProfile?.subscriptionStatus ?? 'free'} />
       </div>
 
       {/* Daily Question and Compatibility - shown below the feed */}

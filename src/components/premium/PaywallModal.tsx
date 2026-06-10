@@ -41,7 +41,7 @@ export function PaywallModal({ isOpen, onClose }: PaywallModalProps) {
                     <p className="opacity-90 text-sm">Eleva tu experiencia y encuentra conexiones reales más rápido.</p>
                 </div>
 
-                <div className="p-8 space-y-6 bg-white dark:bg-gray-950">
+                <div className="p-8 space-y-6 bg-white dark:bg-card">
                     <div className="space-y-4">
                         {features.map((f, i) => (
                             <div key={i} className="flex items-start gap-4">

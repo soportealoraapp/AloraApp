@@ -23,9 +23,14 @@ interface DailyPick {
     isVerified: boolean;
 }
 
-export function DailyPicks() {
+interface DailyPicksProps {
+    subscriptionStatus?: string;
+}
+
+export function DailyPicks({ subscriptionStatus = 'free' }: DailyPicksProps) {
     const [picks, setPicks] = useState<DailyPick[]>([]);
     const [loading, setLoading] = useState(true);
+    const isPlus = subscriptionStatus === 'plus';
 
     useEffect(() => {
         fetch('/api/daily-picks')
@@ -36,6 +41,7 @@ export function DailyPicks() {
     }, []);
 
     if (loading) {
+        if (!isPlus) return null;
         return (
             <div className="space-y-3">
                 <div className="flex items-center gap-2">
@@ -51,7 +57,7 @@ export function DailyPicks() {
         );
     }
 
-    if (picks.length === 0) return null;
+    if (picks.length === 0) return isPlus ? <div className="min-h-[280px]" /> : null;
 
     return (
         <div className="space-y-3">

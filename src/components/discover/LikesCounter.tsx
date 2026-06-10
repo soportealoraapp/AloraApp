@@ -26,7 +26,7 @@ export function LikesCounter({
     const [showModal, setShowModal] = useState(false);
 
     useEffect(() => {
-        const interval = setInterval(() => setNow(new Date()), 60000);
+        const interval = setInterval(() => setNow(new Date()), 30000);
         return () => clearInterval(interval);
     }, []);
 
@@ -46,13 +46,12 @@ export function LikesCounter({
     const percentage = Math.round((remaining / dailyLikesLimit) * 100);
 
     const timeUntilReset = useMemo(() => {
-        if (remaining > 0) return null;
         const diff = resetDate.getTime() - now.getTime();
         if (diff <= 0) return null;
         const hours = Math.floor(diff / (1000 * 60 * 60));
         const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
         return `${hours}h ${minutes}m`;
-    }, [remaining, resetDate, now]);
+    }, [resetDate, now]);
 
     const isLow = remaining <= 10;
     const isEmpty = remaining === 0;
@@ -66,7 +65,7 @@ export function LikesCounter({
                             "h-3.5 w-3.5",
                             isEmpty ? "text-muted-foreground" : isLow ? "text-orange-500" : "text-pink-500 fill-pink-500"
                         )} />
-                        <span className="text-xs font-medium text-muted-foreground">
+                        <span className="text-xs font-medium text-foreground/80">
                             {remaining} de {dailyLikesLimit} likes disponibles
                         </span>
                     </div>

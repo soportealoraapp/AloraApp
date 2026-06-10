@@ -94,7 +94,7 @@ export function MatchFeedbackDialog({ matchId, partnerName, open, onClose, onSub
                                         className={`h-9 w-9 transition-colors ${
                                             (hovered || rating) >= n
                                                 ? 'fill-amber-400 text-amber-400'
-                                                : 'text-muted-foreground/30'
+                                                : 'text-muted-foreground/50'
                                         }`}
                                     />
                                 </button>
