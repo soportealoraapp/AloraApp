@@ -76,7 +76,7 @@ export default function UserProfilePage() {
 
     if (loading) {
         return (
-            <div className="md:pl-60">
+            <div>
                 <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b bg-background/80 px-4 backdrop-blur-sm sm:px-6">
                     <Skeleton className="h-8 w-48" />
                 </header>
@@ -92,7 +92,7 @@ export default function UserProfilePage() {
 
     if (!profile) {
         return (
-            <div className="h-screen flex items-center justify-center md:pl-60">
+            <div className="h-screen flex items-center justify-center">
                 <div className="text-center">
                     <p className="text-muted-foreground mb-4">Perfil no encontrado</p>
                     <Button onClick={() => router.back()}>Volver</Button>
@@ -208,7 +208,7 @@ export default function UserProfilePage() {
     };
 
     return (
-        <div className="md:pl-60">
+        <div>
             <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b bg-background/80 px-4 backdrop-blur-sm sm:px-6">
                 <Button variant="ghost" size="icon" onClick={() => router.back()}>
                     <ArrowLeft className="h-5 w-5" />
@@ -261,7 +261,7 @@ export default function UserProfilePage() {
                 <div className="p-4 space-y-6">
                     {/* Compatibility Score Hero */}
                     {compatibility && (
-                        <Card className="rounded-3xl border border-primary/20 bg-gradient-to-br from-primary/5 to-transparent">
+                        <Card className="rounded-2xl border border-primary/20 bg-gradient-to-br from-primary/5 to-transparent">
                             <CardContent className="p-5">
                                 <div className="flex items-center justify-between mb-3">
                                     <div className="flex items-center gap-2">
@@ -309,7 +309,7 @@ export default function UserProfilePage() {
                     </div>
 
                     {profile.latestAnswer?.question && profile.latestAnswer?.answer && (
-                        <Card className="rounded-3xl border border-primary/10 bg-primary/5">
+                        <Card className="rounded-2xl border border-primary/10 bg-primary/5">
                             <CardContent className="p-5">
                                 <div className="flex items-center gap-2 mb-2">
                                     <MessageSquare className="h-4 w-4 text-primary" />

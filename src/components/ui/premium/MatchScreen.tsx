@@ -13,20 +13,33 @@ import { useRouter } from 'next/navigation';
 
 const SimpleConfetti = () => (
     <div className="fixed inset-0 pointer-events-none overflow-hidden z-50">
-        {Array.from({ length: 25 }).map((_, i) => (
-            <div
-                key={i}
-                className="absolute animate-confetti"
-                style={{
-                    left: `${(i * 4) % 100}%`,
-                    animationDelay: `${(i * 0.17) % 2}s`,
-                    backgroundColor: ['#ff69b4', '#ff1493', '#ffb6c1', '#ffc0cb', '#ff85a2'][i % 5],
-                    width: '10px',
-                    height: '10px',
-                    borderRadius: '50%',
-                }}
-            />
-        ))}
+        {Array.from({ length: 40 }).map((_, i) => {
+            const shapes = ['circle', 'square', 'triangle'];
+            const shape = shapes[i % 3];
+            const colors = ['#ff69b4', '#ff1493', '#ffb6c1', '#ffc0cb', '#ff85a2', '#e879a8', '#f472b6'];
+            const color = colors[i % colors.length];
+            const size = 6 + (i % 5) * 3;
+            const left = (i * 2.5) % 100;
+            const delay = (i * 0.12) % 3;
+            const duration = 2.5 + (i % 4) * 0.5;
+            
+            return (
+                <div
+                    key={i}
+                    className="absolute"
+                    style={{
+                        left: `${left}%`,
+                        width: `${size}px`,
+                        height: `${size}px`,
+                        backgroundColor: color,
+                        borderRadius: shape === 'circle' ? '50%' : shape === 'square' ? '2px' : '0',
+                        clipPath: shape === 'triangle' ? 'polygon(50% 0%, 0% 100%, 100% 100%)' : undefined,
+                        animation: `confetti-fall ${duration}s ease-out ${delay}s infinite`,
+                        opacity: 0.9,
+                    }}
+                />
+            );
+        })}
     </div>
 );
 

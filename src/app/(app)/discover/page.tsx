@@ -5,7 +5,7 @@ import { AnimatePresence } from "framer-motion";
 import { FloatingMatchCard } from "@/components/ui/premium/FloatingMatchCard";
 import { MatchScreen } from "@/components/ui/premium/MatchScreen";
 import { Button } from "@/components/ui/button";
-import { Loader2, RefreshCcw, Sparkles, SlidersHorizontal, RotateCcw, Heart, X } from "lucide-react";
+import { Loader2, RefreshCcw, Sparkles, SlidersHorizontal, RotateCcw, Heart, X, ArrowRight, ArrowLeft, Star } from "lucide-react";
 import { DiscoverFilters, Filters } from "@/components/discover/discover-filters";
 import { Card } from "@/components/ui/card";
 import Image from "next/image";
@@ -23,7 +23,6 @@ import { useAnalytics, AnalyticsEvents } from "@/hooks/use-analytics";
 import { LikesCounter } from "@/components/discover/LikesCounter";
 import { DailyPicks } from "@/components/discover/DailyPicks";
 import { PostOnboardingJourney } from "@/components/onboarding/PostOnboardingJourney";
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 
 
 
@@ -79,9 +78,6 @@ export default function DiscoverPage() {
   const [rewinding, setRewinding] = useState(false);
   const [tutorialStep, setTutorialStep] = useState<number | null>(1);
   const [browseMode, setBrowseMode] = useState<'swipe' | 'grid'>('swipe');
-  const [flechadoConfirmOpen, setFlechadoConfirmOpen] = useState(false);
-  const [flechadoProfile, setFlechadoProfile] = useState<any>(null);
-  const [flechadoRemaining, setFlechadoRemaining] = useState(0);
   const [intent, setIntent] = useState<'dating' | 'friendship'>('dating');
   const [intentChanging, setIntentChanging] = useState(false);
 
@@ -90,7 +86,7 @@ export default function DiscoverPage() {
   const geoRequestedRef = useRef(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const [pullToRefresh, setPullToRefresh] = useState(0);
-  const pullStartRef = useRef(0);
+  const pullStartRef = useRef<number | null>(null);
   const scrollElementRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
@@ -105,7 +101,7 @@ export default function DiscoverPage() {
     };
 
     const handleTouchMove = (e: TouchEvent) => {
-      if (pullStartRef.current === 0) return;
+      if (pullStartRef.current === null) return;
       const pull = e.touches[0].clientY - pullStartRef.current;
       if (pull > 0) {
         setPullToRefresh(Math.min(pull / 300, 1));
@@ -120,7 +116,7 @@ export default function DiscoverPage() {
         if (prev >= 1) refresh();
         return 0;
       });
-      pullStartRef.current = 0;
+      pullStartRef.current = null;
     };
 
     el.addEventListener('touchstart', handleTouchStart, { passive: true });
@@ -267,16 +263,6 @@ export default function DiscoverPage() {
     const profileToActOn = profilesRef.current[0]?.profile;
     if (!profileToActOn || !currentUserProfile || pendingSwipe) return;
 
-    const remaining = (currentUserProfile as any)?.superlikesRemaining ?? 3;
-    setFlechadoProfile(profileToActOn);
-    setFlechadoRemaining(remaining);
-    setFlechadoConfirmOpen(true);
-  };
-
-  const confirmFlechado = async () => {
-    if (!flechadoProfile || !currentUserProfile || pendingSwipe) return;
-    setFlechadoConfirmOpen(false);
-
     const previousProfiles = profilesRef.current;
     setPendingSwipe(true);
     setSwipeCount(prev => prev + 1);
@@ -285,13 +271,13 @@ export default function DiscoverPage() {
     setProfiles(remainingProfiles as any);
 
     try {
-      track(AnalyticsEvents.LIKE_SENT, { targetUserId: flechadoProfile.id, intent });
-      const result = await sendLike(flechadoProfile.id, 'superlike', intent);
-      lastSwipeRef.current = { profileId: flechadoProfile.id, direction: 'flechado' };
-      toast({ title: '¡Super Like enviado!', description: `${flechadoProfile.displayName} recibirá tu interés destacado.` });
+      track(AnalyticsEvents.LIKE_SENT, { targetUserId: profileToActOn.id, intent });
+      const result = await sendLike(profileToActOn.id, 'superlike', intent);
+      lastSwipeRef.current = { profileId: profileToActOn.id, direction: 'flechado' };
+      toast({ title: '¡Super Like enviado!', description: `${profileToActOn.displayName} recibirá tu interés destacado.` });
       if (result?.matched) {
-        track(AnalyticsEvents.MATCH_CREATED, { partnerId: flechadoProfile.id });
-        setMatchedProfile(flechadoProfile);
+        track(AnalyticsEvents.MATCH_CREATED, { partnerId: profileToActOn.id });
+        setMatchedProfile(profileToActOn);
         setMatchId((result as any)?.matchId);
         setShowMatchScreen(true);
       }
@@ -303,7 +289,6 @@ export default function DiscoverPage() {
       toast({ title: "Error", description: "No se pudo enviar el Super Like.", variant: "destructive" });
     } finally {
       setPendingSwipe(false);
-      setFlechadoProfile(null);
     }
   };
 
@@ -352,7 +337,7 @@ export default function DiscoverPage() {
   return (
     <div
       ref={scrollRef}
-      className="md:pl-60 h-screen flex flex-col overflow-y-auto bg-gradient-to-br from-background to-muted/30"
+      className="h-screen flex flex-col overflow-y-auto bg-gradient-to-br from-background to-muted/30"
       style={{ overscrollBehavior: 'contain' } as React.CSSProperties}
     >
       {pullToRefresh > 0 && (
@@ -363,7 +348,7 @@ export default function DiscoverPage() {
           </div>
         </div>
       )}
-      <header className="flex h-16 items-center justify-between px-4 z-10">
+      <header className="sticky top-0 z-30 flex h-16 items-center justify-between px-4 backdrop-blur-md border-b bg-background/90">
         <div className="flex items-center gap-2">
           <h1 className="text-2xl font-bold tracking-tight text-foreground">Alora</h1>
           {(currentUserProfile as any)?.travelModeEnabled && (
@@ -415,7 +400,7 @@ export default function DiscoverPage() {
         <PostOnboardingJourney />
       </div>
 
-      <div className="md:hidden px-4 pt-2">
+      <div className="px-4 pt-2 max-w-sm mx-auto w-full">
         <LikesCounter
           dailyLikesUsed={currentUserProfile?.dailyLikesUsed ?? 0}
           dailyLikesLimit={SWIPE_LIMIT}
@@ -531,9 +516,9 @@ export default function DiscoverPage() {
               {tutorialStep !== null && (
                 <div className="absolute -top-14 left-0 right-0 flex justify-center z-30">
                   <div className="bg-foreground/90 text-background px-5 py-3 rounded-2xl text-sm font-medium shadow-lg max-w-[260px]">
-                    {tutorialStep === 1 && <p>👉 Desliza a la derecha para dar <strong>Like</strong></p>}
-                    {tutorialStep === 2 && <p>👈 Desliza a la izquierda para <strong>Pasar</strong></p>}
-                    {tutorialStep === 3 && <p>⭐ Toca la estrella para enviar un <strong>Super Like</strong> y destacar tu interés</p>}
+                    {tutorialStep === 1 && <p className="flex items-center gap-2"><ArrowRight className="h-4 w-4" /> Desliza a la derecha para dar <strong>Like</strong></p>}
+                    {tutorialStep === 2 && <p className="flex items-center gap-2"><ArrowLeft className="h-4 w-4" /> Desliza a la izquierda para <strong>Pasar</strong></p>}
+                    {tutorialStep === 3 && <p className="flex items-center gap-2"><Star className="h-4 w-4" /> Toca la estrella para enviar un <strong>Super Like</strong></p>}
                     <div className="flex justify-between items-center mt-2.5">
                       <span className="text-xs opacity-50">{tutorialStep}/3</span>
                       <button onClick={tutorialStep === 3 ? dismissTutorial : nextTutorialStep} className="text-[11px] font-bold underline">
@@ -612,20 +597,6 @@ export default function DiscoverPage() {
         />
       )}
 
-      <AlertDialog open={flechadoConfirmOpen} onOpenChange={setFlechadoConfirmOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Enviar Super Like</AlertDialogTitle>
-            <AlertDialogDescription>
-              Enviarás un Super Like a {flechadoProfile?.displayName}. Te quedan {Math.max(0, flechadoRemaining - 1)} Super Likes hoy. ¿Continuar?
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancelar</AlertDialogCancel>
-            <AlertDialogAction onClick={confirmFlechado}>Confirmar</AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
     </div>
   );
 }

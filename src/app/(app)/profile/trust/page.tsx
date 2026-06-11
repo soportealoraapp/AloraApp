@@ -49,7 +49,7 @@ export default function TrustPage() {
 
     if (loading) {
         return (
-            <div className="md:pl-60 p-6 flex justify-center py-20">
+            <div className="p-6 flex justify-center py-20">
                 <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full" />
             </div>
         );
@@ -57,14 +57,14 @@ export default function TrustPage() {
 
     if (!trust) {
         return (
-            <div className="md:pl-60 p-6">
+            <div className="p-6">
                 <p className="text-muted-foreground">No se pudo cargar el score de confianza</p>
             </div>
         );
     }
 
     return (
-        <div className="md:pl-60 p-6 space-y-6 bg-background min-h-screen">
+        <div className="p-6 space-y-6 bg-background min-h-screen">
             <div className="flex items-center gap-4">
                 <Button variant="ghost" size="icon" onClick={() => router.back()}>
                     <ArrowLeft className="h-5 w-5" />

@@ -120,14 +120,14 @@ export default function TravelModePage() {
 
     if (loading) {
         return (
-            <div className="md:pl-60 p-6 flex justify-center py-20">
+            <div className="p-6 flex justify-center py-20">
                 <Loader2 className="animate-spin text-primary h-8 w-8" />
             </div>
         );
     }
 
     return (
-        <div className="md:pl-60 p-6 space-y-6 bg-muted/50 min-h-screen">
+        <div className="p-6 space-y-6 bg-muted/50 min-h-screen">
             <div className="flex items-center gap-4">
                 <Button variant="ghost" size="icon" onClick={() => router.back()}>
                     <ArrowLeft className="h-5 w-5" />

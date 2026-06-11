@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Search, Heart, X, CheckCircle, Loader2, MessageSquare, Trash2 } from "lucide-react";
+import { Search, Heart, X, CheckCircle, Loader2, MessageSquare, EyeOff } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useToast } from "@/hooks/use-toast";
@@ -145,7 +145,7 @@ export default function ChatPage() {
 
     if (loading) {
         return (
-            <div className="md:pl-60">
+            <div>
                 <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b bg-background/80 px-4 backdrop-blur-sm sm:px-6">
                     <h1 className="text-xl font-semibold md:text-2xl font-headline">Conversaciones</h1>
                 </header>
@@ -159,7 +159,7 @@ export default function ChatPage() {
     }
 
     return (
-        <div className="md:pl-60">
+        <div>
             <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b bg-background/80 px-4 backdrop-blur-sm sm:px-6">
                 <h1 className="text-xl font-semibold md:text-2xl font-headline">Conversaciones</h1>
             </header>
@@ -235,7 +235,7 @@ export default function ChatPage() {
 
                     <TabsContent value="conversations" className="space-y-3 mt-4">
                         {filteredMatches.length === 0 ? (
-                            <Card className="rounded-3xl border bg-muted/20">
+                            <Card className="rounded-2xl border bg-muted/20">
                                 <CardContent className="flex flex-col items-center justify-center py-16 px-8">
                                     <div className="bg-card p-4 rounded-full shadow-sm mb-6">
                                         <MessageSquare className="h-10 w-10 text-muted-foreground" />
@@ -321,11 +321,11 @@ export default function ChatPage() {
                                                         }}
                                                         disabled={hidingMatch === match.id}
                                                     >
-                                                        {hidingMatch === match.id ? (
-                                                            <Loader2 className="h-4 w-4 animate-spin" />
-                                                        ) : (
-                                                            <Trash2 className="h-4 w-4" />
-                                                        )}
+                                {hidingMatch === match.id ? (
+                                    <Loader2 className="h-4 w-4 animate-spin" />
+                                ) : (
+                                    <EyeOff className="h-4 w-4" />
+                                )}
                                                     </Button>
                                                 </div>
                                             </motion.div>

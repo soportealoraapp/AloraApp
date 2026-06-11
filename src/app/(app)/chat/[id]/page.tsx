@@ -330,9 +330,13 @@ export default function ChatWindowPage() {
         }
     };
 
+    function handleReport() {
+        setShowReportDialog(true);
+    }
+
     if (loading && messages.length === 0) {
         return (
-            <div className="md:pl-60 h-screen flex flex-col">
+            <div className="h-screen flex flex-col">
                 <header className="flex h-16 items-center gap-4 border-b bg-background/80 px-4 backdrop-blur-sm sm:px-6 shrink-0">
                     <Skeleton className="h-10 w-10 rounded-full" />
                     <Skeleton className="h-6 w-32" />
@@ -349,7 +353,7 @@ export default function ChatWindowPage() {
     }
 
     return (
-        <div className="md:pl-60 flex flex-col h-[100dvh]">
+        <div className="flex flex-col h-[100dvh]">
             {/* Header with avatar */}
             <header className="flex h-16 items-center gap-4 border-b bg-background/80 px-4 backdrop-blur-sm sm:px-6 shrink-0 z-20">
                 <Button variant="ghost" size="icon" onClick={() => router.back()}>
@@ -555,7 +559,7 @@ export default function ChatWindowPage() {
                             exit={{ opacity: 0, y: 50 }}
                             className="absolute bottom-4 left-4 right-4 z-30"
                         >
-                            <Card className="p-4 shadow-2xl border-primary/20 bg-card/95 backdrop-blur-sm rounded-3xl">
+                            <Card className="p-4 shadow-2xl border-primary/20 bg-card/95 backdrop-blur-sm rounded-2xl">
                                 <div className="flex justify-between items-center mb-4">
                                     <h4 className="font-bold text-primary flex items-center gap-2">
                                         <Sparkles className="w-4 h-4" /> Ideas para empezar
@@ -668,8 +672,4 @@ export default function ChatWindowPage() {
             )}
         </div>
     );
-
-    function handleReport() {
-        setShowReportDialog(true);
-    }
 }

@@ -24,7 +24,7 @@ export function SecondChanceSection() {
 
   if (loading) {
     return (
-      <Card className="rounded-3xl border-dashed border-2 border-muted-foreground/20 bg-muted/10">
+      <Card className="rounded-2xl border-dashed border-2 border-muted-foreground/20 bg-muted/10">
         <CardContent className="p-6">
           <div className="flex items-center gap-2 mb-4">
             <div className="h-5 w-5 bg-muted-foreground/20 rounded-full animate-pulse" />
@@ -59,7 +59,7 @@ export function SecondChanceSection() {
   };
 
   return (
-    <Card className="rounded-3xl border-dashed border-2 border-muted-foreground/20 bg-muted/10">
+    <Card className="rounded-2xl border-dashed border-2 border-muted-foreground/20 bg-muted/10">
       <CardContent className="p-6">
         <div className="flex items-center gap-2 mb-4">
           <RotateCcw className="h-5 w-5 text-primary" />

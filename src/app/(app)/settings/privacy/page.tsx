@@ -206,7 +206,7 @@ export default function PrivacySettingsPage() {
 
     if (loading) {
         return (
-            <div className="md:pl-60">
+            <div>
                 <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b bg-background/80 px-4 backdrop-blur-sm sm:px-6">
                     <Skeleton className="h-8 w-48" />
                 </header>
@@ -218,7 +218,7 @@ export default function PrivacySettingsPage() {
     }
 
     return (
-        <div className="md:pl-60">
+        <div>
             <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b bg-background/80 px-4 backdrop-blur-sm sm:px-6">
                 <Button variant="ghost" size="icon" onClick={() => router.back()}>
                     <ArrowLeft className="h-5 w-5" />

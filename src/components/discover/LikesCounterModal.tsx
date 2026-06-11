@@ -10,6 +10,7 @@ import {
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Heart, Sparkles, Clock } from 'lucide-react';
+import { PaywallModal } from '@/components/premium/PaywallModal';
 
 interface LikesCounterModalProps {
     isOpen: boolean;
@@ -21,6 +22,7 @@ interface LikesCounterModalProps {
 
 export function LikesCounterModal({ isOpen, onClose, remaining, dailyLikesLimit, resetAt }: LikesCounterModalProps) {
     const [timeUntilReset, setTimeUntilReset] = useState<string | null>(null);
+    const [showPaywall, setShowPaywall] = useState(false);
 
     useEffect(() => {
         if (!isOpen) return;
@@ -53,57 +55,62 @@ export function LikesCounterModal({ isOpen, onClose, remaining, dailyLikesLimit,
     const isEmpty = remaining === 0;
 
     return (
-        <Dialog open={isOpen} onOpenChange={onClose}>
-            <DialogContent className="sm:max-w-[380px]" aria-labelledby="likes-modal-title" aria-describedby="likes-modal-desc">
-                <DialogHeader>
-                    <DialogTitle className="sr-only">Likes restantes hoy</DialogTitle>
-                    <DialogDescription className="sr-only" id="likes-modal-desc">Control de likes diarios</DialogDescription>
-                </DialogHeader>
+        <>
+            <Dialog open={isOpen} onOpenChange={onClose}>
+                <DialogContent className="sm:max-w-[380px]" aria-labelledby="likes-modal-title" aria-describedby="likes-modal-desc">
+                    <DialogHeader>
+                        <DialogTitle className="sr-only">Likes restantes hoy</DialogTitle>
+                        <DialogDescription className="sr-only" id="likes-modal-desc">Control de likes diarios</DialogDescription>
+                    </DialogHeader>
 
-                <div className="p-6 space-y-6">
-                    <div className="text-center">
-                        <div className="mx-auto w-16 h-16 rounded-full bg-gradient-to-br from-pink-100 to-pink-200 flex items-center justify-center mb-4">
-                            <Heart className={isEmpty ? "h-8 w-8 text-muted-foreground" : "h-8 w-8 text-pink-500 fill-pink-500"} />
+                    <div className="p-6 space-y-6">
+                        <div className="text-center">
+                            <div className="mx-auto w-16 h-16 rounded-full bg-gradient-to-br from-pink-100 to-pink-200 flex items-center justify-center mb-4">
+                                <Heart className={isEmpty ? "h-8 w-8 text-muted-foreground" : "h-8 w-8 text-pink-500 fill-pink-500"} />
+                            </div>
+                            <h2 className="text-lg font-bold text-foreground" id="likes-modal-title">
+                                {isEmpty ? 'Likes agotados' : 'Likes restantes hoy'}
+                            </h2>
+                            <p className="text-3xl font-bold mt-2">
+                                <span className={isEmpty ? "text-muted-foreground" : isLow ? "text-orange-500" : "text-pink-500"}>
+                                    {remaining}
+                                </span>
+                                <span className="text-lg text-muted-foreground"> / {dailyLikesLimit}</span>
+                            </p>
                         </div>
-                        <h2 className="text-lg font-bold text-foreground" id="likes-modal-title">
-                            {isEmpty ? 'Likes agotados' : 'Likes restantes hoy'}
-                        </h2>
-                        <p className="text-3xl font-bold mt-2">
-                            <span className={isEmpty ? "text-muted-foreground" : isLow ? "text-orange-500" : "text-pink-500"}>
-                                {remaining}
-                            </span>
-                            <span className="text-lg text-muted-foreground"> / {dailyLikesLimit}</span>
-                        </p>
-                    </div>
 
-                    <div className="bg-muted/50 rounded-xl p-4 text-center">
-                        <div className="flex items-center justify-center gap-2 text-muted-foreground mb-1">
-                            <Clock className="h-4 w-4" />
-                            <span className="text-sm font-medium">Se reinician a medianoche</span>
+                        <div className="bg-muted/50 rounded-xl p-4 text-center">
+                            <div className="flex items-center justify-center gap-2 text-muted-foreground mb-1">
+                                <Clock className="h-4 w-4" />
+                                <span className="text-sm font-medium">Se reinician mañana</span>
+                            </div>
+                            <p className="text-2xl font-mono font-bold text-foreground tracking-wider">
+                                {timeUntilReset || '...'}
+                            </p>
                         </div>
-                        <p className="text-2xl font-mono font-bold text-foreground tracking-wider">
-                            {timeUntilReset || '...'}
-                        </p>
-                    </div>
 
-                    <div className="space-y-3">
-                        {(isLow || isEmpty) && (
-                            <Button
-                                className="w-full bg-gradient-to-r from-pink-600 to-rose-500 text-white py-6 rounded-2xl text-base font-bold shadow-lg"
-                                onClick={() => {
-                                    window.open('https://alora-app.lemonsqueezy.com/checkout/buy/67dd777a-6ae1-4169-a2a1-8a1f105899e7', '_blank');
-                                }}
-                            >
-                                <Sparkles className="h-4 w-4 mr-2" />
-                                {isEmpty ? 'Recupera más likes con Alora Plus' : 'Sube de nivel con Alora Plus'}
+                        <div className="space-y-3">
+                            {(isLow || isEmpty) && (
+                                <Button
+                                    className="w-full bg-gradient-to-r from-pink-600 to-rose-500 text-white py-6 rounded-2xl text-base font-bold shadow-lg"
+                                    onClick={() => {
+                                        onClose();
+                                        setShowPaywall(true);
+                                    }}
+                                >
+                                    <Sparkles className="h-4 w-4 mr-2" />
+                                    {isEmpty ? 'Obtener más likes con Alora+' : 'Subir de nivel con Alora+'}
+                                </Button>
+                            )}
+                            <Button variant="outline" className="w-full rounded-2xl" onClick={onClose}>
+                                Cerrar
                             </Button>
-                        )}
-                        <Button variant="outline" className="w-full rounded-2xl" onClick={onClose}>
-                            Cerrar
-                        </Button>
+                        </div>
                     </div>
-                </div>
-            </DialogContent>
-        </Dialog>
+                </DialogContent>
+            </Dialog>
+
+            <PaywallModal isOpen={showPaywall} onClose={() => setShowPaywall(false)} />
+        </>
     );
 }

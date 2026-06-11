@@ -92,7 +92,7 @@ export default function QuizPage() {
 
     if (!quiz) {
         return (
-            <div className="md:pl-60 h-screen flex flex-col items-center justify-center p-4">
+            <div className="h-screen flex flex-col items-center justify-center p-4">
                 <Card className="w-full max-w-md">
                     <CardHeader>
                         <CardTitle>Juego no encontrado</CardTitle>
@@ -124,7 +124,7 @@ export default function QuizPage() {
     };
 
     return (
-        <div className="md:pl-60">
+        <div>
             <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b bg-background/80 px-4 backdrop-blur-sm sm:px-6">
                 <Button variant="ghost" size="icon" onClick={() => router.back()}>
                     <ArrowLeft className="h-5 w-5" />

@@ -89,7 +89,7 @@ export function FloatingMatchCard({ profile, onSwipe, onFlechado, compatibility,
       whileHover={{ scale: 1.01 }}
       whileTap={{ scale: 0.98 }}
     >
-      <SoftCard className="min-h-[400px] max-h-[calc(100dvh-180px)] h-full overflow-hidden relative border-none shadow-xl rounded-3xl bg-card">
+      <SoftCard className="min-h-[400px] max-h-[calc(100dvh-180px)] h-full overflow-hidden relative border-none shadow-xl rounded-2xl bg-card">
         {photos.length > 0 ? (
           photos.map((photo, index) => (
             <Image

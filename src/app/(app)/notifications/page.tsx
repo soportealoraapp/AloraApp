@@ -58,7 +58,7 @@ export default function NotificationsPage() {
 
   if (loading) {
     return (
-      <div className="md:pl-60 min-h-screen">
+      <div className="min-h-screen">
         <header className="sticky top-0 z-30 flex h-16 items-center border-b bg-background/90 px-4 backdrop-blur-md">
           <Skeleton className="h-6 w-32" />
         </header>
@@ -76,7 +76,7 @@ export default function NotificationsPage() {
   }
 
   return (
-    <div className="md:pl-60 min-h-screen">
+    <div className="min-h-screen">
       <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b bg-background/90 px-4 backdrop-blur-md">
         <h1 className="text-xl font-bold">Actividad</h1>
         {unreadCount > 0 && (

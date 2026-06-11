@@ -7,39 +7,39 @@ export const BRAND_VOICE = {
 
     states: {
         emptyFeed: {
-            title: 'Buscando algo especial para ti',
-            subtitle: 'Estamos refinando los perfiles para asegurar que cada conexión valga la pena. Vuelve en un momento.',
+            title: 'Buscando perfiles nuevos para ti',
+            subtitle: 'Vuelve pronto, siempre hay gente nueva en Alora.',
         },
         noMatches: {
-            title: 'Tu historia está por comenzar',
-            subtitle: 'Cada gran conexión comienza con un poco de paciencia. Mientras tanto, ¿por qué no completas tu perfil?',
+            title: 'Aún no has encontrado a alguien',
+            subtitle: 'Completar tu perfil aumenta tus posibilidades de conectar.',
         },
         noMessages: {
-            title: 'Silencio que invita',
-            subtitle: 'Todo match comienza con un primer mensaje. ¿Te animas?',
+            title: 'Envía el primer mensaje',
+            subtitle: '¡Hola! Tu match te está esperando.',
         },
         errorGeneric: {
-            title: 'Un pequeño tropiezo',
-            subtitle: 'Incluso las mejores historias tienen pausas. Estamos trabajando para que todo vuelva a fluir.',
+            title: 'Algo salió mal',
+            subtitle: 'Intenta de nuevo en unos segundos.',
         },
         offline: {
             title: 'Sin conexión',
-            subtitle: 'No te preocupes, tus mensajes se guardarán y se enviarán cuando vuelvas a estar en línea.',
+            subtitle: 'Tus mensajes se enviarán cuando vuelvas a estar en línea.',
         },
         discoverExhausted: {
-            title: 'Has visto todos los perfiles',
-            subtitle: 'Vuelve pronto, siempre hay nuevas personas listas para conocerte.',
+            title: 'Viste todos los perfiles por ahora',
+            subtitle: 'Vuelve pronto, siempre hay nuevas personas.',
         },
     },
 
     nudges: {
-        newMatch: '¡Es un Match! La curiosidad es el primer paso.',
-        firstMessageWoman: 'Tienes el primer paso. ¿Qué te gustaría descubrir sobre él?',
-        firstMessageMan: 'Ella dará el primer paso cuando se sienta lista. Mientras tanto, completa tu perfil.',
-        inactivity: 'Esta conexión parece estar en pausa. Siempre puedes saludar de nuevo cuando estés lista.',
-        typing: 'está escribiendo...',
-        online: 'En línea ahora',
-        lastSeen: 'Visto recientemente',
+        newMatch: '¡Es un Match!',
+        firstMessageWoman: 'Escribe algo que lo haga sonreír.',
+        firstMessageMan: 'Espera a que ella esté lista.',
+        inactivity: 'Parece que se enfrió. ¿Un mensaje nuevo?',
+        typing: 'escribiendo...',
+        online: 'En línea',
+        lastSeen: 'Última vez reciente',
     },
 
     safety: {
@@ -65,7 +65,7 @@ export const BRAND_VOICE = {
 };
 
 export const EMOTIONAL_COPY = {
-    matchCreated: 'Dos almas que se encontraron. ¿Qué historia van a escribir?',
+    matchCreated: 'Dos personas que se encontraron. ¿Qué historia van a escribir?',
     firstMessage: 'El primer mensaje es el más valiente. Adelante.',
     icebreaker: 'A veces solo hace falta un "hola" con personalidad.',
     profileComplete: 'Tu perfil brilla. Así te verán los demás.',

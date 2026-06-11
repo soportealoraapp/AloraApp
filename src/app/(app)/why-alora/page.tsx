@@ -51,7 +51,7 @@ const reasons = [
 
 export default function WhyAloraPage() {
     return (
-        <div className="md:pl-60 p-6 space-y-8">
+        <div className="p-6 space-y-8">
             <div className="text-center max-w-2xl mx-auto">
                 <SectionTitle title="¿Por qué Alora?" subtitle="Una app de citas que prioriza conexiones reales sobre swipes infinitos" />
             </div>

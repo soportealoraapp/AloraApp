@@ -35,7 +35,7 @@ export default function SettingsPage() {
     };
 
     return (
-        <div className="md:pl-60">
+        <div>
             <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b bg-background/80 px-4 backdrop-blur-sm sm:px-6">
                 <Button variant="ghost" size="icon" onClick={() => router.back()}>
                     <ArrowLeft className="h-5 w-5" />
@@ -87,7 +87,22 @@ export default function SettingsPage() {
                     </CardContent>
                 </Card>
 
-                <div className="pt-4">
+                <div className="pt-4 space-y-3">
+                    <Button
+                        variant="outline"
+                        className="w-full text-destructive border-destructive/30 hover:bg-destructive/5"
+                        onClick={() => {
+                            if (window.confirm('¿Estás seguro de que quieres eliminar tu cuenta? Esta acción no se puede deshacer.')) {
+                                // TODO: Call delete account API
+                                toast({
+                                    title: "Solicitud enviada",
+                                    description: "Recibirás un email para confirmar la eliminación de tu cuenta.",
+                                });
+                            }
+                        }}
+                    >
+                        Eliminar cuenta
+                    </Button>
                     <Button
                         variant="destructive"
                         className="w-full"

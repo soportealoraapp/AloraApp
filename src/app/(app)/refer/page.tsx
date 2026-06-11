@@ -48,7 +48,7 @@ export default function ReferPage() {
     };
 
     return (
-        <div className="md:pl-60">
+        <div>
             <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b bg-background/80 px-4 backdrop-blur-sm sm:px-6">
                 <h1 className="text-xl font-semibold md:text-2xl font-headline">Recomienda y Gana</h1>
             </header>

@@ -102,8 +102,8 @@ html {
     --accent-foreground: 265 10% 10%;
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 98%;
-    --border: 340 10% 25%;
-    --input: 340 10% 25%;
+    --border: 340 10% 30%;
+    --input: 340 10% 30%;
     --ring: 340 82% 73%;
     --warning: 38 92% 50%;
     --warning-foreground: 0 0% 100%;
@@ -125,7 +125,7 @@ html {
     --sidebar-primary-foreground: 0 0% 100%;
     --sidebar-accent: 340 10% 18%;
     --sidebar-accent-foreground: 336 100% 97%;
-    --sidebar-border: 340 10% 20%;
+    --sidebar-border: 340 10% 28%;
     --sidebar-ring: 340 82% 73%;
   }
 }
@@ -264,5 +264,11 @@ html {
   }
   .scrollbar-hide::-webkit-scrollbar {
     display: none;
+  }
+
+  /* Skeleton shimmer animation */
+  @keyframes shimmer {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
   }
 }
