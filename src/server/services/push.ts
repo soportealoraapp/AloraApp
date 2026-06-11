@@ -223,3 +223,30 @@ export async function notifyProfileVisit(userId: string, visitorName: string) {
         channel: 'engagement',
     });
 }
+
+export async function notifyDailyCompatibility(userId: string, partnerName: string, score: number) {
+    return sendPushToUser(userId, {
+        title: 'Tu match del día',
+        body: `${partnerName} es ${score}% compatible contigo 💜`,
+        data: { type: 'daily_compatibility' },
+        channel: 'engagement',
+    });
+}
+
+export async function notifyStreakAtRisk(userId: string, streakDays: number) {
+    return sendPushToUser(userId, {
+        title: 'No pierdas tu racha 🔥',
+        body: `Llevas ${streakDays} días seguidos. ¡No pares ahora!`,
+        data: { type: 'streak_at_risk' },
+        channel: 'engagement',
+    });
+}
+
+export async function notifyDailyQuestion(userId: string) {
+    return sendPushToUser(userId, {
+        title: 'Pregunta del día',
+        body: 'La pregunta de hoy te espera. Responde y mejora tu compatibilidad',
+        data: { type: 'daily_question' },
+        channel: 'engagement',
+    });
+}

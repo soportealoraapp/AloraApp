@@ -6,11 +6,12 @@ export interface City {
     lat: number;
     lng: number;
     population: number;
+    active?: boolean;
 }
 
 export const CITIES: City[] = [
-    // México
-    { id: 'mx-cdmx', name: 'Ciudad de México', stateCode: 'CDMX', countryCode: 'MX', lat: 19.4326, lng: -99.1332, population: 9210000 },
+    // México — ACTIVA
+    { id: 'mx-cdmx', name: 'Ciudad de México', stateCode: 'CDMX', countryCode: 'MX', lat: 19.4326, lng: -99.1332, population: 9210000, active: true },
     { id: 'mx-guadalajara', name: 'Guadalajara', stateCode: 'JAL', countryCode: 'MX', lat: 20.6597, lng: -103.3496, population: 1495000 },
     { id: 'mx-monterrey', name: 'Monterrey', stateCode: 'NL', countryCode: 'MX', lat: 25.6866, lng: -100.3161, population: 1135000 },
     { id: 'mx-puebla', name: 'Puebla', stateCode: 'PUE', countryCode: 'MX', lat: 19.0414, lng: -98.2063, population: 1577000 },
@@ -148,3 +149,12 @@ export const CITIES: City[] = [
     // Marruecos
     { id: 'ma-casablanca', name: 'Casablanca', stateCode: 'CAS', countryCode: 'MA', lat: 33.5731, lng: -7.5898, population: 3359000 },
 ];
+
+export function getActiveCities(): City[] {
+    return CITIES.filter(city => city.active === true);
+}
+
+export function isCityActive(cityId: string): boolean {
+    const city = CITIES.find(c => c.id === cityId);
+    return city?.active === true;
+}

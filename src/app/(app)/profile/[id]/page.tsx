@@ -44,6 +44,7 @@ export default function UserProfilePage() {
     const [isSuperMatched, setIsSuperMatched] = useState(false);
     const [processing, setProcessing] = useState(false);
     const [hasExistingMatch, setHasExistingMatch] = useState(false);
+    const [compatibility, setCompatibility] = useState<{ score: number; breakdown?: Record<string, number>; explanations?: string[] } | null>(null);
 
     const source = searchParams.get("source");
     const isPreview = searchParams.get("preview") === "1";
@@ -58,6 +59,18 @@ export default function UserProfilePage() {
       fetch(`/api/match/check?targetUserId=${id}`)
         .then(r => r.json())
         .then(data => setHasExistingMatch(data.matched))
+        .catch(() => {});
+    }, [id, user, isPreview]);
+
+    useEffect(() => {
+      if (!id || !user || isPreview || id === user?.id) return;
+      fetch(`/api/compatibility/score?targetId=${id}`)
+        .then(r => r.json())
+        .then(data => {
+          if (data.score !== undefined) {
+            setCompatibility({ score: data.score, breakdown: data.breakdown, explanations: data.explanations });
+          }
+        })
         .catch(() => {});
     }, [id, user, isPreview]);
 
@@ -246,6 +259,35 @@ export default function UserProfilePage() {
                 </div>
 
                 <div className="p-4 space-y-6">
+                    {/* Compatibility Score Hero */}
+                    {compatibility && (
+                        <Card className="rounded-3xl border border-primary/20 bg-gradient-to-br from-primary/5 to-transparent">
+                            <CardContent className="p-5">
+                                <div className="flex items-center justify-between mb-3">
+                                    <div className="flex items-center gap-2">
+                                        <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
+                                            <span className="text-xl font-bold text-primary">{compatibility.score}%</span>
+                                        </div>
+                                        <div>
+                                            <h3 className="font-bold text-foreground">Compatible</h3>
+                                            <p className="text-xs text-muted-foreground">Basado en 7 dimensiones</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                {compatibility.explanations && compatibility.explanations.length > 0 && (
+                                    <div className="space-y-1.5">
+                                        {compatibility.explanations.slice(0, 3).map((exp, i) => (
+                                            <p key={i} className="text-xs text-muted-foreground flex items-start gap-1.5">
+                                                <span className="text-primary mt-0.5">•</span>
+                                                {exp}
+                                            </p>
+                                        ))}
+                                    </div>
+                                )}
+                            </CardContent>
+                        </Card>
+                    )}
+
                     <div>
                         <div className="flex items-baseline gap-2 flex-wrap">
                             <h2 className="text-3xl font-bold font-headline">

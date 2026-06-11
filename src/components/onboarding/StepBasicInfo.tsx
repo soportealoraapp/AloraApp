@@ -2,21 +2,14 @@
 
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useState, useEffect, useMemo } from "react";
 import { trackEvent } from "@/lib/tracking/client";
-import { Sparkles, Heart, Handshake } from "lucide-react";
+import { Heart, Handshake } from "lucide-react";
 import { motion } from "framer-motion";
 import { UserProfile, ConnectionIntent } from "@/lib/domain/types";
 import { cn } from "@/lib/utils";
-
-const BIO_EXAMPLES = [
-    "Una amante del café y los atardeceres...",
-    "Buscando a alguien que baile conmigo bajo la lluvia",
-    "Soy de esas personas que se pierden en librerías",
-];
 
 interface StepBasicInfoProps {
     userId?: string;
@@ -27,7 +20,6 @@ interface StepBasicInfoProps {
 
 export function StepBasicInfo({ data, onUpdate, onNext, userId }: StepBasicInfoProps) {
     const [localData, setLocalData] = useState<Partial<UserProfile>>(data);
-    const [bioExample] = useState(BIO_EXAMPLES[Math.floor(Math.random() * BIO_EXAMPLES.length)]);
 
     const selectedModes: ConnectionIntent[] = (localData.connectionModes || ['dating']) as ConnectionIntent[];
 
@@ -67,8 +59,9 @@ export function StepBasicInfo({ data, onUpdate, onNext, userId }: StepBasicInfoP
         Boolean(localData.displayName?.trim()) &&
         Boolean(localData.age) &&
         Boolean(localData.gender) &&
+        Boolean(localData.city?.trim()) &&
         selectedModes.length > 0,
-        [localData.displayName, localData.age, localData.gender, selectedModes]
+        [localData.displayName, localData.age, localData.gender, localData.city, selectedModes]
     );
 
     return (
@@ -182,24 +175,20 @@ export function StepBasicInfo({ data, onUpdate, onNext, userId }: StepBasicInfoP
                 <motion.div
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.3 }}
+                    transition={{ delay: 0.25 }}
                     className="space-y-2"
                 >
-                    <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1">
-                        <Sparkles className="h-3 w-3 text-muted-foreground" />
-                        Tu esencia
+                    <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                        Ciudad
                     </Label>
-                    <Textarea
-                        placeholder={bioExample}
-                        value={localData.bio || ''}
-                        onChange={(e) => handleChange('bio', e.target.value)}
-                        className="min-h-[100px] rounded-2xl resize-none"
-                        maxLength={500}
+                    <Input
+                        placeholder="Ciudad de México"
+                        value={localData.city || ''}
+                        onChange={(e) => handleChange('city', e.target.value)}
+                        className="rounded-2xl h-12 border-muted focus-visible:ring-primary/20 bg-background/50"
                     />
-                    <p className="text-xs text-right text-muted-foreground">
-                        {(localData.bio || '').length}/500
-                    </p>
                 </motion.div>
+
             </div>
 
             <div className="pt-4">
@@ -212,7 +201,7 @@ export function StepBasicInfo({ data, onUpdate, onNext, userId }: StepBasicInfoP
                 </Button>
                 {!isValid && (
                     <p className="text-xs text-amber-600 text-center mt-2">
-                        Nombre, edad y género son necesarios para encontrar tu mejor match
+                        Nombre, edad, género y ciudad son necesarios para encontrar tu mejor match
                     </p>
                 )}
             </div>

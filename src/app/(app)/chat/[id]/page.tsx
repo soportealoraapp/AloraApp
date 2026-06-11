@@ -209,8 +209,8 @@ export default function ChatWindowPage() {
         } catch (error: any) {
             if (error?.code === 'first_message_restriction') {
                 toast({
-                    title: "Ella da el primer paso",
-                    description: "En conexiones entre hombres y mujeres, ella inicia la conversación.",
+                    title: "Espera la primera vez",
+                    description: "Alguien debe iniciar la conversación para conectar.",
                     variant: "default"
                 });
             } else {
@@ -449,20 +449,16 @@ export default function ChatWindowPage() {
                         </div>
                         <h3 className="font-semibold text-lg mb-2">¡Es un match!</h3>
                         <p className="text-muted-foreground mb-4 max-w-xs">
-                            {profile?.gender === 'woman'
-                                ? 'Da el primer paso — tu mensaje puede ser el inicio de algo especial.'
-                                : 'Ella dará el primer paso cuando esté lista.'}
+                            Empieza la conversación con algo especial. Tu mensaje puede ser el inicio de algo increíble.
                         </p>
-                        {profile?.gender === 'woman' && (
-                            <Button
-                                onClick={fetchIcebreakers}
-                                disabled={loadingIcebreakers}
-                                className="rounded-full bg-gradient-to-r from-primary to-accent text-primary-foreground"
-                            >
-                                {loadingIcebreakers ? <Loader2 className="animate-spin mr-2" /> : <Sparkles className="mr-2 h-4 w-4" />}
-                                Sugerir rompehielos
-                            </Button>
-                        )}
+                        <Button
+                            onClick={fetchIcebreakers}
+                            disabled={loadingIcebreakers}
+                            className="rounded-full bg-gradient-to-r from-primary to-accent text-primary-foreground"
+                        >
+                            {loadingIcebreakers ? <Loader2 className="animate-spin mr-2" /> : <Sparkles className="mr-2 h-4 w-4" />}
+                            Sugerir rompehielos
+                        </Button>
                     </div>
                 ) : (
                     <div className="flex flex-col gap-1">
@@ -579,9 +575,9 @@ export default function ChatWindowPage() {
                         </span>
                     </div>
                 )}
-                {messages.length === 0 && profile?.gender !== 'woman' ? (
+                {messages.length === 0 ? (
                     <p className="text-xs text-center text-muted-foreground mb-2">
-                        💡 Ella da el primer paso, pero puedes enviar un mensaje amable para romper el hielo.
+                        💡 Empieza la conversación con algo amable para romper el hielo.
                     </p>
                 ) : null}
                 <ConversationRoulette

@@ -27,6 +27,8 @@ export function FloatingMatchCard({ profile, onSwipe, onFlechado, compatibility,
   const controls = useAnimation();
   const [dragX, setDragX] = useState(0);
   const [likeBurst, setLikeBurst] = useState(false);
+  const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0);
+  const photos = profile.photos || [];
 
   const handleLike = useCallback((e: React.MouseEvent) => {
     e.stopPropagation();
@@ -79,13 +81,49 @@ export function FloatingMatchCard({ profile, onSwipe, onFlechado, compatibility,
       whileTap={{ scale: 0.98 }}
     >
       <SoftCard className="min-h-[400px] max-h-[calc(100dvh-180px)] h-full overflow-hidden relative border-none shadow-xl rounded-3xl bg-card">
-        <Image
-          src={profile.photos?.[0] || '/placeholder.svg'}
-          alt={profile.displayName}
-          fill
-          className="object-cover pointer-events-none"
-          priority
-        />
+        {photos.length > 0 ? (
+          photos.map((photo, index) => (
+            <Image
+              key={index}
+              src={photo}
+              alt={`${profile.displayName} ${index + 1}`}
+              fill
+              className={`object-cover pointer-events-none transition-opacity duration-300 ${
+                index === currentPhotoIndex ? 'opacity-100' : 'opacity-0'
+              }`}
+              priority={index === 0}
+            />
+          ))
+        ) : (
+          <Image
+            src="/placeholder.svg"
+            alt={profile.displayName}
+            fill
+            className="object-cover pointer-events-none"
+            priority
+          />
+        )}
+
+        {/* Photo dots indicator */}
+        {photos.length > 1 && (
+          <div className="absolute top-2 left-0 right-0 z-20 flex justify-center gap-1.5 px-4">
+            {photos.map((_, index) => (
+              <button
+                key={index}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setCurrentPhotoIndex(index);
+                }}
+                className={`h-1.5 rounded-full transition-all duration-200 ${
+                  index === currentPhotoIndex
+                    ? 'bg-white w-4'
+                    : 'bg-white/40 w-1.5 hover:bg-white/60'
+                }`}
+                aria-label={`Foto ${index + 1}`}
+              />
+            ))}
+          </div>
+        )}
 
         {/* Swipe indicators during drag */}
         {dragX > 50 && (

@@ -3,11 +3,13 @@ import { REFERRAL_CODE_PATTERN } from '@/lib/referral/constants';
 
 export interface ReferralConfig {
     reward: string;
+    rewardDays: number;
     maxReferrals: number;
 }
 
 export const REFERRAL_PROGRAM: ReferralConfig = {
     reward: '1_WEEK_PLUS',
+    rewardDays: 7,
     maxReferrals: 5
 };
 
@@ -44,5 +46,50 @@ export async function trackReferral(referrerId: string, newUserId: string) {
         });
     } catch (err) {
         console.warn('[referral-engine] trackReferral failed:', err);
+    }
+}
+
+export async function grantReferralReward(referrerId: string, newUserId: string): Promise<{ success: boolean; message: string }> {
+    try {
+        const referralCount = await prisma.referral.count({
+            where: { referrerId },
+        });
+
+        if (referralCount >= REFERRAL_PROGRAM.maxReferrals) {
+            return { success: false, message: 'Límite de referrals alcanzado' };
+        }
+
+        const rewardExpiresAt = new Date(Date.now() + REFERRAL_PROGRAM.rewardDays * 24 * 60 * 60 * 1000);
+
+        await Promise.all([
+            prisma.profile.update({
+                where: { userId: referrerId },
+                data: {
+                    subscriptionStatus: 'plus',
+                    subscriptionExpiresAt: rewardExpiresAt,
+                },
+            }),
+            prisma.profile.update({
+                where: { userId: newUserId },
+                data: {
+                    subscriptionStatus: 'plus',
+                    subscriptionExpiresAt: rewardExpiresAt,
+                },
+            }),
+            prisma.referral.create({
+                data: {
+                    referrerId,
+                    code: generateReferralCode(referrerId),
+                    referredId: newUserId,
+                    maxUses: REFERRAL_PROGRAM.maxReferrals,
+                    expiresAt: rewardExpiresAt,
+                },
+            }),
+        ]);
+
+        return { success: true, message: `Plus gratis por ${REFERRAL_PROGRAM.rewardDays} días` };
+    } catch (err) {
+        console.error('[referral-engine] grantReferralReward failed:', err);
+        return { success: false, message: 'Error al otorgar recompensa' };
     }
 }

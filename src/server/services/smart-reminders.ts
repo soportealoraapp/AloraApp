@@ -1,5 +1,5 @@
 import { prisma } from '@/lib/prisma';
-import { notifyBoostAvailable, notifyProfileVisit } from './push';
+import { notifyBoostAvailable, notifyProfileVisit, notifyDailyCompatibility, notifyStreakAtRisk, notifyDailyQuestion } from './push';
 
 const REMINDER_COOLDOWN_HOURS = 24;
 const INACTIVE_THRESHOLD_DAYS = 3;
@@ -132,4 +132,77 @@ async function sendBoostReminder(userId: string) {
             channel: 'engagement',
         },
     }).catch(() => {});
+}
+
+export async function sendDailyCompatibilityReminder(userId: string): Promise<void> {
+    try {
+        const lastReminder = await prisma.notification.findFirst({
+            where: {
+                userId,
+                type: 'reminder',
+                data: { path: ['type'], equals: 'daily_compatibility_reminder' },
+            },
+            orderBy: { createdAt: 'desc' },
+        });
+
+        if (lastReminder) {
+            const hoursSince = (Date.now() - new Date(lastReminder.createdAt).getTime()) / (1000 * 60 * 60);
+            if (hoursSince < REMINDER_COOLDOWN_HOURS) return;
+        }
+
+        const profile = await prisma.profile.findUnique({
+            where: { userId },
+            select: { displayName: true },
+        });
+
+        if (profile) {
+            await notifyDailyCompatibility(userId, profile.displayName || 'Alguien', 85);
+        }
+    } catch (error) {
+        console.error('Error sending daily compatibility reminder:', error);
+    }
+}
+
+export async function sendStreakAtRiskReminder(userId: string, streakDays: number): Promise<void> {
+    try {
+        const lastReminder = await prisma.notification.findFirst({
+            where: {
+                userId,
+                type: 'reminder',
+                data: { path: ['type'], equals: 'streak_at_risk_reminder' },
+            },
+            orderBy: { createdAt: 'desc' },
+        });
+
+        if (lastReminder) {
+            const hoursSince = (Date.now() - new Date(lastReminder.createdAt).getTime()) / (1000 * 60 * 60);
+            if (hoursSince < REMINDER_COOLDOWN_HOURS) return;
+        }
+
+        await notifyStreakAtRisk(userId, streakDays);
+    } catch (error) {
+        console.error('Error sending streak at risk reminder:', error);
+    }
+}
+
+export async function sendDailyQuestionReminder(userId: string): Promise<void> {
+    try {
+        const lastReminder = await prisma.notification.findFirst({
+            where: {
+                userId,
+                type: 'reminder',
+                data: { path: ['type'], equals: 'daily_question_reminder' },
+            },
+            orderBy: { createdAt: 'desc' },
+        });
+
+        if (lastReminder) {
+            const hoursSince = (Date.now() - new Date(lastReminder.createdAt).getTime()) / (1000 * 60 * 60);
+            if (hoursSince < REMINDER_COOLDOWN_HOURS) return;
+        }
+
+        await notifyDailyQuestion(userId);
+    } catch (error) {
+        console.error('Error sending daily question reminder:', error);
+    }
 }

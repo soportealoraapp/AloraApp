@@ -5,8 +5,7 @@ import { AnimatePresence } from "framer-motion";
 import { FloatingMatchCard } from "@/components/ui/premium/FloatingMatchCard";
 import { MatchScreen } from "@/components/ui/premium/MatchScreen";
 import { Button } from "@/components/ui/button";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Loader2, RefreshCcw, Sparkles, SlidersHorizontal, RotateCcw, LayoutGrid, CreditCard, Heart, X } from "lucide-react";
+import { Loader2, RefreshCcw, Sparkles, SlidersHorizontal, RotateCcw, Heart, X } from "lucide-react";
 import { DiscoverFilters, Filters } from "@/components/discover/discover-filters";
 import { Card } from "@/components/ui/card";
 import Image from "next/image";
@@ -23,6 +22,7 @@ import { DailyCompatibilityCard } from "@/components/compatibility/DailyCompatib
 import { useAnalytics, AnalyticsEvents } from "@/hooks/use-analytics";
 import { LikesCounter } from "@/components/discover/LikesCounter";
 import { DailyPicks } from "@/components/discover/DailyPicks";
+import { PostOnboardingJourney } from "@/components/onboarding/PostOnboardingJourney";
 
 
 
@@ -349,28 +349,20 @@ export default function DiscoverPage() {
           )}
         </div>
         <div className="flex items-center gap-1">
-          <div className="hidden md:flex">
-            <LikesCounter
-              dailyLikesUsed={currentUserProfile?.dailyLikesUsed ?? 0}
-              dailyLikesLimit={SWIPE_LIMIT}
-              resetAt={
-                currentUserProfile?.dailyLikesResetAt
-                  ? new Date(currentUserProfile.dailyLikesResetAt)
-                  : new Date(new Date().setHours(24, 0, 0, 0))
-              }
-              subscriptionStatus={currentUserProfile?.subscriptionStatus ?? 'free'}
-            />
+          <div className="hidden md:flex items-center gap-1">
+            <Button variant="ghost" size="icon" onClick={handleRewind} disabled={!lastSwipeRef.current || rewinding} title={`Rewind: deshace el último swipe (${rewindsRemaining}/${maxRewinds} disponibles)`} aria-label="Deshacer último swipe">
+              <RotateCcw className="h-5 w-5 text-muted-foreground" />
+            </Button>
+            <span className="text-[11px] text-muted-foreground font-bold -ml-1">{rewindsRemaining}</span>
+            <Button variant="ghost" size="icon" onClick={() => setFilterOpen(true)} title="Filtros de búsqueda" aria-label="Filtros de búsqueda" className="relative">
+              <SlidersHorizontal className="h-5 w-5 text-muted-foreground" />
+              {countActiveFilters(filters) > 0 && (
+                <span className="absolute -top-0.5 -right-0.5 bg-primary text-primary-foreground text-[11px] font-bold rounded-full min-w-[18px] h-[18px] flex items-center justify-center shadow-sm border border-background">
+                  {countActiveFilters(filters)}
+                </span>
+              )}
+            </Button>
           </div>
-          <Tabs value={browseMode} onValueChange={(v) => setBrowseMode(v as 'swipe' | 'grid')} className="hidden md:block">
-            <TabsList className="h-8">
-              <TabsTrigger value="swipe" className="text-xs px-3 h-7 gap-1">
-                <CreditCard className="h-3.5 w-3.5" /> Swipe
-              </TabsTrigger>
-              <TabsTrigger value="grid" className="text-xs px-3 h-7 gap-1">
-                <LayoutGrid className="h-3.5 w-3.5" /> Explorar
-              </TabsTrigger>
-            </TabsList>
-          </Tabs>
           <div className="md:hidden flex items-center gap-0.5">
             <div className="flex items-center">
               <Button variant="ghost" size="icon" onClick={handleRewind} disabled={!lastSwipeRef.current || rewinding} title={`Rewind: deshace el último swipe (${rewindsRemaining}/${maxRewinds} disponibles)`} aria-label="Deshacer último swipe" className="touch-target">
@@ -387,22 +379,18 @@ export default function DiscoverPage() {
               )}
             </Button>
           </div>
-          <div className="hidden md:flex items-center gap-1">
-            <Button variant="ghost" size="icon" onClick={handleRewind} disabled={!lastSwipeRef.current || rewinding} title={`Rewind: deshace el último swipe (${rewindsRemaining}/${maxRewinds} disponibles)`} aria-label="Deshacer último swipe">
-              <RotateCcw className="h-5 w-5 text-muted-foreground" />
-            </Button>
-            <span className="text-[11px] text-muted-foreground font-bold -ml-1">{rewindsRemaining}</span>
-            <Button variant="ghost" size="icon" onClick={() => setFilterOpen(true)} title="Filtros de búsqueda" aria-label="Filtros de búsqueda" className="relative">
-              <SlidersHorizontal className="h-5 w-5 text-muted-foreground" />
-              {countActiveFilters(filters) > 0 && (
-                <span className="absolute -top-0.5 -right-0.5 bg-primary text-primary-foreground text-[11px] font-bold rounded-full min-w-[18px] h-[18px] flex items-center justify-center shadow-sm border border-background">
-                  {countActiveFilters(filters)}
-                </span>
-              )}
-            </Button>
-          </div>
         </div>
       </header>
+
+      {/* Daily Compatibility — hero before the feed */}
+      <div className="px-4 pb-3 max-w-sm mx-auto w-full">
+        <DailyCompatibilityCard />
+      </div>
+
+      {/* Post-onboarding gamified journey */}
+      <div className="px-4 pb-3 max-w-sm mx-auto w-full">
+        <PostOnboardingJourney />
+      </div>
 
       <div className="md:hidden px-4 pt-2">
         <LikesCounter
@@ -574,9 +562,8 @@ export default function DiscoverPage() {
         <DailyPicks subscriptionStatus={currentUserProfile?.subscriptionStatus ?? 'free'} />
       </div>
 
-      {/* Daily Question and Compatibility - below the feed */}
+      {/* Daily Question - below the feed */}
       <div className="px-4 pb-4 max-w-sm mx-auto w-full space-y-3">
-        <DailyCompatibilityCard />
         <DailyQuestionCard />
       </div>
 
