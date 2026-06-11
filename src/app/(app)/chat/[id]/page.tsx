@@ -38,6 +38,25 @@ export default function ChatWindowPage() {
     const { user, profile } = useAuth();
     const matchId = params.id as string;
     const { messages, setMessages, loading, sending, sendMessage, emitTyping, markAsRead, loadMore, hasMore, loadingMore, isPartnerOnline, partnerTyping } = useChat(matchId);
+    const [keyboardHeight, setKeyboardHeight] = useState(0);
+
+    useEffect(() => {
+        if (typeof window === 'undefined' || !window.visualViewport) return;
+
+        const handleResize = () => {
+            const viewportHeight = window.visualViewport!.height;
+            const windowHeight = window.innerHeight;
+            const heightDiff = windowHeight - viewportHeight;
+            setKeyboardHeight(heightDiff > 50 ? heightDiff : 0);
+        };
+
+        window.visualViewport!.addEventListener('resize', handleResize);
+        window.visualViewport!.addEventListener('scroll', handleResize);
+        return () => {
+            window.visualViewport!.removeEventListener('resize', handleResize);
+            window.visualViewport!.removeEventListener('scroll', handleResize);
+        };
+    }, []);
     const { matches } = useMatches();
     const { toast } = useToast();
     const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -566,7 +585,7 @@ export default function ChatWindowPage() {
             </main>
 
             {/* Chat input area */}
-            <div className="border-t bg-background p-4 pb-safe">
+            <div className="border-t bg-background p-4 pb-safe" style={{ paddingBottom: keyboardHeight > 0 ? `${keyboardHeight}px` : undefined }}>
                 {isPartnerOnline && (
                     <div className="flex items-center gap-2 mb-2">
                         <span className="text-xs text-primary flex items-center gap-1 ml-auto">

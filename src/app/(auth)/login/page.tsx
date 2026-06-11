@@ -108,7 +108,7 @@ export default function LoginPage() {
                     </div>
                 ) : (
                     <>
-                        <CardTitle className="text-2xl font-headline">¡Bienvenida de nuevo!</CardTitle>
+                        <CardTitle className="text-2xl font-headline">¡Hola de nuevo!</CardTitle>
                         <CardDescription>Inicia sesión para encontrar tu conexión.</CardDescription>
                     </>
                 )}

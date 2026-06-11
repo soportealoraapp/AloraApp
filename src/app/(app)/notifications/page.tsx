@@ -10,7 +10,27 @@ import { useState, useEffect } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
 
 function NotificationItem({ notification, onRead }: { notification: any; onRead: () => void }) {
+  const router = useRouter();
   const isUnread = !notification.readAt;
+
+  const handleClick = () => {
+    if (isUnread) onRead();
+
+    const type = notification.type || '';
+    const data = notification.data || {};
+
+    if (type === 'match' || type === 'new_match') {
+      router.push(`/chat/${data.matchId || ''}`);
+    } else if (type === 'message' || type === 'new_message') {
+      router.push(`/chat/${data.conversationId || data.matchId || ''}`);
+    } else if (type === 'like' || type === 'new_like') {
+      router.push(`/profile/${data.fromUserId || data.userId || ''}`);
+    } else if (type === 'quiz' || type === 'compatibility') {
+      router.push('/compatibility');
+    } else if (type === 'profile_view') {
+      router.push(`/profile/${data.viewerId || data.userId || ''}`);
+    }
+  };
 
   return (
     <button
@@ -18,7 +38,7 @@ function NotificationItem({ notification, onRead }: { notification: any; onRead:
         'w-full text-left p-4 border-b transition-colors hover:bg-muted/30',
         isUnread ? 'bg-primary/5 font-medium' : ''
       )}
-      onClick={() => { if (isUnread) onRead(); }}
+      onClick={handleClick}
     >
       <p className="text-sm">{notification.title}</p>
       {notification.body && (

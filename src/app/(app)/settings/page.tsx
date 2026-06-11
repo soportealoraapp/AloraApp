@@ -10,12 +10,14 @@ import { ThemeToggle } from '@/components/theme-toggle';
 import { useAuth } from '@/contexts/AuthContext';
 import { useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 
 export default function SettingsPage() {
     const router = useRouter();
     const { signOut } = useAuth();
     const { toast } = useToast();
     const [loggingOut, setLoggingOut] = useState(false);
+    const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
 
     const handleLogout = async () => {
         setLoggingOut(true);
@@ -159,7 +161,7 @@ export default function SettingsPage() {
                     <Button
                         variant="destructive"
                         className="w-full"
-                        onClick={handleLogout}
+                        onClick={() => setShowLogoutConfirm(true)}
                         disabled={loggingOut}
                     >
                         {loggingOut ? (
@@ -176,6 +178,24 @@ export default function SettingsPage() {
                     </Button>
                 </div>
             </main>
+
+            <AlertDialog open={showLogoutConfirm} onOpenChange={setShowLogoutConfirm}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>¿Cerrar sesión?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            Se cerrará tu sesión y serás redirigido a la pantalla de inicio de sesión.
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel disabled={loggingOut}>Cancelar</AlertDialogCancel>
+                        <AlertDialogAction onClick={handleLogout} disabled={loggingOut} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                            {loggingOut ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : null}
+                            Cerrar Sesión
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
         </div>
     );
 }

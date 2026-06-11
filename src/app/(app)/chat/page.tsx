@@ -16,6 +16,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Skeleton } from "@/components/ui/skeleton";
 import { LikesReceivedList } from "@/components/match/LikesReceivedList";
 import { BRAND_VOICE } from "@/lib/constants/brand-voice";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 
 export default function ChatPage() {
     const { user } = useAuth();
@@ -32,6 +33,10 @@ export default function ChatPage() {
         return new Set();
     });
     const [showStaleOnly, setShowStaleOnly] = useState(false);
+    const [rejectDialogOpen, setRejectDialogOpen] = useState(false);
+    const [rejectTarget, setRejectTarget] = useState<any>(null);
+    const [hideDialogOpen, setHideDialogOpen] = useState(false);
+    const [hideTargetId, setHideTargetId] = useState<string | null>(null);
 
     const filteredMatches = matches.filter((match) => {
         if (hiddenMatches.has(match.id)) return false;
@@ -85,25 +90,40 @@ export default function ChatPage() {
     };
 
     const handleRejectMatch = async (like: any) => {
+        setRejectTarget(like);
+        setRejectDialogOpen(true);
+    };
+
+    const confirmRejectMatch = async () => {
+        if (!rejectTarget) return;
+        setRejectDialogOpen(false);
         toast({
             title: "Match rechazado",
             description: "No volverás a ver este perfil",
         });
         refresh();
+        setRejectTarget(null);
     };
 
     const handleHideConversation = async (matchId: string) => {
-        setHidingMatch(matchId);
+        setHideTargetId(matchId);
+        setHideDialogOpen(true);
+    };
+
+    const confirmHideConversation = async () => {
+        if (!hideTargetId) return;
+        setHidingMatch(hideTargetId);
+        setHideDialogOpen(false);
         try {
             const newHidden = new Set(hiddenMatches);
-            newHidden.add(matchId);
+            newHidden.add(hideTargetId);
             setHiddenMatches(newHidden);
             localStorage.setItem('hiddenMatches', JSON.stringify([...newHidden]));
 
             await fetch('/api/chat/hide', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ matchId }),
+                body: JSON.stringify({ matchId: hideTargetId }),
             });
 
             toast({
@@ -118,6 +138,7 @@ export default function ChatPage() {
             });
         } finally {
             setHidingMatch(null);
+            setHideTargetId(null);
         }
     };
 
@@ -376,6 +397,40 @@ export default function ChatPage() {
                     </TabsContent>
                 </Tabs>
             </main>
+
+            <AlertDialog open={rejectDialogOpen} onOpenChange={setRejectDialogOpen}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>¿Rechazar match?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            No volverás a ver este perfil. Esta acción no se puede deshacer.
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel onClick={() => setRejectTarget(null)}>Cancelar</AlertDialogCancel>
+                        <AlertDialogAction onClick={confirmRejectMatch} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                            Rechazar
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
+
+            <AlertDialog open={hideDialogOpen} onOpenChange={setHideDialogOpen}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>¿Eliminar conversación?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            Esta conversación se ocultará de tu lista. No se eliminarán los mensajes del servidor, pero no podrás verla más.
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel onClick={() => setHideTargetId(null)}>Cancelar</AlertDialogCancel>
+                        <AlertDialogAction onClick={confirmHideConversation} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                            Eliminar
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
         </div>
     );
 }

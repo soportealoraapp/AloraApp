@@ -80,5 +80,17 @@ export const authService = {
             redirectTo: `${window.location.origin}/auth/callback?next=/password-update`,
         })
         if (error) throw error
+    },
+
+    async resendVerificationEmail(email: string) {
+        const supabase = createClient()
+        const { error } = await supabase.auth.resend({
+            type: 'signup',
+            email,
+            options: {
+                emailRedirectTo: `${window.location.origin}/auth/callback`,
+            }
+        })
+        if (error) throw error
     }
 }

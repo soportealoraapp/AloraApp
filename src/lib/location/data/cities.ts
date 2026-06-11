@@ -25,7 +25,7 @@ export const CITIES: City[] = [
     { id: 'mx-mexicali', name: 'Mexicali', stateCode: 'BC', countryCode: 'MX', lat: 32.6278, lng: -115.4594, population: 1032000 },
     { id: 'mx-hermosillo', name: 'Hermosillo', stateCode: 'SON', countryCode: 'MX', lat: 29.0729, lng: -110.9559, population: 912000 },
     { id: 'mx-chihuahua', name: 'Chihuahua', stateCode: 'CHH', countryCode: 'MX', lat: 28.6353, lng: -106.0889, population: 925000 },
-    { id: 'mx-salt lake', name: 'Saltillo', stateCode: 'COA', countryCode: 'MX', lat: 25.4232, lng: -100.9932, population: 865000 },
+    { id: 'mx-saltillo', name: 'Saltillo', stateCode: 'COA', countryCode: 'MX', lat: 25.4232, lng: -100.9932, population: 865000 },
     { id: 'mx-tijuana', name: 'Tijuana', stateCode: 'BC', countryCode: 'MX', lat: 32.5149, lng: -117.0382, population: 1810000 },
     { id: 'mx-acapulco', name: 'Acapulco', stateCode: 'GRO', countryCode: 'MX', lat: 16.8531, lng: -99.8237, population: 687000 },
     { id: 'mx-cuernavaca', name: 'Cuernavaca', stateCode: 'MOR', countryCode: 'MX', lat: 18.9242, lng: -99.2216, population: 367000 },

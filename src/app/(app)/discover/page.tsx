@@ -23,6 +23,7 @@ import { useAnalytics, AnalyticsEvents } from "@/hooks/use-analytics";
 import { LikesCounter } from "@/components/discover/LikesCounter";
 import { DailyPicks } from "@/components/discover/DailyPicks";
 import { PostOnboardingJourney } from "@/components/onboarding/PostOnboardingJourney";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 
 
 
@@ -78,6 +79,9 @@ export default function DiscoverPage() {
   const [rewinding, setRewinding] = useState(false);
   const [tutorialStep, setTutorialStep] = useState<number | null>(1);
   const [browseMode, setBrowseMode] = useState<'swipe' | 'grid'>('swipe');
+  const [flechadoConfirmOpen, setFlechadoConfirmOpen] = useState(false);
+  const [flechadoProfile, setFlechadoProfile] = useState<any>(null);
+  const [flechadoRemaining, setFlechadoRemaining] = useState(0);
   const [intent, setIntent] = useState<'dating' | 'friendship'>('dating');
   const [intentChanging, setIntentChanging] = useState(false);
 
@@ -222,9 +226,14 @@ export default function DiscoverPage() {
     if (!profileToActOn || !currentUserProfile || pendingSwipe) return;
 
     const remaining = (currentUserProfile as any)?.superlikesRemaining ?? 3;
-    if (!window.confirm(`Flechado enviado a ${profileToActOn.displayName}. Te quedan ${remaining - 1} flechados hoy. ¿Continuar?`)) {
-      return;
-    }
+    setFlechadoProfile(profileToActOn);
+    setFlechadoRemaining(remaining);
+    setFlechadoConfirmOpen(true);
+  };
+
+  const confirmFlechado = async () => {
+    if (!flechadoProfile || !currentUserProfile || pendingSwipe) return;
+    setFlechadoConfirmOpen(false);
 
     const previousProfiles = profilesRef.current;
     setPendingSwipe(true);
@@ -234,13 +243,13 @@ export default function DiscoverPage() {
     setProfiles(remainingProfiles as any);
 
     try {
-      track(AnalyticsEvents.LIKE_SENT, { targetUserId: profileToActOn.id, intent });
-      const result = await sendLike(profileToActOn.id, 'superlike', intent);
-      lastSwipeRef.current = { profileId: profileToActOn.id, direction: 'flechado' };
-      toast({ title: '¡Flechado enviado!', description: `${profileToActOn.displayName} lo recibirá como superlike.` });
+      track(AnalyticsEvents.LIKE_SENT, { targetUserId: flechadoProfile.id, intent });
+      const result = await sendLike(flechadoProfile.id, 'superlike', intent);
+      lastSwipeRef.current = { profileId: flechadoProfile.id, direction: 'flechado' };
+      toast({ title: '¡Flechado enviado!', description: `${flechadoProfile.displayName} lo recibirá como superlike.` });
       if (result?.matched) {
-        track(AnalyticsEvents.MATCH_CREATED, { partnerId: profileToActOn.id });
-        setMatchedProfile(profileToActOn);
+        track(AnalyticsEvents.MATCH_CREATED, { partnerId: flechadoProfile.id });
+        setMatchedProfile(flechadoProfile);
         setMatchId((result as any)?.matchId);
         setShowMatchScreen(true);
       }
@@ -252,6 +261,7 @@ export default function DiscoverPage() {
       toast({ title: "Error", description: "No se pudo enviar el Flechado.", variant: "destructive" });
     } finally {
       setPendingSwipe(false);
+      setFlechadoProfile(null);
     }
   };
 
@@ -403,6 +413,11 @@ export default function DiscoverPage() {
           }
           subscriptionStatus={currentUserProfile?.subscriptionStatus ?? 'free'}
         />
+      </div>
+
+      {/* Daily Picks - horizontal carousel above the feed */}
+      <div className="px-4 pb-3 max-w-sm mx-auto w-full">
+        <DailyPicks subscriptionStatus={currentUserProfile?.subscriptionStatus ?? 'free'} />
       </div>
 
       <main className="flex-1 flex flex-col items-center justify-center p-4 relative">
@@ -557,11 +572,6 @@ export default function DiscoverPage() {
         )}
       </main>
 
-      {/* Daily Picks - above the feed as horizontal carousel */}
-      <div className="px-4 pb-3 max-w-sm mx-auto w-full">
-        <DailyPicks subscriptionStatus={currentUserProfile?.subscriptionStatus ?? 'free'} />
-      </div>
-
       {/* Daily Question - below the feed */}
       <div className="px-4 pb-4 max-w-sm mx-auto w-full space-y-3">
         <DailyQuestionCard />
@@ -588,6 +598,21 @@ export default function DiscoverPage() {
           }}
         />
       )}
+
+      <AlertDialog open={flechadoConfirmOpen} onOpenChange={setFlechadoConfirmOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Enviar Flechado</AlertDialogTitle>
+            <AlertDialogDescription>
+              Flechado enviado a {flechadoProfile?.displayName}. Te quedan {flechadoRemaining - 1} flechados hoy. ¿Continuar?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmFlechado}>Confirmar</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

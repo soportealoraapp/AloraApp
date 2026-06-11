@@ -9,15 +9,17 @@ import { useRouter } from "next/navigation";
 import { StepBasicInfo } from "./StepBasicInfo";
 import { StepInterests } from "./StepInterests";
 import { StepCreateAccount } from "./StepCreateAccount";
+import { StepPhotos } from "./StepPhotos";
 import { UserProfile } from "@/lib/domain/types";
 import { Heart, Cloud } from "lucide-react";
 import { REFERRAL_COOKIE, REFERRAL_SESSION_KEY, REFERRAL_CODE_PATTERN } from "@/lib/referral/constants";
 import { trackEvent } from "@/lib/tracking/client";
 
-const STEP_LABELS = ['Tu cuenta', 'Tu esencia', 'Tus colores'];
+const STEP_LABELS = ['Tu cuenta', 'Tu esencia', 'Tus fotos', 'Tus colores'];
 const STEP_WELCOME = [
     'Crea tu cuenta',
     'Datos e intención',
+    'Sube tus fotos',
     'Intereses, valores y música',
 ];
 
@@ -25,7 +27,7 @@ export function OnboardingWizard({ initialRef }: { initialRef?: string } = {}) {
     const { user, profile, authLoading, profileLoading } = useAuth();
     const router = useRouter();
     const [step, setStep] = useState(1);
-    const totalSteps = 3;
+    const totalSteps = 4;
     const [formData, setFormData] = useState<Partial<UserProfile>>({});
     const [isInitialized, setIsInitialized] = useState(false);
     const [syncStatus, setSyncStatus] = useState<'idle' | 'syncing' | 'saved' | 'error'>('idle');
@@ -77,7 +79,7 @@ export function OnboardingWizard({ initialRef }: { initialRef?: string } = {}) {
                 await updateUserProfile(effectiveUserId, {
                     ...updatedData,
                     createdAt: undefined,
-                    isCompleted: step === totalSteps,
+                    isCompleted: false,
                 } as any);
                 setSyncStatus('saved');
                 setTimeout(() => setSyncStatus('idle'), 2000);
@@ -99,12 +101,22 @@ export function OnboardingWizard({ initialRef }: { initialRef?: string } = {}) {
         setStep(2);
     }, []);
 
-    const completeOnboarding = useCallback(() => {
+    const completeOnboarding = useCallback(async () => {
         if (hasCompletedRef.current) return;
         hasCompletedRef.current = true;
+        if (effectiveUserId) {
+            try {
+                await updateUserProfile(effectiveUserId, {
+                    ...formData,
+                    isCompleted: true,
+                } as any);
+            } catch {
+                console.error("Failed to mark profile as completed");
+            }
+        }
         trackEvent('onboarding_completed', { userId: effectiveUserId });
         router.push('/discover');
-    }, [effectiveUserId, router]);
+    }, [effectiveUserId, router, formData]);
 
     const nextStep = useCallback(() => {
         if (step === totalSteps) {
@@ -165,7 +177,8 @@ export function OnboardingWizard({ initialRef }: { initialRef?: string } = {}) {
                             <StepCreateAccount onAccountCreated={handleAccountCreated} initialRef={initialRef} />
                         )}
                         {step === 2 && <StepBasicInfo userId={effectiveUserId} data={formData} onUpdate={saveProgress} onNext={nextStep} />}
-                        {step === 3 && <StepInterests userId={effectiveUserId} data={formData} onUpdate={saveProgress} onNext={nextStep} onPrev={prevStep} />}
+                        {step === 3 && <StepPhotos userId={effectiveUserId} data={formData} onUpdate={saveProgress} onNext={nextStep} onPrev={prevStep} />}
+                        {step === 4 && <StepInterests userId={effectiveUserId} data={formData} onUpdate={saveProgress} onNext={nextStep} onPrev={prevStep} />}
                     </motion.div>
                 </AnimatePresence>
             </div>

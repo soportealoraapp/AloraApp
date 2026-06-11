@@ -39,6 +39,7 @@ export default function PrivacySettingsPage() {
     const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
     const [deleteConfirmText, setDeleteConfirmText] = useState("");
     const [deleting, setDeleting] = useState(false);
+    const [deleteStep2Open, setDeleteStep2Open] = useState(false);
 
     const handleChangePassword = async () => {
         if (!currentPassword || !newPassword) {
@@ -409,8 +410,39 @@ export default function PrivacySettingsPage() {
                                 </div>
                                 <DialogFooter>
                                     <Button variant="outline" onClick={() => { setDeleteDialogOpen(false); setDeleteConfirmText(""); }} disabled={deleting}>Cancelar</Button>
-                                    <Button variant="destructive" onClick={handleDeleteAccount} disabled={deleting || deleteConfirmText !== "ELIMINAR"}>
-                                        {deleting ? <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Eliminando...</> : "Eliminar mi cuenta"}
+                                    <Button variant="destructive" onClick={() => { setDeleteDialogOpen(false); setDeleteStep2Open(true); }} disabled={deleting || deleteConfirmText !== "ELIMINAR"}>
+                                        Continuar
+                                    </Button>
+                                </DialogFooter>
+                            </DialogContent>
+                        </Dialog>
+
+                        <Dialog open={deleteStep2Open} onOpenChange={setDeleteStep2Open}>
+                            <DialogContent>
+                                <DialogHeader>
+                                    <DialogTitle className="flex items-center gap-2 text-destructive">
+                                        <AlertTriangle className="h-5 w-5" />
+                                        ¿Estás absolutamente seguro?
+                                    </DialogTitle>
+                                    <DialogDescription>
+                                        Esta es tu última oportunidad para cancelar. Una vez eliminada tu cuenta, no habrá forma de recuperar tus datos.
+                                    </DialogDescription>
+                                </DialogHeader>
+                                <div className="py-4">
+                                    <div className="bg-destructive/10 p-4 rounded-lg text-sm text-destructive">
+                                        <p className="font-medium">Se eliminarán permanentemente:</p>
+                                        <ul className="list-disc pl-4 mt-2 space-y-1 text-muted-foreground">
+                                            <li>Tu perfil y todas tus fotos</li>
+                                            <li>Todos tus mensajes y conversaciones</li>
+                                            <li>Tus matches y conexiones</li>
+                                            <li>Tus preferencias, ajustes y racha</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                                <DialogFooter>
+                                    <Button variant="outline" onClick={() => setDeleteStep2Open(false)} disabled={deleting}>Cancelar</Button>
+                                    <Button variant="destructive" onClick={handleDeleteAccount} disabled={deleting}>
+                                        {deleting ? <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Eliminando...</> : "Sí, eliminar mi cuenta"}
                                     </Button>
                                 </DialogFooter>
                             </DialogContent>

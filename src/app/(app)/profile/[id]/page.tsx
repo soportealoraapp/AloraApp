@@ -412,7 +412,7 @@ export default function UserProfilePage() {
                 </div>
 
                 {id !== user?.id && !isPreview && (
-                    <div className="fixed bottom-16 left-0 right-0 z-40 p-4 bg-background/80 backdrop-blur-sm border-t pb-[env(safe-area-inset-bottom,0px)] md:sticky md:bottom-0 md:z-auto md:bg-transparent md:border-none md:p-0 md:mt-4 md:px-4 md:pb-0">
+                    <div className="fixed bottom-20 left-0 right-0 z-40 p-4 bg-background/80 backdrop-blur-sm border-t pb-[env(safe-area-inset-bottom,0px)] md:sticky md:bottom-0 md:z-auto md:bg-transparent md:border-none md:p-0 md:mt-4 md:px-4 md:pb-0">
                         {isFromNewMatch ? (
                             <div className="flex justify-around items-center max-w-md mx-auto gap-3">
                                 <Button

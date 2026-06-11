@@ -60,6 +60,15 @@ export function AgeGate() {
                         Debes tener al menos 18 años para usar Alora.
                         La seguridad de nuestra comunidad es nuestra prioridad.
                     </p>
+                    <Button
+                        variant="outline"
+                        className="rounded-full"
+                        onClick={() => {
+                            setDenied(false);
+                        }}
+                    >
+                        Entendido
+                    </Button>
                 </motion.div>
             </div>
         );
@@ -98,7 +107,7 @@ export function AgeGate() {
                     </div>
 
                     <p className="mt-6 text-xs text-muted-foreground uppercase tracking-widest font-medium">
-                        Safety First • Community Driven
+                        Seguridad Primero • Comunidad Segura
                     </p>
                 </Card>
             </motion.div>

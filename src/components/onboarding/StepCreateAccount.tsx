@@ -100,7 +100,7 @@ export function StepCreateAccount({ onAccountCreated, initialRef }: StepCreateAc
     const handleResend = useCallback(async () => {
         setResending(true);
         try {
-            await authService.sendPasswordResetEmail(email);
+            await authService.resendVerificationEmail(email);
             toast({ title: "Correo reenviado", description: "Revisa tu bandeja de entrada." });
         } catch {
             toast({ title: "Error", description: "No se pudo reenviar. Intenta más tarde.", variant: "destructive" });
@@ -245,7 +245,6 @@ export function StepCreateAccount({ onAccountCreated, initialRef }: StepCreateAc
                             type="button"
                             onClick={() => setShowPassword(!showPassword)}
                             className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
-                            tabIndex={-1}
                             aria-label={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
                         >
                             {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
@@ -292,7 +291,6 @@ export function StepCreateAccount({ onAccountCreated, initialRef }: StepCreateAc
                             type="button"
                             onClick={() => setShowConfirm(!showConfirm)}
                             className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
-                            tabIndex={-1}
                             aria-label={showConfirm ? "Ocultar contraseña" : "Mostrar contraseña"}
                         >
                             {showConfirm ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}

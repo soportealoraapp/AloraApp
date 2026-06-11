@@ -4,12 +4,13 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { trackEvent } from "@/lib/tracking/client";
 import { Heart, Handshake } from "lucide-react";
 import { motion } from "framer-motion";
 import { UserProfile, ConnectionIntent } from "@/lib/domain/types";
 import { cn } from "@/lib/utils";
+import { CITIES } from "@/lib/location/data/cities";
 
 interface StepBasicInfoProps {
     userId?: string;
@@ -20,6 +21,9 @@ interface StepBasicInfoProps {
 
 export function StepBasicInfo({ data, onUpdate, onNext, userId }: StepBasicInfoProps) {
     const [localData, setLocalData] = useState<Partial<UserProfile>>(data);
+    const [citySearch, setCitySearch] = useState('');
+    const [showCityDropdown, setShowCityDropdown] = useState(false);
+    const cityDropdownRef = useRef<HTMLDivElement>(null);
 
     const selectedModes: ConnectionIntent[] = (localData.connectionModes || ['dating']) as ConnectionIntent[];
 
@@ -63,6 +67,22 @@ export function StepBasicInfo({ data, onUpdate, onNext, userId }: StepBasicInfoP
         selectedModes.length > 0,
         [localData.displayName, localData.age, localData.gender, localData.city, selectedModes]
     );
+
+    const filteredCities = useMemo(() => {
+        if (!citySearch.trim()) return CITIES.slice(0, 8);
+        const query = citySearch.toLowerCase();
+        return CITIES.filter(c => c.name.toLowerCase().includes(query)).slice(0, 8);
+    }, [citySearch]);
+
+    useEffect(() => {
+        const handleClickOutside = (e: MouseEvent) => {
+            if (cityDropdownRef.current && !cityDropdownRef.current.contains(e.target as Node)) {
+                setShowCityDropdown(false);
+            }
+        };
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
 
     return (
         <div className="space-y-6 flex-1 flex flex-col">
@@ -115,7 +135,7 @@ export function StepBasicInfo({ data, onUpdate, onNext, userId }: StepBasicInfoP
                     <div className="space-y-2">
                         <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Género</Label>
                         <Select
-                            value={localData.gender || ''}
+                            value={localData.gender || undefined}
                             onValueChange={(value) => handleChange('gender', value)}
                         >
                             <SelectTrigger className="h-12 rounded-2xl border-muted bg-background/50">
@@ -177,16 +197,42 @@ export function StepBasicInfo({ data, onUpdate, onNext, userId }: StepBasicInfoP
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.25 }}
                     className="space-y-2"
+                    ref={cityDropdownRef}
                 >
                     <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
                         Ciudad
                     </Label>
-                    <Input
-                        placeholder="Ciudad de México"
-                        value={localData.city || ''}
-                        onChange={(e) => handleChange('city', e.target.value)}
-                        className="rounded-2xl h-12 border-muted focus-visible:ring-primary/20 bg-background/50"
-                    />
+                    <div className="relative">
+                        <Input
+                            placeholder="Busca tu ciudad"
+                            value={localData.city || citySearch}
+                            onChange={(e) => {
+                                setCitySearch(e.target.value);
+                                setShowCityDropdown(true);
+                                handleChange('city', e.target.value);
+                            }}
+                            onFocus={() => setShowCityDropdown(true)}
+                            className="rounded-2xl h-12 border-muted focus-visible:ring-primary/20 bg-background/50"
+                        />
+                        {showCityDropdown && filteredCities.length > 0 && (
+                            <div className="absolute z-50 mt-1 w-full rounded-xl border bg-background shadow-lg max-h-48 overflow-y-auto">
+                                {filteredCities.map((city) => (
+                                    <button
+                                        key={city.id}
+                                        type="button"
+                                        className="w-full text-left px-4 py-2.5 text-sm hover:bg-muted transition-colors first:rounded-t-xl last:rounded-b-xl"
+                                        onClick={() => {
+                                            handleChange('city', city.name);
+                                            setCitySearch('');
+                                            setShowCityDropdown(false);
+                                        }}
+                                    >
+                                        {city.name}, {city.countryCode === 'MX' ? 'México' : city.countryCode}
+                                    </button>
+                                ))}
+                            </div>
+                        )}
+                    </div>
                 </motion.div>
 
             </div>

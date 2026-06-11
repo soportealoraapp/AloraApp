@@ -146,7 +146,7 @@ export function StepPhotos({ userId, data, onUpdate, onNext, onPrev }: any) {
                         <Image src={url} alt={`Photo ${index}`} fill className="object-cover" />
                         <button
                             onClick={() => removePhoto(index)}
-                            className="absolute top-2 right-2 bg-black/50 text-white rounded-full p-2 opacity-0 group-hover:opacity-100 transition-opacity z-10"
+                            className="absolute top-2 right-2 bg-black/50 text-white rounded-full p-2 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity z-10"
                             aria-label="Eliminar foto"
                         >
                             <X className="h-4 w-4" />

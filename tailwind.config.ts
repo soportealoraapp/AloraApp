@@ -105,5 +105,5 @@ export default {
       },
     },
   },
-  plugins: [require('tailwindcss-animate')],
+  plugins: [require('tailwindcss-animate'), require('./tailwind-plugin-safe-area')],
 } satisfies Config;
