@@ -137,7 +137,7 @@ export default function ProfilePage() {
 
             {!profile.isVerified && (
               <Link href="/settings/verification">
-                <Card className="rounded-3xl border border-primary/20 bg-primary/10 hover:shadow-md transition-shadow cursor-pointer">
+                <Card className="rounded-3xl border border-primary/20 bg-primary/5 shadow-sm hover:shadow-md transition-shadow cursor-pointer">
                   <CardContent className="p-4 flex items-center justify-between">
                     <div className="flex items-center gap-3">
                       <div className="p-2 bg-primary/20 rounded-xl">
@@ -161,7 +161,7 @@ export default function ProfilePage() {
 
           {/* 3. Daily answer */}
           {latestAnswer && (
-            <Card className="rounded-3xl border shadow-sm bg-muted/30">
+            <Card className="rounded-3xl border border-border/60 bg-card/90 shadow-sm">
               <CardContent className="p-5">
                 <div className="flex items-center gap-2 mb-2">
                   <MessageCircle className="h-4 w-4 text-primary" />
@@ -177,7 +177,7 @@ export default function ProfilePage() {
 
           {/* 4. Interests / Values / Music */}
           {((profile.interests && profile.interests.length > 0) || (profile.values && profile.values.length > 0) || (profile.musicGenres && profile.musicGenres.length > 0)) && (
-            <Card className="rounded-3xl">
+            <Card className="rounded-3xl border border-border/60 bg-card/90 shadow-sm">
               <CardContent className="p-5 space-y-4">
                 {profile.interests && profile.interests.length > 0 && (
                   <div>
@@ -206,7 +206,7 @@ export default function ProfilePage() {
 
           {/* 5. Completeness CTA — ALWAYS visible */}
           {completenessScore < 100 && (
-            <Card className="rounded-3xl border shadow-sm">
+            <Card className="rounded-3xl border border-border/60 bg-card/90 shadow-sm">
               <CardContent className="p-5">
                 <div className="flex items-center justify-between mb-3">
                   <div className="flex items-center gap-2">
@@ -242,7 +242,7 @@ export default function ProfilePage() {
           )}
 
           {completenessScore >= 90 && (
-            <Card className="rounded-3xl border-primary/20 bg-primary/10">
+            <Card className="rounded-3xl border border-primary/20 bg-primary/5 shadow-sm">
               <CardContent className="p-4 flex items-center gap-3">
                 <span className="text-2xl">⭐</span>
                 <div>
@@ -254,7 +254,7 @@ export default function ProfilePage() {
           )}
 
           {/* 6. Quick links */}
-          <div className="bg-card rounded-3xl border divide-y divide-muted/30 overflow-hidden">
+          <div className="rounded-3xl border border-border/60 bg-card/90 shadow-sm divide-y divide-muted/30 overflow-hidden">
             <Link href="/profile/favorites" className="flex items-center justify-between px-4 py-3.5 hover:bg-muted/20 transition-colors">
               <span className="text-sm font-medium">Perfiles guardados</span>
               <ChevronRight className="h-4 w-4 text-muted-foreground" />

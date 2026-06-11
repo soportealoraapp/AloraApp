@@ -175,6 +175,18 @@ html {
     @apply bg-card/95 backdrop-blur-lg border-border/30;
   }
 
+  .card-surface {
+    @apply rounded-2xl border border-border/60 bg-card/90 shadow-sm;
+  }
+
+  .surface-soft {
+    @apply rounded-2xl border border-border/50 bg-secondary/30;
+  }
+
+  .hover-lift {
+    @apply transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md;
+  }
+
   /* Screen-reader only utility */
   .sr-only {
     @apply absolute w-px h-px p-0 -m-px overflow-hidden whitespace-nowrap border-0;

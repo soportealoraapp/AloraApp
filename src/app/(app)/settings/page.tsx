@@ -3,10 +3,9 @@
 import { useRouter } from 'next/navigation';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, Bell, ChevronRight, FileText, HelpCircle, Palette, Shield, User, LogOut, Loader2, Plane } from "lucide-react";
-import Link from 'next/link';
+import { ArrowLeft, Bell, FileText, HelpCircle, Mail, Palette, Shield, User, LogOut, Loader2, Plane } from "lucide-react";
 import { ThemeToggle } from '@/components/theme-toggle';
+import { SettingsSectionLink } from '@/components/settings/SettingsSectionLink';
 import { useAuth } from '@/contexts/AuthContext';
 import { useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
@@ -43,66 +42,28 @@ export default function SettingsPage() {
                 </Button>
                 <h1 className="text-xl font-semibold md:text-2xl font-headline">Configuración</h1>
             </header>
-            <main className="p-4 space-y-6">
-                 <Card>
-                    <CardHeader>
-                        <CardTitle>Configuración de la Cuenta</CardTitle>
+            <main className="mx-auto max-w-3xl p-4 space-y-6 sm:p-6">
+                 <Card className="border-0 bg-card/80 shadow-sm">
+                    <CardHeader className="pb-2">
+                        <CardTitle className="text-lg">Cuenta</CardTitle>
+                        <CardDescription className="text-xs">Edita tu perfil y tus preferencias principales.</CardDescription>
                     </CardHeader>
-                    <CardContent className="divide-y">
-                        <Link href="/profile/edit">
-                            <div className="flex items-center justify-between p-3 rounded-lg hover:bg-secondary -mx-3">
-                                <div className="flex items-center gap-3">
-                                <User className="w-5 h-5 text-muted-foreground" />
-                                <span>Editar Perfil</span>
-                                </div>
-                                <ChevronRight className="w-5 h-5 text-muted-foreground" />
-                            </div>
-                        </Link>
-                        <Link href="/settings/notifications">
-                            <div className="flex items-center justify-between p-3 rounded-lg hover:bg-secondary -mx-3">
-                                <div className="flex items-center gap-3">
-                                <Bell className="w-5 h-5 text-muted-foreground" />
-                                <span>Notificaciones</span>
-                                </div>
-                                <ChevronRight className="w-5 h-5 text-muted-foreground" />
-                            </div>
-                        </Link>
-                        <Link href="/settings/privacy">
-                            <div className="flex items-center justify-between p-3 rounded-lg hover:bg-secondary -mx-3">
-                                <div className="flex items-center gap-3">
-                                <Shield className="w-5 h-5 text-muted-foreground" />
-                                <span>Privacidad y Seguridad</span>
-                                </div>
-                                <ChevronRight className="w-5 h-5 text-muted-foreground" />
-                            </div>
-                        </Link>
-                        <Link href="/settings/safety">
-                            <div className="flex items-center justify-between p-3 rounded-lg hover:bg-secondary -mx-3">
-                                <div className="flex items-center gap-3">
-                                <Shield className="w-5 h-5 text-destructive" />
-                                <span>Centro de Seguridad</span>
-                                </div>
-                                <ChevronRight className="w-5 h-5 text-muted-foreground" />
-                            </div>
-                        </Link>
-                        <Link href="/settings/travel">
-                            <div className="flex items-center justify-between p-3 rounded-lg hover:bg-secondary -mx-3">
-                                <div className="flex items-center gap-3">
-                                <Plane className="w-5 h-5 text-blue-500" />
-                                <span>Modo Viaje</span>
-                                </div>
-                                <Badge variant="secondary" className="text-xs">Plus</Badge>
-                            </div>
-                        </Link>
+                    <CardContent className="divide-y divide-muted/30 p-0">
+                        <SettingsSectionLink href="/profile/edit" icon={<User className="h-5 w-5" />} label="Editar Perfil" description="Actualiza tu información personal" />
+                        <SettingsSectionLink href="/settings/notifications" icon={<Bell className="h-5 w-5" />} label="Notificaciones" description="Controla alertas y recordatorios" />
+                        <SettingsSectionLink href="/settings/privacy" icon={<Shield className="h-5 w-5" />} label="Privacidad y Seguridad" description="Gestiona tu visibilidad y datos" />
+                        <SettingsSectionLink href="/settings/safety" icon={<Shield className="h-5 w-5 text-destructive" />} label="Centro de Seguridad" description="Revisa recomendaciones de seguridad" iconClassName="text-destructive" />
+                        <SettingsSectionLink href="/settings/travel" icon={<Plane className="h-5 w-5 text-blue-500" />} label="Modo Viaje" description="Activa tu perfil temporal" badge="Plus" />
                     </CardContent>
                 </Card>
 
-                 <Card>
-                    <CardHeader>
-                        <CardTitle>Apariencia</CardTitle>
+                 <Card className="border-0 bg-card/80 shadow-sm">
+                    <CardHeader className="pb-2">
+                        <CardTitle className="text-lg">Apariencia</CardTitle>
+                        <CardDescription className="text-xs">Ajusta el look general de la app.</CardDescription>
                     </CardHeader>
                     <CardContent>
-                        <div className="flex items-center justify-between p-3 rounded-lg -mx-3">
+                        <div className="flex items-center justify-between rounded-xl p-3 -mx-3 hover:bg-muted/30 transition-colors">
                              <div className="flex items-center gap-3">
                                 <Palette className="w-5 h-5 text-muted-foreground" />
                                 <span>Tema de la aplicación</span>
@@ -113,47 +74,16 @@ export default function SettingsPage() {
                 </Card>
 
 
-                         <Card>
-                    <CardHeader>
-                        <CardTitle>Soporte y Legal</CardTitle>
+                         <Card className="border-0 bg-card/80 shadow-sm">
+                    <CardHeader className="pb-2">
+                        <CardTitle className="text-lg">Soporte y Legal</CardTitle>
+                        <CardDescription className="text-xs">Ayuda, contacto y documentación legal.</CardDescription>
                     </CardHeader>
-                    <CardContent className="divide-y">
-                        <Link href="/support">
-                            <div className="flex items-center justify-between p-3 rounded-lg hover:bg-secondary -mx-3">
-                                <div className="flex items-center gap-3">
-                                <HelpCircle className="w-5 h-5 text-muted-foreground" />
-                                <span>Ayuda y Soporte</span>
-                                </div>
-                                <ChevronRight className="w-5 h-5 text-muted-foreground" />
-                            </div>
-                        </Link>
-                        <Link href="/contact">
-                            <div className="flex items-center justify-between p-3 rounded-lg hover:bg-secondary -mx-3">
-                                <div className="flex items-center gap-3">
-                                <span className="text-muted-foreground text-lg">✉️</span>
-                                <span>Contacto</span>
-                                </div>
-                                <ChevronRight className="w-5 h-5 text-muted-foreground" />
-                            </div>
-                        </Link>
-                        <Link href="/terms">
-                            <div className="flex items-center justify-between p-3 rounded-lg hover:bg-secondary -mx-3">
-                                <div className="flex items-center gap-3">
-                                <FileText className="w-5 h-5 text-muted-foreground" />
-                                <span>Términos y Condiciones</span>
-                                </div>
-                                <ChevronRight className="w-5 h-5 text-muted-foreground" />
-                            </div>
-                        </Link>
-                        <Link href="/privacy">
-                            <div className="flex items-center justify-between p-3 rounded-lg hover:bg-secondary -mx-3">
-                                <div className="flex items-center gap-3">
-                                <FileText className="w-5 h-5 text-muted-foreground" />
-                                <span>Política de Privacidad</span>
-                                </div>
-                                <ChevronRight className="w-5 h-5 text-muted-foreground" />
-                            </div>
-                        </Link>
+                    <CardContent className="divide-y divide-muted/30 p-0">
+                        <SettingsSectionLink href="/support" icon={<HelpCircle className="h-5 w-5" />} label="Ayuda y Soporte" description="Encuentra respuestas rápidas" />
+                        <SettingsSectionLink href="/contact" icon={<Mail className="h-5 w-5" />} label="Contacto" description="Envíanos un mensaje" />
+                        <SettingsSectionLink href="/terms" icon={<FileText className="h-5 w-5" />} label="Términos y Condiciones" description="Revisa las reglas de uso" />
+                        <SettingsSectionLink href="/privacy" icon={<FileText className="h-5 w-5" />} label="Política de Privacidad" description="Consulta cómo tratamos tus datos" />
                     </CardContent>
                 </Card>
 
