@@ -35,6 +35,8 @@ const TIERS = [
         name: 'Alora+',
         price: 99,
         period: 'MXN / mes',
+        annualPrice: 79,
+        annualPeriod: 'MXN / mes (anual)',
         features: [
             'Likes ilimitados',
             'Prioridad en Discover',
@@ -50,6 +52,8 @@ const TIERS = [
         name: 'Alora Premium',
         price: 199,
         period: 'MXN / mes',
+        annualPrice: 159,
+        annualPeriod: 'MXN / mes (anual)',
         features: [
             'Todo lo de Alora+',
             'Coaching IA personalizado',
@@ -71,7 +75,7 @@ export function PaywallModal({ isOpen, onClose }: PaywallModalProps) {
                 </DialogHeader>
 
                 {/* Hero */}
-                <div className="bg-gradient-to-br from-pink-600 to-rose-500 p-6 text-white text-center">
+                <div className="bg-gradient-to-br from-primary via-primary/90 to-accent p-6 text-primary-foreground text-center">
                     <div className="bg-white/20 w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-3 backdrop-blur-md">
                         <Sparkles className="h-8 w-8 text-white fill-white" />
                     </div>
@@ -94,7 +98,7 @@ export function PaywallModal({ isOpen, onClose }: PaywallModalProps) {
                 </div>
 
                 {/* Tier cards */}
-                <div className="p-4 space-y-3 bg-white dark:bg-card">
+                <div className="p-4 space-y-3 bg-background">
                     {TIERS.map((tier) => (
                         <div
                             key={tier.id}
@@ -113,9 +117,16 @@ export function PaywallModal({ isOpen, onClose }: PaywallModalProps) {
                                 <div>
                                     <h3 className="font-bold text-foreground">{tier.name}</h3>
                                     {tier.price > 0 ? (
-                                        <div className="flex items-baseline gap-1">
-                                            <span className="text-2xl font-bold">${tier.price}</span>
-                                            <span className="text-xs text-muted-foreground">{tier.period}</span>
+                                        <div>
+                                            <div className="flex items-baseline gap-1">
+                                                <span className="text-2xl font-bold">${tier.price}</span>
+                                                <span className="text-xs text-muted-foreground">{tier.period}</span>
+                                            </div>
+                                            {'annualPrice' in tier && tier.annualPrice && (
+                                                <p className="text-xs text-green-600 font-medium mt-0.5">
+                                                    Anual: ${tier.annualPrice}/mes — Ahorra {Math.round((1 - tier.annualPrice / tier.price) * 100)}%
+                                                </p>
+                                            )}
                                         </div>
                                     ) : (
                                         <span className="text-lg font-bold text-muted-foreground">Gratis</span>
@@ -123,7 +134,7 @@ export function PaywallModal({ isOpen, onClose }: PaywallModalProps) {
                                 </div>
                                 <Button
                                     variant={tier.highlighted ? 'default' : 'outline'}
-                                    className={`rounded-xl px-6 ${tier.highlighted ? 'bg-gradient-to-r from-pink-600 to-rose-500' : ''}`}
+                                    className={`rounded-xl px-6 ${tier.highlighted ? 'bg-primary text-primary-foreground' : ''}`}
                                     onClick={() => {
                                         if (tier.id === 'plus') {
                                             window.location.href = 'https://alora-app.lemonsqueezy.com/checkout/buy/67dd777a-6ae1-4169-a2a1-8a1f105899e7';

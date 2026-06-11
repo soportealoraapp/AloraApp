@@ -84,7 +84,7 @@ export function StreakCard() {
                         <Flame className="h-6 w-6" />
                         <div>
                             <p className="text-sm opacity-90">Racha actual</p>
-                            <p className="text-3xl font-bold">{data.currentStreak} dias</p>
+                            <p className="text-3xl font-bold">{data.currentStreak} días</p>
                         </div>
                     </div>
                     <div className="text-right">
@@ -96,7 +96,7 @@ export function StreakCard() {
             <CardContent className="p-4 space-y-4">
                 {/* Last 7 days */}
                 <div>
-                    <p className="text-xs font-medium text-muted-foreground mb-2">Ultimos 7 dias</p>
+                    <p className="text-xs font-medium text-muted-foreground mb-2">Últimos 7 días</p>
                     <div className="flex justify-between">
                         {data.history.map((active, i) => (
                             <div key={i} className="flex flex-col items-center gap-1">
@@ -140,10 +140,10 @@ export function StreakCard() {
                         <Gift className="h-5 w-5 text-pink-500" />
                         <div>
                             <p className="text-xs text-muted-foreground">
-                                Siguiente recompensa en {data.nextRewardIn} dias
+                                Siguiente recompensa en {data.nextRewardIn} días
                             </p>
                             <p className="text-sm font-medium">
-                                Boost gratis por racha de {data.isPlus ? 3 : 5} dias
+                                Boost gratis por racha de {data.isPlus ? 3 : 5} días
                             </p>
                         </div>
                     </div>

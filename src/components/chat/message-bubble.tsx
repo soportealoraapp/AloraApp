@@ -1,6 +1,6 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { cn } from '@/lib/utils';
-import { AlertCircle, Loader2, Check, CheckCheck, Expand } from 'lucide-react';
+import { AlertCircle, Loader2, Check, CheckCheck, Expand, X } from 'lucide-react';
 import { Message } from '@/lib/domain/types';
 import { Card } from '@/components/ui/card';
 import { MessageReactions } from './MessageReactions';
@@ -35,6 +35,15 @@ export function MessageBubble({ message, isMe, currentUserId, onReact }: Message
   const isImage = message.type === 'image';
   const [showImagePreview, setShowImagePreview] = useState(false);
 
+  useEffect(() => {
+    if (!showImagePreview) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setShowImagePreview(false);
+    };
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [showImagePreview]);
+
   const handleReact = useCallback((emoji: string) => {
     if (onReact && currentUserId) {
       onReact(message.id, emoji);
@@ -58,12 +67,12 @@ export function MessageBubble({ message, isMe, currentUserId, onReact }: Message
             )}
             onClick={() => !isFlagged && setShowImagePreview(true)}
           >
-            <div className="relative h-48 w-48 md:h-56 md:w-56 bg-muted">
+            <div className="relative w-[280px] h-[280px] md:w-[320px] md:h-[320px] bg-muted">
               <Image
                 src={message.content}
-                alt="Imagen"
+                alt="Imagen compartida"
                 fill
-                className="object-cover transition-transform group-hover:scale-105"
+                className="object-contain rounded-xl transition-transform group-hover:scale-[1.02]"
               />
               <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors flex items-center justify-center">
                 <Expand className="h-6 w-6 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
@@ -162,7 +171,16 @@ export function MessageBubble({ message, isMe, currentUserId, onReact }: Message
             exit={{ opacity: 0 }}
             className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-4"
             onClick={() => setShowImagePreview(false)}
+            role="dialog"
+            aria-label="Imagen ampliada"
           >
+            <button
+              onClick={() => setShowImagePreview(false)}
+              className="absolute top-4 right-4 z-50 bg-white/20 hover:bg-white/30 backdrop-blur-sm rounded-full p-2 transition-colors"
+              aria-label="Cerrar imagen"
+            >
+              <X className="h-6 w-6 text-white" />
+            </button>
             <motion.div
               initial={{ scale: 0.9 }}
               animate={{ scale: 1 }}

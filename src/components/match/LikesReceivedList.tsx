@@ -4,10 +4,12 @@ import { useState, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Heart, Loader2 } from 'lucide-react';
 import Image from 'next/image';
+import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { TrustBadge } from '../ui/premium/TrustBadge';
 
 export function LikesReceivedList() {
+    const router = useRouter();
     const [likers, setLikers] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
 
@@ -57,7 +59,10 @@ export function LikesReceivedList() {
                                 animate={{ opacity: 1, scale: 1 }}
                                 transition={{ type: "spring", stiffness: 180, damping: 35 }}
                             >
-                                <Card className="rounded-3xl overflow-hidden hover:shadow-xl transition-all cursor-pointer group border-none shadow-sm active:scale-[0.98]">
+                                <Card
+                                    className="rounded-3xl overflow-hidden hover:shadow-xl transition-all cursor-pointer group border-none shadow-sm active:scale-[0.98]"
+                                    onClick={() => router.push(`/profile/${liker.id}`)}
+                                >
                                     <div className="aspect-[4/5] relative">
                                         <Image
                                             src={liker.photos?.[0] || '/placeholder.svg'}

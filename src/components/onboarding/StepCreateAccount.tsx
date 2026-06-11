@@ -350,7 +350,7 @@ export function StepCreateAccount({ onAccountCreated, initialRef }: StepCreateAc
                         {loading ? (
                             <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Creando cuenta...</>
                         ) : (
-                            'Crear mi cuenta ✨'
+                            'Crear mi cuenta'
                         )}
                     </Button>
                 </div>

@@ -33,6 +33,7 @@ export default function ChatPage() {
         return new Set();
     });
     const [showStaleOnly, setShowStaleOnly] = useState(false);
+    const [dismissedStaleBanner, setDismissedStaleBanner] = useState(false);
     const [rejectDialogOpen, setRejectDialogOpen] = useState(false);
     const [rejectTarget, setRejectTarget] = useState<any>(null);
     const [hideDialogOpen, setHideDialogOpen] = useState(false);
@@ -174,19 +175,30 @@ export default function ChatPage() {
                     />
                 </div>
 
-                {recentStaleMatches.length > 0 && !showStaleOnly && (
+                {recentStaleMatches.length > 0 && !showStaleOnly && !dismissedStaleBanner && (
                     <div className="rounded-2xl border bg-muted/30 p-4 flex items-center justify-between gap-3">
                         <p className="text-sm text-muted-foreground font-medium">
                             Hay conversaciones esperando una respuesta
                         </p>
-                        <Button
-                            variant="outline"
-                            size="sm"
-                            className="rounded-full text-xs whitespace-nowrap"
-                            onClick={() => setShowStaleOnly(true)}
-                        >
-                            Ver conversaciones inactivas
-                        </Button>
+                        <div className="flex items-center gap-1">
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                className="rounded-full text-xs whitespace-nowrap"
+                                onClick={() => setShowStaleOnly(true)}
+                            >
+                                Ver inactivas
+                            </Button>
+                            <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-8 w-8"
+                                onClick={() => setDismissedStaleBanner(true)}
+                                aria-label="Cerrar"
+                            >
+                                <X className="h-3.5 w-3.5" />
+                            </Button>
+                        </div>
                     </div>
                 )}
 

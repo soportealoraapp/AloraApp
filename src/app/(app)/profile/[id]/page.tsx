@@ -293,9 +293,6 @@ export default function UserProfilePage() {
                             <h2 className="text-3xl font-bold font-headline">
                                 {profile.displayName}, {profile.age}
                             </h2>
-                            {profile.isVerified && (
-                                <TrustBadge type="verified" />
-                            )}
                             {(profile as any).quizArchetype && (
                                 <Badge variant="secondary" className="rounded-full text-xs gap-1">
                                     <Sparkles className="h-3 w-3 text-primary" />

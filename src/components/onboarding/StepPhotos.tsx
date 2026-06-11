@@ -127,7 +127,7 @@ export function StepPhotos({ userId, data, onUpdate, onNext, onPrev }: any) {
     return (
         <div className="space-y-6">
             <h2 className="text-2xl font-bold text-center mb-2 text-foreground">Tus Fotos</h2>
-            <p className="center text-muted-foreground mb-6 font-medium text-center">Sube fotos para aparecer en recomendaciones (opcional)</p>
+            <p className="text-muted-foreground mb-6 font-medium text-center">Sube fotos para aparecer en recomendaciones (opcional)</p>
 
             {uploadError && (
                 <motion.div

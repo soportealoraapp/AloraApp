@@ -87,9 +87,15 @@ export default function TravelModePage() {
         }
     };
 
+    const COUNTRY_NAMES: Record<string, string> = {
+        MX: 'México', US: 'Estados Unidos', CA: 'Canadá', CO: 'Colombia',
+        AR: 'Argentina', CL: 'Chile', PE: 'Perú', ES: 'España',
+    };
+
     const handleCitySelect = async (location: LocationResult) => {
         setCity(location.city.name);
         setCountryCode(location.city.countryCode);
+        setSelectedCityId(location.city.id);
 
         if (enabled) {
             setSaving(true);
@@ -161,7 +167,7 @@ export default function TravelModePage() {
                         <div className="flex items-center gap-2 p-3 bg-accent/50 rounded-xl">
                             <MapPin className="h-4 w-4 text-accent-foreground" />
                             <span className="text-sm font-medium text-accent-foreground">
-                                Explorando: {city}, {countryCode}
+                                Explorando: {city}, {COUNTRY_NAMES[countryCode] || countryCode}
                             </span>
                             {startedAt && (
                                 <Badge variant="secondary" className="ml-auto text-xs">

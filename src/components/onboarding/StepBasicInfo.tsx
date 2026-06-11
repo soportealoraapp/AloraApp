@@ -108,6 +108,7 @@ export function StepBasicInfo({ data, onUpdate, onNext, userId }: StepBasicInfoP
                         value={localData.displayName || ''}
                         onChange={(e) => handleChange('displayName', e.target.value)}
                         className="rounded-2xl h-12 border-muted focus-visible:ring-primary/20 bg-background/50"
+                        maxLength={50}
                     />
                 </motion.div>
 
@@ -127,7 +128,11 @@ export function StepBasicInfo({ data, onUpdate, onNext, userId }: StepBasicInfoP
                             value={localData.age ?? ''}
                             onChange={(e) => {
                                 const v = parseInt(e.target.value);
-                                handleChange('age', isNaN(v) ? undefined : v);
+                                if (isNaN(v)) {
+                                    handleChange('age', undefined);
+                                } else if (v >= 18 && v <= 120) {
+                                    handleChange('age', v);
+                                }
                             }}
                             className="rounded-2xl h-12 border-muted focus-visible:ring-primary/20 bg-background/50"
                         />

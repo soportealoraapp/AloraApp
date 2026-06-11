@@ -7,7 +7,7 @@ import Image from 'next/image';
 import { TrustBadge } from './TrustBadge';
 import { ProfileActions } from '../../match/ProfileActions';
 import { Clock, MessageCircle, Heart, X, Star, Music } from 'lucide-react';
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 
 interface FloatingMatchCardProps {
   profile: UserProfile;
@@ -29,11 +29,18 @@ export function FloatingMatchCard({ profile, onSwipe, onFlechado, compatibility,
   const [likeBurst, setLikeBurst] = useState(false);
   const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0);
   const photos = profile.photos || [];
+  const likeTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (likeTimeoutRef.current) clearTimeout(likeTimeoutRef.current);
+    };
+  }, []);
 
   const handleLike = useCallback((e: React.MouseEvent) => {
     e.stopPropagation();
     setLikeBurst(true);
-    setTimeout(() => {
+    likeTimeoutRef.current = setTimeout(() => {
       setLikeBurst(false);
       onSwipe('right');
     }, 400);

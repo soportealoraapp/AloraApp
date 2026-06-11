@@ -11,15 +11,15 @@ import { useToast } from '@/hooks/use-toast';
 import { Loader2, MessageCircle, Send, Sparkles } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
-const SimpleConfetti = ({ width, height }: { width: number; height: number }) => (
+const SimpleConfetti = () => (
     <div className="fixed inset-0 pointer-events-none overflow-hidden z-50">
-        {Array.from({ length: 50 }).map((_, i) => (
+        {Array.from({ length: 25 }).map((_, i) => (
             <div
                 key={i}
                 className="absolute animate-confetti"
                 style={{
-                    left: `${Math.random() * 100}%`,
-                    animationDelay: `${Math.random() * 2}s`,
+                    left: `${(i * 4) % 100}%`,
+                    animationDelay: `${(i * 0.17) % 2}s`,
                     backgroundColor: ['#ff69b4', '#ff1493', '#ffb6c1', '#ffc0cb', '#ff85a2'][i % 5],
                     width: '10px',
                     height: '10px',
@@ -39,7 +39,6 @@ interface MatchScreenProps {
 }
 
 export function MatchScreen({ userProfile, matchedProfile, onChat, onKeepSwiping, matchId }: MatchScreenProps) {
-    const [windowSize, setWindowSize] = useState({ width: 0, height: 0 });
     const [icebreakers, setIcebreakers] = useState<string[]>([]);
     const [loadingIcebreakers, setLoadingIcebreakers] = useState(false);
     const [sending, setSending] = useState<string | null>(null);
@@ -47,10 +46,6 @@ export function MatchScreen({ userProfile, matchedProfile, onChat, onKeepSwiping
     const [compatExplanations, setCompatExplanations] = useState<string[]>([]);
     const router = useRouter();
     const { toast } = useToast();
-
-    useEffect(() => {
-        setWindowSize({ width: window.innerWidth, height: window.innerHeight });
-    }, []);
 
     useEffect(() => {
         if (!matchedProfile?.id) return;
@@ -110,7 +105,7 @@ export function MatchScreen({ userProfile, matchedProfile, onChat, onKeepSwiping
     return (
         <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-black/90 backdrop-blur-sm text-white overflow-y-auto">
             <div className="absolute inset-0 overflow-hidden">
-                <SimpleConfetti width={windowSize.width} height={windowSize.height} />
+                <SimpleConfetti />
             </div>
 
             <motion.div
@@ -227,7 +222,7 @@ export function MatchScreen({ userProfile, matchedProfile, onChat, onKeepSwiping
                     <MessageCircle className="h-5 w-5 mr-2" />
                     Enviar Mensaje
                 </PinkButton>
-                <button onClick={onKeepSwiping} className="text-white/90 hover:text-white transition-all underline text-sm bg-white/10 px-5 py-2.5 rounded-full">
+                <button onClick={onKeepSwiping} className="text-white/90 hover:text-white transition-all underline text-sm bg-white/10 px-5 py-3 min-h-[44px] rounded-full">
                     Seguir explorando
                 </button>
             </div>

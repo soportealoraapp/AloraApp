@@ -91,6 +91,48 @@ export default function DiscoverPage() {
   const scrollRef = useRef<HTMLDivElement>(null);
   const [pullToRefresh, setPullToRefresh] = useState(0);
   const pullStartRef = useRef(0);
+  const scrollElementRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    scrollElementRef.current = el;
+
+    const handleTouchStart = (e: TouchEvent) => {
+      if (el.scrollTop <= 0 && !loading) {
+        pullStartRef.current = e.touches[0].clientY;
+      }
+    };
+
+    const handleTouchMove = (e: TouchEvent) => {
+      if (pullStartRef.current === 0) return;
+      const pull = e.touches[0].clientY - pullStartRef.current;
+      if (pull > 0) {
+        setPullToRefresh(Math.min(pull / 300, 1));
+        if (pull > 100) {
+          e.preventDefault();
+        }
+      }
+    };
+
+    const handleTouchEnd = () => {
+      setPullToRefresh(prev => {
+        if (prev >= 1) refresh();
+        return 0;
+      });
+      pullStartRef.current = 0;
+    };
+
+    el.addEventListener('touchstart', handleTouchStart, { passive: true });
+    el.addEventListener('touchmove', handleTouchMove, { passive: false });
+    el.addEventListener('touchend', handleTouchEnd, { passive: true });
+
+    return () => {
+      el.removeEventListener('touchstart', handleTouchStart);
+      el.removeEventListener('touchmove', handleTouchMove);
+      el.removeEventListener('touchend', handleTouchEnd);
+    };
+  }, [loading, refresh]);
 
 
 
@@ -307,39 +349,11 @@ export default function DiscoverPage() {
     router.push('/chat');
   };
 
-  const handlePullTouchStart = useCallback((e: React.TouchEvent) => {
-    if (scrollRef.current && scrollRef.current.scrollTop <= 0 && !loading) {
-      pullStartRef.current = e.touches[0].clientY;
-    }
-  }, [loading]);
-
-  const handlePullTouchMove = useCallback((e: React.TouchEvent) => {
-    if (pullStartRef.current === 0) return;
-    const pull = e.touches[0].clientY - pullStartRef.current;
-    if (pull > 0) {
-      setPullToRefresh(Math.min(pull / 300, 1));
-      if (pull > 100) {
-        e.preventDefault();
-      }
-    }
-  }, []);
-
-  const handlePullTouchEnd = useCallback(() => {
-    if (pullToRefresh >= 1) {
-      refresh();
-    }
-    setPullToRefresh(0);
-    pullStartRef.current = 0;
-  }, [pullToRefresh, refresh]);
-
   return (
     <div
       ref={scrollRef}
       className="md:pl-60 h-screen flex flex-col overflow-y-auto bg-gradient-to-br from-background to-muted/30"
       style={{ overscrollBehavior: 'contain' } as React.CSSProperties}
-      onTouchStart={handlePullTouchStart}
-      onTouchMove={handlePullTouchMove}
-      onTouchEnd={handlePullTouchEnd}
     >
       {pullToRefresh > 0 && (
         <div className="flex items-center justify-center py-2 -mb-2">

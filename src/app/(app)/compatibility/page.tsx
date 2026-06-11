@@ -27,6 +27,7 @@ export default function CompatibilityPage() {
   interface QuizResult { quizId: string; score: number; archetype: string; completedAt: string; }
   const [completedQuizzes, setCompletedQuizzes] = useState<QuizResult[]>([]);
   const [loadingCompleted, setLoadingCompleted] = useState(true);
+  const [loadError, setLoadError] = useState(false);
 
   useEffect(() => {
     if (!user) {
@@ -46,6 +47,7 @@ export default function CompatibilityPage() {
         }
       } catch (err) {
         console.error('Error loading completed quizzes:', err);
+        if (!cancelled) setLoadError(true);
       } finally {
         if (!cancelled) setLoadingCompleted(false);
       }

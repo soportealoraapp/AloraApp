@@ -48,6 +48,11 @@ export function CompatibilityScoreCard({ score, explanation, dimensions, sharedI
                 <Sparkles className="h-8 w-8 mx-auto mb-2 fill-white" />
                 <h3 className="text-lg font-bold mb-1">Compatibilidad</h3>
                 <div className="text-5xl font-bold">{score}%</div>
+                <p className={`text-sm font-medium mt-1 ${
+                    score >= 80 ? 'text-green-200' : score >= 60 ? 'text-yellow-200' : score >= 40 ? 'text-orange-200' : 'text-red-200'
+                }`}>
+                    {score >= 80 ? 'Excelente' : score >= 60 ? 'Alta' : score >= 40 ? 'Media' : 'Baja'}
+                </p>
                 <Progress value={score} className="mt-3 h-2 bg-white/30" />
             </div>
             <CardContent className="p-6 space-y-4">

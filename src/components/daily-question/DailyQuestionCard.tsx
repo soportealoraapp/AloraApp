@@ -160,11 +160,11 @@ export function DailyQuestionCard() {
                             value={answer}
                             onChange={(e) => setAnswer(e.target.value)}
                             placeholder="Comparte tu respuesta..."
-                            className="min-h-[80px] resize-none text-sm"
+                            className="min-h-[80px] max-h-[200px] overflow-y-auto resize-none text-sm"
                             maxLength={300}
                         />
                         <div className="flex items-center justify-between">
-                            <span className="text-xs text-muted-foreground">
+                            <span className={`text-xs ${(answer.length / 300) >= 0.9 ? 'text-red-500 font-medium' : (answer.length / 300) >= 0.7 ? 'text-amber-500 font-medium' : 'text-muted-foreground'}`}>
                                 {answer.length}/300
                             </span>
                             <div className="flex items-center gap-2">

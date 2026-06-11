@@ -22,7 +22,7 @@ export function AvatarGlow({ src, alt, fallback, size = "md", className, verifie
   return (
     <div className={cn("relative inline-block", className)}>
       <div className={cn(
-        "rounded-full p-[2px] bg-gradient-to-br from-primary via-primary/80 to-accent",
+        "rounded-full p-[2px] bg-gradient-to-br from-primary via-primary/80 to-accent animate-pulse",
         sizeClasses[size]
       )}>
         <Avatar className="h-full w-full border-2 border-background">

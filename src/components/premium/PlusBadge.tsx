@@ -22,7 +22,7 @@ export function PlusBadge({ className, size = 'sm', variant = 'default', label =
                 sizeClasses,
                 variant === 'default'
                     ? 'bg-gradient-to-r from-amber-400 to-pink-500 text-white'
-                    : 'bg-amber-50 text-amber-700 border border-amber-200',
+                    : 'bg-primary/10 text-primary border border-primary/20',
                 className
             )}
         >

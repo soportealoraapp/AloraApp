@@ -26,7 +26,7 @@ export function LikesCounter({
     const [showModal, setShowModal] = useState(false);
 
     useEffect(() => {
-        const interval = setInterval(() => setNow(new Date()), 30000);
+        const interval = setInterval(() => setNow(new Date()), 10000);
         return () => clearInterval(interval);
     }, []);
 
@@ -50,7 +50,8 @@ export function LikesCounter({
         if (diff <= 0) return null;
         const hours = Math.floor(diff / (1000 * 60 * 60));
         const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-        return `${hours}h ${minutes}m`;
+        if (hours > 0) return `${hours}h ${minutes}m`;
+        return `${minutes}m`;
     }, [resetDate, now]);
 
     const isLow = remaining <= 10;

@@ -106,16 +106,23 @@ export function StepInterests({ data, onUpdate, onNext, onPrev, userId }: StepIn
                     ))}
                     <div className="flex items-center gap-1">
                         <div className="flex gap-1">
-                            {Array.from({ length: MAX_INTERESTS }, (_, i) => i + 1).map(i => (
-                                <div
-                                    key={i}
-                                    className={`h-1.5 w-1.5 rounded-full transition-colors ${
-                                        i <= selectedInterests.length ? 'bg-primary' : 'bg-muted'
-                                    }`}
-                                />
-                            ))}
+                            {Array.from({ length: MAX_INTERESTS }, (_, i) => i + 1).map(i => {
+                                const total = selectedInterests.length;
+                                const pct = total / MAX_INTERESTS;
+                                const dotColor = i <= total
+                                    ? pct >= 0.9 ? 'bg-red-500' : pct >= 0.7 ? 'bg-amber-500' : 'bg-primary'
+                                    : 'bg-muted';
+                                return (
+                                    <div
+                                        key={i}
+                                        className={`h-1.5 w-1.5 rounded-full transition-colors ${dotColor}`}
+                                    />
+                                );
+                            })}
                         </div>
-                        <span className="text-xs text-muted-foreground ml-2">{selectedInterests.length}/{MAX_INTERESTS}</span>
+                        <span className={`text-xs ml-2 ${(selectedInterests.length / MAX_INTERESTS) >= 0.9 ? 'text-red-500 font-medium' : (selectedInterests.length / MAX_INTERESTS) >= 0.7 ? 'text-amber-500 font-medium' : 'text-muted-foreground'}`}>
+                            {selectedInterests.length}/{MAX_INTERESTS}
+                        </span>
                     </div>
                     {selectedInterests.length > 0 && <BadgeChipList items={selectedInterests} type="interest" className="mt-2" />}
                 </div>
@@ -180,7 +187,7 @@ export function StepInterests({ data, onUpdate, onNext, onPrev, userId }: StepIn
                         onClick={handleNext}
                         className="w-2/3 rounded-2xl shadow-md"
                     >
-                        {hasSelections ? `¡${selectedInterests.length + selectedValues.length + selectedMusic.length} selecciones! Continuar` : 'Saltar por ahora'}
+                        {hasSelections ? `¡${selectedInterests.length + selectedValues.length + selectedMusic.length} selección${(selectedInterests.length + selectedValues.length + selectedMusic.length) !== 1 ? 'es' : ''}! Continuar` : 'Saltar por ahora'}
                     </Button>
                 </div>
             </div>

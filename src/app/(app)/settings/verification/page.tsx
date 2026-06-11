@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { ArrowLeft, ShieldCheck, Clock, AlertCircle, CheckCircle, Loader2, RefreshCw } from 'lucide-react';
+import { ArrowLeft, ShieldCheck, Clock, AlertCircle, CheckCircle, Loader2, RefreshCw, TrendingUp, Users } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { VerificationUpload } from '@/components/verification/VerificationUpload';
@@ -220,11 +220,11 @@ export default function VerificationPage() {
                                         Badge de verificación visible en tu perfil
                                     </li>
                                     <li className="flex items-center gap-2">
-                                        <ShieldCheck className="h-4 w-4 text-blue-500" />
+                                        <TrendingUp className="h-4 w-4 text-green-500" />
                                         Mayor visibilidad en descubrimientos (+20 puntos trust)
                                     </li>
                                     <li className="flex items-center gap-2">
-                                        <ShieldCheck className="h-4 w-4 text-blue-500" />
+                                        <Users className="h-4 w-4 text-purple-500" />
                                         Mayor confianza en tus matches
                                     </li>
                                 </ul>

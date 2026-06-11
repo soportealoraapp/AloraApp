@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useCallback, useEffect } from "react";
+import { useState, useRef, useCallback, useEffect, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Send, Loader2, Image as ImageIcon, X, Mic, Square } from "lucide-react";
@@ -8,6 +8,7 @@ import { useUploadThing } from "@/utils/uploadthing";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
+import { useToast } from "@/hooks/use-toast";
 
 interface ChatInputProps {
   onSend: (message: string) => Promise<void>;
@@ -19,6 +20,7 @@ interface ChatInputProps {
 }
 
 export function ChatInput({ onSend, onSendImage, onSendVoice, onTyping, disabled, placeholder = "Escribe un mensaje..." }: ChatInputProps) {
+  const { toast } = useToast();
   const [message, setMessage] = useState("");
   const [sending, setSending] = useState(false);
   const [previewImage, setPreviewImage] = useState<string | null>(null);
@@ -113,6 +115,11 @@ export function ChatInput({ onSend, onSendImage, onSendVoice, onTyping, disabled
       }, 1000);
     } catch (error) {
       console.error('Error accessing microphone:', error);
+      if (typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'denied') {
+        toast({ title: 'Permiso de micrófono denegado', description: 'Habilita el permiso en la configuración de tu navegador.', variant: 'destructive' });
+      } else {
+        toast({ title: 'No se pudo acceder al micrófono', description: 'Verifica los permisos de tu navegador.', variant: 'destructive' });
+      }
     }
   };
 
@@ -185,6 +192,19 @@ export function ChatInput({ onSend, onSendImage, onSendVoice, onTyping, disabled
     const file = e.target.files?.[0];
     if (!file) return;
 
+    if (!file.type.startsWith('image/')) {
+      toast({ title: 'Formato no soportado', description: 'Solo se permiten imágenes.', variant: 'destructive' });
+      if (fileInputRef.current) fileInputRef.current.value = '';
+      return;
+    }
+
+    const MAX_SIZE = 10 * 1024 * 1024;
+    if (file.size > MAX_SIZE) {
+      toast({ title: 'Imagen muy grande', description: 'El tamaño máximo es 10 MB.', variant: 'destructive' });
+      if (fileInputRef.current) fileInputRef.current.value = '';
+      return;
+    }
+
     const reader = new FileReader();
     reader.onloadend = () => setPreviewImage(reader.result as string);
     reader.readAsDataURL(file);
@@ -216,6 +236,11 @@ export function ChatInput({ onSend, onSendImage, onSendVoice, onTyping, disabled
     );
   }
 
+  const recordingBars = useMemo(() => Array.from({ length: 30 }).map((_, i) => ({
+    height: 4 + (((i * 7 + 3) % 11) / 11) * 12,
+    delay: `${i * 0.05}s`,
+  })), []);
+
   if (isRecording) {
     return (
       <div className="flex items-center gap-2 p-2 bg-red-50 dark:bg-red-950/30 rounded-2xl border border-red-200 dark:border-red-800">
@@ -223,13 +248,13 @@ export function ChatInput({ onSend, onSendImage, onSendVoice, onTyping, disabled
           <div className="h-3 w-3 rounded-full bg-red-500 animate-pulse" />
           <span className="text-sm font-medium text-red-600 dark:text-red-400">{formatTime(recordingTime)}</span>
           <div className="flex-1 flex items-center gap-[2px] px-2">
-            {Array.from({ length: 30 }).map((_, i) => (
+            {recordingBars.map((bar, i) => (
               <div
                 key={i}
                 className="w-[2px] bg-red-400 rounded-full animate-pulse"
                 style={{
-                  height: 4 + Math.random() * 12,
-                  animationDelay: `${i * 0.05}s`,
+                  height: bar.height,
+                  animationDelay: bar.delay,
                 }}
               />
             ))}
@@ -299,6 +324,7 @@ export function ChatInput({ onSend, onSendImage, onSendVoice, onTyping, disabled
           disabled={disabled || sending}
           className="flex-1 rounded-2xl bg-muted/50 border-muted focus-visible:ring-primary/20"
           maxLength={500}
+          enterKeyHint="send"
         />
         {message.trim() ? (
           <Button

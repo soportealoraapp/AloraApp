@@ -290,9 +290,11 @@ export default function ProfileEditPage() {
     };
 
     const handleTouchEnd = (e: React.TouchEvent) => {
+        if (!swipeBackRef.current) return;
         const dx = e.changedTouches[0].clientX - swipeBackRef.current.startX;
         const dy = e.changedTouches[0].clientY - swipeBackRef.current.startY;
-        if (dx > 80 && Math.abs(dy) < 60) {
+        const scrollY = window.scrollY || document.documentElement.scrollTop;
+        if (dx > 80 && Math.abs(dy) < 60 && scrollY <= 0) {
             goBack();
         }
     };
@@ -399,6 +401,7 @@ export default function ProfileEditPage() {
                                     <SelectItem value="casual">Algo casual</SelectItem>
                                     <SelectItem value="friendship">Amistad</SelectItem>
                                     <SelectItem value="open">Abierto a ver qué pasa</SelectItem>
+                                    <SelectItem value="unsure">Prefiero no decir</SelectItem>
                                 </SelectContent>
                             </Select>
                         </div>

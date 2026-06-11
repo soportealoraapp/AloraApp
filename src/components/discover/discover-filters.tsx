@@ -264,7 +264,7 @@ export function DiscoverFilters({ open, onOpenChange, onApplyFilters, initialFil
                 <Label htmlFor="active-today" className="flex-grow cursor-pointer">🟢 Activo hoy</Label>
               </div>
 
-              <div className="flex items-center space-x-2 rounded-lg border p-3 bg-amber-50/30 dark:bg-amber-950/30">
+              <div className="flex items-center space-x-2 rounded-lg border p-3 bg-accent/50">
                 <Switch id="featured" checked={featuredOnly} onCheckedChange={setFeaturedOnly} />
                 <Label htmlFor="featured" className="flex-grow cursor-pointer">
                   ⭐ Perfil destacado
@@ -272,7 +272,7 @@ export function DiscoverFilters({ open, onOpenChange, onApplyFilters, initialFil
                 </Label>
               </div>
 
-              <div className="flex items-center space-x-2 rounded-lg border p-3 bg-violet-50/30 dark:bg-violet-950/30">
+              <div className="flex items-center space-x-2 rounded-lg border p-3 bg-accent/50">
                 <Switch id="high-compatibility" checked={highCompatibility} onCheckedChange={setHighCompatibility} />
                 <Label htmlFor="high-compatibility" className="flex-grow cursor-pointer">
                   💜 Alta compatibilidad
