@@ -79,7 +79,7 @@ export function useMatches() {
                 await fetchMatches(intent);
             } else if (type !== 'pass') {
                 toast({
-                    title: type === 'superlike' ? '¡Flechado enviado! ✨' : 'Like enviado ❤️',
+                    title: type === 'superlike' ? '¡Super Like enviado! ✨' : 'Like enviado ❤️',
                     description: '¡Ojalá hagan match!',
                 });
             }

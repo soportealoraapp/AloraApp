@@ -147,15 +147,15 @@ export default function UserProfilePage() {
 
             if (result.matched) {
                 toast({
-                    title: `¡Flechado con ${profile.displayName}! 🚀`,
-                    description: "Conexión especial - Ahora pueden chatear",
+                    title: `¡Super Like con ${profile.displayName}! ✨`,
+                    description: "Tu interés destaca y ahora pueden chatear",
                     duration: 5000,
                 });
                 router.push(`/chat/${result.matchId}`);
             }
         } catch (error) {
-            console.error("Error enviando flechado:", error);
-            toast({ title: "Error", description: "No se pudo enviar el Flechado. Intenta de nuevo.", variant: "destructive" });
+            console.error("Error enviando Super Like:", error);
+            toast({ title: "Error", description: "No se pudo enviar el Super Like. Intenta de nuevo.", variant: "destructive" });
         } finally {
             setProcessing(false);
         }
@@ -487,14 +487,14 @@ export default function UserProfilePage() {
                                     )}
                                     onClick={handleSuperMatch}
                                     disabled={isSuperMatched || processing}
-                                    title="Flechado: envío prioritario destacado"
+                                    title="Super Like: destaca tu interés en la lista"
                                 >
                                     {processing ? (
                                         <Loader2 className="h-5 w-5 mr-2 animate-spin" />
                                     ) : (
                                         <Sparkles className="h-5 w-5 mr-2" />
                                     )}
-                                    {isSuperMatched ? "Flechado Enviado" : "Flechado"}
+                                    {isSuperMatched ? "Super Like enviado" : "Super Like"}
                                 </Button>
                             </div>
                         )}

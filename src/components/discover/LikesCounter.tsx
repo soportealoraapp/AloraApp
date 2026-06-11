@@ -67,7 +67,7 @@ export function LikesCounter({
                             isEmpty ? "text-muted-foreground" : isLow ? "text-orange-500" : "text-pink-500 fill-pink-500"
                         )} />
                         <span className="text-xs font-medium text-foreground/80">
-                            {remaining} de {dailyLikesLimit} likes disponibles
+                            {remaining} de {dailyLikesLimit} likes restantes hoy
                         </span>
                     </div>
                     {timeUntilReset && (

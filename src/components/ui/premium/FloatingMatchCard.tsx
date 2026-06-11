@@ -228,7 +228,7 @@ export function FloatingMatchCard({ profile, onSwipe, onFlechado, compatibility,
         </div>
       </SoftCard>
 
-      {/* Action buttons: Pass (left), Flechado (center, larger), Like (right) */}
+      {/* Action buttons: Pass (left), Super Like (center), Like (right) */}
       <div className="absolute -bottom-16 left-0 right-0 flex items-center justify-center gap-4 z-20">
         <button
           onClick={(e) => { e.stopPropagation(); onSwipe('left'); }}
@@ -242,8 +242,8 @@ export function FloatingMatchCard({ profile, onSwipe, onFlechado, compatibility,
           <button
             onClick={(e) => { e.stopPropagation(); onFlechado(); }}
             className="bg-accent hover:bg-accent/80 text-accent-foreground rounded-full w-16 h-16 flex items-center justify-center shadow-xl transition-transform hover:scale-110 active:scale-95 border border-accent/30 focus-visible:ring-2 focus-visible:ring-primary/70 relative"
-            aria-label="Flechado (superlike)"
-            title={`Flechado: envío prioritario (${superlikesRemaining ?? 3}/día)`}
+            aria-label="Super Like"
+            title={`Super Like: destaca tu interés (${superlikesRemaining ?? 3} restantes hoy)`}
           >
             <Star className="h-7 w-7 fill-current" />
             <span className="absolute -top-1 -right-1 bg-primary text-primary-foreground text-[11px] font-bold rounded-full min-w-[20px] h-5 flex items-center justify-center px-1 shadow-sm border border-background">

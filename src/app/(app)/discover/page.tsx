@@ -288,7 +288,7 @@ export default function DiscoverPage() {
       track(AnalyticsEvents.LIKE_SENT, { targetUserId: flechadoProfile.id, intent });
       const result = await sendLike(flechadoProfile.id, 'superlike', intent);
       lastSwipeRef.current = { profileId: flechadoProfile.id, direction: 'flechado' };
-      toast({ title: '¡Flechado enviado!', description: `${flechadoProfile.displayName} lo recibirá como superlike.` });
+      toast({ title: '¡Super Like enviado!', description: `${flechadoProfile.displayName} recibirá tu interés destacado.` });
       if (result?.matched) {
         track(AnalyticsEvents.MATCH_CREATED, { partnerId: flechadoProfile.id });
         setMatchedProfile(flechadoProfile);
@@ -296,11 +296,11 @@ export default function DiscoverPage() {
         setShowMatchScreen(true);
       }
     } catch (error) {
-      console.error("Flechado failed", error);
+      console.error("Super Like failed", error);
       setProfiles(previousProfiles as any);
       setSwipeCount(prev => prev - 1);
       lastSwipeRef.current = null;
-      toast({ title: "Error", description: "No se pudo enviar el Flechado.", variant: "destructive" });
+      toast({ title: "Error", description: "No se pudo enviar el Super Like.", variant: "destructive" });
     } finally {
       setPendingSwipe(false);
       setFlechadoProfile(null);
@@ -406,13 +406,12 @@ export default function DiscoverPage() {
         </div>
       </header>
 
-      {/* Daily Compatibility — hero before the feed */}
-      <div className="px-4 pb-3 max-w-sm mx-auto w-full">
+      {/* Keep the feed focused: reduce the top-of-feed clutter on mobile */}
+      <div className="hidden md:block px-4 pb-3 max-w-sm mx-auto w-full">
         <DailyCompatibilityCard />
       </div>
 
-      {/* Post-onboarding gamified journey */}
-      <div className="px-4 pb-3 max-w-sm mx-auto w-full">
+      <div className="hidden md:block px-4 pb-3 max-w-sm mx-auto w-full">
         <PostOnboardingJourney />
       </div>
 
@@ -534,7 +533,7 @@ export default function DiscoverPage() {
                   <div className="bg-foreground/90 text-background px-5 py-3 rounded-2xl text-sm font-medium shadow-lg max-w-[260px]">
                     {tutorialStep === 1 && <p>👉 Desliza a la derecha para dar <strong>Like</strong></p>}
                     {tutorialStep === 2 && <p>👈 Desliza a la izquierda para <strong>Pasar</strong></p>}
-                    {tutorialStep === 3 && <p>⭐ Toca la estrella para <strong>Flechado</strong> (superlike)</p>}
+                    {tutorialStep === 3 && <p>⭐ Toca la estrella para enviar un <strong>Super Like</strong> y destacar tu interés</p>}
                     <div className="flex justify-between items-center mt-2.5">
                       <span className="text-xs opacity-50">{tutorialStep}/3</span>
                       <button onClick={tutorialStep === 3 ? dismissTutorial : nextTutorialStep} className="text-[11px] font-bold underline">
@@ -616,9 +615,9 @@ export default function DiscoverPage() {
       <AlertDialog open={flechadoConfirmOpen} onOpenChange={setFlechadoConfirmOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Enviar Flechado</AlertDialogTitle>
+            <AlertDialogTitle>Enviar Super Like</AlertDialogTitle>
             <AlertDialogDescription>
-              Flechado enviado a {flechadoProfile?.displayName}. Te quedan {flechadoRemaining - 1} flechados hoy. ¿Continuar?
+              Enviarás un Super Like a {flechadoProfile?.displayName}. Te quedan {Math.max(0, flechadoRemaining - 1)} Super Likes hoy. ¿Continuar?
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
