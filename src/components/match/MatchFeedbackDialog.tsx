@@ -66,7 +66,7 @@ export function MatchFeedbackDialog({ matchId, partnerName, open, onClose, onSub
                 <CardContent className="p-6 space-y-4">
                     <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
-                            <Heart className="h-5 w-5 text-pink-500 fill-pink-500" />
+                            <Heart className="h-5 w-5 text-primary fill-primary" />
                             <h2 className="font-bold text-lg">¿Qué tal con {partnerName}?</h2>
                         </div>
                         <Button variant="ghost" size="icon" onClick={onClose} className="h-8 w-8">

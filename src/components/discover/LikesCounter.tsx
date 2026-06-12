@@ -36,7 +36,7 @@ export function LikesCounter({
     if (isPlus) {
         return (
             <div className={cn("flex items-center gap-2 text-xs text-muted-foreground", className)}>
-                <Heart className="h-3.5 w-3.5 text-pink-500 fill-pink-500" />
+                <Heart className="h-3.5 w-3.5 text-primary fill-primary" />
                 <span className="font-medium">Likes ilimitados</span>
             </div>
         );
@@ -64,10 +64,10 @@ export function LikesCounter({
                     <div className="flex items-center gap-1.5">
                         <Heart className={cn(
                             "h-3.5 w-3.5",
-                            isEmpty ? "text-muted-foreground" : isLow ? "text-orange-500" : "text-pink-500 fill-pink-500"
+                            isEmpty ? "text-muted-foreground" : isLow ? "text-warning" : "text-primary fill-primary"
                         )} />
                         <span className="text-xs font-medium text-foreground/80">
-                            {remaining} de {dailyLikesLimit} likes restantes hoy
+                            {remaining} de {dailyLikesLimit} likes para dar hoy
                         </span>
                     </div>
                     {timeUntilReset && (

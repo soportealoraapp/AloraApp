@@ -88,22 +88,22 @@ html {
   .dark {
     --background: 340 10% 12%;
     --foreground: 336 100% 97%;
-    --card: 340 10% 15%;
+    --card: 340 10% 18%;
     --card-foreground: 336 100% 97%;
     --popover: 340 10% 10%;
     --popover-foreground: 336 100% 97%;
     --primary: 340 82% 73%;
     --primary-foreground: 340 10% 10%;
-    --secondary: 340 10% 22%;
+    --secondary: 340 10% 24%;
     --secondary-foreground: 336 100% 97%;
-    --muted: 340 10% 22%;
-    --muted-foreground: 336 80% 80%;
+    --muted: 340 10% 24%;
+    --muted-foreground: 336 60% 75%;
     --accent: 265 83% 83%;
     --accent-foreground: 265 10% 10%;
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 98%;
-    --border: 340 10% 30%;
-    --input: 340 10% 30%;
+    --border: 340 10% 35%;
+    --input: 340 10% 35%;
     --ring: 340 82% 73%;
     --warning: 38 92% 50%;
     --warning-foreground: 0 0% 100%;

@@ -94,7 +94,7 @@ export function AgeGate() {
 
                     <div className="flex flex-col gap-3">
                         <Button
-                            className="bg-gradient-to-r from-pink-500 to-rose-400 text-white dark:from-pink-600 dark:to-rose-500 rounded-full py-6 text-lg font-bold"
+                            className="bg-gradient-to-r from-primary to-accent text-white dark:from-primary dark:to-accent rounded-full py-6 text-lg font-bold"
                             onClick={handleAccept}
                         >
                             Soy mayor de 18 años

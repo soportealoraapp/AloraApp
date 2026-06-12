@@ -86,6 +86,7 @@ export interface UserProfile extends User {
     spotify?: SpotifyProfileSnapshot | null;
 
     // Status
+    isCompleted?: boolean;
     subscriptionStatus?: 'free' | 'plus';
     verificationStatus?: 'verified' | 'unverified'; // UI helper
     trustStatus?: 'clean' | 'watchlist' | 'restricted' | 'banned';

@@ -113,7 +113,7 @@ export function LegalConsent() {
 
                 <DialogFooter>
                     <Button
-                        className="w-full bg-gradient-to-r from-pink-500 to-rose-400 text-white dark:from-pink-600 dark:to-rose-500 rounded-full py-6 text-lg font-bold"
+                        className="w-full bg-gradient-to-r from-primary to-accent text-white dark:from-primary dark:to-accent rounded-full py-6 text-lg font-bold"
                         disabled={!accepted || isSubmitting}
                         onClick={handleAccept}
                     >

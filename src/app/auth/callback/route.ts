@@ -30,15 +30,34 @@ export async function GET(request: Request) {
                 console.warn('[auth/callback] referral redemption skipped:', err);
             }
 
+            // Check if user has a completed profile — new Google users must onboard
+            let destination = next;
+            try {
+                const { data: { user } } = await supabase.auth.getUser();
+                if (user) {
+                    const { data: profile } = await supabase
+                        .from('profiles')
+                        .select('isCompleted')
+                        .eq('userId', user.id)
+                        .maybeSingle();
+
+                    if (!profile || !profile.isCompleted) {
+                        destination = '/onboarding';
+                    }
+                }
+            } catch (err) {
+                console.warn('[auth/callback] profile check skipped:', err);
+            }
+
             const forwardedHost = request.headers.get('x-forwarded-host');
             const isLocalEnv = process.env.NODE_ENV === 'development';
 
             if (isLocalEnv) {
-                return NextResponse.redirect(`${origin}${next}`);
+                return NextResponse.redirect(`${origin}${destination}`);
             } else if (forwardedHost) {
-                return NextResponse.redirect(`https://${forwardedHost}${next}`);
+                return NextResponse.redirect(`https://${forwardedHost}${destination}`);
             } else {
-                return NextResponse.redirect(`${origin}${next}`);
+                return NextResponse.redirect(`${origin}${destination}`);
             }
         }
     }

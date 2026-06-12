@@ -44,7 +44,6 @@ export async function middleware(request: NextRequest) {
         pathname.startsWith('/chat') ||
         pathname.startsWith('/settings') ||
         pathname.startsWith('/qa') ||
-        pathname.startsWith('/onboarding') ||
         pathname.startsWith('/admin') ||
         pathname.startsWith('/contact') ||
         pathname.startsWith('/support') ||
@@ -77,11 +76,28 @@ export async function middleware(request: NextRequest) {
             .single();
 
         if (!profile || (profile.role !== 'admin' && profile.role !== 'moderator')) {
-            return NextResponse.redirect(new URL('/login', modifiedRequest.url));
+            return NextResponse.redirect(new URL('/discover', modifiedRequest.url));
         }
     }
 
     if (isAuthRoute && user && !pathname.startsWith('/auth/callback')) {
+        // Check if profile is completed — incomplete users go to onboarding
+        if (!pathname.startsWith('/onboarding')) {
+            try {
+                const supabaseClient = await createClient(modifiedRequest, response);
+                const { data: profile } = await supabaseClient
+                    .from('profiles')
+                    .select('isCompleted')
+                    .eq('userId', user.id)
+                    .maybeSingle();
+
+                if (!profile || !profile.isCompleted) {
+                    return NextResponse.redirect(new URL('/onboarding', modifiedRequest.url));
+                }
+            } catch {
+                // If profile check fails, allow through to avoid blocking
+            }
+        }
         return NextResponse.redirect(new URL('/discover', modifiedRequest.url));
     }
 

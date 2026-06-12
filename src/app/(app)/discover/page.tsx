@@ -379,6 +379,12 @@ export default function DiscoverPage() {
               </Button>
               <span className="text-[11px] text-muted-foreground font-bold">{rewindsRemaining}</span>
             </div>
+            {(currentUserProfile as any)?.superlikesRemaining !== undefined && (
+            <div className="flex items-center gap-0.5 px-1">
+              <Star className="h-3.5 w-3.5 text-amber-500 fill-amber-500" />
+              <span className="text-[11px] font-bold text-muted-foreground">{(currentUserProfile as any).superlikesRemaining}</span>
+            </div>
+            )}
             <Button variant="ghost" size="icon" onClick={() => setFilterOpen(true)} title="Filtros de búsqueda" aria-label="Filtros de búsqueda" className="relative touch-target">
               <SlidersHorizontal className="h-4 w-4 text-muted-foreground" />
               {countActiveFilters(filters) > 0 && (
@@ -391,12 +397,12 @@ export default function DiscoverPage() {
         </div>
       </header>
 
-      {/* Keep the feed focused: reduce the top-of-feed clutter on mobile */}
-      <div className="hidden md:block px-4 pb-3 max-w-sm mx-auto w-full">
+      {/* DailyCompatibility and PostOnboarding — visible on all screens */}
+      <div className="px-4 pb-3 max-w-sm mx-auto w-full">
         <DailyCompatibilityCard />
       </div>
 
-      <div className="hidden md:block px-4 pb-3 max-w-sm mx-auto w-full">
+      <div className="px-4 pb-3 max-w-sm mx-auto w-full">
         <PostOnboardingJourney />
       </div>
 

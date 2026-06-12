@@ -44,7 +44,7 @@ export function CompatibilityScoreCard({ score, explanation, dimensions, sharedI
 
     return (
         <Card className="overflow-hidden border-none shadow-lg">
-            <div className="bg-gradient-to-br from-pink-500 via-rose-500 to-purple-600 p-6 text-white text-center">
+            <div className="bg-gradient-to-br from-primary via-accent to-purple-600 p-6 text-white text-center">
                 <Sparkles className="h-8 w-8 mx-auto mb-2 fill-white" />
                 <h3 className="text-lg font-bold mb-1">Compatibilidad</h3>
                 <div className="text-5xl font-bold">{score}%</div>

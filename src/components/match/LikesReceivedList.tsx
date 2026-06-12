@@ -31,13 +31,13 @@ export function LikesReceivedList() {
         }
     };
 
-    if (loading) return <div className="flex justify-center py-12"><Loader2 className="animate-spin text-pink-500 h-8 w-8" /></div>;
+    if (loading) return <div className="flex justify-center py-12"><Loader2 className="animate-spin text-primary h-8 w-8" /></div>;
 
     return (
         <div className="space-y-4">
             <div className="flex items-center justify-between px-1">
                 <h4 className="font-bold text-sm flex items-center gap-2">
-                    <Heart className="h-4 w-4 text-pink-500 fill-pink-500" />
+                    <Heart className="h-4 w-4 text-primary fill-primary" />
                     Le gustas a {likers.length} personas
                 </h4>
             </div>

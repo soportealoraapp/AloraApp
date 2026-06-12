@@ -8,9 +8,10 @@ import { BadgeChipList } from "@/components/profile/BadgeChip";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Settings, Edit, Eye, Music, CheckCircle, ChevronRight, Shield, Sparkles, MessageCircle } from "lucide-react";
+import { Settings, Edit, Eye, Music, CheckCircle, ChevronRight, Shield, Sparkles, MessageCircle, X } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useState, useEffect } from "react";
 import { logger } from "@/lib/logger";
@@ -18,6 +19,7 @@ import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious
 
 export default function ProfilePage() {
   const { user, profile, authLoading, profileLoading } = useAuth();
+  const router = useRouter();
   const loading = authLoading || profileLoading;
   const [latestAnswer, setLatestAnswer] = useState<{
     questionId: string;
@@ -26,6 +28,11 @@ export default function ProfilePage() {
     answer: string;
     createdAt: string;
   } | null>(null);
+  const [dismissedVerification, setDismissedVerification] = useState(false);
+
+  useEffect(() => {
+    setDismissedVerification(localStorage.getItem('dismissedVerification') === 'true');
+  }, []);
 
   useEffect(() => {
     if (!user?.id) return;
@@ -125,21 +132,29 @@ export default function ProfilePage() {
           )}
         </div>
 
-        {/* Stats */}
+        {/* Stats — only show when there's real data */}
+        {((profile as any).likesReceived > 0 || (profile as any).matchesCount > 0 || (profile as any).profileViews > 0) && (
         <div className="grid grid-cols-3 gap-4 px-4 py-4 border-b">
+          {(profile as any).likesReceived > 0 && (
           <div className="text-center">
-            <p className="text-2xl font-bold text-primary">{(profile as any).likesReceived ?? 0}</p>
+            <p className="text-2xl font-bold text-primary">{(profile as any).likesReceived}</p>
             <p className="text-xs text-muted-foreground">Likes</p>
           </div>
+          )}
+          {(profile as any).matchesCount > 0 && (
           <div className="text-center">
-            <p className="text-2xl font-bold text-primary">{(profile as any).matchesCount ?? 0}</p>
+            <p className="text-2xl font-bold text-primary">{(profile as any).matchesCount}</p>
             <p className="text-xs text-muted-foreground">Matches</p>
           </div>
+          )}
+          {(profile as any).profileViews > 0 && (
           <div className="text-center">
-            <p className="text-2xl font-bold text-primary">{(profile as any).profileViews ?? 0}</p>
+            <p className="text-2xl font-bold text-primary">{(profile as any).profileViews}</p>
             <p className="text-xs text-muted-foreground">Visitas</p>
           </div>
+          )}
         </div>
+        )}
 
         <div className="p-4 space-y-6">
           {/* 2. Name + badges + bio */}
@@ -151,23 +166,28 @@ export default function ProfilePage() {
               {profile.subscriptionStatus === 'plus' && <TrustBadge type="premium" />}
             </div>
 
-            {!profile.isVerified && (
-              <Link href="/settings/verification">
-                <Card className="rounded-2xl border border-primary/20 bg-primary/5 shadow-sm hover:shadow-md transition-shadow cursor-pointer">
-                  <CardContent className="p-4 flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="p-2 bg-primary/20 rounded-xl">
-                        <Shield className="h-5 w-5 text-primary" />
-                      </div>
-                      <div>
-                        <h4 className="font-bold text-foreground text-sm">Verifica tu identidad</h4>
-                        <p className="text-xs text-muted-foreground">Aparece primero en Discover</p>
-                      </div>
+            {!profile.isVerified && !dismissedVerification && (
+              <Card className="rounded-2xl border border-primary/20 bg-primary/5 shadow-sm hover:shadow-md transition-shadow cursor-pointer relative" onClick={() => router.push('/settings/verification')}>
+                <button
+                  onClick={(e) => { e.preventDefault(); e.stopPropagation(); setDismissedVerification(true); localStorage.setItem('dismissedVerification', 'true'); }}
+                  className="absolute top-2 right-2 p-1 rounded-full hover:bg-primary/10 transition-colors"
+                  aria-label="Ocultar"
+                >
+                  <X className="h-3.5 w-3.5 text-muted-foreground" />
+                </button>
+                <CardContent className="p-4 flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 bg-primary/20 rounded-xl">
+                      <Shield className="h-5 w-5 text-primary" />
                     </div>
-                    <ChevronRight className="h-5 w-5 text-muted-foreground" />
-                  </CardContent>
-                </Card>
-              </Link>
+                    <div>
+                      <h4 className="font-bold text-foreground text-sm">Verifica tu identidad</h4>
+                      <p className="text-xs text-muted-foreground">Aparece primero en Discover</p>
+                    </div>
+                  </div>
+                  <ChevronRight className="h-5 w-5 text-muted-foreground" />
+                </CardContent>
+              </Card>
             )}
 
             {profile.bio && (

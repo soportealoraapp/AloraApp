@@ -59,20 +59,20 @@ export function LikesCounterModal({ isOpen, onClose, remaining, dailyLikesLimit,
             <Dialog open={isOpen} onOpenChange={onClose}>
                 <DialogContent className="sm:max-w-[380px]" aria-labelledby="likes-modal-title" aria-describedby="likes-modal-desc">
                     <DialogHeader>
-                        <DialogTitle className="sr-only">Likes restantes hoy</DialogTitle>
+                        <DialogTitle className="sr-only">Likes para dar hoy</DialogTitle>
                         <DialogDescription className="sr-only" id="likes-modal-desc">Control de likes diarios</DialogDescription>
                     </DialogHeader>
 
                     <div className="p-6 space-y-6">
                         <div className="text-center">
                             <div className="mx-auto w-16 h-16 rounded-full bg-gradient-to-br from-pink-100 to-pink-200 flex items-center justify-center mb-4">
-                                <Heart className={isEmpty ? "h-8 w-8 text-muted-foreground" : "h-8 w-8 text-pink-500 fill-pink-500"} />
+                                <Heart className={isEmpty ? "h-8 w-8 text-muted-foreground" : "h-8 w-8 text-primary fill-primary"} />
                             </div>
                             <h2 className="text-lg font-bold text-foreground" id="likes-modal-title">
-                                {isEmpty ? 'Likes agotados' : 'Likes restantes hoy'}
+                                {isEmpty ? 'Likes agotados' : 'Likes para dar hoy'}
                             </h2>
                             <p className="text-3xl font-bold mt-2">
-                                <span className={isEmpty ? "text-muted-foreground" : isLow ? "text-orange-500" : "text-pink-500"}>
+                                <span className={isEmpty ? "text-muted-foreground" : isLow ? "text-warning" : "text-primary"}>
                                     {remaining}
                                 </span>
                                 <span className="text-lg text-muted-foreground"> / {dailyLikesLimit}</span>
