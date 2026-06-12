@@ -83,15 +83,15 @@ export default function ChatPage() {
         try {
             await sendLike(like.fromUserId, 'like');
             toast({
-                title: "¡Nuevo match! 🎉",
-                description: "Ahora pueden chatear",
+                title: "¡Es un Match! 💖",
+                description: `¡Genial! Tú y ${like.fromUser?.displayName || 'esta persona'} quieren conocerse.`,
             });
             refresh();
         } catch (error) {
             toast({
                 variant: "destructive",
-                title: "Error",
-                description: "No se pudo aceptar el match",
+                title: "Ups, algo salió mal",
+                description: "No pudimos conectar en este momento. Inténtalo de nuevo.",
             });
         } finally {
             setProcessingMatch(null);
@@ -107,8 +107,8 @@ export default function ChatPage() {
         if (!rejectTarget) return;
         setRejectDialogOpen(false);
         toast({
-            title: "Match rechazado",
-            description: "No volverás a ver este perfil",
+            title: "Perfil archivado",
+            description: "Entendido, buscaremos mejores conexiones para ti.",
         });
         refresh();
         setRejectTarget(null);

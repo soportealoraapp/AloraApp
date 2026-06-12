@@ -199,15 +199,19 @@ export default function ChatWindowPage() {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ matchId })
             });
+            
+            if (!response.ok) {
+                // If AI fails (like GEMINI_API_KEY missing), don't show error to user
+                // just fail silently and don't show the icebreakers section
+                console.warn('Icebreakers AI failed, likely missing API Key');
+                return;
+            }
+
             const data = await response.json();
             setIcebreakers(data.icebreakers || []);
             setShowIcebreakers(true);
         } catch (error) {
-            toast({
-                title: "Error",
-                description: "No pudimos generar sugerencias.",
-                variant: "destructive"
-            });
+            console.error('Icebreakers fetch error:', error);
         } finally {
             setLoadingIcebreakers(false);
         }
@@ -562,7 +566,7 @@ export default function ChatWindowPage() {
                             <Card className="p-4 shadow-2xl border-primary/20 bg-card/95 backdrop-blur-sm rounded-2xl">
                                 <div className="flex justify-between items-center mb-4">
                                     <h4 className="font-bold text-primary flex items-center gap-2">
-                                        <Sparkles className="w-4 h-4" /> Ideas para empezar
+                                        <Sparkles className="w-4 h-4" /> Sugerencias para romper el hielo
                                     </h4>
                                     <Button variant="ghost" size="sm" onClick={() => setShowIcebreakers(false)} className="rounded-full">
                                         Cerrar
@@ -608,16 +612,57 @@ export default function ChatWindowPage() {
                     disabled={sending || !otherUserId}
                 />
                 <div className="flex items-center gap-2">
-                    <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={fetchIcebreakers}
-                        disabled={loadingIcebreakers}
-                        className="shrink-0 h-10 w-10 rounded-full text-primary hover:bg-primary/10"
-                        title="Sugerir rompehielos"
-                    >
-                        {loadingIcebreakers ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
-                    </Button>
+                    <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                            <Button
+                                variant="ghost"
+                                size="icon"
+                                disabled={loadingIcebreakers}
+                                className="shrink-0 h-10 w-10 rounded-full text-primary hover:bg-primary/10"
+                                title="Sugerir rompehielos"
+                            >
+                                {loadingIcebreakers ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
+                            </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="w-64">
+                            <div className="p-3 space-y-3">
+                                <div className="flex items-center gap-2">
+                                    <Sparkles className="h-4 w-4 text-primary" />
+                                    <h4 className="font-bold text-xs uppercase tracking-widest">Sugerencias para romper el hielo</h4>
+                                </div>
+                                <p className="text-[10px] text-muted-foreground leading-tight">
+                                    ¿No sabes qué decir? Prueba con estas ideas personalizadas basadas en sus intereses y valores.
+                                </p>
+                                <div className="space-y-2">
+                                    {loadingIcebreakers ? (
+                                        <div className="flex justify-center py-4">
+                                            <Loader2 className="h-5 w-5 animate-spin text-primary" />
+                                        </div>
+                                    ) : icebreakers.length > 0 ? (
+                                        icebreakers.map((text, i) => (
+                                            <button
+                                                key={i}
+                                                onClick={() => {
+                                                    handleSendMessage(text);
+                                                }}
+                                                className="w-full text-left p-2.5 rounded-xl border border-primary/10 hover:border-primary/40 hover:bg-primary/5 transition-all text-xs leading-snug"
+                                            >
+                                                {text}
+                                            </button>
+                                        ))
+                                    ) : (
+                                        <Button 
+                                            size="sm" 
+                                            className="w-full text-[10px]" 
+                                            onClick={fetchIcebreakers}
+                                        >
+                                            Generar ideas
+                                        </Button>
+                                    )}
+                                </div>
+                            </div>
+                        </DropdownMenuContent>
+                    </DropdownMenu>
                     <div className="flex-1">
                         <ChatInput
                             onSend={handleSendMessage}

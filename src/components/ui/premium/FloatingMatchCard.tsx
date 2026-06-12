@@ -1,6 +1,6 @@
 'use client';
 
-import { motion, PanInfo, useAnimation } from 'framer-motion';
+import { motion, PanInfo, useAnimation, AnimatePresence } from 'framer-motion';
 import { SoftCard } from '../custom/SoftCard';
 import { UserProfile } from '@/lib/domain/types';
 import Image from 'next/image';
@@ -36,6 +36,17 @@ export function FloatingMatchCard({ profile, onSwipe, onFlechado, compatibility,
       if (likeTimeoutRef.current) clearTimeout(likeTimeoutRef.current);
     };
   }, []);
+
+  const handleFlechadoClick = useCallback((e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!onFlechado) return;
+    setLikeBurst(true);
+    // Play a heart sound effect could be added here if assets were available
+    likeTimeoutRef.current = setTimeout(() => {
+      setLikeBurst(false);
+      onFlechado();
+    }, 500);
+  }, [onFlechado]);
 
   const handleLike = useCallback((e: React.MouseEvent) => {
     e.stopPropagation();
@@ -230,7 +241,7 @@ export function FloatingMatchCard({ profile, onSwipe, onFlechado, compatibility,
         </div>
       </SoftCard>
 
-      {/* Action buttons: Pass (left), Super Like (center), Like (right) */}
+      {/* Action buttons: Pass (left), Flechado (center), Like (right) */}
       <div className="flex items-center justify-center gap-4 pt-4 z-20">
         <button
           onClick={(e) => { e.stopPropagation(); onSwipe('left'); }}
@@ -242,12 +253,24 @@ export function FloatingMatchCard({ profile, onSwipe, onFlechado, compatibility,
         </button>
         {onFlechado && (
           <button
-            onClick={(e) => { e.stopPropagation(); onFlechado(); }}
+            onClick={handleFlechadoClick}
             className="bg-accent hover:bg-accent/80 text-accent-foreground rounded-full w-16 h-16 flex items-center justify-center shadow-xl transition-transform hover:scale-110 active:scale-95 border border-accent/30 focus-visible:ring-2 focus-visible:ring-primary/70 relative"
-            aria-label="Super Like"
-            title={`Super Like: destaca tu interés (${superlikesRemaining ?? 0} restantes hoy)`}
+            aria-label="Flechado"
+            title={`Flechado: destaca tu interés (${superlikesRemaining ?? 0} restantes hoy)`}
           >
             <Star className="h-7 w-7 fill-current" />
+            <AnimatePresence>
+              {likeBurst && (
+                <motion.div
+                  initial={{ scale: 0.5, opacity: 0 }}
+                  animate={{ scale: 1.5, opacity: 1 }}
+                  exit={{ scale: 2, opacity: 0 }}
+                  className="absolute inset-0 flex items-center justify-center pointer-events-none"
+                >
+                  <span className="text-4xl">💘</span>
+                </motion.div>
+              )}
+            </AnimatePresence>
             <span className="absolute -top-1 -right-1 bg-primary text-primary-foreground text-[11px] font-bold rounded-full min-w-[20px] h-5 flex items-center justify-center px-1 shadow-sm border border-background">
               {superlikesRemaining ?? 0}
             </span>
@@ -255,29 +278,22 @@ export function FloatingMatchCard({ profile, onSwipe, onFlechado, compatibility,
         )}
         <button
           onClick={handleLike}
-          className="bg-card hover:bg-accent text-primary rounded-full w-14 h-14 flex items-center justify-center shadow-xl transition-all hover:scale-110 active:scale-95 border border-border focus-visible:ring-2 focus-visible:ring-primary/70 relative overflow-visible"
-          aria-label="Dar like al perfil"
-          title="Like (deslizar a la derecha)"
+          className="bg-primary hover:bg-primary/90 text-primary-foreground rounded-full w-14 h-14 flex items-center justify-center shadow-xl transition-transform hover:scale-110 active:scale-95 focus-visible:ring-2 focus-visible:ring-primary/70 relative"
+          aria-label="Dar like"
+          title="Dar Like (deslizar a la derecha)"
         >
-          <Heart className={`h-7 w-7 fill-primary transition-transform ${likeBurst ? 'scale-125' : ''}`} />
-          {likeBurst && (
-            <>
-              {[...Array(6)].map((_, i) => (
-                <motion.div
-                  key={i}
-                  className="absolute w-2 h-2 rounded-full bg-primary"
-                  initial={{ scale: 0, x: 0, y: 0, opacity: 1 }}
-                  animate={{
-                    scale: [0, 1, 0],
-                    x: Math.cos((i * 60) * Math.PI / 180) * 28,
-                    y: Math.sin((i * 60) * Math.PI / 180) * 28,
-                    opacity: [1, 1, 0],
-                  }}
-                  transition={{ duration: 0.4, ease: "easeOut" }}
-                />
-              ))}
-            </>
-          )}
+          <Heart className="h-7 w-7 fill-current" />
+          <AnimatePresence>
+            {likeBurst && (
+              <motion.div
+                initial={{ scale: 0.5, opacity: 0 }}
+                animate={{ scale: 2, opacity: 0 }}
+                className="absolute inset-0 flex items-center justify-center text-primary pointer-events-none"
+              >
+                <Heart className="h-10 w-10 fill-current" />
+              </motion.div>
+            )}
+          </AnimatePresence>
         </button>
       </div>
     </motion.div>

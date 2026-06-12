@@ -267,7 +267,7 @@ export default function DiscoverPage() {
       if (action === 'pass') {
         toast({ title: 'Descartado', description: 'Perfil descartado.' });
       } else if (action === 'superlike') {
-        toast({ title: '¡Super Like enviado!', description: `${profileToActOn.displayName} recibirá tu interés destacado.` });
+        toast({ title: '¡💘 Flechado enviado!', description: `${profileToActOn.displayName} recibirá tu interés destacado.` });
       } else {
         toast({ title: 'Like enviado', description: '¡Esperamos que sea mutuo!' });
       }
@@ -285,7 +285,7 @@ export default function DiscoverPage() {
       lastSwipeRef.current = null;
       toast({
         title: "Error",
-        description: action === 'superlike' ? "No se pudo enviar el Super Like." : "No se pudo procesar la acción. Perfil restaurado.",
+        description: action === 'superlike' ? "No se pudo enviar el Flechado." : "No se pudo procesar la acción. Perfil restaurado.",
         variant: "destructive"
       });
     } finally {
@@ -357,6 +357,7 @@ export default function DiscoverPage() {
           </div>
         </div>
       )}
+      {/* Flechado sound / visual feedback could be triggered here */}
       <header className="sticky top-0 z-30 flex h-16 items-center justify-between px-4 backdrop-blur-md border-b bg-background/90 pt-safe">
         <div className="flex items-center gap-2">
           <h1 className="text-2xl font-bold tracking-tight text-foreground">Alora</h1>
@@ -527,7 +528,7 @@ export default function DiscoverPage() {
                         <div className="text-white text-xs font-bold leading-tight">{p.displayName}, {p.age}</div>
                         {p.city && <div className="text-white/70 text-xs">{p.city}</div>}
                         {p.sharedInterests !== undefined && p.sharedInterests > 0 && (
-                          <div className="text-primary-foreground/80 text-xs mt-0.5">{p.sharedInterests} interés(es) en común</div>
+                          <div className="text-primary-foreground/80 text-[10px] mt-0.5 bg-primary/20 backdrop-blur-sm rounded-full px-2 py-0.5 inline-block">{p.sharedInterests} intereses común</div>
                         )}
                       </div>
                     </div>
@@ -565,7 +566,7 @@ export default function DiscoverPage() {
                   <div className="bg-foreground/90 text-background px-5 py-3 rounded-2xl text-sm font-medium shadow-lg max-w-[260px]">
                     {tutorialStep === 1 && <p className="flex items-center gap-2"><ArrowRight className="h-4 w-4" /> Desliza a la derecha para dar <strong>Like</strong></p>}
                     {tutorialStep === 2 && <p className="flex items-center gap-2"><ArrowLeft className="h-4 w-4" /> Desliza a la izquierda para <strong>Pasar</strong></p>}
-                    {tutorialStep === 3 && <p className="flex items-center gap-2"><Star className="h-4 w-4" /> Toca la estrella para enviar un <strong>Super Like</strong></p>}
+                    {tutorialStep === 3 && <p className="flex items-center gap-2"><Star className="h-4 w-4 text-amber-500 fill-amber-500" /> Toca la estrella para enviar un <strong>Flechado</strong></p>}
                     <div className="flex justify-between items-center mt-2.5">
                       <span className="text-xs opacity-50">{tutorialStep}/3</span>
                       <button onClick={tutorialStep === 3 ? dismissTutorial : nextTutorialStep} className="text-[11px] font-bold underline">
