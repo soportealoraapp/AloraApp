@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { ConnectionIntent, Match } from '@/lib/domain/types';
 import { useToast } from './use-toast';
+import { authFetch } from '@/lib/utils';
 
 // Temporary local type until Like is defined in domain
 type Like = any;
@@ -27,8 +28,8 @@ export function useMatches() {
 
             // Cookie auth handles authentication automatically
             const suffix = intent ? `?intent=${intent}` : '';
-            const matchesResponse = await fetch(`/api/match/feed${suffix}`);
-            const newMatchesResponse = await fetch(`/api/match/new${suffix}`);
+            const matchesResponse = await authFetch(`/api/match/feed${suffix}`);
+            const newMatchesResponse = await authFetch(`/api/match/new${suffix}`);
 
             if (!matchesResponse.ok || !newMatchesResponse.ok) {
                 throw new Error('Error al cargar matches');
@@ -56,7 +57,7 @@ export function useMatches() {
 
         try {
             // Cookie auth handles authentication automatically
-            const response = await fetch('/api/match/like', {
+            const response = await authFetch('/api/match/like', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

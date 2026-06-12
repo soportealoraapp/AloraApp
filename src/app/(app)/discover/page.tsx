@@ -210,11 +210,14 @@ export default function DiscoverPage() {
 
   const [pendingSwipe, setPendingSwipe] = useState(false);
 
-  const handleSwipe = async (direction: 'left' | 'right') => {
+  const executeAction = useCallback(async (
+    action: 'like' | 'pass' | 'superlike',
+    direction: 'right' | 'left' | 'flechado'
+  ) => {
     const profileToActOn = profilesRef.current[0]?.profile;
     if (!profileToActOn || !currentUserProfile || pendingSwipe) return;
 
-    if (swipeCount >= SWIPE_LIMIT) {
+    if (action !== 'superlike' && swipeCount >= SWIPE_LIMIT) {
       toast({
         title: "¡Tómate un respiro!",
         description: "Has visto muchos perfiles. Vuelve en un momento para asegurar conexiones de calidad.",
@@ -231,66 +234,46 @@ export default function DiscoverPage() {
     setProfiles(remainingProfiles as any);
 
     try {
-      if (direction === 'right') {
-        track(AnalyticsEvents.LIKE_SENT, { targetUserId: profileToActOn.id, intent });
-        const result = await sendLike(profileToActOn.id, 'like', intent);
-        lastSwipeRef.current = { profileId: profileToActOn.id, direction };
-        toast({ title: 'Like enviado', description: `¡Esperamos que sea mutuo!` });
-        if (result?.matched) {
-          track(AnalyticsEvents.MATCH_CREATED, { partnerId: profileToActOn.id, intent });
-          setMatchedProfile(profileToActOn);
-          setMatchId((result as any)?.matchId);
-          setShowMatchScreen(true);
-        }
-      } else {
-        track(AnalyticsEvents.PASS_SENT, { targetUserId: profileToActOn.id, intent });
-        await sendLike(profileToActOn.id, 'pass', intent);
-        lastSwipeRef.current = { profileId: profileToActOn.id, direction };
+      track(AnalyticsEvents.LIKE_SENT, { targetUserId: profileToActOn.id, intent });
+      const result = await sendLike(profileToActOn.id, action, intent);
+      lastSwipeRef.current = { profileId: profileToActOn.id, direction };
+
+      if (action === 'pass') {
         toast({ title: 'Descartado', description: 'Perfil descartado.' });
+      } else if (action === 'superlike') {
+        toast({ title: '¡Super Like enviado!', description: `${profileToActOn.displayName} recibirá tu interés destacado.` });
+      } else {
+        toast({ title: 'Like enviado', description: '¡Esperamos que sea mutuo!' });
+      }
+
+      if (result?.matched) {
+        track(AnalyticsEvents.MATCH_CREATED, { partnerId: profileToActOn.id, intent });
+        setMatchedProfile(profileToActOn);
+        setMatchId((result as any)?.matchId);
+        setShowMatchScreen(true);
       }
     } catch (error) {
       console.error("Action failed", error);
       setProfiles(previousProfiles as any);
       setSwipeCount(prev => prev - 1);
       lastSwipeRef.current = null;
-      toast({ title: "Error", description: "No se pudo procesar la acción. Perfil restaurado.", variant: "destructive" });
+      toast({
+        title: "Error",
+        description: action === 'superlike' ? "No se pudo enviar el Super Like." : "No se pudo procesar la acción. Perfil restaurado.",
+        variant: "destructive"
+      });
     } finally {
       setPendingSwipe(false);
     }
-  };
+  }, [currentUserProfile, pendingSwipe, swipeCount, intent, sendLike, track, toast, setProfiles]);
 
-  const handleFlechado = async () => {
-    const profileToActOn = profilesRef.current[0]?.profile;
-    if (!profileToActOn || !currentUserProfile || pendingSwipe) return;
+  const handleSwipe = useCallback((direction: 'left' | 'right') => {
+    executeAction(direction === 'right' ? 'like' : 'pass', direction);
+  }, [executeAction]);
 
-    const previousProfiles = profilesRef.current;
-    setPendingSwipe(true);
-    setSwipeCount(prev => prev + 1);
-
-    const remainingProfiles = previousProfiles.slice(1);
-    setProfiles(remainingProfiles as any);
-
-    try {
-      track(AnalyticsEvents.LIKE_SENT, { targetUserId: profileToActOn.id, intent });
-      const result = await sendLike(profileToActOn.id, 'superlike', intent);
-      lastSwipeRef.current = { profileId: profileToActOn.id, direction: 'flechado' };
-      toast({ title: '¡Super Like enviado!', description: `${profileToActOn.displayName} recibirá tu interés destacado.` });
-      if (result?.matched) {
-        track(AnalyticsEvents.MATCH_CREATED, { partnerId: profileToActOn.id });
-        setMatchedProfile(profileToActOn);
-        setMatchId((result as any)?.matchId);
-        setShowMatchScreen(true);
-      }
-    } catch (error) {
-      console.error("Super Like failed", error);
-      setProfiles(previousProfiles as any);
-      setSwipeCount(prev => prev - 1);
-      lastSwipeRef.current = null;
-      toast({ title: "Error", description: "No se pudo enviar el Super Like.", variant: "destructive" });
-    } finally {
-      setPendingSwipe(false);
-    }
-  };
+  const handleFlechado = useCallback(() => {
+    executeAction('superlike', 'flechado');
+  }, [executeAction]);
 
   const handleRewind = async () => {
     if (!lastSwipeRef.current || rewinding) return;
@@ -397,15 +380,7 @@ export default function DiscoverPage() {
         </div>
       </header>
 
-      {/* DailyCompatibility and PostOnboarding — visible on all screens */}
-      <div className="px-4 pb-3 max-w-sm mx-auto w-full">
-        <DailyCompatibilityCard />
-      </div>
-
-      <div className="px-4 pb-3 max-w-sm mx-auto w-full">
-        <PostOnboardingJourney />
-      </div>
-
+      {/* Likes counter — compact, above feed */}
       <div className="px-4 pt-2 max-w-sm mx-auto w-full">
         <LikesCounter
           dailyLikesUsed={currentUserProfile?.dailyLikesUsed ?? 0}
@@ -417,11 +392,6 @@ export default function DiscoverPage() {
           }
           subscriptionStatus={currentUserProfile?.subscriptionStatus ?? 'free'}
         />
-      </div>
-
-      {/* Daily Picks - horizontal carousel above the feed */}
-      <div className="px-4 pb-3 max-w-sm mx-auto w-full">
-        <DailyPicks subscriptionStatus={currentUserProfile?.subscriptionStatus ?? 'free'} />
       </div>
 
       <main className="flex-1 flex flex-col items-center justify-center p-4 relative">
@@ -575,6 +545,19 @@ export default function DiscoverPage() {
           </div>
         )}
       </main>
+
+      {/* Secondary sections — below the feed */}
+      <div className="px-4 pb-3 max-w-sm mx-auto w-full">
+        <DailyCompatibilityCard />
+      </div>
+
+      <div className="px-4 pb-3 max-w-sm mx-auto w-full">
+        <PostOnboardingJourney />
+      </div>
+
+      <div className="px-4 pb-3 max-w-sm mx-auto w-full">
+        <DailyPicks subscriptionStatus={currentUserProfile?.subscriptionStatus ?? 'free'} />
+      </div>
 
       {/* Daily Question - below the feed */}
       <div className="px-4 pb-4 max-w-sm mx-auto w-full space-y-3">

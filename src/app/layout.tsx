@@ -1,4 +1,4 @@
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import './globals.css';
 import { Toaster } from '@/components/ui/toaster';
 import { cn } from '@/lib/utils';
@@ -9,6 +9,25 @@ import { SafetyGuard } from '@/components/safety/SafetyGuard';
 import { OfflineBanner } from '@/components/offline/OfflineBanner';
 import { AgeGate } from '@/components/auth/AgeGate';
 import { AnalyticsProvider } from '@/components/analytics/AnalyticsProvider';
+
+export const metadata: Metadata = {
+  title: {
+    default: 'Alora — Conexiones reales con inteligencia artificial',
+    template: '%s | Alora',
+  },
+  description: 'Dating app con IA integrada. Encuentra conexiones reales.',
+  manifest: '/manifest.json',
+};
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 1,
+  themeColor: [
+    { media: '(prefers-color-scheme: light)', color: '#FDF7F9' },
+    { media: '(prefers-color-scheme: dark)', color: '#1a1215' },
+  ],
+};
 
 export default async function RootLayout({
   children,

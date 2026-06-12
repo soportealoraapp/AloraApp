@@ -11,9 +11,19 @@ import { useToast } from '@/hooks/use-toast';
 import { Loader2, MessageCircle, Send, Sparkles } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
-const SimpleConfetti = () => (
-    <div className="fixed inset-0 pointer-events-none overflow-hidden z-50">
-        {Array.from({ length: 40 }).map((_, i) => {
+const SimpleConfetti = () => {
+    const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
+    useEffect(() => {
+        const mql = window.matchMedia('(prefers-reduced-motion: reduce)');
+        setPrefersReducedMotion(mql.matches);
+        const handler = (e: MediaQueryListEvent) => setPrefersReducedMotion(e.matches);
+        mql.addEventListener('change', handler);
+        return () => mql.removeEventListener('change', handler);
+    }, []);
+    if (prefersReducedMotion) return null;
+    return (
+        <div className="fixed inset-0 pointer-events-none overflow-hidden z-50">
+            {Array.from({ length: 40 }).map((_, i) => {
             const shapes = ['circle', 'square', 'triangle'];
             const shape = shapes[i % 3];
             const colors = ['#ff69b4', '#ff1493', '#ffb6c1', '#ffc0cb', '#ff85a2', '#e879a8', '#f472b6'];
@@ -40,8 +50,9 @@ const SimpleConfetti = () => (
                 />
             );
         })}
-    </div>
-);
+        </div>
+    );
+};
 
 interface MatchScreenProps {
     userProfile: UserProfile;
@@ -163,19 +174,19 @@ export function MatchScreen({ userProfile, matchedProfile, onChat, onKeepSwiping
                     <AvatarGlow src={userProfile.photos[0]} size="xl" className="border-4 border-white rounded-full shadow-[0_0_50px_rgba(244,143,177,0.6)]" />
                 </motion.div>
 
-                <motion.div
-                    initial={{ scale: 0 }}
-                    animate={{ scale: [0, 1.2, 1] }}
-                    transition={{ delay: 0.8, type: "spring" }}
-                    className="text-4xl md:text-5xl"
-                >
                     <motion.div
-                        animate={{ scale: [1, 1.2, 1] }}
-                        transition={{ repeat: Infinity, duration: 1.5 }}
+                        initial={{ scale: 0 }}
+                        animate={{ scale: [0, 1.2, 1] }}
+                        transition={{ delay: 0.8, type: "spring" }}
+                        className="text-4xl md:text-5xl"
                     >
-                        ❤️
+                        <motion.div
+                            animate={{ scale: [1, 1.2, 1] }}
+                            transition={{ repeat: 4, duration: 1.5 }}
+                        >
+                            ❤️
+                        </motion.div>
                     </motion.div>
-                </motion.div>
 
                 <motion.div
                     initial={{ x: 150, opacity: 0, rotate: 15 }}

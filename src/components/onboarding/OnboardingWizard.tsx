@@ -119,18 +119,35 @@ export function OnboardingWizard({ initialRef }: { initialRef?: string } = {}) {
     }, [effectiveUserId, router, formData]);
 
     const nextStep = useCallback(() => {
+        // Save immediately when changing step (not debounced)
+        if (effectiveUserId) {
+            const serialized = JSON.stringify(formData);
+            if (serialized !== lastSavedRef.current) {
+                lastSavedRef.current = serialized;
+                setSyncStatus('syncing');
+                updateUserProfile(effectiveUserId, {
+                    ...formData,
+                    isCompleted: false,
+                } as any).then(() => {
+                    setSyncStatus('saved');
+                    setTimeout(() => setSyncStatus('idle'), 2000);
+                }).catch(() => {
+                    setSyncStatus('error');
+                });
+            }
+        }
         if (step === totalSteps) {
             completeOnboarding();
             return;
         }
         setStep(prev => Math.min(prev + 1, totalSteps));
-    }, [step, totalSteps, completeOnboarding]);
+    }, [step, totalSteps, completeOnboarding, effectiveUserId, formData]);
 
     const prevStep = useCallback(() => setStep(prev => Math.max(prev - 1, 1)), []);
 
     return (
         <div className="w-full min-h-dvh md:min-h-0 md:max-w-md md:mx-auto p-4 md:p-8 bg-background md:rounded-3xl md:shadow-xl md:border md:border-border/50 flex flex-col">
-            {step > 1 && (
+            {step >= 1 && (
                 <div className="mb-8">
                     <div className="flex items-center justify-between mb-4">
                         <div className="flex items-center gap-2">
@@ -157,7 +174,7 @@ export function OnboardingWizard({ initialRef }: { initialRef?: string } = {}) {
                             {STEP_WELCOME[step - 1]}
                         </p>
                         <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
-                            Paso {step - 1} de {totalSteps - 1}
+                            Paso {step} de {totalSteps}
                         </p>
                     </div>
                 </div>

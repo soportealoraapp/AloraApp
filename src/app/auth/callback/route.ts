@@ -41,12 +41,25 @@ export async function GET(request: Request) {
                         .eq('userId', user.id)
                         .maybeSingle();
 
-                    if (!profile || !profile.isCompleted) {
+                    if (!profile) {
+                        // Create initial profile row for new OAuth users
+                        const displayName = user.user_metadata?.full_name
+                            || user.user_metadata?.name
+                            || user.email?.split('@')[0]
+                            || 'Usuario';
+                        await supabase.from('profiles').insert({
+                            userId: user.id,
+                            displayName,
+                            photos: user.user_metadata?.avatar_url ? [user.user_metadata.avatar_url] : [],
+                            isCompleted: false,
+                        });
+                        destination = '/onboarding';
+                    } else if (!profile.isCompleted) {
                         destination = '/onboarding';
                     }
                 }
             } catch (err) {
-                console.warn('[auth/callback] profile check skipped:', err);
+                console.warn('[auth/callback] profile check/create skipped:', err);
             }
 
             const forwardedHost = request.headers.get('x-forwarded-host');
@@ -62,5 +75,5 @@ export async function GET(request: Request) {
         }
     }
 
-    return NextResponse.redirect(`${origin}/auth/auth-code-error`);
+    return NextResponse.redirect(`${origin}/login?error=auth_code_error`);
 }

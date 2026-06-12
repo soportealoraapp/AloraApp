@@ -13,6 +13,7 @@ interface LikesCounterProps {
     resetAt: Date | string;
     subscriptionStatus?: string;
     className?: string;
+    onReset?: () => void;
 }
 
 export function LikesCounter({
@@ -20,15 +21,23 @@ export function LikesCounter({
     dailyLikesLimit,
     resetAt,
     subscriptionStatus = 'free',
-    className
+    className,
+    onReset
 }: LikesCounterProps) {
     const [now, setNow] = useState(new Date());
     const [showModal, setShowModal] = useState(false);
+    const prevResetRef = useState(resetAt)[0];
 
     useEffect(() => {
         const interval = setInterval(() => setNow(new Date()), 10000);
         return () => clearInterval(interval);
     }, []);
+
+    useEffect(() => {
+        if (resetAt !== prevResetRef && onReset) {
+            onReset();
+        }
+    }, [resetAt, prevResetRef, onReset]);
 
     const resetDate = useMemo(() => new Date(resetAt), [resetAt]);
     const isPlus = subscriptionStatus === 'plus';

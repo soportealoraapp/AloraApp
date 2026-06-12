@@ -1,8 +1,17 @@
 import { createClient } from '../client'
 
+let _supabaseClient: ReturnType<typeof createClient> | null = null;
+
+function getClient() {
+    if (!_supabaseClient) {
+        _supabaseClient = createClient();
+    }
+    return _supabaseClient;
+}
+
 export const authService = {
     async signIn(email: string, password: string) {
-        const supabase = createClient()
+        const supabase = getClient()
         const { data, error } = await supabase.auth.signInWithPassword({
             email,
             password,
@@ -21,7 +30,7 @@ export const authService = {
     },
 
     async signUp(email: string, password: string, name?: string) {
-        const supabase = createClient()
+        const supabase = getClient()
         const { data, error } = await supabase.auth.signUp({
             email,
             password,
@@ -46,7 +55,7 @@ export const authService = {
     },
 
     async signInWithGoogle() {
-        const supabase = createClient()
+        const supabase = getClient()
         const { error } = await supabase.auth.signInWithOAuth({
             provider: 'google',
             options: {
@@ -58,7 +67,7 @@ export const authService = {
     },
 
     async signInWithApple() {
-        const supabase = createClient()
+        const supabase = getClient()
         const { error } = await supabase.auth.signInWithOAuth({
             provider: 'apple',
             options: {
@@ -70,12 +79,12 @@ export const authService = {
     },
 
     async signOut() {
-        const supabase = createClient()
+        const supabase = getClient()
         await supabase.auth.signOut()
     },
 
     async sendPasswordResetEmail(email: string) {
-        const supabase = createClient()
+        const supabase = getClient()
         const { error } = await supabase.auth.resetPasswordForEmail(email, {
             redirectTo: `${window.location.origin}/auth/callback?next=/password-update`,
         })
@@ -83,7 +92,7 @@ export const authService = {
     },
 
     async resendVerificationEmail(email: string) {
-        const supabase = createClient()
+        const supabase = getClient()
         const { error } = await supabase.auth.resend({
             type: 'signup',
             email,

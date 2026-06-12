@@ -92,16 +92,18 @@ export function FloatingMatchCard({ profile, onSwipe, onFlechado, compatibility,
       <SoftCard className="min-h-[400px] max-h-[calc(100dvh-180px)] h-full overflow-hidden relative border-none shadow-xl rounded-2xl bg-card">
         {photos.length > 0 ? (
           photos.map((photo, index) => (
-            <Image
-              key={index}
-              src={photo}
-              alt={`${profile.displayName} ${index + 1}`}
-              fill
-              className={`object-cover pointer-events-none transition-opacity duration-300 ${
-                index === currentPhotoIndex ? 'opacity-100' : 'opacity-0'
-              }`}
-              priority={index === 0}
-            />
+            Math.abs(index - currentPhotoIndex) <= 1 && (
+              <Image
+                key={index}
+                src={photo}
+                alt={`${profile.displayName} ${index + 1}`}
+                fill
+                className={`object-cover pointer-events-none transition-opacity duration-300 ${
+                  index === currentPhotoIndex ? 'opacity-100' : 'opacity-0'
+                }`}
+                priority={index === 0}
+              />
+            )
           ))
         ) : (
           <Image

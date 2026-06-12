@@ -27,8 +27,16 @@ export default function ChatPage() {
     const [hidingMatch, setHidingMatch] = useState<string | null>(null);
     const [hiddenMatches, setHiddenMatches] = useState<Set<string>>(() => {
         if (typeof window !== 'undefined') {
-            const stored = localStorage.getItem('hiddenMatches');
-            return stored ? new Set(JSON.parse(stored)) : new Set();
+            try {
+                const stored = localStorage.getItem('hiddenMatches');
+                if (stored) {
+                    const { ids, expiresAt } = JSON.parse(stored);
+                    if (Date.now() < expiresAt) {
+                        return new Set(ids);
+                    }
+                    localStorage.removeItem('hiddenMatches');
+                }
+            } catch { /* ignore */ }
         }
         return new Set();
     });
@@ -119,7 +127,11 @@ export default function ChatPage() {
             const newHidden = new Set(hiddenMatches);
             newHidden.add(hideTargetId);
             setHiddenMatches(newHidden);
-            localStorage.setItem('hiddenMatches', JSON.stringify([...newHidden]));
+            const thirtyDays = 30 * 24 * 60 * 60 * 1000;
+            localStorage.setItem('hiddenMatches', JSON.stringify({
+                ids: [...newHidden],
+                expiresAt: Date.now() + thirtyDays,
+            }));
 
             await fetch('/api/chat/hide', {
                 method: 'POST',

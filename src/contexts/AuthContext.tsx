@@ -1,6 +1,6 @@
 'use client';
 
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useEffect, useRef, useState } from 'react';
 import { User } from '@supabase/supabase-js';
 import { createClient } from '@/lib/supabase/client';
 import { profileService } from '@/lib/supabase/services/profile';
@@ -27,9 +27,10 @@ const AuthContext = createContext<AuthContextType>({
 export function AuthProvider({ children }: { children: React.ReactNode }) {
     const [user, setUser] = useState<User | null>(null);
     const [profile, setProfile] = useState<UserProfile | null>(null);
-    const [authLoading, setAuthLoading] = useState(false);
+    const [authLoading, setAuthLoading] = useState(true);
     const [profileLoading, setProfileLoading] = useState(false);
     const supabase = createClient();
+    const userRef = useRef<User | null>(null);
 
     const refreshProfile = async () => {
         if (user) {
@@ -92,17 +93,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
             const currentUser = session?.user ?? null;
             setUser(currentUser);
+            userRef.current = currentUser;
 
             if (event === 'SIGNED_OUT' || !currentUser) {
                 setProfile(null);
                 setUser(null);
+                userRef.current = null;
                 setAuthLoading(false);
                 return;
             }
 
             setAuthLoading(false);
 
-            if (currentUser && currentUser.id !== user?.id) {
+            if (currentUser && currentUser.id !== userRef.current?.id) {
                 setProfileLoading(true);
                 try {
                     const userProfile = await profileService.getProfile(currentUser.id);
@@ -123,6 +126,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         await supabase.auth.signOut();
         setUser(null);
         setProfile(null);
+        userRef.current = null;
     };
 
     return (

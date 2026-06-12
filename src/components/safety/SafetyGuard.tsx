@@ -19,7 +19,7 @@ export function SafetyGuard({ children }: { children: React.ReactNode }) {
                 const stored = localStorage.getItem(AGE_GATE_KEY);
                 if (stored) {
                     const { timestamp } = JSON.parse(stored);
-                    setAgeGateAccepted(Date.now() - timestamp < 86400000);
+                    setAgeGateAccepted(Date.now() - timestamp < 365 * 24 * 60 * 60 * 1000);
                     return;
                 }
             } catch {}

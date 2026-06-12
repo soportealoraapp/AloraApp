@@ -91,15 +91,7 @@ export default function SettingsPage() {
                     <Button
                         variant="outline"
                         className="w-full text-destructive border-destructive/30 hover:bg-destructive/5"
-                        onClick={() => {
-                            if (window.confirm('¿Estás seguro de que quieres eliminar tu cuenta? Esta acción no se puede deshacer.')) {
-                                // TODO: Call delete account API
-                                toast({
-                                    title: "Solicitud enviada",
-                                    description: "Recibirás un email para confirmar la eliminación de tu cuenta.",
-                                });
-                            }
-                        }}
+                        onClick={() => router.push('/settings/privacy')}
                     >
                         Eliminar cuenta
                     </Button>
