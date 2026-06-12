@@ -50,17 +50,27 @@ export function OnboardingWizard({ initialRef }: { initialRef?: string } = {}) {
     }, [initialRef]);
 
     useEffect(() => {
-        if (!authLoading && user) {
-            setStep(2);
-        }
-    }, [authLoading, profileLoading, user]);
+        if (isInitialized || authLoading || profileLoading) return;
 
-    useEffect(() => {
-        if (profile && !isInitialized) {
-            setFormData(profile);
+        if (!user) {
             setIsInitialized(true);
+            return;
         }
-    }, [profile, isInitialized]);
+
+        if (profile) {
+            setFormData(profile);
+            const hasBasicInfo = Boolean(profile.displayName?.trim()) && Boolean(profile.age);
+            const hasPhotos = Boolean(profile.photos && profile.photos.length > 0);
+            if (!hasBasicInfo) {
+                setStep(2);
+            } else if (!hasPhotos) {
+                setStep(3);
+            } else {
+                setStep(4);
+            }
+        }
+        setIsInitialized(true);
+    }, [user, profile, authLoading, profileLoading, isInitialized]);
 
     const saveProgress = useCallback(async (newData: Partial<UserProfile>) => {
         if (!effectiveUserId) return;
