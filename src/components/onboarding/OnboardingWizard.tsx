@@ -30,7 +30,7 @@ const STEP_WELCOME_OAUTH = [
 ];
 
 export function OnboardingWizard({ initialRef }: { initialRef?: string } = {}) {
-    const { user, profile, authLoading, profileLoading } = useAuth();
+    const { user, profile, authLoading, profileLoading, refreshProfile } = useAuth();
     const router = useRouter();
     const [step, setStep] = useState(1);
     const [formData, setFormData] = useState<Partial<UserProfile>>({});
@@ -81,6 +81,7 @@ export function OnboardingWizard({ initialRef }: { initialRef?: string } = {}) {
             }
 
             setFormData(profile);
+            formDataRef.current = profile;
             const hasBasicInfo = Boolean(profile.displayName?.trim()) && 
                                Boolean(profile.age) && 
                                Boolean(profile.gender) && 
@@ -164,17 +165,23 @@ export function OnboardingWizard({ initialRef }: { initialRef?: string } = {}) {
         if (effectiveUserId) {
             try {
                 const finalData = formDataRef.current;
-                await updateUserProfile(effectiveUserId, {
+                const result = await updateUserProfile(effectiveUserId, {
                     ...finalData,
                     isCompleted: true,
                 } as any);
+                
+                if (result.success) {
+                    await refreshProfile();
+                }
             } catch (err) {
                 console.error("Failed to mark profile as completed", err);
             }
         }
         trackEvent('onboarding_completed', { userId: effectiveUserId });
-        router.push('/discover');
-    }, [effectiveUserId, router]);
+        
+        // Use window.location for a harder redirect to ensure middleware/state is fresh
+        window.location.href = '/discover';
+    }, [effectiveUserId, refreshProfile]);
 
     const nextStep = useCallback(async () => {
         if (step === totalSteps) {
