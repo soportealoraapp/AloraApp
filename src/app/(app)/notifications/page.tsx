@@ -17,18 +17,28 @@ function NotificationItem({ notification, onRead }: { notification: any; onRead:
     if (isUnread) onRead();
 
     const type = notification.type || '';
-    const data = notification.data || {};
+    const data = (notification.data as any) || {};
+
+    console.log('[NotificationClick]', { type, data });
 
     if (type === 'match' || type === 'new_match') {
-      router.push(`/chat/${data.matchId || ''}`);
+      const matchId = data.matchId || data.id;
+      if (matchId) router.push(`/chat/${matchId}`);
     } else if (type === 'message' || type === 'new_message') {
-      router.push(`/chat/${data.conversationId || data.matchId || ''}`);
+      const chatId = data.conversationId || data.matchId || data.id;
+      if (chatId) router.push(`/chat/${chatId}`);
     } else if (type === 'like' || type === 'new_like') {
-      router.push(`/profile/${data.fromUserId || data.userId || ''}`);
+      const userId = data.fromUserId || data.userId || data.id;
+      if (userId) router.push(`/profile/${userId}`);
     } else if (type === 'quiz' || type === 'compatibility') {
       router.push('/compatibility');
     } else if (type === 'profile_view') {
-      router.push(`/profile/${data.viewerId || data.userId || ''}`);
+      const userId = data.viewerId || data.userId || data.id;
+      if (userId) router.push(`/profile/${userId}`);
+    } else {
+      // Default to profile if we have a userId but unknown type
+      const fallbackId = data.userId || data.fromUserId || data.id;
+      if (fallbackId) router.push(`/profile/${fallbackId}`);
     }
   };
 

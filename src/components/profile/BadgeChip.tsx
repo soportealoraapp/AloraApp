@@ -61,12 +61,18 @@ export function BadgeChip({ label, type, variant, className, onClick }: BadgeChi
   const Tag = onClick ? 'button' : 'span';
   return (
     <Tag
-      onClick={onClick}
+      onClick={(e) => {
+        if (onClick) {
+          e.preventDefault();
+          e.stopPropagation();
+          onClick();
+        }
+      }}
       type={onClick ? 'button' : undefined}
       className={cn(
         badgeVariants({ variant: variant ?? (type === 'value' ? 'outline' : 'secondary') }),
-        'rounded-full text-sm py-1 gap-1 inline-flex items-center',
-        onClick && 'cursor-pointer hover:opacity-80',
+        'rounded-full text-sm py-1 gap-1 inline-flex items-center transition-all',
+        onClick && 'cursor-pointer hover:bg-primary hover:text-primary-foreground hover:scale-105 active:scale-95',
         className
       )}
     >
@@ -76,12 +82,12 @@ export function BadgeChip({ label, type, variant, className, onClick }: BadgeChi
   );
 }
 
-export function BadgeChipList({ items, type, className }: { items: string[]; type: BadgeType; className?: string }) {
+export function BadgeChipList({ items, type, className, onItemClick }: { items: string[]; type: BadgeType; className?: string; onItemClick?: (item: string) => void }) {
   if (!items || items.length === 0) return null;
   return (
     <div className={cn('flex flex-wrap gap-2', className)}>
       {items.map(item => (
-        <BadgeChip key={item} label={item} type={type} />
+        <BadgeChip key={item} label={item} type={type} onClick={onItemClick ? () => onItemClick(item) : undefined} />
       ))}
     </div>
   );

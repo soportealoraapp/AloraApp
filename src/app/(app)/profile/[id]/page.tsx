@@ -207,6 +207,11 @@ export default function UserProfilePage() {
         }
     };
 
+    const handleTagClick = (tag: string, type: 'interest' | 'value' | 'music') => {
+        const queryParam = type === 'interest' ? 'interest' : type === 'value' ? 'value' : 'music';
+        router.push(`/discover?${queryParam}=${encodeURIComponent(tag)}`);
+    };
+
     return (
         <div>
             <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b bg-background/80 px-4 backdrop-blur-sm sm:px-6 pt-safe">
@@ -344,7 +349,11 @@ export default function UserProfilePage() {
                         <div className="flex items-start gap-3">
                             <div className="flex-1 min-w-0">
                                 <h3 className="text-sm font-semibold text-muted-foreground mb-2">Intereses</h3>
-                                <BadgeChipList items={profile.interests} type="interest" />
+                                <BadgeChipList 
+                                    items={profile.interests} 
+                                    type="interest" 
+                                    onItemClick={(tag) => handleTagClick(tag, 'interest')}
+                                />
                             </div>
                         </div>
                     )}
@@ -353,7 +362,11 @@ export default function UserProfilePage() {
                         <div className="flex items-start gap-3">
                             <div className="flex-1 min-w-0">
                                 <h3 className="text-sm font-semibold text-muted-foreground mb-2">Valores</h3>
-                                <BadgeChipList items={profile.values} type="value" />
+                                <BadgeChipList 
+                                    items={profile.values} 
+                                    type="value" 
+                                    onItemClick={(tag) => handleTagClick(tag, 'value')}
+                                />
                             </div>
                         </div>
                     )}

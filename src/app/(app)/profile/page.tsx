@@ -72,6 +72,11 @@ export default function ProfilePage() {
 
   const completenessScore = calculateCompleteness(profile);
 
+  const handleTagClick = (tag: string, type: 'interest' | 'value' | 'music') => {
+    const queryParam = type === 'interest' ? 'interest' : type === 'value' ? 'value' : 'music';
+    router.push(`/discover?${queryParam}=${encodeURIComponent(tag)}`);
+  };
+
   return (
     <div>
       <header className="sticky top-0 z-30 flex h-16 items-center gap-2 border-b bg-background/90 px-3 backdrop-blur-md sm:px-6 pt-safe">
@@ -217,13 +222,21 @@ export default function ProfilePage() {
                 {profile.interests && profile.interests.length > 0 && (
                   <div>
                     <h3 className="font-semibold text-sm mb-2">Intereses</h3>
-                    <BadgeChipList items={profile.interests} type="interest" />
+                    <BadgeChipList 
+                      items={profile.interests} 
+                      type="interest" 
+                      onItemClick={(tag) => handleTagClick(tag, 'interest')}
+                    />
                   </div>
                 )}
                 {profile.values && profile.values.length > 0 && (
                   <div>
                     <h3 className="font-semibold text-sm mb-2">Valores</h3>
-                    <BadgeChipList items={profile.values} type="value" />
+                    <BadgeChipList 
+                      items={profile.values} 
+                      type="value" 
+                      onItemClick={(tag) => handleTagClick(tag, 'value')}
+                    />
                   </div>
                 )}
                 {profile.musicGenres && profile.musicGenres.length > 0 && (
@@ -232,7 +245,11 @@ export default function ProfilePage() {
                       <Music className="h-4 w-4" />
                       Música
                     </h3>
-                    <BadgeChipList items={profile.musicGenres} type="music" />
+                    <BadgeChipList 
+                      items={profile.musicGenres} 
+                      type="music" 
+                      onItemClick={(tag) => handleTagClick(tag, 'music')}
+                    />
                   </div>
                 )}
               </CardContent>

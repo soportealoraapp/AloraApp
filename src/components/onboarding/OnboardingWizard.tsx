@@ -11,7 +11,7 @@ import { StepInterests } from "./StepInterests";
 import { StepCreateAccount } from "./StepCreateAccount";
 import { StepPhotos } from "./StepPhotos";
 import { UserProfile } from "@/lib/domain/types";
-import { Heart, Cloud } from "lucide-react";
+import { Heart, Cloud, Loader2 } from "lucide-react";
 import { REFERRAL_COOKIE, REFERRAL_SESSION_KEY, REFERRAL_CODE_PATTERN } from "@/lib/referral/constants";
 import { trackEvent } from "@/lib/tracking/client";
 
@@ -67,14 +67,14 @@ export function OnboardingWizard({ initialRef }: { initialRef?: string } = {}) {
     }, [initialRef]);
 
     useEffect(() => {
-        if (isInitialized || authLoading || profileLoading) return;
+        if (authLoading || profileLoading) return;
 
         if (!user) {
             setIsInitialized(true);
             return;
         }
 
-        if (profile) {
+        if (profile && !isInitialized) {
             if (profile.isCompleted) {
                 router.replace('/discover');
                 return;
@@ -107,9 +107,12 @@ export function OnboardingWizard({ initialRef }: { initialRef?: string } = {}) {
                     setStep(4);
                 }
             }
+            setIsInitialized(true);
+        } else if (user && !profile && !profileLoading) {
+            // User exists but no profile row yet
+            setIsInitialized(true);
         }
-        setIsInitialized(true);
-    }, [user, profile, authLoading, profileLoading, isInitialized, isOAuthUser]);
+    }, [user, profile, authLoading, profileLoading, isInitialized, isOAuthUser, router]);
 
     useEffect(() => {
         if (isInitialized && effectiveUserId) {
@@ -145,7 +148,7 @@ export function OnboardingWizard({ initialRef }: { initialRef?: string } = {}) {
                 console.error("Auto-save failed");
             }
         }, 800);
-    }, [effectiveUserId, formData]);
+    }, [effectiveUserId]);
 
     useEffect(() => {
         return () => {
@@ -210,6 +213,19 @@ export function OnboardingWizard({ initialRef }: { initialRef?: string } = {}) {
     }, [step, totalSteps, completeOnboarding, effectiveUserId]);
 
     const prevStep = useCallback(() => setStep(prev => Math.max(prev - 1, 1)), []);
+
+    if (!isInitialized) {
+        return (
+            <div className="w-full min-h-dvh flex items-center justify-center">
+                <div className="flex flex-col items-center gap-4">
+                    <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                    <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground animate-pulse">
+                        Cargando tu perfil...
+                    </p>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="w-full min-h-dvh md:min-h-0 md:max-w-md md:mx-auto p-4 md:p-8 bg-background md:rounded-3xl md:shadow-xl md:border md:border-border/50 flex flex-col">

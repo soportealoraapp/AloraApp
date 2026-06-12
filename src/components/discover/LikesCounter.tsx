@@ -29,17 +29,17 @@ export function LikesCounter({
     const prevResetRef = useState(resetAt)[0];
 
     useEffect(() => {
-        const interval = setInterval(() => setNow(new Date()), 10000);
+        const interval = setInterval(() => setNow(new Date()), 1000);
         return () => clearInterval(interval);
     }, []);
 
-    useEffect(() => {
-        if (resetAt !== prevResetRef && onReset) {
-            onReset();
-        }
-    }, [resetAt, prevResetRef, onReset]);
+    const resetDate = useMemo(() => {
+        const d = new Date(resetAt);
+        // If the reset date is in the past, or we want specifically "midnight tomorrow"
+        // we can adjust here, but usually the backend sends the correct next reset time.
+        return d;
+    }, [resetAt]);
 
-    const resetDate = useMemo(() => new Date(resetAt), [resetAt]);
     const isPlus = subscriptionStatus === 'plus';
 
     if (isPlus) {
@@ -56,11 +56,13 @@ export function LikesCounter({
 
     const timeUntilReset = useMemo(() => {
         const diff = resetDate.getTime() - now.getTime();
-        if (diff <= 0) return null;
+        if (diff <= 0) return "00:00:00";
+        
         const hours = Math.floor(diff / (1000 * 60 * 60));
         const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-        if (hours > 0) return `${hours}h ${minutes}m`;
-        return `${minutes}m`;
+        const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+        
+        return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
     }, [resetDate, now]);
 
     const isLow = remaining <= 10;
@@ -81,7 +83,7 @@ export function LikesCounter({
                     </div>
                     {timeUntilReset && (
                     <span className="text-[11px] text-muted-foreground">
-                        Se restauran en {timeUntilReset}
+                        Se reinician en {timeUntilReset}
                     </span>
                     )}
                 </div>

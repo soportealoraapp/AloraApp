@@ -82,7 +82,7 @@ export function LikesCounterModal({ isOpen, onClose, remaining, dailyLikesLimit,
                         <div className="bg-muted/50 rounded-xl p-4 text-center">
                             <div className="flex items-center justify-center gap-2 text-muted-foreground mb-1">
                                 <Clock className="h-4 w-4" />
-                                <span className="text-sm font-medium">Se reinician mañana</span>
+                                <span className="text-sm font-medium">Se reinician en</span>
                             </div>
                             <p className="text-2xl font-mono font-bold text-foreground tracking-wider">
                                 {timeUntilReset || '...'}

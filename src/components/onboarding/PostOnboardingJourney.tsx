@@ -148,7 +148,10 @@ export function PostOnboardingJourney() {
           className="mb-3"
         >
           <p className="text-xs text-muted-foreground mb-1">Próxima misión:</p>
-          <div className="flex items-center gap-3 p-3 rounded-xl bg-background/50 border border-border/50">
+          <button 
+            onClick={() => router.push(nextMission.route)}
+            className="w-full flex items-center gap-3 p-3 rounded-xl bg-background/50 border border-border/50 hover:border-primary/50 hover:bg-primary/5 transition-all text-left"
+          >
             <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center text-primary flex-shrink-0">
               {nextMission.icon}
             </div>
@@ -156,15 +159,10 @@ export function PostOnboardingJourney() {
               <p className="text-sm font-bold text-foreground truncate">{nextMission.title}</p>
               <p className="text-xs text-muted-foreground truncate">{nextMission.description}</p>
             </div>
-            <Button
-              size="sm"
-              variant="ghost"
-              className="h-8 px-2 text-primary flex-shrink-0"
-              onClick={() => router.push(nextMission.route)}
-            >
+            <div className="h-8 px-2 text-primary flex-shrink-0 flex items-center">
               <ChevronRight className="h-4 w-4" />
-            </Button>
-          </div>
+            </div>
+          </button>
         </motion.div>
       )}
 

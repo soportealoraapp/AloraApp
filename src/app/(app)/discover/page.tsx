@@ -13,7 +13,7 @@ import { useDiscover } from "@/hooks/use-discover";
 import { useAuth } from "@/contexts/AuthContext";
 import { useMatches } from "@/hooks/use-matches";
 import { useToast } from "@/hooks/use-toast";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { UserProfile } from "@/lib/domain/types";
 import { BRAND_VOICE } from "@/lib/constants/brand-voice";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -63,8 +63,26 @@ function countActiveFilters(f: Filters): number {
 
 export default function DiscoverPage() {
   const { profile: currentUserProfile } = useAuth();
+  const searchParams = useSearchParams();
   const [filters, setFilters] = useState<Filters>(DEFAULT_FILTERS);
   const [filterOpen, setFilterOpen] = useState(false);
+
+  // Handle URL filters
+  useEffect(() => {
+    const interest = searchParams.get('interest');
+    const value = searchParams.get('value');
+    const music = searchParams.get('music');
+
+    if (interest || value || music) {
+      setFilters(prev => ({
+        ...prev,
+        interests: interest ? [interest] : prev.interests,
+        values: value ? [value] : prev.values,
+        musicGenres: music ? [music] : prev.musicGenres,
+      }));
+      setFilterOpen(false);
+    }
+  }, [searchParams]);
   const { profiles, loading, loadingMore, refresh, loadMore, hasMore, setProfiles, error } = useDiscover("", filters);
   const { sendLike } = useMatches();
   const { toast } = useToast();
@@ -385,11 +403,7 @@ export default function DiscoverPage() {
         <LikesCounter
           dailyLikesUsed={currentUserProfile?.dailyLikesUsed ?? 0}
           dailyLikesLimit={SWIPE_LIMIT}
-          resetAt={
-            currentUserProfile?.dailyLikesResetAt
-              ? new Date(currentUserProfile.dailyLikesResetAt)
-              : new Date(new Date().setHours(24, 0, 0, 0))
-          }
+          resetAt={new Date(new Date().setHours(24, 0, 0, 0))}
           subscriptionStatus={currentUserProfile?.subscriptionStatus ?? 'free'}
         />
       </div>

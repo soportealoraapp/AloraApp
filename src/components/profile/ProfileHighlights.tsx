@@ -5,6 +5,8 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Home, Plane, PawPrint, Palette, BookOpen, Heart, Briefcase, Coffee, Music, Camera, Dumbbell, Sparkles, Users, Compass, type LucideIcon } from 'lucide-react';
 import { BadgeChipList } from '@/components/profile/BadgeChip';
 
+import { useRouter } from 'next/navigation';
+
 interface ProfileHighlightsProps {
     bio?: string | null;
     interests?: string[];
@@ -52,6 +54,7 @@ const LOOKING_FOR_LABEL: Record<string, string> = {
 };
 
 export function ProfileHighlights({ bio, interests = [], values = [], lookingFor, musicGenres = [] }: ProfileHighlightsProps) {
+    const router = useRouter();
     const highlights = useMemo(() => {
         const result: Array<{ label: string; icon: LucideIcon; color: string; source: string }> = [];
         const seen = new Set<string>();
@@ -149,7 +152,11 @@ export function ProfileHighlights({ bio, interests = [], values = [], lookingFor
                 {musicGenres.length > 0 && (
                     <div className="mt-3 pt-3 border-t border-border/50">
                         <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1.5">Escucha</p>
-                        <BadgeChipList items={musicGenres.slice(0, 4)} type="music" />
+                        <BadgeChipList 
+                            items={musicGenres.slice(0, 4)} 
+                            type="music" 
+                            onItemClick={(tag) => router.push(`/discover?music=${encodeURIComponent(tag)}`)}
+                        />
                     </div>
                 )}
             </CardContent>
