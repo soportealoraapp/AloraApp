@@ -54,7 +54,7 @@ export function StepInterests({ data, onUpdate, onNext, onPrev, userId }: StepIn
 
     const handleNext = () => {
         onUpdate({ interests: selectedInterests, values: selectedValues, musicGenres: selectedMusic });
-        trackEvent('REGISTRATION_STEP_COMPLETED', { step: 2, userId });
+        trackEvent('REGISTRATION_STEP_COMPLETED', { step: 'interests', userId });
         onNext();
     };
 

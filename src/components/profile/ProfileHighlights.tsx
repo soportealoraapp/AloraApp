@@ -15,18 +15,18 @@ interface ProfileHighlightsProps {
 }
 
 const KEYWORD_ICON_MAP: Array<{ keywords: string[]; label: string; icon: LucideIcon; color: string }> = [
-    { keywords: ['familia', 'family', 'hijos', 'mamá', 'papá', 'padres'], label: 'Familia', icon: Home, color: 'bg-amber-100 text-amber-700' },
-    { keywords: ['viajar', 'viajes', 'travel', 'viaje', 'mundo', 'destino'], label: 'Viajes', icon: Plane, color: 'bg-sky-100 text-sky-700' },
-    { keywords: ['mascota', 'perro', 'gato', 'animal', 'pet'], label: 'Mascotas', icon: PawPrint, color: 'bg-pink-100 text-pink-700' },
-    { keywords: ['arte', 'pintura', 'creatividad', 'diseño', 'creativa'], label: 'Creatividad', icon: Palette, color: 'bg-purple-100 text-purple-700' },
-    { keywords: ['lectura', 'leer', 'libro', 'literatura', 'escritura'], label: 'Lectura', icon: BookOpen, color: 'bg-indigo-100 text-indigo-700' },
-    { keywords: ['música', 'musica', 'concierto', 'banda', 'guitarra', 'cantar'], label: 'Música', icon: Music, color: 'bg-rose-100 text-rose-700' },
-    { keywords: ['cocinar', 'cocina', 'gastronomía', 'comida', 'recetas'], label: 'Cocina', icon: Coffee, color: 'bg-orange-100 text-orange-700' },
-    { keywords: ['foto', 'fotografía', 'camara', 'cámara'], label: 'Fotografía', icon: Camera, color: 'bg-cyan-100 text-cyan-700' },
-    { keywords: ['deporte', 'gym', 'fitness', 'correr', 'yoga', 'ejercicio'], label: 'Deporte', icon: Dumbbell, color: 'bg-green-100 text-green-700' },
-    { keywords: ['trabajo', 'carrera', 'profesión', 'empresa', 'emprendimiento'], label: 'Profesión', icon: Briefcase, color: 'bg-slate-100 text-slate-700' },
-    { keywords: ['amigos', 'social', 'gente', 'comunidad'], label: 'Social', icon: Users, color: 'bg-teal-100 text-teal-700' },
-    { keywords: ['aventura', 'explorar', 'naturaleza', 'outdoor'], label: 'Aventura', icon: Compass, color: 'bg-emerald-100 text-emerald-700' },
+    { keywords: ['familia', 'family', 'hijos', 'mamá', 'papá', 'padres'], label: 'Familia', icon: Home, color: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300' },
+    { keywords: ['viajar', 'viajes', 'travel', 'viaje', 'mundo', 'destino'], label: 'Viajes', icon: Plane, color: 'bg-sky-100 text-sky-700 dark:bg-sky-900/30 dark:text-sky-300' },
+    { keywords: ['mascota', 'perro', 'gato', 'animal', 'pet'], label: 'Mascotas', icon: PawPrint, color: 'bg-pink-100 text-pink-700 dark:bg-pink-900/30 dark:text-pink-300' },
+    { keywords: ['arte', 'pintura', 'creatividad', 'diseño', 'creativa'], label: 'Creatividad', icon: Palette, color: 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300' },
+    { keywords: ['lectura', 'leer', 'libro', 'literatura', 'escritura'], label: 'Lectura', icon: BookOpen, color: 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300' },
+    { keywords: ['música', 'musica', 'concierto', 'banda', 'guitarra', 'cantar'], label: 'Música', icon: Music, color: 'bg-rose-100 text-rose-700 dark:bg-rose-900/30 dark:text-rose-300' },
+    { keywords: ['cocinar', 'cocina', 'gastronomía', 'comida', 'recetas'], label: 'Cocina', icon: Coffee, color: 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-300' },
+    { keywords: ['foto', 'fotografía', 'camara', 'cámara'], label: 'Fotografía', icon: Camera, color: 'bg-cyan-100 text-cyan-700 dark:bg-cyan-900/30 dark:text-cyan-300' },
+    { keywords: ['deporte', 'gym', 'fitness', 'correr', 'yoga', 'ejercicio'], label: 'Deporte', icon: Dumbbell, color: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300' },
+    { keywords: ['trabajo', 'carrera', 'profesión', 'empresa', 'emprendimiento'], label: 'Profesión', icon: Briefcase, color: 'bg-muted text-muted-foreground' },
+    { keywords: ['amigos', 'social', 'gente', 'comunidad'], label: 'Social', icon: Users, color: 'bg-teal-100 text-teal-700 dark:bg-teal-900/30 dark:text-teal-300' },
+    { keywords: ['aventura', 'explorar', 'naturaleza', 'outdoor'], label: 'Aventura', icon: Compass, color: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300' },
 ];
 
 const VALUE_LABEL_MAP: Record<string, string> = {
@@ -78,7 +78,7 @@ export function ProfileHighlights({ bio, interests = [], values = [], lookingFor
                     result.push({ label: matched.label, icon: matched.icon, color: matched.color, source: 'value' });
                     seen.add(matched.label);
                 } else if (!seen.has(label)) {
-                    result.push({ label, icon: Heart, color: 'bg-rose-100 text-rose-700', source: 'value' });
+                    result.push({ label, icon: Heart, color: 'bg-rose-100 text-rose-700 dark:bg-rose-900/30 dark:text-rose-300', source: 'value' });
                     seen.add(label);
                 }
                 if (result.length >= 6) break;
@@ -98,7 +98,7 @@ export function ProfileHighlights({ bio, interests = [], values = [], lookingFor
                     result.push({
                         label: interest,
                         icon: Sparkles,
-                        color: 'bg-violet-100 text-violet-700',
+                        color: 'bg-violet-100 text-violet-700 dark:bg-violet-900/30 dark:text-violet-300',
                         source: 'interest'
                     });
                     seen.add(interest);
@@ -115,7 +115,7 @@ export function ProfileHighlights({ bio, interests = [], values = [], lookingFor
     if (highlights.length === 0 && !lookingForLabel) return null;
 
     return (
-        <Card className="rounded-3xl border-none shadow-sm bg-gradient-to-br from-primary/5 to-purple-500/5">
+        <Card className="rounded-3xl border-none shadow-sm bg-gradient-to-br from-primary/5 to-purple-500/5 dark:from-primary/10 dark:to-purple-500/10">
             <CardContent className="p-6">
                 <h3 className="font-bold text-lg mb-3 flex items-center gap-2">
                     <Sparkles className="h-5 w-5 text-primary" />

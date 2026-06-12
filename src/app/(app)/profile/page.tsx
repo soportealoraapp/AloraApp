@@ -82,10 +82,9 @@ export default function ProfilePage() {
               <Settings className="h-5 w-5" />
             </Link>
           </Button>
-          <Button variant="ghost" size="sm" asChild className="hidden sm:inline-flex mr-1 shrink-0">
-            <Link href={`/profile/${user?.id}?preview=1`}>
-              <Eye className="h-4 w-4 mr-1" />
-              Vista previa
+          <Button size="icon" variant="ghost" asChild className="shrink-0">
+            <Link href={`/profile/${user?.id}?preview=1`} title="Vista previa">
+              <Eye className="h-5 w-5" />
             </Link>
           </Button>
           <Button variant="default" size="sm" asChild className="shrink-0 text-xs sm:text-sm px-2 sm:px-4">

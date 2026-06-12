@@ -85,11 +85,11 @@ export function FloatingMatchCard({ profile, onSwipe, onFlechado, compatibility,
       initial={{ scale: 0.95, opacity: 0 }}
       whileInView={{ scale: 1, opacity: 1 }}
       transition={{ type: "spring", stiffness: 180, damping: 35 }}
-      className="absolute w-full h-full max-w-sm cursor-grab active:cursor-grabbing"
+      className="absolute w-full h-full max-w-sm cursor-grab active:cursor-grabbing flex flex-col"
       whileHover={{ scale: 1.01 }}
       whileTap={{ scale: 0.98 }}
     >
-      <SoftCard className="min-h-[400px] max-h-[calc(100dvh-180px)] h-full overflow-hidden relative border-none shadow-xl rounded-2xl bg-card">
+      <SoftCard className="flex-1 min-h-0 overflow-hidden relative border-none shadow-xl rounded-2xl bg-card">
         {photos.length > 0 ? (
           photos.map((photo, index) => (
             Math.abs(index - currentPhotoIndex) <= 1 && (
@@ -231,7 +231,7 @@ export function FloatingMatchCard({ profile, onSwipe, onFlechado, compatibility,
       </SoftCard>
 
       {/* Action buttons: Pass (left), Super Like (center), Like (right) */}
-      <div className="absolute -bottom-16 left-0 right-0 flex items-center justify-center gap-4 z-20">
+      <div className="flex items-center justify-center gap-4 pt-4 z-20">
         <button
           onClick={(e) => { e.stopPropagation(); onSwipe('left'); }}
           className="bg-card hover:bg-accent text-destructive rounded-full w-14 h-14 flex items-center justify-center shadow-xl transition-transform hover:scale-110 active:scale-95 border border-border focus-visible:ring-2 focus-visible:ring-primary/70"

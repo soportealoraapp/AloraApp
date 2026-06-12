@@ -168,22 +168,22 @@ export function PostOnboardingJourney() {
         </motion.div>
       )}
 
-      <div className="grid grid-cols-7 gap-1">
+      <div className="flex gap-1 overflow-x-auto pb-1 scrollbar-hide">
         {missions.map((mission) => (
           <div
             key={mission.id}
-            className={`flex flex-col items-center gap-1 p-1 rounded-lg transition-colors ${
+            className={`flex flex-col items-center gap-1 p-1.5 rounded-lg transition-colors flex-shrink-0 min-w-[40px] ${
               mission.completed ? 'bg-primary/10' : 'bg-muted/30'
             }`}
           >
-            <div className={`h-6 w-6 rounded-full flex items-center justify-center text-xs ${
+            <div className={`h-7 w-7 rounded-full flex items-center justify-center text-xs ${
               mission.completed
                 ? 'bg-primary text-primary-foreground'
                 : 'bg-muted text-muted-foreground'
             }`}>
-              {mission.completed ? <Check className="h-3 w-3" /> : mission.day}
+              {mission.completed ? <Check className="h-3.5 w-3.5" /> : mission.day}
             </div>
-            <span className="text-[10px] text-muted-foreground text-center leading-tight">
+            <span className="text-[10px] text-muted-foreground text-center leading-tight whitespace-nowrap">
               {mission.day === nextMission?.day && !mission.completed ? 'Ahora' : `D${mission.day}`}
             </span>
           </div>

@@ -117,7 +117,7 @@ export function StepPhotos({ userId, data, onUpdate, onNext, onPrev }: any) {
             photos,
             incomplete_media: isIncomplete
         });
-        trackEvent('REGISTRATION_STEP_COMPLETED', { step: 3, userId, incomplete: isIncomplete });
+        trackEvent('REGISTRATION_STEP_COMPLETED', { step: 'photos', userId, incomplete: isIncomplete });
         onNext();
     }, [photos, userId, onUpdate, onNext]);
 

@@ -4,7 +4,7 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useState, useEffect, useMemo, useRef } from "react";
+import { useState, useEffect, useMemo, useRef, useCallback } from "react";
 import { trackEvent } from "@/lib/tracking/client";
 import { Heart, Handshake } from "lucide-react";
 import { motion } from "framer-motion";
@@ -22,8 +22,10 @@ interface StepBasicInfoProps {
 export function StepBasicInfo({ data, onUpdate, onNext, userId }: StepBasicInfoProps) {
     const [localData, setLocalData] = useState<Partial<UserProfile>>(data);
     const [citySearch, setCitySearch] = useState('');
+    const [debouncedCitySearch, setDebouncedCitySearch] = useState('');
     const [showCityDropdown, setShowCityDropdown] = useState(false);
     const cityDropdownRef = useRef<HTMLDivElement>(null);
+    const debounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
     const selectedModes: ConnectionIntent[] = (localData.connectionModes || ['dating']) as ConnectionIntent[];
 
@@ -55,7 +57,7 @@ export function StepBasicInfo({ data, onUpdate, onNext, userId }: StepBasicInfoP
 
     const handleNext = () => {
         onUpdate(localData);
-        trackEvent('REGISTRATION_STEP_COMPLETED', { step: 1, userId });
+        trackEvent('REGISTRATION_STEP_COMPLETED', { step: 'basic_info', userId });
         onNext();
     };
 
@@ -69,9 +71,20 @@ export function StepBasicInfo({ data, onUpdate, onNext, userId }: StepBasicInfoP
     );
 
     const filteredCities = useMemo(() => {
-        if (!citySearch.trim()) return CITIES.slice(0, 8);
-        const query = citySearch.toLowerCase();
+        if (!debouncedCitySearch.trim()) return CITIES.slice(0, 8);
+        const query = debouncedCitySearch.toLowerCase();
         return CITIES.filter(c => c.name.toLowerCase().includes(query)).slice(0, 8);
+    }, [debouncedCitySearch]);
+
+    // Debounce city search
+    useEffect(() => {
+        if (debounceTimerRef.current) clearTimeout(debounceTimerRef.current);
+        debounceTimerRef.current = setTimeout(() => {
+            setDebouncedCitySearch(citySearch);
+        }, 300);
+        return () => {
+            if (debounceTimerRef.current) clearTimeout(debounceTimerRef.current);
+        };
     }, [citySearch]);
 
     useEffect(() => {

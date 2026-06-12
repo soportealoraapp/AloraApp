@@ -23,6 +23,14 @@ export async function authFetch(url: string, options: RequestInit = {}): Promise
     } catch {
       // Refresh failed — redirect to login
     }
+    // Sign out to clear stale session state before redirecting
+    try {
+      const { createClient } = await import('@/lib/supabase/client');
+      const supabase = createClient();
+      await supabase.auth.signOut();
+    } catch {
+      // Best effort — proceed with redirect even if signOut fails
+    }
     if (typeof window !== 'undefined') {
       window.location.href = '/login?error=session_expired';
     }

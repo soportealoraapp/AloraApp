@@ -47,10 +47,19 @@ export async function GET(request: Request) {
                             || user.user_metadata?.name
                             || user.email?.split('@')[0]
                             || 'Usuario';
+                        const avatarUrl = user.user_metadata?.avatar_url || null;
                         await supabase.from('profiles').insert({
                             userId: user.id,
+                            email: user.email || null,
                             displayName,
-                            photos: user.user_metadata?.avatar_url ? [user.user_metadata.avatar_url] : [],
+                            photos: avatarUrl ? [avatarUrl] : [],
+                            age: 0,
+                            gender: '',
+                            city: '',
+                            countryCode: user.user_metadata?.locale?.split('-')?.[1] || '',
+                            stateCode: '',
+                            connectionModes: ['dating'],
+                            seeking: 'all',
                             isCompleted: false,
                         });
                         destination = '/onboarding';

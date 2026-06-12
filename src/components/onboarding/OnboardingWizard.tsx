@@ -15,9 +15,15 @@ import { Heart, Cloud } from "lucide-react";
 import { REFERRAL_COOKIE, REFERRAL_SESSION_KEY, REFERRAL_CODE_PATTERN } from "@/lib/referral/constants";
 import { trackEvent } from "@/lib/tracking/client";
 
-const STEP_LABELS = ['Tu cuenta', 'Tu esencia', 'Tus fotos', 'Tus colores'];
-const STEP_WELCOME = [
+const STEP_LABELS_ALL = ['Tu cuenta', 'Tu esencia', 'Tus fotos', 'Tus colores'];
+const STEP_LABELS_OAUTH = ['Tu esencia', 'Tus fotos', 'Tus colores'];
+const STEP_WELCOME_ALL = [
     'Crea tu cuenta',
+    'Datos e intención',
+    'Sube tus fotos',
+    'Intereses, valores y música',
+];
+const STEP_WELCOME_OAUTH = [
     'Datos e intención',
     'Sube tus fotos',
     'Intereses, valores y música',
@@ -27,7 +33,6 @@ export function OnboardingWizard({ initialRef }: { initialRef?: string } = {}) {
     const { user, profile, authLoading, profileLoading } = useAuth();
     const router = useRouter();
     const [step, setStep] = useState(1);
-    const totalSteps = 4;
     const [formData, setFormData] = useState<Partial<UserProfile>>({});
     const [isInitialized, setIsInitialized] = useState(false);
     const [syncStatus, setSyncStatus] = useState<'idle' | 'syncing' | 'saved' | 'error'>('idle');
@@ -35,6 +40,13 @@ export function OnboardingWizard({ initialRef }: { initialRef?: string } = {}) {
     const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
     const lastSavedRef = useRef<string>('');
     const hasCompletedRef = useRef(false);
+
+    // OAuth users (Google/Apple) already have a user from auth context at mount
+    // Email signup users start without a user
+    const isOAuthUser = Boolean(user);
+    const totalSteps = isOAuthUser ? 3 : 4;
+    const STEP_LABELS = isOAuthUser ? STEP_LABELS_OAUTH : STEP_LABELS_ALL;
+    const STEP_WELCOME = isOAuthUser ? STEP_WELCOME_OAUTH : STEP_WELCOME_ALL;
 
     const effectiveUserId = user?.id || signupUserId;
 
@@ -61,16 +73,29 @@ export function OnboardingWizard({ initialRef }: { initialRef?: string } = {}) {
             setFormData(profile);
             const hasBasicInfo = Boolean(profile.displayName?.trim()) && Boolean(profile.age);
             const hasPhotos = Boolean(profile.photos && profile.photos.length > 0);
-            if (!hasBasicInfo) {
-                setStep(2);
-            } else if (!hasPhotos) {
-                setStep(3);
+
+            if (isOAuthUser) {
+                // OAuth users: step 1=BasicInfo, 2=Photos, 3=Interests
+                if (!hasBasicInfo) {
+                    setStep(1);
+                } else if (!hasPhotos) {
+                    setStep(2);
+                } else {
+                    setStep(3);
+                }
             } else {
-                setStep(4);
+                // Email users: step 1=CreateAccount, 2=BasicInfo, 3=Photos, 4=Interests
+                if (!hasBasicInfo) {
+                    setStep(2);
+                } else if (!hasPhotos) {
+                    setStep(3);
+                } else {
+                    setStep(4);
+                }
             }
         }
         setIsInitialized(true);
-    }, [user, profile, authLoading, profileLoading, isInitialized]);
+    }, [user, profile, authLoading, profileLoading, isInitialized, isOAuthUser]);
 
     const saveProgress = useCallback(async (newData: Partial<UserProfile>) => {
         if (!effectiveUserId) return;
@@ -200,12 +225,22 @@ export function OnboardingWizard({ initialRef }: { initialRef?: string } = {}) {
                         transition={{ duration: 0.25, ease: "easeOut" }}
                         className="flex-1 flex flex-col"
                     >
-                        {step === 1 && (
-                            <StepCreateAccount onAccountCreated={handleAccountCreated} initialRef={initialRef} />
+                        {isOAuthUser ? (
+                            <>
+                                {step === 1 && <StepBasicInfo userId={effectiveUserId} data={formData} onUpdate={saveProgress} onNext={nextStep} />}
+                                {step === 2 && <StepPhotos userId={effectiveUserId} data={formData} onUpdate={saveProgress} onNext={nextStep} onPrev={prevStep} />}
+                                {step === 3 && <StepInterests userId={effectiveUserId} data={formData} onUpdate={saveProgress} onNext={nextStep} onPrev={prevStep} />}
+                            </>
+                        ) : (
+                            <>
+                                {step === 1 && (
+                                    <StepCreateAccount onAccountCreated={handleAccountCreated} initialRef={initialRef} />
+                                )}
+                                {step === 2 && <StepBasicInfo userId={effectiveUserId} data={formData} onUpdate={saveProgress} onNext={nextStep} />}
+                                {step === 3 && <StepPhotos userId={effectiveUserId} data={formData} onUpdate={saveProgress} onNext={nextStep} onPrev={prevStep} />}
+                                {step === 4 && <StepInterests userId={effectiveUserId} data={formData} onUpdate={saveProgress} onNext={nextStep} onPrev={prevStep} />}
+                            </>
                         )}
-                        {step === 2 && <StepBasicInfo userId={effectiveUserId} data={formData} onUpdate={saveProgress} onNext={nextStep} />}
-                        {step === 3 && <StepPhotos userId={effectiveUserId} data={formData} onUpdate={saveProgress} onNext={nextStep} onPrev={prevStep} />}
-                        {step === 4 && <StepInterests userId={effectiveUserId} data={formData} onUpdate={saveProgress} onNext={nextStep} onPrev={prevStep} />}
                     </motion.div>
                 </AnimatePresence>
             </div>

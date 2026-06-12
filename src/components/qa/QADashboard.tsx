@@ -162,7 +162,7 @@ export default function QADashboard() {
                                                 <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
                                                 <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
                                                 <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-                                                <div className="w-2 h-2 rounded-full bg-gray-300" />
+                                                <div className="w-2 h-2 rounded-full bg-muted-foreground/30" />
                                             </div>
                                         </div>
                                     </CardContent>
@@ -335,7 +335,7 @@ export default function QADashboard() {
 
                         <div className="mt-6 flex flex-wrap gap-4">
                             <div className="bg-primary w-12 h-12 rounded-2xl shadow-lg ring-4 ring-primary/10" />
-                            <div className="bg-[#FDF7F9] border w-12 h-12 rounded-2xl" />
+                                        <div className="bg-background border w-12 h-12 rounded-2xl" />
                             <div className="bg-muted w-12 h-12 rounded-2xl" />
                             <div className="bg-white border-4 border-pink-50 w-12 h-12 rounded-2xl" />
                         </div>

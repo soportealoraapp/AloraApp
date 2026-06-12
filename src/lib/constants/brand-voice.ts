@@ -57,7 +57,7 @@ export const BRAND_VOICE = {
         step1: 'Cuéntanos quién eres',
         step2: '¿Qué te hace vibrar?',
         step3: 'Muéstranos tu mundo',
-        step4: 'Protege tu espacio',
+        step4: 'Tus colores',
         completion: 'Tu perfil está listo. Hora de conocer personas increíbles.',
         skip: 'Lo haré más tarde',
         encouragement: 'Cada paso acerca una conexión auténtica.',

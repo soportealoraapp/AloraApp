@@ -320,7 +320,7 @@ export default function DiscoverPage() {
   return (
     <div
       ref={scrollRef}
-      className="h-screen flex flex-col overflow-y-auto bg-gradient-to-br from-background to-muted/30"
+      className="min-h-dvh md:min-h-0 h-dvh flex flex-col overflow-y-auto bg-gradient-to-br from-background to-muted/30"
       style={{ overscrollBehavior: 'contain' } as React.CSSProperties}
     >
       {pullToRefresh > 0 && (
