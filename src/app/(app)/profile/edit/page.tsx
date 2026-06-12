@@ -12,7 +12,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { getEmoji } from "@/components/profile/BadgeChip";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ArrowLeft, Upload, Loader2 } from "lucide-react";
+import { ArrowLeft, Upload, Loader2, MapPin } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Skeleton } from "@/components/ui/skeleton";
 import { CityAutocomplete } from "@/components/ui/city-autocomplete";
@@ -69,6 +69,7 @@ export default function ProfileEditPage() {
     const [latitude, setLatitude] = useState<number | null>(null);
     const [longitude, setLongitude] = useState<number | null>(null);
     const [lookingFor, setLookingFor] = useState("");
+    const [isLocating, setIsLocating] = useState(false);
     const [cropIndex, setCropIndex] = useState<number | null>(null);
     const [cropImageSrc, setCropImageSrc] = useState<string | null>(null);
     const [voiceIntroUrl, setVoiceIntroUrl] = useState<string | undefined>(undefined);
@@ -218,6 +219,49 @@ export default function ProfileEditPage() {
                     : prev
         );
     };
+
+    const handleAutoLocate = useCallback(async () => {
+        if (!navigator.geolocation) {
+            toast({ title: "No disponible", description: "Tu navegador no soporta geolocalización", variant: "destructive" });
+            return;
+        }
+
+        setIsLocating(true);
+        navigator.geolocation.getCurrentPosition(
+            async (pos) => {
+                try {
+                    const { latitude: lat, longitude: lng } = pos.coords;
+                    setLatitude(lat);
+                    setLongitude(lng);
+
+                    // Fetch city name from coordinates
+                    const res = await fetch(`/api/location/search?lat=${lat}&lng=${lng}`);
+                    if (!res.ok) throw new Error("Failed to reverse geocode");
+                    
+                    const data = await res.json();
+                    if (data.results && data.results.length > 0) {
+                        const result = data.results[0];
+                        setCity(`${result.city.name}, ${result.country.name}`);
+                        setCityId(result.city.id);
+                        setCountryCode(result.country.code);
+                        setStateCode(result.city.stateCode || "");
+                        markDirty();
+                        toast({ title: "Ubicación actualizada", description: `Te encontramos en ${result.city.name}` });
+                    }
+                } catch (err) {
+                    console.error("Locate error:", err);
+                    toast({ title: "Error", description: "No pudimos determinar tu ciudad exacta", variant: "destructive" });
+                } finally {
+                    setIsLocating(false);
+                }
+            },
+            () => {
+                setIsLocating(false);
+                toast({ title: "Acceso denegado", description: "Permite el acceso a tu ubicación para usar esta función", variant: "destructive" });
+            },
+            { timeout: 10000 }
+        );
+    }, [toast]);
 
     const handleSave = async () => {
         if (!user) return;
@@ -375,16 +419,28 @@ export default function ProfileEditPage() {
                         </div>
 
                         <div className="space-y-2">
-                            <Label htmlFor="city">Ciudad</Label>
+                            <div className="flex items-center justify-between">
+                                <Label htmlFor="city">Ciudad</Label>
+                                <button
+                                    type="button"
+                                    onClick={handleAutoLocate}
+                                    disabled={isLocating}
+                                    className="text-[10px] font-black uppercase tracking-widest text-primary flex items-center gap-1 hover:underline disabled:opacity-50"
+                                >
+                                    {isLocating ? <Loader2 className="h-3 w-3 animate-spin" /> : <MapPin className="h-3 w-3" />}
+                                    Auto-asignar
+                                </button>
+                            </div>
                             <CityAutocomplete
                                 value={city}
                                 onSelect={(location: LocationResult) => {
-                                    setCity(location.city.name);
+                                    setCity(`${location.city.name}, ${location.country.name}`);
                                     setCityId(location.city.id);
                                     setCountryCode(location.country.code);
-                                    setStateCode(location.city.stateCode);
+                                    setStateCode(location.city.stateCode || "");
                                     setLatitude(location.city.lat);
                                     setLongitude(location.city.lng);
+                                    markDirty();
                                 }}
                                 placeholder="Buscar tu ciudad..."
                             />

@@ -329,12 +329,13 @@ export default function UserProfilePage() {
                         </Card>
                     )}
 
-                    <ProfileHighlights
-                        bio={profile.bio}
-                        interests={profile.interests}
-                        values={profile.values}
+                    <ProfileHighlights 
+                        bio={profile.bio} 
+                        interests={profile.interests} 
+                        values={profile.values} 
                         lookingFor={profile.lookingFor}
                         musicGenres={profile.musicGenres}
+                        voiceIntro={profile.voiceIntro}
                     />
 
                     {profile.bio && (

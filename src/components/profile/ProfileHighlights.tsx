@@ -2,10 +2,7 @@
 
 import { useMemo } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
-import { Home, Plane, PawPrint, Palette, BookOpen, Heart, Briefcase, Coffee, Music, Camera, Dumbbell, Sparkles, Users, Compass, type LucideIcon } from 'lucide-react';
-import { BadgeChipList } from '@/components/profile/BadgeChip';
-
-import { useRouter } from 'next/navigation';
+import { Home, Plane, PawPrint, Palette, BookOpen, Heart, Briefcase, Coffee, Music, Camera, Dumbbell, Sparkles, Users, Compass, Mic, type LucideIcon } from 'lucide-react';
 
 interface ProfileHighlightsProps {
     bio?: string | null;
@@ -14,7 +11,11 @@ interface ProfileHighlightsProps {
     lookingFor?: string | null;
     musicGenres?: string[];
     personalGuide?: any;
+    voiceIntro?: string | null;
 }
+
+import { BadgeChipList } from '@/components/profile/BadgeChip';
+import { useRouter } from 'next/navigation';
 
 const KEYWORD_ICON_MAP: Array<{ keywords: string[]; label: string; icon: LucideIcon; color: string }> = [
     { keywords: ['familia', 'family', 'hijos', 'mamá', 'papá', 'padres'], label: 'Familia', icon: Home, color: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300' },
@@ -53,7 +54,7 @@ const LOOKING_FOR_LABEL: Record<string, string> = {
     networking: 'Networking',
 };
 
-export function ProfileHighlights({ bio, interests = [], values = [], lookingFor, musicGenres = [] }: ProfileHighlightsProps) {
+export function ProfileHighlights({ bio, interests = [], values = [], lookingFor, musicGenres = [], voiceIntro }: ProfileHighlightsProps) {
     const router = useRouter();
     const highlights = useMemo(() => {
         const result: Array<{ label: string; icon: LucideIcon; color: string; source: string }> = [];
@@ -115,7 +116,7 @@ export function ProfileHighlights({ bio, interests = [], values = [], lookingFor
 
     const lookingForLabel = lookingFor ? LOOKING_FOR_LABEL[lookingFor] : null;
 
-    if (highlights.length === 0 && !lookingForLabel) return null;
+    if (highlights.length === 0 && !lookingForLabel && !voiceIntro) return null;
 
     return (
         <Card className="rounded-3xl border-none shadow-sm bg-gradient-to-br from-primary/5 to-purple-500/5 dark:from-primary/10 dark:to-purple-500/10">
@@ -125,12 +126,21 @@ export function ProfileHighlights({ bio, interests = [], values = [], lookingFor
                     Lo mejor de esta persona
                 </h3>
 
-                {lookingForLabel && (
-                    <div className="mb-3 inline-flex items-center gap-1.5 bg-primary/10 text-primary px-3 py-1.5 rounded-full text-xs font-bold">
-                        <Heart className="h-3 w-3" fill="currentColor" />
-                        Busca: {lookingForLabel}
-                    </div>
-                )}
+                <div className="flex flex-wrap gap-2 mb-4">
+                    {lookingForLabel && (
+                        <div className="inline-flex items-center gap-1.5 bg-primary/10 text-primary px-3 py-1.5 rounded-full text-xs font-bold">
+                            <Heart className="h-3 w-3" fill="currentColor" />
+                            Busca: {lookingForLabel}
+                        </div>
+                    )}
+
+                    {voiceIntro && (
+                        <div className="inline-flex items-center gap-1.5 bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 px-3 py-1.5 rounded-full text-xs font-bold border border-indigo-500/20">
+                            <Mic className="h-3 w-3" />
+                            Tiene audio de voz
+                        </div>
+                    )}
+                </div>
 
                 {highlights.length > 0 && (
                     <div className="flex flex-wrap gap-2">

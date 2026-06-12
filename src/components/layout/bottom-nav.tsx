@@ -10,8 +10,8 @@ import { useNotifications } from '@/hooks/use-notifications';
 
 const navItems = [
   { href: '/discover', icon: Compass, label: 'Descubrir' },
-  { href: '/compatibility', icon: Sparkles, label: 'Almas', special: true },
   { href: '/chat', icon: MessageSquare, label: 'Mensajes' },
+  { href: '/compatibility', icon: Sparkles, label: 'Almas', special: true },
   { href: '/notifications', icon: Bell, label: 'Actividad' },
   { href: '/profile', icon: User, label: 'Perfil' },
 ];

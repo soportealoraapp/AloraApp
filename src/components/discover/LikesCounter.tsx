@@ -10,6 +10,7 @@ import { LikesCounterModal } from './LikesCounterModal';
 interface LikesCounterProps {
     dailyLikesUsed: number;
     dailyLikesLimit: number;
+    superlikesRemaining: number;
     resetAt: Date | string;
     subscriptionStatus?: string;
     className?: string;
@@ -19,6 +20,7 @@ interface LikesCounterProps {
 export function LikesCounter({
     dailyLikesUsed,
     dailyLikesLimit,
+    superlikesRemaining,
     resetAt,
     subscriptionStatus = 'free',
     className,
@@ -103,6 +105,7 @@ export function LikesCounter({
                 onClose={() => setShowModal(false)}
                 remaining={remaining}
                 dailyLikesLimit={dailyLikesLimit}
+                superlikesRemaining={superlikesRemaining}
                 resetAt={resetAt}
             />
         </>

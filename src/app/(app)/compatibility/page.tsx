@@ -8,8 +8,11 @@ import { Progress } from '@/components/ui/progress';
 import { COMPATIBILITY_QUIZZES, Quiz, QuizQuestion } from '@/lib/compatibility/quizzes';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from '@/components/ui/use-toast';
-import { Loader2, CheckCircle2, Heart, MessageCircle, Zap, Target, ArrowRight, ArrowLeft, Trophy } from 'lucide-react';
+import { Loader2, CheckCircle2, Heart, MessageCircle, Zap, Target, ArrowRight, ArrowLeft, Trophy, Sparkles } from 'lucide-react';
 import { ARCHETYPES } from '@/lib/compatibility/quizzes';
+import { DailyQuestionCard } from '@/components/daily-question/DailyQuestionCard';
+import { DailyCompatibilityCard } from '@/components/compatibility/DailyCompatibilityCard';
+import { Lightbulb, Info, Star } from 'lucide-react';
 
 const icons: Record<string, any> = {
   Heart,
@@ -212,16 +215,64 @@ export default function CompatibilityPage() {
 
   return (
     <div className="container max-w-lg mx-auto p-4 pb-24">
-      <header className="py-8 space-y-2">
-        <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
-          Compatibilidad
+      <header className="py-8 space-y-3">
+        <div className="inline-flex items-center gap-2 bg-primary/10 text-primary px-3 py-1 rounded-full text-xs font-bold uppercase tracking-widest">
+          <Sparkles className="h-3 w-3" />
+          Conexión Profunda
+        </div>
+        <h1 className="text-4xl font-black bg-gradient-to-tr from-primary via-purple-500 to-pink-500 bg-clip-text text-transparent leading-tight">
+          Almas
         </h1>
-        <p className="text-muted-foreground">
-          Completa estos quizzes para mejorar tus matches y encontrar a alguien que comparta tus valores.
+        <p className="text-muted-foreground text-lg leading-relaxed">
+          Donde la ciencia de la personalidad y el destino se encuentran para encontrar a tu alma gemela.
         </p>
       </header>
 
-      <div className="grid grid-cols-1 gap-4">
+      {/* Sección Destacada: Tu Alma del Día */}
+      <div className="mb-10">
+        <h2 className="text-xs font-black uppercase tracking-[0.2em] text-muted-foreground mb-4 px-1 flex items-center gap-2">
+          <Star className="h-3 w-3 text-yellow-500 fill-yellow-500" />
+          Tu Conexión del Día
+        </h2>
+        <DailyCompatibilityCard />
+      </div>
+
+      {/* Consejos de Alora */}
+      <Card className="mb-10 border-none bg-gradient-to-br from-indigo-500/10 to-purple-500/10 rounded-3xl overflow-hidden relative group cursor-pointer hover:shadow-lg transition-all">
+        <CardContent className="p-6">
+          <div className="flex items-start gap-4">
+            <div className="h-12 w-12 rounded-2xl bg-indigo-500/20 flex items-center justify-center shrink-0">
+              <Lightbulb className="h-6 w-6 text-indigo-600" />
+            </div>
+            <div className="space-y-1">
+              <h3 className="font-bold text-indigo-900 dark:text-indigo-300">Consejo de Alora</h3>
+              <p className="text-sm text-indigo-800/70 dark:text-indigo-400/70 leading-snug">
+                "Las almas gemelas no se encuentran, se construyen sobre valores compartidos y comunicación honesta."
+              </p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      <div className="mb-10">
+        <h2 className="text-xs font-black uppercase tracking-[0.2em] text-muted-foreground mb-4 px-1">
+          Reflexión Diaria
+        </h2>
+        <DailyQuestionCard />
+      </div>
+
+      <div className="space-y-6">
+        <div className="flex items-end justify-between px-1">
+          <div>
+            <h2 className="text-xs font-black uppercase tracking-[0.2em] text-muted-foreground">Viaje de Autodescubrimiento</h2>
+            <p className="text-[10px] text-muted-foreground mt-1 italic">Completa quizzes para desbloquear icebreakers exclusivos.</p>
+          </div>
+          <span className="text-[10px] font-bold bg-muted px-2 py-1 rounded-lg">
+            {completedQuizzes.length}/{COMPATIBILITY_QUIZZES.length}
+          </span>
+        </div>
+        
+        <div className="grid grid-cols-1 gap-4">
         {COMPATIBILITY_QUIZZES.map((quiz) => {
           const Icon = icons[quiz.icon] || Heart;
           const result = completedQuizzes.find(q => q.quizId === quiz.id);
@@ -268,6 +319,7 @@ export default function CompatibilityPage() {
             </Card>
           );
         })}
+        </div>
       </div>
 
       <div className="mt-8 p-6 rounded-3xl bg-gradient-to-br from-primary/5 to-primary/10 border border-border/50 space-y-3">

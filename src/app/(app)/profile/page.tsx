@@ -16,6 +16,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useState, useEffect } from "react";
 import { logger } from "@/lib/logger";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
+import { ProfileHighlights } from "@/components/profile/ProfileHighlights";
 
 export default function ProfilePage() {
   const { user, profile, authLoading, profileLoading } = useAuth();
@@ -199,7 +200,17 @@ export default function ProfilePage() {
             )}
           </div>
 
-          {/* 3. Daily answer */}
+          {/* 3. Highlights & Voice Intro */}
+          <ProfileHighlights 
+            bio={profile.bio} 
+            interests={profile.interests} 
+            values={profile.values} 
+            lookingFor={profile.lookingFor}
+            musicGenres={profile.musicGenres}
+            voiceIntro={profile.voiceIntro}
+          />
+
+          {/* 4. Daily answer */}
           {latestAnswer && (
             <Card className="rounded-2xl border border-border/60 bg-card/90 shadow-sm">
               <CardContent className="p-5">

@@ -7,7 +7,7 @@ import { MatchScreen } from "@/components/ui/premium/MatchScreen";
 import { Button } from "@/components/ui/button";
 import { Loader2, RefreshCcw, Sparkles, SlidersHorizontal, RotateCcw, Heart, X, ArrowRight, ArrowLeft, Star } from "lucide-react";
 import { DiscoverFilters, Filters } from "@/components/discover/discover-filters";
-import { Card } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import Image from "next/image";
 import { useDiscover } from "@/hooks/use-discover";
 import { useAuth } from "@/contexts/AuthContext";
@@ -17,12 +17,12 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { UserProfile } from "@/lib/domain/types";
 import { BRAND_VOICE } from "@/lib/constants/brand-voice";
 import { Skeleton } from "@/components/ui/skeleton";
-import { DailyQuestionCard } from "@/components/daily-question/DailyQuestionCard";
-import { DailyCompatibilityCard } from "@/components/compatibility/DailyCompatibilityCard";
-import { useAnalytics, AnalyticsEvents } from "@/hooks/use-analytics";
 import { LikesCounter } from "@/components/discover/LikesCounter";
 import { DailyPicks } from "@/components/discover/DailyPicks";
 import { PostOnboardingJourney } from "@/components/onboarding/PostOnboardingJourney";
+import { Handshake } from "lucide-react";
+import { useAnalytics, AnalyticsEvents } from "@/hooks/use-analytics";
+import { DailyCompatibilityCard } from "@/components/compatibility/DailyCompatibilityCard";
 
 
 
@@ -98,6 +98,14 @@ export default function DiscoverPage() {
   const [browseMode, setBrowseMode] = useState<'swipe' | 'grid'>('swipe');
   const [intent, setIntent] = useState<'dating' | 'friendship'>('dating');
   const [intentChanging, setIntentChanging] = useState(false);
+
+  // Handle URL intent
+  useEffect(() => {
+    const urlIntent = searchParams.get('intent');
+    if (urlIntent === 'friendship' || urlIntent === 'dating') {
+      setIntent(urlIntent);
+    }
+  }, [searchParams]);
 
   const lastSwipeRef = useRef<{ profileId: string; direction: string } | null>(null);
   const sentinelRef = useRef<HTMLDivElement>(null);
@@ -399,10 +407,45 @@ export default function DiscoverPage() {
       </header>
 
       {/* Likes counter — compact, above feed */}
-      <div className="px-4 pt-2 max-w-sm mx-auto w-full">
+      <div className="px-4 pt-2 max-w-sm mx-auto w-full space-y-3">
+        {intent === 'dating' && (
+          <Card className="border-none bg-gradient-to-r from-blue-500/10 to-indigo-500/10 rounded-2xl overflow-hidden cursor-pointer hover:bg-indigo-500/20 transition-all" onClick={() => setIntent('friendship')}>
+            <CardContent className="p-3 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="h-10 w-10 rounded-xl bg-blue-500/20 flex items-center justify-center text-blue-600">
+                  <Handshake className="h-5 w-5" />
+                </div>
+                <div>
+                  <p className="text-xs font-black uppercase tracking-widest text-blue-700">Modo Amistad</p>
+                  <p className="text-[10px] text-blue-600/80">Busca conexiones platónicas</p>
+                </div>
+              </div>
+              <ArrowRight className="h-4 w-4 text-blue-400" />
+            </CardContent>
+          </Card>
+        )}
+
+        {intent === 'friendship' && (
+          <Card className="border-none bg-gradient-to-r from-pink-500/10 to-primary/10 rounded-2xl overflow-hidden cursor-pointer hover:bg-primary/20 transition-all" onClick={() => setIntent('dating')}>
+            <CardContent className="p-3 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="h-10 w-10 rounded-xl bg-pink-500/20 flex items-center justify-center text-primary">
+                  <Heart className="h-5 w-5" />
+                </div>
+                <div>
+                  <p className="text-xs font-black uppercase tracking-widest text-primary">Modo Citas</p>
+                  <p className="text-[10px] text-primary/80">Vuelve a buscar tu alma gemela</p>
+                </div>
+              </div>
+              <ArrowRight className="h-4 w-4 text-primary/40" />
+            </CardContent>
+          </Card>
+        )}
+
         <LikesCounter
           dailyLikesUsed={currentUserProfile?.dailyLikesUsed ?? 0}
           dailyLikesLimit={SWIPE_LIMIT}
+          superlikesRemaining={currentUserProfile?.superlikesRemaining ?? 0}
           resetAt={new Date(new Date().setHours(24, 0, 0, 0))}
           subscriptionStatus={currentUserProfile?.subscriptionStatus ?? 'free'}
         />
@@ -587,11 +630,6 @@ export default function DiscoverPage() {
         <DailyPicks subscriptionStatus={currentUserProfile?.subscriptionStatus ?? 'free'} />
       </div>
 
-      {/* Daily Question - below the feed */}
-      <div className="px-4 pb-4 max-w-sm mx-auto w-full space-y-3">
-        <DailyQuestionCard />
-      </div>
-
       <DiscoverFilters
         open={filterOpen}
         onOpenChange={setFilterOpen}
@@ -614,6 +652,8 @@ export default function DiscoverPage() {
         />
       )}
 
+      {/* Bottom spacing for scrolling */}
+      <div className="h-20 md:hidden" />
     </div>
   );
 }

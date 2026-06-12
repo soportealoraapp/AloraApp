@@ -15,6 +15,10 @@ interface CityAutocompleteProps {
 export function CityAutocomplete({ value, onSelect, placeholder = "Buscar ciudad...", className }: CityAutocompleteProps) {
     const [query, setQuery] = useState(value);
     const [results, setResults] = useState<LocationResult[]>([]);
+
+    useEffect(() => {
+        setQuery(value);
+    }, [value]);
     const [isOpen, setIsOpen] = useState(false);
     const [highlightIndex, setHighlightIndex] = useState(-1);
     const [loading, setLoading] = useState(false);
