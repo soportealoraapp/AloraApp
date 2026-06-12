@@ -9,17 +9,36 @@ const INTEREST_EMOJIS: Record<string, string> = {
   'Escalada': '🧗', 'Ciclismo': '🚴', 'Correr': '🏃', 'Surf': '🏄',
   'Gaming': '🎮', 'Series': '📺', 'Anime': '🇯🇵', 'Comedia': '😂', 'Podcasts': '🎙️',
   'Tecnología': '💻', 'Astronomía': '🔭', 'Cócteles': '🍸',
+  'Gastronomía': '🍽️', 'Camping': '⛺', 'Pesca': '🎣', 'Ajedrez': '♟️', 'Pintura': '🖌️',
+  'Cerámica': '🏺', 'Pilates': '🧘', 'CrossFit': '🏋️', 'Natación': '🏊', 'Tenis': '🎾',
+  'Boxeo': '🥊', 'Escritura': '✍️', 'Poesía': '📜', 'Canto': '🎤', 'Instrumentos': '🎸',
+  'Voluntariado': '🤝', 'Emprendimiento': '🚀', 'Idiomas': '🌐', 'Repostería': '🧁',
+  'Café': '☕', 'Tatuajes': '💉', 'Juegos de Mesa': '🎲', 'Kayak': '🛶', 'Vela': '⛵',
+  'Paracaidismo': '🪂', 'Artes Marciales': '🥋', 'Patinaje': '🛼', 'Esquí': '⛷️',
+  'Go Kart': '🏎️', 'Paintball': '🔫', 'Escape Rooms': '🔑', 'Coleccionismo': '📦',
+  'Antigüedades': '🕰️', 'Aromaterapia': '🕯️', 'Cuidado Personal': '✨', 'Moda Sostenible': '♻️'
 };
 
 const VALUE_EMOJIS: Record<string, string> = {
   'Honestidad': '🤝', 'Respeto': '🙏', 'Lealtad': '🛡️', 'Humor': '😄', 'Aventura': '🚀',
   'Familia': '👨‍👩‍👧‍👦', 'Crecimiento': '🌱', 'Independencia': '🦅', 'Creatividad': '💡', 'Empatía': '💕',
+  'Disciplina': '⭐', 'Paciencia': '⏳', 'Tolerancia': '🌍', 'Generosidad': '🎁', 'Gratitud': '🙏',
+  'Compromiso': '💍', 'Responsabilidad': '✅', 'Libertad': '🕊️', 'Equilibrio': '⚖️', 'Espontaneidad': '⚡',
+  'Ambición': '🎯', 'Originalidad': '🦄', 'Sabiduría': '📖', 'Coraje': '🦁', 'Fe': '⛪',
+  'Tradición': '🏺', 'Sostenibilidad': '🌿', 'Solidaridad': '✊', 'Perseverancia': '🏔️', 'Alegría': '☀️'
 };
 
 const MUSIC_EMOJIS: Record<string, string> = {
   'Pop': '🎤', 'Rock': '🎸', 'Jazz': '🎷', 'Clásica': '🎻', 'Electrónica': '🎧',
   'Hip-Hop': '🎙️', 'Reggaeton': '🕺', 'Salsa': '💃', 'Country': '🤠', 'Indie': '🎸',
-  'R&B': '🎵', 'Folk': '🪕',
+  'R&B': '🎵', 'Folk': '🪕', 'Metal': '🤘', 'Punk': '⚡', 'Ska': '🏁', 'Reggae': '🇯🇲',
+  'Blues': '🎷', 'Soul': '🎹', 'Funk': '🎸', 'Disco': '🪩', 'Techno': '🎹', 'House': '🏠',
+  'Trance': '🌀', 'Drum and Bass': '🥁', 'Dubstep': '🔊', 'Ambient': '🌊', 'Bossa Nova': '🎸',
+  'Cumbia': '🪗', 'Banda': '🎺', 'Norteño': '🪗', 'Mariachi': '🎻', 'Ranchera': '🤠',
+  'Bolero': '🌹', 'Balada': '💌', 'Tropical': '🌴', 'Merengue': '💃', 'Bachata': '🕺',
+  'Flamenco': '💃', 'K-pop': '🇰🇷', 'J-pop': '🇯🇵', 'Rap': '🎤', 'Trap': '🔥',
+  'Corridos': '🎸', 'Corridos Tumbados': '🔥', 'Música Mexicana': '🇲🇽', 'New Age': '🧘',
+  'Gospel': '🙌', 'Afrobeat': '🌍', 'Garage Rock': '🚗', 'Shoegaze': '👟'
 };
 
 export type BadgeType = 'interest' | 'value' | 'music';

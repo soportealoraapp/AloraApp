@@ -187,7 +187,7 @@ export function StepInterests({ data, onUpdate, onNext, onPrev, userId }: StepIn
                         onClick={handleNext}
                         className="w-2/3 rounded-2xl shadow-md"
                     >
-                        {hasSelections ? `¡${selectedInterests.length + selectedValues.length + selectedMusic.length} selección${(selectedInterests.length + selectedValues.length + selectedMusic.length) !== 1 ? 'es' : ''}! Continuar` : 'Saltar por ahora'}
+                        {hasSelections ? `¡${selectedInterests.length + selectedValues.length + selectedMusic.length} selecciones! Continuar` : 'Saltar por ahora'}
                     </Button>
                 </div>
             </div>

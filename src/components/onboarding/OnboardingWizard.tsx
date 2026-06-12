@@ -34,12 +34,17 @@ export function OnboardingWizard({ initialRef }: { initialRef?: string } = {}) {
     const router = useRouter();
     const [step, setStep] = useState(1);
     const [formData, setFormData] = useState<Partial<UserProfile>>({});
+    const formDataRef = useRef<Partial<UserProfile>>({});
     const [isInitialized, setIsInitialized] = useState(false);
     const [syncStatus, setSyncStatus] = useState<'idle' | 'syncing' | 'saved' | 'error'>('idle');
     const [signupUserId, setSignupUserId] = useState<string>();
     const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
     const lastSavedRef = useRef<string>('');
     const hasCompletedRef = useRef(false);
+
+    useEffect(() => {
+        formDataRef.current = formData;
+    }, [formData]);
 
     // OAuth users (Google) already have a user from auth context at mount
     // Email signup users start without a user
@@ -113,8 +118,9 @@ export function OnboardingWizard({ initialRef }: { initialRef?: string } = {}) {
 
     const saveProgress = useCallback(async (newData: Partial<UserProfile>) => {
         if (!effectiveUserId || hasCompletedRef.current) return;
-        const updatedData = { ...formData, ...newData };
+        const updatedData = { ...formDataRef.current, ...newData };
         setFormData(updatedData);
+        formDataRef.current = updatedData;
 
         const serialized = JSON.stringify(updatedData);
         if (serialized === lastSavedRef.current) return;
@@ -157,17 +163,18 @@ export function OnboardingWizard({ initialRef }: { initialRef?: string } = {}) {
         if (debounceRef.current) clearTimeout(debounceRef.current);
         if (effectiveUserId) {
             try {
+                const finalData = formDataRef.current;
                 await updateUserProfile(effectiveUserId, {
-                    ...formData,
+                    ...finalData,
                     isCompleted: true,
                 } as any);
-            } catch {
-                console.error("Failed to mark profile as completed");
+            } catch (err) {
+                console.error("Failed to mark profile as completed", err);
             }
         }
         trackEvent('onboarding_completed', { userId: effectiveUserId });
         router.push('/discover');
-    }, [effectiveUserId, router, formData]);
+    }, [effectiveUserId, router]);
 
     const nextStep = useCallback(async () => {
         if (step === totalSteps) {
@@ -176,12 +183,13 @@ export function OnboardingWizard({ initialRef }: { initialRef?: string } = {}) {
         }
         // Save immediately when changing step (not debounced)
         if (effectiveUserId) {
-            const serialized = JSON.stringify(formData);
+            const currentData = formDataRef.current;
+            const serialized = JSON.stringify(currentData);
             if (serialized !== lastSavedRef.current) {
                 lastSavedRef.current = serialized;
                 setSyncStatus('syncing');
                 updateUserProfile(effectiveUserId, {
-                    ...formData,
+                    ...currentData,
                     isCompleted: false,
                 } as any).then(() => {
                     setSyncStatus('saved');
@@ -192,7 +200,7 @@ export function OnboardingWizard({ initialRef }: { initialRef?: string } = {}) {
             }
         }
         setStep(prev => Math.min(prev + 1, totalSteps));
-    }, [step, totalSteps, completeOnboarding, effectiveUserId, formData]);
+    }, [step, totalSteps, completeOnboarding, effectiveUserId]);
 
     const prevStep = useCallback(() => setStep(prev => Math.max(prev - 1, 1)), []);
 
