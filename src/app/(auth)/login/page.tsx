@@ -197,6 +197,7 @@ export default function LoginPage() {
         <div className="text-center text-xs text-muted-foreground space-x-3 mt-4">
             <Link href="/terms" className="hover:underline">Términos</Link>
             <Link href="/privacy" className="hover:underline">Privacidad</Link>
+            <Link href="/contact" className="hover:underline">Contacto</Link>
             <Link href="/support" className="hover:underline">Ayuda</Link>
         </div>
         </>

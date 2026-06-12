@@ -63,7 +63,7 @@ export function StepBasicInfo({ data, onUpdate, onNext, userId }: StepBasicInfoP
 
     const isValid = useMemo(() =>
         Boolean(localData.displayName?.trim()) &&
-        Boolean(localData.age) &&
+        Boolean(localData.age && localData.age >= 18 && localData.age <= 120) &&
         Boolean(localData.gender) &&
         Boolean(localData.city?.trim()) &&
         selectedModes.length > 0,
@@ -135,20 +135,22 @@ export function StepBasicInfo({ data, onUpdate, onNext, userId }: StepBasicInfoP
                         <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Edad</Label>
                         <Input
                             type="number"
-                            min={18}
-                            max={120}
                             placeholder="24"
                             value={localData.age ?? ''}
                             onChange={(e) => {
-                                const v = parseInt(e.target.value);
-                                if (isNaN(v)) {
+                                const val = e.target.value;
+                                if (val === '') {
                                     handleChange('age', undefined);
-                                } else if (v >= 18 && v <= 120) {
-                                    handleChange('age', v);
+                                    return;
                                 }
+                                const v = parseInt(val);
+                                handleChange('age', isNaN(v) ? undefined : v);
                             }}
                             className="rounded-2xl h-12 border-muted focus-visible:ring-primary/20 bg-background/50"
                         />
+                        {localData.age !== undefined && (localData.age < 18 || localData.age > 120) && (
+                            <p className="text-[10px] text-destructive mt-1 ml-2">Debes ser mayor de 18 años</p>
+                        )}
                     </div>
                     <div className="space-y-2">
                         <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Género</Label>

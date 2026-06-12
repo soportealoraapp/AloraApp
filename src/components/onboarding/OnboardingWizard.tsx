@@ -41,7 +41,7 @@ export function OnboardingWizard({ initialRef }: { initialRef?: string } = {}) {
     const lastSavedRef = useRef<string>('');
     const hasCompletedRef = useRef(false);
 
-    // OAuth users (Google/Apple) already have a user from auth context at mount
+    // OAuth users (Google) already have a user from auth context at mount
     // Email signup users start without a user
     const isOAuthUser = Boolean(user);
     const totalSteps = isOAuthUser ? 3 : 4;
@@ -70,8 +70,16 @@ export function OnboardingWizard({ initialRef }: { initialRef?: string } = {}) {
         }
 
         if (profile) {
+            if (profile.isCompleted) {
+                router.replace('/discover');
+                return;
+            }
+
             setFormData(profile);
-            const hasBasicInfo = Boolean(profile.displayName?.trim()) && Boolean(profile.age);
+            const hasBasicInfo = Boolean(profile.displayName?.trim()) && 
+                               Boolean(profile.age) && 
+                               Boolean(profile.gender) && 
+                               Boolean(profile.city?.trim());
             const hasPhotos = Boolean(profile.photos && profile.photos.length > 0);
 
             if (isOAuthUser) {

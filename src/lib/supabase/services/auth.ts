@@ -66,18 +66,6 @@ export const authService = {
         if (error) throw error
     },
 
-    async signInWithApple() {
-        const supabase = getClient()
-        const { error } = await supabase.auth.signInWithOAuth({
-            provider: 'apple',
-            options: {
-                redirectTo: `${window.location.origin}/auth/callback`,
-            },
-        })
-
-        if (error) throw error
-    },
-
     async signOut() {
         const supabase = getClient()
         await supabase.auth.signOut()
