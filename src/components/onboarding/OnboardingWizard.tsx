@@ -104,7 +104,7 @@ export function OnboardingWizard({ initialRef }: { initialRef?: string } = {}) {
     }, [isInitialized, effectiveUserId, isOAuthUser]);
 
     const saveProgress = useCallback(async (newData: Partial<UserProfile>) => {
-        if (!effectiveUserId) return;
+        if (!effectiveUserId || hasCompletedRef.current) return;
         const updatedData = { ...formData, ...newData };
         setFormData(updatedData);
 
@@ -116,6 +116,7 @@ export function OnboardingWizard({ initialRef }: { initialRef?: string } = {}) {
 
         setSyncStatus('syncing');
         debounceRef.current = setTimeout(async () => {
+            if (hasCompletedRef.current) return;
             try {
                 await updateUserProfile(effectiveUserId, {
                     ...updatedData,
@@ -145,6 +146,7 @@ export function OnboardingWizard({ initialRef }: { initialRef?: string } = {}) {
     const completeOnboarding = useCallback(async () => {
         if (hasCompletedRef.current) return;
         hasCompletedRef.current = true;
+        if (debounceRef.current) clearTimeout(debounceRef.current);
         if (effectiveUserId) {
             try {
                 await updateUserProfile(effectiveUserId, {
@@ -159,7 +161,11 @@ export function OnboardingWizard({ initialRef }: { initialRef?: string } = {}) {
         router.push('/discover');
     }, [effectiveUserId, router, formData]);
 
-    const nextStep = useCallback(() => {
+    const nextStep = useCallback(async () => {
+        if (step === totalSteps) {
+            await completeOnboarding();
+            return;
+        }
         // Save immediately when changing step (not debounced)
         if (effectiveUserId) {
             const serialized = JSON.stringify(formData);
@@ -176,10 +182,6 @@ export function OnboardingWizard({ initialRef }: { initialRef?: string } = {}) {
                     setSyncStatus('error');
                 });
             }
-        }
-        if (step === totalSteps) {
-            completeOnboarding();
-            return;
         }
         setStep(prev => Math.min(prev + 1, totalSteps));
     }, [step, totalSteps, completeOnboarding, effectiveUserId, formData]);

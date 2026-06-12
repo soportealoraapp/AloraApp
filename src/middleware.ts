@@ -21,14 +21,20 @@ export async function middleware(request: NextRequest) {
     const requestHeaders = new Headers(request.headers);
     const modifiedRequest = new NextRequest(request, { headers: requestHeaders });
 
-    const response = await updateSession(modifiedRequest);
+    let response = NextResponse.next({
+        request: {
+            headers: modifiedRequest.headers,
+        },
+    });
+
+    const supabase = await createClient(modifiedRequest, response);
     let user = null;
     try {
         const timeout = new Promise<never>((_, reject) =>
             setTimeout(() => reject(new Error('getUser timeout')), 10000)
         );
         const { data } = await Promise.race([
-            (await createClient(modifiedRequest, response)).auth.getUser(),
+            supabase.auth.getUser(),
             timeout,
         ]);
         user = data.user;
@@ -64,19 +70,20 @@ export async function middleware(request: NextRequest) {
         pathname.startsWith('/auth');
 
     if (isAppRoute && !user) {
-        return NextResponse.redirect(new URL('/login', modifiedRequest.url));
+        response = NextResponse.redirect(new URL('/login', modifiedRequest.url));
+        return response;
     }
 
     if (isAppRoute && user) {
         try {
-            const supabaseClient = await createClient(modifiedRequest, response);
-            const { data: profile } = await supabaseClient
+            const { data: profile } = await supabase
                 .from('profiles')
                 .select('isCompleted')
                 .eq('userId', user.id)
                 .maybeSingle();
             if (profile && !profile.isCompleted) {
-                return NextResponse.redirect(new URL('/onboarding', modifiedRequest.url));
+                response = NextResponse.redirect(new URL('/onboarding', modifiedRequest.url));
+                return response;
             }
         } catch {
             // Allow through if check fails
@@ -84,15 +91,15 @@ export async function middleware(request: NextRequest) {
     }
 
     if (isAdminRoute && user) {
-        const supabaseClient = await createClient(modifiedRequest, response);
-        const { data: profile } = await supabaseClient
+        const { data: profile } = await supabase
             .from('users')
             .select('role')
             .eq('id', user.id)
             .single();
 
         if (!profile || (profile.role !== 'admin' && profile.role !== 'moderator')) {
-            return NextResponse.redirect(new URL('/discover', modifiedRequest.url));
+            response = NextResponse.redirect(new URL('/discover', modifiedRequest.url));
+            return response;
         }
     }
 
@@ -100,21 +107,22 @@ export async function middleware(request: NextRequest) {
         // Check if profile is completed — incomplete users go to onboarding
         if (!pathname.startsWith('/onboarding')) {
             try {
-                const supabaseClient = await createClient(modifiedRequest, response);
-                const { data: profile } = await supabaseClient
+                const { data: profile } = await supabase
                     .from('profiles')
                     .select('isCompleted')
                     .eq('userId', user.id)
                     .maybeSingle();
 
                 if (!profile || !profile.isCompleted) {
-                    return NextResponse.redirect(new URL('/onboarding', modifiedRequest.url));
+                    response = NextResponse.redirect(new URL('/onboarding', modifiedRequest.url));
+                    return response;
                 }
             } catch {
                 // If profile check fails, allow through to avoid blocking
             }
         }
-        return NextResponse.redirect(new URL('/discover', modifiedRequest.url));
+        response = NextResponse.redirect(new URL('/discover', modifiedRequest.url));
+        return response;
     }
 
     response.headers.set('Content-Security-Policy', csp);

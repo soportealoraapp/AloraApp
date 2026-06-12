@@ -1,6 +1,9 @@
 import { createUploadthing, type FileRouter } from "uploadthing/next";
+import { UTApi } from "uploadthing/server";
 import { createClient } from "@/lib/supabase/server";
 import { prisma } from "@/lib/prisma";
+
+export const utapi = new UTApi();
 
 const f = createUploadthing({
     errorFormatter: (err) => {

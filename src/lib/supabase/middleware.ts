@@ -12,9 +12,6 @@ export async function createClient(request: NextRequest, response: NextResponse)
                 },
                 setAll(cookiesToSet) {
                     cookiesToSet.forEach(({ name, value, options }) =>
-                        request.cookies.set(name, value)
-                    )
-                    cookiesToSet.forEach(({ name, value, options }) =>
                         response.cookies.set(name, value, options)
                     )
                 },

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { requireAdmin } from '@/lib/middleware/admin';
+import { utapi } from '../../uploadthing/core';
 
 export async function GET(request: NextRequest) {
     const auth = await requireAdmin();
@@ -89,6 +90,12 @@ export async function POST(request: NextRequest) {
                     data: { screen: '/settings/verification' },
                 }
             });
+            // Delete the rejected selfie from UploadThing
+            try {
+                await utapi.deleteFiles([submission.selfieUrl]);
+            } catch (deleteErr) {
+                console.error('Failed to delete rejected verification selfie from UploadThing:', deleteErr);
+            }
         } else {
             return NextResponse.json({ error: 'Invalid action' }, { status: 400 });
         }

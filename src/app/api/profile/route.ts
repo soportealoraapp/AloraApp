@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { EditableProfileSchema, sanitizeProfileUpdates } from '@/lib/schemas/validation';
 import { withRateLimit } from '@/server/utils/api-rate-limit';
+import { utapi } from '../uploadthing/core';
 
 async function getUser() {
     const { createClient } = await import('@/lib/supabase/server');
@@ -61,6 +62,24 @@ export async function PUT(request: NextRequest) {
                 error: 'Validation failed',
                 details: parsed.error.flatten().fieldErrors
             }, { status: 400 });
+        }
+
+        // Check for old photos to delete
+        const existingProfile = await prisma.profile.findUnique({
+            where: { userId: user.id },
+            select: { photos: true }
+        });
+
+        const oldPhotos = existingProfile?.photos || [];
+        const newPhotos = parsed.data.photos || [];
+        const photosToDelete = oldPhotos.filter(url => !newPhotos.includes(url));
+
+        if (photosToDelete.length > 0) {
+            try {
+                await utapi.deleteFiles(photosToDelete);
+            } catch (deleteErr) {
+                console.error('Failed to delete old photos from UploadThing:', deleteErr);
+            }
         }
 
         const updated = await prisma.profile.upsert({
