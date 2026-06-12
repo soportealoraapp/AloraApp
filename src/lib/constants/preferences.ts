@@ -2,7 +2,12 @@ export const INTERESTS = [
   'Música', 'Cine', 'Libros', 'Arte', 'Fotografía', 'Teatro', 'Museos', 'Baile',
   'Viajes', 'Cocina', 'Moda', 'Yoga', 'Meditación', 'Jardinería', 'Mascotas', 'Fitness',
   'Deporte', 'Naturaleza', 'Senderismo', 'Buceo', 'Escalada', 'Ciclismo', 'Correr', 'Surf',
-  'Gaming', 'Series', 'Anime', 'Comedia', 'Podcasts', 'Tecnología', 'Astronomía', 'Cócteles'
+  'Gaming', 'Series', 'Anime', 'Comedia', 'Podcasts', 'Tecnología', 'Astronomía', 'Cócteles',
+  'Gastronomía', 'Camping', 'Pesca', 'Ajedrez', 'Pintura', 'Cerámica', 'Pilates', 'CrossFit',
+  'Natación', 'Tenis', 'Boxeo', 'Escritura', 'Poesía', 'Canto', 'Instrumentos', 'Voluntariado',
+  'Emprendimiento', 'Idiomas', 'Repostería', 'Café', 'Tatuajes', 'Juegos de Mesa', 'Kayak', 'Vela',
+  'Paracaidismo', 'Artes Marciales', 'Patinaje', 'Esquí', 'Go Kart', 'Paintball', 'Escape Rooms',
+  'Coleccionismo', 'Antigüedades', 'Aromaterapia', 'Cuidado Personal', 'Moda Sostenible'
 ] as const;
 
 export const INTEREST_CATEGORIES = [
@@ -21,17 +26,43 @@ export const INTEREST_CATEGORIES = [
   {
     name: 'Entretenimiento',
     items: ['Gaming', 'Series', 'Anime', 'Comedia', 'Podcasts', 'Tecnología', 'Astronomía', 'Cócteles'] as const
+  },
+  {
+    name: 'Deportes',
+    items: ['Natación', 'Tenis', 'Boxeo', 'Pilates', 'CrossFit', 'Artes Marciales', 'Patinaje', 'Esquí'] as const
+  },
+  {
+    name: 'Creatividad',
+    items: ['Pintura', 'Cerámica', 'Escritura', 'Poesía', 'Canto', 'Instrumentos', 'Fotografía', 'Tatuajes'] as const
+  },
+  {
+    name: 'Bienestar',
+    items: ['Yoga', 'Meditación', 'Aromaterapia', 'Cuidado Personal', 'Jardinería', 'Voluntariado', 'Emprendimiento', 'Idiomas'] as const
+  },
+  {
+    name: 'Social',
+    items: ['Gastronomía', 'Cócteles', 'Café', 'Repostería', 'Camping', 'Pesca', 'Juegos de Mesa', 'Escape Rooms'] as const
   }
 ] as const;
 
 export const VALUES = [
   'Honestidad', 'Respeto', 'Lealtad', 'Humor', 'Aventura',
-  'Familia', 'Crecimiento', 'Independencia', 'Creatividad', 'Empatía'
+  'Familia', 'Crecimiento', 'Independencia', 'Creatividad', 'Empatía',
+  'Disciplina', 'Paciencia', 'Tolerancia', 'Generosidad', 'Gratitud',
+  'Compromiso', 'Responsabilidad', 'Libertad', 'Equilibrio', 'Espontaneidad',
+  'Ambición', 'Originalidad', 'Sabiduría', 'Coraje', 'Fe',
+  'Tradición', 'Sostenibilidad', 'Solidaridad', 'Perseverancia', 'Alegría'
 ] as const;
 
 export const MUSIC_GENRES = [
   'Pop', 'Rock', 'Jazz', 'Clásica', 'Electrónica', 'Hip-Hop',
-  'Reggaeton', 'Salsa', 'Country', 'Indie', 'R&B', 'Folk'
+  'Reggaeton', 'Salsa', 'Country', 'Indie', 'R&B', 'Folk',
+  'Metal', 'Punk', 'Ska', 'Reggae', 'Blues', 'Soul', 'Funk', 'Disco',
+  'Techno', 'House', 'Trance', 'Drum and Bass', 'Dubstep', 'Ambient',
+  'Bossa Nova', 'Cumbia', 'Banda', 'Norteño', 'Mariachi', 'Ranchera',
+  'Bolero', 'Balada', 'Tropical', 'Merengue', 'Bachata', 'Flamenco',
+  'K-pop', 'J-pop', 'Rap', 'Trap', 'Corridos', 'Corridos Tumbados',
+  'Música Mexicana', 'New Age', 'Gospel', 'Afrobeat', 'Garage Rock', 'Shoegaze'
 ] as const;
 
 export const LIFESTYLE_OPTIONS = {
