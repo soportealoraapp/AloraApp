@@ -139,6 +139,7 @@ model Profile {
 
   // Status
   isVerified             Boolean   @default(false)
+  isCompleted            Boolean   @default(false) // Onboarding completion flag
   subscriptionStatus     String    @default("free") // free, plus
   subscriptionStartedAt  DateTime?
   subscriptionExpiresAt  DateTime?
@@ -151,6 +152,7 @@ model Profile {
   // Daily likes tracking
   dailyLikesUsed    Int      @default(0)
   dailyLikesResetAt DateTime @default(now())
+  superlikesRemaining Int    @default(3)
 
   // Boost tracking
   boostExpiresAt DateTime?

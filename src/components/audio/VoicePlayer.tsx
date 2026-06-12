@@ -19,7 +19,7 @@ export function VoicePlayer({ src, transcription }: { src: string, transcription
     };
 
     return (
-        <div className="bg-white rounded-xl p-3 shadow-sm border border-gray-100 max-w-xs">
+        <div className="bg-card rounded-xl p-3 shadow-sm border border-border max-w-xs">
             <div className="flex items-center gap-3">
                 <Button size="icon" className="rounded-full w-10 h-10 bg-indigo-100 text-indigo-600 hover:bg-indigo-200" onClick={togglePlay}>
                     {playing ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4 ml-1" />}

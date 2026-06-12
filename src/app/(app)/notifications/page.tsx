@@ -59,7 +59,7 @@ export default function NotificationsPage() {
   if (loading) {
     return (
       <div className="min-h-screen">
-        <header className="sticky top-0 z-30 flex h-16 items-center border-b bg-background/90 px-4 backdrop-blur-md">
+        <header className="sticky top-0 z-30 flex h-16 items-center border-b bg-background/90 px-4 backdrop-blur-md pt-safe">
           <Skeleton className="h-6 w-32" />
         </header>
         <main className="max-w-xl mx-auto">
@@ -77,7 +77,7 @@ export default function NotificationsPage() {
 
   return (
     <div className="min-h-screen">
-      <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b bg-background/90 px-4 backdrop-blur-md">
+      <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b bg-background/90 px-4 backdrop-blur-md pt-safe">
         <h1 className="text-xl font-bold">Actividad</h1>
         {unreadCount > 0 && (
           <Button variant="ghost" size="sm" onClick={() => markAllRead()}>

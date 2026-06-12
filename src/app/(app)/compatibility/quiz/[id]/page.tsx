@@ -131,7 +131,7 @@ export default function QuizPage() {
                 </Button>
                 <h1 className="text-xl font-semibold md:text-2xl font-headline">{quiz.title}</h1>
             </header>
-            <main className="flex items-center justify-center min-h-[calc(100vh-4rem)] p-4">
+            <main className="flex items-center justify-center min-h-[calc(100dvh-4rem)] p-4">
                 <Card className="w-full max-w-lg text-center">
                     {showResults ? (
                         <>

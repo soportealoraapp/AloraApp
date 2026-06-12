@@ -158,7 +158,7 @@ export default function ChatPage() {
     if (loading) {
         return (
             <div>
-                <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b bg-background/80 px-4 backdrop-blur-sm sm:px-6">
+                <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b bg-background/80 px-4 backdrop-blur-sm sm:px-6 pt-safe">
                     <h1 className="text-xl font-semibold md:text-2xl font-headline">Conversaciones</h1>
                 </header>
                 <main className="p-4 space-y-4">
@@ -172,7 +172,7 @@ export default function ChatPage() {
 
     return (
         <div>
-            <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b bg-background/80 px-4 backdrop-blur-sm sm:px-6">
+            <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b bg-background/80 px-4 backdrop-blur-sm sm:px-6 pt-safe">
                 <h1 className="text-xl font-semibold md:text-2xl font-headline">Conversaciones</h1>
             </header>
 

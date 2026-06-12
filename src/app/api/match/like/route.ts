@@ -37,7 +37,7 @@ export async function POST(request: NextRequest) {
         if (interactionType !== 'pass') {
             const profile = await prisma.profile.findUnique({
                 where: { userId: user.id },
-                select: { subscriptionStatus: true, dailyLikesUsed: true, dailyLikesResetAt: true }
+                select: { subscriptionStatus: true, dailyLikesUsed: true, dailyLikesResetAt: true, superlikesRemaining: true }
             });
 
             if (profile && profile.subscriptionStatus === 'free') {
@@ -49,7 +49,7 @@ export async function POST(request: NextRequest) {
                     const previousLikesUsed = profile.dailyLikesUsed;
                     await prisma.profile.update({
                         where: { userId: user.id },
-                        data: { dailyLikesUsed: 0, dailyLikesResetAt: now }
+                        data: { dailyLikesUsed: 0, dailyLikesResetAt: now, superlikesRemaining: 3 }
                     });
                     if (previousLikesUsed > 0) {
                         notifyLikesRestored(user.id)
@@ -67,6 +67,14 @@ export async function POST(request: NextRequest) {
                             retryAfter,
                             message: `Has alcanzado el limite de ${FREE_DAILY_LIKES_LIMIT} likes diarios. Tus likes se reinician manana.`
                         },
+                        { status: 429 }
+                    );
+                }
+
+                // Superlike limit: 3 per day for free users
+                if (interactionType === 'superlike' && (profile.superlikesRemaining ?? 0) <= 0) {
+                    return NextResponse.json(
+                        { error: 'Superlike limit reached', message: 'Has agotado tus Super Likes diarios.' },
                         { status: 429 }
                     );
                 }
@@ -129,6 +137,14 @@ export async function POST(request: NextRequest) {
                 where: { userId: user.id },
                 data: { dailyLikesUsed: { increment: 1 } }
             }).catch((err) => console.warn('[match/like] dailyLikesUsed increment failed:', err));
+        }
+
+        // Decrement superlikes remaining for superlikes
+        if (interactionType === 'superlike') {
+            await prisma.profile.update({
+                where: { userId: user.id },
+                data: { superlikesRemaining: { decrement: 1 } }
+            }).catch((err) => console.warn('[match/like] superlikesRemaining decrement failed:', err));
         }
 
         if (interactionType === 'pass') {

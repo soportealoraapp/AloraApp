@@ -127,8 +127,8 @@ export function FloatingMatchCard({ profile, onSwipe, onFlechado, compatibility,
                 }}
                 className={`h-1.5 rounded-full transition-all duration-200 ${
                   index === currentPhotoIndex
-                    ? 'bg-white w-4'
-                    : 'bg-white/40 w-1.5 hover:bg-white/60'
+                    ? 'bg-foreground/30 w-4'
+                    : 'bg-foreground/20 w-1.5 hover:bg-foreground/40'
                 }`}
                 aria-label={`Foto ${index + 1}`}
               />
@@ -245,11 +245,11 @@ export function FloatingMatchCard({ profile, onSwipe, onFlechado, compatibility,
             onClick={(e) => { e.stopPropagation(); onFlechado(); }}
             className="bg-accent hover:bg-accent/80 text-accent-foreground rounded-full w-16 h-16 flex items-center justify-center shadow-xl transition-transform hover:scale-110 active:scale-95 border border-accent/30 focus-visible:ring-2 focus-visible:ring-primary/70 relative"
             aria-label="Super Like"
-            title={`Super Like: destaca tu interés (${superlikesRemaining ?? 3} restantes hoy)`}
+            title={`Super Like: destaca tu interés (${superlikesRemaining ?? 0} restantes hoy)`}
           >
             <Star className="h-7 w-7 fill-current" />
             <span className="absolute -top-1 -right-1 bg-primary text-primary-foreground text-[11px] font-bold rounded-full min-w-[20px] h-5 flex items-center justify-center px-1 shadow-sm border border-background">
-              {superlikesRemaining ?? 3}
+              {superlikesRemaining ?? 0}
             </span>
           </button>
         )}

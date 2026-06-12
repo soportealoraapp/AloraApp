@@ -313,7 +313,7 @@ export function ChatInput({ onSend, onSendImage, onSendVoice, onTyping, disabled
           variant="ghost"
           onClick={() => fileInputRef.current?.click()}
           disabled={disabled || uploadingImage}
-          className="h-10 w-10 rounded-full text-muted-foreground hover:text-foreground"
+          className="h-11 w-11 rounded-full text-muted-foreground hover:text-foreground"
         >
           <ImageIcon className="h-5 w-5" />
         </Button>
@@ -346,7 +346,7 @@ export function ChatInput({ onSend, onSendImage, onSendVoice, onTyping, disabled
             variant="ghost"
             disabled={disabled}
             onClick={startRecording}
-            className="h-10 w-10 rounded-full text-muted-foreground hover:text-foreground"
+            className="h-11 w-11 rounded-full text-muted-foreground hover:text-foreground"
           >
             <Mic className="h-5 w-5" />
           </Button>

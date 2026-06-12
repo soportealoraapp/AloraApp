@@ -67,6 +67,22 @@ export async function middleware(request: NextRequest) {
         return NextResponse.redirect(new URL('/login', modifiedRequest.url));
     }
 
+    if (isAppRoute && user) {
+        try {
+            const supabaseClient = await createClient(modifiedRequest, response);
+            const { data: profile } = await supabaseClient
+                .from('profiles')
+                .select('isCompleted')
+                .eq('userId', user.id)
+                .maybeSingle();
+            if (profile && !profile.isCompleted) {
+                return NextResponse.redirect(new URL('/onboarding', modifiedRequest.url));
+            }
+        } catch {
+            // Allow through if check fails
+        }
+    }
+
     if (isAdminRoute && user) {
         const supabaseClient = await createClient(modifiedRequest, response);
         const { data: profile } = await supabaseClient

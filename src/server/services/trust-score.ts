@@ -103,10 +103,10 @@ export async function calculateTrustScore(userId: string): Promise<TrustScoreRes
  */
 export function getTrustBadgeColor(level: string): string {
     switch (level) {
-        case 'Premium Confiable': return 'bg-purple-100 text-purple-700 border-purple-200';
-        case 'Destacado': return 'bg-blue-100 text-blue-700 border-blue-200';
-        case 'Muy Confiable': return 'bg-green-100 text-green-700 border-green-200';
-        case 'Confiable': return 'bg-yellow-100 text-yellow-700 border-yellow-200';
-        default: return 'bg-gray-100 text-gray-500 border-gray-200';
+        case 'Premium Confiable': return 'bg-accent/10 text-accent-foreground border-accent/20';
+        case 'Destacado': return 'bg-primary/10 text-primary border-primary/20';
+        case 'Muy Confiable': return 'bg-success/10 text-success-foreground border-success/20';
+        case 'Confiable': return 'bg-warning/10 text-warning-foreground border-warning/20';
+        default: return 'bg-muted text-muted-foreground border-border';
     }
 }

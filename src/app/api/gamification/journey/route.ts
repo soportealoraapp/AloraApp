@@ -121,7 +121,7 @@ export async function GET() {
                 rewardType: 'likes',
                 completed: hasQuiz,
                 icon: '🧪',
-                href: '/onboarding?step=quiz',
+                href: '/compatibility',
             },
             {
                 id: 'first_like',

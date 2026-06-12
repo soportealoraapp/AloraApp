@@ -114,6 +114,9 @@ export interface UserProfile extends User {
     rewindsUsed?: number;
     rewindsResetAt?: Date;
 
+    // Superlikes
+    superlikesRemaining?: number;
+
     // Streaks
     currentStreak?: number;
     longestStreak?: number;

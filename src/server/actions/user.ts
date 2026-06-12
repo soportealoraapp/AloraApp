@@ -51,8 +51,10 @@ export const getUserProfile = unstable_cache(
                 lookingFor: (profile as any).lookingFor || '',
                 connectionModes: (profile as any).connectionModes || ['dating'],
 
+                isCompleted: (profile as any).isCompleted ?? false,
                 subscriptionStatus: profile.subscriptionStatus as any,
-                trustStatus: profile.trustStatus as any
+                trustStatus: profile.trustStatus as any,
+                superlikesRemaining: (profile as any).superlikesRemaining ?? 3,
             };
         } catch (e) {
             console.error('Error fetching profile', e);
@@ -77,6 +79,7 @@ export async function updateUserProfile(userId: string, data: Partial<UserProfil
             compatibility,
             completenessScore,
             verificationStatus,
+            isCompleted,
             ...profileUpdates
         } = data;
 
@@ -94,10 +97,14 @@ export async function updateUserProfile(userId: string, data: Partial<UserProfil
 
         await prisma.profile.upsert({
             where: { userId },
-            update: profileUpdates,
+            update: {
+                ...profileUpdates,
+                ...(isCompleted !== undefined ? { isCompleted } : {}),
+            },
             create: {
                 userId,
                 ...profileUpdates,
+                isCompleted: isCompleted ?? false,
             },
         });
         return { success: true };

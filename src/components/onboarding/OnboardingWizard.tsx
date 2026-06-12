@@ -97,6 +97,12 @@ export function OnboardingWizard({ initialRef }: { initialRef?: string } = {}) {
         setIsInitialized(true);
     }, [user, profile, authLoading, profileLoading, isInitialized, isOAuthUser]);
 
+    useEffect(() => {
+        if (isInitialized && effectiveUserId) {
+            trackEvent('onboarding_started', { userId: effectiveUserId, isOAuth: isOAuthUser });
+        }
+    }, [isInitialized, effectiveUserId, isOAuthUser]);
+
     const saveProgress = useCallback(async (newData: Partial<UserProfile>) => {
         if (!effectiveUserId) return;
         const updatedData = { ...formData, ...newData };
@@ -123,7 +129,7 @@ export function OnboardingWizard({ initialRef }: { initialRef?: string } = {}) {
                 console.error("Auto-save failed");
             }
         }, 800);
-    }, [effectiveUserId, formData, step]);
+    }, [effectiveUserId, formData]);
 
     useEffect(() => {
         return () => {

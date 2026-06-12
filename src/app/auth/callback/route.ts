@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 import { createClient } from '@/lib/supabase/server';
+import { prisma } from '@/lib/prisma';
 import { redeemReferral } from '@/server/actions/referral';
 import { REFERRAL_COOKIE, REFERRAL_CODE_PATTERN } from '@/lib/referral/constants';
 
@@ -35,32 +36,28 @@ export async function GET(request: Request) {
             try {
                 const { data: { user } } = await supabase.auth.getUser();
                 if (user) {
-                    const { data: profile } = await supabase
-                        .from('profiles')
-                        .select('isCompleted')
-                        .eq('userId', user.id)
-                        .maybeSingle();
+                    const profile = await prisma.profile.findUnique({
+                        where: { userId: user.id },
+                        select: { isCompleted: true }
+                    });
 
                     if (!profile) {
-                        // Create initial profile row for new OAuth users
+                        // Create initial profile row for new OAuth users via Prisma
                         const displayName = user.user_metadata?.full_name
                             || user.user_metadata?.name
                             || user.email?.split('@')[0]
                             || 'Usuario';
                         const avatarUrl = user.user_metadata?.avatar_url || null;
-                        await supabase.from('profiles').insert({
-                            userId: user.id,
-                            email: user.email || null,
-                            displayName,
-                            photos: avatarUrl ? [avatarUrl] : [],
-                            age: 0,
-                            gender: '',
-                            city: '',
-                            countryCode: user.user_metadata?.locale?.split('-')?.[1] || '',
-                            stateCode: '',
-                            connectionModes: ['dating'],
-                            seeking: 'all',
-                            isCompleted: false,
+                        await prisma.profile.create({
+                            data: {
+                                userId: user.id,
+                                displayName,
+                                photos: avatarUrl ? [avatarUrl] : [],
+                                countryCode: user.user_metadata?.locale?.split('-')?.[1] || null,
+                                connectionModes: ['dating'],
+                                seeking: 'all',
+                                isCompleted: false,
+                            }
                         });
                         destination = '/onboarding';
                     } else if (!profile.isCompleted) {

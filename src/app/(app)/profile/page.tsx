@@ -55,7 +55,7 @@ export default function ProfilePage() {
   if (loading) {
     return (
       <div>
-        <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b bg-background/80 px-4 backdrop-blur-sm sm:px-6">
+        <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b bg-background/80 px-4 backdrop-blur-sm sm:px-6 pt-safe">
           <Skeleton className="h-8 w-32" />
         </header>
         <main className="pb-24 md:pb-4">
@@ -74,7 +74,7 @@ export default function ProfilePage() {
 
   return (
     <div>
-      <header className="sticky top-0 z-30 flex h-16 items-center gap-2 border-b bg-background/90 px-3 backdrop-blur-md sm:px-6">
+      <header className="sticky top-0 z-30 flex h-16 items-center gap-2 border-b bg-background/90 px-3 backdrop-blur-md sm:px-6 pt-safe">
         <h1 className="text-xl font-bold md:text-2xl text-foreground shrink-0">Mi Perfil</h1>
         <div className="ml-auto flex items-center gap-1 sm:gap-2 min-w-0">
           <Button size="icon" variant="ghost" asChild className="shrink-0">

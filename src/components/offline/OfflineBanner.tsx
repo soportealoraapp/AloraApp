@@ -30,7 +30,7 @@ export function OfflineBanner() {
                     initial={{ y: -60, opacity: 0 }}
                     animate={{ y: 0, opacity: 1 }}
                     exit={{ y: -60, opacity: 0 }}
-                    className="fixed top-0 left-0 right-0 z-[100] bg-amber-50 border-b border-amber-200 px-4 py-3"
+                    className="fixed top-0 left-0 right-0 z-[100] bg-warning/10 border-b border-warning/20 px-4 py-3"
                 >
                     <div className="flex items-center justify-between max-w-4xl mx-auto">
                         <div className="flex items-center gap-2 text-amber-800">

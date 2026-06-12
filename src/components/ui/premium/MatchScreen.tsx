@@ -171,7 +171,7 @@ export function MatchScreen({ userProfile, matchedProfile, onChat, onKeepSwiping
                     animate={{ x: 0, opacity: 1, rotate: 0 }}
                     transition={{ type: "spring", damping: 15, delay: 0.2 }}
                 >
-                    <AvatarGlow src={userProfile.photos[0]} size="xl" className="border-4 border-white rounded-full shadow-[0_0_50px_rgba(244,143,177,0.6)]" />
+                    <AvatarGlow src={userProfile.photos[0]} size="xl" className="border-4 border-white rounded-full shadow-[0_0_50px_hsl(var(--primary)/0.6)]" />
                 </motion.div>
 
                     <motion.div
@@ -193,7 +193,7 @@ export function MatchScreen({ userProfile, matchedProfile, onChat, onKeepSwiping
                     animate={{ x: 0, opacity: 1, rotate: 0 }}
                     transition={{ type: "spring", damping: 15, delay: 0.2 }}
                 >
-                    <AvatarGlow src={matchedProfile.photos[0]} size="xl" className="border-4 border-white rounded-full shadow-[0_0_50px_rgba(168,85,247,0.6)]" />
+                    <AvatarGlow src={matchedProfile.photos[0]} size="xl" className="border-4 border-white rounded-full shadow-[0_0_50px_hsl(var(--accent)/0.6)]" />
                 </motion.div>
             </div>
 

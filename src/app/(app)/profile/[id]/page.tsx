@@ -77,7 +77,7 @@ export default function UserProfilePage() {
     if (loading) {
         return (
             <div>
-                <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b bg-background/80 px-4 backdrop-blur-sm sm:px-6">
+                <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b bg-background/80 px-4 backdrop-blur-sm sm:px-6 pt-safe">
                     <Skeleton className="h-8 w-48" />
                 </header>
                 <main className="pb-24 md:pb-4">
@@ -209,7 +209,7 @@ export default function UserProfilePage() {
 
     return (
         <div>
-            <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b bg-background/80 px-4 backdrop-blur-sm sm:px-6">
+            <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b bg-background/80 px-4 backdrop-blur-sm sm:px-6 pt-safe">
                 <Button variant="ghost" size="icon" onClick={() => router.back()}>
                     <ArrowLeft className="h-5 w-5" />
                 </Button>
@@ -409,7 +409,7 @@ export default function UserProfilePage() {
                 </div>
 
                 {id !== user?.id && !isPreview && (
-                    <div className="fixed bottom-[88px] sm:bottom-0 left-0 right-0 z-40 p-4 bg-background/80 backdrop-blur-sm border-t pb-[max(env(safe-area-inset-bottom,0px),16px)] md:sticky md:bottom-0 md:z-auto md:bg-transparent md:border-none md:p-0 md:mt-4 md:px-4 md:pb-0">
+                    <div className="fixed bottom-0 pb-safe sm:bottom-0 left-0 right-0 z-40 p-4 bg-background/80 backdrop-blur-sm border-t pb-[max(env(safe-area-inset-bottom,0px),16px)] md:sticky md:bottom-0 md:z-auto md:bg-transparent md:border-none md:p-0 md:mt-4 md:px-4 md:pb-0">
                         {isFromNewMatch ? (
                             <div className="flex justify-around items-center max-w-md mx-auto gap-3">
                                 <Button

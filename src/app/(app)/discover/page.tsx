@@ -331,7 +331,7 @@ export default function DiscoverPage() {
           </div>
         </div>
       )}
-      <header className="sticky top-0 z-30 flex h-16 items-center justify-between px-4 backdrop-blur-md border-b bg-background/90">
+      <header className="sticky top-0 z-30 flex h-16 items-center justify-between px-4 backdrop-blur-md border-b bg-background/90 pt-safe">
         <div className="flex items-center gap-2">
           <h1 className="text-2xl font-bold tracking-tight text-foreground">Alora</h1>
           {(currentUserProfile as any)?.travelModeEnabled && (
@@ -362,10 +362,10 @@ export default function DiscoverPage() {
               </Button>
               <span className="text-[11px] text-muted-foreground font-bold">{rewindsRemaining}</span>
             </div>
-            {(currentUserProfile as any)?.superlikesRemaining !== undefined && (
+            {currentUserProfile?.superlikesRemaining !== undefined && (
             <div className="flex items-center gap-0.5 px-1">
               <Star className="h-3.5 w-3.5 text-amber-500 fill-amber-500" />
-              <span className="text-[11px] font-bold text-muted-foreground">{(currentUserProfile as any).superlikesRemaining}</span>
+              <span className="text-[11px] font-bold text-muted-foreground">{currentUserProfile?.superlikesRemaining}</span>
             </div>
             )}
             <Button variant="ghost" size="icon" onClick={() => setFilterOpen(true)} title="Filtros de búsqueda" aria-label="Filtros de búsqueda" className="relative touch-target">
@@ -487,7 +487,7 @@ export default function DiscoverPage() {
               </div>
             </div>
           ) : currentProfile ? (
-            <div className="w-full max-w-sm min-h-[500px] max-h-[calc(100vh-180px)] h-full relative">
+            <div className="w-full max-w-sm min-h-[500px] max-h-[calc(100dvh-180px)] h-full relative">
               {/* Tutorial de swipe — primera vez */}
               {tutorialStep !== null && (
                 <div className="absolute -top-14 left-0 right-0 flex justify-center z-30">
@@ -515,7 +515,7 @@ export default function DiscoverPage() {
                   explanations={profiles[0]?.score?.explanation}
                   onSwipe={handleSwipe}
                   onFlechado={handleFlechado}
-                  superlikesRemaining={(currentUserProfile as any)?.superlikesRemaining ?? 3}
+                  superlikesRemaining={currentUserProfile?.superlikesRemaining}
                 />
               </div>
             </div>

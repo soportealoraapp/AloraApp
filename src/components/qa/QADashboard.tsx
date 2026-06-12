@@ -175,7 +175,7 @@ export default function QADashboard() {
                             <Card className="rounded-3xl border-none shadow-xl shadow-pink-100/50 max-w-2xl mx-auto overflow-hidden">
                                 <div className="bg-gradient-to-r from-purple-100 to-pink-100 p-8 flex flex-col items-center text-center gap-6 relative">
                                     <div className={cn(
-                                        "w-full max-w-sm bg-white p-8 rounded-3xl shadow-2xl transition-all duration-500 border-2 border-dashed",
+                                        "w-full max-w-sm bg-card p-8 rounded-3xl shadow-2xl transition-all duration-500 border-2 border-dashed",
                                         isShaking ? "animate-shake border-red-500 shadow-red-100" : "border-primary/20 hover:border-primary/50"
                                     )}>
                                         <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -337,7 +337,7 @@ export default function QADashboard() {
                             <div className="bg-primary w-12 h-12 rounded-2xl shadow-lg ring-4 ring-primary/10" />
                                         <div className="bg-background border w-12 h-12 rounded-2xl" />
                             <div className="bg-muted w-12 h-12 rounded-2xl" />
-                            <div className="bg-white border-4 border-pink-50 w-12 h-12 rounded-2xl" />
+                            <div className="bg-card border-4 border-primary/20 w-12 h-12 rounded-2xl" />
                         </div>
                     </section>
                 </main>
