@@ -84,6 +84,10 @@ export function DailyQuestionCard() {
 
             toast({ title: 'Respuesta guardada', description: 'Tu respuesta ya influye en tu compatibilidad y se ve en tu perfil.' });
             setData({ ...data, userAnswer: answer.trim(), answered: true });
+            setEditing(false);
+            
+            // Dispatch custom event for mission completion tracking
+            window.dispatchEvent(new CustomEvent('daily-question-answered'));
         } catch (error: any) {
             toast({ title: 'Error', description: error.message, variant: 'destructive' });
         } finally {

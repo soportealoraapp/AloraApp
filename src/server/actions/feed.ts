@@ -208,7 +208,13 @@ export async function getDynamicFeed(
         }
 
         let candidateIds: string[] | null = null;
-        if (filters?.distance && effectiveLat && effectiveLng) {
+        
+        // If countryCode is 'MX' and travel mode is NOT enabled, allow seeing all Mexico
+        const isMexicoUser = profile.countryCode === 'MX';
+        const isTravelEnabled = profile.travelModeEnabled;
+        const shouldRestrictDistance = filters?.distance && effectiveLat && effectiveLng && (!isMexicoUser || isTravelEnabled);
+
+        if (shouldRestrictDistance) {
             // Get all profiles with coordinates and filter by distance in-memory
             const allWithCoords = await prisma.profile.findMany({
                 where: {

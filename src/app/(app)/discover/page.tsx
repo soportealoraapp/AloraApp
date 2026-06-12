@@ -409,6 +409,20 @@ export default function DiscoverPage() {
       </div>
 
       <main className="flex-1 flex flex-col items-center justify-center p-4 relative">
+        {countActiveFilters(filters) > 0 && !loading && (
+          <div className="mb-4 text-center px-4">
+            <p className="text-xs text-muted-foreground bg-muted/50 py-1.5 px-3 rounded-full inline-flex items-center gap-2">
+              <Sparkles className="h-3 w-3 text-primary" />
+              Mostrando resultados filtrados por {filters.interests.length > 0 ? filters.interests[0] : filters.values.length > 0 ? filters.values[0] : filters.musicGenres && filters.musicGenres.length > 0 ? filters.musicGenres[0] : 'tus preferencias'}
+              <button 
+                onClick={() => setFilters(DEFAULT_FILTERS)}
+                className="ml-1 text-primary font-bold hover:underline"
+              >
+                Limpiar
+              </button>
+            </p>
+          </div>
+        )}
         {error && !loading && profiles.length === 0 && (
           <div className="text-center px-8 mb-4">
             <p className="text-destructive text-sm mb-2">Error al cargar perfiles</p>

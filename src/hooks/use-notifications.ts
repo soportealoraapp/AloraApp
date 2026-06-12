@@ -25,6 +25,7 @@ interface UseNotificationsResult {
     refresh: () => Promise<void>;
     markRead: (ids: string[]) => Promise<void>;
     markAllRead: () => Promise<void>;
+    deleteNotification: (id: string) => Promise<void>;
 }
 
 const DEFAULT_POLL_MS = 30_000;
@@ -102,6 +103,17 @@ export function useNotifications({
         }
     }, []);
 
+    const deleteNotification = useCallback(async (id: string) => {
+        setNotifications(prev => prev.filter(n => n.id !== id));
+        try {
+            await fetch(`/api/notifications?id=${id}`, {
+                method: 'DELETE',
+            });
+        } catch (err) {
+            console.warn('[use-notifications] deleteNotification failed:', err);
+        }
+    }, []);
+
     return {
         notifications,
         unreadCount,
@@ -110,5 +122,6 @@ export function useNotifications({
         refresh: () => fetchNotifications(),
         markRead,
         markAllRead,
+        deleteNotification,
     };
 }

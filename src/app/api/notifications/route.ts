@@ -77,3 +77,28 @@ export async function PATCH(request: Request) {
 
     return NextResponse.json({ error: 'No ids provided' }, { status: 400 });
 }
+
+export async function DELETE(request: Request) {
+    const userId = await getCurrentUserId();
+    if (!userId) {
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    try {
+        const { searchParams } = new URL(request.url);
+        const id = searchParams.get('id');
+
+        if (!id) {
+            return NextResponse.json({ error: 'Notification ID required' }, { status: 400 });
+        }
+
+        await prisma.notification.delete({
+            where: { id, userId }
+        });
+
+        return NextResponse.json({ success: true });
+    } catch (error) {
+        console.error('Error deleting notification:', error);
+        return NextResponse.json({ error: 'Failed to delete' }, { status: 500 });
+    }
+}

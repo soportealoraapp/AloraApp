@@ -2,14 +2,20 @@
 
 import { useNotifications } from '@/hooks/use-notifications';
 import { Button } from '@/components/ui/button';
-import { CheckCheck, Bell, Loader2, Info } from 'lucide-react';
+import { CheckCheck, Bell, Loader2, Info, MoreVertical, Trash2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
-function NotificationItem({ notification, onRead }: { notification: any; onRead: () => void }) {
+function NotificationItem({ notification, onRead, onDelete }: { notification: any; onRead: () => void; onDelete: () => void }) {
   const router = useRouter();
   const isUnread = !notification.readAt;
 
@@ -43,28 +49,49 @@ function NotificationItem({ notification, onRead }: { notification: any; onRead:
   };
 
   return (
-    <button
-      className={cn(
-        'w-full text-left p-4 border-b transition-colors hover:bg-muted/30',
-        isUnread ? 'bg-primary/5 font-medium' : ''
-      )}
-      onClick={handleClick}
-    >
-      <p className="text-sm">{notification.title}</p>
-      {notification.body && (
-        <p className="text-xs text-muted-foreground mt-1">{notification.body}</p>
-      )}
-      <p className="text-xs text-muted-foreground/60 mt-1">
-        {new Date(notification.createdAt).toLocaleDateString('es-MX', {
-          day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit'
-        })}
-      </p>
-    </button>
+    <div className="relative group">
+      <button
+        className={cn(
+          'w-full text-left p-4 border-b transition-colors hover:bg-muted/30 pr-12',
+          isUnread ? 'bg-primary/5 font-medium' : ''
+        )}
+        onClick={handleClick}
+      >
+        <p className="text-sm">{notification.title}</p>
+        {notification.body && (
+          <p className="text-xs text-muted-foreground mt-1">{notification.body}</p>
+        )}
+        <p className="text-xs text-muted-foreground/60 mt-1">
+          {new Date(notification.createdAt).toLocaleDateString('es-MX', {
+            day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit'
+          })}
+        </p>
+      </button>
+
+      <div className="absolute right-2 top-1/2 -translate-y-1/2">
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-foreground">
+              <MoreVertical className="h-4 w-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem 
+              className="text-destructive focus:text-destructive cursor-pointer"
+              onClick={() => onDelete()}
+            >
+              <Trash2 className="h-4 w-4 mr-2" />
+              Eliminar
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
+    </div>
   );
 }
 
 export default function NotificationsPage() {
-  const { notifications, unreadCount, loading, markRead, markAllRead } = useNotifications({ pollIntervalMs: 30000 });
+  const { notifications, unreadCount, loading, markRead, markAllRead, deleteNotification } = useNotifications({ pollIntervalMs: 30000 });
 
   if (loading) {
     return (
@@ -113,6 +140,7 @@ export default function NotificationsPage() {
                 key={n.id}
                 notification={n}
                 onRead={() => markRead([n.id])}
+                onDelete={() => deleteNotification(n.id)}
               />
             ))}
           </div>

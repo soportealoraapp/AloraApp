@@ -65,7 +65,7 @@ const getMissions = (profile: any): Mission[] => [
     action: 'Responder pregunta',
     route: '/discover',
     reward: 'Aparece en tu perfil',
-    completed: false,
+    completed: profile?.latestAnswer?.answered ?? false,
   },
   {
     id: 'photos',
@@ -111,6 +111,19 @@ export function PostOnboardingJourney() {
     if (profile) {
       setMissions(getMissions(profile));
     }
+  }, [profile]);
+
+  useEffect(() => {
+    const handleAnswered = () => {
+      if (profile) {
+        setMissions(getMissions({
+          ...profile,
+          latestAnswer: { ...profile.latestAnswer, answered: true }
+        }));
+      }
+    };
+    window.addEventListener('daily-question-answered', handleAnswered);
+    return () => window.removeEventListener('daily-question-answered', handleAnswered);
   }, [profile]);
 
   const completedCount = missions.filter(m => m.completed).length;

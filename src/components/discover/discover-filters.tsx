@@ -14,13 +14,13 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
-import { allInterests, allValues, allMusicGenres, lifestyleOptions } from "@/lib/mock-data";
 import { Badge } from "@/components/ui/badge";
 import { getEmoji } from "@/components/profile/BadgeChip";
 import { ScrollArea } from "../ui/scroll-area";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
 import { Separator } from "../ui/separator";
 import { RadioGroup, RadioGroupItem } from "../ui/radio-group";
+import { INTERESTS, VALUES, MUSIC_GENRES, LIFESTYLE_OPTIONS, INTEREST_CATEGORIES } from "@/lib/constants/preferences";
 
 export interface Filters {
   ageRange: [number, number];
@@ -289,21 +289,21 @@ export function DiscoverFilters({ open, onOpenChange, onApplyFilters, initialFil
                 <Label>Tabaco</Label>
                 <Select value={selectedSmoking} onValueChange={setSelectedSmoking}>
                   <SelectTrigger><SelectValue placeholder="Cualquiera" /></SelectTrigger>
-                  <SelectContent>{lifestyleOptions.smoking.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent>
+                  <SelectContent>{LIFESTYLE_OPTIONS.smoking.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent>
                 </Select>
               </div>
               <div className="space-y-2">
                 <Label>Alcohol</Label>
                 <Select value={selectedDrinking} onValueChange={setSelectedDrinking}>
                   <SelectTrigger><SelectValue placeholder="Cualquiera" /></SelectTrigger>
-                  <SelectContent>{lifestyleOptions.drinking.map(d => <SelectItem key={d} value={d}>{d}</SelectItem>)}</SelectContent>
+                  <SelectContent>{LIFESTYLE_OPTIONS.drinking.map(d => <SelectItem key={d} value={d}>{d}</SelectItem>)}</SelectContent>
                 </Select>
               </div>
               <div className="space-y-2">
                 <Label>Hijos</Label>
                 <Select value={selectedChildren} onValueChange={setSelectedChildren}>
                   <SelectTrigger><SelectValue placeholder="Cualquiera" /></SelectTrigger>
-                  <SelectContent>{lifestyleOptions.children.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent>
+                  <SelectContent>{LIFESTYLE_OPTIONS.children.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent>
                 </Select>
               </div>
               <div className="space-y-2">
@@ -311,7 +311,7 @@ export function DiscoverFilters({ open, onOpenChange, onApplyFilters, initialFil
                 <Select value={selectedEducation} onValueChange={setSelectedEducation}>
                   <SelectTrigger><SelectValue placeholder="Cualquiera" /></SelectTrigger>
                   <SelectContent>
-                    {['Secundaria', 'Preparatoria', 'Universidad', 'Maestría', 'Doctorado'].map(e => (
+                    {LIFESTYLE_OPTIONS.education.map(e => (
                       <SelectItem key={e} value={e}>{e}</SelectItem>
                     ))}
                   </SelectContent>
@@ -322,7 +322,7 @@ export function DiscoverFilters({ open, onOpenChange, onApplyFilters, initialFil
                 <Select value={selectedReligion} onValueChange={setSelectedReligion}>
                   <SelectTrigger><SelectValue placeholder="Cualquiera" /></SelectTrigger>
                   <SelectContent>
-                    {['Cristiano', 'Católico', 'Ateo', 'Agnóstico', 'Otro'].map(r => (
+                    {LIFESTYLE_OPTIONS.religion.map(r => (
                       <SelectItem key={r} value={r}>{r}</SelectItem>
                     ))}
                   </SelectContent>
@@ -334,13 +334,20 @@ export function DiscoverFilters({ open, onOpenChange, onApplyFilters, initialFil
 
             <div className="space-y-3">
               <Label>Intereses en Común (hasta 10)</Label>
-                <div className="flex flex-wrap gap-2">
-                {allInterests.slice(0, 20).map((interest) => (
-                  <button key={interest} onClick={() => toggleSelection(interest, selectedInterests, setSelectedInterests, 10)}>
-                    <Badge variant={selectedInterests.includes(interest) ? 'default' : 'secondary'} className="cursor-pointer text-sm py-1">
-                      {getEmoji(interest, 'interest')} {interest}
-                    </Badge>
-                  </button>
+              <div className="space-y-4">
+                {INTEREST_CATEGORIES.map((category) => (
+                  <div key={category.name} className="space-y-2">
+                    <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">{category.name}</p>
+                    <div className="flex flex-wrap gap-2">
+                      {category.items.map((interest) => (
+                        <button key={interest} onClick={() => toggleSelection(interest, selectedInterests, setSelectedInterests, 10)}>
+                          <Badge variant={selectedInterests.includes(interest) ? 'default' : 'secondary'} className="cursor-pointer text-xs py-1">
+                            {getEmoji(interest, 'interest')} {interest}
+                          </Badge>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
                 ))}
               </div>
             </div>
@@ -348,9 +355,9 @@ export function DiscoverFilters({ open, onOpenChange, onApplyFilters, initialFil
             <div className="space-y-3">
               <Label>Valores Compartidos (hasta 5)</Label>
                 <div className="flex flex-wrap gap-2">
-                {allValues.slice(0, 15).map((value) => (
-                  <button key={value} onClick={() => toggleSelection(value, selectedValues, setSelectedValues)}>
-                    <Badge variant={selectedValues.includes(value) ? 'default' : 'secondary'} className="cursor-pointer text-sm py-1">
+                {VALUES.map((value) => (
+                  <button key={value} onClick={() => toggleSelection(value, selectedValues, setSelectedValues, 5)}>
+                    <Badge variant={selectedValues.includes(value) ? 'default' : 'secondary'} className="cursor-pointer text-xs py-1">
                       {getEmoji(value, 'value')} {value}
                     </Badge>
                   </button>
@@ -361,9 +368,9 @@ export function DiscoverFilters({ open, onOpenChange, onApplyFilters, initialFil
             <div className="space-y-3">
               <Label>Géneros Musicales (hasta 5)</Label>
                 <div className="flex flex-wrap gap-2">
-                {allMusicGenres.map((genre) => (
+                {MUSIC_GENRES.map((genre) => (
                   <button key={genre} onClick={() => toggleSelection(genre, selectedMusicGenres, setSelectedMusicGenres, 5)}>
-                    <Badge variant={selectedMusicGenres.includes(genre) ? 'default' : 'secondary'} className="cursor-pointer text-sm py-1">
+                    <Badge variant={selectedMusicGenres.includes(genre) ? 'default' : 'secondary'} className="cursor-pointer text-xs py-1">
                       {getEmoji(genre, 'music')} {genre}
                     </Badge>
                   </button>
