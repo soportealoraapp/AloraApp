@@ -506,18 +506,40 @@ export default function ChatWindowPage() {
                                     const messageElement = (() => {
                                         if (message.type === 'voice') {
                                             try {
-                                                const voiceData = JSON.parse(message.content);
+                                                const voiceData = typeof message.content === 'string'
+                                                    ? JSON.parse(message.content)
+                                                    : message.content;
+                                                if (voiceData && typeof voiceData === 'object' && voiceData.audioUrl) {
+                                                    return (
+                                                        <VoiceMessage
+                                                            audioUrl={voiceData.audioUrl}
+                                                            duration={voiceData.duration}
+                                                            isOwn={isMe}
+                                                        />
+                                                    );
+                                                }
                                                 return (
-                                                    <VoiceMessage
-                                                        audioUrl={voiceData.audioUrl}
-                                                        duration={voiceData.duration}
-                                                        isOwn={isMe}
+                                                    <MessageBubble
+                                                        message={{
+                                                            ...message,
+                                                            content: typeof message.content === 'string'
+                                                                ? message.content
+                                                                : JSON.stringify(message.content)
+                                                        }}
+                                                        isMe={isMe}
+                                                        currentUserId={user?.id}
+                                                        onReact={handleReact}
                                                     />
                                                 );
                                             } catch {
                                                 return (
                                                     <MessageBubble
-                                                        message={message}
+                                                        message={{
+                                                            ...message,
+                                                            content: typeof message.content === 'string'
+                                                                ? message.content
+                                                                : JSON.stringify(message.content)
+                                                        }}
                                                         isMe={isMe}
                                                         currentUserId={user?.id}
                                                         onReact={handleReact}
@@ -527,7 +549,12 @@ export default function ChatWindowPage() {
                                         }
                                         return (
                                             <MessageBubble
-                                                message={message}
+                                                message={{
+                                                    ...message,
+                                                    content: typeof message.content === 'string'
+                                                        ? message.content
+                                                        : JSON.stringify(message.content)
+                                                }}
                                                 isMe={isMe}
                                                 currentUserId={user?.id}
                                                 onReact={handleReact}

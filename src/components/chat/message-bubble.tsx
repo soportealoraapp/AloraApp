@@ -128,7 +128,7 @@ export function MessageBubble({ message, isMe, currentUserId, onReact }: Message
             )}
           >
             <p className="text-sm whitespace-pre-wrap break-words leading-relaxed">
-              {isFlagged && !isMe ? 'Mensaje oculto por moderación' : message.content}
+              {isFlagged && !isMe ? 'Mensaje oculto por moderación' : (typeof message.content === 'string' ? message.content : JSON.stringify(message.content))}
             </p>
 
             <div className="flex items-center justify-end gap-1.5 mt-1">

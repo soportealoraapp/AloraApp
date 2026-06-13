@@ -43,25 +43,13 @@ const TIERS = [
             'Boost de visibilidad',
             'Rewind (3 al día)',
             'Modo Viaje',
+            'Coaching IA personalizado',
+            'Insights de compatibilidad profundos',
+            'Historial de quién te visitó',
+            'Modo incógnito',
         ],
         highlighted: true,
         popular: true,
-    },
-    {
-        id: 'premium',
-        name: 'Alora Premium',
-        price: 199,
-        period: 'MXN / mes',
-        annualPrice: 159,
-        annualPeriod: 'MXN / mes (anual)',
-        features: [
-            'Todo lo de Alora+',
-            'Coaching IA personalizado',
-            'Insights de compatibilidad',
-            'Historial de visitas',
-            'Modo incógnito',
-        ],
-        highlighted: false,
     },
 ];
 
@@ -139,7 +127,7 @@ export function PaywallModal({ isOpen, onClose }: PaywallModalProps) {
                                         if (tier.id === 'plus') {
                                             window.location.href = 'https://alora-app.lemonsqueezy.com/checkout/buy/67dd777a-6ae1-4169-a2a1-8a1f105899e7';
                                         } else if (tier.id === 'premium') {
-                                            window.location.href = 'https://alora-app.lemonsqueezy.com/checkout/buy/premium';
+                                            window.location.href = 'https://alora-app.lemonsqueezy.com/checkout/buy/67dd777a-6ae1-4169-a2a1-8a1f105899e7';
                                         } else {
                                             onClose();
                                         }

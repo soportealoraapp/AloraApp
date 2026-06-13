@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ArrowLeft, Heart, MessageSquare, Sparkles, MapPin, Briefcase, Cigarette, GlassWater, Baby, Star, BookOpen, Music, X, Undo, UserCheck, Loader2, ChevronLeft, ChevronRight, Mic } from "lucide-react";
+import { HeartArrow } from "@/components/ui/custom/HeartArrow";
 import { ProfileHighlights } from "@/components/profile/ProfileHighlights";
 import { FavoriteButton } from "@/components/profile/FavoriteButton";
 import { TrustBadge } from "@/components/ui/premium/TrustBadge";
@@ -481,48 +482,51 @@ export default function UserProfilePage() {
                                 </Button>
                             </div>
                         ) : (
-                            <div className="flex justify-around items-center max-w-md mx-auto gap-3">
-                                <Button
-                                    size="lg"
-                                    variant={isLiked ? "default" : "outline"}
-                                    className="w-full min-h-[48px]"
+                            <div className="flex justify-around items-center max-w-sm mx-auto gap-3">
+                                {/* Pass */}
+                                <button
+                                    onClick={() => router.back()}
+                                    disabled={processing}
+                                    className="h-16 w-16 rounded-full border-2 border-muted-foreground/20 bg-background flex items-center justify-center shadow-lg hover:border-red-400 hover:bg-red-50 dark:hover:bg-red-950/30 hover:text-red-500 transition-all active:scale-95"
+                                    aria-label="Pasar"
+                                >
+                                    <X className="h-7 w-7" />
+                                </button>
+
+                                {/* Like */}
+                                <button
                                     onClick={handleLike}
                                     disabled={isLiked || processing}
+                                    className={cn(
+                                        'h-20 w-20 rounded-full flex items-center justify-center shadow-xl transition-all active:scale-95 border-2',
+                                        isLiked
+                                            ? 'bg-primary border-primary text-primary-foreground'
+                                            : 'bg-background border-primary/30 hover:bg-primary hover:border-primary hover:text-primary-foreground text-primary'
+                                    )}
+                                    aria-label="Like"
                                 >
                                     {processing ? (
-                                        <Loader2 className="h-5 w-5 mr-2 animate-spin" />
+                                        <Loader2 className="h-8 w-8 animate-spin" />
                                     ) : (
-                                        <Heart
-                                            className={cn("h-5 w-5 mr-2", isLiked && "fill-current")}
-                                        />
+                                        <Heart className={cn('h-8 w-8', isLiked && 'fill-current')} />
                                     )}
-                                    {isLiked ? "Ya te gusta" : "Me Gusta"}
-                                </Button>
-                                {hasExistingMatch && (
-                                    <Button asChild size="lg" variant="default" className="w-full min-h-[48px]">
-                                        <Link href={`/chat/${id}`}>
-                                            <MessageSquare className="h-5 w-5 mr-2" /> Mensaje
-                                        </Link>
-                                    </Button>
-                                )}
-                                <Button
-                                    size="lg"
-                                    variant="secondary"
-                                    className={cn(
-                                        "w-full min-h-[48px] bg-gradient-to-r from-primary to-accent text-white",
-                                        isSuperMatched && "animate-pulse"
-                                    )}
+                                </button>
+
+                                {/* Flechado (Super Like) */}
+                                <button
                                     onClick={handleSuperMatch}
                                     disabled={isSuperMatched || processing}
-                                    title="Super Like: destaca tu interés en la lista"
-                                >
-                                    {processing ? (
-                                        <Loader2 className="h-5 w-5 mr-2 animate-spin" />
-                                    ) : (
-                                        <Sparkles className="h-5 w-5 mr-2" />
+                                    className={cn(
+                                        'h-16 w-16 rounded-full border-2 flex items-center justify-center shadow-lg transition-all active:scale-95',
+                                        isSuperMatched
+                                            ? 'bg-amber-400 border-amber-400 text-white'
+                                            : 'bg-background border-amber-400/40 hover:bg-amber-50 dark:hover:bg-amber-950/30 hover:border-amber-400 text-amber-500'
                                     )}
-                                    {isSuperMatched ? "Super Like enviado" : "Super Like"}
-                                </Button>
+                                    aria-label="Flechado"
+                                    title="Flechado: destaca tu interés"
+                                >
+                                    <HeartArrow className="h-6 w-6" />
+                                </button>
                             </div>
                         )}
                     </div>
