@@ -101,6 +101,7 @@ export function MessageBubble({ message, isMe, currentUserId, onReact }: Message
               reactions={message.reactions || {}}
               currentUserId={currentUserId}
               onReact={handleReact}
+              isMe={isMe}
             />
           )}
 
@@ -157,6 +158,7 @@ export function MessageBubble({ message, isMe, currentUserId, onReact }: Message
               reactions={message.reactions || {}}
               currentUserId={currentUserId}
               onReact={handleReact}
+              isMe={isMe}
             />
           )}
         </div>

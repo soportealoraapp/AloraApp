@@ -2,30 +2,26 @@
 
 import { useNotifications } from '@/hooks/use-notifications';
 import { Button } from '@/components/ui/button';
-import { CheckCheck, Bell, Loader2, Info, MoreVertical, Trash2 } from 'lucide-react';
+import { CheckCheck, Bell, Loader2, Info, Trash2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+import { motion, AnimatePresence, useMotionValue, useTransform, animate } from 'framer-motion';
 
 function NotificationItem({ notification, onRead, onDelete }: { notification: any; onRead: () => void; onDelete: () => void }) {
   const router = useRouter();
   const isUnread = !notification.readAt;
+  const x = useMotionValue(0);
+  const background = useTransform(x, [-80, 0], ['hsl(var(--destructive))', 'hsl(var(--background))']);
+  const deleteOpacity = useTransform(x, [-80, -30], [1, 0]);
 
   const handleClick = () => {
     if (isUnread) onRead();
 
     const type = notification.type || '';
     const data = (notification.data as any) || {};
-
-    console.log('[NotificationClick]', { type, data });
 
     if (type === 'match' || type === 'new_match') {
       const matchId = data.matchId || data.id;
@@ -42,50 +38,66 @@ function NotificationItem({ notification, onRead, onDelete }: { notification: an
       const userId = data.viewerId || data.userId || data.id;
       if (userId) router.push(`/profile/${userId}`);
     } else {
-      // Default to profile if we have a userId but unknown type
       const fallbackId = data.userId || data.fromUserId || data.id;
       if (fallbackId) router.push(`/profile/${fallbackId}`);
     }
   };
 
-  return (
-    <div className="relative group">
-      <button
-        className={cn(
-          'w-full text-left p-4 border-b transition-colors hover:bg-muted/30 pr-12',
-          isUnread ? 'bg-primary/5 font-medium' : ''
-        )}
-        onClick={handleClick}
-      >
-        <p className="text-sm">{notification.title}</p>
-        {notification.body && (
-          <p className="text-xs text-muted-foreground mt-1">{notification.body}</p>
-        )}
-        <p className="text-xs text-muted-foreground/60 mt-1">
-          {new Date(notification.createdAt).toLocaleDateString('es-MX', {
-            day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit'
-          })}
-        </p>
-      </button>
+  const handleDragEnd = (_: any, info: any) => {
+    if (info.offset.x < -60) {
+      // Animate fully off screen then delete
+      animate(x, -400, { type: 'spring', stiffness: 200, damping: 25 });
+      setTimeout(onDelete, 250);
+    } else {
+      animate(x, 0, { type: 'spring', stiffness: 300, damping: 30 });
+    }
+  };
 
-      <div className="absolute right-2 top-1/2 -translate-y-1/2">
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-foreground">
-              <MoreVertical className="h-4 w-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuItem 
-              className="text-destructive focus:text-destructive cursor-pointer"
-              onClick={() => onDelete()}
-            >
-              <Trash2 className="h-4 w-4 mr-2" />
-              Eliminar
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </div>
+  return (
+    <div className="relative overflow-hidden">
+      {/* Delete hint revealed behind */}
+      <motion.div
+        className="absolute inset-0 flex items-center justify-end pr-5 bg-destructive"
+        style={{ opacity: deleteOpacity }}
+      >
+        <Trash2 className="h-5 w-5 text-destructive-foreground" />
+      </motion.div>
+
+      <motion.div
+        style={{ x, backgroundColor: background }}
+        drag="x"
+        dragDirectionLock
+        dragConstraints={{ left: -200, right: 0 }}
+        dragElastic={{ left: 0.15, right: 0 }}
+        onDragEnd={handleDragEnd}
+        whileTap={{ cursor: 'grabbing' }}
+        className="relative cursor-grab active:cursor-grabbing touch-pan-y"
+      >
+        <button
+          className={cn(
+            'w-full text-left p-4 border-b transition-colors hover:bg-muted/30',
+            isUnread ? 'bg-primary/5 font-medium' : ''
+          )}
+          onClick={handleClick}
+        >
+          <div className="flex items-start gap-3">
+            {isUnread && (
+              <span className="mt-1.5 h-2 w-2 rounded-full bg-primary flex-shrink-0" />
+            )}
+            <div className={cn('flex-1 min-w-0', !isUnread && 'pl-5')}>
+              <p className="text-sm leading-snug">{notification.title}</p>
+              {notification.body && (
+                <p className="text-xs text-muted-foreground mt-1 leading-relaxed">{notification.body}</p>
+              )}
+              <p className="text-xs text-muted-foreground/60 mt-1.5">
+                {new Date(notification.createdAt).toLocaleDateString('es-MX', {
+                  day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit'
+                })}
+              </p>
+            </div>
+          </div>
+        </button>
+      </motion.div>
     </div>
   );
 }
@@ -135,14 +147,24 @@ export default function NotificationsPage() {
           </div>
         ) : (
           <div className="max-w-xl mx-auto">
-            {notifications.map((n) => (
-              <NotificationItem
-                key={n.id}
-                notification={n}
-                onRead={() => markRead([n.id])}
-                onDelete={() => deleteNotification(n.id)}
-              />
-            ))}
+            <AnimatePresence initial={false}>
+              {notifications.map((n) => (
+                <motion.div
+                  key={n.id}
+                  layout
+                  initial={{ opacity: 0, y: -8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, height: 0, overflow: 'hidden' }}
+                  transition={{ type: 'spring', stiffness: 250, damping: 30 }}
+                >
+                  <NotificationItem
+                    notification={n}
+                    onRead={() => markRead([n.id])}
+                    onDelete={() => deleteNotification(n.id)}
+                  />
+                </motion.div>
+              ))}
+            </AnimatePresence>
           </div>
         )}
       </main>

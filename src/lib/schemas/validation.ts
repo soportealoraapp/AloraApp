@@ -42,6 +42,8 @@ export const EditableProfileSchema = z.object({
     longitude: z.number().optional().nullable(),
     lookingFor: z.string().optional().default(''),
     connectionModes: z.array(z.enum(ALLOWED_CONNECTION_INTENTS)).max(2).optional().default(['dating']),
+    voiceIntro: z.string().url('Voice intro must be a valid URL').nullable().optional(),
+    voiceIntroDuration: z.number().nullable().optional(),
 }).strict('Unexpected fields are not allowed');
 
 export type EditableProfile = z.infer<typeof EditableProfileSchema>;
@@ -73,7 +75,7 @@ export const MessageSchema = z.object({
     content: z.string().min(1).max(1000),
     matchId: z.string().uuid(),
     receiverId: z.string().optional(),
-    type: z.enum(['text', 'image', 'icebreaker']).default('text')
+    type: z.enum(['text', 'image', 'icebreaker', 'voice']).default('text')
 });
 
 export const LikeSchema = z.object({

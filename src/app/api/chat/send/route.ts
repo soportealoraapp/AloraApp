@@ -82,37 +82,39 @@ export async function POST(request: NextRequest) {
         // Moderate message content
         let content = text;
         let isFiltered = false;
-        try {
-            const moderationResult = await filterOffensiveMessages({ text });
-            content = moderationResult.filteredText;
-            isFiltered = moderationResult.isOffensive;
-        } catch (moderationError) {
-            console.error('Moderation error:', moderationError);
-        }
+        const skipModeration = type === 'voice' || type === 'image';
 
-        // Risk engine analysis (love bombing, manipulation, scam detection)
-        let isHighRisk = false;
-        try {
-            const prevMessageCount = await prisma.message.count({ where: { matchId } });
-            const riskAssessment = await analyzeMessageSafety(
-                matchId,
-                user.id,
-                receiverId,
-                content,
-                prevMessageCount
-            );
-
-            if (riskAssessment.assessment.riskLevel === 'critical' || riskAssessment.assessment.riskLevel === 'high') {
-                // Flag message for review and reduce sender reputation
-                isFiltered = true;
-                isHighRisk = true;
-                await prisma.profile.update({
-                    where: { userId: user.id },
-                    data: { reputationScore: { decrement: riskAssessment.assessment.riskLevel === 'critical' ? 10 : 5 } }
-                }).catch((err) => console.warn('[chat/send] reputation decrement failed:', err));
+        if (!skipModeration) {
+            try {
+                const moderationResult = await filterOffensiveMessages({ text });
+                content = moderationResult.filteredText;
+                isFiltered = moderationResult.isOffensive;
+            } catch (moderationError) {
+                console.error('Moderation error:', moderationError);
             }
-        } catch (riskError) {
-            console.error('Risk engine error:', riskError);
+
+            // Risk engine analysis (love bombing, manipulation, scam detection)
+            try {
+                const prevMessageCount = await prisma.message.count({ where: { matchId } });
+                const riskAssessment = await analyzeMessageSafety(
+                    matchId,
+                    user.id,
+                    receiverId,
+                    content,
+                    prevMessageCount
+                );
+
+                if (riskAssessment.assessment.riskLevel === 'critical' || riskAssessment.assessment.riskLevel === 'high') {
+                    // Flag message for review and reduce sender reputation
+                    isFiltered = true;
+                    await prisma.profile.update({
+                        where: { userId: user.id },
+                        data: { reputationScore: { decrement: riskAssessment.assessment.riskLevel === 'critical' ? 10 : 5 } }
+                    }).catch((err) => console.warn('[chat/send] reputation decrement failed:', err));
+                }
+            } catch (riskError) {
+                console.error('Risk engine error:', riskError);
+            }
         }
 
         // Create Message

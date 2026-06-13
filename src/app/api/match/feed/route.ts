@@ -54,6 +54,7 @@ export async function GET(request: NextRequest) {
                 } : null,
                 createdAt: match.createdAt,
                 intent: match.intent,
+                mutedUntil: match.mutedUntil,
                 partner: {
                     id: partner.id,
                     displayName: partnerProfile?.displayName,

@@ -78,6 +78,11 @@ export default function ChatWindowPage() {
     const partnerName = partner?.displayName || `Usuario #${otherUserId?.slice(0, 8)}`;
     const partnerPhoto = partner?.photoURL || '/placeholder.svg';
 
+    const isMuted = useMemo(() => {
+        if (!match?.mutedUntil) return false;
+        return new Date(match.mutedUntil) > new Date();
+    }, [match?.mutedUntil]);
+
     useEffect(() => {
         if (!matchId) return;
         fetch(`/api/chat/health?matchId=${matchId}`)
@@ -497,38 +502,57 @@ export default function ChatWindowPage() {
                                     </span>
                                 </div>
                                 {group.messages.map((message) => {
-                                    if (message.type === 'voice') {
-                                        try {
-                                            const voiceData = JSON.parse(message.content);
-                                            return (
-                                                <VoiceMessage
-                                                    key={message.id}
-                                                    audioUrl={voiceData.audioUrl}
-                                                    duration={voiceData.duration}
-                                                    isOwn={message.senderId === user?.id}
-                                                />
-                                            );
-                                        } catch {
-                                            return (
-                                                <MessageBubble
-                                                    key={message.id}
-                                                    message={message}
-                                                    isMe={message.senderId === user?.id}
-                                                    currentUserId={user?.id}
-                                                    onReact={handleReact}
-                                                />
-                                            );
+                                    const isMe = message.senderId === user?.id;
+                                    const messageElement = (() => {
+                                        if (message.type === 'voice') {
+                                            try {
+                                                const voiceData = JSON.parse(message.content);
+                                                return (
+                                                    <VoiceMessage
+                                                        audioUrl={voiceData.audioUrl}
+                                                        duration={voiceData.duration}
+                                                        isOwn={isMe}
+                                                    />
+                                                );
+                                            } catch {
+                                                return (
+                                                    <MessageBubble
+                                                        message={message}
+                                                        isMe={isMe}
+                                                        currentUserId={user?.id}
+                                                        onReact={handleReact}
+                                                    />
+                                                );
+                                            }
                                         }
+                                        return (
+                                            <MessageBubble
+                                                message={message}
+                                                isMe={isMe}
+                                                currentUserId={user?.id}
+                                                onReact={handleReact}
+                                            />
+                                        );
+                                    })();
+
+                                    if (isMe) {
+                                        return (
+                                            <div key={message.id} className="w-full flex justify-end">
+                                                {messageElement}
+                                            </div>
+                                        );
+                                    } else {
+                                        return (
+                                            <div key={message.id} className="w-full flex justify-start items-start gap-2 mb-2">
+                                                <Link href={otherUserId ? `/profile/${otherUserId}` : '#'} className="h-8 w-8 rounded-full overflow-hidden shrink-0 relative mt-1 border border-muted hover:opacity-90 transition-opacity">
+                                                    <Image src={partnerPhoto} alt={partnerName} fill className="object-cover" />
+                                                </Link>
+                                                <div className="flex-1 min-w-0 max-w-[85%]">
+                                                    {messageElement}
+                                                </div>
+                                            </div>
+                                        );
                                     }
-                                    return (
-                                        <MessageBubble
-                                            key={message.id}
-                                            message={message}
-                                            isMe={message.senderId === user?.id}
-                                            currentUserId={user?.id}
-                                            onReact={handleReact}
-                                        />
-                                    );
                                 })}
                             </div>
                         ))}
@@ -700,7 +724,7 @@ export default function ChatWindowPage() {
                         isOpen={showMuteDialog}
                         onClose={() => setShowMuteDialog(false)}
                         onMute={handleMute}
-                        isMuted={false}
+                        isMuted={isMuted}
                     />
                     <MatchTimeline
                         matchId={matchId}

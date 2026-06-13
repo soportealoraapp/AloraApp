@@ -5,7 +5,8 @@ import { AnimatePresence } from "framer-motion";
 import { FloatingMatchCard } from "@/components/ui/premium/FloatingMatchCard";
 import { MatchScreen } from "@/components/ui/premium/MatchScreen";
 import { Button } from "@/components/ui/button";
-import { Loader2, RefreshCcw, Sparkles, SlidersHorizontal, RotateCcw, Heart, X, ArrowRight, ArrowLeft, Star } from "lucide-react";
+import { Loader2, RefreshCcw, Sparkles, SlidersHorizontal, RotateCcw, Heart, X, ArrowRight, ArrowLeft } from "lucide-react";
+import { HeartArrow } from "@/components/ui/custom/HeartArrow";
 import { DiscoverFilters, Filters } from "@/components/discover/discover-filters";
 import { Card, CardContent } from "@/components/ui/card";
 import Image from "next/image";
@@ -35,6 +36,7 @@ const DEFAULT_FILTERS: Filters = {
   values: [],
   musicGenres: [],
   highCompatibility: false,
+  intent: 'dating',
 };
 
 const SWIPE_LIMIT = 50;
@@ -389,12 +391,7 @@ export default function DiscoverPage() {
               </Button>
               <span className="text-[11px] text-muted-foreground font-bold">{rewindsRemaining}</span>
             </div>
-            {currentUserProfile?.superlikesRemaining !== undefined && (
-            <div className="flex items-center gap-0.5 px-1">
-              <Star className="h-3.5 w-3.5 text-amber-500 fill-amber-500" />
-              <span className="text-[11px] font-bold text-muted-foreground">{currentUserProfile?.superlikesRemaining}</span>
-            </div>
-            )}
+            
             <Button variant="ghost" size="icon" onClick={() => setFilterOpen(true)} title="Filtros de búsqueda" aria-label="Filtros de búsqueda" className="relative touch-target">
               <SlidersHorizontal className="h-4 w-4 text-muted-foreground" />
               {countActiveFilters(filters) > 0 && (
@@ -566,7 +563,7 @@ export default function DiscoverPage() {
                   <div className="bg-foreground/90 text-background px-5 py-3 rounded-2xl text-sm font-medium shadow-lg max-w-[260px]">
                     {tutorialStep === 1 && <p className="flex items-center gap-2"><ArrowRight className="h-4 w-4" /> Desliza a la derecha para dar <strong>Like</strong></p>}
                     {tutorialStep === 2 && <p className="flex items-center gap-2"><ArrowLeft className="h-4 w-4" /> Desliza a la izquierda para <strong>Pasar</strong></p>}
-                    {tutorialStep === 3 && <p className="flex items-center gap-2"><Star className="h-4 w-4 text-amber-500 fill-amber-500" /> Toca la estrella para enviar un <strong>Flechado</strong></p>}
+                    {tutorialStep === 3 && <p className="flex items-center gap-2"><HeartArrow className="h-4 w-4 text-amber-500 fill-amber-500" /> Toca el corazón flechado para enviar un <strong>Flechado</strong></p>}
                     <div className="flex justify-between items-center mt-2.5">
                       <span className="text-xs opacity-50">{tutorialStep}/3</span>
                       <button onClick={tutorialStep === 3 ? dismissTutorial : nextTutorialStep} className="text-[11px] font-bold underline">

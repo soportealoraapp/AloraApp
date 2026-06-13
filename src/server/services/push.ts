@@ -154,17 +154,38 @@ export async function sendPushToMultipleUsers(userIds: string[], payload: PushPa
 
 export async function notifyNewMatch(userId: string, partnerName: string, matchId: string) {
     return sendPushToUser(userId, {
-        title: 'Nuevo match!',
-        body: `${partnerName} y tu se gustaron mutuamente`,
+        title: '¡Tenés un match! 💖',
+        body: `Tú y ${partnerName} se gustaron mutuamente. ¡Ahora di hola!`,
         data: { type: 'match', matchId },
         channel: 'matches',
     });
 }
 
 export async function notifyNewMessage(userId: string, senderName: string, matchId: string, preview: string) {
+    // Format preview smartly for non-text message types
+    let formattedPreview = preview;
+    if (preview.startsWith('{') || preview.startsWith('[')) {
+        try {
+            const parsed = JSON.parse(preview);
+            if (parsed.audioUrl) {
+                formattedPreview = '🎤 Mensaje de voz';
+            } else {
+                formattedPreview = '📎 Contenido multimedia';
+            }
+        } catch {
+            // Not JSON — check if it looks like a URL
+            if (preview.startsWith('http') && (preview.includes('.jpg') || preview.includes('.png') || preview.includes('.webp'))) {
+                formattedPreview = '🖼️ Imagen';
+            }
+        }
+    } else if (preview.startsWith('http') && (preview.includes('.jpg') || preview.includes('.png') || preview.includes('.webp'))) {
+        formattedPreview = '🖼️ Imagen';
+    }
+
+    const body = formattedPreview.length > 80 ? formattedPreview.substring(0, 80) + '...' : formattedPreview;
     return sendPushToUser(userId, {
         title: senderName,
-        body: preview.length > 100 ? preview.substring(0, 100) + '...' : preview,
+        body,
         data: { type: 'message', matchId },
         channel: 'messages',
     });
@@ -172,8 +193,8 @@ export async function notifyNewMessage(userId: string, senderName: string, match
 
 export async function notifyVerificationApproved(userId: string) {
     return sendPushToUser(userId, {
-        title: 'Identidad verificada',
-        body: 'Tu identidad ha sido verificada exitosamente',
+        title: '✅ ¡Estás verificado!',
+        body: 'Tu identidad fue confirmada. Tu perfil ahora genera mucha más confianza.',
         data: { type: 'verification' },
         channel: 'verification',
     });
@@ -181,8 +202,8 @@ export async function notifyVerificationApproved(userId: string) {
 
 export async function notifyVerificationRejected(userId: string, reason: string) {
     return sendPushToUser(userId, {
-        title: 'Verificación requerida',
-        body: reason || 'Tu verificación necesita revisión',
+        title: 'Revisemos tu verificación',
+        body: reason || 'Necesitamos que subas una foto más clara. ¡Va a valer la pena!',
         data: { type: 'verification' },
         channel: 'verification',
     });
@@ -199,8 +220,8 @@ export async function notifyReportResolved(userId: string) {
 
 export async function notifyLikesRestored(userId: string) {
     return sendPushToUser(userId, {
-        title: 'Tus likes ya están disponibles',
-        body: 'Tus 50 likes diarios ya están disponibles. ¡A conectar!',
+        title: '❤️ Tus likes ya están listos',
+        body: '¡Tus 50 likes del día se renovaron! Sal a descubrir personas increíbles.',
         data: { type: 'likes_restored' },
         channel: 'engagement',
     });
@@ -208,8 +229,8 @@ export async function notifyLikesRestored(userId: string) {
 
 export async function notifyBoostAvailable(userId: string) {
     return sendPushToUser(userId, {
-        title: 'Boost disponible',
-        body: 'Tienes un boost gratuito disponible. ¡Destaca por 30 minutos!',
+        title: '🚀 Boost disponible',
+        body: 'Tienes un boost gratis esperándote. ¡Destaca por 30 minutos y sube tus posibilidades!',
         data: { type: 'boost_available' },
         channel: 'engagement',
     });
@@ -217,8 +238,8 @@ export async function notifyBoostAvailable(userId: string) {
 
 export async function notifyProfileVisit(userId: string, visitorName: string) {
     return sendPushToUser(userId, {
-        title: 'Alguien visitó tu perfil',
-        body: `${visitorName} vio tu perfil`,
+        title: '👀 Alguien te visitó',
+        body: `${visitorName} pasó por tu perfil. ¿Le das una vuelta al suyo?`,
         data: { type: 'profile_visit' },
         channel: 'engagement',
     });
@@ -226,8 +247,8 @@ export async function notifyProfileVisit(userId: string, visitorName: string) {
 
 export async function notifyDailyCompatibility(userId: string, partnerName: string, score: number) {
     return sendPushToUser(userId, {
-        title: 'Tu match del día',
-        body: `${partnerName} es ${score}% compatible contigo 💜`,
+        title: '💜 Tu match del día llegó',
+        body: `${partnerName} y tú tienen un ${score}% de compatibilidad. ¡No dejes pasar esta conexión!`,
         data: { type: 'daily_compatibility' },
         channel: 'engagement',
     });
@@ -235,8 +256,8 @@ export async function notifyDailyCompatibility(userId: string, partnerName: stri
 
 export async function notifyStreakAtRisk(userId: string, streakDays: number) {
     return sendPushToUser(userId, {
-        title: 'No pierdas tu racha 🔥',
-        body: `Llevas ${streakDays} días seguidos. ¡No pares ahora!`,
+        title: '🔥 ¡Tu racha corre peligro!',
+        body: `Llevas ${streakDays} día${streakDays !== 1 ? 's' : ''} de racha. Entra un momento y síguela.`,
         data: { type: 'streak_at_risk' },
         channel: 'engagement',
     });
@@ -244,8 +265,8 @@ export async function notifyStreakAtRisk(userId: string, streakDays: number) {
 
 export async function notifyDailyQuestion(userId: string) {
     return sendPushToUser(userId, {
-        title: 'Pregunta del día',
-        body: 'La pregunta de hoy te espera. Responde y mejora tu compatibilidad',
+        title: '💬 La pregunta del día te espera',
+        body: 'Responde hoy y deja que las personas que te interesan te conozcan mejor.',
         data: { type: 'daily_question' },
         channel: 'engagement',
     });

@@ -6,7 +6,8 @@ import { UserProfile } from '@/lib/domain/types';
 import Image from 'next/image';
 import { TrustBadge } from './TrustBadge';
 import { ProfileActions } from '../../match/ProfileActions';
-import { Clock, MessageCircle, Heart, X, Star, Music } from 'lucide-react';
+import { Clock, MessageCircle, Heart, X, Music } from 'lucide-react';
+import { HeartArrow } from '../custom/HeartArrow';
 import { useState, useCallback, useEffect, useRef } from 'react';
 
 interface FloatingMatchCardProps {
@@ -258,7 +259,7 @@ export function FloatingMatchCard({ profile, onSwipe, onFlechado, compatibility,
             aria-label="Flechado"
             title={`Flechado: destaca tu interés (${superlikesRemaining ?? 0} restantes hoy)`}
           >
-            <Star className="h-7 w-7 fill-current" />
+            <HeartArrow className="h-7 w-7" />
             <AnimatePresence>
               {likeBurst && (
                 <motion.div

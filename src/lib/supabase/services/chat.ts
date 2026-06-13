@@ -72,7 +72,7 @@ export const chatService = {
             }
         })
 
-        // Realtime subscription for new messages
+        // Realtime subscription for new messages and status updates
         const channel = supabase
             .channel(`match:${matchId}`)
             .on(
@@ -96,6 +96,26 @@ export const chatService = {
                         callback(cached.messages)
                     } else {
                         callback([message])
+                    }
+                }
+            )
+            .on(
+                'postgres_changes' as any,
+                {
+                    event: 'UPDATE',
+                    schema: 'public',
+                    table: 'messages',
+                    filter: `matchId=eq.${matchId}`,
+                },
+                (payload: RealtimePostgresChangesPayload<{ [key: string]: any }>) => {
+                    const updatedMsg = payload.new as any
+                    if (!updatedMsg || !updatedMsg.id) return
+
+                    const message = normalizeMessage(updatedMsg)
+                    const cached = messageCache.get(cacheKey)
+                    if (cached) {
+                        cached.messages = cached.messages.map(m => m.id === message.id ? message : m)
+                        callback(cached.messages)
                     }
                 }
             )

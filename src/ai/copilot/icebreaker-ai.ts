@@ -52,12 +52,75 @@ Genera 3 opciones diferentes con estilos variados.`,
 });
 
 /**
+ * Fallback template-based icebreaker generator.
+ * Used when the AI model is unavailable or throws an error.
+ */
+function generateFallbackIcebreakers(
+    userA: { displayName: string; interests: string[]; values: string[]; bio: string; musicGenres: string[] },
+    userB: { displayName: string; interests: string[]; values: string[]; bio: string; musicGenres: string[] }
+): string[] {
+    const icebreakers: string[] = [];
+
+    // Shared interests
+    const sharedInterests = userA.interests.filter(i =>
+        userB.interests.some(j => j.toLowerCase() === i.toLowerCase())
+    );
+    if (sharedInterests.length > 0) {
+        const interest = sharedInterests[0];
+        icebreakers.push(`Vi que a los dos les gusta ${interest} — ¿cuál fue la última vez que lo disfrutaste de verdad?`);
+    }
+
+    // Shared values
+    const sharedValues = userA.values.filter(v =>
+        userB.values.some(w => w.toLowerCase() === v.toLowerCase())
+    );
+    if (sharedValues.length > 0) {
+        const value = sharedValues[0];
+        icebreakers.push(`Me parece que ambos valoramos ${value}. ¿Cómo se refleja eso en tu día a día?`);
+    }
+
+    // Shared music
+    const sharedMusic = userA.musicGenres.filter(m =>
+        userB.musicGenres.some(n => n.toLowerCase() === m.toLowerCase())
+    );
+    if (sharedMusic.length > 0) {
+        const genre = sharedMusic[0];
+        icebreakers.push(`¡Música de ${genre} en común! ¿Cuál es esa canción que nunca pasa de moda para ti?`);
+    }
+
+    // Generic warm starters as padding
+    const generics = [
+        `Hola ${userB.displayName} 👋 ¿Qué es lo más interesante que te ha pasado esta semana?`,
+        `De todo lo que tienes en tu perfil, ¿cuál es la parte que más te representa hoy?`,
+        `Si pudieras hacer planes para este fin de semana sin límites, ¿qué harías?`,
+    ];
+
+    // Fill up to 3 icebreakers
+    for (const g of generics) {
+        if (icebreakers.length >= 3) break;
+        icebreakers.push(g);
+    }
+
+    return icebreakers.slice(0, 3);
+}
+
+/**
  * Generate personalized icebreakers for a match.
+ * Falls back to template-based generation if AI is unavailable.
  */
 export async function generateIcebreakers(
     userA: { displayName: string; interests: string[]; values: string[]; bio: string; musicGenres: string[] },
     userB: { displayName: string; interests: string[]; values: string[]; bio: string; musicGenres: string[] }
 ): Promise<string[]> {
-    const { output } = await icebreakerPrompt({ userA, userB });
-    return output?.icebreakers || [];
+    try {
+        const { output } = await icebreakerPrompt({ userA, userB });
+        if (output?.icebreakers && output.icebreakers.length > 0) {
+            return output.icebreakers;
+        }
+        // AI returned empty — use fallback
+        return generateFallbackIcebreakers(userA, userB);
+    } catch (err) {
+        console.warn('[icebreaker-ai] AI failed, using template fallback:', err);
+        return generateFallbackIcebreakers(userA, userB);
+    }
 }

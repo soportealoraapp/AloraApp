@@ -10,10 +10,11 @@ import { SpotifySection } from "@/components/profile/SpotifySection";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, Heart, MessageSquare, Sparkles, MapPin, Briefcase, Cigarette, GlassWater, Baby, Star, BookOpen, Music, X, Undo, UserCheck, Loader2, ChevronLeft, ChevronRight } from "lucide-react";
+import { ArrowLeft, Heart, MessageSquare, Sparkles, MapPin, Briefcase, Cigarette, GlassWater, Baby, Star, BookOpen, Music, X, Undo, UserCheck, Loader2, ChevronLeft, ChevronRight, Mic } from "lucide-react";
 import { ProfileHighlights } from "@/components/profile/ProfileHighlights";
 import { FavoriteButton } from "@/components/profile/FavoriteButton";
 import { TrustBadge } from "@/components/ui/premium/TrustBadge";
+import { VoicePlayer } from "@/components/audio/VoicePlayer";
 import Image from "next/image";
 import Link from "next/link";
 import { useToast } from "@/hooks/use-toast";
@@ -325,6 +326,18 @@ export default function UserProfilePage() {
                                     <p className="text-sm text-foreground leading-relaxed">&ldquo;{profile.latestAnswer.answer}&rdquo;</p>
                                 </div>
                                 <p className="text-xs text-muted-foreground mt-2">Usa esta respuesta para iniciar una conversación</p>
+                            </CardContent>
+                        </Card>
+                    )}
+
+                    {profile.voiceIntro && (
+                        <Card className="rounded-2xl border border-border/60 bg-card/90 shadow-sm overflow-hidden">
+                            <CardContent className="p-5">
+                                <div className="flex items-center gap-2 mb-3">
+                                    <Mic className="h-4 w-4 text-primary" />
+                                    <h3 className="font-semibold text-sm text-foreground">Presentación de voz</h3>
+                                </div>
+                                <VoicePlayer src={profile.voiceIntro} />
                             </CardContent>
                         </Card>
                     )}

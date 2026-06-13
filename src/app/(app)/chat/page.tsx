@@ -9,8 +9,9 @@ import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Search, Heart, X, CheckCircle, Loader2, MessageSquare, EyeOff } from "lucide-react";
+import { Search, Heart, X, CheckCircle, Loader2, MessageSquare, EyeOff, Bell, BellOff, Trash2 } from "lucide-react";
 import Image from "next/image";
+import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { useToast } from "@/hooks/use-toast";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -155,6 +156,31 @@ export default function ChatPage() {
         }
     };
 
+    const handleMuteConversation = async (matchId: string, isCurrentlyMuted: boolean) => {
+        try {
+            const duration = isCurrentlyMuted ? -1 : null;
+            const response = await fetch('/api/chat/mute', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ matchId, duration }),
+            });
+            if (!response.ok) throw new Error('Failed to mute');
+            toast({
+                title: isCurrentlyMuted ? 'Notificaciones activadas' : 'Conversación silenciada',
+                description: isCurrentlyMuted
+                    ? 'Recibirás notificaciones de nuevos mensajes'
+                    : 'No recibirás notificaciones de esta conversación',
+            });
+            refresh();
+        } catch (error) {
+            toast({
+                title: 'Error',
+                description: 'No se pudo cambiar el silencio',
+                variant: 'destructive',
+            });
+        }
+    };
+
     if (loading) {
         return (
             <div>
@@ -270,15 +296,57 @@ export default function ChatPage() {
                                         const otherUserId = match.users.find(id => id !== user?.id);
                                         const partnerName = match.partner?.displayName || `Usuario #${otherUserId?.slice(0, 8)}`;
                                         const partnerPhoto = match.partner?.photoURL || '/placeholder.svg';
+                                        const isMuted = match.mutedUntil ? new Date(match.mutedUntil) > new Date() : false;
+
                                         return (
                                             <motion.div
                                                 key={match.id}
                                                 initial={{ opacity: 0, y: 10 }}
                                                 animate={{ opacity: 1, y: 0 }}
                                                 transition={{ delay: idx * 0.05, type: "spring", stiffness: 180, damping: 35 }}
+                                                className="relative overflow-hidden rounded-2xl"
                                             >
-                                                <div className="flex items-center gap-2">
-                                                    <Link href={`/chat/${match.id}`} className="flex-1">
+                                                {/* Action buttons revealed behind the card */}
+                                                <div className="absolute inset-0 flex items-center justify-end gap-1.5 pr-2 bg-muted/20 z-0">
+                                                    <Button
+                                                        variant="ghost"
+                                                        size="sm"
+                                                        onClick={(e) => {
+                                                            e.preventDefault();
+                                                            handleMuteConversation(match.id, isMuted);
+                                                        }}
+                                                        className={cn(
+                                                            "h-[calc(100%-8px)] rounded-xl flex flex-col items-center justify-center px-4 transition-all text-white border-none shadow-sm",
+                                                            isMuted ? "bg-amber-500 hover:bg-amber-600" : "bg-blue-500 hover:bg-blue-600"
+                                                        )}
+                                                    >
+                                                        {isMuted ? <Bell className="h-4 w-4 mb-0.5" /> : <BellOff className="h-4 w-4 mb-0.5" />}
+                                                        <span className="text-[10px] font-bold">{isMuted ? "Activar" : "Silenciar"}</span>
+                                                    </Button>
+                                                    <Button
+                                                        variant="ghost"
+                                                        size="sm"
+                                                        onClick={(e) => {
+                                                            e.preventDefault();
+                                                            handleHideConversation(match.id);
+                                                        }}
+                                                        disabled={hidingMatch === match.id}
+                                                        className="bg-destructive hover:bg-destructive/90 text-destructive-foreground rounded-xl h-[calc(100%-8px)] flex flex-col items-center justify-center px-4 border-none shadow-sm"
+                                                    >
+                                                        <Trash2 className="h-4 w-4 mb-0.5" />
+                                                        <span className="text-[10px] font-bold">Eliminar</span>
+                                                    </Button>
+                                                </div>
+
+                                                {/* Draggable card container */}
+                                                <motion.div
+                                                    drag="x"
+                                                    dragDirectionLock
+                                                    dragConstraints={{ left: -160, right: 0 }}
+                                                    dragElastic={{ left: 0.1, right: 0 }}
+                                                    className="relative z-10 bg-background"
+                                                >
+                                                    <Link href={`/chat/${match.id}`} className="block">
                                                         <Card className="rounded-2xl border shadow-sm hover:shadow-md transition-all cursor-pointer group active:scale-[0.98]">
                                                             <CardContent className="flex items-center gap-4 p-4">
                                                                 <div className="relative h-16 w-16 rounded-full overflow-hidden flex-shrink-0 border-2 border-muted">
@@ -288,6 +356,11 @@ export default function ChatPage() {
                                                                         fill
                                                                         className="object-cover"
                                                                     />
+                                                                    {isMuted && (
+                                                                        <div className="absolute top-0 right-0 bg-amber-500 text-white rounded-full p-0.5 shadow-sm border border-background">
+                                                                            <BellOff className="h-3 w-3" />
+                                                                        </div>
+                                                                    )}
                                                                 </div>
                                                                 <div className="flex-1 min-w-0">
                                                                     <div className="flex items-center justify-between mb-1">
@@ -307,39 +380,23 @@ export default function ChatPage() {
                                                                     <p className="text-xs text-muted-foreground truncate italic">
                                                                         {match.lastMessage?.content || `¡Es un match! ${BRAND_VOICE.nudges.newMatch}`}
                                                                     </p>
-                                                                        {match.lastMessage?.createdAt && (() => {
-                                                                         const hours = (Date.now() - new Date(match.lastMessage.createdAt).getTime()) / (1000 * 60 * 60);
-                                                                         if (hours > 72) {
-                                                                             return (
-                                                                                 <p className="text-xs text-muted-foreground mt-1 flex items-center gap-1">
-                                                                                     <span className="inline-block h-1.5 w-1.5 rounded-full bg-muted-foreground/50" />
-                                                                                     Sin respuesta por {Math.round(hours / 24)} día(s)
-                                                                                 </p>
-                                                                             );
-                                                                         }
-                                                                         return null;
-                                                                     })()}
+                                                                    {match.lastMessage?.createdAt && (() => {
+                                                                        const hours = (Date.now() - new Date(match.lastMessage.createdAt).getTime()) / (1000 * 60 * 60);
+                                                                        if (hours > 72) {
+                                                                            return (
+                                                                                <p className="text-xs text-muted-foreground mt-1 flex items-center gap-1">
+                                                                                    <span className="inline-block h-1.5 w-1.5 rounded-full bg-muted-foreground/50" />
+                                                                                    Sin respuesta por {Math.round(hours / 24)} día(s)
+                                                                                </p>
+                                                                            );
+                                                                        }
+                                                                        return null;
+                                                                    })()}
                                                                 </div>
                                                             </CardContent>
                                                         </Card>
                                                     </Link>
-                                                    <Button
-                                                        size="icon"
-                                                        variant="ghost"
-                                                        className="h-9 w-9 flex-shrink-0 text-muted-foreground hover:text-destructive"
-                                                        onClick={(e) => {
-                                                            e.preventDefault();
-                                                            handleHideConversation(match.id);
-                                                        }}
-                                                        disabled={hidingMatch === match.id}
-                                                    >
-                                {hidingMatch === match.id ? (
-                                    <Loader2 className="h-4 w-4 animate-spin" />
-                                ) : (
-                                    <EyeOff className="h-4 w-4" />
-                                )}
-                                                    </Button>
-                                                </div>
+                                                </motion.div>
                                             </motion.div>
                                         );
                                     })}

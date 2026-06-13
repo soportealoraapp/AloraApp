@@ -8,7 +8,7 @@ import { BadgeChipList } from "@/components/profile/BadgeChip";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Settings, Edit, Eye, Music, CheckCircle, ChevronRight, Shield, Sparkles, MessageCircle, X } from "lucide-react";
+import { Settings, Edit, Eye, Music, CheckCircle, ChevronRight, Shield, Sparkles, MessageCircle, X, Mic } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -17,6 +17,7 @@ import { useState, useEffect } from "react";
 import { logger } from "@/lib/logger";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 import { ProfileHighlights } from "@/components/profile/ProfileHighlights";
+import { VoicePlayer } from "@/components/audio/VoicePlayer";
 
 export default function ProfilePage() {
   const { user, profile, authLoading, profileLoading } = useAuth();
@@ -199,6 +200,18 @@ export default function ProfilePage() {
               <p className="text-foreground leading-relaxed whitespace-pre-wrap text-sm">{profile.bio}</p>
             )}
           </div>
+
+          {profile.voiceIntro && (
+            <Card className="rounded-2xl border border-border/60 bg-card/90 shadow-sm overflow-hidden">
+              <CardContent className="p-5">
+                <div className="flex items-center gap-2 mb-3">
+                  <Mic className="h-4 w-4 text-primary" />
+                  <h3 className="font-semibold text-sm text-foreground">Presentación de voz</h3>
+                </div>
+                <VoicePlayer src={profile.voiceIntro} />
+              </CardContent>
+            </Card>
+          )}
 
           {/* 3. Highlights & Voice Intro */}
           <ProfileHighlights 

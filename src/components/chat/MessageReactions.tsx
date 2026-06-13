@@ -9,20 +9,21 @@ interface MessageReactionsProps {
     reactions: Record<string, string>;
     currentUserId: string;
     onReact: (emoji: string) => void;
+    isMe?: boolean;
 }
 
 const AVAILABLE_REACTIONS = ['❤️', '😂', '🔥', '😮', '👏', '🥹'];
 
-export function MessageReactions({ reactions, currentUserId, onReact }: MessageReactionsProps) {
+export function MessageReactions({ reactions, currentUserId, onReact, isMe = false }: MessageReactionsProps) {
     const [showPicker, setShowPicker] = useState(false);
 
     const reactionEntries = Object.entries(reactions);
     const myReaction = reactions[currentUserId];
 
     return (
-        <div className="relative">
+        <div className={cn("relative flex flex-col", isMe ? "items-end" : "items-start")}>
             {reactionEntries.length > 0 && (
-                <div className="flex flex-wrap gap-1 mt-1">
+                <div className={cn("flex flex-wrap gap-1 mt-1", isMe ? "justify-end" : "justify-start")}>
                     {Object.entries(
                         reactionEntries.reduce((acc, [userId, emoji]) => {
                             acc[emoji] = (acc[emoji] || 0) + 1;
@@ -37,7 +38,7 @@ export function MessageReactions({ reactions, currentUserId, onReact }: MessageR
                                 myReaction === emoji
                                     ? "bg-primary/20 border border-primary/30"
                                     : "bg-muted hover:bg-muted/80"
-                            )}
+                             )}
                         >
                             <span>{emoji}</span>
                             {count > 1 && <span className="text-xs text-muted-foreground">{count}</span>}
@@ -62,7 +63,10 @@ export function MessageReactions({ reactions, currentUserId, onReact }: MessageR
                                 initial={{ opacity: 0, scale: 0.8, y: 5 }}
                                 animate={{ opacity: 1, scale: 1, y: 0 }}
                                 exit={{ opacity: 0, scale: 0.8, y: 5 }}
-                                className="absolute bottom-full left-0 mb-1 z-50 bg-card border border-border rounded-full shadow-lg px-2 py-1 flex gap-1"
+                                className={cn(
+                                    "absolute bottom-full mb-1 z-50 bg-card border border-border rounded-full shadow-lg px-2 py-1 flex gap-1",
+                                    isMe ? "right-0" : "left-0"
+                                )}
                             >
                                 {AVAILABLE_REACTIONS.map((emoji) => (
                                     <button

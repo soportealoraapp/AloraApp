@@ -21,7 +21,7 @@ export async function POST(request: NextRequest) {
 
         const message = await prisma.message.findUnique({
             where: { id: messageId },
-            select: { matchId: true },
+            select: { matchId: true, reactions: true },
         });
 
         if (!message) {
@@ -37,16 +37,22 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
         }
 
-        const result = await prisma.$queryRaw`
-            UPDATE messages
-            SET reactions = COALESCE(reactions, '{}'::jsonb) || ${JSON.stringify({ [user.id]: emoji })}::jsonb
-            WHERE id = ${messageId}
-            RETURNING reactions
-        `;
+        const existingReactions = (message.reactions as Record<string, string>) || {};
+        const updatedReactions = { ...existingReactions };
 
-        const reactions = (result as any[])[0]?.reactions || {};
+        if (existingReactions[user.id] === emoji) {
+            delete updatedReactions[user.id];
+        } else {
+            updatedReactions[user.id] = emoji;
+        }
 
-        return NextResponse.json({ reactions });
+        const updatedMessage = await prisma.message.update({
+            where: { id: messageId },
+            data: { reactions: updatedReactions },
+            select: { reactions: true }
+        });
+
+        return NextResponse.json({ reactions: updatedMessage.reactions || {} });
     } catch (error) {
         console.error('Error reacting to message:', error);
         return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
