@@ -1,4 +1,7 @@
-import { OnboardingWizard } from "@/components/onboarding/OnboardingWizard";
+"use client";
+
+import dynamic from "next/dynamic";
+const OnboardingWizard = dynamic(() => import("@/components/onboarding/OnboardingWizard").then(m => m.OnboardingWizard), { ssr: false });
 
 export default function OnboardingPage() {
   return (

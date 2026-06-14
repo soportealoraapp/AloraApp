@@ -73,6 +73,7 @@ const MemoizedMessageBubble = React.memo(function MessageBubble({ message, isMe,
                 alt="Imagen compartida"
                 fill
                 className="object-contain rounded-xl transition-transform group-hover:scale-[1.02]"
+                loading="lazy"
               />
               <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors flex items-center justify-center">
                 <Expand className="h-6 w-6 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
@@ -196,6 +197,7 @@ const MemoizedMessageBubble = React.memo(function MessageBubble({ message, isMe,
                 width={800}
                 height={800}
                 className="object-contain max-h-[80vh] rounded-xl"
+                loading="lazy"
               />
             </motion.div>
           </motion.div>

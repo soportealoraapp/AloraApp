@@ -86,7 +86,7 @@ export default function AdminUsersPage() {
                         <div key={u.id} className="bg-gray-900 border border-gray-800 rounded-xl p-4 flex items-center gap-4">
                             <div className="relative h-12 w-12 rounded-full overflow-hidden bg-gray-800 flex-shrink-0">
                                 {u.profile?.photos?.[0] ? (
-                                    <Image src={u.profile.photos[0]} alt="" fill className="object-cover" />
+                                    <Image src={u.profile.photos[0]} alt="" fill className="object-cover" loading="lazy" />
                                 ) : (
                                     <div className="h-full w-full flex items-center justify-center text-gray-600">?</div>
                                 )}

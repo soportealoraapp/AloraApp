@@ -91,6 +91,7 @@ export default function FavoritesPage() {
                                         alt={fav.name}
                                         fill
                                         className="object-cover group-hover:scale-105 transition-transform"
+                                        loading="lazy"
                                     />
                                     <Button
                                         size="icon"

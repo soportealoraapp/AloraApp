@@ -355,6 +355,7 @@ export default function ChatPage() {
                                                                         alt={partnerName}
                                                                         fill
                                                                         className="object-cover"
+                                                                        loading="lazy"
                                                                     />
                                                                     {isMuted && (
                                                                         <div className="absolute top-0 right-0 bg-amber-500 text-white rounded-full p-0.5 shadow-sm border border-background">
@@ -424,6 +425,7 @@ export default function ChatPage() {
                                                             alt={like.displayName || 'Perfil'}
                                                             fill
                                                             className="object-cover"
+                                                            loading="lazy"
                                                         />
                                                     </div>
                                                     <div className="flex-1 min-w-0">

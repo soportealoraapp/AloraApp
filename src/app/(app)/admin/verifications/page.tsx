@@ -75,13 +75,13 @@ export default function AdminVerificationsPage() {
                         <div key={sub.id} className="bg-gray-900 border border-gray-800 rounded-xl p-5 space-y-4">
                             <div className="flex items-start gap-6">
                                 <div className="relative h-40 w-32 rounded-xl overflow-hidden bg-gray-800 flex-shrink-0">
-                                    <Image src={sub.selfieUrl} alt="Selfie" fill className="object-cover" />
+                                    <Image src={sub.selfieUrl} alt="Selfie" fill className="object-cover" loading="lazy" />
                                 </div>
                                 <div className="flex-1">
                                     <div className="flex items-center gap-2 mb-2">
                                         <div className="relative h-10 w-10 rounded-full overflow-hidden bg-gray-800">
                                             {sub.user.profile?.photos?.[0] ? (
-                                                <Image src={sub.user.profile.photos[0]} alt="" fill className="object-cover" />
+                                                <Image src={sub.user.profile.photos[0]} alt="" fill className="object-cover" loading="lazy" />
                                             ) : (
                                                 <div className="h-full w-full flex items-center justify-center text-gray-600 text-xs">?</div>
                                             )}
@@ -105,7 +105,7 @@ export default function AdminVerificationsPage() {
                                         <div className="flex gap-2 mt-3">
                                             {sub.user.profile.photos.slice(0, 4).map((photo, i) => (
                                                 <div key={i} className="relative h-14 w-14 rounded-lg overflow-hidden bg-gray-800">
-                                                    <Image src={photo} alt={`Photo ${i}`} fill className="object-cover" />
+                                                    <Image src={photo} alt={`Photo ${i}`} fill className="object-cover" loading="lazy" />
                                                 </div>
                                             ))}
                                         </div>

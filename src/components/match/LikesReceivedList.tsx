@@ -69,6 +69,7 @@ export function LikesReceivedList() {
                                             alt={liker.displayName}
                                             fill
                                             className="object-cover transition-transform duration-700 group-hover:scale-110"
+                                            loading="lazy"
                                         />
                                         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
                                         <div className="absolute bottom-3 left-3 text-white flex flex-col gap-0.5">

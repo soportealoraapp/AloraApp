@@ -75,6 +75,7 @@ export function SecondChanceSection() {
                   alt={profile.displayName || ''}
                   fill
                   className="object-cover"
+                  loading="lazy"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
                 <div className="absolute bottom-2 left-2 text-white text-xs font-bold">

@@ -1,5 +1,5 @@
 import { cookies } from 'next/headers';
-import { OnboardingWizard } from "@/components/onboarding/OnboardingWizard";
+import { OnboardingWizardLazy } from "@/components/onboarding/OnboardingWizardLazy";
 import { REFERRAL_COOKIE } from '@/lib/referral/constants';
 
 export const dynamic = 'force-dynamic';
@@ -24,7 +24,7 @@ export default async function SignupPage({
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
-      <OnboardingWizard initialRef={refCode} />
+      <OnboardingWizardLazy initialRef={refCode} />
     </div>
   );
 }

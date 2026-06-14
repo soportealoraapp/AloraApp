@@ -57,6 +57,7 @@ export default function BlockedUsersPage() {
                                         alt={block.displayName || "Profile"}
                                         fill
                                         className="object-cover"
+                                        loading="lazy"
                                     />
                                 </div>
                                 <div className="flex-1 min-w-0">

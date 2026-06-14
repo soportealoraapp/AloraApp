@@ -74,7 +74,7 @@ export default function RejectedUsersPage() {
                                 <CardContent className="p-4 flex items-center justify-between gap-3">
                                     <div className="flex items-center gap-3">
                                         <div className="relative h-10 w-10 rounded-full overflow-hidden bg-muted">
-                                            {u.photoUrl && <Image src={u.photoUrl} alt={u.displayName} fill className="object-cover" />}
+                                            {u.photoUrl && <Image src={u.photoUrl} alt={u.displayName} fill className="object-cover" loading="lazy" />}
                                         </div>
                                         <div>
                                             <p className="font-medium">{u.displayName}</p>

@@ -386,6 +386,7 @@ export function DailyQuestionCard() {
                                                     alt={currentAnswer.profile.displayName}
                                                     fill
                                                     className="object-cover"
+                                                    loading="lazy"
                                                 />
                                             </Link>
                                             <div className="min-w-0">

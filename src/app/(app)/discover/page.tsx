@@ -1,9 +1,11 @@
 "use client";
 
-import { useState, useRef, useEffect, useCallback } from "react";
-import { AnimatePresence } from "framer-motion";
-import { FloatingMatchCard } from "@/components/ui/premium/FloatingMatchCard";
-import { MatchScreen } from "@/components/ui/premium/MatchScreen";
+import { useState, useRef, useEffect, useCallback, useMemo } from "react";
+import { AnimatePresence, motion } from "framer-motion";
+import dynamic from "next/dynamic";
+import { useVirtualizer } from "@tanstack/react-virtual";
+const FloatingMatchCard = dynamic(() => import("@/components/ui/premium/FloatingMatchCard").then(m => m.FloatingMatchCard), { ssr: false });
+const MatchScreen = dynamic(() => import("@/components/ui/premium/MatchScreen").then(m => m.MatchScreen), { ssr: false });
 import { Button } from "@/components/ui/button";
 import { Loader2, RefreshCcw, Sparkles, SlidersHorizontal, RotateCcw, Heart, X, ArrowRight, ArrowLeft } from "lucide-react";
 import { HeartArrow } from "@/components/ui/custom/HeartArrow";
@@ -97,6 +99,7 @@ export default function DiscoverPage() {
   const [showMatchScreen, setShowMatchScreen] = useState(false);
   const [swipeCount, setSwipeCount] = useState(0);
   const [rewinding, setRewinding] = useState(false);
+  const [rewindedProfileId, setRewindedProfileId] = useState<string | null>(null);
   const [tutorialStep, setTutorialStep] = useState<number | null>(1);
   const [browseMode, setBrowseMode] = useState<'swipe' | 'grid'>('swipe');
   const [intent, setIntent] = useState<'dating' | 'friendship'>('dating');
@@ -124,6 +127,7 @@ export default function DiscoverPage() {
   const sentinelRef = useRef<HTMLDivElement>(null);
   const geoRequestedRef = useRef(false);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const gridContainerRef = useRef<HTMLDivElement>(null);
   const [pullToRefresh, setPullToRefresh] = useState(0);
   const pullStartRef = useRef<number | null>(null);
   const scrollElementRef = useRef<HTMLDivElement | null>(null);
@@ -229,6 +233,16 @@ export default function DiscoverPage() {
   const rewindsUsed = isNewRewindDay ? 0 : (currentUserProfile?.rewindsUsed ?? 0);
   const rewindsRemaining = maxRewinds - rewindsUsed;
 
+  // Grid virtualization
+  const gridColumns = typeof window !== 'undefined' && window.innerWidth >= 640 ? 3 : 2;
+  const gridRowCount = Math.ceil(profiles.length / gridColumns);
+  const gridVirtualizer = useVirtualizer({
+    count: gridRowCount,
+    getScrollElement: () => gridContainerRef.current,
+    estimateSize: () => 340,
+    overscan: 2,
+  });
+
   // Infinite scroll observer
   useEffect(() => {
     const sentinel = sentinelRef.current;
@@ -320,8 +334,20 @@ export default function DiscoverPage() {
     try {
       const res = await fetch('/api/match/rewind', { method: 'POST' });
       if (res.ok) {
+        const data = await res.json();
+        const restoredUserId = data.undone?.targetUserId;
+        if (restoredUserId) {
+          // Fetch the restored profile
+          const profileRes = await fetch(`/api/profile/${restoredUserId}`);
+          if (profileRes.ok) {
+            const restoredProfile = await profileRes.json();
+            setRewindedProfileId(restoredUserId);
+            setProfiles(prev => [{ profile: restoredProfile.profile || restoredProfile, compatibility: null }, ...prev] as any);
+            // Clear the rewind animation flag after animation completes
+            setTimeout(() => setRewindedProfileId(null), 800);
+          }
+        }
         toast({ title: "Deshecho", description: "Último swipe revertido." });
-        refresh();
       } else {
         const data = await res.json();
         toast({ title: "No se pudo deshacer", description: data.error || "Intenta de nuevo.", variant: "destructive" });
@@ -494,76 +520,103 @@ export default function DiscoverPage() {
               </div>
             </div>
           ) : browseMode === 'grid' && profiles.length > 0 ? (
-            <div className="w-full">
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                {profiles.map(({ profile: p, compatibility }: any) => (
-                  <Card key={p.id} className="rounded-2xl overflow-hidden shadow-sm border group">
+            <div ref={gridContainerRef} className="w-full overflow-auto" style={{ height: 'calc(100dvh - 180px)' }}>
+              <div
+                style={{ height: gridVirtualizer.getTotalSize(), position: 'relative' }}
+              >
+                {gridVirtualizer.getVirtualItems().map((virtualRow) => {
+                  const rowIndex = virtualRow.index;
+                  return (
                     <div
-                      className="aspect-[3/4] relative cursor-pointer"
-                      onClick={() => router.push(`/profile/${p.id}?source=discover&intent=${intent}`)}
-                      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') router.push(`/profile/${p.id}?source=discover&intent=${intent}`); }}
-                      tabIndex={0}
-                      role="button"
-                      aria-label={`Ver perfil de ${p.displayName || ''}`}
+                      key={virtualRow.key}
+                      style={{
+                        position: 'absolute',
+                        top: 0,
+                        left: 0,
+                        width: '100%',
+                        height: virtualRow.size,
+                        transform: `translateY(${virtualRow.start}px)`,
+                      }}
                     >
-                      <Image
-                        src={p.photos?.[0] || '/placeholder.svg'}
-                        alt={p.displayName || ''}
-                        fill
-                        className="object-cover"
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
-                      {p.activeNow && (
-                        <div className="absolute top-2 left-2 bg-primary/90 backdrop-blur-sm text-primary-foreground text-[11px] font-bold px-1.5 py-0.5 rounded-full flex items-center gap-1 border border-primary/30">
-                          <span className="relative flex h-1.5 w-1.5">
-                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary/75 opacity-75" />
-                            <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-primary-foreground" />
-                          </span>
-                          Activa
-                        </div>
-                      )}
-                      {(p as any).latestAnswer && (
-                        <div className="absolute top-2 right-2 bg-accent/90 backdrop-blur-sm text-accent-foreground text-[11px] font-bold px-1.5 py-0.5 rounded-full">
-                          💬 Resp.
-                        </div>
-                      )}
-                      {p.voiceIntro && (
-                        <div className="absolute top-8 left-2 bg-muted/90 backdrop-blur-sm text-muted-foreground text-[11px] font-bold px-1.5 py-0.5 rounded-full">
-                          🎵 Voz
-                        </div>
-                      )}
-                      <div className="absolute bottom-2 left-2 right-2">
-                        <div className="text-white text-xs font-bold leading-tight">{p.displayName}, {p.age}</div>
-                        {p.city && <div className="text-white/70 text-xs">{p.city}</div>}
-                        {p.sharedInterests !== undefined && p.sharedInterests > 0 && (
-                          <div className="text-primary-foreground/80 text-[10px] mt-0.5 bg-primary/20 backdrop-blur-sm rounded-full px-2 py-0.5 inline-block">{p.sharedInterests} intereses común</div>
-                        )}
+                      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 h-full">
+                        {Array.from({ length: gridColumns }, (_, colIndex) => {
+                          const profileIndex = rowIndex * gridColumns + colIndex;
+                          if (profileIndex >= profiles.length) return <div key={colIndex} />;
+                          const { profile: p, compatibility: compat } = profiles[profileIndex];
+                          return (
+                            <Card key={p.id} className="rounded-2xl overflow-hidden shadow-sm border group">
+                              <div
+                                className="aspect-[3/4] relative cursor-pointer"
+                                onClick={() => router.push(`/profile/${p.id}?source=discover&intent=${intent}`)}
+                                onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') router.push(`/profile/${p.id}?source=discover&intent=${intent}`); }}
+                                tabIndex={0}
+                                role="button"
+                                aria-label={`Ver perfil de ${p.displayName || ''}`}
+                              >
+                                <Image
+                                  src={p.photos?.[0] || '/placeholder.svg'}
+                                  alt={p.displayName || ''}
+                                  fill
+                                  className="object-cover"
+                                  loading="lazy"
+                                />
+                                <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
+                                {p.activeNow && (
+                                  <div className="absolute top-2 left-2 bg-primary/90 backdrop-blur-sm text-primary-foreground text-[11px] font-bold px-1.5 py-0.5 rounded-full flex items-center gap-1 border border-primary/30">
+                                    <span className="relative flex h-1.5 w-1.5">
+                                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary/75 opacity-75" />
+                                      <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-primary-foreground" />
+                                    </span>
+                                    Activa
+                                  </div>
+                                )}
+                                {(p as any).latestAnswer && (
+                                  <div className="absolute top-2 right-2 bg-accent/90 backdrop-blur-sm text-accent-foreground text-[11px] font-bold px-1.5 py-0.5 rounded-full">
+                                    💬 Resp.
+                                  </div>
+                                )}
+                                {p.voiceIntro && (
+                                  <div className="absolute top-8 left-2 bg-muted/90 backdrop-blur-sm text-muted-foreground text-[11px] font-bold px-1.5 py-0.5 rounded-full">
+                                    🎵 Voz
+                                  </div>
+                                )}
+                                <div className="absolute bottom-2 left-2 right-2">
+                                  <div className="text-white text-xs font-bold leading-tight">{p.displayName}, {p.age}</div>
+                                  {p.city && <div className="text-white/70 text-xs">{p.city}</div>}
+                                  {p.sharedInterests !== undefined && p.sharedInterests > 0 && (
+                                    <div className="text-primary-foreground/80 text-[10px] mt-0.5 bg-primary/20 backdrop-blur-sm rounded-full px-2 py-0.5 inline-block">{p.sharedInterests} intereses común</div>
+                                  )}
+                                </div>
+                              </div>
+                              <div className="flex gap-1 p-1.5">
+                                <Button size="sm" variant="ghost" className="flex-1 h-11" aria-label={`Descartar a ${p.displayName || ''}`} onClick={async () => {
+                                  track(AnalyticsEvents.PASS_SENT, { targetUserId: p.id, intent });
+                                  await sendLike(p.id, 'pass', intent);
+                                  setProfiles(prev => prev.filter(item => item.profile.id !== p.id));
+                                }}>
+                                  <X className="h-5 w-5 text-destructive" />
+                                </Button>
+                                <Button size="sm" variant="ghost" className="flex-1 h-11" aria-label={`Dar like a ${p.displayName || ''}`} onClick={async () => {
+                                  track(AnalyticsEvents.LIKE_SENT, { targetUserId: p.id, intent });
+                                  const result = await sendLike(p.id, 'like', intent);
+                                  setProfiles(prev => prev.filter(item => item.profile.id !== p.id));
+                                  if (result?.matched) {
+                                    track(AnalyticsEvents.MATCH_CREATED, { partnerId: p.id, intent });
+                                    setMatchedProfile(p);
+                                    setMatchId((result as any)?.matchId);
+                                    setShowMatchScreen(true);
+                                  }
+                                }}>
+                                  <Heart className="h-5 w-5 text-primary fill-primary" />
+                                </Button>
+                              </div>
+                            </Card>
+                          );
+                        })}
                       </div>
                     </div>
-                    <div className="flex gap-1 p-1.5">
-                      <Button size="sm" variant="ghost" className="flex-1 h-11" aria-label={`Descartar a ${p.displayName || ''}`} onClick={async () => {
-                        track(AnalyticsEvents.PASS_SENT, { targetUserId: p.id, intent });
-                        await sendLike(p.id, 'pass', intent);
-                        setProfiles(prev => prev.filter(item => item.profile.id !== p.id));
-                      }}>
-                        <X className="h-5 w-5 text-destructive" />
-                      </Button>
-                      <Button size="sm" variant="ghost" className="flex-1 h-11" aria-label={`Dar like a ${p.displayName || ''}`} onClick={async () => {
-                        track(AnalyticsEvents.LIKE_SENT, { targetUserId: p.id, intent });
-                        const result = await sendLike(p.id, 'like', intent);
-                        setProfiles(prev => prev.filter(item => item.profile.id !== p.id));
-                        if (result?.matched) {
-                          track(AnalyticsEvents.MATCH_CREATED, { partnerId: p.id, intent });
-                          setMatchedProfile(p);
-                          setMatchId((result as any)?.matchId);
-                          setShowMatchScreen(true);
-                        }
-                      }}>
-                        <Heart className="h-5 w-5 text-primary fill-primary" />
-                      </Button>
-                    </div>
-                  </Card>
-                ))}
+                  );
+                })}
               </div>
             </div>
           ) : currentProfile ? (
@@ -588,8 +641,14 @@ export default function DiscoverPage() {
                 <div className="absolute inset-0 top-4 scale-95 opacity-50 bg-card rounded-3xl shadow-xl z-0 transform translate-y-2" />
               )}
               <div className="relative z-10 h-full">
-                <FloatingMatchCard
+                <motion.div
                   key={currentProfile.id}
+                  initial={rewindedProfileId === currentProfile.id ? { scale: 0.85, opacity: 0, y: 40 } : false}
+                  animate={{ scale: 1, opacity: 1, y: 0 }}
+                  transition={{ type: "spring", stiffness: 250, damping: 22 }}
+                  className="h-full"
+                >
+                <FloatingMatchCard
                   profile={currentProfile}
                   compatibility={profiles[0]?.compatibility}
                   explanations={profiles[0]?.score?.explanation}
@@ -597,6 +656,7 @@ export default function DiscoverPage() {
                   onFlechado={handleFlechado}
                   superlikesRemaining={currentUserProfile?.superlikesRemaining}
                 />
+                </motion.div>
               </div>
             </div>
           ) : (

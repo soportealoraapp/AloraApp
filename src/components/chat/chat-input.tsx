@@ -316,7 +316,7 @@ export function ChatInput({ onSend, onSendImage, onSendVoice, onTyping, disabled
             className="relative inline-block rounded-xl overflow-hidden border border-muted"
           >
             <div className="relative h-20 w-20">
-              <Image src={previewImage} alt="Preview" fill className="object-cover" />
+              <Image src={previewImage} alt="Preview" fill className="object-cover" loading="lazy" />
             </div>
             {uploadingImage && (
               <div className="absolute inset-0 bg-black/40 flex items-center justify-center">

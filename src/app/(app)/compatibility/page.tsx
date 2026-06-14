@@ -521,7 +521,7 @@ export default function CompatibilityPage() {
                             onClick={() => { setSelectedResult(null); router.push(`/profile/${u.id}`); }}
                           >
                             {u.photo ? (
-                              <Image src={u.photo} alt={u.name} width={48} height={48} className="w-full h-full object-cover" />
+                              <Image src={u.photo} alt={u.name} width={48} height={48} className="w-full h-full object-cover" loading="lazy" />
                             ) : (
                               <div className="w-full h-full bg-primary/20 flex items-center justify-center text-primary font-bold">
                                 {u.name?.charAt(0)}

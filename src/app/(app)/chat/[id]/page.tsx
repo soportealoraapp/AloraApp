@@ -371,7 +371,7 @@ export default function ChatWindowPage() {
 
                 <Link href={otherUserId ? `/profile/${otherUserId}` : '#'} className={`flex items-center gap-3 flex-1 overflow-hidden ${!otherUserId ? 'pointer-events-none' : ''}`}>
                     <div className="relative h-10 w-10 rounded-full overflow-hidden flex-shrink-0 border-2 border-muted">
-                        <Image src={partnerPhoto} alt={partnerName} fill className="object-cover" />
+                        <Image src={partnerPhoto} alt={partnerName} fill className="object-cover" loading="lazy" />
                         {isPartnerOnline && (
                             <span className="absolute bottom-0 right-0 h-3 w-3 rounded-full bg-primary border-2 border-background" />
                         )}
@@ -572,7 +572,7 @@ export default function ChatWindowPage() {
                                         return (
                                             <div key={message.id} className="w-full flex justify-start items-start gap-2 mb-2">
                                                 <Link href={otherUserId ? `/profile/${otherUserId}` : '#'} className="h-8 w-8 rounded-full overflow-hidden shrink-0 relative mt-1 border border-muted hover:opacity-90 transition-opacity">
-                                                    <Image src={partnerPhoto} alt={partnerName} fill className="object-cover" />
+                                                    <Image src={partnerPhoto} alt={partnerName} fill className="object-cover" loading="lazy" />
                                                 </Link>
                                                 <div className="flex-1 min-w-0 max-w-[85%]">
                                                     {messageElement}

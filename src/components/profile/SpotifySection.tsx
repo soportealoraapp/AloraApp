@@ -156,6 +156,7 @@ export function SpotifySection({ spotify, isOwn }: SpotifySectionProps) {
                       width={20}
                       height={20}
                       className="rounded-full"
+                      loading="lazy"
                     />
                   )}
                   <span>{artist.name}</span>
@@ -190,6 +191,7 @@ export function SpotifySection({ spotify, isOwn }: SpotifySectionProps) {
                       width={40}
                       height={40}
                       className="rounded-lg object-cover"
+                      loading="lazy"
                     />
                   )}
                   {!track.imageUrl && (

@@ -97,7 +97,7 @@ export default function AdminReportsPage() {
                                 <div className="flex items-start gap-4">
                                     <div className="relative h-10 w-10 rounded-full overflow-hidden bg-gray-800 flex-shrink-0">
                                         {report.reported?.profile?.photos?.[0] ? (
-                                            <Image src={report.reported.profile.photos[0]} alt="" fill className="object-cover" />
+                                            <Image src={report.reported.profile.photos[0]} alt="" fill className="object-cover" loading="lazy" />
                                         ) : (
                                             <div className="h-full w-full flex items-center justify-center text-gray-600 text-xs">
                                                 {report.reported?.profile?.displayName?.[0] || '?'}

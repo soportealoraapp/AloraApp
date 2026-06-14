@@ -79,6 +79,7 @@ export function DailyCompatibilityCard() {
                                 alt={data.profile.displayName}
                                 fill
                                 className="object-cover"
+                                loading="lazy"
                             />
                         </div>
                         <div className="flex-1 min-w-0">

@@ -231,7 +231,7 @@ export function VerificationUpload({ gesture, onComplete }: VerificationUploadPr
                 >
                     {selfiePreview ? (
                         <div className="relative h-48 w-full mx-auto animate-in fade-in zoom-in duration-300">
-                            <Image src={selfiePreview} alt="Selfie preview" fill className="object-contain rounded-xl" />
+                            <Image src={selfiePreview} alt="Selfie preview" fill className="object-contain rounded-xl" loading="lazy" />
                             <div className="absolute inset-0 flex items-center justify-center bg-black/40 text-white opacity-0 hover:opacity-100 transition-opacity rounded-xl cursor-pointer">
                                 <Camera className="h-6 w-6 mr-2" /> Repetir foto
                             </div>
