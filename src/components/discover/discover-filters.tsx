@@ -379,7 +379,7 @@ export function DiscoverFilters({ open, onOpenChange, onApplyFilters, initialFil
             </div>
           </div>
         </ScrollArea>
-        <SheetFooter className="grid grid-cols-2 gap-2 pt-4">
+        <SheetFooter className="grid grid-cols-2 gap-2 pt-4 sticky bottom-0 bg-background border-t border-border z-10">
           <Button variant="secondary" onClick={handleClearFilters}>Limpiar</Button>
           <Button onClick={handleApply}>Aplicar Filtros</Button>
         </SheetFooter>

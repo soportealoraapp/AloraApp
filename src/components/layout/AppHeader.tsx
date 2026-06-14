@@ -16,7 +16,7 @@ export function AppHeader({ title, showBack = false, onBack, rightContent, class
 
   return (
     <header className={cn(
-      "sticky top-0 z-30 flex h-16 items-center gap-4 border-b bg-background/90 px-4 backdrop-blur-md sm:px-6 shrink-0",
+      "sticky top-0 z-30 flex h-16 items-center gap-4 border-b bg-background/90 px-4 backdrop-blur-md sm:px-6 shrink-0 pt-safe",
       className
     )}>
       {showBack && (

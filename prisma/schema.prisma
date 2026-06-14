@@ -189,6 +189,9 @@ model Profile {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  @@index([trustStatus])
+  @@index([countryCode])
+  @@index([lastActiveAt])
   @@map("profiles")
 }
 
@@ -289,6 +292,8 @@ model Interaction {
   deletedAt DateTime?
 
   @@unique([fromUserId, toUserId, intent])
+  @@index([fromUserId])
+  @@index([toUserId])
   @@map("interactions")
 }
 
@@ -867,6 +872,7 @@ model Report {
   createdAt DateTime @default(now())
 
   @@index([reportedId])
+  @@index([reporterId])
   @@map("reports")
 }
 

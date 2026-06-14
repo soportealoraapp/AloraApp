@@ -276,7 +276,7 @@ export default function CompatibilityPage() {
 
   return (
     <>
-      <div className="container max-w-lg mx-auto p-4 pb-24">
+      <div className="container max-w-lg mx-auto p-4 pb-24 pt-safe">
         <header className="py-8 space-y-3">
           <div className="inline-flex items-center gap-2 bg-primary/10 text-primary px-3 py-1 rounded-full text-xs font-bold uppercase tracking-widest">
             <Sparkles className="h-3 w-3" />

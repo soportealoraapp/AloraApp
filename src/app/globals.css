@@ -147,9 +147,9 @@ html {
     @apply min-h-[44px];
   }
 
-  /* But smaller elements within buttons */
+  /* Small buttons preserve 44px touch targets */
   button.btn-sm, .btn-sm {
-    @apply min-h-0 min-w-0;
+    @apply min-h-[44px] min-w-[44px];
   }
 
   /* Skip to content link for keyboard users */

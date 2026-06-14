@@ -54,7 +54,6 @@
     "firebase-functions": "^7.0.1",
     "framer-motion": "^12.26.2",
     "genkit": "^1.14.1",
-    "html2canvas": "^1.4.1",
     "lucide-react": "^0.475.0",
     "natural": "^8.1.0",
     "next": "15.3.8",

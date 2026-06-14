@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { cn } from '@/lib/utils';
 import { AlertCircle, Loader2, Check, CheckCheck, Expand, X } from 'lucide-react';
 import { Message } from '@/lib/domain/types';
@@ -27,7 +27,7 @@ function formatTime(date: Date | string): string {
   return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 }
 
-export function MessageBubble({ message, isMe, currentUserId, onReact }: MessageBubbleProps) {
+const MemoizedMessageBubble = React.memo(function MessageBubble({ message, isMe, currentUserId, onReact }: MessageBubbleProps) {
   const isPending = message.status === 'pending';
   const isFlagged = message.status === 'flagged';
   const isRead = !!message.readAt;
@@ -203,4 +203,6 @@ export function MessageBubble({ message, isMe, currentUserId, onReact }: Message
       </AnimatePresence>
     </motion.div>
   );
-}
+});
+
+export { MemoizedMessageBubble as MessageBubble };

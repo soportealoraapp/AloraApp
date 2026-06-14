@@ -143,7 +143,7 @@ export default function AdminExperimentsPage() {
                 <input
                   value={newName}
                   onChange={e => setNewName(e.target.value)}
-                  className="w-full mt-1 px-3 py-2 rounded-lg border bg-white text-sm"
+                  className="w-full mt-1 px-3 py-2 rounded-lg border bg-background text-sm"
                   placeholder="ej: discover_scoring_v2"
                 />
               </div>
@@ -152,7 +152,7 @@ export default function AdminExperimentsPage() {
                 <input
                   value={newDescription}
                   onChange={e => setNewDescription(e.target.value)}
-                  className="w-full mt-1 px-3 py-2 rounded-lg border bg-white text-sm"
+                  className="w-full mt-1 px-3 py-2 rounded-lg border bg-background text-sm"
                   placeholder="Opcional"
                 />
               </div>
@@ -161,7 +161,7 @@ export default function AdminExperimentsPage() {
                 <select
                   value={newMetric}
                   onChange={e => setNewMetric(e.target.value)}
-                  className="w-full mt-1 px-3 py-2 rounded-lg border bg-white text-sm"
+                  className="w-full mt-1 px-3 py-2 rounded-lg border bg-background text-sm"
                 >
                   <option value="activation_rate">Tasa de activación</option>
                   <option value="match_rate">Match rate</option>

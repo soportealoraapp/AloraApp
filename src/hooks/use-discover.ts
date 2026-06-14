@@ -20,6 +20,8 @@ export function useDiscover(searchTerm: string = '', filters?: FeedFilters, limi
     const [retryCount, setRetryCount] = useState(0);
     const cursorRef = useRef<string | null>(null);
     const hasMoreRef = useRef(true);
+    const filtersRef = useRef(filters);
+    filtersRef.current = filters;
 
     const fetchProfiles = useCallback(async (isRefresh = false) => {
         if (!user?.id) {
@@ -39,7 +41,7 @@ export function useDiscover(searchTerm: string = '', filters?: FeedFilters, limi
                 searchTerm || undefined,
                 isRefresh ? undefined : cursorRef.current || undefined,
                 limit,
-                filters
+                filtersRef.current
             );
 
             cursorRef.current = result.nextCursor;
@@ -82,7 +84,7 @@ export function useDiscover(searchTerm: string = '', filters?: FeedFilters, limi
             setLoading(false);
             setLoadingMore(false);
         }
-    }, [user?.id, searchTerm, limit, filters]);
+    }, [user?.id, searchTerm, limit]);
 
     useEffect(() => {
         fetchProfiles(true);

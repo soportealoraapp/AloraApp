@@ -321,9 +321,9 @@ export default function PrivacySettingsPage() {
                         <Link href="/settings/privacy/rejected">
                             <div className="flex items-center justify-between p-3 rounded-lg hover:bg-secondary transition-colors cursor-pointer">
                                 <div>
-                                    <p className="font-medium">Perfiles Ocultos</p>
+                                    <p className="font-medium">Perfiles Bloqueados</p>
                                     <p className="text-sm text-muted-foreground">
-                                        Perfiles que rechazaste
+                                        Personas que bloqueaste
                                     </p>
                                 </div>
                                 <ArrowLeft className="h-5 w-5 rotate-180 text-muted-foreground" />

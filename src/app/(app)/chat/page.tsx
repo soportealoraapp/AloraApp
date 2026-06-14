@@ -431,7 +431,7 @@ export default function ChatPage() {
                                                             <p className="font-semibold truncate">{like.displayName || `Usuario #${(like.fromUserId || like.id).slice(0, 8)}`}</p>
                                                              {like.type === 'superlike' && (
                                                                   <Badge className="bg-gradient-to-r from-primary to-accent text-primary-foreground">
-                                                                      Super Like
+                                                                       Flechado
                                                                   </Badge>
                                                               )}
                                                         </div>

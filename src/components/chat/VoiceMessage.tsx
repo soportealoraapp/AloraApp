@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useMemo, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Play, Pause } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -17,6 +17,15 @@ export function VoiceMessage({ audioUrl, duration: propDuration, isOwn = false }
     const [duration, setDuration] = useState(propDuration || 0);
     const audioRef = useRef<HTMLAudioElement | null>(null);
     const animationRef = useRef<number>();
+    const progressBarRef = useRef<HTMLDivElement>(null);
+
+    // Stable bar heights - computed once
+    const barHeights = useMemo(() => {
+        return Array.from({ length: 20 }).map((_, i) => {
+            const seed = i * 7 + 3;
+            return 4 + ((seed % 11) / 11) * 12;
+        });
+    }, []);
 
     useEffect(() => {
         const audio = new Audio(audioUrl);
@@ -56,6 +65,18 @@ export function VoiceMessage({ audioUrl, duration: propDuration, isOwn = false }
         }
     };
 
+    const handleSeek = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+        const audio = audioRef.current;
+        const bar = progressBarRef.current;
+        if (!audio || !bar || duration <= 0) return;
+
+        const rect = bar.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const percentage = Math.max(0, Math.min(1, x / rect.width));
+        audio.currentTime = percentage * duration;
+        setCurrentTime(audio.currentTime);
+    }, [duration]);
+
     const formatTime = (seconds: number) => {
         const mins = Math.floor(seconds / 60);
         const secs = Math.floor(seconds % 60);
@@ -86,9 +107,12 @@ export function VoiceMessage({ audioUrl, duration: propDuration, isOwn = false }
             </Button>
 
             <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-1">
-                    {Array.from({ length: 20 }).map((_, i) => {
-                        const barHeight = 4 + Math.sin(i * 0.8) * 8 + Math.random() * 4;
+                <div
+                    ref={progressBarRef}
+                    className="flex items-center gap-1 cursor-pointer"
+                    onClick={handleSeek}
+                >
+                    {barHeights.map((barHeight, i) => {
                         const isActive = (i / 20) * 100 <= progress;
                         return (
                             <div

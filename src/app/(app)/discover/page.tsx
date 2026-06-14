@@ -24,6 +24,7 @@ import { PostOnboardingJourney } from "@/components/onboarding/PostOnboardingJou
 import { Handshake } from "lucide-react";
 import { useAnalytics, AnalyticsEvents } from "@/hooks/use-analytics";
 import { DailyCompatibilityCard } from "@/components/compatibility/DailyCompatibilityCard";
+import { SecondChanceSection } from "@/components/discover/SecondChanceSection";
 
 
 
@@ -101,7 +102,17 @@ export default function DiscoverPage() {
   const [intent, setIntent] = useState<'dating' | 'friendship'>('dating');
   const [intentChanging, setIntentChanging] = useState(false);
 
-  // Handle URL intent
+  // Initialize intent from user's connectionModes
+  useEffect(() => {
+    if (currentUserProfile?.connectionModes?.length) {
+      const savedIntent = currentUserProfile.connectionModes[0];
+      if (savedIntent === 'dating' || savedIntent === 'friendship') {
+        setIntent(savedIntent);
+      }
+    }
+  }, [currentUserProfile?.connectionModes]);
+
+  // Handle URL intent (overrides profile default)
   useEffect(() => {
     const urlIntent = searchParams.get('intent');
     if (urlIntent === 'friendship' || urlIntent === 'dating') {
@@ -626,6 +637,10 @@ export default function DiscoverPage() {
 
       <div className="px-4 pb-3 max-w-sm mx-auto w-full">
         <DailyPicks subscriptionStatus={currentUserProfile?.subscriptionStatus ?? 'free'} />
+      </div>
+
+      <div className="px-4 pb-3 max-w-sm mx-auto w-full">
+        <SecondChanceSection />
       </div>
 
       <DiscoverFilters

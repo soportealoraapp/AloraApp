@@ -62,15 +62,22 @@ export function FloatingMatchCard({ profile, onSwipe, onFlechado, compatibility,
     setDragX(info.offset.x);
   };
 
+  const triggerHaptic = useCallback(() => {
+    if (typeof navigator !== 'undefined' && navigator.vibrate) {
+      navigator.vibrate(10);
+    }
+  }, []);
+
   const handleDragEnd = async (event: any, info: PanInfo) => {
     setDragX(0);
     const velocity = Math.abs(info.velocity.x);
-    const distance = Math.abs(info.offset.x);
     const threshold = velocity > 500 ? 30 : 100;
     if (info.offset.x > threshold) {
+      triggerHaptic();
       await controls.start({ x: 500, opacity: 0, rotate: 20 });
       onSwipe('right');
     } else if (info.offset.x < -threshold) {
+      triggerHaptic();
       await controls.start({ x: -500, opacity: 0, rotate: -20 });
       onSwipe('left');
     } else {

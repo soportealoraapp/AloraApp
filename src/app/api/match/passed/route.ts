@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
-export async function GET() {
+export async function GET(request: Request) {
   const { createClient } = await import('@/lib/supabase/server');
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
@@ -11,11 +11,17 @@ export async function GET() {
   }
 
   try {
+    const { searchParams } = new URL(request.url);
+    const intent = searchParams.get('intent');
+
+    const where: any = {
+      fromUserId: user.id,
+      type: 'pass',
+    };
+    if (intent) where.intent = intent;
+
     const passes = await prisma.interaction.findMany({
-      where: {
-        fromUserId: user.id,
-        type: 'pass',
-      },
+      where,
       orderBy: { createdAt: 'desc' },
       take: 20,
       include: {

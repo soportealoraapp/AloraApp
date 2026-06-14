@@ -72,6 +72,22 @@ export async function sendPushToUser(userId: string, payload: PushPayload) {
             where: { userId }
         });
 
+        if (prefs) {
+            const prefMap: Record<string, boolean | undefined> = {
+                match: prefs.matches,
+                new_match: prefs.matches,
+                message: prefs.messages,
+                new_message: prefs.messages,
+                profile_visit: prefs.profileViews,
+                daily_question: prefs.dailyQuestion,
+                streak_at_risk: prefs.streakReminder,
+            };
+            const allowed = prefMap[notifType];
+            if (allowed === false) {
+                return { succeeded: 0, failed: 0, skippedByPreference: true };
+            }
+        }
+
         await prisma.notification.create({
             data: {
                 userId,

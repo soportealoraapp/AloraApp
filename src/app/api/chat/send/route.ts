@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { withRateLimit } from '@/server/utils/api-rate-limit';
+import { checkIdempotency, completeIdempotency } from '@/server/utils/idempotency';
 import { filterOffensiveMessages } from '@/ai/flows/filter-offensive-messages';
 import { analyzeMessageSafety } from '@/ai/safety-engine/risk-engine';
 import { notifyNewMessage } from '@/server/services/push';
@@ -26,6 +27,13 @@ export async function POST(request: NextRequest) {
 
         if (!matchId || !text) {
             return NextResponse.json({ error: 'Missing fields' }, { status: 400 });
+        }
+
+        // Idempotency: prevent duplicate messages on retry
+        const idempotencyKey = `${matchId}:${user.id}:${text.slice(0, 50)}:${Math.floor(Date.now() / 60000)}`;
+        const idempotencyResult = await checkIdempotency(idempotencyKey, user.id, 'chat_send');
+        if (!idempotencyResult.ok) {
+            return NextResponse.json(idempotencyResult.body, { status: idempotencyResult.status || 200 });
         }
 
         // Verify match ownership
@@ -82,9 +90,11 @@ export async function POST(request: NextRequest) {
         // Moderate message content
         let content = text;
         let isFiltered = false;
-        const skipModeration = type === 'voice' || type === 'image';
 
-        if (!skipModeration) {
+        if (type === 'voice' || type === 'image') {
+            // Voice/image: cannot auto-moderate content, but mark for review
+            isFiltered = false;
+        } else {
             try {
                 const moderationResult = await filterOffensiveMessages({ text });
                 content = moderationResult.filteredText;
@@ -127,6 +137,9 @@ export async function POST(request: NextRequest) {
                 status: isFiltered ? 'flagged' : 'sent',
             }
         });
+
+        // Store idempotency response
+        await completeIdempotency(idempotencyKey, 'chat_send', 200, message);
 
         // Update Match updatedAt
         await prisma.match.update({

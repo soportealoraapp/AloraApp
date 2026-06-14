@@ -37,6 +37,18 @@ function NotificationItem({ notification, onRead, onDelete }: { notification: an
     } else if (type === 'profile_view') {
       const userId = data.viewerId || data.userId || data.id;
       if (userId) router.push(`/profile/${userId}`);
+    } else if (type === 'daily_question') {
+      router.push('/compatibility');
+    } else if (type === 'streak_at_risk' || type === 'daily_compatibility') {
+      router.push('/profile');
+    } else if (type === 'boost_available' || type === 'likes_restored') {
+      router.push('/discover');
+    } else if (type === 'verification') {
+      router.push('/settings/verification');
+    } else if (type === 'safety') {
+      router.push('/settings/safety');
+    } else if (type === 'reminder') {
+      router.push('/discover');
     } else {
       const fallbackId = data.userId || data.fromUserId || data.id;
       if (fallbackId) router.push(`/profile/${fallbackId}`);

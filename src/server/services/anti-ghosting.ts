@@ -27,24 +27,33 @@ export async function detectGhostedMatches(userId: string): Promise<Array<{
 
     const ghosted = [];
     const now = new Date();
+    const matchesWithMessages = matches.filter(m => m.messages.length > 0);
 
-    for (const match of matches) {
-        if (match.messages.length === 0) continue;
+    // Batch fetch all partner profiles
+    const otherUserIds = matchesWithMessages.map(m => m.user1Id === userId ? m.user2Id : m.user1Id);
+    const profiles = await prisma.profile.findMany({
+        where: { userId: { in: otherUserIds } },
+        select: { userId: true, displayName: true, photos: true },
+    });
+    const profileMap = new Map(profiles.map(p => [p.userId, p]));
 
+    // Batch fetch message counts per match
+    const matchIds = matchesWithMessages.map(m => m.id);
+    const messageCounts = await prisma.message.groupBy({
+        by: ['matchId'],
+        where: { matchId: { in: matchIds } },
+        _count: { id: true },
+    });
+    const messageCountMap = new Map(messageCounts.map(mc => [mc.matchId, mc._count.id]));
+
+    for (const match of matchesWithMessages) {
         const lastMessage = match.messages[0];
         const hoursSince = (now.getTime() - new Date(lastMessage.createdAt).getTime()) / (1000 * 60 * 60);
 
         if (hoursSince < GHOSTING_THRESHOLD_HOURS) continue;
 
         const otherUserId = match.user1Id === userId ? match.user2Id : match.user1Id;
-        const partner = await prisma.profile.findUnique({
-            where: { userId: otherUserId },
-            select: { displayName: true, photos: true },
-        });
-
-        const messageCount = await prisma.message.count({
-            where: { matchId: match.id },
-        });
+        const partner = profileMap.get(otherUserId);
 
         ghosted.push({
             matchId: match.id,
@@ -52,7 +61,7 @@ export async function detectGhostedMatches(userId: string): Promise<Array<{
             partnerPhoto: partner?.photos?.[0] || '/placeholder.svg',
             lastMessageAt: lastMessage.createdAt,
             hoursSinceLastMessage: Math.round(hoursSince),
-            messageCount,
+            messageCount: messageCountMap.get(match.id) || 0,
         });
     }
 

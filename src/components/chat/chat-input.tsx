@@ -106,12 +106,31 @@ export function ChatInput({ onSend, onSendImage, onSendVoice, onTyping, disabled
         stream.getTracks().forEach(track => track.stop());
       };
 
+      mediaRecorder.onerror = () => {
+        toast({ title: 'Error de grabación', description: 'Intenta de nuevo.', variant: 'destructive' });
+        stream.getTracks().forEach(track => track.stop());
+        setIsRecording(false);
+        setRecordingTime(0);
+        if (recordingTimerRef.current) clearInterval(recordingTimerRef.current);
+      };
+
       mediaRecorder.start();
       setIsRecording(true);
       setRecordingTime(0);
 
+      const MAX_RECORDING_SECONDS = 120;
       recordingTimerRef.current = setInterval(() => {
-        setRecordingTime(prev => prev + 1);
+        setRecordingTime(prev => {
+          if (prev + 1 >= MAX_RECORDING_SECONDS) {
+            if (recordingTimerRef.current) clearInterval(recordingTimerRef.current);
+            if (mediaRecorderRef.current && mediaRecorderRef.current.state === 'recording') {
+              mediaRecorderRef.current.stop();
+            }
+            setIsRecording(false);
+            return MAX_RECORDING_SECONDS;
+          }
+          return prev + 1;
+        });
       }, 1000);
     } catch (error) {
       console.error('Error accessing microphone:', error);
@@ -148,6 +167,11 @@ export function ChatInput({ onSend, onSendImage, onSendVoice, onTyping, disabled
 
   const sendVoiceMessage = async () => {
     if (!recordedBlob) return;
+    const MAX_VOICE_SIZE = 2 * 1024 * 1024; // 2MB (UploadThing limit)
+    if (recordedBlob.size > MAX_VOICE_SIZE) {
+      toast({ title: 'Audio muy grande', description: 'El audio debe ser menor a 2 MB. Intenta grabar uno más corto.', variant: 'destructive' });
+      return;
+    }
     setUploadingVoice(true);
     const mimeType = getAudioMimeType();
     const ext = mimeType === 'audio/mp4' ? 'm4a' : 'webm';
@@ -161,6 +185,17 @@ export function ChatInput({ onSend, onSendImage, onSendVoice, onTyping, disabled
       if (recordedUrl) URL.revokeObjectURL(recordedUrl);
     };
   }, [recordedUrl]);
+
+  // Cancel recording when tab becomes hidden (call, app switch, etc.)
+  useEffect(() => {
+    const handleVisibility = () => {
+      if (document.hidden && isRecording) {
+        cancelRecording();
+      }
+    };
+    document.addEventListener('visibilitychange', handleVisibility);
+    return () => document.removeEventListener('visibilitychange', handleVisibility);
+  }, [isRecording]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setMessage(e.target.value);

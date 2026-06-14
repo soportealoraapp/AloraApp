@@ -14,52 +14,27 @@ export async function checkRateLimit(key: string, limit: number = 10, windowSeco
     try {
         const now = new Date();
 
-        // Upsert logic: get existing or create new
-        // Note: Concurrency might be an issue for strict limits, but acceptable for this use case
-        const rateLimit = await prisma.rateLimit.findUnique({
+        // Atomic upsert: create or increment in a single query
+        const rateLimit = await prisma.rateLimit.upsert({
             where: { key },
+            create: { key, count: 1, lastReset: now },
+            update: { count: { increment: 1 } },
         });
-
-        if (!rateLimit) {
-            await prisma.rateLimit.create({
-                data: {
-                    key,
-                    count: 1,
-                    lastReset: now,
-                },
-            });
-            return true;
-        }
 
         const resetTime = addSeconds(rateLimit.lastReset, windowSeconds);
 
         if (isAfter(now, resetTime)) {
-            // Window complete, reset
+            // Window complete, reset count
             await prisma.rateLimit.update({
                 where: { key },
-                data: {
-                    count: 1,
-                    lastReset: now,
-                },
-            });
-            return true;
-        } else {
-            // Within window
-            if (rateLimit.count >= limit) {
-                return false; // Limited
-            }
-
-            await prisma.rateLimit.update({
-                where: { key },
-                data: {
-                    count: rateLimit.count + 1,
-                },
+                data: { count: 1, lastReset: now },
             });
             return true;
         }
+
+        return rateLimit.count <= limit;
     } catch (error) {
         console.error('Rate limit error', error);
-        // Fail closed: on DB error, deny the request to prevent abuse
         return false;
     }
 }

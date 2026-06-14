@@ -182,8 +182,7 @@ export function OnboardingWizard({ initialRef }: { initialRef?: string } = {}) {
         }
         trackEvent('onboarding_completed', { userId: effectiveUserId });
         
-        // Use window.location for a harder redirect to ensure middleware/state is fresh
-        window.location.href = '/discover';
+        router.push('/discover');
     }, [effectiveUserId, refreshProfile]);
 
     const nextStep = useCallback(async () => {
@@ -228,7 +227,7 @@ export function OnboardingWizard({ initialRef }: { initialRef?: string } = {}) {
     }
 
     return (
-        <div className="w-full min-h-dvh md:min-h-0 md:max-w-md md:mx-auto p-4 md:p-8 bg-background md:rounded-3xl md:shadow-xl md:border md:border-border/50 flex flex-col">
+        <div className="w-full min-h-dvh md:min-h-0 md:max-w-md md:mx-auto p-4 md:p-8 bg-background md:rounded-3xl md:shadow-xl md:border md:border-border/50 flex flex-col pt-safe">
             {step >= 1 && (
                 <div className="mb-8">
                     <div className="flex items-center justify-between mb-4">

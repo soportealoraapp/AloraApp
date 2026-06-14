@@ -52,7 +52,7 @@ export function useMatches() {
         fetchMatches();
     }, [fetchMatches]);
 
-    const sendLike = async (toUserId: string, type: 'like' | 'superlike' | 'pass' = 'like', intent: ConnectionIntent = 'dating') => {
+    const sendLike = useCallback(async (toUserId: string, type: 'like' | 'superlike' | 'pass' = 'like', intent: ConnectionIntent = 'dating') => {
         if (!user) return;
 
         try {
@@ -80,7 +80,7 @@ export function useMatches() {
                 await fetchMatches(intent);
             } else if (type !== 'pass') {
                 toast({
-                    title: type === 'superlike' ? '¡Super Like enviado! ✨' : 'Like enviado ❤️',
+                    title: type === 'superlike' ? '¡Flechado enviado! ✨' : 'Like enviado ❤️',
                     description: '¡Ojalá hagan match!',
                 });
             }
@@ -94,7 +94,7 @@ export function useMatches() {
             });
             throw err;
         }
-    };
+    }, [user, fetchMatches, toast]);
 
     return {
         matches,

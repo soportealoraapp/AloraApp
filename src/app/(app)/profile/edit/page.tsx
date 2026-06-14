@@ -69,6 +69,7 @@ export default function ProfileEditPage() {
     const [latitude, setLatitude] = useState<number | null>(null);
     const [longitude, setLongitude] = useState<number | null>(null);
     const [lookingFor, setLookingFor] = useState("");
+    const [connectionModes, setConnectionModes] = useState<string[]>(["dating"]);
     const [isLocating, setIsLocating] = useState(false);
     const [cropIndex, setCropIndex] = useState<number | null>(null);
     const [cropImageSrc, setCropImageSrc] = useState<string | null>(null);
@@ -99,6 +100,7 @@ export default function ProfileEditPage() {
             setLatitude((currentProfile as any).latitude || null);
             setLongitude((currentProfile as any).longitude || null);
             setLookingFor((currentProfile as any).lookingFor || "");
+            setConnectionModes((currentProfile as any).connectionModes || ["dating"]);
             setVoiceIntroUrl((currentProfile as any).voiceIntro ?? undefined);
             setVoiceIntroDuration((currentProfile as any).voiceIntroDuration ?? undefined);
             setVoiceIntroChanged(false);
@@ -289,6 +291,7 @@ export default function ProfileEditPage() {
                 latitude: latitude ?? undefined,
                 longitude: longitude ?? undefined,
                 lookingFor,
+                connectionModes,
                 ...(voiceIntroChanged ? {
                     voiceIntro: voiceIntroUrl ?? null,
                     voiceIntroDuration: voiceIntroDuration ?? null,
@@ -460,6 +463,41 @@ export default function ProfileEditPage() {
                                     <SelectItem value="unsure">Prefiero no decir</SelectItem>
                                 </SelectContent>
                             </Select>
+                        </div>
+
+                        <div className="space-y-2">
+                            <Label>Modo de conexión</Label>
+                            <p className="text-sm text-muted-foreground">Elige cómo quieres conectar con others</p>
+                            <div className="flex gap-2">
+                                <Button
+                                    type="button"
+                                    variant={connectionModes.includes('dating') ? 'default' : 'outline'}
+                                    size="sm"
+                                    onClick={() => {
+                                        setConnectionModes(prev =>
+                                            prev.includes('dating')
+                                                ? prev.filter(m => m !== 'dating')
+                                                : [...prev, 'dating']
+                                        );
+                                    }}
+                                >
+                                    💑 Citas
+                                </Button>
+                                <Button
+                                    type="button"
+                                    variant={connectionModes.includes('friendship') ? 'default' : 'outline'}
+                                    size="sm"
+                                    onClick={() => {
+                                        setConnectionModes(prev =>
+                                            prev.includes('friendship')
+                                                ? prev.filter(m => m !== 'friendship')
+                                                : [...prev, 'friendship']
+                                        );
+                                    }}
+                                >
+                                    🤝 Amistad
+                                </Button>
+                            </div>
                         </div>
 
                         <div className="space-y-2">

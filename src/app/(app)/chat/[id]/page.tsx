@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useRef, useState, useMemo } from "react";
+import React, { useEffect, useRef, useState, useMemo, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useChat } from "@/hooks/use-chat";
 import { useAuth } from "@/contexts/AuthContext";
@@ -151,7 +151,7 @@ export default function ChatWindowPage() {
     }, [matchId, markAsRead, messages.length]);
 
     // Track scroll position for auto-scroll
-    const handleScroll = () => {
+    const handleScroll = useCallback(() => {
         const container = scrollContainerRef.current;
         if (!container) return;
         const { scrollTop, scrollHeight, clientHeight } = container;
@@ -161,7 +161,7 @@ export default function ChatWindowPage() {
         if (scrollTop < 50 && hasMore && !loadingMore) {
             loadMore();
         }
-    };
+    }, [hasMore, loadingMore, loadMore]);
 
     // Group messages by date for date separators
     const groupedMessages = useMemo(() => {

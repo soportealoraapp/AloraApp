@@ -1,7 +1,10 @@
 "use client"
 
 import * as React from "react"
-import * as RechartsPrimitive from "recharts"
+import { ResponsiveContainer, Tooltip, Legend } from "recharts"
+import type { TooltipProps, LegendProps } from "recharts"
+
+const RechartsPrimitive = { ResponsiveContainer, Tooltip, Legend } as const
 
 import { cn } from "@/lib/utils"
 
@@ -261,7 +264,7 @@ const ChartLegend = RechartsPrimitive.Legend
 const ChartLegendContent = React.forwardRef<
   HTMLDivElement,
   React.ComponentProps<"div"> &
-    Pick<RechartsPrimitive.LegendProps, "payload" | "verticalAlign"> & {
+    Pick<LegendProps, "payload" | "verticalAlign"> & {
       hideIcon?: boolean
       nameKey?: string
     }

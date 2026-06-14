@@ -149,15 +149,15 @@ export default function UserProfilePage() {
 
             if (result.matched) {
                 toast({
-                    title: `¡Super Like con ${profile.displayName}! ✨`,
+                    title: `¡Flechado con ${profile.displayName}! ✨`,
                     description: "Tu interés destaca y ahora pueden chatear",
                     duration: 5000,
                 });
                 router.push(`/chat/${result.matchId}`);
             }
         } catch (error) {
-            console.error("Error enviando Super Like:", error);
-            toast({ title: "Error", description: "No se pudo enviar el Super Like. Intenta de nuevo.", variant: "destructive" });
+            console.error("Error enviando Flechado:", error);
+            toast({ title: "Error", description: "No se pudo enviar el Flechado. Intenta de nuevo.", variant: "destructive" });
         } finally {
             setProcessing(false);
         }

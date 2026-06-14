@@ -52,15 +52,27 @@ export async function POST(request: NextRequest) {
             }
         });
 
-        // Delete notifications between them
-        await prisma.notification.deleteMany({
+        // Delete only notifications related to the match between these two users
+        const matchBetween = await prisma.match.findFirst({
             where: {
                 OR: [
-                    { userId: user.id, type: 'match' },
-                    { userId: blockedId, type: 'match' },
+                    { user1Id: user.id, user2Id: blockedId },
+                    { user1Id: blockedId, user2Id: user.id },
                 ]
-            }
+            },
+            select: { id: true }
         });
+
+        if (matchBetween) {
+            await prisma.notification.deleteMany({
+                where: {
+                    OR: [
+                        { userId: user.id, data: { path: ['matchId'], equals: matchBetween.id } },
+                        { userId: blockedId, data: { path: ['matchId'], equals: matchBetween.id } },
+                    ]
+                }
+            });
+        }
 
         return NextResponse.json({ success: true });
     } catch (error) {
