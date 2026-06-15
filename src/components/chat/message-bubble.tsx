@@ -30,6 +30,7 @@ function formatTime(date: Date | string): string {
 const MemoizedMessageBubble = React.memo(function MessageBubble({ message, isMe, currentUserId, onReact }: MessageBubbleProps) {
   const isPending = message.status === 'pending';
   const isFlagged = message.status === 'flagged';
+  const isFailed = message.status === 'failed';
   const isRead = !!message.readAt;
   const isDelivered = message.status === 'delivered' || message.status === 'sent';
   const isImage = message.type === 'image';
@@ -125,11 +126,12 @@ const MemoizedMessageBubble = React.memo(function MessageBubble({ message, isMe,
               isMe
                 ? 'rounded-br-sm bg-primary text-primary-foreground'
                 : 'rounded-bl-sm bg-secondary text-secondary-foreground',
-              isFlagged && 'opacity-50 grayscale'
+              isFlagged && 'opacity-50 grayscale',
+              isFailed && 'opacity-50 border border-destructive/50'
             )}
           >
             <p className="text-sm whitespace-pre-wrap break-words leading-relaxed">
-              {isFlagged && !isMe ? 'Mensaje oculto por moderación' : (typeof message.content === 'string' ? message.content : JSON.stringify(message.content))}
+              {isFailed && isMe ? 'Error al enviar' : isFlagged && !isMe ? 'Mensaje oculto por moderación' : (typeof message.content === 'string' ? message.content : JSON.stringify(message.content))}
             </p>
 
             <div className="flex items-center justify-end gap-1.5 mt-1">
@@ -144,6 +146,8 @@ const MemoizedMessageBubble = React.memo(function MessageBubble({ message, isMe,
                 <div className="flex items-center">
                   {isPending ? (
                     <Loader2 className="h-2.5 w-2.5 animate-spin" />
+                  ) : isFailed ? (
+                    <AlertCircle className="h-3 w-3 text-destructive" />
                   ) : isRead ? (
                     <CheckCheck className="h-3 w-3 text-blue-300" />
                   ) : (

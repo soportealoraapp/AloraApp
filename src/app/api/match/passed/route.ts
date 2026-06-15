@@ -17,6 +17,7 @@ export async function GET(request: Request) {
     const where: any = {
       fromUserId: user.id,
       type: 'pass',
+      deletedAt: null,
     };
     if (intent) where.intent = intent;
 
@@ -54,5 +55,41 @@ export async function GET(request: Request) {
   } catch (error) {
     console.error('Error fetching passed profiles:', error);
     return NextResponse.json({ profiles: [] });
+  }
+}
+
+export async function POST(request: Request) {
+  const { createClient } = await import('@/lib/supabase/server');
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+
+  if (!user) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
+  try {
+    const { profileId } = await request.json();
+
+    if (!profileId) {
+      return NextResponse.json({ error: 'Missing profileId' }, { status: 400 });
+    }
+
+    // Mark the pass interaction as definitively excluded
+    await prisma.interaction.updateMany({
+      where: {
+        fromUserId: user.id,
+        toUserId: profileId,
+        type: 'pass',
+        deletedAt: null,
+      },
+      data: {
+        deletedAt: new Date(),
+      },
+    });
+
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    console.error('Error marking pass as definitive:', error);
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

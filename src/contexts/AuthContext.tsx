@@ -112,8 +112,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                     setProfile(userProfile);
                 } catch (e) {
                     console.error("Profile fetch on auth change failed", e);
+                    setProfile(null);
+                } finally {
+                    setProfileLoading(false);
                 }
-                setProfileLoading(false);
             }
         });
 

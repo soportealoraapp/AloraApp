@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getDailyQuestionForUser, submitAnswer } from '@/server/services/daily-question';
 
 // GET /api/daily-question — Get today's question
-export async function GET() {
+export async function GET(request: NextRequest) {
     const { createClient } = await import('@/lib/supabase/server');
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
@@ -12,7 +12,9 @@ export async function GET() {
     }
 
     try {
-        const data = await getDailyQuestionForUser(user.id);
+        // Get timezone from header or default to UTC
+        const timezone = request.headers.get('x-timezone') || 'UTC';
+        const data = await getDailyQuestionForUser(user.id, timezone);
         return NextResponse.json(data);
     } catch (error) {
         console.error('Error getting daily question:', error);

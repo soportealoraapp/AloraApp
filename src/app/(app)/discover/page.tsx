@@ -104,11 +104,15 @@ export default function DiscoverPage() {
   const [browseMode, setBrowseMode] = useState<'swipe' | 'grid'>('swipe');
   const [intent, setIntent] = useState<'dating' | 'friendship'>('dating');
   const [intentChanging, setIntentChanging] = useState(false);
+  const [pendingGridAction, setPendingGridAction] = useState(false);
 
   // Initialize intent from user's connectionModes
   useEffect(() => {
     if (currentUserProfile?.connectionModes?.length) {
-      const savedIntent = currentUserProfile.connectionModes[0];
+      // Prioritize 'dating' as the default mode
+      const savedIntent = currentUserProfile.connectionModes.includes('dating') 
+        ? 'dating' 
+        : currentUserProfile.connectionModes[0];
       if (savedIntent === 'dating' || savedIntent === 'friendship') {
         setIntent(savedIntent);
       }
@@ -589,22 +593,34 @@ export default function DiscoverPage() {
                                 </div>
                               </div>
                               <div className="flex gap-1 p-1.5">
-                                <Button size="sm" variant="ghost" className="flex-1 h-11" aria-label={`Descartar a ${p.displayName || ''}`} onClick={async () => {
-                                  track(AnalyticsEvents.PASS_SENT, { targetUserId: p.id, intent });
-                                  await sendLike(p.id, 'pass', intent);
-                                  setProfiles(prev => prev.filter(item => item.profile.id !== p.id));
+                                <Button size="sm" variant="ghost" className="flex-1 h-11" aria-label={`Descartar a ${p.displayName || ''}`} disabled={pendingGridAction} onClick={async () => {
+                                  if (pendingGridAction) return;
+                                  setPendingGridAction(true);
+                                  try {
+                                    track(AnalyticsEvents.PASS_SENT, { targetUserId: p.id, intent });
+                                    await sendLike(p.id, 'pass', intent);
+                                    setProfiles(prev => prev.filter(item => item.profile.id !== p.id));
+                                  } finally {
+                                    setPendingGridAction(false);
+                                  }
                                 }}>
                                   <X className="h-5 w-5 text-destructive" />
                                 </Button>
-                                <Button size="sm" variant="ghost" className="flex-1 h-11" aria-label={`Dar like a ${p.displayName || ''}`} onClick={async () => {
-                                  track(AnalyticsEvents.LIKE_SENT, { targetUserId: p.id, intent });
-                                  const result = await sendLike(p.id, 'like', intent);
-                                  setProfiles(prev => prev.filter(item => item.profile.id !== p.id));
-                                  if (result?.matched) {
-                                    track(AnalyticsEvents.MATCH_CREATED, { partnerId: p.id, intent });
-                                    setMatchedProfile(p);
-                                    setMatchId((result as any)?.matchId);
-                                    setShowMatchScreen(true);
+                                <Button size="sm" variant="ghost" className="flex-1 h-11" aria-label={`Dar like a ${p.displayName || ''}`} disabled={pendingGridAction} onClick={async () => {
+                                  if (pendingGridAction) return;
+                                  setPendingGridAction(true);
+                                  try {
+                                    track(AnalyticsEvents.LIKE_SENT, { targetUserId: p.id, intent });
+                                    const result = await sendLike(p.id, 'like', intent);
+                                    setProfiles(prev => prev.filter(item => item.profile.id !== p.id));
+                                    if (result?.matched) {
+                                      track(AnalyticsEvents.MATCH_CREATED, { partnerId: p.id, intent });
+                                      setMatchedProfile(p);
+                                      setMatchId((result as any)?.matchId);
+                                      setShowMatchScreen(true);
+                                    }
+                                  } finally {
+                                    setPendingGridAction(false);
                                   }
                                 }}>
                                   <Heart className="h-5 w-5 text-primary fill-primary" />

@@ -22,6 +22,10 @@ export async function GET(request: NextRequest) {
                     { user2Id: user.id }
                 ],
                 isActive: true,
+                // Exclude matches hidden by the current user
+                NOT: {
+                    hiddenBy: { has: user.id }
+                },
                 ...(intent ? { intent } : {})
             },
             include: {

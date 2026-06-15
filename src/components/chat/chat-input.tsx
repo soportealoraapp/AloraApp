@@ -134,7 +134,8 @@ export function ChatInput({ onSend, onSendImage, onSendVoice, onTyping, disabled
       }, 1000);
     } catch (error) {
       console.error('Error accessing microphone:', error);
-      if (typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'denied') {
+      const errorName = error instanceof Error ? error.name : '';
+      if (errorName === 'NotAllowedError') {
         toast({ title: 'Permiso de micrófono denegado', description: 'Habilita el permiso en la configuración de tu navegador.', variant: 'destructive' });
       } else {
         toast({ title: 'No se pudo acceder al micrófono', description: 'Verifica los permisos de tu navegador.', variant: 'destructive' });

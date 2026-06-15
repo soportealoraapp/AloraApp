@@ -199,7 +199,7 @@ export function useChat(matchId: string) {
             setMessages(prev =>
                 prev.map(m =>
                     m.id === optimisticId
-                        ? { ...m, status: 'flagged' as const }
+                        ? { ...m, status: 'failed' as const }
                         : m
                 )
             );

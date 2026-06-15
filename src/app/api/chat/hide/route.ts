@@ -21,11 +21,21 @@ export async function POST(request: NextRequest) {
 
         const match = await prisma.match.findUnique({
             where: { id: matchId },
-            select: { user1Id: true, user2Id: true },
+            select: { user1Id: true, user2Id: true, hiddenBy: true },
         });
 
         if (!match || (match.user1Id !== user.id && match.user2Id !== user.id)) {
             return NextResponse.json({ error: 'Match not found' }, { status: 404 });
+        }
+
+        // Add user to hiddenBy array if not already present
+        if (!match.hiddenBy.includes(user.id)) {
+            await prisma.match.update({
+                where: { id: matchId },
+                data: {
+                    hiddenBy: { push: user.id }
+                }
+            });
         }
 
         return NextResponse.json({ success: true, matchId });

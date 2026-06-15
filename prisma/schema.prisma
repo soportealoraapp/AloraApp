@@ -553,6 +553,8 @@ model NotificationPreference {
   promotions      Boolean @default(false)
   dailyQuestion   Boolean @default(true)
   streakReminder  Boolean @default(true)
+  readReceipts    Boolean @default(true)
+  notifications   Boolean @default(true)
 
   @@map("notification_preferences")
 }

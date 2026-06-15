@@ -31,10 +31,23 @@ export default function ProfilePage() {
     createdAt: string;
   } | null>(null);
   const [dismissedVerification, setDismissedVerification] = useState(false);
+  const [profileStats, setProfileStats] = useState<{ likesReceived: number; matchesCount: number; profileViews: number } | null>(null);
 
   useEffect(() => {
     setDismissedVerification(localStorage.getItem('dismissedVerification') === 'true');
   }, []);
+
+  useEffect(() => {
+    if (!user?.id) return;
+    fetch('/api/profile/stats')
+      .then(r => r.json())
+      .then(data => {
+        if (data.likesReceived !== undefined) {
+          setProfileStats(data);
+        }
+      })
+      .catch(() => logger.warn('Failed to fetch profile stats'));
+  }, [user?.id]);
 
   useEffect(() => {
     if (!user?.id) return;
@@ -139,23 +152,23 @@ export default function ProfilePage() {
         </div>
 
         {/* Stats — only show when there's real data */}
-        {((profile as any).likesReceived > 0 || (profile as any).matchesCount > 0 || (profile as any).profileViews > 0) && (
+        {profileStats && (profileStats.likesReceived > 0 || profileStats.matchesCount > 0 || profileStats.profileViews > 0) && (
         <div className="grid grid-cols-3 gap-4 px-4 py-4 border-b">
-          {(profile as any).likesReceived > 0 && (
+          {profileStats.likesReceived > 0 && (
           <div className="text-center">
-            <p className="text-2xl font-bold text-primary">{(profile as any).likesReceived}</p>
+            <p className="text-2xl font-bold text-primary">{profileStats.likesReceived}</p>
             <p className="text-xs text-muted-foreground">Likes</p>
           </div>
           )}
-          {(profile as any).matchesCount > 0 && (
+          {profileStats.matchesCount > 0 && (
           <div className="text-center">
-            <p className="text-2xl font-bold text-primary">{(profile as any).matchesCount}</p>
+            <p className="text-2xl font-bold text-primary">{profileStats.matchesCount}</p>
             <p className="text-xs text-muted-foreground">Matches</p>
           </div>
           )}
-          {(profile as any).profileViews > 0 && (
+          {profileStats.profileViews > 0 && (
           <div className="text-center">
-            <p className="text-2xl font-bold text-primary">{(profile as any).profileViews}</p>
+            <p className="text-2xl font-bold text-primary">{profileStats.profileViews}</p>
             <p className="text-xs text-muted-foreground">Visitas</p>
           </div>
           )}

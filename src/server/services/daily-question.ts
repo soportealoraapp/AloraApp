@@ -18,13 +18,25 @@ const QUESTIONS = [
     { question: "Como te gustaria que sea tu vida en 5 anos?", category: "goals" },
 ];
 
-export async function getTodayQuestion() {
-    // Use day of year to pick a consistent question per day
+export async function getTodayQuestion(timezone?: string) {
     const now = new Date();
-    const start = new Date(now.getFullYear(), 0, 0);
-    const diff = now.getTime() - start.getTime();
-    const oneDay = 1000 * 60 * 60 * 24;
-    const dayOfYear = Math.floor(diff / oneDay);
+    let dayOfYear: number;
+
+    if (timezone && timezone !== 'UTC') {
+        // Get the date in the user's timezone
+        const localDateStr = now.toLocaleString('en-US', { timeZone: timezone });
+        const localDate = new Date(localDateStr);
+        const start = new Date(localDate.getFullYear(), 0, 0);
+        const diff = localDate.getTime() - start.getTime();
+        const oneDay = 1000 * 60 * 60 * 24;
+        dayOfYear = Math.floor(diff / oneDay);
+    } else {
+        // Default to UTC
+        const start = new Date(now.getFullYear(), 0, 0);
+        const diff = now.getTime() - start.getTime();
+        const oneDay = 1000 * 60 * 60 * 24;
+        dayOfYear = Math.floor(diff / oneDay);
+    }
 
     const questionIndex = dayOfYear % QUESTIONS.length;
     const todayQuestion = QUESTIONS[questionIndex];
@@ -60,8 +72,8 @@ export async function submitAnswer(userId: string, questionId: string, answer: s
     });
 }
 
-export async function getDailyQuestionForUser(userId: string) {
-    const question = await getTodayQuestion();
+export async function getDailyQuestionForUser(userId: string, timezone?: string) {
+    const question = await getTodayQuestion(timezone);
     const userAnswer = await getUserAnswer(userId, question.id);
 
     return {

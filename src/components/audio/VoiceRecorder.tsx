@@ -1,10 +1,21 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Mic, Square, Trash2, Send, Loader2 } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
+
+const MAX_DURATION = 120; // 2 minutes
+
+function getAudioMimeType(): string {
+    if (typeof navigator !== 'undefined') {
+        if (navigator.userAgent.includes('Safari') && !navigator.userAgent.includes('Chrome')) {
+            return 'audio/mp4';
+        }
+    }
+    return 'audio/webm';
+}
 
 export function VoiceRecorder({ onStop, onCancel }: { onStop: (blob: Blob, duration: number) => void; onCancel?: () => void }) {
     const [recording, setRecording] = useState(false);
@@ -12,26 +23,62 @@ export function VoiceRecorder({ onStop, onCancel }: { onStop: (blob: Blob, durat
     const mediaRecorder = useRef<MediaRecorder | null>(null);
     const timerRef = useRef<NodeJS.Timeout | null>(null);
     const chunks = useRef<Blob[]>([]);
+    const streamRef = useRef<MediaStream | null>(null);
     const { toast } = useToast();
+
+    // Cleanup on unmount
+    useEffect(() => {
+        return () => {
+            if (mediaRecorder.current && mediaRecorder.current.state !== 'inactive') {
+                mediaRecorder.current.stop();
+            }
+            if (streamRef.current) {
+                streamRef.current.getTracks().forEach(track => track.stop());
+            }
+            if (timerRef.current) {
+                clearInterval(timerRef.current);
+            }
+        };
+    }, []);
+
+    // Stop recording when tab becomes hidden
+    useEffect(() => {
+        const handleVisibilityChange = () => {
+            if (document.hidden && mediaRecorder.current?.state === 'recording') {
+                stopRecording();
+            }
+        };
+        document.addEventListener('visibilitychange', handleVisibilityChange);
+        return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
+    }, [recording]);
 
     const startRecording = async () => {
         try {
             const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-            mediaRecorder.current = new MediaRecorder(stream);
+            streamRef.current = stream;
+            const mimeType = getAudioMimeType();
+            mediaRecorder.current = new MediaRecorder(stream, { mimeType });
             chunks.current = [];
 
             mediaRecorder.current.ondataavailable = (e) => chunks.current.push(e.data);
             mediaRecorder.current.onstop = () => {
-                const blob = new Blob(chunks.current, { type: 'audio/webm' });
-                onStop(blob, duration);
+                const blob = new Blob(chunks.current, { type: mimeType });
+                const finalDuration = duration;
                 setDuration(0);
+                onStop(blob, finalDuration);
             };
 
             mediaRecorder.current.start();
             setRecording(true);
 
             timerRef.current = setInterval(() => {
-                setDuration(prev => prev + 1);
+                setDuration(prev => {
+                    if (prev >= MAX_DURATION - 1) {
+                        stopRecording();
+                        return prev;
+                    }
+                    return prev + 1;
+                });
             }, 1000);
 
         } catch (err) {
@@ -49,8 +96,9 @@ export function VoiceRecorder({ onStop, onCancel }: { onStop: (blob: Blob, durat
             mediaRecorder.current.stop();
             setRecording(false);
             if (timerRef.current) clearInterval(timerRef.current);
-            // Stop tracks
-            mediaRecorder.current.stream.getTracks().forEach(track => track.stop());
+            if (streamRef.current) {
+                streamRef.current.getTracks().forEach(track => track.stop());
+            }
         }
     };
 
@@ -66,7 +114,7 @@ export function VoiceRecorder({ onStop, onCancel }: { onStop: (blob: Blob, durat
                 <div className="flex items-center gap-4 w-full justify-between">
                     <div className="flex items-center gap-2 text-destructive animate-pulse font-mono">
                         <div className="w-3 h-3 bg-destructive rounded-full"></div>
-                        Rec {formatTime(duration)}
+                        Rec {formatTime(duration)} / {formatTime(MAX_DURATION)}
                     </div>
                     <div className="flex gap-2">
                         {onCancel && (

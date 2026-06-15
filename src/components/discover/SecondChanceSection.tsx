@@ -53,9 +53,14 @@ export function SecondChanceSection() {
     }
   };
 
-  const handleDefinitivePass = (profileId: string) => {
+  const handleDefinitivePass = async (profileId: string) => {
     setPassedProfiles(prev => prev.filter(p => p.id !== profileId));
     toast({ title: 'Descartado definitivamente' });
+    await fetch('/api/match/passed', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ profileId })
+    }).catch(() => {});
   };
 
   return (

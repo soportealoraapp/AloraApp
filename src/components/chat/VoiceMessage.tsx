@@ -16,7 +16,6 @@ export function VoiceMessage({ audioUrl, duration: propDuration, isOwn = false }
     const [currentTime, setCurrentTime] = useState(0);
     const [duration, setDuration] = useState(propDuration || 0);
     const audioRef = useRef<HTMLAudioElement | null>(null);
-    const animationRef = useRef<number>();
     const progressBarRef = useRef<HTMLDivElement>(null);
 
     // Stable bar heights - computed once
@@ -42,13 +41,11 @@ export function VoiceMessage({ audioUrl, duration: propDuration, isOwn = false }
         audio.addEventListener('ended', () => {
             setIsPlaying(false);
             setCurrentTime(0);
-            if (animationRef.current) cancelAnimationFrame(animationRef.current);
         });
 
         return () => {
             audio.pause();
             audio.src = '';
-            if (animationRef.current) cancelAnimationFrame(animationRef.current);
         };
     }, [audioUrl]);
 

@@ -6,14 +6,20 @@ import { ConnectionIntent, Match } from '@/lib/domain/types';
 import { useToast } from './use-toast';
 import { authFetch } from '@/lib/utils';
 
-// Temporary local type until Like is defined in domain
-type Like = any;
+interface LikePreview {
+    id: string;
+    displayName: string;
+    photoURL: string | null;
+    type: string;
+    intent: string;
+    createdAt: Date;
+}
 
 export function useMatches() {
     const { user } = useAuth();
     const { toast } = useToast();
     const [matches, setMatches] = useState<Match[]>([]);
-    const [newMatches, setNewMatches] = useState<Like[]>([]);
+    const [newMatches, setNewMatches] = useState<LikePreview[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 

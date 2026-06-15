@@ -309,21 +309,9 @@ export default function PrivacySettingsPage() {
                         <Link href="/settings/privacy/blocked">
                             <div className="flex items-center justify-between p-3 rounded-lg hover:bg-secondary transition-colors cursor-pointer">
                                 <div>
-                                    <p className="font-medium">Contactos Bloqueados</p>
+                                    <p className="font-medium">Usuarios Bloqueados</p>
                                     <p className="text-sm text-muted-foreground">
-                                        Ver y gestionar usuarios bloqueados
-                                    </p>
-                                </div>
-                                <ArrowLeft className="h-5 w-5 rotate-180 text-muted-foreground" />
-                            </div>
-                        </Link>
-
-                        <Link href="/settings/privacy/rejected">
-                            <div className="flex items-center justify-between p-3 rounded-lg hover:bg-secondary transition-colors cursor-pointer">
-                                <div>
-                                    <p className="font-medium">Perfiles Bloqueados</p>
-                                    <p className="text-sm text-muted-foreground">
-                                        Personas que bloqueaste
+                                        Ver y gestionar usuarios que bloqueaste
                                     </p>
                                 </div>
                                 <ArrowLeft className="h-5 w-5 rotate-180 text-muted-foreground" />

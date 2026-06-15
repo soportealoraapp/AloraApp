@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Mic, Play, Pause, Trash2, Loader2 } from 'lucide-react';
@@ -21,9 +21,20 @@ interface VoiceIntroProps {
 export function VoiceIntro({ audioUrl, duration, onSave, onDelete, isOwn = true }: VoiceIntroProps) {
     const [isRecording, setIsRecording] = useState(false);
     const [previewBlob, setPreviewBlob] = useState<Blob | null>(null);
+    const [previewUrl, setPreviewUrl] = useState<string | null>(null);
     const [previewDuration, setPreviewDuration] = useState(0);
     const [uploading, setUploading] = useState(false);
     const { toast } = useToast();
+
+    // Create and revoke preview URL
+    useEffect(() => {
+        if (previewBlob) {
+            const url = URL.createObjectURL(previewBlob);
+            setPreviewUrl(url);
+            return () => URL.revokeObjectURL(url);
+        }
+        setPreviewUrl(null);
+    }, [previewBlob]);
 
     const { startUpload } = useUploadThing("voiceUploader", {
         onClientUploadComplete: async (res: any) => {
@@ -104,12 +115,12 @@ export function VoiceIntro({ audioUrl, duration, onSave, onDelete, isOwn = true 
         );
     }
 
-    if (previewBlob) {
+    if (previewBlob && previewUrl) {
         return (
             <Card className="rounded-2xl border-primary/30">
                 <CardContent className="p-4 space-y-3">
                     <p className="text-sm font-medium">Vista previa</p>
-                    <VoicePlayer src={URL.createObjectURL(previewBlob)} />
+                    <VoicePlayer src={previewUrl} />
                     <div className="flex gap-2">
                         <Button
                             size="sm"

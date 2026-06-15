@@ -174,7 +174,7 @@ export interface Message {
     createdAt: Date;
     readAt?: Date;
     type: 'text' | 'image' | 'icebreaker' | 'voice';
-    status?: 'sent' | 'delivered' | 'read' | 'pending' | 'flagged';
+    status?: 'sent' | 'delivered' | 'read' | 'pending' | 'flagged' | 'failed';
     reactions?: Record<string, string>;
 }
 
