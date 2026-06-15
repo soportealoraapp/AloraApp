@@ -140,13 +140,11 @@ function scorePersonality(bioA: string, bioB: string, interestsA: string[], inte
  * Reads from quiz_results table.
  * Accepts optional pre-fetched quizzes for userA to avoid redundant queries.
  */
-async function scoreQuizzes(userIdA: string, userIdB: string, quizzesA?: any[]): Promise<number> {
-    const [qa, qb] = quizzesA
-        ? [quizzesA, await prisma.quizResult.findMany({ where: { userId: userIdB } })]
-        : await Promise.all([
-            prisma.quizResult.findMany({ where: { userId: userIdA } }),
-            prisma.quizResult.findMany({ where: { userId: userIdB } }),
-        ]);
+async function scoreQuizzes(userIdA: string, userIdB: string, quizzesA?: any[], quizzesB?: any[]): Promise<number> {
+    const [qa, qb] = await Promise.all([
+        quizzesA ? Promise.resolve(quizzesA) : prisma.quizResult.findMany({ where: { userId: userIdA } }),
+        quizzesB ? Promise.resolve(quizzesB) : prisma.quizResult.findMany({ where: { userId: userIdB } }),
+    ]);
 
     if (qa.length === 0 || qb.length === 0) return 50;
 
@@ -413,38 +411,38 @@ export async function calculateCompatibility(
         profile: ProfileData;
         quizzes: any[];
         dailyAnswer: { answer: string; question: { category: string } } | null;
+    },
+    candidateData?: {
+        profile: ProfileData;
+        quizzes: any[];
+        dailyAnswer: { answer: string; question: { category: string } } | null;
     }
 ): Promise<CompatibilityResult> {
-    const [profileA, profileB] = viewerData
-        ? [viewerData.profile, await prisma.profile.findUnique({
-            where: { userId: userIdB },
+    // Batch-optimized: use pre-fetched candidate profile or query
+    const profileB = candidateData?.profile ?? await prisma.profile.findUnique({
+        where: { userId: userIdB },
+        select: {
+            values: true, interests: true, musicGenres: true,
+            smoking: true, drinking: true, children: true,
+            education: true, religion: true, bio: true,
+            seeking: true, city: true, zodiacSign: true,
+        }
+    });
+
+    let profileA: ProfileData | null = null;
+    if (viewerData) {
+        profileA = viewerData.profile;
+    } else {
+        profileA = await prisma.profile.findUnique({
+            where: { userId: userIdA },
             select: {
                 values: true, interests: true, musicGenres: true,
                 smoking: true, drinking: true, children: true,
                 education: true, religion: true, bio: true,
                 seeking: true, city: true, zodiacSign: true,
             }
-        })]
-        : await Promise.all([
-            prisma.profile.findUnique({
-                where: { userId: userIdA },
-                select: {
-                    values: true, interests: true, musicGenres: true,
-                    smoking: true, drinking: true, children: true,
-                    education: true, religion: true, bio: true,
-                    seeking: true, city: true, zodiacSign: true,
-                }
-            }),
-            prisma.profile.findUnique({
-                where: { userId: userIdB },
-                select: {
-                    values: true, interests: true, musicGenres: true,
-                    smoking: true, drinking: true, children: true,
-                    education: true, religion: true, bio: true,
-                    seeking: true, city: true, zodiacSign: true,
-                }
-            }),
-        ]);
+        });
+    }
 
     if (!profileA || !profileB) {
         return {
@@ -456,23 +454,23 @@ export async function calculateCompatibility(
         };
     }
 
-    const dailyP = viewerData?.dailyAnswer
-        ? Promise.resolve(viewerData.dailyAnswer)
-        : prisma.dailyAnswer.findFirst({
-            where: { userId: userIdA },
-            orderBy: { createdAt: 'desc' },
-            select: { answer: true, question: { select: { category: true } } },
-        });
-
     const [quizScore, goalsScore, latestA, latestB] = await Promise.all([
-        scoreQuizzes(userIdA, userIdB, viewerData?.quizzes),
+        scoreQuizzes(userIdA, userIdB, viewerData?.quizzes, candidateData?.quizzes),
         scoreRelationshipGoals(userIdA, userIdB, profileA, profileB),
-        dailyP,
-        prisma.dailyAnswer.findFirst({
-            where: { userId: userIdB },
-            orderBy: { createdAt: 'desc' },
-            select: { answer: true, question: { select: { category: true } } },
-        }),
+        viewerData?.dailyAnswer !== undefined
+            ? Promise.resolve(viewerData.dailyAnswer)
+            : prisma.dailyAnswer.findFirst({
+                where: { userId: userIdA },
+                orderBy: { createdAt: 'desc' },
+                select: { answer: true, question: { select: { category: true } } },
+            }),
+        candidateData?.dailyAnswer !== undefined
+            ? Promise.resolve(candidateData.dailyAnswer)
+            : prisma.dailyAnswer.findFirst({
+                where: { userId: userIdB },
+                orderBy: { createdAt: 'desc' },
+                select: { answer: true, question: { select: { category: true } } },
+            }),
     ]);
 
     const dailyScore = scoreDailyQuestion(

@@ -127,7 +127,7 @@ export function PhotoGrid({ photos, onReorder, onRemove, onCrop, maxPhotos = 6 }
                         <Button
                             size="sm"
                             variant="secondary"
-                            className="h-8 w-8 p-0"
+                            className="h-11 w-11 p-0"
                             onMouseDown={(e) => e.stopPropagation()}
                         >
                             <GripVertical className="h-4 w-4" />
@@ -136,7 +136,7 @@ export function PhotoGrid({ photos, onReorder, onRemove, onCrop, maxPhotos = 6 }
                             <Button
                                 size="sm"
                                 variant="secondary"
-                                className="h-8 w-8 p-0"
+                                className="h-11 w-11 p-0"
                                 onClick={(e) => { e.stopPropagation(); onCrop(index); }}
                             >
                                 <Crop className="h-4 w-4" />
@@ -145,7 +145,7 @@ export function PhotoGrid({ photos, onReorder, onRemove, onCrop, maxPhotos = 6 }
                         <Button
                             size="sm"
                             variant="destructive"
-                            className="h-8 w-8 p-0"
+                            className="h-11 w-11 p-0"
                             onClick={(e) => { e.stopPropagation(); onRemove(index); }}
                         >
                             <X className="h-4 w-4" />

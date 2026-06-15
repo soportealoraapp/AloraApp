@@ -30,19 +30,19 @@ export function OfflineBanner() {
                     initial={{ y: -60, opacity: 0 }}
                     animate={{ y: 0, opacity: 1 }}
                     exit={{ y: -60, opacity: 0 }}
-                    className="fixed top-0 left-0 right-0 z-[100] bg-warning/10 border-b border-warning/20 px-4 py-3"
+                    className="fixed top-0 left-0 right-0 z-[100] bg-warning/10 border-b border-warning/20 px-4 py-3 pt-safe"
                 >
                     <div className="flex items-center justify-between max-w-4xl mx-auto">
-                        <div className="flex items-center gap-2 text-amber-800">
+                        <div className="flex items-center gap-2 text-warning-foreground">
                             <WifiOff className="h-4 w-4" />
                             <span className="text-sm font-medium">Sin conexión</span>
-                            <span className="text-xs text-amber-600">Algunas funciones pueden no estar disponibles</span>
+                            <span className="text-xs text-muted-foreground">Algunas funciones pueden no estar disponibles</span>
                         </div>
                         <Button
                             variant="ghost"
                             size="sm"
                             onClick={() => window.location.reload()}
-                            className="text-amber-700 hover:text-amber-900 hover:bg-amber-100"
+                            className="text-muted-foreground hover:text-foreground hover:bg-secondary"
                         >
                             <RefreshCw className="h-3 w-3 mr-1" />
                             Reconectar

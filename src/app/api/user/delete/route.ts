@@ -59,7 +59,15 @@ export async function POST(request: NextRequest) {
         // (though we should check the delete_user_account RPC function)
         await prisma.$transaction([
             prisma.notification.deleteMany({ where: { userId: user.id } }),
+            prisma.notificationPreference.deleteMany({ where: { userId: user.id } }),
+            prisma.pushToken.deleteMany({ where: { userId: user.id } }),
+            prisma.session.deleteMany({ where: { userId: user.id } }),
+            prisma.analyticsEvent.deleteMany({ where: { userId: user.id } }),
+            prisma.deviceFingerprint.deleteMany({ where: { userId: user.id } }),
             prisma.verificationSubmission.deleteMany({ where: { userId: user.id } }),
+            prisma.dailyAnswer.deleteMany({ where: { userId: user.id } }),
+            prisma.quizResult.deleteMany({ where: { userId: user.id } }),
+            prisma.profileVisit.deleteMany({ where: { OR: [{ visitorId: user.id }, { visitedId: user.id }] } }),
             prisma.message.deleteMany({ where: { senderId: user.id } }),
             prisma.match.deleteMany({
                 where: {
@@ -78,6 +86,22 @@ export async function POST(request: NextRequest) {
                 }
             }),
             prisma.favorite.deleteMany({ where: { userId: user.id } }),
+            prisma.block.deleteMany({
+                where: {
+                    OR: [
+                        { blockerId: user.id },
+                        { blockedId: user.id }
+                    ]
+                }
+            }),
+            prisma.report.deleteMany({
+                where: {
+                    OR: [
+                        { reporterId: user.id },
+                        { reportedId: user.id }
+                    ]
+                }
+            }),
             prisma.profile.deleteMany({ where: { userId: user.id } }),
             prisma.user.delete({ where: { id: user.id } })
         ]);

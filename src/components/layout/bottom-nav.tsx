@@ -23,7 +23,7 @@ export function BottomNav() {
   return (
     <>
       {/* Bottom Navigation for Mobile */}
-      <nav className="fixed bottom-0 left-0 right-0 z-50 border-t bg-background/95 backdrop-blur-xl md:hidden pb-safe">
+      <nav className="fixed bottom-0 left-0 right-0 z-50 border-t bg-background/95 backdrop-blur-xl md:hidden pb-safe" aria-label="Navegación principal">
         <div className="flex justify-around items-center h-16">
           {navItems.map(({ href, icon: Icon, label, special }) => {
             const isActive = pathname.startsWith(href);
@@ -31,7 +31,7 @@ export function BottomNav() {
             
             if (special) {
               return (
-                <Link key={href} href={href} className="flex-1 flex flex-col items-center justify-center relative -top-3">
+                <Link key={href} href={href} className="flex-1 flex flex-col items-center justify-center relative -top-3" aria-current={isActive ? 'page' : undefined}>
                   <motion.div
                     whileTap={{ scale: 0.9 }}
                     className="flex flex-col items-center"
@@ -62,7 +62,7 @@ export function BottomNav() {
             }
 
             return (
-              <Link key={href} href={href} className="flex-1 flex flex-col items-center justify-center relative">
+              <Link key={href} href={href} className="flex-1 flex flex-col items-center justify-center relative" aria-current={isActive ? 'page' : undefined}>
                 <motion.div
                   whileTap={{ scale: 0.9 }}
                   className={cn(

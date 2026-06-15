@@ -4,8 +4,6 @@ import { useState } from "react";
 import { AlertTriangle, ShieldOff, VolumeX } from "lucide-react";
 import { MuteDialog } from "@/components/chat/MuteDialog";
 import { Button } from "@/components/ui/button";
-import { reportUser } from "@/server/actions/safety";
-import { blockUser } from "@/server/actions/block";
 import { useAuth } from "@/contexts/AuthContext";
 import { BRAND_VOICE } from "@/lib/constants/brand-voice";
 import {
@@ -65,13 +63,23 @@ export function ProfileActions({ userId, userName, matchId, isMuted = false, onM
 
         try {
             if (type === 'report') {
-                await reportUser(currentUser.id, userId, "general_report");
+                const res = await fetch('/api/safety/report', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ reportedId: userId, category: 'other' })
+                });
+                if (!res.ok) throw new Error('Error al enviar reporte');
                 toast({
                     title: "Reporte enviado",
                     description: BRAND_VOICE.safety.reportThankYou,
                 });
             } else if (type === 'block') {
-                await blockUser(currentUser.id, userId);
+                const res = await fetch('/api/safety/block', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ blockedId: userId })
+                });
+                if (!res.ok) throw new Error('Error al bloquear usuario');
                 toast({
                     title: "Usuario bloqueado",
                     description: BRAND_VOICE.safety.blockConfirm,

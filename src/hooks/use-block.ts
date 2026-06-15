@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
-import { blockUser as blockAction, unblockUser as unblockAction, getBlockedUsers } from '@/server/actions/block';
 
 export function useBlock() {
     const { user } = useAuth();
@@ -15,8 +14,11 @@ export function useBlock() {
             return;
         }
         try {
-            const users = await getBlockedUsers(user.id);
-            setBlockedUsers(users);
+            const response = await fetch('/api/safety/block');
+            if (response.ok) {
+                const users = await response.json();
+                setBlockedUsers(users);
+            }
         } catch (e) {
             console.error('Error fetching blocked users', e);
         } finally {
@@ -30,13 +32,23 @@ export function useBlock() {
 
     const blockUser = async (blockedId: string, reason?: string) => {
         if (!user) return;
-        await blockAction(user.id, blockedId, reason);
+        const response = await fetch('/api/safety/block', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ blockedId, reason })
+        });
+        if (!response.ok) throw new Error('Error al bloquear usuario');
         await fetchBlocked();
     };
 
     const unblockUser = async (blockedId: string) => {
         if (!user) return;
-        await unblockAction(user.id, blockedId);
+        const response = await fetch('/api/safety/block', {
+            method: 'DELETE',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ blockedId })
+        });
+        if (!response.ok) throw new Error('Error al desbloquear usuario');
         await fetchBlocked();
     };
 

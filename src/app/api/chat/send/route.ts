@@ -29,6 +29,19 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ error: 'Missing fields' }, { status: 400 });
         }
 
+        // Validate message type
+        const validTypes = ['text', 'voice', 'image'];
+        const messageType = validTypes.includes(type) ? type : 'text';
+
+        // Validate message content
+        const trimmedText = typeof text === 'string' ? text.trim() : '';
+        if (trimmedText.length === 0 && messageType === 'text') {
+            return NextResponse.json({ error: 'Message cannot be empty' }, { status: 400 });
+        }
+        if (trimmedText.length > 1000) {
+            return NextResponse.json({ error: 'Message too long (max 1000 characters)' }, { status: 400 });
+        }
+
         // Idempotency: prevent duplicate messages on retry
         const idempotencyKey = `${matchId}:${user.id}:${text.slice(0, 50)}:${Math.floor(Date.now() / 60000)}`;
         const idempotencyResult = await checkIdempotency(idempotencyKey, user.id, 'chat_send');
@@ -133,7 +146,7 @@ export async function POST(request: NextRequest) {
                 matchId,
                 senderId: user.id,
                 content,
-                type: type || 'text',
+                type: messageType,
                 status: isFiltered ? 'flagged' : 'sent',
             }
         });

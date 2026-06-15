@@ -193,7 +193,7 @@ export class IncidentManager {
                 // Pause expensive jobs
                 await prisma.job.updateMany({
                     where: {
-                        type: { in: ['process_analytics', 'generate_nudges'] },
+                        type: { in: ['process_analytics'] },
                         status: 'pending',
                     },
                     data: { priority: 5 },

@@ -32,6 +32,10 @@ export async function GET(request: Request) {
             }
 
             // Check if user has a completed profile — new Google users must onboard
+            // Only override destination if the user doesn't have a specific next target
+            // (e.g., password reset should go to /password-update, not /onboarding)
+            const validNextRoutes = ['/password-update', '/discover', '/onboarding', '/settings'];
+            const hasSpecificTarget = validNextRoutes.some(route => next.startsWith(route));
             let destination = next;
             try {
                 const { data: { user } } = await supabase.auth.getUser();
@@ -60,7 +64,7 @@ export async function GET(request: Request) {
                             }
                         });
                         destination = '/onboarding';
-                    } else if (!profile.isCompleted) {
+                    } else if (!profile.isCompleted && !hasSpecificTarget) {
                         destination = '/onboarding';
                     }
                 }

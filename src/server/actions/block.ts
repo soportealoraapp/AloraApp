@@ -30,13 +30,34 @@ export async function blockUser(blockerId: string, blockedId: string, reason?: s
             }
         });
 
-        // Delete notifications between the two users
-        await prisma.notification.deleteMany({
+        // Delete notifications tied to matches between the two users
+        const matchesBetween = await prisma.match.findMany({
             where: {
-                userId: blockerId,
-                data: { path: ['userId'], equals: blockedId }
-            }
+                OR: [
+                    { user1Id: blockerId, user2Id: blockedId },
+                    { user1Id: blockedId, user2Id: blockerId }
+                ]
+            },
+            select: { id: true }
         });
+
+        if (matchesBetween.length > 0) {
+            const matchIds = new Set(matchesBetween.map(m => m.id));
+            // Fetch notifications and filter in memory since Prisma Json doesn't support 'in' operator
+            const notifications = await prisma.notification.findMany({
+                where: { userId: blockerId, type: { in: ['match', 'message'] } },
+                select: { id: true, data: true }
+            });
+            const toDelete = notifications.filter(n => {
+                const matchId = (n.data as Record<string, unknown>)?.matchId;
+                return typeof matchId === 'string' && matchIds.has(matchId);
+            });
+            if (toDelete.length > 0) {
+                await prisma.notification.deleteMany({
+                    where: { id: { in: toDelete.map(n => n.id) } }
+                }).catch(() => {});
+            }
+        }
 
         revalidatePath('/discover');
         revalidatePath('/chat');

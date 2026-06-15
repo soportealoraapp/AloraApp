@@ -9,8 +9,7 @@ export type JobType =
     | 'ai_coaching'
     | 'cleanup_expired'
     | 'process_upload'
-    | 'update_reputation'
-    | 'generate_nudges';
+    | 'update_reputation';
 
 export interface QueueJob {
     id: string;
@@ -34,7 +33,6 @@ const JOB_TYPES = {
     cleanup_expired: { maxRetries: 1, priority: 5, timeout: 300000 },
     process_upload: { maxRetries: 3, priority: 2, timeout: 60000 },
     update_reputation: { maxRetries: 3, priority: 3, timeout: 30000 },
-    generate_nudges: { maxRetries: 2, priority: 4, timeout: 60000 },
 };
 
 export class JobQueue {
@@ -251,12 +249,6 @@ export async function processJob(job: QueueJob): Promise<void> {
                 break;
             case 'process_analytics':
                 // Batch process analytics events
-                break;
-            case 'generate_nudges':
-                if (job.payload.userId) {
-                    const { generateEmotionalNudges } = await import('./emotional-retention');
-                    await generateEmotionalNudges(job.payload.userId);
-                }
                 break;
             default:
                 console.log(`No processor for job type: ${job.type}`);

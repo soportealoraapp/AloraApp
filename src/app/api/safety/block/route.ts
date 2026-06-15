@@ -1,11 +1,73 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
-export async function POST(request: NextRequest) {
+async function getUser() {
     const { createClient } = await import('@/lib/supabase/server');
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
+    return user;
+}
 
+// GET /api/safety/block — List blocked users
+export async function GET() {
+    const user = await getUser();
+    if (!user) {
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    try {
+        const blocks = await prisma.block.findMany({
+            where: { blockerId: user.id }
+        });
+
+        const blockedIds = blocks.map(b => b.blockedId);
+        if (blockedIds.length === 0) return NextResponse.json([]);
+
+        const blockedUsers = await prisma.profile.findMany({
+            where: { userId: { in: blockedIds } },
+        });
+
+        return NextResponse.json(blockedUsers.map(p => ({
+            id: p.userId,
+            blockedId: p.userId,
+            displayName: p.displayName,
+            photoUrl: p.photos[0] || null,
+            reason: blocks.find(b => b.blockedId === p.userId)?.reason,
+            createdAt: blocks.find(b => b.blockedId === p.userId)?.createdAt
+        })));
+    } catch (error) {
+        console.error('Error fetching blocked users:', error);
+        return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    }
+}
+
+// DELETE /api/safety/block — Unblock a user
+export async function DELETE(request: NextRequest) {
+    const user = await getUser();
+    if (!user) {
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    try {
+        const { blockedId } = await request.json();
+        if (!blockedId) {
+            return NextResponse.json({ error: 'Missing blockedId' }, { status: 400 });
+        }
+
+        await prisma.block.deleteMany({
+            where: { blockerId: user.id, blockedId }
+        });
+
+        return NextResponse.json({ success: true });
+    } catch (error) {
+        console.error('Error unblocking user:', error);
+        return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    }
+}
+
+// POST /api/safety/block — Block a user
+export async function POST(request: NextRequest) {
+    const user = await getUser();
     if (!user) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }

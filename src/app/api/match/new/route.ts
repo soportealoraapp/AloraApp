@@ -15,6 +15,17 @@ export async function GET(request: NextRequest) {
     try {
         const intentParam = request.nextUrl.searchParams.get('intent');
         const intent = intentParam === 'friendship' ? 'friendship' : intentParam === 'dating' ? 'dating' : undefined;
+
+        // Fetch blocks in both directions to exclude blocked users
+        const [blocks1, blocks2] = await Promise.all([
+            prisma.block.findMany({ where: { blockerId: user.id }, select: { blockedId: true } }),
+            prisma.block.findMany({ where: { blockedId: user.id }, select: { blockerId: true } }),
+        ]);
+        const blockedIds = new Set([
+            ...blocks1.map(b => b.blockedId),
+            ...blocks2.map(b => b.blockerId),
+        ]);
+
         const likes = await prisma.interaction.findMany({
             where: {
                 toUserId: user.id,
@@ -50,7 +61,10 @@ export async function GET(request: NextRequest) {
             `${m.user2Id}:${m.intent}`
         ]));
 
-        const pendingLikes = likes.filter(like => !matchKeys.has(`${like.fromUserId}:${like.intent}`));
+        const pendingLikes = likes.filter(like => 
+            !matchKeys.has(`${like.fromUserId}:${like.intent}`) && 
+            !blockedIds.has(like.fromUserId)
+        );
 
         const formattedLikes = pendingLikes.map(like => {
             const p = like.fromUser.profile;

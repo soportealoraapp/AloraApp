@@ -390,6 +390,16 @@ export async function getDynamicFeed(
                 select: { answer: true, question: { select: { category: true } } },
             }),
         ]);
+
+        // Batch-fetch candidate quizzes to avoid N+1 in compatibility scoring
+        const candidateQuizzesRaw = resultCandidateIds.length > 0
+            ? await prisma.quizResult.findMany({ where: { userId: { in: resultCandidateIds } } })
+            : [];
+        const candidateQuizzesMap = new Map<string, any[]>();
+        for (const q of candidateQuizzesRaw) {
+            if (!candidateQuizzesMap.has(q.userId)) candidateQuizzesMap.set(q.userId, []);
+            candidateQuizzesMap.get(q.userId)!.push(q);
+        }
         const viewerProfile = currentUser.profile;
         const viewerData = {
             profile: {
@@ -440,7 +450,31 @@ export async function getDynamicFeed(
                 };
 
                 const completeness = calculateCompleteness(profile);
-                const deepScore = await getCompatibilityScore(currentUserId, profile.id, viewerData);
+
+                // Construct candidateData from pre-fetched info (eliminates N+1 queries)
+                const candidateProfileData = {
+                    values: cp.values || [],
+                    interests: cp.interests || [],
+                    musicGenres: cp.musicGenres || [],
+                    smoking: (cp.smoking as string | null) || null,
+                    drinking: (cp.drinking as string | null) || null,
+                    children: (cp.children as string | null) || null,
+                    education: (cp.education as string | null) || null,
+                    religion: (cp.religion as string | null) || null,
+                    bio: (cp.bio as string | null) || null,
+                    seeking: (cp.seeking as string | null) || null,
+                    city: (cp.city as string | null) || null,
+                    zodiacSign: (cp.zodiacSign as string | null) || null,
+                };
+                const candidateDataObj = {
+                    profile: candidateProfileData,
+                    quizzes: candidateQuizzesMap.get(cp.userId) || [],
+                    dailyAnswer: latestAnswerMap.get(cp.userId)
+                        ? { answer: latestAnswerMap.get(cp.userId)!.answer, question: latestAnswerMap.get(cp.userId)!.question }
+                        : null,
+                };
+
+                const deepScore = await getCompatibilityScore(currentUserId, profile.id, viewerData, candidateDataObj);
                 const messagesSent = messagesSentMap.get(cp.userId) || 0;
                 const dailyAnswer = latestAnswerMap.get(cp.userId);
                 if (dailyAnswer) {

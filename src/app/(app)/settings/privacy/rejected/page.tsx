@@ -3,7 +3,6 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
-import { getBlockedUsers, unblockUser } from "@/server/actions/block";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { ArrowLeft, Loader2, UserX } from "lucide-react";
@@ -27,9 +26,11 @@ export default function RejectedUsersPage() {
         if (!user) return;
         setLoading(true);
         try {
-            // Using ID since user might be Supabase user in Context
-            const users = await getBlockedUsers(user.id || '');
-            setBlockedUsers(users);
+            const response = await fetch('/api/safety/block');
+            if (response.ok) {
+                const users = await response.json();
+                setBlockedUsers(users);
+            }
         } catch (error) {
             console.error(error);
         } finally {
@@ -40,7 +41,12 @@ export default function RejectedUsersPage() {
     const handleUnblock = async (blockedId: string) => {
         if (!user) return;
         try {
-            await unblockUser(user.id || '', blockedId);
+            const response = await fetch('/api/safety/block', {
+                method: 'DELETE',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ blockedId })
+            });
+            if (!response.ok) throw new Error('Error al desbloquear');
             setBlockedUsers(prev => prev.filter(u => u.id !== blockedId));
             toast({ title: "Usuario desbloqueado" });
         } catch (error) {

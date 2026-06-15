@@ -69,7 +69,7 @@ export function MatchFeedbackDialog({ matchId, partnerName, open, onClose, onSub
                             <Heart className="h-5 w-5 text-primary fill-primary" />
                             <h2 className="font-bold text-lg">¿Qué tal con {partnerName}?</h2>
                         </div>
-                        <Button variant="ghost" size="icon" onClick={onClose} className="h-8 w-8">
+                        <Button variant="ghost" size="icon" onClick={onClose} className="h-11 w-11">
                             <X className="h-4 w-4" />
                         </Button>
                     </div>

@@ -61,7 +61,7 @@ export async function middleware(request: NextRequest) {
         pathname.startsWith('/refer') ||
         pathname.startsWith('/app');
 
-    const isAdminRoute = pathname.startsWith('/admin');
+    const isAdminRoute = pathname.startsWith('/admin') || pathname.startsWith('/qa');
 
     const isAuthRoute = pathname.startsWith('/login') ||
         pathname.startsWith('/signup') ||

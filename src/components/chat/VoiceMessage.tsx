@@ -91,7 +91,7 @@ export function VoiceMessage({ audioUrl, duration: propDuration, isOwn = false }
                 size="sm"
                 variant="ghost"
                 className={cn(
-                    "h-8 w-8 p-0 rounded-full flex-shrink-0",
+                    "h-11 w-11 p-0 rounded-full flex-shrink-0",
                     isOwn ? "hover:bg-primary-foreground/20 text-primary-foreground" : "hover:bg-muted-foreground/20"
                 )}
                 onClick={togglePlay}

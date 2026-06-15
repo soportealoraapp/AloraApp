@@ -173,11 +173,20 @@ export function OnboardingWizard({ initialRef }: { initialRef?: string } = {}) {
                     isCompleted: true,
                 } as any);
                 
-                if (result.success) {
-                    await refreshProfile();
+                if (!result.success) {
+                    // Allow retry — unmark so user can try again
+                    hasCompletedRef.current = false;
+                    setSyncStatus('error');
+                    console.error("Failed to mark profile as completed:", result.error);
+                    return;
                 }
+                
+                await refreshProfile();
             } catch (err) {
+                hasCompletedRef.current = false;
+                setSyncStatus('error');
                 console.error("Failed to mark profile as completed", err);
+                return;
             }
         }
         trackEvent('onboarding_completed', { userId: effectiveUserId });
@@ -197,15 +206,16 @@ export function OnboardingWizard({ initialRef }: { initialRef?: string } = {}) {
             if (serialized !== lastSavedRef.current) {
                 lastSavedRef.current = serialized;
                 setSyncStatus('syncing');
-                updateUserProfile(effectiveUserId, {
-                    ...currentData,
-                    isCompleted: false,
-                } as any).then(() => {
+                try {
+                    await updateUserProfile(effectiveUserId, {
+                        ...currentData,
+                        isCompleted: false,
+                    } as any);
                     setSyncStatus('saved');
                     setTimeout(() => setSyncStatus('idle'), 2000);
-                }).catch(() => {
+                } catch {
                     setSyncStatus('error');
-                });
+                }
             }
         }
         setStep(prev => Math.min(prev + 1, totalSteps));

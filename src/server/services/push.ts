@@ -68,6 +68,23 @@ export async function sendPushToUser(userId: string, payload: PushPayload) {
             return { succeeded: 0, failed: 0, rateLimited: true };
         }
 
+        // Check if there's a block between the notification sender and recipient
+        // If payload.data contains a fromUserId, check for blocks
+        const fromUserId = payload.data?.fromUserId;
+        if (fromUserId) {
+            const blockExists = await prisma.block.findFirst({
+                where: {
+                    OR: [
+                        { blockerId: userId, blockedId: fromUserId },
+                        { blockerId: fromUserId, blockedId: userId },
+                    ]
+                }
+            });
+            if (blockExists) {
+                return { succeeded: 0, failed: 0, blocked: true };
+            }
+        }
+
         const prefs = await prisma.notificationPreference.findUnique({
             where: { userId }
         });

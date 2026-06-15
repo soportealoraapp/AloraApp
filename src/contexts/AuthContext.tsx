@@ -5,6 +5,7 @@ import { User } from '@supabase/supabase-js';
 import { createClient } from '@/lib/supabase/client';
 import { profileService } from '@/lib/supabase/services/profile';
 import { UserProfile } from '@/lib/domain/types';
+import { useWebPush } from '@/hooks/use-web-push';
 
 interface AuthContextType {
     user: User | null;
@@ -31,6 +32,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const [profileLoading, setProfileLoading] = useState(false);
     const supabase = createClient();
     const userRef = useRef<User | null>(null);
+
+    // Auto-register web push token when user is authenticated (PWA only)
+    useWebPush(user?.id ?? null);
 
     const refreshProfile = async () => {
         if (user) {
@@ -92,8 +96,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         // Auth state changes
         const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
             const currentUser = session?.user ?? null;
-            setUser(currentUser);
+            const previousUser = userRef.current;
             userRef.current = currentUser;
+            setUser(currentUser);
 
             if (event === 'SIGNED_OUT' || !currentUser) {
                 setProfile(null);
@@ -105,7 +110,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
             setAuthLoading(false);
 
-            if (currentUser && currentUser.id !== userRef.current?.id) {
+            // Fetch profile when user changes (new sign-in) or on INITIAL_SESSION if no profile loaded
+            const userChanged = !previousUser || currentUser.id !== previousUser.id;
+            if (userChanged) {
                 setProfileLoading(true);
                 try {
                     const userProfile = await profileService.getProfile(currentUser.id);

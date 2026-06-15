@@ -571,7 +571,7 @@ export default function ChatWindowPage() {
                                     } else {
                                         return (
                                             <div key={message.id} className="w-full flex justify-start items-start gap-2 mb-2">
-                                                <Link href={otherUserId ? `/profile/${otherUserId}` : '#'} className="h-8 w-8 rounded-full overflow-hidden shrink-0 relative mt-1 border border-muted hover:opacity-90 transition-opacity">
+                                                <Link href={otherUserId ? `/profile/${otherUserId}` : '#'} className="h-11 w-11 rounded-full overflow-hidden shrink-0 relative mt-1 border border-muted hover:opacity-90 transition-opacity">
                                                     <Image src={partnerPhoto} alt={partnerName} fill className="object-cover" loading="lazy" />
                                                 </Link>
                                                 <div className="flex-1 min-w-0 max-w-[85%]">
