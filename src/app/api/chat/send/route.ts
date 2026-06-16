@@ -23,7 +23,7 @@ export async function POST(request: NextRequest) {
     if (rateLimitResponse) return rateLimitResponse;
 
     try {
-        const { matchId, text, type } = await request.json();
+        const { matchId, text, type, clientMessageId } = await request.json();
 
         if (!matchId || !text) {
             return NextResponse.json({ error: 'Missing fields' }, { status: 400 });
@@ -42,8 +42,10 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ error: 'Message too long (max 1000 characters)' }, { status: 400 });
         }
 
-        // Idempotency: prevent duplicate messages on retry
-        const idempotencyKey = `${matchId}:${user.id}:${text.slice(0, 50)}:${Math.floor(Date.now() / 60000)}`;
+        // Idempotency: use client-provided stable key if available, otherwise fall back to time-based
+        const idempotencyKey = clientMessageId
+            ? `${matchId}:${user.id}:${clientMessageId}`
+            : `${matchId}:${user.id}:${text.slice(0, 50)}:${Math.floor(Date.now() / 60000)}`;
         const idempotencyResult = await checkIdempotency(idempotencyKey, user.id, 'chat_send');
         if (!idempotencyResult.ok) {
             return NextResponse.json(idempotencyResult.body, { status: idempotencyResult.status || 200 });

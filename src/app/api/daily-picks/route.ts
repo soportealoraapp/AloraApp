@@ -71,10 +71,17 @@ export async function GET(request: NextRequest) {
         }
 
         const blockedUsers = await prisma.block.findMany({
-            where: { blockerId: user.id },
-            select: { blockedId: true },
+            where: {
+                OR: [
+                    { blockerId: user.id },
+                    { blockedId: user.id },
+                ]
+            },
+            select: { blockerId: true, blockedId: true },
         });
-        const blockedIds = blockedUsers.map(b => b.blockedId);
+        const blockedIds = blockedUsers.map(b =>
+            b.blockerId === user.id ? b.blockedId : b.blockerId
+        );
 
         const interactions = await prisma.interaction.findMany({
             where: { fromUserId: user.id },

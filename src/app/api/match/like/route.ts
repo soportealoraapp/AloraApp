@@ -33,7 +33,7 @@ export async function POST(request: NextRequest) {
         const { toUserId, type, intent } = parsed.data;
         const interactionType = type || 'like';
 
-        // Daily likes limit for free users (atomic check-and-increment)
+        // Daily likes limit for free users (atomic check-and-increment to prevent race conditions)
         if (interactionType !== 'pass') {
             const profileBefore = await prisma.profile.findUnique({
                 where: { userId: user.id },
@@ -83,6 +83,29 @@ export async function POST(request: NextRequest) {
                         );
                     }
                 }
+
+                // Atomic increment to prevent race conditions between concurrent requests
+                const updated = await prisma.profile.updateMany({
+                    where: {
+                        userId: user.id,
+                        dailyLikesUsed: { lt: FREE_DAILY_LIKES_LIMIT }
+                    },
+                    data: {
+                        dailyLikesUsed: { increment: 1 },
+                        lastSwipeAt: new Date(),
+                    }
+                });
+
+                if (updated.count === 0) {
+                    // Race condition caught: another request consumed the last like
+                    return NextResponse.json(
+                        {
+                            error: 'Daily like limit reached',
+                            message: `Has alcanzado el limite de ${FREE_DAILY_LIKES_LIMIT} likes diarios.`
+                        },
+                        { status: 429 }
+                    );
+                }
             }
         }
 
@@ -127,13 +150,11 @@ export async function POST(request: NextRequest) {
             }
         });
 
-        // Track last swipe + atomic increment counters
+        // Track last swipe + decrement superlikes if applicable
         await prisma.profile.update({
             where: { userId: user.id },
             data: {
                 lastSwipeId: interaction.id,
-                lastSwipeAt: new Date(),
-                ...(interactionType !== 'pass' ? { dailyLikesUsed: { increment: 1 } } : {}),
                 ...(interactionType === 'superlike' ? { superlikesRemaining: { decrement: 1 } } : {}),
             }
         }).catch((err) => console.warn('[match/like] profile update failed:', err));
@@ -205,8 +226,8 @@ export async function POST(request: NextRequest) {
         ]).then(r => r.map(p => p.status === 'fulfilled' ? p.value : null));
 
         const settled = await Promise.allSettled([
-            notifyNewMatch(result.u1, partner2?.displayName || 'Alguien', result.matchId),
-            notifyNewMatch(result.u2, partner1?.displayName || 'Alguien', result.matchId),
+            notifyNewMatch(result.u1, partner2?.displayName || 'Alguien', result.matchId, intent),
+            notifyNewMatch(result.u2, partner1?.displayName || 'Alguien', result.matchId, intent),
             trackEvent(result.u1, AnalyticsEvents.FIRST_MATCH, { matchId: result.matchId, intent }),
             trackEvent(result.u2, AnalyticsEvents.FIRST_MATCH, { matchId: result.matchId, intent }),
         ]);

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { utapi } from '../../uploadthing/core';
 
 async function getUser() {
     const { createClient } = await import('@/lib/supabase/server');
@@ -134,6 +135,32 @@ export async function POST(request: NextRequest) {
                     ]
                 }
             });
+
+            // Clean up UploadThing files from chat messages (images and voice)
+            const mediaMessages = await prisma.message.findMany({
+                where: { matchId: matchBetween.id, type: { in: ['image', 'voice'] } },
+                select: { content: true, type: true },
+            });
+
+            const filesToDelete: string[] = [];
+            for (const msg of mediaMessages) {
+                try {
+                    if (msg.type === 'image' && msg.content?.startsWith('http')) {
+                        filesToDelete.push(msg.content);
+                    } else if (msg.type === 'voice') {
+                        const parsed = JSON.parse(msg.content);
+                        if (parsed.audioUrl) filesToDelete.push(parsed.audioUrl);
+                    }
+                } catch {
+                    // Skip malformed content
+                }
+            }
+
+            if (filesToDelete.length > 0) {
+                utapi.deleteFiles(filesToDelete).catch(err =>
+                    console.error('Failed to delete chat media from UploadThing:', err)
+                );
+            }
         }
 
         return NextResponse.json({ success: true });

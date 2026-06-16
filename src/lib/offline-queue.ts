@@ -11,6 +11,7 @@ interface QueueItem {
     payload: any;
     createdAt: string;
     retries: number;
+    status: 'pending' | 'failed';
 }
 
 const QUEUE_KEY = 'alora_offline_queue';
@@ -39,6 +40,7 @@ export function addToQueue(type: QueueItem['type'], payload: any) {
         payload,
         createdAt: new Date().toISOString(),
         retries: 0,
+        status: 'pending',
     });
     saveQueue(queue);
     return queue.length;
@@ -50,7 +52,21 @@ export function removeFromQueue(id: string) {
 }
 
 export function getPendingItems(): QueueItem[] {
-    return getQueue();
+    return getQueue().filter(item => item.status !== 'failed');
+}
+
+export function getFailedItems(): QueueItem[] {
+    return getQueue().filter(item => item.status === 'failed');
+}
+
+export function retryFailedItem(id: string): boolean {
+    const queue = getQueue();
+    const item = queue.find(i => i.id === id);
+    if (!item || item.status !== 'failed') return false;
+    item.status = 'pending';
+    item.retries = 0;
+    saveQueue(queue);
+    return true;
 }
 
 export function incrementRetry(id: string): boolean {
@@ -60,7 +76,8 @@ export function incrementRetry(id: string): boolean {
 
     item.retries++;
     if (item.retries >= MAX_RETRIES) {
-        removeFromQueue(id);
+        item.status = 'failed';
+        saveQueue(queue);
         return false;
     }
     saveQueue(queue);

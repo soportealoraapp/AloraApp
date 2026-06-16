@@ -252,7 +252,17 @@ export default function ChatWindowPage() {
     };
 
     const handleSendImage = async (imageUrl: string) => {
-        if (!otherUserId) return;
+        if (!otherUserId || !user) return;
+        const optimisticId = crypto.randomUUID();
+        const optimisticMsg: any = {
+            id: optimisticId,
+            matchId,
+            senderId: user.id,
+            text: imageUrl,
+            type: 'image',
+            createdAt: new Date().toISOString(),
+        };
+        setMessages(prev => [...prev, optimisticMsg]);
         try {
             const response = await fetch('/api/chat/send', {
                 method: 'POST',
@@ -262,10 +272,12 @@ export default function ChatWindowPage() {
                     receiverId: otherUserId,
                     text: imageUrl,
                     type: 'image',
+                    clientMessageId: optimisticId,
                 }),
             });
             if (!response.ok) throw new Error('Failed to send image');
         } catch (error) {
+            setMessages(prev => prev.filter(m => m.id !== optimisticId));
             toast({
                 title: "Error",
                 description: "No se pudo enviar la imagen.",
@@ -275,7 +287,17 @@ export default function ChatWindowPage() {
     };
 
     const handleSendVoice = async (audioUrl: string, duration: number) => {
-        if (!otherUserId) return;
+        if (!otherUserId || !user) return;
+        const optimisticId = crypto.randomUUID();
+        const optimisticMsg: any = {
+            id: optimisticId,
+            matchId,
+            senderId: user.id,
+            text: JSON.stringify({ audioUrl, duration }),
+            type: 'voice',
+            createdAt: new Date().toISOString(),
+        };
+        setMessages(prev => [...prev, optimisticMsg]);
         try {
             const response = await fetch('/api/chat/send', {
                 method: 'POST',
@@ -285,10 +307,12 @@ export default function ChatWindowPage() {
                     receiverId: otherUserId,
                     text: JSON.stringify({ audioUrl, duration }),
                     type: 'voice',
+                    clientMessageId: optimisticId,
                 }),
             });
             if (!response.ok) throw new Error('Failed to send voice message');
         } catch (error) {
+            setMessages(prev => prev.filter(m => m.id !== optimisticId));
             toast({
                 title: "Error",
                 description: "No se pudo enviar el mensaje de voz.",

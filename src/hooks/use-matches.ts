@@ -78,9 +78,10 @@ export function useMatches() {
             const result = await response.json();
 
             if (result.matched) {
+                const isFriendship = intent === 'friendship';
                 toast({
-                    title: '¡Nuevo match! 🎉',
-                    description: 'Ahora puedes chatear.',
+                    title: isFriendship ? '¡Nueva amistad! 🤝' : '¡Nuevo match! 🎉',
+                    description: isFriendship ? 'Ahora pueden conocerse como amigos.' : 'Ahora puedes chatear.',
                 });
                 // Refresh matches
                 await fetchMatches(intent);

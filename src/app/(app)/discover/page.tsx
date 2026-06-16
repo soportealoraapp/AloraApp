@@ -67,7 +67,7 @@ function countActiveFilters(f: Filters): number {
 }
 
 export default function DiscoverPage() {
-  const { profile: currentUserProfile } = useAuth();
+  const { user, profile: currentUserProfile } = useAuth();
   const searchParams = useSearchParams();
   const [filters, setFilters] = useState<Filters>(DEFAULT_FILTERS);
   const [filterOpen, setFilterOpen] = useState(false);
@@ -105,6 +105,19 @@ export default function DiscoverPage() {
   const [intent, setIntent] = useState<'dating' | 'friendship'>('dating');
   const [intentChanging, setIntentChanging] = useState(false);
   const [pendingGridAction, setPendingGridAction] = useState(false);
+
+  // Sync swipeCount with server's dailyLikesUsed on mount
+  useEffect(() => {
+    if (!user?.id) return;
+    fetch('/api/profile')
+      .then(r => r.json())
+      .then(data => {
+        if (typeof data.dailyLikesUsed === 'number') {
+          setSwipeCount(data.dailyLikesUsed);
+        }
+      })
+      .catch(() => {});
+  }, [user?.id]);
 
   // Initialize intent from user's connectionModes
   useEffect(() => {
@@ -351,6 +364,7 @@ export default function DiscoverPage() {
             setTimeout(() => setRewindedProfileId(null), 800);
           }
         }
+        setSwipeCount(prev => Math.max(0, prev - 1));
         toast({ title: "Deshecho", description: "Último swipe revertido." });
       } else {
         const data = await res.json();
@@ -497,7 +511,7 @@ export default function DiscoverPage() {
               <Sparkles className="h-3 w-3 text-primary" />
               Mostrando resultados filtrados por {filters.interests.length > 0 ? filters.interests[0] : filters.values.length > 0 ? filters.values[0] : filters.musicGenres && filters.musicGenres.length > 0 ? filters.musicGenres[0] : 'tus preferencias'}
               <button 
-                onClick={() => setFilters(DEFAULT_FILTERS)}
+                onClick={() => { setFilters(DEFAULT_FILTERS); setIntent('dating'); }}
                 className="ml-1 text-primary font-bold hover:underline"
               >
                 Limpiar
@@ -595,10 +609,15 @@ export default function DiscoverPage() {
                               <div className="flex gap-1 p-1.5">
                                 <Button size="sm" variant="ghost" className="flex-1 h-11" aria-label={`Descartar a ${p.displayName || ''}`} disabled={pendingGridAction} onClick={async () => {
                                   if (pendingGridAction) return;
+                                  if (swipeCount >= SWIPE_LIMIT) {
+                                    toast({ title: "¡Tómate un respiro!", description: "Has visto muchos perfiles. Vuelve en un momento.", variant: "default" });
+                                    return;
+                                  }
                                   setPendingGridAction(true);
                                   try {
                                     track(AnalyticsEvents.PASS_SENT, { targetUserId: p.id, intent });
                                     await sendLike(p.id, 'pass', intent);
+                                    setSwipeCount(prev => prev + 1);
                                     setProfiles(prev => prev.filter(item => item.profile.id !== p.id));
                                   } finally {
                                     setPendingGridAction(false);
@@ -608,10 +627,15 @@ export default function DiscoverPage() {
                                 </Button>
                                 <Button size="sm" variant="ghost" className="flex-1 h-11" aria-label={`Dar like a ${p.displayName || ''}`} disabled={pendingGridAction} onClick={async () => {
                                   if (pendingGridAction) return;
+                                  if (swipeCount >= SWIPE_LIMIT) {
+                                    toast({ title: "¡Tómate un respiro!", description: "Has visto muchos perfiles. Vuelve en un momento.", variant: "default" });
+                                    return;
+                                  }
                                   setPendingGridAction(true);
                                   try {
                                     track(AnalyticsEvents.LIKE_SENT, { targetUserId: p.id, intent });
                                     const result = await sendLike(p.id, 'like', intent);
+                                    setSwipeCount(prev => prev + 1);
                                     setProfiles(prev => prev.filter(item => item.profile.id !== p.id));
                                     if (result?.matched) {
                                       track(AnalyticsEvents.MATCH_CREATED, { partnerId: p.id, intent });
@@ -726,6 +750,8 @@ export default function DiscoverPage() {
         initialFilters={filters}
         browseMode={browseMode}
         onBrowseModeChange={setBrowseMode}
+        intent={intent}
+        onIntentChange={setIntent}
       />
 
       {showMatchScreen && matchedProfile && currentUserProfile && (

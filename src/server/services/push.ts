@@ -185,16 +185,31 @@ export async function sendPushToMultipleUsers(userIds: string[], payload: PushPa
     return results;
 }
 
-export async function notifyNewMatch(userId: string, partnerName: string, matchId: string) {
+export async function notifyNewMatch(userId: string, partnerName: string, matchId: string, intent?: string) {
+    const isFriendship = intent === 'friendship';
     return sendPushToUser(userId, {
-        title: '¡Tenés un match! 💖',
-        body: `Tú y ${partnerName} se gustaron mutuamente. ¡Ahora di hola!`,
+        title: isFriendship ? '¡Tenés una nueva amistad! 🤝' : '¡Tenés un match! 💖',
+        body: isFriendship
+            ? `Tú y ${partnerName} quieren conocerse como amigos. ¡Ahora di hola!`
+            : `Tú y ${partnerName} se gustaron mutuamente. ¡Ahora di hola!`,
         data: { type: 'match', matchId },
         channel: 'matches',
     });
 }
 
 export async function notifyNewMessage(userId: string, senderName: string, matchId: string, preview: string) {
+    // Check if the match is muted for this user
+    const match = await prisma.match.findFirst({
+        where: {
+            id: matchId,
+            OR: [{ user1Id: userId }, { user2Id: userId }],
+        },
+        select: { mutedUntil: true },
+    });
+    if (match?.mutedUntil && new Date(match.mutedUntil) > new Date()) {
+        return { succeeded: 0, failed: 0, muted: true };
+    }
+
     // Format preview smartly for non-text message types
     let formattedPreview = preview;
     if (preview.startsWith('{') || preview.startsWith('[')) {
@@ -269,11 +284,11 @@ export async function notifyBoostAvailable(userId: string) {
     });
 }
 
-export async function notifyProfileVisit(userId: string, visitorName: string) {
+export async function notifyProfileVisit(userId: string, visitorName: string, visitorId?: string) {
     return sendPushToUser(userId, {
         title: '👀 Alguien te visitó',
         body: `${visitorName} pasó por tu perfil. ¿Le das una vuelta al suyo?`,
-        data: { type: 'profile_visit' },
+        data: { type: 'profile_visit', ...(visitorId ? { visitorId } : {}) },
         channel: 'engagement',
     });
 }

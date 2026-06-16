@@ -34,8 +34,8 @@ function NotificationItem({ notification, onRead, onDelete }: { notification: an
       if (userId) router.push(`/profile/${userId}`);
     } else if (type === 'quiz' || type === 'compatibility') {
       router.push('/compatibility');
-    } else if (type === 'profile_view') {
-      const userId = data.viewerId || data.userId || data.id;
+    } else if (type === 'profile_visit') {
+      const userId = data.visitorId || data.fromUserId || data.userId || data.id;
       if (userId) router.push(`/profile/${userId}`);
     } else if (type === 'daily_question') {
       router.push('/compatibility');
@@ -47,6 +47,14 @@ function NotificationItem({ notification, onRead, onDelete }: { notification: an
       router.push('/settings/verification');
     } else if (type === 'safety') {
       router.push('/settings/safety');
+    } else if (type === 'system') {
+      // Admin notifications: use screen from data if available
+      if (data.screen) {
+        router.push(data.screen);
+      } else {
+        const fallbackId = data.userId || data.fromUserId || data.id;
+        if (fallbackId) router.push(`/profile/${fallbackId}`);
+      }
     } else if (type === 'reminder') {
       router.push('/discover');
     } else {

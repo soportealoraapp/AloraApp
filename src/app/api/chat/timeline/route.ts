@@ -35,6 +35,7 @@ export async function GET(request: NextRequest) {
                 id: true,
                 user1Id: true,
                 user2Id: true,
+                intent: true,
                 createdAt: true,
                 healthUpdatedAt: true,
             }
@@ -46,12 +47,13 @@ export async function GET(request: NextRequest) {
 
         const events: TimelineEvent[] = [];
 
+        const isFriendship = match.intent === 'friendship';
         events.push({
             id: `match-${match.id}`,
             type: 'match_created',
-            icon: '💚',
-            title: 'Match creado',
-            description: 'Se hizo la conexión',
+            icon: isFriendship ? '🤝' : '💚',
+            title: isFriendship ? 'Amistad creada' : 'Match creado',
+            description: isFriendship ? 'Se hizo la conexión de amistad' : 'Se hizo la conexión',
             createdAt: match.createdAt.toISOString(),
         });
 

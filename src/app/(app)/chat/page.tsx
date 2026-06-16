@@ -82,10 +82,13 @@ export default function ChatPage() {
     const handleAcceptMatch = async (like: any) => {
         setProcessingMatch(like.fromUserId);
         try {
-            await sendLike(like.fromUserId, 'like');
+            await sendLike(like.fromUserId, 'like', like.intent || 'dating');
+            const isFriendship = like.intent === 'friendship';
             toast({
-                title: "¡Es un Match! 💖",
-                description: `¡Genial! Tú y ${like.fromUser?.displayName || 'esta persona'} quieren conocerse.`,
+                title: isFriendship ? "¡Nueva amistad! 🤝" : "¡Es un Match! 💖",
+                description: isFriendship
+                    ? `¡Genial! Tú y ${like.fromUser?.displayName || 'esta persona'} quieren conocerse como amigos.`
+                    : `¡Genial! Tú y ${like.fromUser?.displayName || 'esta persona'} quieren conocerse.`,
             });
             refresh();
         } catch (error) {
@@ -379,7 +382,7 @@ export default function ChatPage() {
                                                                         })()}
                                                                     </div>
                                                                     <p className="text-xs text-muted-foreground truncate italic">
-                                                                        {match.lastMessage?.content || `¡Es un match! ${BRAND_VOICE.nudges.newMatch}`}
+                                                                        {match.lastMessage?.content || (match.intent === 'friendship' ? '¡Nueva amistad!' : `¡Es un match! ${BRAND_VOICE.nudges.newMatch}`)}
                                                                     </p>
                                                                     {match.lastMessage?.createdAt && (() => {
                                                                         const hours = (Date.now() - new Date(match.lastMessage.createdAt).getTime()) / (1000 * 60 * 60);
@@ -438,7 +441,7 @@ export default function ChatPage() {
                                                               )}
                                                         </div>
                                                         <p className="text-sm text-muted-foreground">
-                                                            Match mutuo • Chatea ahora
+                                                            {like.intent === 'friendship' ? 'Amistad mutua' : 'Match mutuo'} • Chatea ahora
                                                         </p>
                                                     </div>
                                                 </Link>

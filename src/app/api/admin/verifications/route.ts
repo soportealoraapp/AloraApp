@@ -67,28 +67,24 @@ export async function POST(request: NextRequest) {
                 where: { userId: submission.userId },
                 data: { isVerified: true, trustStatus: 'trusted' },
             });
-            await prisma.notification.create({
-                data: {
-                    userId: submission.userId,
-                    type: 'system',
-                    title: '¡Identidad verificada!',
-                    body: 'Tu verificación ha sido aprobada. Ahora tienes el badge azul en tu perfil.',
-                    data: { screen: '/settings/verification' },
-                }
+            const { sendPushToUser } = await import('@/server/services/push');
+            await sendPushToUser(submission.userId, {
+                title: '¡Identidad verificada!',
+                body: 'Tu verificación ha sido aprobada. Ahora tienes el badge azul en tu perfil.',
+                data: { type: 'verification', screen: '/settings/verification' },
+                channel: 'safety',
             });
         } else if (action === 'reject') {
             await prisma.verificationSubmission.update({
                 where: { id: submissionId },
                 data: { status: 'rejected', reason: reason || 'Selfie no clara', reviewedBy: adminUser.id, reviewedAt: new Date() },
             });
-            await prisma.notification.create({
-                data: {
-                    userId: submission.userId,
-                    type: 'system',
-                    title: 'Verificación rechazada',
-                    body: reason || 'No pudimos verificar tu identidad. Intenta de nuevo con una selfie más clara.',
-                    data: { screen: '/settings/verification' },
-                }
+            const { sendPushToUser } = await import('@/server/services/push');
+            await sendPushToUser(submission.userId, {
+                title: 'Verificación rechazada',
+                body: reason || 'No pudimos verificar tu identidad. Intenta de nuevo con una selfie más clara.',
+                data: { type: 'verification', screen: '/settings/verification' },
+                channel: 'safety',
             });
             // Delete the rejected selfie from UploadThing
             try {

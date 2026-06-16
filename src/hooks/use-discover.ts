@@ -18,10 +18,25 @@ export function useDiscover(searchTerm: string = '', filters?: FeedFilters, limi
     const [loadingMore, setLoadingMore] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [retryCount, setRetryCount] = useState(0);
+    const [filterVersion, setFilterVersion] = useState(0);
+    const [hasMore, setHasMore] = useState(true);
     const cursorRef = useRef<string | null>(null);
-    const hasMoreRef = useRef(true);
     const filtersRef = useRef(filters);
+    const prevFiltersRef = useRef(filters);
     filtersRef.current = filters;
+
+    // Detect filter changes and trigger refresh
+    useEffect(() => {
+        const prev = prevFiltersRef.current;
+        const curr = filters;
+        if (prev !== curr) {
+            prevFiltersRef.current = curr;
+            // Only trigger refresh if this is not the initial render
+            if (prev !== undefined) {
+                setFilterVersion(v => v + 1);
+            }
+        }
+    }, [filters]);
 
     const fetchProfiles = useCallback(async (isRefresh = false) => {
         if (!user?.id) {
@@ -33,7 +48,7 @@ export function useDiscover(searchTerm: string = '', filters?: FeedFilters, limi
             if (isRefresh) {
                 setLoading(true);
                 cursorRef.current = null;
-                hasMoreRef.current = true;
+                setHasMore(true);
             }
 
             const result = await getDynamicFeed(
@@ -45,7 +60,7 @@ export function useDiscover(searchTerm: string = '', filters?: FeedFilters, limi
             );
 
             cursorRef.current = result.nextCursor;
-            hasMoreRef.current = result.hasMore;
+            setHasMore(result.hasMore);
 
             const mapped: DiscoverProfile[] = result.items.map(item => {
                 const realCompatibility = item.score?.details?.quizzes;
@@ -88,13 +103,13 @@ export function useDiscover(searchTerm: string = '', filters?: FeedFilters, limi
 
     useEffect(() => {
         fetchProfiles(true);
-    }, [fetchProfiles, retryCount]);
+    }, [fetchProfiles, retryCount, filterVersion]);
 
     const loadMore = useCallback(() => {
-        if (loadingMore || !hasMoreRef.current) return;
+        if (loadingMore || !hasMore) return;
         setLoadingMore(true);
         fetchProfiles(false);
-    }, [loadingMore, fetchProfiles]);
+    }, [loadingMore, hasMore, fetchProfiles]);
 
     const refresh = useCallback(() => {
         setRetryCount(prev => prev + 1);
@@ -108,6 +123,6 @@ export function useDiscover(searchTerm: string = '', filters?: FeedFilters, limi
         error,
         refresh,
         loadMore,
-        hasMore: hasMoreRef.current,
+        hasMore,
     };
 }

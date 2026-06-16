@@ -53,11 +53,13 @@ interface DiscoverFiltersProps {
   onOpenChange: (open: boolean) => void;
   onApplyFilters: (filters: Filters) => void;
   initialFilters: Filters;
-  browseMode?: 'swipe' | 'grid';
-  onBrowseModeChange?: (mode: 'swipe' | 'grid') => void;
+  browseMode: 'swipe' | 'grid';
+  onBrowseModeChange: (mode: 'swipe' | 'grid') => void;
+  intent?: 'dating' | 'friendship';
+  onIntentChange?: (intent: 'dating' | 'friendship') => void;
 }
 
-export function DiscoverFilters({ open, onOpenChange, onApplyFilters, initialFilters, browseMode, onBrowseModeChange }: DiscoverFiltersProps) {
+export function DiscoverFilters({ open, onOpenChange, onApplyFilters, initialFilters, browseMode, onBrowseModeChange, intent, onIntentChange }: DiscoverFiltersProps) {
   const [ageRange, setAgeRange] = useState<[number, number]>(initialFilters.ageRange);
   const [distance, setDistance] = useState([initialFilters.distance]);
   const [seeking, setSeeking] = useState(initialFilters.seeking);
@@ -138,6 +140,7 @@ export function DiscoverFilters({ open, onOpenChange, onApplyFilters, initialFil
       featuredOnly: false,
       highCompatibility: false,
       activeToday: false,
+      intent: intent || 'dating',
       userLat: initialFilters.userLat,
       userLng: initialFilters.userLng,
       countryCode: initialFilters.countryCode,
@@ -161,6 +164,7 @@ export function DiscoverFilters({ open, onOpenChange, onApplyFilters, initialFil
     setFeaturedOnly(false);
     setHighCompatibility(false);
     setActiveToday(false);
+    onIntentChange?.('dating');
     onApplyFilters(defaultFilters);
   }
 

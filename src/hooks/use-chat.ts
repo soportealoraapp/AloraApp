@@ -166,6 +166,7 @@ export function useChat(matchId: string) {
                     receiverId,
                     text: text.trim(),
                     type: 'text',
+                    clientMessageId: optimisticId,
                 }),
             });
 

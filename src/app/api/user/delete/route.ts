@@ -16,8 +16,8 @@ export async function POST(request: NextRequest) {
     }
 
     try {
-        // Get all user's files (photos, verification selfie, voice intro, chat images)
-        const [profile, verificationSubmission] = await Promise.all([
+        // Get all user's files (photos, verification selfie, voice intro, chat images/voices)
+        const [profile, verificationSubmission, userMessages] = await Promise.all([
             prisma.profile.findUnique({
                 where: { userId: user.id },
                 select: { photos: true, voiceIntro: true }
@@ -25,6 +25,10 @@ export async function POST(request: NextRequest) {
             prisma.verificationSubmission.findFirst({
                 where: { userId: user.id },
                 select: { selfieUrl: true }
+            }),
+            prisma.message.findMany({
+                where: { senderId: user.id, type: { in: ['image', 'voice'] } },
+                select: { content: true, type: true },
             })
         ]);
 
@@ -43,6 +47,26 @@ export async function POST(request: NextRequest) {
         // Add voice intro
         if (profile?.voiceIntro) {
             filesToDelete.push(profile.voiceIntro);
+        }
+
+        // Add chat image and voice message files
+        for (const msg of userMessages) {
+            try {
+                if (msg.type === 'image') {
+                    // Image messages store the URL directly as content
+                    if (msg.content && msg.content.startsWith('http')) {
+                        filesToDelete.push(msg.content);
+                    }
+                } else if (msg.type === 'voice') {
+                    // Voice messages store JSON: {"audioUrl":"...","duration":N}
+                    const parsed = JSON.parse(msg.content);
+                    if (parsed.audioUrl) {
+                        filesToDelete.push(parsed.audioUrl);
+                    }
+                }
+            } catch {
+                // Skip malformed content
+            }
         }
 
         // Delete all from UploadThing

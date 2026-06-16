@@ -193,13 +193,17 @@ export default function UserProfilePage() {
         try {
             const result = await sendLike(id as string, "like", intent);
 
-            toast({
-                title: "¡Segunda oportunidad!",
-                description: `Has hecho match con ${profile.displayName}`,
-            });
-
             if (result.matchId) {
+                toast({
+                    title: "¡Segunda oportunidad!",
+                    description: `¡Hiciste match con ${profile.displayName}!`,
+                });
                 router.push(`/chat/${result.matchId}`);
+            } else {
+                toast({
+                    title: "¡Like enviado!",
+                    description: `Le diste una segunda oportunidad a ${profile.displayName}.`,
+                });
             }
         } catch (error) {
             console.error("Error giving second chance:", error);

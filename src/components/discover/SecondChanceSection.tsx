@@ -45,7 +45,7 @@ export function SecondChanceSection() {
 
   const handleLike = async (profileId: string) => {
     try {
-      await sendLike(profileId, 'like');
+      await sendLike(profileId, 'like', 'dating');
       toast({ title: '¡Like enviado!' });
       setPassedProfiles(prev => prev.filter(p => p.id !== profileId));
     } catch {

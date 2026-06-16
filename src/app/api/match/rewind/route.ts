@@ -38,7 +38,7 @@ export async function POST() {
         // Check if rewinds need to be reset (new day)
         const now = new Date();
         const lastReset = profile.rewindsResetAt;
-        const isNewDay = now.toDateString() !== lastReset.toDateString();
+        const isNewDay = !lastReset || now.toDateString() !== lastReset.toDateString();
 
         if (isNewDay) {
             await prisma.profile.update({
@@ -99,6 +99,7 @@ export async function POST() {
             where: {
                 user1Id: u1,
                 user2Id: u2,
+                intent: interaction.intent,
                 isActive: true
             }
         });
@@ -121,16 +122,27 @@ export async function POST() {
             });
         }
 
-        // Update profile: increment rewinds, decrement daily likes, clear last swipe
-        await prisma.profile.update({
-            where: { userId: user.id },
-            data: {
-                rewindsUsed: { increment: 1 },
-                dailyLikesUsed: { decrement: 1 },
-                lastSwipeId: null,
-                lastSwipeAt: null,
-            }
-        });
+        // Update profile: increment rewinds, decrement daily likes (safe floor at 0), clear last swipe
+        if (profile.dailyLikesUsed > 0) {
+            await prisma.profile.update({
+                where: { userId: user.id },
+                data: {
+                    rewindsUsed: { increment: 1 },
+                    dailyLikesUsed: { decrement: 1 },
+                    lastSwipeId: null,
+                    lastSwipeAt: null,
+                }
+            });
+        } else {
+            await prisma.profile.update({
+                where: { userId: user.id },
+                data: {
+                    rewindsUsed: { increment: 1 },
+                    lastSwipeId: null,
+                    lastSwipeAt: null,
+                }
+            });
+        }
 
         // Track analytics
         await prisma.analyticsEvent.create({

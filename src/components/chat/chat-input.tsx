@@ -35,6 +35,7 @@ export function ChatInput({ onSend, onSendImage, onSendVoice, onTyping, disabled
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const recordingTimerRef = useRef<NodeJS.Timeout | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
+  const cancelledRecordingRef = useRef(false);
 
   const { startUpload } = useUploadThing("chatImageUploader", {
     onClientUploadComplete: async (res: any) => {
@@ -99,6 +100,12 @@ export function ChatInput({ onSend, onSendImage, onSendVoice, onTyping, disabled
       };
 
       mediaRecorder.onstop = () => {
+        // Don't set state if recording was cancelled
+        if (cancelledRecordingRef.current) {
+          cancelledRecordingRef.current = false;
+          stream.getTracks().forEach(track => track.stop());
+          return;
+        }
         const type = MediaRecorder.isTypeSupported(mimeType) ? mimeType : 'audio/webm';
         const blob = new Blob(audioChunksRef.current, { type });
         setRecordedBlob(blob);
@@ -155,6 +162,7 @@ export function ChatInput({ onSend, onSendImage, onSendVoice, onTyping, disabled
 
   const cancelRecording = () => {
     if (mediaRecorderRef.current && isRecording) {
+      cancelledRecordingRef.current = true;
       mediaRecorderRef.current.stop();
       setIsRecording(false);
       setRecordedBlob(null);

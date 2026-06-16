@@ -5,6 +5,9 @@ import { Button } from '@/components/ui/button';
 import { Play, Pause } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
+// Singleton: track the currently playing audio so only one voice plays at a time
+let currentlyPlayingAudio: HTMLAudioElement | null = null;
+
 interface VoiceMessageProps {
     audioUrl: string;
     duration?: number;
@@ -41,9 +44,22 @@ export function VoiceMessage({ audioUrl, duration: propDuration, isOwn = false }
         audio.addEventListener('ended', () => {
             setIsPlaying(false);
             setCurrentTime(0);
+            if (currentlyPlayingAudio === audio) {
+                currentlyPlayingAudio = null;
+            }
+        });
+
+        audio.addEventListener('error', () => {
+            setIsPlaying(false);
+            if (currentlyPlayingAudio === audio) {
+                currentlyPlayingAudio = null;
+            }
         });
 
         return () => {
+            if (currentlyPlayingAudio === audio) {
+                currentlyPlayingAudio = null;
+            }
             audio.pause();
             audio.src = '';
         };
@@ -56,9 +72,17 @@ export function VoiceMessage({ audioUrl, duration: propDuration, isOwn = false }
         if (isPlaying) {
             audio.pause();
             setIsPlaying(false);
+            if (currentlyPlayingAudio === audio) {
+                currentlyPlayingAudio = null;
+            }
         } else {
+            // Stop any other playing audio first
+            if (currentlyPlayingAudio && currentlyPlayingAudio !== audio) {
+                currentlyPlayingAudio.pause();
+            }
             audio.play();
             setIsPlaying(true);
+            currentlyPlayingAudio = audio;
         }
     };
 

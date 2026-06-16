@@ -106,7 +106,9 @@ export function DailyQuestionCard() {
     const fetchQuestion = async () => {
         try {
             setFetchError(false);
-            const res = await fetch('/api/daily-question');
+            const res = await fetch('/api/daily-question', {
+                headers: { 'x-timezone': Intl.DateTimeFormat().resolvedOptions().timeZone },
+            });
             if (!res.ok) throw new Error('Failed to fetch');
             const result = await res.json();
             setData(result);

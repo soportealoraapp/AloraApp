@@ -57,7 +57,8 @@ export function VoiceRecorder({ onStop, onCancel }: { onStop: (blob: Blob, durat
             const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
             streamRef.current = stream;
             const mimeType = getAudioMimeType();
-            mediaRecorder.current = new MediaRecorder(stream, { mimeType });
+            const options = MediaRecorder.isTypeSupported(mimeType) ? { mimeType } : {};
+            mediaRecorder.current = new MediaRecorder(stream, options);
             chunks.current = [];
 
             mediaRecorder.current.ondataavailable = (e) => chunks.current.push(e.data);

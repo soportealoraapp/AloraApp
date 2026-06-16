@@ -64,7 +64,9 @@ export function VoiceIntro({ audioUrl, duration, onSave, onDelete, isOwn = true 
     const handleSave = async () => {
         if (!previewBlob) return;
         setUploading(true);
-        const file = new File([previewBlob], `voice-intro-${Date.now()}.webm`, { type: 'audio/webm' });
+        const mimeType = previewBlob.type || 'audio/webm';
+        const ext = mimeType === 'audio/mp4' ? 'm4a' : 'webm';
+        const file = new File([previewBlob], `voice-intro-${Date.now()}.${ext}`, { type: mimeType });
         await startUpload([file]);
     };
 

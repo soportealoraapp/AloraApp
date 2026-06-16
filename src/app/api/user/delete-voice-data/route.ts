@@ -3,9 +3,18 @@ import { prisma } from '@/lib/prisma';
 
 export async function POST(req: NextRequest) {
     try {
+        const { createClient } = await import('@/lib/supabase/server');
+        const supabase = await createClient();
+        const { data: { user } } = await supabase.auth.getUser();
+
+        if (!user) {
+            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+        }
+
+        // Only allow users to delete their own voice data
         const { userId } = await req.json();
-        if (!userId) {
-            return NextResponse.json({ error: 'userId required' }, { status: 400 });
+        if (!userId || userId !== user.id) {
+            return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
         }
 
         await prisma.profile.update({

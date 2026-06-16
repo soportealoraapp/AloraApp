@@ -24,19 +24,17 @@ export async function GET(
         const { searchParams } = new URL(request.url);
         const isPreview = searchParams.get('preview') === '1';
 
-        // Block check: prevent blocked users from viewing profiles
-        if (!isPreview) {
-            const blockExists = await prisma.block.findFirst({
-                where: {
-                    OR: [
-                        { blockerId: user.id, blockedId: targetUserId },
-                        { blockerId: targetUserId, blockedId: user.id }
-                    ]
-                }
-            });
-            if (blockExists) {
-                return NextResponse.json({ error: 'Profile not available' }, { status: 404 });
+        // Block check: ALWAYS enforce, even in preview mode
+        const blockExists = await prisma.block.findFirst({
+            where: {
+                OR: [
+                    { blockerId: user.id, blockedId: targetUserId },
+                    { blockerId: targetUserId, blockedId: user.id }
+                ]
             }
+        });
+        if (blockExists) {
+            return NextResponse.json({ error: 'Profile not available' }, { status: 404 });
         }
 
         const profile = await prisma.profile.findUnique({
@@ -72,7 +70,7 @@ export async function GET(
             });
 
             if (!recentVisit || recentVisit.createdAt < new Date(Date.now() - 4 * 60 * 60 * 1000)) {
-                notifyProfileVisit(targetUserId, visitorProfile?.displayName || 'Alguien').catch(() => logger.warn('Failed to notify profile visit'));
+                notifyProfileVisit(targetUserId, visitorProfile?.displayName || 'Alguien', user.id).catch(() => logger.warn('Failed to notify profile visit'));
             }
         }
 

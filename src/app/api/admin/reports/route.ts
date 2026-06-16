@@ -86,13 +86,12 @@ export async function PATCH(request: NextRequest) {
                 break;
             case 'warn':
                 updates.status = 'resolved';
-                await prisma.notification.create({
-                    data: {
-                        userId: report.reportedId,
-                        type: 'system',
-                        title: 'Aviso de moderación',
-                        body: reason || 'Has recibido un aviso por comportamiento inapropiado.',
-                    }
+                const { sendPushToUser: sendPushWarn } = await import('@/server/services/push');
+                await sendPushWarn(report.reportedId, {
+                    title: 'Aviso de moderación',
+                    body: reason || 'Has recibido un aviso por comportamiento inapropiado.',
+                    data: { type: 'safety' },
+                    channel: 'safety',
                 });
                 break;
             case 'shadowban':

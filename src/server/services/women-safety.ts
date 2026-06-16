@@ -5,6 +5,8 @@ export interface SafetyStatus {
     verificationStatus: string;
     blockedCount: number;
     reportsMade: number;
+    blockedUsers: Array<{ id: string; displayName: string; photos: string[] }>;
+    reports: Array<{ id: string; reason: string; status: string; createdAt: string }>;
     privacySettings: {
         incognito: boolean;
         showMeInDiscover: boolean;
@@ -17,7 +19,7 @@ export interface SafetyStatus {
  * Get comprehensive safety status for a user.
  */
 export async function getSafetyStatus(userId: string): Promise<SafetyStatus> {
-    const [profile, blockedCount, reportsMade, verificationSub] = await Promise.all([
+    const [profile, blockedCount, reportsMade, verificationSub, blockedProfiles, reportsList] = await Promise.all([
         prisma.profile.findUnique({
             where: { userId },
             select: {
@@ -32,7 +34,29 @@ export async function getSafetyStatus(userId: string): Promise<SafetyStatus> {
             orderBy: { createdAt: 'desc' },
             select: { status: true }
         }),
+        prisma.block.findMany({
+            where: { blockerId: userId },
+            include: { blocked: { select: { id: true, profile: { select: { displayName: true, photos: true } } } } },
+            orderBy: { createdAt: 'desc' },
+        }),
+        prisma.report.findMany({
+            where: { reporterId: userId },
+            orderBy: { createdAt: 'desc' },
+        }),
     ]);
+
+    const blockedUsers = blockedProfiles.map(b => ({
+        id: b.blocked.id,
+        displayName: b.blocked.profile?.displayName || '',
+        photos: b.blocked.profile?.photos || [],
+    }));
+
+    const reports = reportsList.map(r => ({
+        id: r.id,
+        reason: r.reason,
+        status: r.status,
+        createdAt: r.createdAt.toISOString(),
+    }));
 
     const recommendations: string[] = [];
 
@@ -64,6 +88,8 @@ export async function getSafetyStatus(userId: string): Promise<SafetyStatus> {
         verificationStatus: profile?.isVerified ? 'Verificado' : verificationSub?.status || 'Sin verificar',
         blockedCount,
         reportsMade,
+        blockedUsers,
+        reports,
         privacySettings: {
             incognito: profile?.incognitoMode || false,
             showMeInDiscover: profile?.showMeInDiscover ?? true,

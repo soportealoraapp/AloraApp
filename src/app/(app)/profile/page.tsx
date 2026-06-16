@@ -51,7 +51,9 @@ export default function ProfilePage() {
 
   useEffect(() => {
     if (!user?.id) return;
-    fetch('/api/daily-question')
+    fetch('/api/daily-question', {
+        headers: { 'x-timezone': Intl.DateTimeFormat().resolvedOptions().timeZone },
+    })
       .then(r => r.json())
       .then(data => {
         if (data.answered && data.userAnswer) {
