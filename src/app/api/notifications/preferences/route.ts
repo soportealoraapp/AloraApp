@@ -43,7 +43,7 @@ export async function PUT(request: NextRequest) {
     try {
         const body = await request.json();
 
-        const allowedFields = ['matches', 'messages', 'profileViews', 'promotions', 'dailyQuestion', 'streakReminder'];
+        const allowedFields = ['matches', 'messages', 'profileViews', 'promotions', 'dailyQuestion', 'streakReminder', 'readReceipts', 'notifications'];
         const updateData: Record<string, boolean> = {};
 
         for (const field of allowedFields) {

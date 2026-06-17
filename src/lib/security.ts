@@ -48,7 +48,7 @@ export function getCSP(): string {
         `img-src 'self' blob: data: https://*.uploadthing.com https://utfs.io https://*.supabase.co https://lh3.googleusercontent.com https://placehold.co https://picsum.photos https://i.scdn.co`,
         `font-src 'self' data: https://fonts.gstatic.com`,
         `connect-src 'self' https://*.supabase.co wss://*.supabase.co https://*.uploadthing.com https://uploadthing.com https://utfs.io https://securetoken.googleapis.com https://api.spotify.com`,
-        `media-src 'self' blob:`,
+        `media-src 'self' blob: https://utfs.io https://*.utfs.io`,
         `frame-src https://open.spotify.com`,
         `object-src 'none'`,
         `base-uri 'self'`,
