@@ -87,6 +87,20 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ favorited: true, message: 'Already favorited' });
         }
 
+        // Limit favorites for free users
+        const { ensureSubscriptionState } = await import('@/lib/subscription-helper');
+        await ensureSubscriptionState(user.id);
+        const profile = await prisma.profile.findUnique({
+            where: { userId: user.id },
+            select: { subscriptionStatus: true },
+        });
+        if (profile?.subscriptionStatus === 'free') {
+            const count = await prisma.favorite.count({ where: { userId: user.id } });
+            if (count >= 20) {
+                return NextResponse.json({ error: 'Límite de favoritos alcanzado', message: 'Los usuarios free pueden guardar hasta 20 favoritos. Actualiza a Plus para guardar ilimitados.' }, { status: 429 });
+            }
+        }
+
         await prisma.favorite.create({
             data: {
                 userId: user.id,

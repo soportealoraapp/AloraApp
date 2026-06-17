@@ -37,7 +37,7 @@ export function BlockDialog({ isOpen, onClose, blockedId, onSuccess }: BlockDial
 
             toast({
                 title: "Usuario bloqueado",
-                description: "Ya no podréis contactar ni veros en Alora.",
+                description: "Ya no podrán contactar ni verse en Alora.",
             });
             onClose();
             if (onSuccess) onSuccess();
@@ -64,8 +64,8 @@ export function BlockDialog({ isOpen, onClose, blockedId, onSuccess }: BlockDial
                         Esta acción es irreversible y definitiva. Al bloquear:
                         <ul className="list-disc list-inside mt-2 space-y-1">
                             <li>El match se deshará inmediatamente.</li>
-                            <li>Ya no podréis ver vuestros perfiles.</li>
-                            <li>No podréis enviaros mensajes.</li>
+                            <li>Ya no podrán ver sus perfiles.</li>
+                            <li>No podrán enviarse mensajes.</li>
                         </ul>
                     </DialogDescription>
                 </DialogHeader>

@@ -602,7 +602,7 @@ export default function DiscoverPage() {
                                   <div className="text-white text-xs font-bold leading-tight">{p.displayName}, {p.age}</div>
                                   {p.city && <div className="text-white/70 text-xs">{p.city}</div>}
                                   {p.sharedInterests !== undefined && p.sharedInterests > 0 && (
-                                    <div className="text-primary-foreground/80 text-[10px] mt-0.5 bg-primary/20 backdrop-blur-sm rounded-full px-2 py-0.5 inline-block">{p.sharedInterests} intereses común</div>
+                                     <div className="text-primary-foreground/80 text-[10px] mt-0.5 bg-primary/20 backdrop-blur-sm rounded-full px-2 py-0.5 inline-block">{p.sharedInterests} intereses en común</div>
                                   )}
                                 </div>
                               </div>

@@ -43,7 +43,7 @@ export const BRAND_VOICE = {
     },
 
     safety: {
-        blockConfirm: 'Has bloqueado a este usuario. No volveréis a veros en Alora.',
+        blockConfirm: 'Has bloqueado a este usuario. No volverán a verse en Alora.',
         reportThankYou: 'Gracias por ayudarnos a mantener Alora segura. Revisaremos tu reporte en 24-48 horas.',
         reportAnonymous: 'Tu reporte es completamente anónimo.',
         verificationPending: 'Tu verificación está en revisión. Te notificaremos cuando esté lista.',

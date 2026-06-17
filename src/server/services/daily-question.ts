@@ -1,21 +1,21 @@
 import { prisma } from '@/lib/prisma';
 
 const QUESTIONS = [
-    { question: "Que significa una relacion sana para ti?", category: "values" },
-    { question: "Cual es tu mayor meta este ano?", category: "goals" },
-    { question: "Que valor nunca negociarias?", category: "values" },
-    { question: "Como prefieres resolver un conflicto?", category: "communication" },
-    { question: "Que te hace sentir mas conectado/a con alguien?", category: "connection" },
-    { question: "Cual es tu forma favorita de pasar un domingo?", category: "lifestyle" },
-    { question: "Que aprendiste de tu ultima relacion?", category: "growth" },
-    { question: "Que buscas en una primera cita?", category: "dating" },
-    { question: "Que opinas sobre la vulnerabilidad en una relacion?", category: "values" },
-    { question: "Cual es tu lenguaje del amor principal?", category: "connection" },
-    { question: "Que buscas en tu proxima relacion?", category: "goals" },
-    { question: "Como te describes en tres palabras?", category: "personality" },
-    { question: "Que actividad te gustaria compartir con tu pareja?", category: "lifestyle" },
-    { question: "Que es lo mas importante que buscas en una pareja?", category: "values" },
-    { question: "Como te gustaria que sea tu vida en 5 anos?", category: "goals" },
+    { question: "¿Qué significa una relación sana para ti?", category: "values" },
+    { question: "¿Cuál es tu mayor meta este año?", category: "goals" },
+    { question: "¿Qué valor nunca negociarías?", category: "values" },
+    { question: "¿Cómo prefieres resolver un conflicto?", category: "communication" },
+    { question: "¿Qué te hace sentir más conectado/a con alguien?", category: "connection" },
+    { question: "¿Cuál es tu forma favorita de pasar un domingo?", category: "lifestyle" },
+    { question: "¿Qué aprendiste de tu última relación?", category: "growth" },
+    { question: "¿Qué buscas en una primera cita?", category: "dating" },
+    { question: "¿Qué opinas sobre la vulnerabilidad en una relación?", category: "values" },
+    { question: "¿Cuál es tu lenguaje del amor principal?", category: "connection" },
+    { question: "¿Qué buscas en tu próxima relación?", category: "goals" },
+    { question: "¿Cómo te describes en tres palabras?", category: "personality" },
+    { question: "¿Qué actividad te gustaría compartir con tu pareja?", category: "lifestyle" },
+    { question: "¿Qué es lo más importante que buscas en una pareja?", category: "values" },
+    { question: "¿Cómo te gustaría que sea tu vida en 5 años?", category: "goals" },
 ];
 
 export async function getTodayQuestion(timezone?: string) {

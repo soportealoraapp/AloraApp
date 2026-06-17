@@ -170,7 +170,7 @@ export default function UserProfilePage() {
 
             toast({
                 title: `¡Nuevo match con ${profile.displayName}! 🎉`,
-                description: "Ahora podéis chatear",
+                    description: "Ahora pueden chatear",
             });
 
             if (result.matchId) {

@@ -64,14 +64,14 @@ export async function POST(request: NextRequest) {
                         {
                             error: 'Daily like limit reached',
                             retryAfter,
-                            message: `Has alcanzado el limite de ${FREE_DAILY_LIKES_LIMIT} likes diarios. Tus likes se reinician manana.`
+                            message: `Has alcanzado el límite de ${FREE_DAILY_LIKES_LIMIT} likes diarios. Tus likes se reinician mañana.`
                         },
                         { status: 429 }
                     );
-                }
+            }
 
-                // Superlike limit: 3 per day for free users
-                if (interactionType === 'superlike') {
+            // Superlike limit: 3 per day for free users
+            if (interactionType === 'superlike') {
                     const profileSuper = await prisma.profile.findUnique({
                         where: { userId: user.id },
                         select: { superlikesRemaining: true }
@@ -101,7 +101,7 @@ export async function POST(request: NextRequest) {
                     return NextResponse.json(
                         {
                             error: 'Daily like limit reached',
-                            message: `Has alcanzado el limite de ${FREE_DAILY_LIKES_LIMIT} likes diarios.`
+                            message: `Has alcanzado el límite de ${FREE_DAILY_LIKES_LIMIT} likes diarios.`
                         },
                         { status: 429 }
                     );
