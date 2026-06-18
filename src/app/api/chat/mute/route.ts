@@ -21,7 +21,7 @@ export async function POST(request: NextRequest) {
 
         const match = await prisma.match.findUnique({
             where: { id: matchId },
-            select: { user1Id: true, user2Id: true },
+            select: { user1Id: true, user2Id: true, mutedUntil: true, mutedByUserId: true },
         });
 
         if (!match || (match.user1Id !== user.id && match.user2Id !== user.id)) {
@@ -30,7 +30,11 @@ export async function POST(request: NextRequest) {
 
         let mutedUntil: Date | null = null;
         let mutedByUserId: string | null = null;
+
         if (duration === -1) {
+            if (match.mutedByUserId && match.mutedByUserId !== user.id) {
+                return NextResponse.json({ success: true, mutedUntil: match.mutedUntil, mutedByUserId: match.mutedByUserId });
+            }
             mutedUntil = null;
             mutedByUserId = null;
         } else if (duration === null) {

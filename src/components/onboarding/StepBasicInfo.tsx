@@ -52,6 +52,8 @@ export function StepBasicInfo({ data, onUpdate, onNext, userId }: StepBasicInfoP
         handleChange('connectionModes', next);
         if (next.length === 1) {
             handleChange('lookingFor', next[0] === 'dating' ? 'serious' : 'friendship');
+        } else if (next.length > 1) {
+            handleChange('lookingFor', 'serious');
         }
     };
 

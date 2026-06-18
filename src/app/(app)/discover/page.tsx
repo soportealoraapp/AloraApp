@@ -617,12 +617,14 @@ export default function DiscoverPage() {
                                     return;
                                   }
                                   setPendingGridAction(true);
+                                  const previousGridProfiles = profiles;
                                   try {
                                     track(AnalyticsEvents.PASS_SENT, { targetUserId: p.id, intent });
                                     await sendLike(p.id, 'pass', intent);
                                     setSwipeCount(prev => prev + 1);
                                     setProfiles(prev => prev.filter(item => item.profile.id !== p.id));
                                   } catch (error) {
+                                    setProfiles(previousGridProfiles);
                                     toast({ title: "Error", description: "No se pudo descartar. Inténtalo de nuevo.", variant: "destructive" });
                                   } finally {
                                     setPendingGridAction(false);
@@ -637,6 +639,7 @@ export default function DiscoverPage() {
                                     return;
                                   }
                                   setPendingGridAction(true);
+                                  const previousGridProfiles = profiles;
                                   try {
                                     track(AnalyticsEvents.LIKE_SENT, { targetUserId: p.id, intent });
                                     const result = await sendLike(p.id, 'like', intent);
@@ -649,6 +652,8 @@ export default function DiscoverPage() {
                                       setShowMatchScreen(true);
                                     }
                                   } catch (error) {
+                                    setProfiles(previousGridProfiles);
+                                    setSwipeCount(prev => prev - 1);
                                     toast({ title: "Error", description: "No se pudo enviar el like. Inténtalo de nuevo.", variant: "destructive" });
                                   } finally {
                                     setPendingGridAction(false);
