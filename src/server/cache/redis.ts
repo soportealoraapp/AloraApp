@@ -39,11 +39,17 @@ export class HybridCache {
         if (!entry) return null;
 
         if (now < entry.expiresAt) {
+            // Move to end for LRU behavior
+            this.memoryCache.delete(cacheKey);
+            this.memoryCache.set(cacheKey, entry);
             return entry.value as T;
         }
 
         // Stale but still usable (stale-while-revalidate)
         if (now < entry.staleAt) {
+            // Move to end for LRU behavior
+            this.memoryCache.delete(cacheKey);
+            this.memoryCache.set(cacheKey, entry);
             // Trigger async refresh in background
             return entry.value as T;
         }

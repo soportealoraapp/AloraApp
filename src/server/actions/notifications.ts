@@ -59,9 +59,6 @@ export async function markNotificationAsRead(notificationId: string) {
 }
 
 export async function createNotification(userId: string, type: string, title: string, body: string) {
-    const currentUserId = await getAuthenticatedUserId();
-    if (!currentUserId || currentUserId !== userId) return;
-
     try {
         await prisma.notification.create({
             data: {

@@ -19,8 +19,12 @@ export async function GET(request: NextRequest) {
         const search = searchParams.get('search') || undefined;
         const cursor = searchParams.get('cursor') || undefined;
         const limit = parseInt(searchParams.get('limit') || '10');
+        const connectionModesParam = searchParams.get('connectionModes');
+        const connectionModes = connectionModesParam
+            ? connectionModesParam.split(',') as ('dating' | 'friendship')[]
+            : undefined;
 
-        const result = await getDynamicFeed(user.id, search, cursor, limit);
+        const result = await getDynamicFeed(user.id, search, cursor, limit, connectionModes ? { intent: connectionModes[0] } : undefined);
         return NextResponse.json(result);
     } catch (error) {
         console.error('Error getting discover feed:', error);

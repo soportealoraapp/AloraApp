@@ -19,6 +19,11 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ error: 'Missing messageId or emoji' }, { status: 400 });
         }
 
+        const MAX_EMOJI_LENGTH = 8;
+        if (typeof emoji !== 'string' || emoji.length > MAX_EMOJI_LENGTH || /[<>"'&]/.test(emoji)) {
+            return NextResponse.json({ error: 'Invalid emoji' }, { status: 400 });
+        }
+
         const message = await prisma.message.findUnique({
             where: { id: messageId },
             select: { matchId: true, reactions: true },

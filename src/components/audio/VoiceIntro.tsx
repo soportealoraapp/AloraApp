@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Mic, Play, Pause, Trash2, Loader2 } from 'lucide-react';
@@ -23,6 +23,7 @@ export function VoiceIntro({ audioUrl, duration, onSave, onDelete, isOwn = true 
     const [previewBlob, setPreviewBlob] = useState<Blob | null>(null);
     const [previewUrl, setPreviewUrl] = useState<string | null>(null);
     const [previewDuration, setPreviewDuration] = useState(0);
+    const previewDurationRef = useRef(0);
     const [uploading, setUploading] = useState(false);
     const { toast } = useToast();
 
@@ -39,7 +40,7 @@ export function VoiceIntro({ audioUrl, duration, onSave, onDelete, isOwn = true 
     const { startUpload } = useUploadThing("voiceUploader", {
         onClientUploadComplete: async (res: any) => {
             if (res && res.length > 0) {
-                onSave(res[0].url, previewDuration);
+                onSave(res[0].url, previewDurationRef.current);
                 setPreviewBlob(null);
                 toast({ title: "Presentación guardada" });
             }
@@ -58,6 +59,7 @@ export function VoiceIntro({ audioUrl, duration, onSave, onDelete, isOwn = true 
         }
         setPreviewBlob(blob);
         setPreviewDuration(duration);
+        previewDurationRef.current = duration;
         setIsRecording(false);
     };
 

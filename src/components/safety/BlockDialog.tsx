@@ -61,12 +61,12 @@ export function BlockDialog({ isOpen, onClose, blockedId, onSuccess }: BlockDial
                         <DialogTitle>¿Bloquear a este usuario?</DialogTitle>
                     </div>
                     <DialogDescription>
-                        Esta acción es irreversible y definitiva. Al bloquear:
+                        Al bloquear:
                         <ul className="list-disc list-inside mt-2 space-y-1">
                             <li>El match se deshará inmediatamente.</li>
-                            <li>Ya no podrán ver sus perfiles.</li>
-                            <li>No podrán enviarse mensajes.</li>
+                            <li>Ya no podrán ver sus perfiles ni enviarse mensajes.</li>
                         </ul>
+                        <p className="mt-2 text-xs text-muted-foreground">Puedes desbloquear a esta persona desde Ajustes → Seguridad en cualquier momento.</p>
                     </DialogDescription>
                 </DialogHeader>
 
@@ -80,7 +80,7 @@ export function BlockDialog({ isOpen, onClose, blockedId, onSuccess }: BlockDial
                         disabled={isSubmitting}
                     >
                         {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
-                        Bloquear Definitivamente
+                        Bloquear
                     </Button>
                 </DialogFooter>
             </DialogContent>

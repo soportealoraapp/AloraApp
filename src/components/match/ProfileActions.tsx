@@ -14,8 +14,28 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu";
+import {
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+    DialogDescription,
+    DialogFooter
+} from "@/components/ui/dialog";
 import { MoreVertical } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+
+const REPORT_CATEGORIES = [
+    { value: 'spam', label: 'Spam o contenido no deseado' },
+    { value: 'harassment', label: 'Acoso o intimidación' },
+    { value: 'offensive_language', label: 'Lenguaje ofensivo' },
+    { value: 'sexual_content', label: 'Contenido sexual no deseado' },
+    { value: 'impersonation', label: 'Suplantación de identidad' },
+    { value: 'fake_identity', label: 'Identidad falsa' },
+    { value: 'violence', label: 'Amenazas o violencia' },
+    { value: 'minor', label: 'Menor de edad' },
+    { value: 'other', label: 'Otro motivo' },
+] as const;
 
 interface ProfileActionsProps {
     userId: string;
@@ -29,6 +49,7 @@ export function ProfileActions({ userId, userName, matchId, isMuted = false, onM
     const { toast } = useToast();
     const { user: currentUser } = useAuth();
     const [showMuteDialog, setShowMute] = useState(false);
+    const [showReportDialog, setShowReportDialog] = useState(false);
 
     const handleMute = async (duration: number | null) => {
         if (!currentUser || !matchId) return;
@@ -58,21 +79,36 @@ export function ProfileActions({ userId, userName, matchId, isMuted = false, onM
         }
     };
 
+    const handleReport = async (category: string) => {
+        if (!currentUser) return;
+
+        try {
+            const res = await fetch('/api/safety/report', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ reportedId: userId, category })
+            });
+            if (!res.ok) throw new Error('Error al enviar reporte');
+            toast({
+                title: "Reporte enviado",
+                description: BRAND_VOICE.safety.reportThankYou,
+            });
+            setShowReportDialog(false);
+        } catch (error) {
+            toast({
+                title: "Error",
+                description: "No se pudo enviar el reporte. Inténtalo de nuevo.",
+                variant: "destructive"
+            });
+        }
+    };
+
     const handleAction = async (type: "report" | "block" | "mute") => {
         if (!currentUser) return;
 
         try {
             if (type === 'report') {
-                const res = await fetch('/api/safety/report', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ reportedId: userId, category: 'other' })
-                });
-                if (!res.ok) throw new Error('Error al enviar reporte');
-                toast({
-                    title: "Reporte enviado",
-                    description: BRAND_VOICE.safety.reportThankYou,
-                });
+                setShowReportDialog(true);
             } else if (type === 'block') {
                 const res = await fetch('/api/safety/block', {
                     method: 'POST',
@@ -137,6 +173,33 @@ export function ProfileActions({ userId, userName, matchId, isMuted = false, onM
                 onMute={handleMute}
                 isMuted={isMuted}
             />
+            <Dialog open={showReportDialog} onOpenChange={setShowReportDialog}>
+                <DialogContent className="sm:max-w-[400px]">
+                    <DialogHeader>
+                        <DialogTitle>¿Por qué reportas a {userName}?</DialogTitle>
+                        <DialogDescription>
+                            Selecciona el motivo de tu reporte. Esto nos ayuda a mantener la comunidad segura.
+                        </DialogDescription>
+                    </DialogHeader>
+                    <div className="space-y-2 py-2">
+                        {REPORT_CATEGORIES.map((cat) => (
+                            <Button
+                                key={cat.value}
+                                variant="outline"
+                                className="w-full justify-start text-left h-auto py-3"
+                                onClick={() => handleReport(cat.value)}
+                            >
+                                {cat.label}
+                            </Button>
+                        ))}
+                    </div>
+                    <DialogFooter>
+                        <Button variant="ghost" onClick={() => setShowReportDialog(false)}>
+                            Cancelar
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
         </>
     );
 }

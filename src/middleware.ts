@@ -21,7 +21,7 @@ export async function middleware(request: NextRequest) {
     const requestHeaders = new Headers(request.headers);
     const modifiedRequest = new NextRequest(request, { headers: requestHeaders });
 
-    let response = NextResponse.next({
+    const response = NextResponse.next({
         request: {
             headers: modifiedRequest.headers,
         },
@@ -44,11 +44,22 @@ export async function middleware(request: NextRequest) {
 
     const pathname = modifiedRequest.nextUrl.pathname;
 
+    const applySecurityHeaders = (res: NextResponse) => {
+        res.headers.set('Content-Security-Policy', csp);
+        res.headers.set('X-DNS-Prefetch-Control', 'on');
+        res.headers.set('Strict-Transport-Security', 'max-age=63072000; includeSubDomains; preload');
+        for (const [key, value] of Object.entries(SECURITY_HEADERS)) {
+            res.headers.set(key, value);
+        }
+        return res;
+    };
+
     const isAppRoute = pathname.startsWith('/discover') ||
         pathname.startsWith('/profile') ||
         pathname.startsWith('/messages') ||
         pathname.startsWith('/chat') ||
         pathname.startsWith('/settings') ||
+        pathname.startsWith('/notifications') ||
         pathname.startsWith('/qa') ||
         pathname.startsWith('/admin') ||
         pathname.startsWith('/contact') ||
@@ -70,8 +81,7 @@ export async function middleware(request: NextRequest) {
         pathname.startsWith('/auth');
 
     if (isAppRoute && !user) {
-        response = NextResponse.redirect(new URL('/login', modifiedRequest.url));
-        return response;
+        return applySecurityHeaders(NextResponse.redirect(new URL('/login', modifiedRequest.url)));
     }
 
     if (isAppRoute && user) {
@@ -82,8 +92,7 @@ export async function middleware(request: NextRequest) {
                 .eq('userId', user.id)
                 .maybeSingle();
             if (profile && !profile.isCompleted) {
-                response = NextResponse.redirect(new URL('/onboarding', modifiedRequest.url));
-                return response;
+                return applySecurityHeaders(NextResponse.redirect(new URL('/onboarding', modifiedRequest.url)));
             }
         } catch {
             // Allow through if check fails
@@ -98,8 +107,7 @@ export async function middleware(request: NextRequest) {
             .single();
 
         if (!profile || (profile.role !== 'admin' && profile.role !== 'moderator')) {
-            response = NextResponse.redirect(new URL('/discover', modifiedRequest.url));
-            return response;
+            return applySecurityHeaders(NextResponse.redirect(new URL('/discover', modifiedRequest.url)));
         }
     }
 
@@ -114,25 +122,16 @@ export async function middleware(request: NextRequest) {
                     .maybeSingle();
 
                 if (!profile || !profile.isCompleted) {
-                    response = NextResponse.redirect(new URL('/onboarding', modifiedRequest.url));
-                    return response;
+                    return applySecurityHeaders(NextResponse.redirect(new URL('/onboarding', modifiedRequest.url)));
                 }
             } catch {
                 // If profile check fails, allow through to avoid blocking
             }
         }
-        response = NextResponse.redirect(new URL('/discover', modifiedRequest.url));
-        return response;
+        return applySecurityHeaders(NextResponse.redirect(new URL('/discover', modifiedRequest.url)));
     }
 
-    response.headers.set('Content-Security-Policy', csp);
-    response.headers.set('X-DNS-Prefetch-Control', 'on');
-    response.headers.set('Strict-Transport-Security', 'max-age=63072000; includeSubDomains; preload');
-
-    for (const [key, value] of Object.entries(SECURITY_HEADERS)) {
-        response.headers.set(key, value);
-    }
-
+    applySecurityHeaders(response);
     response.headers.set('x-feature-flags', JSON.stringify({
         aiWingman: true,
         superBoost: true

@@ -49,7 +49,7 @@ export function generateExplanations(
     if (scores.relationshipGoals >= 70) {
         explanations.push('Ambos buscan un tipo de relación similar');
     } else if (scores.relationshipGoals < 40) {
-        explanations.push('Sus objetivos de relación no coinciden完全amente');
+        explanations.push('Sus objetivos de relación no coinciden completamente');
     }
 
     // Interests
