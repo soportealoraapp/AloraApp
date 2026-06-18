@@ -82,7 +82,7 @@ export default function ChatPage() {
     const handleAcceptMatch = async (like: any) => {
         setProcessingMatch(like.fromUserId);
         try {
-            await sendLike(like.fromUserId, 'like', like.intent || 'dating');
+            await sendLike(like.fromUserId, 'like', like.intent || 'dating', false);
             const isFriendship = like.intent === 'friendship';
             toast({
                 title: isFriendship ? "¡Nueva amistad! 🤝" : "¡Es un Match! 💖",

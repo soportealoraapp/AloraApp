@@ -304,8 +304,11 @@ export default function DiscoverPage() {
     setProfiles(remainingProfiles as any);
 
     try {
-      track(AnalyticsEvents.LIKE_SENT, { targetUserId: profileToActOn.id, intent });
-      const result = await sendLike(profileToActOn.id, action, intent);
+      const analyticsEvent = action === 'pass' ? AnalyticsEvents.PASS_SENT
+        : action === 'superlike' ? AnalyticsEvents.SUPERLIKE_SENT
+        : AnalyticsEvents.LIKE_SENT;
+      track(analyticsEvent, { targetUserId: profileToActOn.id, intent });
+      const result = await sendLike(profileToActOn.id, action, intent, false);
       lastSwipeRef.current = { profileId: profileToActOn.id, direction };
 
       if (action === 'pass') {

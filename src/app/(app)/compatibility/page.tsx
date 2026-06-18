@@ -10,7 +10,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { COMPATIBILITY_QUIZZES, Quiz, QuizQuestion } from '@/lib/compatibility/quizzes';
 import { useAuth } from '@/contexts/AuthContext';
 import { useMatches } from '@/hooks/use-matches';
-import { toast } from '@/components/ui/use-toast';
+import { toast } from '@/hooks/use-toast';
 import { Loader2, CheckCircle2, Heart, MessageCircle, Zap, Target, ArrowRight, ArrowLeft, Trophy, Sparkles, X, Users, ChevronRight } from 'lucide-react';
 import { ARCHETYPES } from '@/lib/compatibility/quizzes';
 import { DailyQuestionCard } from '@/components/daily-question/DailyQuestionCard';
@@ -162,7 +162,7 @@ export default function CompatibilityPage() {
   const handleLikeSimilar = async (targetId: string, type: 'like' | 'superlike') => {
     setInteractingId(targetId);
     try {
-      await sendLike(targetId, type, 'dating');
+      await sendLike(targetId, type, 'dating', false);
       toast({ title: type === 'superlike' ? '💘 Flechado enviado' : '❤️ Like enviado' });
       setSimilarUsers(prev => prev.filter(u => u.id !== targetId));
     } catch {

@@ -166,7 +166,7 @@ export default function UserProfilePage() {
     const handleAcceptMatch = async () => {
         setProcessing(true);
         try {
-            const result = await sendLike(id as string, "like", intent);
+            const result = await sendLike(id as string, "like", intent, false);
 
             toast({
                 title: `¡Nuevo match con ${profile.displayName}! 🎉`,
@@ -200,7 +200,7 @@ export default function UserProfilePage() {
     const handleGiveSecondChance = async () => {
         setProcessing(true);
         try {
-            const result = await sendLike(id as string, "like", intent);
+            const result = await sendLike(id as string, "like", intent, false);
 
             if (result.matchId) {
                 toast({

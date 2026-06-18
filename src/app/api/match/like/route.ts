@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { withRateLimit } from '@/server/utils/api-rate-limit';
-import { notifyNewMatch, notifyLikesRestored } from '@/server/services/push';
+import { notifyNewMatch, notifyLikeReceived, notifyLikesRestored } from '@/server/services/push';
 import { trackEvent } from '@/server/services/analytics';
 import { AnalyticsEvents } from '@/lib/tracking/events';
 import { LikeSchema } from '@/lib/schemas/validation';
@@ -204,6 +204,15 @@ export async function POST(request: NextRequest) {
         }, { isolationLevel: 'Serializable' });
 
         if (!result.matched) {
+            // Notify recipient that someone liked them (fire-and-forget)
+            prisma.profile.findUnique({ where: { userId: user.id }, select: { displayName: true } })
+                .then((senderProfile) => {
+                    if (senderProfile?.displayName) {
+                        notifyLikeReceived(toUserId, senderProfile.displayName, user.id, intent)
+                            .catch((err) => console.warn('[match/like] notifyLikeReceived failed:', err));
+                    }
+                })
+                .catch(() => {});
             return NextResponse.json({ matched: false, matchId: null, intent });
         }
 

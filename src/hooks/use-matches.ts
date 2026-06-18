@@ -58,7 +58,7 @@ export function useMatches() {
         fetchMatches();
     }, [fetchMatches]);
 
-    const sendLike = useCallback(async (toUserId: string, type: 'like' | 'superlike' | 'pass' = 'like', intent: ConnectionIntent = 'dating') => {
+    const sendLike = useCallback(async (toUserId: string, type: 'like' | 'superlike' | 'pass' = 'like', intent: ConnectionIntent = 'dating', showToast: boolean = true) => {
         if (!user) return;
 
         try {
@@ -78,14 +78,15 @@ export function useMatches() {
             const result = await response.json();
 
             if (result.matched) {
-                const isFriendship = intent === 'friendship';
-                toast({
-                    title: isFriendship ? '¡Nueva amistad! 🤝' : '¡Nuevo match! 🎉',
-                    description: isFriendship ? 'Ahora pueden conocerse como amigos.' : 'Ahora puedes chatear.',
-                });
-                // Refresh matches
+                if (showToast) {
+                    const isFriendship = intent === 'friendship';
+                    toast({
+                        title: isFriendship ? '¡Nueva amistad! 🤝' : '¡Nuevo match! 🎉',
+                        description: isFriendship ? 'Ahora pueden conocerse como amigos.' : 'Ahora puedes chatear.',
+                    });
+                }
                 await fetchMatches(intent);
-            } else if (type !== 'pass') {
+            } else if (showToast && type !== 'pass') {
                 toast({
                     title: type === 'superlike' ? '¡Flechado enviado! ✨' : 'Like enviado ❤️',
                     description: '¡Ojalá hagan match!',
@@ -94,11 +95,13 @@ export function useMatches() {
 
             return result;
         } catch (err) {
-            toast({
-                variant: 'destructive',
-                title: 'Error',
-                description: 'No se pudo enviar el like',
-            });
+            if (showToast) {
+                toast({
+                    variant: 'destructive',
+                    title: 'Error',
+                    description: 'No se pudo enviar el like',
+                });
+            }
             throw err;
         }
     }, [user, fetchMatches, toast]);

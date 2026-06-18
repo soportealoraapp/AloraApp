@@ -85,7 +85,25 @@ export default function ProfilePage() {
     );
   }
 
-  if (!profile) return null;
+  if (!profile) {
+    return (
+      <div>
+        <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b bg-background/80 px-4 backdrop-blur-sm sm:px-6 pt-safe">
+          <h1 className="text-xl font-bold md:text-2xl text-foreground">Mi Perfil</h1>
+        </header>
+        <main className="pb-24 md:pb-4 flex flex-col items-center justify-center min-h-[60vh] gap-4 px-4 text-center">
+          <Shield className="h-12 w-12 text-muted-foreground" />
+          <h2 className="text-lg font-semibold text-foreground">No pudimos cargar tu perfil</h2>
+          <p className="text-sm text-muted-foreground max-w-sm">
+            Ocurrió un error al obtener tu información. Por favor, revisa tu conexión e intenta de nuevo.
+          </p>
+          <Button onClick={() => router.refresh()} variant="default">
+            Intentar de nuevo
+          </Button>
+        </main>
+      </div>
+    );
+  }
 
   const completenessScore = calculateCompleteness(profile);
 

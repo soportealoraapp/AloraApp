@@ -93,6 +93,7 @@ export async function sendPushToUser(userId: string, payload: PushPayload) {
             const prefMap: Record<string, boolean | undefined> = {
                 match: prefs.matches,
                 new_match: prefs.matches,
+                like_received: prefs.matches,
                 message: prefs.messages,
                 new_message: prefs.messages,
                 profile_visit: prefs.profileViews,
@@ -193,6 +194,18 @@ export async function notifyNewMatch(userId: string, partnerName: string, matchI
             ? `Tú y ${partnerName} quieren conocerse como amigos. ¡Ahora di hola!`
             : `Tú y ${partnerName} se gustaron mutuamente. ¡Ahora di hola!`,
         data: { type: 'match', matchId },
+        channel: 'matches',
+    });
+}
+
+export async function notifyLikeReceived(userId: string, fromUserName: string, fromUserId: string, intent?: string) {
+    const isFriendship = intent === 'friendship';
+    return sendPushToUser(userId, {
+        title: isFriendship ? '🫶 Alguien te quiere conocer' : '💜 ¡A alguien le gustaste!',
+        body: isFriendship
+            ? `${fromUserName} te quiere conocer como amigo. ¡Revisa su perfil!`
+            : `${fromUserName} te dio like. ¡Revisa su perfil y Swipea de vuelta!`,
+        data: { type: 'like_received', fromUserId },
         channel: 'matches',
     });
 }
