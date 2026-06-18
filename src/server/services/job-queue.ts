@@ -60,33 +60,36 @@ export class JobQueue {
     }
 
     async dequeue(workerId: string, types?: JobType[]): Promise<QueueJob | null> {
-        const where: any = {
-            status: 'pending',
-            scheduledAt: { lte: new Date() },
-        };
-        if (types && types.length > 0) {
-            where.type = { in: types };
-        }
+        // Atomic claim with SKIP LOCKED to prevent duplicate processing
+        const rows = types && types.length > 0
+            ? await prisma.$queryRaw<{ id: string }[]>`
+                UPDATE "Job"
+                SET status = 'processing', "workerId" = ${workerId}, "startedAt" = NOW()
+                WHERE id = (
+                    SELECT id FROM "Job"
+                    WHERE status = 'pending' AND "scheduledAt" <= NOW() AND type IN (${types.join(',')})
+                    ORDER BY priority ASC, "createdAt" ASC
+                    LIMIT 1
+                    FOR UPDATE SKIP LOCKED
+                )
+                RETURNING id
+            `
+            : await prisma.$queryRaw<{ id: string }[]>`
+                UPDATE "Job"
+                SET status = 'processing', "workerId" = ${workerId}, "startedAt" = NOW()
+                WHERE id = (
+                    SELECT id FROM "Job"
+                    WHERE status = 'pending' AND "scheduledAt" <= NOW()
+                    ORDER BY priority ASC, "createdAt" ASC
+                    LIMIT 1
+                    FOR UPDATE SKIP LOCKED
+                )
+                RETURNING id
+            `;
 
-        // Use a transaction to atomically claim a job (PostgreSQL SKIP LOCKED)
-        const job = await prisma.$transaction(async (tx) => {
-            const candidates = await tx.job.findMany({
-                where,
-                orderBy: [{ priority: 'asc' }, { createdAt: 'asc' }],
-                take: 1,
-            });
+        if (rows.length === 0) return null;
 
-            if (candidates.length === 0) return null;
-
-            const candidate = candidates[0];
-            await tx.job.update({
-                where: { id: candidate.id },
-                data: { status: 'processing', workerId, startedAt: new Date() },
-            });
-
-            return candidate;
-        });
-
+        const job = await prisma.job.findUnique({ where: { id: rows[0].id } });
         if (!job) return null;
 
         return {

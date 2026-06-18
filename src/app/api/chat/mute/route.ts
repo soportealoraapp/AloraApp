@@ -29,21 +29,25 @@ export async function POST(request: NextRequest) {
         }
 
         let mutedUntil: Date | null = null;
+        let mutedByUserId: string | null = null;
         if (duration === -1) {
             mutedUntil = null;
+            mutedByUserId = null;
         } else if (duration === null) {
             mutedUntil = new Date('2099-12-31');
+            mutedByUserId = user.id;
         } else {
             mutedUntil = new Date(Date.now() + duration);
+            mutedByUserId = user.id;
         }
 
         await prisma.$executeRaw`
             UPDATE matches
-            SET "mutedUntil" = ${mutedUntil}
+            SET "mutedUntil" = ${mutedUntil}, "mutedByUserId" = ${mutedByUserId}
             WHERE id = ${matchId}
         `;
 
-        return NextResponse.json({ success: true, mutedUntil });
+        return NextResponse.json({ success: true, mutedUntil, mutedByUserId });
     } catch (error) {
         console.error('Error muting conversation:', error);
         return NextResponse.json({ error: 'Internal server error' }, { status: 500 });

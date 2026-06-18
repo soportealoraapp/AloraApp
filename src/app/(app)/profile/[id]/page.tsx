@@ -184,8 +184,17 @@ export default function UserProfilePage() {
         }
     };
 
-    const handleDeclineMatch = () => {
-        router.back();
+    const handleDeclineMatch = async () => {
+        setProcessing(true);
+        try {
+            await sendLike(id as string, "pass", intent);
+            toast({ title: "Perfil archivado", description: "Buscaremos mejores conexiones para ti." });
+            router.back();
+        } catch {
+            toast({ title: "Error", description: "No se pudo archivar.", variant: "destructive" });
+        } finally {
+            setProcessing(false);
+        }
     };
 
     const handleGiveSecondChance = async () => {

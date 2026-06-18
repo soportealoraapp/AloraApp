@@ -204,9 +204,9 @@ export async function notifyNewMessage(userId: string, senderName: string, match
             id: matchId,
             OR: [{ user1Id: userId }, { user2Id: userId }],
         },
-        select: { mutedUntil: true },
+        select: { mutedUntil: true, mutedByUserId: true },
     });
-    if (match?.mutedUntil && new Date(match.mutedUntil) > new Date()) {
+    if (match?.mutedUntil && match.mutedByUserId === userId && new Date(match.mutedUntil) > new Date()) {
         return { succeeded: 0, failed: 0, muted: true };
     }
 

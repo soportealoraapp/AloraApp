@@ -110,11 +110,28 @@ export default function ChatPage() {
     const confirmRejectMatch = async () => {
         if (!rejectTarget) return;
         setRejectDialogOpen(false);
-        toast({
-            title: "Perfil archivado",
-            description: "Entendido, buscaremos mejores conexiones para ti.",
-        });
-        refresh();
+        try {
+            await fetch('/api/match/like', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    toUserId: rejectTarget.id,
+                    type: 'pass',
+                    intent: rejectTarget.intent || 'dating',
+                }),
+            });
+            toast({
+                title: "Perfil archivado",
+                description: "Entendido, buscaremos mejores conexiones para ti.",
+            });
+            refresh();
+        } catch {
+            toast({
+                title: "Error",
+                description: "No se pudo archivar. Inténtalo de nuevo.",
+                variant: "destructive"
+            });
+        }
         setRejectTarget(null);
     };
 
@@ -299,7 +316,7 @@ export default function ChatPage() {
                                         const otherUserId = match.users.find(id => id !== user?.id);
                                         const partnerName = match.partner?.displayName || `Usuario #${otherUserId?.slice(0, 8)}`;
                                         const partnerPhoto = match.partner?.photoURL || '/placeholder.svg';
-                                        const isMuted = match.mutedUntil ? new Date(match.mutedUntil) > new Date() : false;
+                                        const isMuted = match.mutedUntil && match.mutedByUserId === user?.id ? new Date(match.mutedUntil) > new Date() : false;
 
                                         return (
                                             <motion.div

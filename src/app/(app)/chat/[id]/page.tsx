@@ -79,9 +79,9 @@ export default function ChatWindowPage() {
     const partnerPhoto = partner?.photoURL || '/placeholder.svg';
 
     const isMuted = useMemo(() => {
-        if (!match?.mutedUntil) return false;
+        if (!match?.mutedUntil || match.mutedByUserId !== user?.id) return false;
         return new Date(match.mutedUntil) > new Date();
-    }, [match?.mutedUntil]);
+    }, [match?.mutedUntil, match?.mutedByUserId, user?.id]);
 
     useEffect(() => {
         if (!matchId) return;
@@ -258,9 +258,10 @@ export default function ChatWindowPage() {
             id: optimisticId,
             matchId,
             senderId: user.id,
-            text: imageUrl,
+            content: imageUrl,
             type: 'image',
             createdAt: new Date().toISOString(),
+            status: 'pending',
         };
         setMessages(prev => [...prev, optimisticMsg]);
         try {
@@ -276,6 +277,8 @@ export default function ChatWindowPage() {
                 }),
             });
             if (!response.ok) throw new Error('Failed to send image');
+            const data = await response.json();
+            setMessages(prev => prev.map(m => m.id === optimisticId ? { ...data, createdAt: new Date(data.created_at || data.createdAt) } : m));
         } catch (error) {
             setMessages(prev => prev.filter(m => m.id !== optimisticId));
             toast({
@@ -293,9 +296,10 @@ export default function ChatWindowPage() {
             id: optimisticId,
             matchId,
             senderId: user.id,
-            text: JSON.stringify({ audioUrl, duration }),
+            content: JSON.stringify({ audioUrl, duration }),
             type: 'voice',
             createdAt: new Date().toISOString(),
+            status: 'pending',
         };
         setMessages(prev => [...prev, optimisticMsg]);
         try {
@@ -311,6 +315,8 @@ export default function ChatWindowPage() {
                 }),
             });
             if (!response.ok) throw new Error('Failed to send voice message');
+            const data = await response.json();
+            setMessages(prev => prev.map(m => m.id === optimisticId ? { ...data, createdAt: new Date(data.created_at || data.createdAt) } : m));
         } catch (error) {
             setMessages(prev => prev.filter(m => m.id !== optimisticId));
             toast({

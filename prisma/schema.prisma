@@ -24,21 +24,21 @@ datasource db {
 // -----------------------------------------------------------------------------
 
 model User {
-  id        String    @id @default(uuid())
-  email     String    @unique
-  name      String?
-  role      String    @default("user") // user, moderator, admin
-  isActive  Boolean   @default(true)
-  isBetaUser Boolean  @default(false)
+  id            String    @id @default(uuid())
+  email         String    @unique
+  name          String?
+  role          String    @default("user") // user, moderator, admin
+  isActive      Boolean   @default(true)
+  isBetaUser    Boolean   @default(false)
   betaInvitedBy String?
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-  deletedAt DateTime? // Soft delete
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  deletedAt     DateTime? // Soft delete
 
   // Core Relations
-  profile      Profile?
-  sessions     Session[]
-  sentMessages Message[] @relation("SentMessages")
+  profile        Profile?
+  sessions       Session[]
+  sentMessages   Message[]       @relation("SentMessages")
   spotifyAccount SpotifyAccount?
 
   // Auditing
@@ -60,9 +60,9 @@ model User {
   blockedUsers Block[] @relation("UserBlocker")
 
   // Notifications
-  notifications         Notification[]
+  notifications          Notification[]
   notificationPreference NotificationPreference?
-  dailyAnswers          DailyAnswer[]
+  dailyAnswers           DailyAnswer[]
 
   // Analytics
   analyticsEvents AnalyticsEvent[]
@@ -86,8 +86,8 @@ model User {
   userMemory              UserMemory?
   dateReflections         DateReflection[]
   quizResults             QuizResult[]
-  profileVisitsGiven      ProfileVisit[] @relation("ProfileVisitVisitor")
-  profileVisitsReceived   ProfileVisit[] @relation("ProfileVisitVisited")
+  profileVisitsGiven      ProfileVisit[]           @relation("ProfileVisitVisitor")
+  profileVisitsReceived   ProfileVisit[]           @relation("ProfileVisitVisited")
   waitlistEntries         WaitlistEntry[]
 
   @@map("users")
@@ -123,7 +123,7 @@ model Profile {
   personalGuide Json?
 
   // Relationship goals
-  lookingFor String? // casual, serious, friendship, networking
+  lookingFor      String? // casual, serious, friendship, networking
   connectionModes String[] @default(["dating"]) // dating, friendship
 
   // Privacy settings
@@ -139,29 +139,29 @@ model Profile {
   longitude   Float?
 
   // Status
-  isVerified             Boolean   @default(false)
-  isCompleted            Boolean   @default(false) // Onboarding completion flag
-  subscriptionStatus     String    @default("free") // free, plus
-  subscriptionStartedAt  DateTime?
-  subscriptionExpiresAt  DateTime?
-  trustStatus            String    @default("clean") // clean, watchlist, banned
-  reputationScore    Int      @default(100) // v3.9.0 Secret Score
-  isShadowBanned     Boolean  @default(false) // v3.9.1 Shadow Moderation
-  incomplete_media   Boolean  @default(false) // v3.9.2 Signup UX logic
-  lastActiveAt       DateTime @default(now())
+  isVerified            Boolean   @default(false)
+  isCompleted           Boolean   @default(false) // Onboarding completion flag
+  subscriptionStatus    String    @default("free") // free, plus
+  subscriptionStartedAt DateTime?
+  subscriptionExpiresAt DateTime?
+  trustStatus           String    @default("clean") // clean, watchlist, banned
+  reputationScore       Int       @default(100) // v3.9.0 Secret Score
+  isShadowBanned        Boolean   @default(false) // v3.9.1 Shadow Moderation
+  incomplete_media      Boolean   @default(false) // v3.9.2 Signup UX logic
+  lastActiveAt          DateTime  @default(now())
 
   // Daily likes tracking
-  dailyLikesUsed    Int      @default(0)
-  dailyLikesResetAt DateTime @default(now())
-  superlikesRemaining Int    @default(3)
+  dailyLikesUsed      Int      @default(0)
+  dailyLikesResetAt   DateTime @default(now())
+  superlikesRemaining Int      @default(3)
 
   // Boost tracking
   boostExpiresAt DateTime?
   lastBoostAt    DateTime?
-  totalBoosts    Int      @default(0)
+  totalBoosts    Int       @default(0)
 
   // Travel mode
-  travelModeEnabled Boolean @default(false)
+  travelModeEnabled Boolean   @default(false)
   travelCity        String?
   travelCountryCode String?
   travelLatitude    Float?
@@ -171,14 +171,14 @@ model Profile {
   // Rewind
   lastSwipeId    String?
   lastSwipeAt    DateTime?
-  rewindsUsed    Int      @default(0)
-  rewindsResetAt DateTime @default(now())
+  rewindsUsed    Int       @default(0)
+  rewindsResetAt DateTime  @default(now())
 
   // Streaks
-  currentStreak       Int      @default(0)
-  longestStreak       Int      @default(0)
-  lastCheckInAt       DateTime?
-  streakRewardsClaimed String[] @default([])
+  currentStreak        Int       @default(0)
+  longestStreak        Int       @default(0)
+  lastCheckInAt        DateTime?
+  streakRewardsClaimed String[]  @default([])
 
   // Gamification
   badges Json @default("[]") // [{key, unlockedAt}]
@@ -227,15 +227,16 @@ model Match {
   isActive Boolean @default(true)
 
   // State
-  stage String @default("talking") // talking, dating, relationship, unmatched
+  stage  String @default("talking") // talking, dating, relationship, unmatched
   intent String @default("dating") // dating, friendship
 
   // Trust & Safety
-  mutedUntil DateTime?
-  hiddenBy   String[] @default([])
+  mutedUntil    DateTime?
+  mutedByUserId String? // Which user initiated the mute
+  hiddenBy      String[]  @default([])
 
   // Match Health
-  healthScore    Int?
+  healthScore     Int?
   healthUpdatedAt DateTime?
 
   createdAt DateTime  @default(now())
@@ -291,7 +292,7 @@ model Interaction {
   toUserId String
   toUser   User   @relation("InteractionReceiver", fields: [toUserId], references: [id], onDelete: Cascade)
 
-  type String // like, superlike, pass
+  type   String // like, superlike, pass
   intent String @default("dating") // dating, friendship
 
   createdAt DateTime  @default(now())
@@ -311,8 +312,8 @@ model SpotifyAccount {
   spotifyUserId         String
   displayName           String?
   refreshTokenEncrypted String
-  topTracks             Json @default("[]")
-  topArtists            Json @default("[]")
+  topTracks             Json      @default("[]")
+  topArtists            Json      @default("[]")
   playlistId            String?
   playlistUrl           String?
   lastSyncedAt          DateTime?
@@ -527,24 +528,24 @@ model AuditLog {
 }
 
 model DailyQuestion {
-  id        String   @id @default(uuid())
+  id        String        @id @default(uuid())
   question  String
   category  String
-  isActive  Boolean  @default(true)
-  createdAt DateTime @default(now())
+  isActive  Boolean       @default(true)
+  createdAt DateTime      @default(now())
   answers   DailyAnswer[]
 
   @@map("daily_questions")
 }
 
 model DailyAnswer {
-  id         String   @id @default(uuid())
+  id         String        @id @default(uuid())
   userId     String
-  user       User     @relation(fields: [userId], references: [id])
+  user       User          @relation(fields: [userId], references: [id])
   questionId String
   question   DailyQuestion @relation(fields: [questionId], references: [id])
   answer     String
-  createdAt  DateTime @default(now())
+  createdAt  DateTime      @default(now())
 
   @@unique([userId, questionId])
   @@index([userId])
@@ -552,17 +553,17 @@ model DailyAnswer {
 }
 
 model NotificationPreference {
-  id              String  @id @default(uuid())
-  userId          String  @unique
-  user            User    @relation(fields: [userId], references: [id], onDelete: Cascade)
-  matches         Boolean @default(true)
-  messages        Boolean @default(true)
-  profileViews    Boolean @default(true)
-  promotions      Boolean @default(false)
-  dailyQuestion   Boolean @default(true)
-  streakReminder  Boolean @default(true)
-  readReceipts    Boolean @default(true)
-  notifications   Boolean @default(true)
+  id             String  @id @default(uuid())
+  userId         String  @unique
+  user           User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  matches        Boolean @default(true)
+  messages       Boolean @default(true)
+  profileViews   Boolean @default(true)
+  promotions     Boolean @default(false)
+  dailyQuestion  Boolean @default(true)
+  streakReminder Boolean @default(true)
+  readReceipts   Boolean @default(true)
+  notifications  Boolean @default(true)
 
   @@map("notification_preferences")
 }
@@ -967,11 +968,11 @@ model SuccessStory {
 // ========== Experimentation Platform (v7) ==========
 
 model Experiment {
-  id          String   @id @default(uuid())
-  name        String   @unique
+  id          String  @id @default(uuid())
+  name        String  @unique
   description String?
-  status      String   @default("draft") // draft, running, paused, completed
-  metric      String   @default("activation_rate") // activation_rate, match_rate, d7_retention
+  status      String  @default("draft") // draft, running, paused, completed
+  metric      String  @default("activation_rate") // activation_rate, match_rate, d7_retention
 
   variants    ExperimentVariant[]
   assignments ExperimentAssignment[]
@@ -987,7 +988,7 @@ model ExperimentVariant {
   id           String     @id @default(uuid())
   experimentId String
   experiment   Experiment @relation(fields: [experimentId], references: [id], onDelete: Cascade)
-  name         String     // control, treatment_a, treatment_b...
+  name         String // control, treatment_a, treatment_b...
   trafficPct   Float      @default(50) // 0-100
 
   assignments ExperimentAssignment[]
@@ -998,9 +999,9 @@ model ExperimentVariant {
 }
 
 model ExperimentAssignment {
-  id        String             @id @default(uuid())
+  id           String            @id @default(uuid())
   experimentId String
-  experiment   Experiment      @relation(fields: [experimentId], references: [id], onDelete: Cascade)
+  experiment   Experiment        @relation(fields: [experimentId], references: [id], onDelete: Cascade)
   variantId    String
   variant      ExperimentVariant @relation(fields: [variantId], references: [id], onDelete: Cascade)
   userId       String

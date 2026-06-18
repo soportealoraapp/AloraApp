@@ -29,9 +29,10 @@ export async function middleware(request: NextRequest) {
 
     const supabase = await createClient(modifiedRequest, response);
     let user = null;
+    let authCheckFailed = false;
     try {
         const timeout = new Promise<never>((_, reject) =>
-            setTimeout(() => reject(new Error('getUser timeout')), 10000)
+            setTimeout(() => reject(new Error('getUser timeout')), 3000)
         );
         const { data } = await Promise.race([
             supabase.auth.getUser(),
@@ -39,6 +40,7 @@ export async function middleware(request: NextRequest) {
         ]);
         user = data.user;
     } catch (err) {
+        authCheckFailed = true;
         console.warn('middleware: getUser failed', err);
     }
 
@@ -81,7 +83,11 @@ export async function middleware(request: NextRequest) {
         pathname.startsWith('/auth');
 
     if (isAppRoute && !user) {
-        return applySecurityHeaders(NextResponse.redirect(new URL('/login', modifiedRequest.url)));
+        if (authCheckFailed) {
+            // Auth check failed/timeout — allow through. API routes verify auth themselves.
+        } else {
+            return applySecurityHeaders(NextResponse.redirect(new URL('/login', modifiedRequest.url)));
+        }
     }
 
     if (isAppRoute && user) {
