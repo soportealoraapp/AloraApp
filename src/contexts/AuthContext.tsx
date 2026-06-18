@@ -93,6 +93,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
         checkSession();
 
+        // Proactive token refresh — call getUser() every 50 minutes to trigger
+        // Supabase's automatic token refresh before the 60-minute JWT expiry.
+        const REFRESH_INTERVAL_MS = 50 * 60 * 1000; // 50 minutes
+        const refreshInterval = setInterval(() => {
+            supabase.auth.getUser().catch(() => {
+                // Silently ignore — will be caught by onAuthStateChange if session expires
+            });
+        }, REFRESH_INTERVAL_MS);
+
         // Auth state changes
         const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
             const currentUser = session?.user ?? null;
@@ -127,6 +136,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         });
 
         return () => {
+            clearInterval(refreshInterval);
             subscription.unsubscribe();
         };
     }, []);

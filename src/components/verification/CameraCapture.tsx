@@ -107,7 +107,7 @@ export function CameraCapture({ onCapture, onCancel, onGalleryUpload }: CameraCa
                                 <Upload className="h-4 w-4 mr-2" /> Subir desde galería
                             </Button>
                         )}
-                        <Button onClick={onCancel} variant="outline" className="text-black">
+                        <Button onClick={onCancel} variant="outline" className="text-foreground">
                             Cerrar
                         </Button>
                     </div>

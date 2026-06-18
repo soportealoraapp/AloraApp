@@ -46,12 +46,22 @@ export async function GET(request: Request) {
                     });
 
                     if (!profile) {
-                        // Create initial profile row for new OAuth users via Prisma
+                        // Create User row if it doesn't exist (Supabase auth.users ≠ Prisma User)
                         const displayName = user.user_metadata?.full_name
                             || user.user_metadata?.name
                             || user.email?.split('@')[0]
                             || 'Usuario';
                         const avatarUrl = user.user_metadata?.avatar_url || null;
+                        await prisma.user.upsert({
+                            where: { id: user.id },
+                            create: {
+                                id: user.id,
+                                email: user.email || `${user.id}@placeholder.local`,
+                                name: displayName,
+                            },
+                            update: {},
+                        });
+                        // Create initial profile row for new OAuth users via Prisma
                         await prisma.profile.create({
                             data: {
                                 userId: user.id,

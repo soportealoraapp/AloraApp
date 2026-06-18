@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { utapi } from '../../uploadthing/core';
+import { withRateLimit } from '@/server/utils/api-rate-limit';
 
 async function getUser() {
     const { createClient } = await import('@/lib/supabase/server');
@@ -73,6 +74,9 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    const rateLimitResponse = await withRateLimit(user.id, 'block');
+    if (rateLimitResponse) return rateLimitResponse;
+
     try {
         const { blockedId, reason } = await request.json();
 
@@ -82,6 +86,15 @@ export async function POST(request: NextRequest) {
 
         if (blockedId === user.id) {
             return NextResponse.json({ error: 'Cannot block yourself' }, { status: 400 });
+        }
+
+        // Verify target user exists
+        const targetUser = await prisma.user.findUnique({
+            where: { id: blockedId },
+            select: { id: true }
+        });
+        if (!targetUser) {
+            return NextResponse.json({ error: 'User not found' }, { status: 404 });
         }
 
         // Create block record

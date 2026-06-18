@@ -24,7 +24,7 @@ export async function GET(request: NextRequest) {
             ? connectionModesParam.split(',') as ('dating' | 'friendship')[]
             : undefined;
 
-        const result = await getDynamicFeed(user.id, search, cursor, limit, connectionModes ? { intent: connectionModes[0] } : undefined);
+        const result = await getDynamicFeed(user.id, search, cursor, limit, connectionModes && connectionModes.length > 0 ? { intent: connectionModes[0] } : undefined);
         return NextResponse.json(result);
     } catch (error) {
         console.error('Error getting discover feed:', error);

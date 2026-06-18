@@ -54,7 +54,7 @@ export default function VerificationPage() {
     if (showUpload && selectedGesture) {
         return (
             <div>
-                <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b bg-background/80 px-4 backdrop-blur-sm sm:px-6">
+                <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b bg-background/80 px-4 backdrop-blur-sm sm:px-6 pt-safe">
                     <Button variant="ghost" size="icon" onClick={() => setShowUpload(false)}>
                         <ArrowLeft className="h-5 w-5" />
                     </Button>
@@ -75,7 +75,7 @@ export default function VerificationPage() {
     if (statusLoading) {
         return (
             <div>
-                <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b bg-background/80 px-4 backdrop-blur-sm sm:px-6">
+                <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b bg-background/80 px-4 backdrop-blur-sm sm:px-6 pt-safe">
                     <Button variant="ghost" size="icon" onClick={() => router.back()}>
                         <ArrowLeft className="h-5 w-5" />
                     </Button>
@@ -90,7 +90,7 @@ export default function VerificationPage() {
 
     return (
         <div>
-            <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b bg-background/80 px-4 backdrop-blur-sm sm:px-6">
+            <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b bg-background/80 px-4 backdrop-blur-sm sm:px-6 pt-safe">
                 <Button variant="ghost" size="icon" onClick={() => router.back()}>
                     <ArrowLeft className="h-5 w-5" />
                 </Button>

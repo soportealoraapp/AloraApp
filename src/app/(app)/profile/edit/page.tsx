@@ -322,7 +322,7 @@ export default function ProfileEditPage() {
     if (!currentProfile) {
         return (
             <div>
-                <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b bg-background/80 px-4 backdrop-blur-sm sm:px-6">
+                <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b bg-background/80 px-4 backdrop-blur-sm sm:px-6 pt-safe">
                     <Skeleton className="h-8 w-48" />
                 </header>
                 <main className="p-4 space-y-4">
@@ -348,7 +348,7 @@ export default function ProfileEditPage() {
 
     return (
         <div onTouchStart={handleTouchStart} onTouchEnd={handleTouchEnd}>
-            <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b bg-background/80 px-4 backdrop-blur-sm sm:px-6">
+            <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b bg-background/80 px-4 backdrop-blur-sm sm:px-6 pt-safe">
                 <Button variant="ghost" size="icon" onClick={goBack}>
                     <ArrowLeft className="h-5 w-5" />
                 </Button>
@@ -397,7 +397,7 @@ export default function ProfileEditPage() {
                                             <Upload className="h-8 w-8 mx-auto mb-2" />
                                         )}
                                         <p className="text-sm text-muted-foreground">
-                                            {uploading ? "Subiendo..." : "Click para subir fotos"}
+                                            {uploading ? "Subiendo..." : "Toca para subir fotos"}
                                         </p>
                                     </div>
                                 </Label>
@@ -467,7 +467,7 @@ export default function ProfileEditPage() {
 
                         <div className="space-y-2">
                             <Label>Modo de conexión</Label>
-                            <p className="text-sm text-muted-foreground">Elige cómo quieres conectar con others</p>
+                            <p className="text-sm text-muted-foreground">Elige cómo quieres conectar con otros</p>
                             <div className="flex gap-2">
                                 <Button
                                     type="button"

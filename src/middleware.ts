@@ -21,11 +21,9 @@ export async function middleware(request: NextRequest) {
     const requestHeaders = new Headers(request.headers);
     const modifiedRequest = new NextRequest(request, { headers: requestHeaders });
 
-    const response = NextResponse.next({
-        request: {
-            headers: modifiedRequest.headers,
-        },
-    });
+    // updateSession creates its own response with refreshed Supabase cookies.
+    // getUser() triggers automatic token refresh if the JWT is expired.
+    const response = await updateSession(modifiedRequest);
 
     const supabase = await createClient(modifiedRequest, response);
     let user = null;

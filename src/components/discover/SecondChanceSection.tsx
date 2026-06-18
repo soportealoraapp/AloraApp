@@ -7,6 +7,7 @@ import { Heart, RotateCcw, UserX } from 'lucide-react';
 import Image from 'next/image';
 import { useMatches } from '@/hooks/use-matches';
 import { useToast } from '@/hooks/use-toast';
+import { ConnectionIntent } from '@/lib/domain/types';
 
 export function SecondChanceSection() {
   const [passedProfiles, setPassedProfiles] = useState<any[]>([]);
@@ -43,9 +44,9 @@ export function SecondChanceSection() {
 
   if (passedProfiles.length === 0) return null;
 
-  const handleLike = async (profileId: string) => {
+  const handleLike = async (profileId: string, intent: ConnectionIntent = 'dating') => {
     try {
-      await sendLike(profileId, 'like', 'dating', false);
+      await sendLike(profileId, 'like', intent, false);
       toast({ title: '¡Like enviado!' });
       setPassedProfiles(prev => prev.filter(p => p.id !== profileId));
     } catch {
@@ -88,7 +89,7 @@ export function SecondChanceSection() {
                 </div>
               </div>
               <div className="flex gap-1 p-1.5">
-                <Button size="sm" variant="ghost" className="flex-1 h-11" onClick={() => handleLike(profile.id)}>
+                <Button size="sm" variant="ghost" className="flex-1 h-11" onClick={() => handleLike(profile.id, (profile.intent as ConnectionIntent) || 'dating')}>
                   <Heart className="h-4 w-4 text-primary" />
                 </Button>
                 <Button size="sm" variant="ghost" className="flex-1 h-11" onClick={() => handleDefinitivePass(profile.id)}>

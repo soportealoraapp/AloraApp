@@ -130,7 +130,10 @@ export function DailyQuestionCard() {
             const res = await fetch(`/api/compatibility/question-answers?questionId=${data.questionId}`);
             if (res.ok) {
                 const result = await res.json();
-                setOtherAnswers(result.answers || []);
+                const answers = (result.answers || []).filter(
+                    (a: any) => a.profile?.userId !== currentUserProfile?.id
+                );
+                setOtherAnswers(answers);
                 setCurrentIndex(0);
             }
         } catch (err) {

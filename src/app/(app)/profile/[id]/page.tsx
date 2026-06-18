@@ -56,6 +56,14 @@ export default function UserProfilePage() {
 
     const { profile, loading } = useProfile(id as string);
 
+    const goBack = () => {
+        if (typeof window !== 'undefined' && window.history.length > 1) {
+            goBack();
+        } else {
+            router.push('/discover');
+        }
+    };
+
     useEffect(() => {
       if (!id || !user || isPreview) return;
       fetch(`/api/match/check?targetUserId=${id}`)
@@ -97,7 +105,7 @@ export default function UserProfilePage() {
             <div className="h-screen flex items-center justify-center">
                 <div className="text-center">
                     <p className="text-muted-foreground mb-4">Perfil no encontrado</p>
-                    <Button onClick={() => router.back()}>Volver</Button>
+                    <Button onClick={() => goBack()}>Volver</Button>
                 </div>
             </div>
         );
@@ -189,7 +197,7 @@ export default function UserProfilePage() {
         try {
             await sendLike(id as string, "pass", intent);
             toast({ title: "Perfil archivado", description: "Buscaremos mejores conexiones para ti." });
-            router.back();
+            goBack();
         } catch {
             toast({ title: "Error", description: "No se pudo archivar.", variant: "destructive" });
         } finally {
@@ -198,6 +206,10 @@ export default function UserProfilePage() {
     };
 
     const handleGiveSecondChance = async () => {
+        if (hasExistingMatch) {
+            toast({ title: "Ya tienes match con esta persona", description: "Puedes buscarla en tu lista de chats." });
+            return;
+        }
         setProcessing(true);
         try {
             const result = await sendLike(id as string, "like", intent, false);
@@ -230,7 +242,7 @@ export default function UserProfilePage() {
     return (
         <div>
             <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b bg-background/80 px-4 backdrop-blur-sm sm:px-6 pt-safe">
-                <Button variant="ghost" size="icon" onClick={() => router.back()}>
+                <Button variant="ghost" size="icon" onClick={() => goBack()}>
                     <ArrowLeft className="h-5 w-5" />
                 </Button>
                 <div className="flex items-center gap-2">
@@ -498,7 +510,7 @@ export default function UserProfilePage() {
                             <div className="flex justify-around items-center max-w-sm mx-auto gap-3">
                                 {/* Pass */}
                                 <button
-                                    onClick={() => router.back()}
+                                    onClick={() => goBack()}
                                     disabled={processing}
                                     className="h-16 w-16 rounded-full border-2 border-muted-foreground/20 bg-background flex items-center justify-center shadow-lg hover:border-red-400 hover:bg-red-50 dark:hover:bg-red-950/30 hover:text-red-500 transition-all active:scale-95"
                                     aria-label="Pasar"

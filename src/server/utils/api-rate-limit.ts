@@ -7,6 +7,7 @@ const LIMITS: Record<string, { limit: number; windowSeconds: number }> = {
     profileUpdate: { limit: 5, windowSeconds: 60 },
     upload: { limit: 10, windowSeconds: 60 },
     auth: { limit: 5, windowSeconds: 60 },
+    block: { limit: 10, windowSeconds: 60 },
 };
 
 export async function withRateLimit(userId: string, action: keyof typeof LIMITS): Promise<NextResponse | null> {

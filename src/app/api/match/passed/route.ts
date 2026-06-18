@@ -48,6 +48,7 @@ export async function GET(request: Request) {
       .map(p => ({
         id: p.toUser.id,
         ...p.toUser.profile,
+        intent: p.intent,
         passedAt: p.createdAt,
       }));
 

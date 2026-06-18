@@ -208,7 +208,7 @@ export function DiscoverFilters({ open, onOpenChange, onApplyFilters, initialFil
                   onClick={() => onBrowseModeChange?.('swipe')}
                   className={`flex items-center justify-center gap-2 rounded-lg border-2 p-3 text-sm font-medium transition-all ${browseMode === 'swipe' ? 'border-primary bg-primary/5' : 'border-muted bg-transparent hover:bg-accent'}`}
                 >
-                  <CreditCard className="h-4 w-4" /> Swipe
+                  <CreditCard className="h-4 w-4" /> Deslizar
                 </button>
                 <button
                   onClick={() => onBrowseModeChange?.('grid')}
