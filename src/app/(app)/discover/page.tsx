@@ -619,6 +619,8 @@ export default function DiscoverPage() {
                                     await sendLike(p.id, 'pass', intent);
                                     setSwipeCount(prev => prev + 1);
                                     setProfiles(prev => prev.filter(item => item.profile.id !== p.id));
+                                  } catch (error) {
+                                    toast({ title: "Error", description: "No se pudo descartar. Inténtalo de nuevo.", variant: "destructive" });
                                   } finally {
                                     setPendingGridAction(false);
                                   }
@@ -643,6 +645,8 @@ export default function DiscoverPage() {
                                       setMatchId((result as any)?.matchId);
                                       setShowMatchScreen(true);
                                     }
+                                  } catch (error) {
+                                    toast({ title: "Error", description: "No se pudo enviar el like. Inténtalo de nuevo.", variant: "destructive" });
                                   } finally {
                                     setPendingGridAction(false);
                                   }

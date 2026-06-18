@@ -145,6 +145,13 @@ export default function ChatPage() {
         setHidingMatch(hideTargetId);
         setHideDialogOpen(false);
         try {
+            const response = await fetch('/api/chat/hide', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ matchId: hideTargetId }),
+            });
+            if (!response.ok) throw new Error('Failed to hide');
+
             const newHidden = new Set(hiddenMatches);
             newHidden.add(hideTargetId);
             setHiddenMatches(newHidden);
@@ -153,12 +160,6 @@ export default function ChatPage() {
                 ids: [...newHidden],
                 expiresAt: Date.now() + thirtyDays,
             }));
-
-            await fetch('/api/chat/hide', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ matchId: hideTargetId }),
-            });
 
             toast({
                 title: "Conversación eliminada",

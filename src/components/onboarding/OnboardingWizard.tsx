@@ -192,7 +192,7 @@ export function OnboardingWizard({ initialRef }: { initialRef?: string } = {}) {
         trackEvent('onboarding_completed', { userId: effectiveUserId });
         
         router.push('/discover');
-    }, [effectiveUserId, refreshProfile]);
+    }, [effectiveUserId, refreshProfile, router]);
 
     const nextStep = useCallback(async () => {
         if (step === totalSteps) {

@@ -24,7 +24,12 @@ export function useChat(matchId: string) {
     const [partnerTyping, setPartnerTyping] = useState(false);
     const [unreadCount, setUnreadCount] = useState(0);
     const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+    const mountedRef = useRef(true);
     const PAGE_SIZE = 50;
+
+    useEffect(() => {
+        return () => { mountedRef.current = false; };
+    }, []);
 
     // Subscribe to messages via realtime
     useEffect(() => {
@@ -34,6 +39,7 @@ export function useChat(matchId: string) {
         setMessages([]);
 
         const unsubscribeMessages = chatService.subscribeToMessages(matchId, (initialMessages) => {
+            if (!mountedRef.current) return;
             setMessages(initialMessages);
             setLoading(false);
             setHasMore(initialMessages.length === PAGE_SIZE);
@@ -51,7 +57,7 @@ export function useChat(matchId: string) {
         const unsubscribePresence = chatService.subscribeToPresence(
             matchId,
             user.id,
-            (online) => setIsPartnerOnline(online)
+            (online) => { if (mountedRef.current) setIsPartnerOnline(online); }
         );
 
         return () => unsubscribePresence();
@@ -65,12 +71,15 @@ export function useChat(matchId: string) {
             matchId,
             user.id,
             (typingUserIds) => {
+                if (!mountedRef.current) return;
                 const isPartnerTyping = typingUserIds.length > 0;
                 setPartnerTyping(isPartnerTyping);
                 if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
                 if (isPartnerTyping) {
                     // Auto-clear after 3s of no signal
-                    typingTimeoutRef.current = setTimeout(() => setPartnerTyping(false), 3000);
+                    typingTimeoutRef.current = setTimeout(() => {
+                        if (mountedRef.current) setPartnerTyping(false);
+                    }, 3000);
                 }
             }
         );
@@ -89,7 +98,7 @@ export function useChat(matchId: string) {
         const unsubscribeUnread = chatService.subscribeToUnreadCount(
             matchId,
             user.id,
-            (count) => setUnreadCount(count)
+            (count) => { if (mountedRef.current) setUnreadCount(count); }
         );
 
         return () => unsubscribeUnread();
