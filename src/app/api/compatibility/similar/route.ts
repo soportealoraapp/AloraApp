@@ -85,7 +85,8 @@ export async function GET(request: NextRequest) {
                     sharedValues: sharedValues.slice(0, 3),
                     sharedInterests: sharedInterests.slice(0, 3),
                 };
-            });
+            })
+            .sort((a, b) => a.compatibility - b.compatibility);
 
         return NextResponse.json({ profiles });
     } catch (error) {

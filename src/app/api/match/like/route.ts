@@ -143,6 +143,10 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ error: 'User not found' }, { status: 404 });
         }
 
+        if (toUserId === user.id) {
+            return NextResponse.json({ error: 'Cannot interact with own profile' }, { status: 400 });
+        }
+
         // 1. Create/Update Interaction (idempotent via upsert)
         const interaction = await prisma.interaction.upsert({
             where: {

@@ -61,7 +61,7 @@ export const getUserProfile = unstable_cache(
             return null;
         }
     },
-    ['user-profile'],
+    ['user-profile', 'v1'],
     { tags: ['profile'], revalidate: 60 }
 );
 

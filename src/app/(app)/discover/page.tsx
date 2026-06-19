@@ -631,6 +631,36 @@ export default function DiscoverPage() {
                                 }}>
                                   <X className="h-5 w-5 text-destructive" />
                                 </Button>
+                                <Button size="sm" variant="ghost" className="flex-1 h-11" aria-label={`Flechado a ${p.displayName || ''}`} disabled={pendingGridAction} onClick={async () => {
+                                  if (pendingGridAction) return;
+                                  if (swipeCount >= SWIPE_LIMIT) {
+                                    toast({ title: "¡Tómate un respiro!", description: "Has visto muchos perfiles. Vuelve en un momento.", variant: "default" });
+                                    return;
+                                  }
+                                  setPendingGridAction(true);
+                                  const previousGridProfiles = profiles;
+                                  try {
+                                    track(AnalyticsEvents.SUPERLIKE_SENT, { targetUserId: p.id, intent });
+                                    const result = await sendLike(p.id, 'superlike', intent);
+                                    setSwipeCount(prev => prev + 1);
+                                    setProfiles(prev => prev.filter(item => item.profile.id !== p.id));
+                                    toast({ title: '¡💘 Flechado enviado!', description: `${p.displayName} recibirá tu interés destacado.` });
+                                    if (result?.matched) {
+                                      track(AnalyticsEvents.MATCH_CREATED, { partnerId: p.id, intent });
+                                      setMatchedProfile(p);
+                                      setMatchId((result as any)?.matchId);
+                                      setShowMatchScreen(true);
+                                    }
+                                  } catch (error) {
+                                    setProfiles(previousGridProfiles);
+                                    setSwipeCount(prev => prev - 1);
+                                    toast({ title: "Error", description: "No se pudo enviar el Flechado. Inténtalo de nuevo.", variant: "destructive" });
+                                  } finally {
+                                    setPendingGridAction(false);
+                                  }
+                                }}>
+                                  <HeartArrow className="h-5 w-5 text-amber-500 fill-amber-500" />
+                                </Button>
                                 <Button size="sm" variant="ghost" className="flex-1 h-11" aria-label={`Dar like a ${p.displayName || ''}`} disabled={pendingGridAction} onClick={async () => {
                                   if (pendingGridAction) return;
                                   if (swipeCount >= SWIPE_LIMIT) {

@@ -62,8 +62,9 @@ export async function GET(request: Request) {
                             update: {},
                         });
                         // Create initial profile row for new OAuth users via Prisma
-                        await prisma.profile.create({
-                            data: {
+                        await prisma.profile.upsert({
+                            where: { userId: user.id },
+                            create: {
                                 userId: user.id,
                                 displayName,
                                 photos: avatarUrl ? [avatarUrl] : [],
@@ -71,7 +72,8 @@ export async function GET(request: Request) {
                                 connectionModes: ['dating'],
                                 seeking: 'all',
                                 isCompleted: false,
-                            }
+                            },
+                            update: {},
                         });
                         destination = '/onboarding';
                     } else if (!profile.isCompleted && !hasSpecificTarget) {

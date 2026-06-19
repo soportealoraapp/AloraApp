@@ -125,6 +125,13 @@ export async function checkAndAwardBadges(userId: string): Promise<BadgeKey[]> {
 
 export async function assignBadge(userId: string, badgeKey: BadgeKey): Promise<{ success: boolean }> {
     try {
+        const { createClient } = await import('@/lib/supabase/server');
+        const supabase = await createClient();
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user || user.id !== userId) {
+            return { success: false };
+        }
+
         const result = await prisma.$queryRaw`
             SELECT badges FROM profiles WHERE "userId" = ${userId}
         ` as any[];
