@@ -122,10 +122,8 @@ export default function DiscoverPage() {
   // Initialize intent from user's connectionModes
   useEffect(() => {
     if (currentUserProfile?.connectionModes?.length) {
-      // Prioritize 'dating' as the default mode
-      const savedIntent = currentUserProfile.connectionModes.includes('dating') 
-        ? 'dating' 
-        : currentUserProfile.connectionModes[0];
+      // Use the first available mode as default (don't force 'dating')
+      const savedIntent = currentUserProfile.connectionModes[0];
       if (savedIntent === 'dating' || savedIntent === 'friendship') {
         setIntent(savedIntent);
       }
@@ -514,7 +512,7 @@ export default function DiscoverPage() {
               <Sparkles className="h-3 w-3 text-primary" />
               Mostrando resultados filtrados por {filters.interests.length > 0 ? filters.interests[0] : filters.values.length > 0 ? filters.values[0] : filters.musicGenres && filters.musicGenres.length > 0 ? filters.musicGenres[0] : 'tus preferencias'}
               <button 
-                onClick={() => { setFilters(DEFAULT_FILTERS); setIntent('dating'); }}
+                onClick={() => { setFilters(DEFAULT_FILTERS); setIntent(currentUserProfile?.connectionModes?.[0] || 'dating'); }}
                 className="ml-1 text-primary font-bold hover:underline"
               >
                 Limpiar

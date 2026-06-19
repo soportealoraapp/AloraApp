@@ -78,9 +78,15 @@ export async function POST(request: NextRequest) {
             }
         }
 
-        // Note: We should actually delete the Supabase user too,
-        // but for now we'll just delete the data from Prisma
-        // (though we should check the delete_user_account RPC function)
+        // Delete Supabase auth user to prevent continued authentication
+        const { createClient } = await import('@/lib/supabase/server');
+        const supabaseAdmin = await createClient();
+        const { error: deleteAuthError } = await supabaseAdmin.auth.admin.deleteUser(user.id);
+        if (deleteAuthError) {
+            console.error('Failed to delete Supabase auth user:', deleteAuthError);
+            // Continue with Prisma deletion even if auth deletion fails
+        }
+
         await prisma.$transaction([
             prisma.notification.deleteMany({ where: { userId: user.id } }),
             prisma.notificationPreference.deleteMany({ where: { userId: user.id } }),

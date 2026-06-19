@@ -26,21 +26,6 @@ export default function ChatPage() {
     const { toast } = useToast();
     const [processingMatch, setProcessingMatch] = useState<string | null>(null);
     const [hidingMatch, setHidingMatch] = useState<string | null>(null);
-    const [hiddenMatches, setHiddenMatches] = useState<Set<string>>(() => {
-        if (typeof window !== 'undefined') {
-            try {
-                const stored = localStorage.getItem('hiddenMatches');
-                if (stored) {
-                    const { ids, expiresAt } = JSON.parse(stored);
-                    if (Date.now() < expiresAt) {
-                        return new Set(ids);
-                    }
-                    localStorage.removeItem('hiddenMatches');
-                }
-            } catch { /* ignore */ }
-        }
-        return new Set();
-    });
     const [showStaleOnly, setShowStaleOnly] = useState(false);
     const [dismissedStaleBanner, setDismissedStaleBanner] = useState(false);
     const [rejectDialogOpen, setRejectDialogOpen] = useState(false);
@@ -49,7 +34,7 @@ export default function ChatPage() {
     const [hideTargetId, setHideTargetId] = useState<string | null>(null);
 
     const filteredMatches = matches.filter((match) => {
-        if (hiddenMatches.has(match.id)) return false;
+        // hiddenMatches are already filtered server-side via hiddenBy field
         if (searchTerm.trim()) {
             const partnerName = match.partner?.displayName || '';
             if (!partnerName.toLowerCase().includes(searchTerm.toLowerCase())) return false;
@@ -64,7 +49,6 @@ export default function ChatPage() {
     });
 
     const staleMatches = matches.filter((match) => {
-        if (hiddenMatches.has(match.id)) return false;
         const lastMsg = match.lastMessage?.createdAt;
         if (!lastMsg) return false;
         const hours = (Date.now() - new Date(lastMsg).getTime()) / (1000 * 60 * 60);
@@ -72,7 +56,7 @@ export default function ChatPage() {
     });
 
     const recentStaleMatches = matches.filter((match) => {
-        if (hiddenMatches.has(match.id)) return false;
+        // hiddenMatches are already filtered server-side via hiddenBy field
         const lastMsg = match.lastMessage?.createdAt;
         if (!lastMsg) return false;
         const hours = (Date.now() - new Date(lastMsg).getTime()) / (1000 * 60 * 60);
@@ -152,14 +136,8 @@ export default function ChatPage() {
             });
             if (!response.ok) throw new Error('Failed to hide');
 
-            const newHidden = new Set(hiddenMatches);
-            newHidden.add(hideTargetId);
-            setHiddenMatches(newHidden);
-            const thirtyDays = 30 * 24 * 60 * 60 * 1000;
-            localStorage.setItem('hiddenMatches', JSON.stringify({
-                ids: [...newHidden],
-                expiresAt: Date.now() + thirtyDays,
-            }));
+            // Refresh matches to reflect server-side hiddenBy filter
+            refresh();
 
             toast({
                 title: "Conversación eliminada",

@@ -55,7 +55,7 @@ export const ourFileRouter = {
             return { uploadedBy: metadata.userId, url: (file as any).url };
         }),
 
-    voiceUploader: f({ blob: { maxFileSize: "2MB", maxFileCount: 1 } })
+    voiceUploader: f({ audio: { maxFileSize: "2MB", maxFileCount: 1 } })
         .middleware(async ({ req }) => {
             const userId = await resolveUserId(req);
             return { userId, type: 'voice' };

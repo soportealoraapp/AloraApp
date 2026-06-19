@@ -41,7 +41,7 @@ export const EditableProfileSchema = z.object({
     latitude: z.number().optional().nullable(),
     longitude: z.number().optional().nullable(),
     lookingFor: z.string().optional().default(''),
-    connectionModes: z.array(z.enum(ALLOWED_CONNECTION_INTENTS)).max(2).optional().default(['dating']),
+    connectionModes: z.array(z.enum(ALLOWED_CONNECTION_INTENTS)).min(1).max(2).optional().default(['dating']),
     voiceIntro: z.string().url('Voice intro must be a valid URL').nullable().optional(),
     voiceIntroDuration: z.number().nullable().optional(),
 }).strict('Unexpected fields are not allowed');

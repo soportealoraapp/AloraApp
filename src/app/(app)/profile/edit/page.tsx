@@ -474,11 +474,13 @@ export default function ProfileEditPage() {
                                     variant={connectionModes.includes('dating') ? 'default' : 'outline'}
                                     size="sm"
                                     onClick={() => {
-                                        setConnectionModes(prev =>
-                                            prev.includes('dating')
-                                                ? prev.filter(m => m !== 'dating')
-                                                : [...prev, 'dating']
-                                        );
+                                        setConnectionModes(prev => {
+                                            if (prev.includes('dating')) {
+                                                // Prevent deselecting the last mode
+                                                return prev.length > 1 ? prev.filter(m => m !== 'dating') : prev;
+                                            }
+                                            return [...prev, 'dating'];
+                                        });
                                     }}
                                 >
                                     💑 Citas
@@ -488,11 +490,13 @@ export default function ProfileEditPage() {
                                     variant={connectionModes.includes('friendship') ? 'default' : 'outline'}
                                     size="sm"
                                     onClick={() => {
-                                        setConnectionModes(prev =>
-                                            prev.includes('friendship')
-                                                ? prev.filter(m => m !== 'friendship')
-                                                : [...prev, 'friendship']
-                                        );
+                                        setConnectionModes(prev => {
+                                            if (prev.includes('friendship')) {
+                                                // Prevent deselecting the last mode
+                                                return prev.length > 1 ? prev.filter(m => m !== 'friendship') : prev;
+                                            }
+                                            return [...prev, 'friendship'];
+                                        });
                                     }}
                                 >
                                     🤝 Amistad

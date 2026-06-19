@@ -488,7 +488,7 @@ export default function ChatWindowPage() {
             <main
                 ref={scrollContainerRef}
                 onScroll={handleScroll}
-                className="flex-1 overflow-y-auto p-4 space-y-1 touch-pan-y overscroll-contain relative"
+                className="flex-1 overflow-y-auto p-4 pb-safe space-y-1 touch-pan-y overscroll-contain relative"
             >
                 {partnerAnswer && (
                     <div className="bg-primary/5 border border-primary/10 rounded-2xl p-4 mb-4 mx-auto max-w-sm">
@@ -674,7 +674,7 @@ export default function ChatWindowPage() {
             </main>
 
             {/* Chat input area */}
-            <div className="border-t bg-background p-4 pb-safe" style={{ paddingBottom: keyboardHeight > 0 ? `${keyboardHeight}px` : undefined }}>
+            <div className="border-t bg-background p-4 pb-safe" style={{ paddingBottom: keyboardHeight > 0 ? `calc(${keyboardHeight}px + env(safe-area-inset-bottom, 0px))` : undefined }}>
                 {isPartnerOnline && (
                     <div className="flex items-center gap-2 mb-2">
                         <span className="text-xs text-primary flex items-center gap-1 ml-auto">

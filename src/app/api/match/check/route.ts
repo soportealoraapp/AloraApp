@@ -27,5 +27,21 @@ export async function GET(request: NextRequest) {
     select: { id: true, intent: true },
   });
 
-  return NextResponse.json({ matched: !!match, matchId: match?.id || null, intent: match?.intent || null });
+  // Check existing interaction from current user to target
+  const interaction = await prisma.interaction.findFirst({
+    where: {
+      fromUserId: user.id,
+      toUserId: targetUserId,
+      deletedAt: null,
+    },
+    select: { type: true },
+    orderBy: { createdAt: 'desc' },
+  });
+
+  return NextResponse.json({
+    matched: !!match,
+    matchId: match?.id || null,
+    intent: match?.intent || null,
+    interactionType: interaction?.type || null,
+  });
 }

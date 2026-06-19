@@ -8,6 +8,13 @@ const LIMITS: Record<string, { limit: number; windowSeconds: number }> = {
     upload: { limit: 10, windowSeconds: 60 },
     auth: { limit: 5, windowSeconds: 60 },
     block: { limit: 10, windowSeconds: 60 },
+    report: { limit: 10, windowSeconds: 60 },
+    rewind: { limit: 5, windowSeconds: 60 },
+    boost: { limit: 5, windowSeconds: 60 },
+    referral: { limit: 5, windowSeconds: 60 },
+    analytics: { limit: 30, windowSeconds: 60 },
+    ai: { limit: 10, windowSeconds: 60 },
+    spotify: { limit: 10, windowSeconds: 60 },
 };
 
 export async function withRateLimit(userId: string, action: keyof typeof LIMITS): Promise<NextResponse | null> {

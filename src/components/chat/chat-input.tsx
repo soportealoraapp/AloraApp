@@ -192,6 +192,13 @@ export function ChatInput({ onSend, onSendImage, onSendVoice, onTyping, disabled
     return () => {
       if (recordingTimerRef.current) clearInterval(recordingTimerRef.current);
       if (recordedUrl) URL.revokeObjectURL(recordedUrl);
+      // Stop microphone on unmount to prevent leaks
+      if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
+        mediaRecorderRef.current.stop();
+      }
+      if (mediaRecorderRef.current?.stream) {
+        mediaRecorderRef.current.stream.getTracks().forEach(track => track.stop());
+      }
     };
   }, [recordedUrl]);
 
@@ -367,7 +374,7 @@ export function ChatInput({ onSend, onSendImage, onSendVoice, onTyping, disabled
           placeholder={placeholder}
           disabled={disabled || sending}
           className="flex-1 rounded-2xl bg-muted/50 border-muted focus-visible:ring-primary/20"
-          maxLength={500}
+          maxLength={1000}
           enterKeyHint="send"
         />
         {message.trim() ? (

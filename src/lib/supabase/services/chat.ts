@@ -195,6 +195,10 @@ export const chatService = {
 
         let entry = typingChannels.get(key)
         if (!entry) {
+            // Store a pending promise immediately to prevent race conditions
+            const pendingEntry = {} as any
+            typingChannels.set(key, pendingEntry)
+
             const channel = supabase.channel(key, {
                 config: { presence: { key: userId } },
             })

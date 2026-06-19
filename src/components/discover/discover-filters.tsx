@@ -164,7 +164,8 @@ export function DiscoverFilters({ open, onOpenChange, onApplyFilters, initialFil
     setFeaturedOnly(false);
     setHighCompatibility(false);
     setActiveToday(false);
-    onIntentChange?.('dating');
+    // Don't reset intent here — let the parent handle it via DEFAULT_FILTERS
+    // onIntentChange?.('dating');
     onApplyFilters(defaultFilters);
   }
 

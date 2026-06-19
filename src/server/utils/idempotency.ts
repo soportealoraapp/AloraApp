@@ -48,18 +48,37 @@ export async function checkIdempotency(
         };
     }
 
-    // First use — claim it
-    await claimIdempotency(key, userId, action);
+    // First use — claim it atomically
+    const claimed = await claimIdempotency(key, userId, action);
+    if (!claimed) {
+        // Race condition: another request claimed it first — return the existing response
+        const raceExisting = await prisma.idempotencyKey.findUnique({
+            where: { key_action: { key, action } },
+        });
+        if (raceExisting) {
+            return {
+                ok: false,
+                status: raceExisting.responseStatus || 200,
+                body: raceExisting.responseBody,
+            };
+        }
+    }
     return { ok: true };
 }
 
-async function claimIdempotency(key: string, userId: string, action: string) {
-    await prisma.idempotencyKey.create({
-        data: { key, userId, action },
-    }).catch((err) => {
-        // Ignore unique constraint violation (race condition)
-        if (err.code !== 'P2002') throw err;
-    });
+async function claimIdempotency(key: string, userId: string, action: string): Promise<boolean> {
+    try {
+        await prisma.idempotencyKey.create({
+            data: { key, userId, action },
+        });
+        return true;
+    } catch (err: any) {
+        if (err.code === 'P2002') {
+            // Unique constraint violation — another request claimed it
+            return false;
+        }
+        throw err;
+    }
 }
 
 /**

@@ -4,13 +4,24 @@ import { prisma } from '@/lib/prisma';
 
 export async function POST(request: Request) {
     try {
-        const body = await request.json();
+        // Read raw body first for HMAC verification (must be before json parsing)
+        const rawBody = await request.text();
+        const body = JSON.parse(rawBody);
         const event = body.meta?.event_name;
 
-        // Verify webhook signature (basic check)
+        // Verify webhook signature (HMAC-SHA256)
         const signature = request.headers.get('x-signature');
         const secret = process.env.LEMON_SQUEEZY_WEBHOOK_SECRET;
-        if (secret && signature !== secret) {
+        if (!secret) {
+            console.error('[webhook] LEMON_SQUEEZY_WEBHOOK_SECRET not configured');
+            return NextResponse.json({ error: 'Server misconfigured' }, { status: 500 });
+        }
+        if (!signature) {
+            return NextResponse.json({ error: 'Missing signature' }, { status: 401 });
+        }
+        const crypto = await import('crypto');
+        const expected = crypto.createHmac('sha256', secret).update(rawBody).digest('hex');
+        if (!crypto.timingSafeEqual(Buffer.from(signature), Buffer.from(expected))) {
             return NextResponse.json({ error: 'Invalid signature' }, { status: 401 });
         }
 

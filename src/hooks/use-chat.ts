@@ -162,8 +162,10 @@ export function useChat(matchId: string) {
                     text: text.trim(),
                     type: 'text',
                 });
-                // Keep optimistic message as pending
-                setMessages(prev => prev.filter(m => m.id !== optimisticId));
+                // Keep optimistic message visible with pending status
+                setMessages(prev => prev.map(m =>
+                    m.id === optimisticId ? { ...m, status: 'pending' as const } : m
+                ));
                 return;
             }
 

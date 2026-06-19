@@ -26,31 +26,35 @@ export async function GET(request: NextRequest) {
         });
 
         if (existingPicks.length >= 3) {
-            const picks = await Promise.all(
-                existingPicks.map(async (pick) => {
-                    const profile = await prisma.profile.findUnique({
-                        where: { userId: pick.profileId },
-                        select: {
-                            displayName: true,
-                            age: true,
-                            city: true,
-                            photos: true,
-                            interests: true,
-                            values: true,
-                            isVerified: true,
-                            lastActiveAt: true,
-                            bio: true,
-                        },
-                    });
-                    return {
-                        id: pick.profileId,
-                        reason: pick.reason,
-                        score: pick.score,
-                        ...profile,
-                        photo: profile?.photos?.[0] || '/placeholder.svg',
-                    };
-                })
-            );
+            // Batch fetch all profiles in a single query (avoids N+1)
+            const profileIds = existingPicks.map(pick => pick.profileId);
+            const profiles = await prisma.profile.findMany({
+                where: { userId: { in: profileIds } },
+                select: {
+                    userId: true,
+                    displayName: true,
+                    age: true,
+                    city: true,
+                    photos: true,
+                    interests: true,
+                    values: true,
+                    isVerified: true,
+                    lastActiveAt: true,
+                    bio: true,
+                },
+            });
+            const profileMap = new Map(profiles.map(p => [p.userId, p]));
+
+            const picks = existingPicks.map((pick) => {
+                const profile = profileMap.get(pick.profileId);
+                return {
+                    id: pick.profileId,
+                    reason: pick.reason,
+                    score: pick.score,
+                    ...profile,
+                    photo: profile?.photos?.[0] || '/placeholder.svg',
+                };
+            });
             return NextResponse.json({ picks, cached: true });
         }
 

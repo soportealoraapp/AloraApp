@@ -123,6 +123,11 @@ export async function POST() {
         }
 
         // Update profile: increment rewinds, decrement daily likes (safe floor at 0), clear last swipe
+        // If the interaction was a superlike, also restore superlikesRemaining
+        const superlikeRestore = interaction.type === 'superlike'
+            ? { superlikesRemaining: { increment: 1 } }
+            : {};
+
         if (profile.dailyLikesUsed > 0) {
             await prisma.profile.update({
                 where: { userId: user.id },
@@ -131,6 +136,7 @@ export async function POST() {
                     dailyLikesUsed: { decrement: 1 },
                     lastSwipeId: null,
                     lastSwipeAt: null,
+                    ...superlikeRestore,
                 }
             });
         } else {
@@ -140,6 +146,7 @@ export async function POST() {
                     rewindsUsed: { increment: 1 },
                     lastSwipeId: null,
                     lastSwipeAt: null,
+                    ...superlikeRestore,
                 }
             });
         }

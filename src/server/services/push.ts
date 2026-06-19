@@ -17,19 +17,19 @@ const MAX_RETRY_ATTEMPTS = 1;
 const deduplicationCache = new Map<string, number>();
 const rateLimitCache = new Map<string, { count: number; resetAt: number }>();
 
-function getDeduplicationKey(userId: string, type: string): string {
-    return `${userId}:${type}`;
+function getDeduplicationKey(userId: string, type: string, fromUserId?: string): string {
+    return fromUserId ? `${userId}:${type}:${fromUserId}` : `${userId}:${type}`;
 }
 
-function isDeduplicated(userId: string, type: string): boolean {
-    const key = getDeduplicationKey(userId, type);
+function isDeduplicated(userId: string, type: string, fromUserId?: string): boolean {
+    const key = getDeduplicationKey(userId, type, fromUserId);
     const lastSent = deduplicationCache.get(key);
     if (!lastSent) return false;
     return (Date.now() - lastSent) < DEDUP_WINDOW_MINUTES * 60 * 1000;
 }
 
-function markSent(userId: string, type: string): void {
-    const key = getDeduplicationKey(userId, type);
+function markSent(userId: string, type: string, fromUserId?: string): void {
+    const key = getDeduplicationKey(userId, type, fromUserId);
     deduplicationCache.set(key, Date.now());
     if (deduplicationCache.size > 1000) {
         const firstKey = deduplicationCache.keys().next().value;
@@ -60,7 +60,7 @@ export async function sendPushToUser(userId: string, payload: PushPayload) {
     try {
         const notifType = payload.data?.type || 'system';
 
-        if (isDeduplicated(userId, notifType)) {
+        if (isDeduplicated(userId, notifType, payload.data?.fromUserId)) {
             return { succeeded: 0, failed: 0, deduplicated: true };
         }
 
@@ -169,7 +169,7 @@ export async function sendPushToUser(userId: string, payload: PushPayload) {
             }
         }
 
-        markSent(userId, notifType);
+        markSent(userId, notifType, payload.data?.fromUserId);
         incrementRateLimit(userId);
 
         return { succeeded, failed };

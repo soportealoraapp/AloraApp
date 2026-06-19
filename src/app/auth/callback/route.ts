@@ -79,7 +79,9 @@ export async function GET(request: Request) {
                     }
                 }
             } catch (err) {
-                console.warn('[auth/callback] profile check/create skipped:', err);
+                console.error('[auth/callback] profile check/create failed:', err);
+                // Redirect to error page instead of silently continuing to onboarding
+                destination = '/login?error=profile_creation_failed';
             }
 
             const forwardedHost = request.headers.get('x-forwarded-host');

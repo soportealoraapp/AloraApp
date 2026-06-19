@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { withRateLimit } from '@/server/utils/api-rate-limit';
 
 const VALID_CATEGORIES = [
     'spam',
@@ -22,6 +23,9 @@ export async function POST(request: NextRequest) {
     if (!user) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
+
+    const rateLimitResponse = await withRateLimit(user.id, 'report');
+    if (rateLimitResponse) return rateLimitResponse;
 
     try {
         const { reportedId, category, matchId, messageIds, description } = await request.json();
@@ -55,12 +59,14 @@ export async function POST(request: NextRequest) {
         });
 
         // If there's enough reports on this user, auto-escalate trust status
+        // Only count reports from DIFFERENT users to prevent abuse
         if (category !== 'spam' && category !== 'other') {
-            const reportCount = await prisma.report.count({
-                where: { reportedId, status: 'pending' }
+            const distinctReporters = await prisma.report.groupBy({
+                by: ['reporterId'],
+                where: { reportedId, status: 'pending' },
             });
 
-            if (reportCount >= 3) {
+            if (distinctReporters.length >= 3) {
                 await prisma.profile.update({
                     where: { userId: reportedId },
                     data: { trustStatus: 'watchlist' },

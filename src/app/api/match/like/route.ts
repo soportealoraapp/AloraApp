@@ -68,20 +68,6 @@ export async function POST(request: NextRequest) {
                         },
                         { status: 429 }
                     );
-            }
-
-            // Superlike limit: 3 per day for free users
-            if (interactionType === 'superlike') {
-                    const profileSuper = await prisma.profile.findUnique({
-                        where: { userId: user.id },
-                        select: { superlikesRemaining: true }
-                    });
-                    if ((profileSuper?.superlikesRemaining ?? 0) <= 0) {
-                        return NextResponse.json(
-                            { error: 'Flechado limit reached', message: 'Has agotado tus Flechados diarios.' },
-                            { status: 429 }
-                        );
-                    }
                 }
 
                 // Atomic increment to prevent race conditions between concurrent requests
@@ -103,6 +89,20 @@ export async function POST(request: NextRequest) {
                             error: 'Daily like limit reached',
                             message: `Has alcanzado el límite de ${FREE_DAILY_LIKES_LIMIT} likes diarios.`
                         },
+                        { status: 429 }
+                    );
+                }
+            }
+
+            // Superlike limit: 3 per day for free users (outside free block so it applies to all)
+            if (interactionType === 'superlike') {
+                const profileSuper = await prisma.profile.findUnique({
+                    where: { userId: user.id },
+                    select: { superlikesRemaining: true, subscriptionStatus: true }
+                });
+                if (profileSuper?.subscriptionStatus === 'free' && (profileSuper?.superlikesRemaining ?? 0) <= 0) {
+                    return NextResponse.json(
+                        { error: 'Flechado limit reached', message: 'Has agotado tus Flechados diarios.' },
                         { status: 429 }
                     );
                 }
@@ -150,12 +150,18 @@ export async function POST(request: NextRequest) {
             }
         });
 
-        // Track last swipe + decrement superlikes if applicable
+        // Track last swipe + decrement superlikes if applicable (only for free users)
+        const currentProfile = await prisma.profile.findUnique({
+            where: { userId: user.id },
+            select: { subscriptionStatus: true }
+        });
         await prisma.profile.update({
             where: { userId: user.id },
             data: {
                 lastSwipeId: interaction.id,
-                ...(interactionType === 'superlike' ? { superlikesRemaining: { decrement: 1 } } : {}),
+                ...(interactionType === 'superlike' && currentProfile?.subscriptionStatus !== 'plus'
+                    ? { superlikesRemaining: { decrement: 1 } }
+                    : {}),
             }
         }).catch((err) => console.warn('[match/like] profile update failed:', err));
 

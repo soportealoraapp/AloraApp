@@ -58,7 +58,7 @@ export default function UserProfilePage() {
 
     const goBack = () => {
         if (typeof window !== 'undefined' && window.history.length > 1) {
-            goBack();
+            window.history.back();
         } else {
             router.push('/discover');
         }
@@ -68,7 +68,27 @@ export default function UserProfilePage() {
       if (!id || !user || isPreview) return;
       fetch(`/api/match/check?targetUserId=${id}`)
         .then(r => r.json())
-        .then(data => setHasExistingMatch(data.matched))
+        .then(data => {
+          setHasExistingMatch(data.matched);
+          // Restore like/flechado state from existing interaction
+          if (data.interactionType === 'superlike') {
+            setIsSuperMatched(true);
+          } else if (data.interactionType === 'like') {
+            setIsLiked(true);
+          }
+        })
+        .catch(() => {});
+    }, [id, user, isPreview]);
+
+    useEffect(() => {
+      if (!id || !user || isPreview || id === user?.id) return;
+      fetch(`/api/compatibility/score?targetId=${id}`)
+        .then(r => r.json())
+        .then(data => {
+          if (data.score !== undefined) {
+            setCompatibility({ score: data.score, breakdown: data.breakdown, explanations: data.explanations });
+          }
+        })
         .catch(() => {});
     }, [id, user, isPreview]);
 
