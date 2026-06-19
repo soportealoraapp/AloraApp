@@ -16,7 +16,7 @@ export function SecondChanceSection() {
   const { toast } = useToast();
 
   useEffect(() => {
-    fetch('/api/match/passed')
+    fetch('/api/match/passed?intent=dating')
       .then(r => r.json())
       .then(data => { setPassedProfiles(data.profiles || []); })
       .catch(() => {})

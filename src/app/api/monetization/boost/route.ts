@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { withRateLimit } from '@/server/utils/api-rate-limit';
 
 const BOOST_DURATION_MINUTES = 30;
 const FREE_BOOST_COOLDOWN_DAYS = 5;
@@ -13,6 +14,9 @@ export async function POST(request: Request) {
     if (!user) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
+
+    const rateLimitResponse = await withRateLimit(user.id, 'boost');
+    if (rateLimitResponse) return rateLimitResponse;
 
     try {
         const { ensureSubscriptionState } = await import('@/lib/subscription-helper');

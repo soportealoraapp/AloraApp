@@ -203,7 +203,10 @@ export function useChat(matchId: string) {
                     text: text.trim(),
                     type: 'text',
                 });
-                setMessages(prev => prev.filter(m => m.id !== optimisticId));
+                // Keep optimistic message visible with pending status (queued for retry)
+                setMessages(prev => prev.map(m =>
+                    m.id === optimisticId ? { ...m, status: 'pending' as const } : m
+                ));
                 return;
             }
 

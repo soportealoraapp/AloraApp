@@ -58,7 +58,7 @@ export function LikesCounterModal({ isOpen, onClose, remaining, dailyLikesLimit,
     return (
         <>
             <Dialog open={isOpen} onOpenChange={onClose}>
-                <DialogContent className="sm:max-w-[380px]" aria-labelledby="likes-modal-title" aria-describedby="likes-modal-desc">
+                <DialogContent className="sm:max-w-[380px] max-w-[95vw]" aria-labelledby="likes-modal-title" aria-describedby="likes-modal-desc">
                     <DialogHeader>
                         <DialogTitle className="sr-only">Likes para dar hoy</DialogTitle>
                         <DialogDescription className="sr-only" id="likes-modal-desc">Control de likes diarios</DialogDescription>

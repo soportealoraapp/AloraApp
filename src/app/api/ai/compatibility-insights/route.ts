@@ -22,6 +22,21 @@ export async function POST(request: Request) {
             return NextResponse.json({ error: 'candidateId required' }, { status: 400 });
         }
 
+        // IDOR protection: verify there is an active match between the two users
+        const existingMatch = await prisma.match.findFirst({
+            where: {
+                intent: 'dating',
+                OR: [
+                    { user1Id: user.id, user2Id: candidateId },
+                    { user1Id: candidateId, user2Id: user.id },
+                ],
+            },
+            select: { id: true },
+        });
+        if (!existingMatch) {
+            return NextResponse.json({ error: 'No match found with this user' }, { status: 403 });
+        }
+
         // Get both profiles
         const [userProfile, candidateProfile] = await Promise.all([
             prisma.profile.findUnique({

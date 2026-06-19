@@ -36,7 +36,8 @@ export async function GET(request: NextRequest) {
                     take: 1
                 }
             },
-            orderBy: { updatedAt: 'desc' }
+            orderBy: { updatedAt: 'desc' },
+            take: 100,
         });
 
         // Format for frontend

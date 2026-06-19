@@ -1,6 +1,6 @@
 'use client';
 
-import React, { createContext, useContext, useEffect, useRef, useState } from 'react';
+import React, { createContext, useContext, useEffect, useRef, useState, useMemo, useCallback } from 'react';
 import { User } from '@supabase/supabase-js';
 import { createClient } from '@/lib/supabase/client';
 import { profileService } from '@/lib/supabase/services/profile';
@@ -30,13 +30,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const [profile, setProfile] = useState<UserProfile | null>(null);
     const [authLoading, setAuthLoading] = useState(true);
     const [profileLoading, setProfileLoading] = useState(false);
-    const supabase = createClient();
+    const supabaseRef = useRef(createClient());
     const userRef = useRef<User | null>(null);
+
+    const supabase = supabaseRef.current;
 
     // Auto-register web push token when user is authenticated (PWA only)
     useWebPush(user?.id ?? null);
 
-    const refreshProfile = async () => {
+    const refreshProfile = useCallback(async () => {
         if (user) {
             try {
                 const userProfile = await profileService.getProfile(user.id);
@@ -45,7 +47,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                 console.error('Error loading profile:', error);
             }
         }
-    };
+    }, [user]);
 
     useEffect(() => {
         let cancelled = false;
@@ -141,24 +143,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         };
     }, []);
 
-    const handleSignOut = async () => {
+    const handleSignOut = useCallback(async () => {
         await supabase.auth.signOut();
         setUser(null);
         setProfile(null);
         userRef.current = null;
-    };
+    }, []);
+
+    const contextValue = useMemo(() => ({
+        user,
+        profile,
+        authLoading,
+        profileLoading,
+        signOut: handleSignOut,
+        refreshProfile,
+    }), [user, profile, authLoading, profileLoading, handleSignOut, refreshProfile]);
 
     return (
-        <AuthContext.Provider
-            value={{
-                user,
-                profile,
-                authLoading,
-                profileLoading,
-                signOut: handleSignOut,
-                refreshProfile,
-            }}
-        >
+        <AuthContext.Provider value={contextValue}>
             {children}
         </AuthContext.Provider>
     );

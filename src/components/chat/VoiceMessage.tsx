@@ -34,7 +34,7 @@ export function VoiceMessage({ audioUrl, duration: propDuration, isOwn = false }
         audioRef.current = audio;
 
         audio.addEventListener('loadedmetadata', () => {
-            setDuration(audio.duration);
+            setDuration(audio.duration || propDuration || 0);
         });
 
         audio.addEventListener('timeupdate', () => {

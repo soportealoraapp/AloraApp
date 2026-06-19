@@ -36,7 +36,8 @@ export async function GET(request: NextRequest) {
             include: {
                 fromUser: { include: { profile: true } }
             },
-            orderBy: { createdAt: 'desc' }
+            orderBy: { createdAt: 'desc' },
+            take: 100,
         });
 
         // Filter out those who are already matched?

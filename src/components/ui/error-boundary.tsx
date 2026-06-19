@@ -38,9 +38,9 @@ export class ErrorBoundary extends Component<Props, State> {
             <div className="mx-auto w-16 h-16 rounded-full bg-destructive/10 flex items-center justify-center">
               <AlertTriangle className="h-8 w-8 text-destructive" />
             </div>
-            <h2 className="text-xl font-bold">Algo salió mal</h2>
+            <h2 className="text-xl font-bold">Ups, algo no salió bien</h2>
             <p className="text-muted-foreground text-sm">
-              Ocurrió un error inesperado. Por favor intenta de nuevo.
+              No pudimos cargar esta sección. Por favor, intenta de nuevo.
             </p>
             <div className="flex gap-3 justify-center pt-2">
               <Button onClick={() => window.location.reload()}>

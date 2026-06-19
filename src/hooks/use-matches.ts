@@ -34,8 +34,10 @@ export function useMatches() {
 
             // Cookie auth handles authentication automatically
             const suffix = intent ? `?intent=${intent}` : '';
-            const matchesResponse = await authFetch(`/api/match/feed${suffix}`);
-            const newMatchesResponse = await authFetch(`/api/match/new${suffix}`);
+            const [matchesResponse, newMatchesResponse] = await Promise.all([
+                authFetch(`/api/match/feed${suffix}`),
+                authFetch(`/api/match/new${suffix}`),
+            ]);
 
             if (!matchesResponse.ok || !newMatchesResponse.ok) {
                 throw new Error('Error al cargar matches');

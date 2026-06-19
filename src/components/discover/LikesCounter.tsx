@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import { Heart } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
 import { cn } from '@/lib/utils';
@@ -28,12 +28,20 @@ export function LikesCounter({
 }: LikesCounterProps) {
     const [now, setNow] = useState(new Date());
     const [showModal, setShowModal] = useState(false);
-    const prevResetRef = useState(resetAt)[0];
+    const prevResetRef = useRef(resetAt);
 
     useEffect(() => {
         const interval = setInterval(() => setNow(new Date()), 1000);
         return () => clearInterval(interval);
     }, []);
+
+    // Detect reset (new day) and trigger callback
+    useEffect(() => {
+        if (prevResetRef.current !== resetAt) {
+            prevResetRef.current = resetAt;
+            onReset?.();
+        }
+    }, [resetAt, onReset]);
 
     const resetDate = useMemo(() => {
         const d = new Date(resetAt);

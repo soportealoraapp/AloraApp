@@ -29,14 +29,13 @@ function NotificationItem({ notification, onRead, onDelete }: { notification: an
     } else if (type === 'message' || type === 'new_message') {
       const chatId = data.conversationId || data.matchId || data.id;
       if (chatId) router.push(`/chat/${chatId}`);
-    } else if (type === 'like' || type === 'new_like') {
+    } else if (type === 'like' || type === 'new_like' || type === 'like_received') {
       const userId = data.fromUserId || data.userId || data.id;
       if (userId) router.push(`/profile/${userId}`);
     } else if (type === 'quiz' || type === 'compatibility') {
       router.push('/compatibility');
     } else if (type === 'profile_visit') {
-      const userId = data.visitorId || data.fromUserId || data.userId || data.id;
-      if (userId) router.push(`/profile/${userId}`);
+      router.push('/profile/visitors');
     } else if (type === 'daily_question') {
       router.push('/compatibility');
     } else if (type === 'streak_at_risk' || type === 'daily_compatibility') {

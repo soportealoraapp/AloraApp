@@ -92,18 +92,6 @@ export default function UserProfilePage() {
         .catch(() => {});
     }, [id, user, isPreview]);
 
-    useEffect(() => {
-      if (!id || !user || isPreview || id === user?.id) return;
-      fetch(`/api/compatibility/score?targetId=${id}`)
-        .then(r => r.json())
-        .then(data => {
-          if (data.score !== undefined) {
-            setCompatibility({ score: data.score, breakdown: data.breakdown, explanations: data.explanations });
-          }
-        })
-        .catch(() => {});
-    }, [id, user, isPreview]);
-
     if (loading) {
         return (
             <div>

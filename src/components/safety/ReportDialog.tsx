@@ -75,7 +75,7 @@ export function ReportDialog({ isOpen, onClose, reportedId, matchId, messageIds 
 
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>
-            <DialogContent className="sm:max-w-[425px]">
+            <DialogContent className="sm:max-w-[425px] max-w-[95vw]">
                 <DialogHeader>
                     <div className="flex items-center gap-2 text-destructive mb-2">
                         <AlertCircle className="h-5 w-5" />

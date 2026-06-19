@@ -576,6 +576,7 @@ export default function DiscoverPage() {
                                   src={p.photos?.[0] || '/placeholder.svg'}
                                   alt={p.displayName || ''}
                                   fill
+                                  sizes="(max-width: 640px) 50vw, 33vw"
                                   className="object-cover"
                                   loading="lazy"
                                 />

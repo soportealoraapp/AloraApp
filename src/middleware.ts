@@ -101,11 +101,12 @@ export async function middleware(request: NextRequest) {
                 .select('isCompleted')
                 .eq('userId', user.id)
                 .maybeSingle();
-            if (profile && !profile.isCompleted) {
+            if (!profile || !profile.isCompleted) {
                 return applySecurityHeaders(NextResponse.redirect(new URL('/onboarding', modifiedRequest.url)));
             }
         } catch {
-            // Allow through if check fails
+            // Deny access if profile check fails (fail-closed for security)
+            return applySecurityHeaders(NextResponse.redirect(new URL('/onboarding', modifiedRequest.url)));
         }
     }
 
@@ -142,10 +143,6 @@ export async function middleware(request: NextRequest) {
     }
 
     applySecurityHeaders(response);
-    response.headers.set('x-feature-flags', JSON.stringify({
-        aiWingman: true,
-        superBoost: true
-    }));
 
     return response;
 }

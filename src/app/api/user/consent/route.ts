@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { prisma } from '@/lib/prisma';
 
 export async function POST(request: Request) {
     try {
@@ -16,6 +17,18 @@ export async function POST(request: Request) {
         if (!version) {
             return NextResponse.json({ error: 'Version required' }, { status: 400 });
         }
+
+        // Persist GDPR consent as an analytics event
+        await prisma.analyticsEvent.create({
+            data: {
+                userId: user.id,
+                event: 'gdpr_consent',
+                metadata: {
+                    version,
+                    consentedAt: new Date().toISOString(),
+                },
+            },
+        });
 
         return NextResponse.json({ success: true, version });
     } catch (error) {

@@ -77,13 +77,19 @@ export function useNotifications({
     const markRead = useCallback(async (ids: string[]) => {
         if (ids.length === 0) return;
         
-        // Save previous state for rollback
-        const previousNotifications = notifications;
-        const previousUnreadCount = unreadCount;
+        // Capture current state for rollback
+        let prevNotifications: AppNotification[] = [];
+        let prevUnreadCount = 0;
         
-        // Optimistic update
-        setNotifications(prev => prev.map(n => ids.includes(n.id) && !n.readAt ? { ...n, readAt: new Date().toISOString() } : n));
-        setUnreadCount(prev => Math.max(0, prev - ids.filter(id => notifications.find(n => n.id === id && !n.readAt)).length));
+        // Optimistic update using functional state updates to avoid stale closures
+        setNotifications(prev => {
+            prevNotifications = prev;
+            return prev.map(n => ids.includes(n.id) && !n.readAt ? { ...n, readAt: new Date().toISOString() } : n);
+        });
+        setUnreadCount(prev => {
+            prevUnreadCount = prev;
+            return Math.max(0, prev - ids.length);
+        });
         
         try {
             const res = await fetch('/api/notifications', {
@@ -94,20 +100,26 @@ export function useNotifications({
             if (!res.ok) throw new Error('Failed to mark as read');
         } catch (err) {
             // Rollback on failure
-            setNotifications(previousNotifications);
-            setUnreadCount(previousUnreadCount);
+            setNotifications(prevNotifications);
+            setUnreadCount(prevUnreadCount);
             console.warn('[use-notifications] markRead failed:', err);
         }
-    }, [notifications, unreadCount]);
+    }, []);
 
     const markAllRead = useCallback(async () => {
-        // Save previous state for rollback
-        const previousNotifications = notifications;
-        const previousUnreadCount = unreadCount;
+        // Capture current state for rollback
+        let prevNotifications: AppNotification[] = [];
+        let prevUnreadCount = 0;
         
-        // Optimistic update
-        setNotifications(prev => prev.map(n => n.readAt ? n : { ...n, readAt: new Date().toISOString() }));
-        setUnreadCount(0);
+        // Optimistic update using functional state updates to avoid stale closures
+        setNotifications(prev => {
+            prevNotifications = prev;
+            return prev.map(n => n.readAt ? n : { ...n, readAt: new Date().toISOString() });
+        });
+        setUnreadCount(prev => {
+            prevUnreadCount = prev;
+            return 0;
+        });
         
         try {
             const res = await fetch('/api/notifications', {
@@ -118,18 +130,21 @@ export function useNotifications({
             if (!res.ok) throw new Error('Failed to mark all as read');
         } catch (err) {
             // Rollback on failure
-            setNotifications(previousNotifications);
-            setUnreadCount(previousUnreadCount);
+            setNotifications(prevNotifications);
+            setUnreadCount(prevUnreadCount);
             console.warn('[use-notifications] markAllRead failed:', err);
         }
-    }, [notifications, unreadCount]);
+    }, []);
 
     const deleteNotification = useCallback(async (id: string) => {
-        // Save previous state for rollback
-        const previousNotifications = notifications;
+        // Capture current state for rollback
+        let prevNotifications: AppNotification[] = [];
         
-        // Optimistic update
-        setNotifications(prev => prev.filter(n => n.id !== id));
+        // Optimistic update using functional state update to avoid stale closures
+        setNotifications(prev => {
+            prevNotifications = prev;
+            return prev.filter(n => n.id !== id);
+        });
         
         try {
             const res = await fetch(`/api/notifications?id=${id}`, {
@@ -138,10 +153,10 @@ export function useNotifications({
             if (!res.ok) throw new Error('Failed to delete notification');
         } catch (err) {
             // Rollback on failure
-            setNotifications(previousNotifications);
+            setNotifications(prevNotifications);
             console.warn('[use-notifications] deleteNotification failed:', err);
         }
-    }, [notifications]);
+    }, []);
 
     return {
         notifications,

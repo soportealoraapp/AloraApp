@@ -12,8 +12,8 @@ export default function Error({
     return (
         <div className="min-h-screen flex items-center justify-center bg-background">
             <div className="text-center space-y-4 max-w-md px-4">
-                <h1 className="text-4xl font-bold text-foreground">Algo salió mal</h1>
-                <p className="text-muted-foreground">Ocurrió un error inesperado. Intenta de nuevo.</p>
+                <h1 className="text-4xl font-bold text-foreground">Ups, algo no salió bien</h1>
+                <p className="text-muted-foreground">No pudimos completar tu solicitud. Por favor, intenta de nuevo.</p>
                 {error.digest && (
                     <p className="text-xs text-muted-foreground/60">Error ID: {error.digest}</p>
                 )}

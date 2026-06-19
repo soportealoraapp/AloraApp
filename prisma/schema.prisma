@@ -301,6 +301,7 @@ model Interaction {
   @@unique([fromUserId, toUserId, intent])
   @@index([fromUserId])
   @@index([toUserId])
+  @@index([toUserId, type, deletedAt])
   @@map("interactions")
 }
 
@@ -624,6 +625,7 @@ model Notification {
   createdAt DateTime @default(now())
 
   @@index([userId])
+  @@index([userId, readAt])
   @@map("notifications")
 }
 

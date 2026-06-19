@@ -237,8 +237,6 @@ export const jobQueue = new JobQueue();
 // ========== WORKER EXECUTOR ==========
 
 export async function processJob(job: QueueJob): Promise<void> {
-    console.log(`Processing job ${job.id}: ${job.type}`);
-
     try {
         switch (job.type) {
             case 'cleanup_expired':
@@ -254,7 +252,7 @@ export async function processJob(job: QueueJob): Promise<void> {
                 // Batch process analytics events
                 break;
             default:
-                console.log(`No processor for job type: ${job.type}`);
+                // Unknown job type — no action needed
         }
 
         await jobQueue.complete(job.id);

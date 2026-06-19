@@ -158,15 +158,35 @@ async function scoreQuizzes(userIdA: string, userIdB: string, quizzesA?: any[], 
         const quizA = qa.find(q => q.quizId === quizB.quizId);
         if (!quizA) continue;
 
-        // Compare answers
+        // Compare answers by score (not by option ID) for accurate compatibility
         const answersA = quizA.answers as Record<string, string>;
         const answersB = quizB.answers as Record<string, string>;
+        // Import quiz data to resolve option scores
+        const { COMPATIBILITY_QUIZZES } = await import('@/data/quizzes-data');
+        const quizDef = COMPATIBILITY_QUIZZES.find(q => q.id === quizB.quizId);
         const allKeys = new Set([...Object.keys(answersA), ...Object.keys(answersB)]);
-        let matches = 0;
+        let totalScoreDiff = 0;
+        let comparedQuestions = 0;
         for (const key of allKeys) {
-            if (answersA[key] === answersB[key]) matches++;
+            const optionA = answersA[key];
+            const optionB = answersB[key];
+            if (!optionA || !optionB) continue;
+            if (quizDef) {
+                const question = quizDef.questions.find(q => q.id === key);
+                if (question?.options) {
+                    const scoreA = question.options.find(o => o.id === optionA)?.score ?? 5;
+                    const scoreB = question.options.find(o => o.id === optionB)?.score ?? 5;
+                    // Normalize to 0-1 range: max possible diff is 7 (score range 3-10)
+                    totalScoreDiff += 1 - Math.abs(scoreA - scoreB) / 7;
+                    comparedQuestions++;
+                }
+            } else {
+                // Fallback: exact ID match if quiz definition not found
+                if (optionA === optionB) totalScoreDiff += 1;
+                comparedQuestions++;
+            }
         }
-        totalSimilarity += allKeys.size > 0 ? (matches / allKeys.size) * 100 : 0;
+        totalSimilarity += comparedQuestions > 0 ? (totalScoreDiff / comparedQuestions) * 100 : 0;
     }
 
     return totalSimilarity / sharedQuizzes.length;

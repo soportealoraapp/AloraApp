@@ -54,7 +54,7 @@ export function BlockDialog({ isOpen, onClose, blockedId, onSuccess }: BlockDial
 
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>
-            <DialogContent className="sm:max-w-[400px]">
+            <DialogContent className="sm:max-w-[400px] max-w-[95vw]">
                 <DialogHeader>
                     <div className="flex items-center gap-2 text-destructive mb-2">
                         <ShieldAlert className="h-5 w-5" />

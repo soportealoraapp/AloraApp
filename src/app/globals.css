@@ -199,20 +199,6 @@ html {
     @apply min-h-[44px] min-w-[44px] flex items-center justify-center;
   }
 
-  /* Safe area insets for notched phones */
-  .pb-safe {
-    padding-bottom: env(safe-area-inset-bottom, 0px);
-  }
-  .pt-safe {
-    padding-top: env(safe-area-inset-top, 0px);
-  }
-  .pl-safe {
-    padding-left: env(safe-area-inset-left, 0px);
-  }
-  .pr-safe {
-    padding-right: env(safe-area-inset-right, 0px);
-  }
-
   /* Consistent focus ring */
   .focus-ring {
     @apply focus-visible:ring-2 focus-visible:ring-primary/70 focus-visible:ring-offset-2 focus-visible:outline-none;

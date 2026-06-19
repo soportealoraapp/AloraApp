@@ -56,7 +56,7 @@ const TIERS = [
 export function PaywallModal({ isOpen, onClose }: PaywallModalProps) {
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>
-            <DialogContent className="sm:max-w-[500px] p-0 overflow-hidden border-none rounded-3xl shadow-2xl">
+            <DialogContent className="sm:max-w-[500px] max-w-[95vw] p-0 overflow-hidden border-none rounded-3xl shadow-2xl">
                 <DialogHeader>
                     <DialogTitle className="sr-only">Elige tu plan</DialogTitle>
                     <DialogDescription className="sr-only">Suscripción premium para desbloquear beneficios</DialogDescription>

@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { redeemReferral } from '@/server/actions/referral';
+import { withRateLimit } from '@/server/utils/api-rate-limit';
 
 export async function POST(request: Request) {
     let body: unknown;
@@ -9,9 +10,16 @@ export async function POST(request: Request) {
         return NextResponse.json({ ok: false, reason: 'invalid_body' }, { status: 400 });
     }
 
+    // Rate limit referral redemption attempts
     const code = typeof body === 'object' && body !== null && 'code' in body
         ? String((body as { code?: unknown }).code ?? '')
         : '';
+
+    // Use code as rate limit key to prevent brute-force
+    if (code) {
+        const rateLimitResponse = await withRateLimit(`referral:${code}`, 'referral');
+        if (rateLimitResponse) return rateLimitResponse;
+    }
 
     const result = await redeemReferral(code);
 
