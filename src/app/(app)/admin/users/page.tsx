@@ -60,16 +60,16 @@ export default function AdminUsersPage() {
                 </div>
                 <div className="flex gap-2 ml-auto">
                     <div className="relative">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-600" />
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/60" />
                         <Input
                             placeholder="Buscar..."
-                            className="pl-9 h-9 w-48 bg-gray-800 border-gray-700 text-sm text-gray-200"
+                            className="pl-9 h-9 w-48 bg-muted border-border text-sm text-foreground"
                             value={search}
                             onChange={e => setSearch(e.target.value)}
                         />
                     </div>
                     <select value={trustFilter} onChange={e => setTrustFilter(e.target.value)}
-                        className="bg-gray-800 border border-gray-700 rounded-lg px-3 py-1.5 text-sm text-gray-300">
+                        className="bg-muted border border-border rounded-lg px-3 py-1.5 text-sm text-foreground">
                         <option value="all">Todos</option>
                         <option value="clean">Clean</option>
                         <option value="watchlist">Watchlist</option>
@@ -80,15 +80,15 @@ export default function AdminUsersPage() {
 
             <main className="p-6 max-w-6xl mx-auto space-y-2">
                 {loading ? (
-                    [1, 2, 3].map(i => <Skeleton key={i} className="h-20 rounded-xl bg-gray-800" />)
+                    [1, 2, 3].map(i => <Skeleton key={i} className="h-20 rounded-xl bg-muted" />)
                 ) : (
                     users.map(u => (
-                        <div key={u.id} className="bg-gray-900 border border-gray-800 rounded-xl p-4 flex items-center gap-4">
-                            <div className="relative h-12 w-12 rounded-full overflow-hidden bg-gray-800 flex-shrink-0">
+                        <div key={u.id} className="bg-card border border-border rounded-xl p-4 flex items-center gap-4">
+                            <div className="relative h-12 w-12 rounded-full overflow-hidden bg-muted flex-shrink-0">
                                 {u.profile?.photos?.[0] ? (
                                     <Image src={u.profile.photos[0]} alt="" fill className="object-cover" loading="lazy" />
                                 ) : (
-                                    <div className="h-full w-full flex items-center justify-center text-gray-600">?</div>
+                                    <div className="h-full w-full flex items-center justify-center text-muted-foreground">?</div>
                                 )}
                             </div>
                             <div className="flex-1 min-w-0">
@@ -106,7 +106,7 @@ export default function AdminUsersPage() {
                                         {u.profile?.trustStatus}
                                     </Badge>
                                 </div>
-                                <div className="flex items-center gap-3 text-xs text-gray-500 mt-0.5">
+                                <div className="flex items-center gap-3 text-xs text-muted-foreground mt-0.5">
                                     <span>{u.email}</span>
                                     <span>Score: {u.profile?.reputationScore}</span>
                                     <span>Matches: {(u._count.matchesAsUser1 + u._count.matchesAsUser2)}</span>
@@ -115,21 +115,21 @@ export default function AdminUsersPage() {
                                 </div>
                             </div>
                             <div className="flex gap-1.5 flex-shrink-0">
-                                <Button variant="ghost" size="sm" className="text-gray-500 h-8 text-xs"
+                                <Button variant="ghost" size="sm" className="text-muted-foreground h-8 text-xs"
                                     onClick={() => handleAction(u.id, 'shadowban')} title="Shadowban">
                                     <EyeOff className="h-3 w-3" />
                                 </Button>
-                                <Button variant="ghost" size="sm" className="text-gray-500 h-8 text-xs"
+                                <Button variant="ghost" size="sm" className="text-muted-foreground h-8 text-xs"
                                     onClick={() => handleAction(u.id, 'suspend')} title="Suspend">
                                     <ShieldAlert className="h-3 w-3" />
+                                </Button>
+                                <Button variant="ghost" size="sm" className="text-muted-foreground h-8 text-xs"
+                                    onClick={() => handleAction(u.id, 'set_role', u.role === 'admin' ? 'user' : 'admin')} title="Toggle admin">
+                                    <Shield className="h-3 w-3" />
                                 </Button>
                                 <Button variant="ghost" size="sm" className="text-red-500 h-8 text-xs"
                                     onClick={() => handleAction(u.id, 'ban')} title="Ban">
                                     <Ban className="h-3 w-3" />
-                                </Button>
-                                <Button variant="ghost" size="sm" className="text-gray-500 h-8 text-xs"
-                                    onClick={() => handleAction(u.id, 'set_role', u.role === 'admin' ? 'user' : 'admin')} title="Toggle admin">
-                                    <Shield className="h-3 w-3" />
                                 </Button>
                             </div>
                         </div>

@@ -94,17 +94,28 @@ export async function POST(request: NextRequest) {
                 }
             }
 
-            // Superlike limit: 3 per day for free users (outside free block so it applies to all)
+            // Superlike limit: 3 per day for free users — atomic check-and-decrement
             if (interactionType === 'superlike') {
                 const profileSuper = await prisma.profile.findUnique({
                     where: { userId: user.id },
-                    select: { superlikesRemaining: true, subscriptionStatus: true }
+                    select: { subscriptionStatus: true }
                 });
-                if (profileSuper?.subscriptionStatus === 'free' && (profileSuper?.superlikesRemaining ?? 0) <= 0) {
-                    return NextResponse.json(
-                        { error: 'Flechado limit reached', message: 'Has agotado tus Flechados diarios.' },
-                        { status: 429 }
-                    );
+                if (profileSuper?.subscriptionStatus === 'free') {
+                    const updated = await prisma.profile.updateMany({
+                        where: {
+                            userId: user.id,
+                            superlikesRemaining: { gt: 0 }
+                        },
+                        data: {
+                            superlikesRemaining: { decrement: 1 }
+                        }
+                    });
+                    if (updated.count === 0) {
+                        return NextResponse.json(
+                            { error: 'Flechado limit reached', message: 'Has agotado tus Flechados diarios.' },
+                            { status: 429 }
+                        );
+                    }
                 }
             }
         }
@@ -150,18 +161,11 @@ export async function POST(request: NextRequest) {
             }
         });
 
-        // Track last swipe + decrement superlikes if applicable (only for free users)
-        const currentProfile = await prisma.profile.findUnique({
-            where: { userId: user.id },
-            select: { subscriptionStatus: true }
-        });
+        // Track last swipe
         await prisma.profile.update({
             where: { userId: user.id },
             data: {
                 lastSwipeId: interaction.id,
-                ...(interactionType === 'superlike' && currentProfile?.subscriptionStatus !== 'plus'
-                    ? { superlikesRemaining: { decrement: 1 } }
-                    : {}),
             }
         }).catch((err) => console.warn('[match/like] profile update failed:', err));
 

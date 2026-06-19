@@ -79,8 +79,12 @@ export async function POST(request: NextRequest) {
         }
 
         // Delete Supabase auth user to prevent continued authentication
-        const { createClient } = await import('@/lib/supabase/server');
-        const supabaseAdmin = await createClient();
+        // Requires service_role key — anon key cannot delete auth users
+        const { createClient: createServiceClient } = await import('@supabase/supabase-js');
+        const supabaseAdmin = createServiceClient(
+            process.env.NEXT_PUBLIC_SUPABASE_URL!,
+            process.env.SUPABASE_SERVICE_ROLE_KEY!
+        );
         const { error: deleteAuthError } = await supabaseAdmin.auth.admin.deleteUser(user.id);
         if (deleteAuthError) {
             console.error('Failed to delete Supabase auth user:', deleteAuthError);

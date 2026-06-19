@@ -75,7 +75,7 @@ export default function AdminReportsPage() {
                 <div className="flex gap-2 ml-auto">
                     {['pending', 'reviewed', 'dismissed', 'resolved'].map(s => (
                         <Button key={s} variant={filter === s ? 'default' : 'outline'} size="sm" onClick={() => setFilter(s)}
-                            className={filter === s ? '' : 'border-gray-700 text-gray-400'}>
+                            className={filter === s ? '' : 'border-border text-muted-foreground'}>
                             {s.charAt(0).toUpperCase() + s.slice(1)}
                         </Button>
                     ))}
@@ -84,22 +84,22 @@ export default function AdminReportsPage() {
 
             <main className="p-6 max-w-5xl mx-auto space-y-3">
                 {loading ? (
-                    [1, 2, 3].map(i => <Skeleton key={i} className="h-32 rounded-xl bg-gray-800" />)
+                    [1, 2, 3].map(i => <Skeleton key={i} className="h-32 rounded-xl bg-muted" />)
                 ) : reports.length === 0 ? (
-                    <div className="text-center py-16 text-gray-500">
-                        <CheckCircle className="h-12 w-12 mx-auto mb-4 text-gray-600" />
+                    <div className="text-center py-16 text-muted-foreground">
+                        <CheckCircle className="h-12 w-12 mx-auto mb-4 text-muted-foreground/60" />
                         <p>No hay reportes {filter === 'pending' ? 'pendientes' : 'en este estado'}</p>
                     </div>
                 ) : (
                     reports.map(report => (
-                        <div key={report.id} className="bg-gray-900 border border-gray-800 rounded-xl p-5 space-y-3">
+                        <div key={report.id} className="bg-card border border-border rounded-xl p-5 space-y-3">
                             <div className="flex items-start justify-between">
                                 <div className="flex items-start gap-4">
-                                    <div className="relative h-10 w-10 rounded-full overflow-hidden bg-gray-800 flex-shrink-0">
+                                    <div className="relative h-10 w-10 rounded-full overflow-hidden bg-muted flex-shrink-0">
                                         {report.reported?.profile?.photos?.[0] ? (
                                             <Image src={report.reported.profile.photos[0]} alt="" fill className="object-cover" loading="lazy" />
                                         ) : (
-                                            <div className="h-full w-full flex items-center justify-center text-gray-600 text-xs">
+                                            <div className="h-full w-full flex items-center justify-center text-muted-foreground text-xs">
                                                 {report.reported?.profile?.displayName?.[0] || '?'}
                                             </div>
                                         )}
@@ -110,17 +110,17 @@ export default function AdminReportsPage() {
                                             <Badge variant="outline" className={trustColor(report.reported?.profile?.trustStatus || '')}>
                                                 {report.reported?.profile?.trustStatus}
                                             </Badge>
-                                            <span className="text-xs text-gray-500">Score: {report.reported?.profile?.reputationScore}</span>
+                                            <span className="text-xs text-muted-foreground">Score: {report.reported?.profile?.reputationScore}</span>
                                         </div>
-                                        <div className="flex items-center gap-2 text-sm text-gray-400 mt-1">
-                                            <Badge variant="outline" className="text-xs border-gray-700">{report.reason}</Badge>
+                                        <div className="flex items-center gap-2 text-sm text-muted-foreground mt-1">
+                                            <Badge variant="outline" className="text-xs border-border">{report.reason}</Badge>
                                             <span>Reportes: {report.reportCount}</span>
                                             <span>{new Date(report.createdAt).toLocaleDateString()}</span>
                                         </div>
                                         {report.details && (
-                                            <p className="text-xs text-gray-500 mt-1 line-clamp-1">{report.details}</p>
+                                            <p className="text-xs text-muted-foreground mt-1 line-clamp-1">{report.details}</p>
                                         )}
-                                        <div className="text-xs text-gray-600 mt-1">
+                                        <div className="text-xs text-muted-foreground/60 mt-1">
                                             Reportado por: {report.reporter?.email || 'Unknown'}
                                         </div>
                                     </div>
@@ -131,9 +131,9 @@ export default function AdminReportsPage() {
                             </div>
 
                             {filter === 'pending' && (
-                                <div className="flex gap-2 pt-2 border-t border-gray-800">
+                                <div className="flex gap-2 pt-2 border-t border-border">
                                     <Button variant="outline" size="sm" onClick={() => handleAction(report.id, 'ignore')}
-                                        className="border-gray-700 text-gray-400 hover:text-white text-xs">
+                                        className="border-border text-muted-foreground hover:text-foreground text-xs">
                                         <XCircle className="h-3 w-3 mr-1" /> Ignorar
                                     </Button>
                                     <Button variant="outline" size="sm" onClick={() => handleAction(report.id, 'warn')}
@@ -141,7 +141,7 @@ export default function AdminReportsPage() {
                                         <AlertTriangle className="h-3 w-3 mr-1" /> Advertir
                                     </Button>
                                     <Button variant="outline" size="sm" onClick={() => handleAction(report.id, 'shadowban')}
-                                        className="border-gray-600 text-gray-300 hover:text-white text-xs">
+                                        className="border-border text-muted-foreground hover:text-foreground text-xs">
                                         <EyeOff className="h-3 w-3 mr-1" /> Shadowban
                                     </Button>
                                     <Button variant="outline" size="sm" onClick={() => handleAction(report.id, 'suspend')}

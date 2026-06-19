@@ -83,27 +83,14 @@ export async function middleware(request: NextRequest) {
     const isApiRoute = pathname.startsWith('/api/');
 
     if (!user) {
-        if (authCheckFailed) {
-            // Auth check failed/timeout — reject API routes, redirect app routes
-            if (isApiRoute) {
-                return applySecurityHeaders(NextResponse.json(
-                    { error: 'Authentication required' },
-                    { status: 401 }
-                ));
-            }
-            if (isAppRoute) {
-                return applySecurityHeaders(NextResponse.redirect(new URL('/login', modifiedRequest.url)));
-            }
-        } else {
-            if (isApiRoute) {
-                return applySecurityHeaders(NextResponse.json(
-                    { error: 'Authentication required' },
-                    { status: 401 }
-                ));
-            }
-            if (isAppRoute) {
-                return applySecurityHeaders(NextResponse.redirect(new URL('/login', modifiedRequest.url)));
-            }
+        if (isApiRoute) {
+            return applySecurityHeaders(NextResponse.json(
+                { error: 'Authentication required' },
+                { status: 401 }
+            ));
+        }
+        if (isAppRoute) {
+            return applySecurityHeaders(NextResponse.redirect(new URL('/login', modifiedRequest.url)));
         }
     }
 

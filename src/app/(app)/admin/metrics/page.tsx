@@ -91,7 +91,7 @@ export default function AdminMetricsPage() {
                     <h1 className="text-xl font-bold">Métricas</h1>
                 </div>
                 <Button variant="outline" size="sm" onClick={exportCSV}
-                    className="ml-auto border-gray-700 text-gray-400 text-xs">
+                    className="ml-auto border-border text-muted-foreground text-xs">
                     Exportar CSV
                 </Button>
             </header>
@@ -99,14 +99,14 @@ export default function AdminMetricsPage() {
             <main className="p-6 max-w-6xl mx-auto space-y-6">
                 {loading ? (
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        {[1, 2, 3, 4, 5, 6].map(i => <Skeleton key={i} className="h-28 rounded-xl bg-gray-800" />)}
+                        {[1, 2, 3, 4, 5, 6].map(i => <Skeleton key={i} className="h-28 rounded-xl bg-muted" />)}
                     </div>
                 ) : (
                     <>
                         {/* Overview Cards */}
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                            <Card className="bg-gray-900 border-gray-800">
-                                <CardHeader className="pb-2"><CardTitle className="text-xs text-gray-500 uppercase">Overview</CardTitle></CardHeader>
+                            <Card className="bg-card border-border">
+                                <CardHeader className="pb-2"><CardTitle className="text-xs text-muted-foreground uppercase">Overview</CardTitle></CardHeader>
                                 <CardContent className="space-y-2">
                                     {[
                                         { label: 'Usuarios', value: metrics?.overview.totalUsers, icon: Users },
@@ -116,15 +116,15 @@ export default function AdminMetricsPage() {
                                         { label: 'Reportes', value: metrics?.overview.totalReports, icon: Flag },
                                     ].map(item => (
                                         <div key={item.label} className="flex items-center justify-between text-sm">
-                                            <span className="flex items-center gap-2 text-gray-400"><item.icon className="h-3 w-3" />{item.label}</span>
+                                            <span className="flex items-center gap-2 text-muted-foreground"><item.icon className="h-3 w-3" />{item.label}</span>
                                             <span className="font-medium">{item.value}</span>
                                         </div>
                                     ))}
                                 </CardContent>
                             </Card>
 
-                            <Card className="bg-gray-900 border-gray-800">
-                                <CardHeader className="pb-2"><CardTitle className="text-xs text-gray-500 uppercase">Activity</CardTitle></CardHeader>
+                            <Card className="bg-card border-border">
+                                <CardHeader className="pb-2"><CardTitle className="text-xs text-muted-foreground uppercase">Activity</CardTitle></CardHeader>
                                 <CardContent className="space-y-2">
                                     {[
                                         { label: 'DAU', value: metrics?.activity.dau, icon: Activity },
@@ -133,15 +133,15 @@ export default function AdminMetricsPage() {
                                         { label: 'Stickiness', value: `${metrics?.activity.stickiness}%`, icon: TrendingUp },
                                     ].map(item => (
                                         <div key={item.label} className="flex items-center justify-between text-sm">
-                                            <span className="flex items-center gap-2 text-gray-400"><item.icon className="h-3 w-3" />{item.label}</span>
+                                            <span className="flex items-center gap-2 text-muted-foreground"><item.icon className="h-3 w-3" />{item.label}</span>
                                             <span className="font-medium">{item.value}</span>
                                         </div>
                                     ))}
                                 </CardContent>
                             </Card>
 
-                            <Card className="bg-gray-900 border-gray-800">
-                                <CardHeader className="pb-2"><CardTitle className="text-xs text-gray-500 uppercase">Daily</CardTitle></CardHeader>
+                            <Card className="bg-card border-border">
+                                <CardHeader className="pb-2"><CardTitle className="text-xs text-muted-foreground uppercase">Daily</CardTitle></CardHeader>
                                 <CardContent className="space-y-2">
                                     {[
                                         { label: 'New Users', value: metrics?.daily.newUsers },
@@ -151,7 +151,7 @@ export default function AdminMetricsPage() {
                                         { label: 'Match Rate', value: metrics?.daily.matchRate },
                                     ].map(item => (
                                         <div key={item.label} className="flex items-center justify-between text-sm">
-                                            <span className="text-gray-400">{item.label}</span>
+                                            <span className="text-muted-foreground">{item.label}</span>
                                             <span className="font-medium">{item.value}</span>
                                         </div>
                                     ))}
@@ -160,31 +160,31 @@ export default function AdminMetricsPage() {
                         </div>
 
                         {/* Queue Status */}
-                        <Card className="bg-gray-900 border-gray-800">
-                            <CardHeader><CardTitle className="text-sm text-gray-300">Queue Status</CardTitle></CardHeader>
+                        <Card className="bg-card border-border">
+                            <CardHeader><CardTitle className="text-sm text-foreground">Queue Status</CardTitle></CardHeader>
                             <CardContent className="flex gap-4">
                                 <div className="flex-1 p-4 rounded-lg bg-amber-500/5 border border-amber-500/20 text-center">
                                     <p className="text-2xl font-bold text-amber-400">{metrics?.overview.pendingReports}</p>
-                                    <p className="text-xs text-gray-500">Reportes pendientes</p>
+                                    <p className="text-xs text-muted-foreground">Reportes pendientes</p>
                                 </div>
                                 <div className="flex-1 p-4 rounded-lg bg-emerald-500/5 border border-emerald-500/20 text-center">
                                     <p className="text-2xl font-bold text-emerald-400">{metrics?.overview.pendingVerifications}</p>
-                                    <p className="text-xs text-gray-500">Verificaciones pendientes</p>
+                                    <p className="text-xs text-muted-foreground">Verificaciones pendientes</p>
                                 </div>
                                 <div className="flex-1 p-4 rounded-lg bg-blue-500/5 border border-blue-500/20 text-center">
                                     <p className="text-2xl font-bold text-blue-400">{metrics?.activity.dau}</p>
-                                    <p className="text-xs text-gray-500">Usuarios activos hoy</p>
+                                    <p className="text-xs text-muted-foreground">Usuarios activos hoy</p>
                                 </div>
                             </CardContent>
                         </Card>
 
                         {/* Funnel */}
-                        <Card className="bg-gray-900 border-gray-800">
+                        <Card className="bg-card border-border">
                             <CardHeader className="flex flex-row items-center justify-between">
-                                <CardTitle className="text-sm text-gray-300 flex items-center gap-2">
+                                <CardTitle className="text-sm text-foreground flex items-center gap-2">
                                     <Zap className="h-4 w-4 text-yellow-400" /> Funnel de conversión
                                 </CardTitle>
-                                <Button variant="ghost" size="sm" onClick={() => exportAnalyticsCSV('funnel')} className="text-gray-500 text-xs">
+                                <Button variant="ghost" size="sm" onClick={() => exportAnalyticsCSV('funnel')} className="text-muted-foreground text-xs">
                                     <Download className="h-3 w-3 mr-1" /> CSV
                                 </Button>
                             </CardHeader>
@@ -192,8 +192,8 @@ export default function AdminMetricsPage() {
                                 <div className="space-y-3">
                                     {funnel.map((step, i) => (
                                         <div key={step.event} className="flex items-center gap-4">
-                                            <div className="w-36 text-xs text-gray-500">{step.label}</div>
-                                            <div className="flex-1 h-6 bg-gray-800 rounded-full overflow-hidden relative">
+                                            <div className="w-36 text-xs text-muted-foreground">{step.label}</div>
+                                            <div className="flex-1 h-6 bg-muted rounded-full overflow-hidden relative">
                                                 <div
                                                     className="h-full bg-gradient-to-r from-blue-500 to-blue-400 rounded-full transition-all"
                                                     style={{ width: `${Math.min(100, (step.count / Math.max(1, funnel[0]?.count)) * 100)}%` }}
@@ -208,7 +208,7 @@ export default function AdminMetricsPage() {
                                                         {step.conversionRate}%
                                                     </span>
                                                 ) : (
-                                                    <span className="text-gray-600">—</span>
+                                                    <span className="text-muted-foreground/60">—</span>
                                                 )}
                                             </div>
                                         </div>
@@ -218,9 +218,9 @@ export default function AdminMetricsPage() {
                         </Card>
 
                         {/* Retention */}
-                        <Card className="bg-gray-900 border-gray-800">
+                        <Card className="bg-card border-border">
                             <CardHeader className="flex flex-row items-center justify-between">
-                                <CardTitle className="text-sm text-gray-300 flex items-center gap-2">
+                                <CardTitle className="text-sm text-foreground flex items-center gap-2">
                                     <TrendingUp className="h-4 w-4 text-green-400" /> Retención
                                 </CardTitle>
                                 <div className="flex gap-2">
@@ -231,7 +231,7 @@ export default function AdminMetricsPage() {
                                             <span className="text-red-400">D30: {latestRetention.d30Percent}%</span>
                                         </div>
                                     )}
-                                    <Button variant="ghost" size="sm" onClick={() => exportAnalyticsCSV('retention')} className="text-gray-500 text-xs">
+                                    <Button variant="ghost" size="sm" onClick={() => exportAnalyticsCSV('retention')} className="text-muted-foreground text-xs">
                                         <Download className="h-3 w-3 mr-1" /> CSV
                                     </Button>
                                 </div>
@@ -239,7 +239,7 @@ export default function AdminMetricsPage() {
                             <CardContent className="max-h-64 overflow-y-auto">
                                 <table className="w-full text-xs">
                                     <thead>
-                                        <tr className="text-gray-500 border-b border-gray-800">
+                                        <tr className="text-muted-foreground border-b border-border">
                                             <th className="text-left py-2">Fecha</th>
                                             <th className="text-right py-2">Nuevos</th>
                                             <th className="text-right py-2">D1</th>
@@ -249,8 +249,8 @@ export default function AdminMetricsPage() {
                                     </thead>
                                     <tbody>
                                         {retention.slice(-14).map(row => (
-                                            <tr key={row.date} className="border-b border-gray-800/50">
-                                                <td className="py-1.5 text-gray-400">{row.date}</td>
+                                            <tr key={row.date} className="border-b border-border/50">
+                                                <td className="py-1.5 text-muted-foreground">{row.date}</td>
                                                 <td className="py-1.5 text-right">{row.newUsers}</td>
                                                 <td className="py-1.5 text-right">
                                                     <span className={row.d1Percent < 30 ? 'text-red-400' : row.d1Percent < 60 ? 'text-yellow-400' : 'text-green-400'}>
@@ -270,7 +270,7 @@ export default function AdminMetricsPage() {
                                             </tr>
                                         ))}
                                         {retention.length === 0 && (
-                                            <tr><td colSpan={5} className="text-center py-4 text-gray-600">No hay datos de retención aún</td></tr>
+                                            <tr><td colSpan={5} className="text-center py-4 text-muted-foreground/60">No hay datos de retención aún</td></tr>
                                         )}
                                     </tbody>
                                 </table>

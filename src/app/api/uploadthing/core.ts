@@ -13,9 +13,9 @@ const f = createUploadthing({
 
 async function resolveUserId(req: Request) {
     const supabase = await createClient();
-    const { data: { session } } = await supabase.auth.getSession();
+    const { data: { user } } = await supabase.auth.getUser();
 
-    if (session?.user) return session.user.id;
+    if (user) return user.id;
 
     throw new Error("Unauthorized: se requiere una sesión válida de Supabase");
 }

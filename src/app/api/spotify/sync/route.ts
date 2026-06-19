@@ -12,7 +12,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  const rateLimitResponse = await withRateLimit(user.id, 'spotifySync');
+  const rateLimitResponse = await withRateLimit(user.id, 'spotify');
   if (rateLimitResponse) return rateLimitResponse;
 
   try {
