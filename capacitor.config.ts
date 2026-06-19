@@ -8,7 +8,7 @@ const config: CapacitorConfig = {
         androidScheme: 'https',
     },
     android: {
-        backgroundColor: '#ffffff',
+        backgroundColor: '#1a1a2e',
         allowMixedContent: false,
         captureInput: true,
         webContentsDebuggingEnabled: process.env.NODE_ENV === 'development',
@@ -19,14 +19,14 @@ const config: CapacitorConfig = {
         },
         SplashScreen: {
             launchShowDuration: 1000,
-            backgroundColor: '#ffffff',
+            backgroundColor: '#1a1a2e',
             androidSplashResourceName: 'splash',
             showSpinner: false,
         },
         StatusBar: {
             overlaysWebView: false,
-            style: 'DARK',
-            backgroundColor: '#ffffff',
+            style: 'LIGHT',
+            backgroundColor: '#1a1a2e',
         },
         Keyboard: {
             resize: 'body',

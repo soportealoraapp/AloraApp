@@ -27,7 +27,6 @@ export const ourFileRouter = {
             return { userId, type: 'profile' };
         })
         .onUploadComplete(async ({ metadata, file }) => {
-            console.log("Profile upload complete for userId:", metadata.userId);
             return { uploadedBy: metadata.userId };
         }),
 
@@ -37,7 +36,6 @@ export const ourFileRouter = {
             return { userId, type: 'chat' };
         })
         .onUploadComplete(async ({ metadata, file }) => {
-            console.log("Chat image upload complete for userId:", metadata.userId);
             return {
                 uploadedBy: metadata.userId,
                 url: (file as any).url,
@@ -51,7 +49,6 @@ export const ourFileRouter = {
             return { userId, type: 'verification' };
         })
         .onUploadComplete(async ({ metadata, file }) => {
-            console.log("Verification upload complete for userId:", metadata.userId);
             return { uploadedBy: metadata.userId, url: (file as any).url };
         }),
 
@@ -61,7 +58,6 @@ export const ourFileRouter = {
             return { userId, type: 'voice' };
         })
         .onUploadComplete(async ({ metadata, file }) => {
-            console.log("Voice upload complete for userId:", metadata.userId);
             return {
                 uploadedBy: metadata.userId,
                 url: (file as any).url,

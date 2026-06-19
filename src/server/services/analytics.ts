@@ -11,7 +11,7 @@ export type AnalyticsEventType =
     | 'profile_photo_added'
     | 'like_sent'
     | 'pass_sent'
-    | 'superlike_sent'
+    | 'flechado_sent'
     | 'rewind_used'
     | 'match_created'
     | 'first_message'

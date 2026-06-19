@@ -63,9 +63,9 @@ export default function AdminReportsPage() {
     };
 
     return (
-        <div className="min-h-screen bg-gray-950 text-gray-100">
-            <header className="sticky top-0 z-30 border-b border-gray-800 bg-gray-950/80 backdrop-blur-sm px-6 py-4 flex items-center gap-4">
-                <Button variant="ghost" size="icon" onClick={() => router.push('/admin')} className="text-gray-400">
+        <div className="min-h-screen bg-background text-foreground">
+            <header className="sticky top-0 z-30 border-b border-border bg-background/80 backdrop-blur-sm px-6 py-4 flex items-center gap-4">
+                <Button variant="ghost" size="icon" onClick={() => router.push('/admin')} className="text-muted-foreground">
                     <ArrowLeft className="h-5 w-5" />
                 </Button>
                 <div className="flex items-center gap-3">

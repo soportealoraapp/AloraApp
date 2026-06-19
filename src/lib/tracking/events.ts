@@ -13,7 +13,7 @@ export const AnalyticsEvents = {
     // Discovery
     LIKE_SENT: 'like_sent',
     PASS_SENT: 'pass_sent',
-    SUPERLIKE_SENT: 'superlike_sent',
+    SUPERLIKE_SENT: 'flechado_sent',
     REWIND_USED: 'rewind_used',
 
     // Matching
