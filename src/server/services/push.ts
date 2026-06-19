@@ -13,9 +13,24 @@ interface PushPayload {
 const DEDUP_WINDOW_MINUTES = 5;
 const RATE_LIMIT_PER_HOUR = 10;
 const MAX_RETRY_ATTEMPTS = 1;
+const SILENT_HOURS_START = 22; // 10 PM
+const SILENT_HOURS_END = 8;    // 8 AM
 
 const deduplicationCache = new Map<string, number>();
 const rateLimitCache = new Map<string, { count: number; resetAt: number }>();
+
+function isQuietHours(timezone?: string): boolean {
+    try {
+        const tz = timezone || 'UTC';
+        const hour = parseInt(new Date().toLocaleString('en-US', { timeZone: tz, hour: 'numeric', hour12: false }));
+        if (SILENT_HOURS_START >= SILENT_HOURS_END) {
+            return hour >= SILENT_HOURS_START || hour < SILENT_HOURS_END;
+        }
+        return hour >= SILENT_HOURS_START && hour < SILENT_HOURS_END;
+    } catch {
+        return false;
+    }
+}
 
 function getDeduplicationKey(userId: string, type: string, fromUserId?: string): string {
     return fromUserId ? `${userId}:${type}:${fromUserId}` : `${userId}:${type}`;
@@ -66,6 +81,18 @@ export async function sendPushToUser(userId: string, payload: PushPayload) {
 
         if (isRateLimited(userId)) {
             return { succeeded: 0, failed: 0, rateLimited: true };
+        }
+
+        // Quiet hours: don't send non-critical push notifications during sleep hours
+        const isSafetyChannel = payload.channel === 'safety';
+        if (!isSafetyChannel) {
+            const userPrefs = await prisma.notificationPreference.findUnique({
+                where: { userId },
+                select: { timezone: true },
+            }).catch(() => null);
+            if (isQuietHours(userPrefs?.timezone || undefined)) {
+                return { succeeded: 0, failed: 0, quietHours: true };
+            }
         }
 
         // Check if there's a block between the notification sender and recipient

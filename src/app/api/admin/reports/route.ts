@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { requireModerator } from '@/lib/middleware/admin';
+import { withRateLimit } from '@/server/utils/api-rate-limit';
 
 export async function GET(request: NextRequest) {
     const auth = await requireModerator();
@@ -65,6 +66,9 @@ export async function PATCH(request: NextRequest) {
     const supabase = await createClient();
     const { data: { user: adminUser } } = await supabase.auth.getUser();
     if (!adminUser) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+
+    const rateLimitResponse = await withRateLimit(adminUser.id, 'adminAction');
+    if (rateLimitResponse) return rateLimitResponse;
 
     try {
         const { reportId, action, reason } = await request.json();

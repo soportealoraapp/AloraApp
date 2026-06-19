@@ -7,6 +7,8 @@ import { analyzeMessageSafety } from '@/ai/safety-engine/risk-engine';
 import { notifyNewMessage } from '@/server/services/push';
 import { trackEvent } from '@/server/services/analytics';
 import { AnalyticsEvents } from '@/lib/tracking/events';
+import { detectSpamBehavior } from '@/server/services/anti-abuse';
+import { ensureSubscriptionState } from '@/lib/subscription-helper';
 
 // POST /api/chat/send
 export const dynamic = 'force-dynamic';
@@ -21,6 +23,15 @@ export async function POST(request: NextRequest) {
 
     const rateLimitResponse = await withRateLimit(user.id, 'send');
     if (rateLimitResponse) return rateLimitResponse;
+
+    // Spam detection: rapid-fire messaging, copy-paste patterns
+    const spamResult = await detectSpamBehavior(user.id, 'message');
+    if (spamResult.isSpam) {
+        return NextResponse.json({ error: 'Demasiados mensajes. Por favor, espera un momento.' }, { status: 429 });
+    }
+
+    // Enforce subscription state (auto-downgrade expired subscriptions)
+    await ensureSubscriptionState(user.id);
 
     try {
         const { matchId, text, type, clientMessageId } = await request.json();
@@ -95,7 +106,7 @@ export async function POST(request: NextRequest) {
                 return NextResponse.json(
                     {
                         error: 'first_message_restriction',
-                        message: 'En conexiones entre hombres y mujeres, ella da el primer paso 💬'
+                        message: 'En conexiones entre hombres y mujeres, la persona que recibe decide cuándo escribir 💬'
                     },
                     { status: 403 }
                 );
@@ -120,7 +131,6 @@ export async function POST(request: NextRequest) {
 
             // Risk engine analysis (love bombing, manipulation, scam detection)
             try {
-                const prevMessageCount = await prisma.message.count({ where: { matchId } });
                 const riskAssessment = await analyzeMessageSafety(
                     matchId,
                     user.id,

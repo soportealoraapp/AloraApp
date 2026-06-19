@@ -50,6 +50,9 @@ export async function DELETE(request: NextRequest) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    const rateLimitResponse = await withRateLimit(user.id, 'block');
+    if (rateLimitResponse) return rateLimitResponse;
+
     try {
         const { blockedId } = await request.json();
         if (!blockedId) {

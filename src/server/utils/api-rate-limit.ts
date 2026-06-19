@@ -15,6 +15,7 @@ const LIMITS: Record<string, { limit: number; windowSeconds: number }> = {
     analytics: { limit: 30, windowSeconds: 60 },
     ai: { limit: 10, windowSeconds: 60 },
     spotify: { limit: 10, windowSeconds: 60 },
+    adminAction: { limit: 30, windowSeconds: 60 },
 };
 
 export async function withRateLimit(userId: string, action: keyof typeof LIMITS): Promise<NextResponse | null> {

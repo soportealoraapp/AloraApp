@@ -17,6 +17,9 @@ export async function GET(request: NextRequest) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    const rateLimitResponse = await withRateLimit(user.id, 'profileUpdate');
+    if (rateLimitResponse) return rateLimitResponse;
+
     try {
         const [profile, spotifyAccount] = await Promise.all([
             prisma.profile.findUnique({ where: { userId: user.id } }),

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { requireSuperAdmin } from '@/lib/middleware/admin';
 import { grantPlus, revokePlus } from '@/lib/subscription-helper';
+import { withRateLimit } from '@/server/utils/api-rate-limit';
 
 export async function GET(request: NextRequest) {
     const auth = await requireSuperAdmin();
@@ -56,6 +57,9 @@ export async function PATCH(request: NextRequest) {
     const supabase = await createClient();
     const { data: { user: adminUser } } = await supabase.auth.getUser();
     if (!adminUser) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+
+    const rateLimitResponse = await withRateLimit(adminUser.id, 'adminAction');
+    if (rateLimitResponse) return rateLimitResponse;
 
     try {
         const { userId, action, value, reason } = await request.json();
