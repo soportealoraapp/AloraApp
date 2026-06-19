@@ -121,18 +121,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
             setAuthLoading(false);
 
-            // Fetch profile when user changes (new sign-in) or on INITIAL_SESSION if no profile loaded
             const userChanged = !previousUser || currentUser.id !== previousUser.id;
             if (userChanged) {
                 setProfileLoading(true);
                 try {
-                    const userProfile = await profileService.getProfile(currentUser.id);
-                    setProfile(userProfile);
+                    const PROFILE_TIMEOUT_MS = 10000;
+                    const userProfile = await Promise.race([
+                        profileService.getProfile(currentUser.id),
+                        new Promise<never>((_, reject) =>
+                            setTimeout(() => reject(new Error('Profile fetch on auth change timed out')), PROFILE_TIMEOUT_MS)
+                        ),
+                    ]);
+                    if (!cancelled) setProfile(userProfile as UserProfile);
                 } catch (e) {
                     console.error("Profile fetch on auth change failed", e);
-                    setProfile(null);
+                    if (!cancelled) setProfile(null);
                 } finally {
-                    setProfileLoading(false);
+                    if (!cancelled) setProfileLoading(false);
                 }
             }
         });

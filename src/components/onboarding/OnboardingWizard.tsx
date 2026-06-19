@@ -37,6 +37,16 @@ export function OnboardingWizard({ initialRef }: { initialRef?: string } = {}) {
     const formDataRef = useRef<Partial<UserProfile>>({});
     const [isInitialized, setIsInitialized] = useState(false);
     const [syncStatus, setSyncStatus] = useState<'idle' | 'syncing' | 'saved' | 'error'>('idle');
+
+    useEffect(() => {
+        const safetyTimeout = setTimeout(() => {
+            if (!isInitialized) {
+                console.warn('OnboardingWizard: safety timeout — forcing initialization');
+                setIsInitialized(true);
+            }
+        }, 20000);
+        return () => clearTimeout(safetyTimeout);
+    }, [isInitialized]);
     const [signupUserId, setSignupUserId] = useState<string>();
     const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
     const lastSavedRef = useRef<string>('');

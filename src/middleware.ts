@@ -23,24 +23,7 @@ export async function middleware(request: NextRequest) {
 
     // updateSession creates its own response with refreshed Supabase cookies.
     // getUser() triggers automatic token refresh if the JWT is expired.
-    const response = await updateSession(modifiedRequest);
-
-    const supabase = await createClient(modifiedRequest, response);
-    let user = null;
-    let authCheckFailed = false;
-    try {
-        const timeout = new Promise<never>((_, reject) =>
-            setTimeout(() => reject(new Error('getUser timeout')), 3000)
-        );
-        const { data } = await Promise.race([
-            supabase.auth.getUser(),
-            timeout,
-        ]);
-        user = data.user;
-    } catch (err) {
-        authCheckFailed = true;
-        console.warn('middleware: getUser failed', err);
-    }
+    const { supabaseResponse: response, user } = await updateSession(modifiedRequest);
 
     const pathname = modifiedRequest.nextUrl.pathname;
 
@@ -96,11 +79,18 @@ export async function middleware(request: NextRequest) {
 
     if (isAppRoute && user) {
         try {
-            const { data: profile } = await supabase
+            const supabase = await createClient(modifiedRequest, response);
+            const profileQuery = supabase
                 .from('profiles')
                 .select('isCompleted')
                 .eq('userId', user.id)
                 .maybeSingle();
+            const { data: profile } = await Promise.race([
+                profileQuery,
+                new Promise<never>((_, reject) =>
+                    setTimeout(() => reject(new Error('Profile check timeout')), 5000)
+                ),
+            ]);
             if (!profile || !profile.isCompleted) {
                 return applySecurityHeaders(NextResponse.redirect(new URL('/onboarding', modifiedRequest.url)));
             }
@@ -111,6 +101,7 @@ export async function middleware(request: NextRequest) {
     }
 
     if (isAdminRoute && user) {
+        const supabase = await createClient(modifiedRequest, response);
         const { data: profile } = await supabase
             .from('users')
             .select('role')
@@ -126,6 +117,7 @@ export async function middleware(request: NextRequest) {
         // Check if profile is completed — incomplete users go to onboarding
         if (!pathname.startsWith('/onboarding')) {
             try {
+                const supabase = await createClient(modifiedRequest, response);
                 const { data: profile } = await supabase
                     .from('profiles')
                     .select('isCompleted')
