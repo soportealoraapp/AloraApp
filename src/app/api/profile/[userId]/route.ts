@@ -4,6 +4,7 @@ import { logger } from '@/lib/logger';
 import { recordProfileVisit } from '@/server/services/visit-tracker';
 import { notifyProfileVisit } from '@/server/services/push';
 import { getLatestAnswerForUserById } from '@/server/services/daily-question';
+import { withRateLimit } from '@/server/utils/api-rate-limit';
 
 // GET /api/profile/[userId]
 export async function GET(
@@ -18,6 +19,9 @@ export async function GET(
     if (!user) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
+
+    const rateLimitResponse = await withRateLimit(user.id, 'profileView');
+    if (rateLimitResponse) return rateLimitResponse;
 
     try {
         const targetUserId = params.userId;
@@ -43,6 +47,35 @@ export async function GET(
 
         if (!profile) {
             return NextResponse.json({ error: 'Profile not found' }, { status: 404 });
+        }
+
+        // Incognito mode: return limited profile data to non-matched users
+        const isOwnProfile = user.id === targetUserId;
+        if (!isOwnProfile && (profile.incognitoMode || !profile.showMeInDiscover)) {
+            // Check if viewer is matched with this user
+            const [u1, u2] = [user.id, targetUserId].sort();
+            const existingMatch = await prisma.match.findFirst({
+                where: {
+                    user1Id: u1,
+                    user2Id: u2,
+                    isActive: true,
+                    deletedAt: null,
+                },
+                select: { id: true }
+            });
+
+            if (!existingMatch) {
+                // Not matched — return limited data
+                return NextResponse.json({
+                    userId: profile.userId,
+                    displayName: profile.displayName,
+                    photos: profile.photos.slice(0, 1),
+                    age: profile.age,
+                    city: profile.city,
+                    isVerified: profile.isVerified,
+                    isIncognitoRestricted: true,
+                });
+            }
         }
 
         // Skip visit tracking for preview mode

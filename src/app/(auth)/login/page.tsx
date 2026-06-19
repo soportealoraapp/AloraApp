@@ -54,6 +54,15 @@ export default function LoginPage() {
                 return;
             }
 
+            const profileRes = await fetch('/api/profile');
+            if (profileRes.ok) {
+                const profileData = await profileRes.json();
+                if (profileData && !profileData.isCompleted) {
+                    router.push("/onboarding");
+                    return;
+                }
+            }
+
             router.push("/discover");
         } catch (error: unknown) {
             const message = error instanceof Error ? error.message : "";

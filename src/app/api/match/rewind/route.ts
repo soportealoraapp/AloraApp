@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { withRateLimit } from '@/server/utils/api-rate-limit';
 
 const REWIND_WINDOW_MINUTES = 5;
 const FREE_DAILY_REWINDS = 1;
@@ -14,6 +15,9 @@ export async function POST() {
     if (!user) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
+
+    const rateLimitResponse = await withRateLimit(user.id, 'rewind');
+    if (rateLimitResponse) return rateLimitResponse;
 
     try {
         const { ensureSubscriptionState } = await import('@/lib/subscription-helper');

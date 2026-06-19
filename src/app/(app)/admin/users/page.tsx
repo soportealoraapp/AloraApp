@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ArrowLeft, Users, Search, Ban, ShieldAlert, EyeOff, CheckCircle, Shield, Flag } from 'lucide-react';
 import Image from 'next/image';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 
 interface AdminUser {
     id: string; email: string; name: string | null; role: string; isActive: boolean; createdAt: string;
@@ -21,6 +22,7 @@ export default function AdminUsersPage() {
     const [loading, setLoading] = useState(true);
     const [search, setSearch] = useState('');
     const [trustFilter, setTrustFilter] = useState('all');
+    const [roleConfirmUser, setRoleConfirmUser] = useState<AdminUser | null>(null);
 
     const fetchUsers = async () => {
         setLoading(true);
@@ -124,7 +126,7 @@ export default function AdminUsersPage() {
                                     <ShieldAlert className="h-3 w-3" />
                                 </Button>
                                 <Button variant="ghost" size="sm" className="text-muted-foreground h-8 text-xs"
-                                    onClick={() => handleAction(u.id, 'set_role', u.role === 'admin' ? 'user' : 'admin')} title="Toggle admin">
+                                    onClick={() => setRoleConfirmUser(u)} title="Toggle admin">
                                     <Shield className="h-3 w-3" />
                                 </Button>
                                 <Button variant="ghost" size="sm" className="text-red-500 h-8 text-xs"
@@ -136,6 +138,33 @@ export default function AdminUsersPage() {
                     ))
                 )}
             </main>
+
+            <AlertDialog open={!!roleConfirmUser} onOpenChange={(open) => { if (!open) setRoleConfirmUser(null); }}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>
+                            {roleConfirmUser?.role === 'admin' ? 'Revocar rol de Admin' : 'Promover a Admin'}
+                        </AlertDialogTitle>
+                        <AlertDialogDescription>
+                            {roleConfirmUser?.role === 'admin'
+                                ? `¿Seguro que deseas revocar el rol de admin de ${roleConfirmUser?.profile?.displayName || roleConfirmUser?.email}?`
+                                : `¿Seguro que deseas promover a ${roleConfirmUser?.profile?.displayName || roleConfirmUser?.email} a admin? Esta acción otorga acceso total al panel de administración.`
+                            }
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel onClick={() => setRoleConfirmUser(null)}>Cancelar</AlertDialogCancel>
+                        <AlertDialogAction onClick={() => {
+                            if (roleConfirmUser) {
+                                handleAction(roleConfirmUser.id, 'set_role', roleConfirmUser.role === 'admin' ? 'user' : 'admin');
+                                setRoleConfirmUser(null);
+                            }
+                        }}>
+                            Confirmar
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
         </div>
     );
 }

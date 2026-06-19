@@ -11,7 +11,7 @@ import { COMPATIBILITY_QUIZZES, Quiz, QuizQuestion } from '@/lib/compatibility/q
 import { useAuth } from '@/contexts/AuthContext';
 import { useMatches } from '@/hooks/use-matches';
 import { toast } from '@/hooks/use-toast';
-import { Loader2, CheckCircle2, Heart, MessageCircle, Zap, Target, ArrowRight, ArrowLeft, Trophy, Sparkles, X, Users, ChevronRight } from 'lucide-react';
+import { Loader2, CheckCircle2, Heart, MessageCircle, Zap, Target, ArrowRight, ArrowLeft, Trophy, Sparkles, X, Users, ChevronRight, Sun, Home, Shield, Gamepad2, Brain } from 'lucide-react';
 import { ARCHETYPES } from '@/lib/compatibility/quizzes';
 import { DailyQuestionCard } from '@/components/daily-question/DailyQuestionCard';
 import { DailyCompatibilityCard } from '@/components/compatibility/DailyCompatibilityCard';
@@ -24,7 +24,13 @@ const icons: Record<string, any> = {
   Heart,
   MessageCircle,
   Zap,
-  Target
+  Target,
+  Sun,
+  Home,
+  Shield,
+  Users,
+  Gamepad2,
+  Brain,
 };
 
 interface QuizResult { quizId: string; score: number; archetype: string; completedAt: string; }

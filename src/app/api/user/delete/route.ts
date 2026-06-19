@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { utapi } from '../../uploadthing/core';
+import { withRateLimit } from '@/server/utils/api-rate-limit';
 
 async function getUser() {
     const { createClient } = await import('@/lib/supabase/server');
@@ -14,6 +15,9 @@ export async function POST(request: NextRequest) {
     if (!user) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
+
+    const rateLimitResponse = await withRateLimit(user.id, 'deleteAccount');
+    if (rateLimitResponse) return rateLimitResponse;
 
     try {
         // Get all user's files (photos, verification selfie, voice intro, chat images/voices)

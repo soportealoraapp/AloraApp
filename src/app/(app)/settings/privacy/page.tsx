@@ -21,7 +21,7 @@ import { createClient } from "@/lib/supabase/client";
 
 export default function PrivacySettingsPage() {
     const router = useRouter();
-    const { user, signOut } = useAuth();
+    const { user, profile, signOut } = useAuth();
     const { toast } = useToast();
 
     const [loading, setLoading] = useState(true);
@@ -258,7 +258,7 @@ export default function PrivacySettingsPage() {
                             />
                         </div>
 
-                        {user && (user as any).user_metadata?.subscriptionStatus !== 'plus' && (
+                        {user && profile?.subscriptionStatus !== 'plus' && (
                             <UpgradePrompt trigger="incognito" />
                         )}
 

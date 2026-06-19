@@ -80,7 +80,9 @@ export async function POST() {
         let newStreak = 1;
         if (profile.lastCheckInAt) {
             const lastCheckIn = new Date(profile.lastCheckInAt);
-            const diffDays = Math.floor((now.getTime() - lastCheckIn.getTime()) / (1000 * 60 * 60 * 24));
+            const lastDay = new Date(lastCheckIn.getFullYear(), lastCheckIn.getMonth(), lastCheckIn.getDate());
+            const thisDay = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+            const diffDays = Math.round((thisDay.getTime() - lastDay.getTime()) / (1000 * 60 * 60 * 24));
 
             if (diffDays === 1) {
                 newStreak = profile.currentStreak + 1;

@@ -45,8 +45,6 @@ export async function middleware(request: NextRequest) {
         pathname.startsWith('/notifications') ||
         pathname.startsWith('/qa') ||
         pathname.startsWith('/admin') ||
-        pathname.startsWith('/contact') ||
-        pathname.startsWith('/support') ||
         pathname.startsWith('/compatibility') ||
         pathname.startsWith('/match') ||
         pathname.startsWith('/events') ||
@@ -101,14 +99,13 @@ export async function middleware(request: NextRequest) {
     }
 
     if (isAdminRoute && user) {
-        const supabase = await createClient(modifiedRequest, response);
-        const { data: profile } = await supabase
-            .from('users')
-            .select('role')
-            .eq('id', user.id)
-            .single();
+        const { prisma } = await import('@/lib/prisma');
+        const dbUser = await prisma.user.findUnique({
+            where: { id: user.id },
+            select: { role: true }
+        });
 
-        if (!profile || (profile.role !== 'admin' && profile.role !== 'moderator')) {
+        if (!dbUser || (dbUser.role !== 'admin' && dbUser.role !== 'super_admin')) {
             return applySecurityHeaders(NextResponse.redirect(new URL('/discover', modifiedRequest.url)));
         }
     }

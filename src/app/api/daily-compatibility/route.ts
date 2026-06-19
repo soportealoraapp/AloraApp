@@ -11,6 +11,9 @@ export async function GET() {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    const { ensureSubscriptionState } = await import('@/lib/subscription-helper');
+    await ensureSubscriptionState(user.id);
+
     try {
         const result = await getDailyCompatibility(user.id);
 

@@ -73,7 +73,7 @@ export default function NotificationsPage() {
         { key: 'matches' as const, label: "Nuevos matches", description: "Cuando alguien hace match contigo." },
         { key: 'messages' as const, label: "Nuevos mensajes", description: "Cuando recibes un nuevo mensaje." },
         { key: 'profileViews' as const, label: "Visitas a tu perfil", description: "Cuando alguien visita tu perfil." },
-        { key: 'dailyQuestion' as const, label: "Pregunta del dia", description: "Recordatorio de la pregunta diaria." },
+        { key: 'dailyQuestion' as const, label: "Pregunta del día", description: "Recordatorio de la pregunta diaria." },
         { key: 'streakReminder' as const, label: "Recordatorio de racha", description: "No pierdas tu racha diaria." },
         { key: 'promotions' as const, label: "Promociones", description: "Noticias y ofertas de Alora." },
     ];

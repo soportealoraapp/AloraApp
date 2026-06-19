@@ -5,6 +5,7 @@ import { notifyNewMatch, notifyLikeReceived, notifyLikesRestored } from '@/serve
 import { trackEvent } from '@/server/services/analytics';
 import { AnalyticsEvents } from '@/lib/tracking/events';
 import { LikeSchema } from '@/lib/schemas/validation';
+import { detectSpamBehavior } from '@/server/services/anti-abuse';
 
 const FREE_DAILY_LIKES_LIMIT = 50;
 
@@ -145,6 +146,14 @@ export async function POST(request: NextRequest) {
 
         if (toUserId === user.id) {
             return NextResponse.json({ error: 'Cannot interact with own profile' }, { status: 400 });
+        }
+
+        // Spam detection
+        if (interactionType !== 'pass') {
+            const spamCheck = await detectSpamBehavior(user.id, 'like');
+            if (spamCheck.isSpam) {
+                return NextResponse.json({ error: 'Spam detected', message: spamCheck.reason }, { status: 429 });
+            }
         }
 
         // 1. Create/Update Interaction (idempotent via upsert)

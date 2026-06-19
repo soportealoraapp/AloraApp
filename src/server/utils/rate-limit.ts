@@ -40,7 +40,7 @@ export async function checkRateLimit(key: string, limit: number = 10, windowSeco
         return true; // count=1, always within limit
     } catch (error) {
         console.error('Rate limit error', error);
-        // Fail-open: allow request if rate limiter has errors (maintain availability)
-        return true;
+        // Fail-closed: deny request if rate limiter has errors (protect against abuse during outages)
+        return false;
     }
 }

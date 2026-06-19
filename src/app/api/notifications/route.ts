@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { getCurrentUserId } from '@/lib/auth/session';
+import { ensureSubscriptionState } from '@/lib/subscription-helper';
 
 const MAX_LIMIT = 50;
 
@@ -9,6 +10,8 @@ export async function GET(request: Request) {
     if (!userId) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
+
+    await ensureSubscriptionState(userId);
 
     const url = new URL(request.url);
     const limitParam = url.searchParams.get('limit');

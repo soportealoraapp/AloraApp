@@ -9,6 +9,9 @@ export async function GET(request: NextRequest) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    const { ensureSubscriptionState } = await import('@/lib/subscription-helper');
+    await ensureSubscriptionState(user.id);
+
     const targetId = request.nextUrl.searchParams.get('targetId');
     if (!targetId) {
         return NextResponse.json({ error: 'Missing targetId' }, { status: 400 });

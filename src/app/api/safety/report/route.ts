@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { withRateLimit } from '@/server/utils/api-rate-limit';
+import { applyAutoActions, updateReputation } from '@/server/services/anti-abuse';
 
 const VALID_CATEGORIES = [
     'spam',
@@ -42,6 +43,11 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ error: 'Cannot report yourself' }, { status: 400 });
         }
 
+        const MAX_DESCRIPTION_LENGTH = 1000;
+        const sanitizedDescription = typeof description === 'string'
+            ? description.slice(0, MAX_DESCRIPTION_LENGTH)
+            : '';
+
         const report = await prisma.report.create({
             data: {
                 reporterId: user.id,
@@ -51,7 +57,7 @@ export async function POST(request: NextRequest) {
                     category,
                     matchId: matchId || null,
                     messageIds: messageIds || [],
-                    description: description || '',
+                    description: sanitizedDescription,
                     timestamp: new Date().toISOString(),
                 }),
                 status: 'pending',
@@ -73,6 +79,11 @@ export async function POST(request: NextRequest) {
                 });
             }
         }
+
+        // Update reputation and apply auto-actions (fire-and-forget)
+        updateReputation(reportedId)
+            .then(() => applyAutoActions(reportedId))
+            .catch((err) => console.warn('[safety/report] auto-actions failed:', err));
 
         return NextResponse.json({ id: report.id, status: 'pending' });
     } catch (error) {
