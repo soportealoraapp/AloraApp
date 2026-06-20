@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { useProfile } from "@/hooks/use-profile";
-import { useMatches } from "@/hooks/use-matches";
+import { useSendLike } from "@/hooks/use-send-like";
 import { useAuth } from "@/contexts/AuthContext";
 import { BadgeChipList } from "@/components/profile/BadgeChip";
 import { SpotifySection } from "@/components/profile/SpotifySection";
@@ -40,7 +40,7 @@ export default function UserProfilePage() {
     const { user } = useAuth();
     const { id } = params;
     const { toast } = useToast();
-    const { sendLike } = useMatches();
+    const { sendLike } = useSendLike();
 
     const [isLiked, setIsLiked] = useState(false);
     const [isSuperMatched, setIsSuperMatched] = useState(false);

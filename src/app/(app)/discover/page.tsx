@@ -14,7 +14,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import Image from "next/image";
 import { useDiscover } from "@/hooks/use-discover";
 import { useAuth } from "@/contexts/AuthContext";
-import { useMatches } from "@/hooks/use-matches";
+import { useSendLike } from "@/hooks/use-send-like";
 import { useToast } from "@/hooks/use-toast";
 import { useRouter, useSearchParams } from "next/navigation";
 import { UserProfile } from "@/lib/domain/types";
@@ -89,7 +89,7 @@ export default function DiscoverPage() {
     }
   }, [searchParams]);
   const { profiles, loading, loadingMore, refresh, loadMore, hasMore, setProfiles, error } = useDiscover("", filters);
-  const { sendLike } = useMatches();
+  const { sendLike } = useSendLike();
   const { toast } = useToast();
   const router = useRouter();
   const { track } = useAnalytics();

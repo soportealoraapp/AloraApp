@@ -1,8 +1,14 @@
 'use server';
 
 import { Mission } from '@/lib/domain/gamification';
+import { getCurrentUserId } from '@/lib/auth/session';
 
 export async function getDailyMissions(userId: string): Promise<Mission[]> {
+    const callerId = await getCurrentUserId();
+    if (!callerId || callerId !== userId) {
+        return [];
+    }
+
     // In production, fetch from DB based on user state/plan
     return [
         { id: 'm1', title: 'Envía un mensaje', type: 'message', target: 1, progress: 0, completed: false, rewardPoints: 10 },

@@ -11,6 +11,11 @@ export interface RedeemReferralResult {
 }
 
 export async function getReferralCode(userId: string): Promise<string> {
+    const callerId = await getCurrentUserId();
+    if (!callerId || callerId !== userId) {
+        return '';
+    }
+
     const existing = await prisma.referral.findFirst({
         where: { referrerId: userId },
         select: { code: true },
@@ -25,6 +30,11 @@ export async function getReferralCode(userId: string): Promise<string> {
 }
 
 export async function generateReferralLink(userId: string): Promise<string> {
+    const callerId = await getCurrentUserId();
+    if (!callerId || callerId !== userId) {
+        return '';
+    }
+
     const code = await getReferralCode(userId);
     const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://alora-app-kappa.vercel.app';
     return `${baseUrl}/signup?ref=${code}`;

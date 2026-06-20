@@ -3,6 +3,7 @@
 import { prisma } from '@/lib/prisma';
 import { BADGE_DEFINITIONS, BadgeKey } from '@/lib/domain/gamification';
 import { calculateCompleteness } from '@/lib/utils/completeness';
+import { getCurrentUserId } from '@/lib/auth/session';
 
 export async function getUserBadges(userId: string): Promise<{ key: BadgeKey; unlockedAt: Date | null }[]> {
     try {
@@ -24,6 +25,11 @@ export async function getUserBadges(userId: string): Promise<{ key: BadgeKey; un
 
 export async function checkAndAwardBadges(userId: string): Promise<BadgeKey[]> {
     try {
+        const callerId = await getCurrentUserId();
+        if (!callerId || callerId !== userId) {
+            return [];
+        }
+
         const profile = await prisma.profile.findUnique({
             where: { userId },
             select: {

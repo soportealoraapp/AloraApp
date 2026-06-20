@@ -8,7 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { MessageCircle, Loader2, Check, Send, Heart, Target, MessageSquare, Link2, Sun, TrendingUp, Sparkles, Smile, Users, MapPin, X } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
-import { useMatches } from '@/hooks/use-matches';
+import { useSendLike } from '@/hooks/use-send-like';
 import { useAuth } from '@/contexts/AuthContext';
 import { HeartArrow } from '@/components/ui/custom/HeartArrow';
 import { MatchScreen } from '@/components/ui/premium/MatchScreen';
@@ -72,7 +72,7 @@ const cardVariants = {
 
 export function DailyQuestionCard() {
     const { toast } = useToast();
-    const { sendLike } = useMatches();
+    const { sendLike } = useSendLike();
     const { profile: currentUserProfile } = useAuth();
     const [data, setData] = useState<DailyQuestionData | null>(null);
     const [loading, setLoading] = useState(true);

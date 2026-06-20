@@ -3,8 +3,8 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { ConnectionIntent, Match } from '@/lib/domain/types';
-import { useToast } from './use-toast';
 import { authFetch } from '@/lib/utils';
+import { useSendLike } from './use-send-like';
 
 interface LikePreview {
     id: string;
@@ -17,7 +17,6 @@ interface LikePreview {
 
 export function useMatches() {
     const { user } = useAuth();
-    const { toast } = useToast();
     const [matches, setMatches] = useState<Match[]>([]);
     const [newMatches, setNewMatches] = useState<LikePreview[]>([]);
     const [loading, setLoading] = useState(true);
@@ -32,7 +31,6 @@ export function useMatches() {
         try {
             setLoading(true);
 
-            // Cookie auth handles authentication automatically
             const suffix = intent ? `?intent=${intent}` : '';
             const [matchesResponse, newMatchesResponse] = await Promise.all([
                 authFetch(`/api/match/feed${suffix}`),
@@ -60,53 +58,18 @@ export function useMatches() {
         fetchMatches();
     }, [fetchMatches]);
 
-    const sendLike = useCallback(async (toUserId: string, type: 'like' | 'superlike' | 'pass' = 'like', intent: ConnectionIntent = 'dating', showToast: boolean = true) => {
-        if (!user) return;
+    const { sendLike: baseSendLike } = useSendLike((intent) => {
+        fetchMatches(intent);
+    });
 
-        try {
-            // Cookie auth handles authentication automatically
-            const response = await authFetch('/api/match/like', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ toUserId, type, intent }),
-            });
-
-            if (!response.ok) {
-                throw new Error('Error al enviar like');
-            }
-
-            const result = await response.json();
-
-            if (result.matched) {
-                if (showToast) {
-                    const isFriendship = intent === 'friendship';
-                    toast({
-                        title: isFriendship ? '¡Nueva amistad! 🤝' : '¡Nuevo match! 🎉',
-                        description: isFriendship ? 'Ahora pueden conocerse como amigos.' : 'Ahora puedes chatear.',
-                    });
-                }
-                await fetchMatches(intent);
-            } else if (showToast && type !== 'pass') {
-                toast({
-                    title: type === 'superlike' ? '¡Flechado enviado! ✨' : 'Like enviado ❤️',
-                    description: '¡Ojalá hagan match!',
-                });
-            }
-
-            return result;
-        } catch (err) {
-            if (showToast) {
-                toast({
-                    variant: 'destructive',
-                    title: 'Error',
-                    description: 'No se pudo enviar el like',
-                });
-            }
-            throw err;
-        }
-    }, [user, fetchMatches, toast]);
+    const sendLike = useCallback(async (
+        toUserId: string,
+        type: 'like' | 'superlike' | 'pass' = 'like',
+        intent: ConnectionIntent = 'dating',
+        showToast: boolean = true
+    ) => {
+        return baseSendLike(toUserId, type, intent, showToast);
+    }, [baseSendLike]);
 
     return {
         matches,

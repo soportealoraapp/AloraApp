@@ -3,6 +3,7 @@
 import { unstable_cache } from 'next/cache';
 import { prisma } from '@/lib/prisma';
 import { UserProfile } from '@/lib/domain/types';
+import { getCurrentUserId } from '@/lib/auth/session';
 
 export const getUserProfile = unstable_cache(
     async (userId: string): Promise<UserProfile | null> => {
@@ -67,6 +68,11 @@ export const getUserProfile = unstable_cache(
 
 export async function updateUserProfile(userId: string, data: Partial<UserProfile>) {
     try {
+        const callerId = await getCurrentUserId();
+        if (!callerId || callerId !== userId) {
+            return { success: false, error: 'Unauthorized' };
+        }
+
         const {
             id,
             email,
@@ -116,6 +122,11 @@ export async function updateUserProfile(userId: string, data: Partial<UserProfil
 
 export async function setVerifiedOnlyFilter(userId: string, value: boolean) {
     try {
+        const callerId = await getCurrentUserId();
+        if (!callerId || callerId !== userId) {
+            return { success: false, error: 'Unauthorized' };
+        }
+
         await prisma.profile.upsert({
             where: { userId },
             update: { verifiedOnly: value },

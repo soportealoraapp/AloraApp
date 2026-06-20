@@ -9,7 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { COMPATIBILITY_QUIZZES, Quiz, QuizQuestion } from '@/lib/compatibility/quizzes';
 import { useAuth } from '@/contexts/AuthContext';
-import { useMatches } from '@/hooks/use-matches';
+import { useSendLike } from '@/hooks/use-send-like';
 import { toast } from '@/hooks/use-toast';
 import { Loader2, CheckCircle2, Heart, MessageCircle, Zap, Target, ArrowRight, ArrowLeft, Trophy, Sparkles, X, Users, ChevronRight, Sun, Home, Shield, Gamepad2, Brain } from 'lucide-react';
 import { ARCHETYPES } from '@/lib/compatibility/quizzes';
@@ -51,7 +51,7 @@ interface SimilarUser {
 export default function CompatibilityPage() {
   const { user } = useAuth();
   const router = useRouter();
-  const { sendLike } = useMatches();
+  const { sendLike } = useSendLike();
 
   const [selectedQuiz, setSelectedQuiz] = useState<Quiz | null>(null);
   const [currentStep, setCurrentStep] = useState(0);

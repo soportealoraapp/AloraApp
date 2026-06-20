@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { generateCompatibilityInsights } from '@/ai/copilot/compatibility-insights';
 import { prisma } from '@/lib/prisma';
 import { calculateCompatibility } from '@/lib/compatibility/engine';
+import { withRateLimit } from '@/server/utils/api-rate-limit';
 
 async function getServerUser() {
     const { createClient } = await import('@/lib/supabase/server');
@@ -16,6 +17,9 @@ export async function POST(request: Request) {
         if (!user) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
+
+        const rateLimitResponse = await withRateLimit(user.id, 'ai');
+        if (rateLimitResponse) return rateLimitResponse;
 
         const { candidateId } = await request.json();
         if (!candidateId) {

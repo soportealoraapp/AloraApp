@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { generateDailyInsight } from '@/ai/copilot/daily-insights';
 import { prisma } from '@/lib/prisma';
+import { withRateLimit } from '@/server/utils/api-rate-limit';
 
 async function getServerUser() {
     const { createClient } = await import('@/lib/supabase/server');
@@ -15,6 +16,9 @@ export async function GET() {
         if (!user) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
+
+        const rateLimitResponse = await withRateLimit(user.id, 'ai');
+        if (rateLimitResponse) return rateLimitResponse;
 
         // Rate limit: once per day
         const today = new Date();

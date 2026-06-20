@@ -5,7 +5,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Heart, RotateCcw, UserX } from 'lucide-react';
 import Image from 'next/image';
-import { useMatches } from '@/hooks/use-matches';
+import { useSendLike } from '@/hooks/use-send-like';
 import { useToast } from '@/hooks/use-toast';
 import { ConnectionIntent } from '@/lib/domain/types';
 
@@ -16,7 +16,7 @@ interface SecondChanceSectionProps {
 export function SecondChanceSection({ intent = 'dating' }: SecondChanceSectionProps) {
   const [passedProfiles, setPassedProfiles] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const { sendLike } = useMatches();
+  const { sendLike } = useSendLike();
   const { toast } = useToast();
 
   useEffect(() => {
