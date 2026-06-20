@@ -56,10 +56,12 @@ export function StepPhotos({ userId, data, onUpdate, onNext, onPrev }: any) {
         onClientUploadComplete: (res: any) => {
             if (res && res.length > 0) {
                 const newUrls = res.map((r: any) => r.url);
-                const updatedPhotos = [...photos, ...newUrls];
-                setPhotos(updatedPhotos);
+                setPhotos(prev => {
+                    const updated = [...prev, ...newUrls];
+                    onUpdate({ photos: updated });
+                    return updated;
+                });
                 setUploadProgress({});
-                onUpdate({ photos: updatedPhotos });
                 trackEvent('PHOTO_UPLOADED', { userId, count: res.length });
             }
         },

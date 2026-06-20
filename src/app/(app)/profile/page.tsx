@@ -40,14 +40,19 @@ export default function ProfilePage() {
 
   useEffect(() => {
     if (!user?.id) return;
-    fetch('/api/profile/stats')
-      .then(r => r.json())
-      .then(data => {
-        if (data.likesReceived !== undefined) {
-          setProfileStats(data);
-        }
-      })
-      .catch(() => logger.warn('Failed to fetch profile stats'));
+    const fetchStats = () => {
+      fetch('/api/profile/stats')
+        .then(r => r.json())
+        .then(data => {
+          if (data.likesReceived !== undefined) {
+            setProfileStats(data);
+          }
+        })
+        .catch(() => logger.warn('Failed to fetch profile stats'));
+    };
+    fetchStats();
+    const interval = setInterval(fetchStats, 30000);
+    return () => clearInterval(interval);
   }, [user?.id]);
 
   useEffect(() => {

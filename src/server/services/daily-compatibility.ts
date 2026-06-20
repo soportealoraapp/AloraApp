@@ -16,9 +16,19 @@ export interface DailyCompatibilityResult {
     differences: string[];
 }
 
-export async function getDailyCompatibility(userId: string): Promise<DailyCompatibilityResult | null> {
-    // Check if we already have a daily compatibility for today
-    const today = new Date().toISOString().split('T')[0];
+export async function getDailyCompatibility(userId: string, timezone?: string): Promise<DailyCompatibilityResult | null> {
+    // Use user's timezone for local date, fallback to UTC
+    const now = new Date();
+    let today: string;
+    if (timezone) {
+        try {
+            today = now.toLocaleDateString('en-CA', { timeZone: timezone }); // YYYY-MM-DD format
+        } catch {
+            today = now.toISOString().split('T')[0];
+        }
+    } else {
+        today = now.toISOString().split('T')[0];
+    }
     const existing = await prisma.analyticsEvent.findFirst({
         where: {
             userId,

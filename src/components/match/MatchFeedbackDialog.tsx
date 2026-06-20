@@ -61,7 +61,7 @@ export function MatchFeedbackDialog({ matchId, partnerName, open, onClose, onSub
     };
 
     return (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-label={`Feedback sobre ${partnerName}`}>
             <Card className="w-full max-w-md rounded-3xl">
                 <CardContent className="p-6 space-y-4">
                     <div className="flex items-center justify-between">
@@ -87,15 +87,12 @@ export function MatchFeedbackDialog({ matchId, partnerName, open, onClose, onSub
                                     onMouseEnter={() => setHovered(n)}
                                     onMouseLeave={() => setHovered(0)}
                                     onClick={() => setRating(n)}
-                                    className="p-1 transition-transform hover:scale-110"
+                                    className="p-1.5 transition-transform hover:scale-110 min-h-[44px] min-w-[44px] flex items-center justify-center"
                                     type="button"
+                                    aria-label={n + ' estrella' + (n > 1 ? 's' : '')}
                                 >
                                     <Star
-                                        className={`h-9 w-9 transition-colors ${
-                                            (hovered || rating) >= n
-                                                ? 'fill-amber-400 text-amber-400'
-                                                : 'text-muted-foreground/50'
-                                        }`}
+                                        className={`h-9 w-9 transition-colors ${(hovered || rating) >= n ? 'fill-amber-400 text-amber-400' : 'text-muted-foreground/50'}`}
                                     />
                                 </button>
                             ))}

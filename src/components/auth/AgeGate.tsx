@@ -50,7 +50,7 @@ export function AgeGate() {
 
     if (denied) {
         return (
-            <div className="fixed inset-0 z-[100] bg-background flex items-center justify-center p-6 text-center">
+            <div className="fixed inset-0 z-[100] bg-background flex items-center justify-center p-6 text-center" role="dialog" aria-modal="true" aria-label="Verificación de edad">
                 <motion.div
                     initial={{ opacity: 0, scale: 0.9 }}
                     animate={{ opacity: 1, scale: 1 }}
@@ -77,7 +77,7 @@ export function AgeGate() {
     }
 
     return (
-        <div className="fixed inset-0 z-[100] bg-black/60 backdrop-blur-md flex items-center justify-center p-6">
+        <div className="fixed inset-0 z-[100] bg-black/60 backdrop-blur-md flex items-center justify-center p-6" role="dialog" aria-modal="true" aria-label="Verificación de edad">
             <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}

@@ -15,6 +15,45 @@ import { NextResponse, NextRequest } from 'next/server';
 import { updateSession, createClient } from '@/lib/supabase/middleware';
 import { getCSP, SECURITY_HEADERS } from '@/lib/security';
 
+// In-memory caches for stable DB lookups in middleware
+const profileCache = new Map<string, { isCompleted: boolean; ts: number }>();
+const roleCache = new Map<string, { role: string; ts: number }>();
+const PROFILE_CACHE_TTL = 60_000; // 1 minute
+const ROLE_CACHE_TTL = 300_000; // 5 minutes
+
+async function getCachedProfileCompleted(
+    supabase: Awaited<ReturnType<typeof createClient>>,
+    userId: string,
+): Promise<boolean> {
+    const cached = profileCache.get(userId);
+    if (cached && Date.now() - cached.ts < PROFILE_CACHE_TTL) return cached.isCompleted;
+
+    const { data } = await supabase
+        .from('profiles')
+        .select('isCompleted')
+        .eq('userId', userId)
+        .maybeSingle();
+
+    const isCompleted = data?.isCompleted ?? false;
+    profileCache.set(userId, { isCompleted, ts: Date.now() });
+    return isCompleted;
+}
+
+async function getCachedAdminRole(userId: string): Promise<string | null> {
+    const cached = roleCache.get(userId);
+    if (cached && Date.now() - cached.ts < ROLE_CACHE_TTL) return cached.role;
+
+    const { prisma } = await import('@/lib/prisma');
+    const dbUser = await prisma.user.findUnique({
+        where: { id: userId },
+        select: { role: true },
+    });
+
+    const role = dbUser?.role ?? 'user';
+    roleCache.set(userId, { role, ts: Date.now() });
+    return role;
+}
+
 export async function middleware(request: NextRequest) {
     const csp = getCSP();
 
@@ -78,50 +117,28 @@ export async function middleware(request: NextRequest) {
     if (isAppRoute && user) {
         try {
             const supabase = await createClient(modifiedRequest, response);
-            const profileQuery = supabase
-                .from('profiles')
-                .select('isCompleted')
-                .eq('userId', user.id)
-                .maybeSingle();
-            const { data: profile } = await Promise.race([
-                profileQuery,
-                new Promise<never>((_, reject) =>
-                    setTimeout(() => reject(new Error('Profile check timeout')), 5000)
-                ),
-            ]);
-            if (!profile || !profile.isCompleted) {
+            const isCompleted = await getCachedProfileCompleted(supabase, user.id);
+            if (!isCompleted) {
                 return applySecurityHeaders(NextResponse.redirect(new URL('/onboarding', modifiedRequest.url)));
             }
         } catch {
-            // Deny access if profile check fails (fail-closed for security)
             return applySecurityHeaders(NextResponse.redirect(new URL('/onboarding', modifiedRequest.url)));
         }
     }
 
     if (isAdminRoute && user) {
-        const { prisma } = await import('@/lib/prisma');
-        const dbUser = await prisma.user.findUnique({
-            where: { id: user.id },
-            select: { role: true }
-        });
-
-        if (!dbUser || (dbUser.role !== 'admin' && dbUser.role !== 'super_admin')) {
+        const role = await getCachedAdminRole(user.id);
+        if (role !== 'admin' && role !== 'super_admin') {
             return applySecurityHeaders(NextResponse.redirect(new URL('/discover', modifiedRequest.url)));
         }
     }
 
     if (isAuthRoute && user && !pathname.startsWith('/auth/callback')) {
-        // Check if profile is completed — incomplete users go to onboarding
         if (!pathname.startsWith('/onboarding')) {
             try {
                 const supabase = await createClient(modifiedRequest, response);
-                const { data: profile } = await supabase
-                    .from('profiles')
-                    .select('isCompleted')
-                    .eq('userId', user.id)
-                    .maybeSingle();
-
-                if (!profile || !profile.isCompleted) {
+                const isCompleted = await getCachedProfileCompleted(supabase, user.id);
+                if (!isCompleted) {
                     return applySecurityHeaders(NextResponse.redirect(new URL('/onboarding', modifiedRequest.url)));
                 }
             } catch {

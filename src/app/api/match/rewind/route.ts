@@ -108,52 +108,44 @@ export async function POST() {
             }
         });
 
-        // Soft-delete the interaction
-        await prisma.interaction.update({
-            where: { id: interaction.id },
-            data: { deletedAt: now }
-        });
-
-        // If a match was created, deactivate it
-        if (existingMatch) {
-            await prisma.match.update({
-                where: { id: existingMatch.id },
-                data: {
-                    isActive: false,
-                    stage: 'unmatched',
-                    deletedAt: now
-                }
-            });
-        }
-
-        // Update profile: increment rewinds, decrement daily likes (safe floor at 0), clear last swipe
-        // If the interaction was a superlike, also restore superlikesRemaining
+        // Soft-delete the interaction and update profile atomically
         const superlikeRestore = interaction.type === 'superlike'
             ? { superlikesRemaining: { increment: 1 } }
             : {};
 
-        if (profile.dailyLikesUsed > 0) {
-            await prisma.profile.update({
-                where: { userId: user.id },
-                data: {
-                    rewindsUsed: { increment: 1 },
-                    dailyLikesUsed: { decrement: 1 },
-                    lastSwipeId: null,
-                    lastSwipeAt: null,
-                    ...superlikeRestore,
-                }
+        await prisma.$transaction(async (tx) => {
+            await tx.interaction.update({
+                where: { id: interaction.id },
+                data: { deletedAt: now }
             });
-        } else {
-            await prisma.profile.update({
+
+            if (existingMatch) {
+                await tx.match.update({
+                    where: { id: existingMatch.id },
+                    data: {
+                        isActive: false,
+                        stage: 'unmatched',
+                        deletedAt: now
+                    }
+                });
+            }
+
+            const profileUpdateData: Record<string, unknown> = {
+                rewindsUsed: { increment: 1 },
+                lastSwipeId: null,
+                lastSwipeAt: null,
+                ...superlikeRestore,
+            };
+
+            if (profile.dailyLikesUsed > 0) {
+                profileUpdateData.dailyLikesUsed = { decrement: 1 };
+            }
+
+            await tx.profile.update({
                 where: { userId: user.id },
-                data: {
-                    rewindsUsed: { increment: 1 },
-                    lastSwipeId: null,
-                    lastSwipeAt: null,
-                    ...superlikeRestore,
-                }
+                data: profileUpdateData,
             });
-        }
+        });
 
         // Track analytics
         await prisma.analyticsEvent.create({

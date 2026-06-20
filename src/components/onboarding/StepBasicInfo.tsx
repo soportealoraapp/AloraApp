@@ -24,6 +24,7 @@ export function StepBasicInfo({ data, onUpdate, onNext, userId }: StepBasicInfoP
     const [citySearch, setCitySearch] = useState('');
     const [debouncedCitySearch, setDebouncedCitySearch] = useState('');
     const [showCityDropdown, setShowCityDropdown] = useState(false);
+    const [citySelectedFromDropdown, setCitySelectedFromDropdown] = useState(Boolean(data?.city));
     const cityDropdownRef = useRef<HTMLDivElement>(null);
     const debounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -31,7 +32,7 @@ export function StepBasicInfo({ data, onUpdate, onNext, userId }: StepBasicInfoP
 
     useEffect(() => {
         if (data && Object.keys(data).length > 0 && Object.keys(localData).length === 0) {
-            setLocalData(data);
+            setLocalData({ ...data, lookingFor: data.lookingFor || (data.connectionModes?.includes('dating') ? 'serious' : 'friendship') });
         }
     }, [data, localData]);
 
@@ -68,8 +69,9 @@ export function StepBasicInfo({ data, onUpdate, onNext, userId }: StepBasicInfoP
         Boolean(localData.age && localData.age >= 18 && localData.age <= 120) &&
         Boolean(localData.gender) &&
         Boolean(localData.city?.trim()) &&
+        citySelectedFromDropdown &&
         selectedModes.length > 0,
-        [localData.displayName, localData.age, localData.gender, localData.city, selectedModes]
+        [localData.displayName, localData.age, localData.gender, localData.city, selectedModes, citySelectedFromDropdown]
     );
 
     const filteredCities = useMemo(() => {
@@ -231,6 +233,7 @@ export function StepBasicInfo({ data, onUpdate, onNext, userId }: StepBasicInfoP
                             onChange={(e) => {
                                 setCitySearch(e.target.value);
                                 setShowCityDropdown(true);
+                                setCitySelectedFromDropdown(false);
                                 handleChange('city', e.target.value);
                             }}
                             onFocus={() => setShowCityDropdown(true)}
@@ -247,6 +250,7 @@ export function StepBasicInfo({ data, onUpdate, onNext, userId }: StepBasicInfoP
                                             handleChange('city', city.name);
                                             setCitySearch('');
                                             setShowCityDropdown(false);
+                                            setCitySelectedFromDropdown(true);
                                         }}
                                     >
                                         {city.name}, {city.countryCode === 'MX' ? 'México' : city.countryCode}

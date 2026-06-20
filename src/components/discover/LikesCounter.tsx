@@ -52,17 +52,8 @@ export function LikesCounter({
 
     const isPlus = subscriptionStatus === 'plus';
 
-    if (isPlus) {
-        return (
-            <div className={cn("flex items-center gap-2 text-xs text-muted-foreground", className)}>
-                <Heart className="h-3.5 w-3.5 text-primary fill-primary" />
-                <span className="font-medium">Likes ilimitados</span>
-            </div>
-        );
-    }
-
-    const remaining = Math.max(0, dailyLikesLimit - dailyLikesUsed);
-    const percentage = Math.round((remaining / dailyLikesLimit) * 100);
+    const remaining = isPlus ? dailyLikesLimit : Math.max(0, dailyLikesLimit - dailyLikesUsed);
+    const percentage = isPlus ? 100 : Math.round((remaining / dailyLikesLimit) * 100);
 
     const timeUntilReset = useMemo(() => {
         const diff = resetDate.getTime() - now.getTime();
@@ -74,6 +65,15 @@ export function LikesCounter({
         
         return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
     }, [resetDate, now]);
+
+    if (isPlus) {
+        return (
+            <div className={cn("flex items-center gap-2 text-xs text-muted-foreground", className)}>
+                <Heart className="h-3.5 w-3.5 text-primary fill-primary" />
+                <span className="font-medium">Likes ilimitados</span>
+            </div>
+        );
+    }
 
     const isLow = remaining <= 10;
     const isEmpty = remaining === 0;

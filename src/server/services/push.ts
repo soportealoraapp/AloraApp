@@ -86,11 +86,12 @@ export async function sendPushToUser(userId: string, payload: PushPayload) {
         // Quiet hours: don't send non-critical push notifications during sleep hours
         const isSafetyChannel = payload.channel === 'safety';
         if (!isSafetyChannel) {
-            const userPrefs = await prisma.notificationPreference.findUnique({
+            const fingerprint = await prisma.deviceFingerprint.findFirst({
                 where: { userId },
                 select: { timezone: true },
+                orderBy: { lastSeen: 'desc' },
             }).catch(() => null);
-            if (isQuietHours(userPrefs?.timezone || undefined)) {
+            if (isQuietHours(fingerprint?.timezone || undefined)) {
                 return { succeeded: 0, failed: 0, quietHours: true };
             }
         }

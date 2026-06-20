@@ -1,8 +1,8 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { getDailyCompatibility } from '@/server/services/daily-compatibility';
 
 // GET /api/daily-compatibility — Get today's featured connection
-export async function GET() {
+export async function GET(request: NextRequest) {
     const { createClient } = await import('@/lib/supabase/server');
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
@@ -14,8 +14,10 @@ export async function GET() {
     const { ensureSubscriptionState } = await import('@/lib/subscription-helper');
     await ensureSubscriptionState(user.id);
 
+    const timezone = request.headers.get('x-timezone') || undefined;
+
     try {
-        const result = await getDailyCompatibility(user.id);
+        const result = await getDailyCompatibility(user.id, timezone);
 
         if (!result) {
             return NextResponse.json({ found: false });

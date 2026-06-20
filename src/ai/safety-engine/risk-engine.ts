@@ -351,11 +351,12 @@ export async function analyzeMessageSafety(
     // Auto-execute trust reduction
     if (adjustedRisk >= 0.3) {
         const penalty = Math.round(adjustedRisk * 20);
+        // First recalculate base reputation from reports/blocks, then apply message risk penalty
+        await updateReputation(senderId);
         await prisma.profile.update({
             where: { userId: senderId },
             data: { reputationScore: { decrement: penalty } },
         });
-        await updateReputation(senderId);
     }
 
     // Log audit

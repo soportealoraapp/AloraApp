@@ -35,7 +35,7 @@ export async function GET(request: Request) {
             // Only override destination if the user doesn't have a specific next target
             // (e.g., password reset should go to /password-update, not /onboarding)
             const validNextRoutes = ['/password-update', '/discover', '/onboarding', '/settings'];
-            const hasSpecificTarget = validNextRoutes.some(route => next.startsWith(route));
+            const hasSpecificTarget = validNextRoutes.includes(next);
             let destination = next;
             try {
                 const { data: { user } } = await supabase.auth.getUser();

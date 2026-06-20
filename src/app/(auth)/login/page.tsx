@@ -61,9 +61,11 @@ export default function LoginPage() {
                     router.push("/onboarding");
                     return;
                 }
+                router.push("/discover");
+            } else {
+                // Profile not found — user needs to complete onboarding
+                router.push("/onboarding");
             }
-
-            router.push("/discover");
         } catch (error: unknown) {
             const message = error instanceof Error ? error.message : "";
             if (message.includes("Invalid login credentials")) {

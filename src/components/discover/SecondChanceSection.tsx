@@ -9,19 +9,23 @@ import { useMatches } from '@/hooks/use-matches';
 import { useToast } from '@/hooks/use-toast';
 import { ConnectionIntent } from '@/lib/domain/types';
 
-export function SecondChanceSection() {
+interface SecondChanceSectionProps {
+  intent?: ConnectionIntent;
+}
+
+export function SecondChanceSection({ intent = 'dating' }: SecondChanceSectionProps) {
   const [passedProfiles, setPassedProfiles] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const { sendLike } = useMatches();
   const { toast } = useToast();
 
   useEffect(() => {
-    fetch('/api/match/passed?intent=dating')
+    fetch(`/api/match/passed?intent=${intent}`)
       .then(r => r.json())
       .then(data => { setPassedProfiles(data.profiles || []); })
       .catch(() => {})
       .finally(() => setLoading(false));
-  }, []);
+  }, [intent]);
 
   if (loading) {
     return (

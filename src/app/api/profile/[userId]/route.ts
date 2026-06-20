@@ -42,7 +42,34 @@ export async function GET(
         }
 
         const profile = await prisma.profile.findUnique({
-            where: { userId: targetUserId }
+            where: { userId: targetUserId },
+            select: {
+                userId: true,
+                displayName: true,
+                bio: true,
+                age: true,
+                gender: true,
+                photos: true,
+                interests: true,
+                city: true,
+                countryCode: true,
+                lookingFor: true,
+                connectionModes: true,
+                isVerified: true,
+                isCompleted: true,
+
+                badges: true,
+                dailyLikesUsed: true,
+                superlikesRemaining: true,
+                lastActiveAt: true,
+                subscriptionStatus: true,
+                trustStatus: true,
+                reputationScore: true,
+                createdAt: true,
+                // Needed for incognito check, excluded from response below
+                incognitoMode: true,
+                showMeInDiscover: true,
+            },
         });
 
         if (!profile) {
@@ -126,8 +153,8 @@ export async function GET(
             },
         });
 
-        // Hide private fields
-        const { incognitoMode, showMeInDiscover, ...safeProfile } = profile as any;
+        // Strip private fields from response
+        const { incognitoMode: _, showMeInDiscover: __, ...safeProfile } = profile;
 
         const latestAnswer = await getLatestAnswerForUserById(targetUserId);
 

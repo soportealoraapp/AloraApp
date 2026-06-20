@@ -271,6 +271,11 @@ export function ChatInput({ onSend, onSendImage, onSendVoice, onTyping, disabled
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
 
+  const recordingBars = useMemo(() => Array.from({ length: 30 }).map((_, i) => ({
+    height: 4 + (((i * 7 + 3) % 11) / 11) * 12,
+    delay: `${i * 0.05}s`,
+  })), []);
+
   if (recordedUrl) {
     return (
       <div className="space-y-2">
@@ -286,11 +291,6 @@ export function ChatInput({ onSend, onSendImage, onSendVoice, onTyping, disabled
       </div>
     );
   }
-
-  const recordingBars = useMemo(() => Array.from({ length: 30 }).map((_, i) => ({
-    height: 4 + (((i * 7 + 3) % 11) / 11) * 12,
-    delay: `${i * 0.05}s`,
-  })), []);
 
   if (isRecording) {
     return (

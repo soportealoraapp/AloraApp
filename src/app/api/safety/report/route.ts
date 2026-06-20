@@ -43,6 +43,18 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ error: 'Cannot report yourself' }, { status: 400 });
         }
 
+        // Prevent duplicate reports from the same reporter to the same user
+        const existingReport = await prisma.report.findFirst({
+            where: {
+                reporterId: user.id,
+                reportedId,
+                status: { in: ['pending', 'reviewed'] },
+            },
+        });
+        if (existingReport) {
+            return NextResponse.json({ error: 'Ya has reportado a este usuario' }, { status: 409 });
+        }
+
         const MAX_DESCRIPTION_LENGTH = 1000;
         const sanitizedDescription = typeof description === 'string'
             ? description.slice(0, MAX_DESCRIPTION_LENGTH)

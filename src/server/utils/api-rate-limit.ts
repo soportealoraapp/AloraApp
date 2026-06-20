@@ -13,6 +13,7 @@ const LIMITS: Record<string, { limit: number; windowSeconds: number }> = {
     boost: { limit: 5, windowSeconds: 60 },
     referral: { limit: 5, windowSeconds: 60 },
     analytics: { limit: 30, windowSeconds: 60 },
+    passedRead: { limit: 30, windowSeconds: 60 },
     ai: { limit: 10, windowSeconds: 60 },
     spotify: { limit: 10, windowSeconds: 60 },
     adminAction: { limit: 30, windowSeconds: 60 },

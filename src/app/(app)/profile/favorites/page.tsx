@@ -62,7 +62,6 @@ export default function FavoritesPage() {
                     </div>
                     <p className="text-sm text-muted-foreground">
                         {favorites.length} perfil{favorites.length !== 1 ? 'es' : ''} guardado{favorites.length !== 1 ? 's' : ''}
-                        <span className="text-warning ml-1">· Favoritos ilimitados con Plus</span>
                     </p>
                 </div>
             </div>

@@ -506,7 +506,7 @@ export async function getDynamicFeed(
         let visible = scoredItems.filter(item =>
             item.profile.photos &&
             item.profile.photos.length >= 1 &&
-            !(item.profile as any).incomplete_media &&
+            !(item.profile.incomplete_media) &&
             (item.profile.completenessScore ?? 0) >= 40
         );
 

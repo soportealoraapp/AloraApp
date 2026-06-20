@@ -17,6 +17,9 @@ export async function GET() {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    const rateLimitResponse = await withRateLimit(user.id, 'blockRead');
+    if (rateLimitResponse) return rateLimitResponse;
+
     try {
         const blocks = await prisma.block.findMany({
             where: { blockerId: user.id }

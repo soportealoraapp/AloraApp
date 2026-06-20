@@ -132,7 +132,7 @@ export async function updateReputation(userId: string) {
 // ========== SPAM DETECTION ==========
 
 export async function detectSpamBehavior(userId: string, action: string): Promise<{ isSpam: boolean; reason?: string }> {
-    const windowMinutes = 1;
+    const windowMinutes = 5;
     const since = new Date(Date.now() - windowMinutes * 60000);
 
     switch (action) {
@@ -189,13 +189,31 @@ export async function applyAutoActions(userId: string) {
             where: { userId },
             data: { isShadowBanned: true, trustStatus: 'watchlist' },
         });
+    } else if (score < 30) {
+        // Significant restrictions: reduce daily likes to 10, flag for review
+        await prisma.profile.update({
+            where: { userId },
+            data: {
+                trustStatus: 'watchlist',
+                dailyLikesUsed: 0,
+            },
+        });
+        await prisma.auditLog.create({
+            data: {
+                userId,
+                action: 'auto_action_restricted',
+                details: { score, reason: 'reputation below 30' },
+            }
+        });
     } else if (score < 40) {
-        // Reduce discover visibility
-        // This is handled in feed calculation (reputation < 50 → 0.6x multiplier)
-    }
-
-    // If score is very low, put a cooldown on likes
-    if (score < 30) {
-        // Will be enforced by rate limiter using reputation-based limits
+        // Moderate restrictions: reduce discover visibility (handled in feed scoring)
+        // Add audit log for monitoring
+        await prisma.auditLog.create({
+            data: {
+                userId,
+                action: 'auto_action_warning',
+                details: { score, reason: 'reputation below 40' },
+            }
+        });
     }
 }

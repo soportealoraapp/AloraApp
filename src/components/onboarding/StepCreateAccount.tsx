@@ -75,8 +75,17 @@ export function StepCreateAccount({ onAccountCreated, initialRef }: StepCreateAc
     const startEmailPolling = useCallback((userId: string) => {
         if (pollingRef.current) clearInterval(pollingRef.current);
         setVerifying(true);
+        let attempts = 0;
+        const MAX_ATTEMPTS = 50; // ~2.5 minutes
 
         pollingRef.current = setInterval(async () => {
+            attempts++;
+            if (attempts >= MAX_ATTEMPTS) {
+                if (pollingRef.current) clearInterval(pollingRef.current);
+                pollingRef.current = null;
+                setVerifying(false);
+                return;
+            }
             try {
                 const { data: { user } } = await supabase.auth.getUser();
                 if (user?.email_confirmed_at) {

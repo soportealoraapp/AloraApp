@@ -66,13 +66,30 @@ export async function assignVariant(experimentName: string, userId: string): Pro
   for (const variant of experiment.variants) {
     cumulative += (variant.trafficPct / totalPct) * 0xFFFFFFFF;
     if (hash < cumulative) {
-      await prisma.experimentAssignment.create({
-        data: {
-          experimentId: experiment.id,
-          variantId: variant.id,
-          userId,
-        },
-      });
+      try {
+        await prisma.experimentAssignment.create({
+          data: {
+            experimentId: experiment.id,
+            variantId: variant.id,
+            userId,
+          },
+        });
+      } catch (err: unknown) {
+        // P2002 = unique constraint violation (concurrent request already created it)
+        if (err && typeof err === 'object' && 'code' in err && (err as { code: string }).code === 'P2002') {
+          const existing = await prisma.experimentAssignment.findFirst({
+            where: { experimentId: experiment.id, userId },
+            include: { variant: true, experiment: true },
+          });
+          if (existing) {
+            return {
+              variant: { id: existing.variant.id, name: existing.variant.name, trafficPct: existing.variant.trafficPct },
+              experiment: { id: existing.experiment.id, name: existing.experiment.name, status: existing.experiment.status, metric: existing.experiment.metric, variants: [] },
+            };
+          }
+        }
+        throw err;
+      }
 
       return {
         variant: { id: variant.id, name: variant.name, trafficPct: variant.trafficPct },
@@ -82,13 +99,29 @@ export async function assignVariant(experimentName: string, userId: string): Pro
   }
 
   const fallback = experiment.variants[experiment.variants.length - 1];
-  await prisma.experimentAssignment.create({
-    data: {
-      experimentId: experiment.id,
-      variantId: fallback.id,
-      userId,
-    },
-  });
+  try {
+    await prisma.experimentAssignment.create({
+      data: {
+        experimentId: experiment.id,
+        variantId: fallback.id,
+        userId,
+      },
+    });
+  } catch (err: unknown) {
+    if (err && typeof err === 'object' && 'code' in err && (err as { code: string }).code === 'P2002') {
+      const existing = await prisma.experimentAssignment.findFirst({
+        where: { experimentId: experiment.id, userId },
+        include: { variant: true, experiment: true },
+      });
+      if (existing) {
+        return {
+          variant: { id: existing.variant.id, name: existing.variant.name, trafficPct: existing.variant.trafficPct },
+          experiment: { id: existing.experiment.id, name: existing.experiment.name, status: existing.experiment.status, metric: existing.experiment.metric, variants: [] },
+        };
+      }
+    }
+    throw err;
+  }
 
   return {
     variant: { id: fallback.id, name: fallback.name, trafficPct: fallback.trafficPct },

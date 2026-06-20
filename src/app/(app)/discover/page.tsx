@@ -795,7 +795,7 @@ export default function DiscoverPage() {
       </div>
 
       <div className="px-4 pb-3 max-w-sm mx-auto w-full">
-        <SecondChanceSection />
+        <SecondChanceSection intent={intent} />
       </div>
 
       <DiscoverFilters

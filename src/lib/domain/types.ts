@@ -127,6 +127,7 @@ export interface UserProfile extends User {
     experimentalGroup?: 'A' | 'B';
     compatibility?: number; // UI helper
     completenessScore?: number; // v3.8.0
+    incomplete_media?: boolean; // v3.9.2 — true if profile has pending media upload
 
     // Discover V3 retention signals
     activeNow?: boolean;
