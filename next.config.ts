@@ -66,15 +66,6 @@ const nextConfig: NextConfig = {
   experimental: {
     optimizePackageImports: ['lucide-react', 'date-fns', 'framer-motion', 'recharts'],
   },
-
-  async headers() {
-    return [
-      {
-        source: '/(.*)',
-        headers: [],
-      },
-    ];
-  },
 };
 
 export default withPWA(nextConfig);
