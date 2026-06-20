@@ -20,7 +20,7 @@ export async function POST(request: Request) {
 
     try {
         const { ensureSubscriptionState } = await import('@/lib/subscription-helper');
-        await ensureSubscriptionState(user.id);
+        const { subscriptionStatus } = await ensureSubscriptionState(user.id);
 
         const profile = await prisma.profile.findUnique({
             where: { userId: user.id },
@@ -36,7 +36,10 @@ export async function POST(request: Request) {
             return NextResponse.json({ error: 'Profile not found' }, { status: 404 });
         }
 
-        const isPlus = profile.subscriptionStatus === 'plus';
+        const isPlus = subscriptionStatus === 'plus';
+        if (!isPlus) {
+            return NextResponse.json({ error: 'Requiere Alora Plus', code: 'subscription_required' }, { status: 403 });
+        }
         const now = new Date();
 
         // Check if boost is already active

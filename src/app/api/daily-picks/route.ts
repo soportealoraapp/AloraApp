@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { ensureSubscriptionState } from '@/lib/subscription-helper';
 
 export const dynamic = 'force-dynamic';
 
@@ -10,6 +11,11 @@ export async function GET(request: NextRequest) {
 
     if (!user) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const { subscriptionStatus } = await ensureSubscriptionState(user.id);
+    if (subscriptionStatus !== 'plus') {
+        return NextResponse.json({ error: 'Requiere Alora Plus', code: 'subscription_required' }, { status: 403 });
     }
 
     try {

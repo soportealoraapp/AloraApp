@@ -10,7 +10,7 @@ import { SpotifySection } from "@/components/profile/SpotifySection";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, Heart, MessageSquare, Sparkles, MapPin, Briefcase, Cigarette, GlassWater, Baby, Star, BookOpen, Music, X, Undo, UserCheck, Loader2, ChevronLeft, ChevronRight, Mic } from "lucide-react";
+import { ArrowLeft, Heart, MessageSquare, Sparkles, MapPin, Briefcase, Cigarette, GlassWater, Baby, Star, BookOpen, Music, X, UserCheck, Loader2, ChevronLeft, ChevronRight, Mic } from "lucide-react";
 import { HeartArrow } from "@/components/ui/custom/HeartArrow";
 import { ProfileHighlights } from "@/components/profile/ProfileHighlights";
 import { FavoriteButton } from "@/components/profile/FavoriteButton";
@@ -52,7 +52,6 @@ export default function UserProfilePage() {
     const isPreview = searchParams.get("preview") === "1";
     const intent = (searchParams.get("intent") as 'dating' | 'friendship' | null) || 'dating';
     const isFromNewMatch = source === "new-match";
-    const isFromRejected = source === "rejected";
 
     const { profile, loading } = useProfile(id as string);
 
@@ -66,7 +65,7 @@ export default function UserProfilePage() {
 
     useEffect(() => {
       if (!id || !user || isPreview) return;
-      fetch(`/api/match/check?targetUserId=${id}`)
+      fetch(`/api/match/check?targetUserId=${id}&intent=${intent}`)
         .then(r => r.json())
         .then(data => {
           setHasExistingMatch(data.matched);
@@ -213,38 +212,22 @@ export default function UserProfilePage() {
         }
     };
 
-    const handleGiveSecondChance = async () => {
-        if (hasExistingMatch) {
-            toast({ title: "Ya tienes match con esta persona", description: "Puedes buscarla en tu lista de chats." });
-            return;
-        }
-        setProcessing(true);
-        try {
-            const result = await sendLike(id as string, "like", intent, false);
-
-            if (result.matchId) {
-                toast({
-                    title: "¡Segunda oportunidad!",
-                    description: `¡Hiciste match con ${profile.displayName}!`,
-                });
-                router.push(`/chat/${result.matchId}`);
-            } else {
-                toast({
-                    title: "¡Like enviado!",
-                    description: `Le diste una segunda oportunidad a ${profile.displayName}.`,
-                });
-            }
-        } catch (error) {
-            console.error("Error giving second chance:", error);
-            toast({ title: "Error", description: "No se pudo dar segunda oportunidad. Intenta de nuevo.", variant: "destructive" });
-        } finally {
-            setProcessing(false);
-        }
-    };
-
     const handleTagClick = (tag: string, type: 'interest' | 'value' | 'music') => {
         const queryParam = type === 'interest' ? 'interest' : type === 'value' ? 'value' : 'music';
         router.push(`/discover?${queryParam}=${encodeURIComponent(tag)}`);
+    };
+
+    const handlePass = async () => {
+        if (processing) return;
+        setProcessing(true);
+        try {
+            await sendLike(id as string, "pass", intent);
+        } catch {
+            // Pass is best-effort, still go back
+        } finally {
+            setProcessing(false);
+            goBack();
+        }
     };
 
     return (
@@ -497,28 +480,20 @@ export default function UserProfilePage() {
                                     Hacer Match
                                 </Button>
                             </div>
-                        ) : isFromRejected ? (
-                            <div className="flex justify-around items-center max-w-md mx-auto gap-3">
-                                <Button
-                                    size="lg"
-                                    variant="default"
-                                    className="w-full min-h-[48px]"
-                                    onClick={handleGiveSecondChance}
-                                    disabled={processing}
-                                >
-                                    {processing ? (
-                                        <Loader2 className="h-5 w-5 mr-2 animate-spin" />
-                                    ) : (
-                                        <Undo className="h-5 w-5 mr-2" />
-                                    )}
-                                    Dar una segunda oportunidad
-                                </Button>
+                        ) : hasExistingMatch ? (
+                            <div className="flex justify-center max-w-sm mx-auto">
+                                <Link href={`/chat`} className="w-full">
+                                    <Button size="lg" variant="default" className="w-full min-h-[48px]">
+                                        <MessageSquare className="h-5 w-5 mr-2" />
+                                        Ir al chat
+                                    </Button>
+                                </Link>
                             </div>
                         ) : (
                             <div className="flex justify-around items-center max-w-sm mx-auto gap-3">
                                 {/* Pass */}
                                 <button
-                                    onClick={() => goBack()}
+                                    onClick={handlePass}
                                     disabled={processing}
                                     className="h-16 w-16 rounded-full border-2 border-muted-foreground/20 bg-background flex items-center justify-center shadow-lg hover:border-red-400 hover:bg-red-50 dark:hover:bg-red-950/30 hover:text-red-500 transition-all active:scale-95"
                                     aria-label="Pasar"

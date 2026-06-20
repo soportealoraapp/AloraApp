@@ -4,6 +4,7 @@ import { prisma } from '@/lib/prisma';
 import { calculateCompatibility } from '@/lib/compatibility/engine';
 import { withRateLimit } from '@/server/utils/api-rate-limit';
 import { getServerUser } from '@/lib/middleware/auth';
+import { ensureSubscriptionState } from '@/lib/subscription-helper';
 
 export async function POST(request: Request) {
     try {
@@ -14,6 +15,11 @@ export async function POST(request: Request) {
 
         const rateLimitResponse = await withRateLimit(user.id, 'ai');
         if (rateLimitResponse) return rateLimitResponse;
+
+        const { subscriptionStatus } = await ensureSubscriptionState(user.id);
+        if (subscriptionStatus !== 'plus') {
+            return NextResponse.json({ error: 'Requiere Alora Plus', code: 'subscription_required' }, { status: 403 });
+        }
 
         const { candidateId } = await request.json();
         if (!candidateId) {

@@ -160,6 +160,17 @@ export async function POST() {
             }
         }).catch(() => {});
 
+        // Notify the other user if a match was undone
+        if (existingMatch) {
+            const { notifyMatchUndone } = await import('@/server/services/push');
+            const otherUserId = interaction.toUserId;
+            const currentUserProfile = await prisma.profile.findUnique({
+                where: { userId: user.id },
+                select: { displayName: true }
+            });
+            notifyMatchUndone(otherUserId, currentUserProfile?.displayName || 'Alguien', interaction.intent).catch(() => {});
+        }
+
         return NextResponse.json({
             success: true,
             undone: {

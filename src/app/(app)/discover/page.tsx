@@ -289,7 +289,9 @@ export default function DiscoverPage() {
 
     const previousProfiles = profilesRef.current;
     setPendingSwipe(true);
-    setSwipeCount(prev => prev + 1);
+    if (action !== 'pass') {
+      setSwipeCount(prev => prev + 1);
+    }
 
     const remainingProfiles = previousProfiles.slice(1);
     setProfiles(remainingProfiles as any);
@@ -319,7 +321,9 @@ export default function DiscoverPage() {
     } catch (error) {
       console.error("Action failed", error);
       setProfiles(previousProfiles as any);
-      setSwipeCount(prev => prev - 1);
+      if (action !== 'pass') {
+        setSwipeCount(prev => prev - 1);
+      }
       lastSwipeRef.current = null;
       toast({
         title: "Error",
@@ -359,6 +363,7 @@ export default function DiscoverPage() {
           }
         }
         setSwipeCount(prev => Math.max(0, prev - 1));
+        lastSwipeRef.current = null;
         toast({ title: "Deshecho", description: "Último swipe revertido." });
       } else {
         const data = await res.json();
@@ -614,11 +619,9 @@ export default function DiscoverPage() {
                                   try {
                                     track(AnalyticsEvents.PASS_SENT, { targetUserId: p.id, intent });
                                     await sendLike(p.id, 'pass', intent);
-                                    setSwipeCount(prev => prev + 1);
                                     setProfiles(prev => prev.filter(item => item.profile.id !== p.id));
                                   } catch (error) {
                                     setProfiles(previousGridProfiles);
-                                    setSwipeCount(prev => prev - 1);
                                     toast({ title: "Error", description: "No se pudo descartar. Inténtalo de nuevo.", variant: "destructive" });
                                   } finally {
                                     setPendingGridAction(false);

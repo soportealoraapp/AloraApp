@@ -11,29 +11,40 @@ export async function GET(request: NextRequest) {
   }
 
   const targetUserId = request.nextUrl.searchParams.get('targetUserId');
+  const intent = request.nextUrl.searchParams.get('intent') as 'dating' | 'friendship' | null;
   if (!targetUserId) {
     return NextResponse.json({ error: 'targetUserId required' }, { status: 400 });
   }
 
   const [u1, u2] = [user.id, targetUserId].sort();
 
+  const matchWhere: any = {
+    OR: [
+      { user1Id: u1, user2Id: u2, isActive: true },
+      { user1Id: u2, user2Id: u1, isActive: true },
+    ],
+  };
+  if (intent) {
+    matchWhere.intent = intent;
+  }
+
   const match = await prisma.match.findFirst({
-    where: {
-      OR: [
-        { user1Id: u1, user2Id: u2, isActive: true },
-        { user1Id: u2, user2Id: u1, isActive: true },
-      ],
-    },
+    where: matchWhere,
     select: { id: true, intent: true },
   });
 
   // Check existing interaction from current user to target
+  const interactionWhere: any = {
+    fromUserId: user.id,
+    toUserId: targetUserId,
+    deletedAt: null,
+  };
+  if (intent) {
+    interactionWhere.intent = intent;
+  }
+
   const interaction = await prisma.interaction.findFirst({
-    where: {
-      fromUserId: user.id,
-      toUserId: targetUserId,
-      deletedAt: null,
-    },
+    where: interactionWhere,
     select: { type: true },
     orderBy: { createdAt: 'desc' },
   });

@@ -50,8 +50,12 @@ export const SecondChanceSection = React.memo(function SecondChanceSection({ int
 
   const handleLike = async (profileId: string, intent: ConnectionIntent = 'dating') => {
     try {
-      await sendLike(profileId, 'like', intent, false);
-      toast({ title: '¡Like enviado!' });
+      const result = await sendLike(profileId, 'like', intent, false);
+      if (result?.matched) {
+        toast({ title: '¡Match!', description: '¡Ahora pueden chatear!', duration: 5000 });
+      } else {
+        toast({ title: '¡Like enviado!' });
+      }
       setPassedProfiles(prev => prev.filter(p => p.id !== profileId));
     } catch {
       toast({ title: 'Error', variant: 'destructive' });

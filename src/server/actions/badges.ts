@@ -134,7 +134,21 @@ export async function assignBadge(userId: string, badgeKey: BadgeKey): Promise<{
         const { createClient } = await import('@/lib/supabase/server');
         const supabase = await createClient();
         const { data: { user } } = await supabase.auth.getUser();
-        if (!user || user.id !== userId) {
+        if (!user) {
+            return { success: false };
+        }
+
+        // Admin-only: verify caller has admin or super_admin role
+        const callerProfile = await prisma.user.findUnique({
+            where: { id: user.id },
+            select: { role: true },
+        });
+        if (!callerProfile || !['admin', 'super_admin'].includes(callerProfile.role)) {
+            return { success: false };
+        }
+
+        // Validate badge key exists in definitions
+        if (!BADGE_DEFINITIONS[badgeKey]) {
             return { success: false };
         }
 

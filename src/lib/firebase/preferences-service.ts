@@ -1,4 +1,5 @@
 import { prisma } from '@/lib/prisma';
+import { ensureSubscriptionState } from '@/lib/subscription-helper';
 
 export const preferencesService = {
     getPreferences: async (userId: string) => {
@@ -46,6 +47,10 @@ export const preferencesService = {
     },
 
     toggleIncognito: async (userId: string) => {
+        const { subscriptionStatus } = await ensureSubscriptionState(userId);
+        if (subscriptionStatus !== 'plus') {
+            return { success: false, error: 'subscription_required', message: 'Modo Incógnito requiere Alora Plus' };
+        }
         const profile = await prisma.profile.findUnique({
             where: { userId },
             select: { incognitoMode: true }
