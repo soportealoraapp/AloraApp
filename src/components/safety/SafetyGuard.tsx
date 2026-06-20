@@ -3,8 +3,7 @@
 import { useState, useEffect } from 'react';
 import { LegalConsent } from '@/components/legal/LegalConsent';
 import { useAuth } from '@/contexts/AuthContext';
-
-const AGE_GATE_KEY = 'alora_age_gate';
+import { AGE_GATE_KEY } from '@/lib/constants/preferences';
 
 export function SafetyGuard({ children }: { children: React.ReactNode }) {
     const { user, profile } = useAuth();

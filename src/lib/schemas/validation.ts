@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { MAX_INTERESTS, MAX_VALUES, MAX_MUSIC_GENRES } from '@/lib/constants/preferences';
 
 // Canonical gender vocabulary. Legacy values ('male' / 'female') are normalized
 // to ('man' / 'woman') by `normalizeGender` before they ever reach the DB or
@@ -9,9 +10,6 @@ export type Gender = (typeof ALLOWED_GENDERS)[number];
 const ALLOWED_SEEKING = ['women', 'men', 'all', 'everyone'] as const;
 const ALLOWED_CONNECTION_INTENTS = ['dating', 'friendship'] as const;
 const MAX_PHOTOS = 6;
-const MAX_INTERESTS = 10;
-const MAX_VALUES = 5;
-const MAX_MUSIC_GENRES = 5;
 const MAX_BIO_LENGTH = 500;
 const MAX_DISPLAY_NAME_LENGTH = 50;
 const MAX_CITY_LENGTH = 100;

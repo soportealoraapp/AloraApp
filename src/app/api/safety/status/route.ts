@@ -1,12 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getSafetyStatus } from '@/server/services/women-safety';
-
-async function getServerUser() {
-    const { createClient } = await import('@/lib/supabase/server');
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    return user;
-}
+import { getServerUser } from '@/lib/middleware/auth';
 
 export async function GET() {
     try {

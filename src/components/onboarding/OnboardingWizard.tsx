@@ -11,7 +11,7 @@ import { StepInterests } from "./StepInterests";
 import { StepCreateAccount } from "./StepCreateAccount";
 import { StepPhotos } from "./StepPhotos";
 import { UserProfile } from "@/lib/domain/types";
-import { Heart, Cloud, Loader2 } from "lucide-react";
+import { Heart, Cloud, Loader2, ArrowLeft } from "lucide-react";
 import { REFERRAL_COOKIE, REFERRAL_SESSION_KEY, REFERRAL_CODE_PATTERN } from "@/lib/referral/constants";
 import { trackEvent } from "@/lib/tracking/client";
 
@@ -252,6 +252,15 @@ export function OnboardingWizard({ initialRef }: { initialRef?: string } = {}) {
                 <div className="mb-8">
                     <div className="flex items-center justify-between mb-4">
                         <div className="flex items-center gap-2">
+                            {step > 1 && (
+                                <button
+                                    onClick={prevStep}
+                                    className="p-1 -ml-1 rounded-full hover:bg-muted transition-colors"
+                                    aria-label="Paso anterior"
+                                >
+                                    <ArrowLeft className="h-4 w-4 text-muted-foreground" />
+                                </button>
+                            )}
                             <Heart className="h-4 w-4 text-primary" />
                             <span className="text-xs uppercase tracking-[0.2em] text-muted-foreground font-bold">
                                 {STEP_LABELS[step - 1]}
@@ -293,7 +302,7 @@ export function OnboardingWizard({ initialRef }: { initialRef?: string } = {}) {
                     >
                         {isOAuthUser ? (
                             <>
-                                {step === 1 && <StepBasicInfo userId={effectiveUserId} data={formData} onUpdate={saveProgress} onNext={nextStep} />}
+                                {step === 1 && <StepBasicInfo userId={effectiveUserId} data={formData} onUpdate={saveProgress} onNext={nextStep} onPrev={prevStep} />}
                                 {step === 2 && <StepPhotos userId={effectiveUserId} data={formData} onUpdate={saveProgress} onNext={nextStep} onPrev={prevStep} />}
                                 {step === 3 && <StepInterests userId={effectiveUserId} data={formData} onUpdate={saveProgress} onNext={nextStep} onPrev={prevStep} />}
                             </>
@@ -302,7 +311,7 @@ export function OnboardingWizard({ initialRef }: { initialRef?: string } = {}) {
                                 {step === 1 && (
                                     <StepCreateAccount onAccountCreated={handleAccountCreated} initialRef={initialRef} />
                                 )}
-                                {step === 2 && <StepBasicInfo userId={effectiveUserId} data={formData} onUpdate={saveProgress} onNext={nextStep} />}
+                                {step === 2 && <StepBasicInfo userId={effectiveUserId} data={formData} onUpdate={saveProgress} onNext={nextStep} onPrev={prevStep} />}
                                 {step === 3 && <StepPhotos userId={effectiveUserId} data={formData} onUpdate={saveProgress} onNext={nextStep} onPrev={prevStep} />}
                                 {step === 4 && <StepInterests userId={effectiveUserId} data={formData} onUpdate={saveProgress} onNext={nextStep} onPrev={prevStep} />}
                             </>

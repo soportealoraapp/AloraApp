@@ -129,6 +129,7 @@ export function PhotoGrid({ photos, onReorder, onRemove, onCrop, maxPhotos = 6 }
                             variant="secondary"
                             className="h-11 w-11 p-0"
                             onMouseDown={(e) => e.stopPropagation()}
+                            aria-label="Arrastrar para reordenar"
                         >
                             <GripVertical className="h-4 w-4" />
                         </Button>
@@ -138,6 +139,7 @@ export function PhotoGrid({ photos, onReorder, onRemove, onCrop, maxPhotos = 6 }
                                 variant="secondary"
                                 className="h-11 w-11 p-0"
                                 onClick={(e) => { e.stopPropagation(); onCrop(index); }}
+                                aria-label="Recortar foto"
                             >
                                 <Crop className="h-4 w-4" />
                             </Button>
@@ -147,6 +149,7 @@ export function PhotoGrid({ photos, onReorder, onRemove, onCrop, maxPhotos = 6 }
                             variant="destructive"
                             className="h-11 w-11 p-0"
                             onClick={(e) => { e.stopPropagation(); onRemove(index); }}
+                            aria-label="Eliminar foto"
                         >
                             <X className="h-4 w-4" />
                         </Button>

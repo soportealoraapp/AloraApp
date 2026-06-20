@@ -44,7 +44,7 @@ export default function ProfileEditPage() {
 
     const [loading, setLoading] = useState(false);
     const [uploading, setUploading] = useState(false);
-    const swipeBackRef = useRef({ startX: 0, startY: 0 });
+    const swipeBackRef = useRef<{ startX: number; startY: number; isEdge?: boolean }>({ startX: 0, startY: 0 });
     const goBack = useCallback(() => {
         if (isDirtyRef.current && !window.confirm('Tienes cambios sin guardar. ¿Estás seguro de salir?')) return;
         router.back();
@@ -333,11 +333,12 @@ export default function ProfileEditPage() {
     }
 
     const handleTouchStart = (e: React.TouchEvent) => {
-        swipeBackRef.current = { startX: e.touches[0].clientX, startY: e.touches[0].clientY };
+        const x = e.touches[0].clientX;
+        swipeBackRef.current = { startX: x, startY: e.touches[0].clientY, isEdge: x < 30 };
     };
 
     const handleTouchEnd = (e: React.TouchEvent) => {
-        if (!swipeBackRef.current) return;
+        if (!swipeBackRef.current || !swipeBackRef.current.isEdge) return;
         const dx = e.changedTouches[0].clientX - swipeBackRef.current.startX;
         const dy = e.changedTouches[0].clientY - swipeBackRef.current.startY;
         const scrollY = window.scrollY || document.documentElement.scrollTop;

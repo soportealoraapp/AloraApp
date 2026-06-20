@@ -34,7 +34,7 @@ const stats = [
 
 export default function WelcomePage() {
   return (
-    <div className="flex min-h-screen w-full flex-col items-center bg-background">
+    <div className="flex min-h-dvh w-full flex-col items-center bg-background">
       <div className="absolute top-4 right-4 z-10">
         <ThemeToggle />
       </div>

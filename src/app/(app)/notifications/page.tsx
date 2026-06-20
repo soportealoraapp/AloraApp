@@ -122,7 +122,7 @@ function NotificationItem({ notification, onRead, onDelete }: { notification: an
 }
 
 export default function NotificationsPage() {
-  const { notifications, unreadCount, loading, markRead, markAllRead, deleteNotification } = useNotifications({ pollIntervalMs: 30000 });
+  const { notifications, unreadCount, loading, markRead, markAllRead, deleteNotification, undoDelete, refresh } = useNotifications({ pollIntervalMs: 30000 });
   const [deletedNotification, setDeletedNotification] = useState<any>(null);
   const undoTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -134,7 +134,7 @@ export default function NotificationsPage() {
     // Clear previous undo timeout
     if (undoTimeoutRef.current) clearTimeout(undoTimeoutRef.current);
 
-    // Auto-clear undo after 5 seconds
+    // Auto-clear undo after 5 seconds (matching the delayed delete in the hook)
     undoTimeoutRef.current = setTimeout(() => {
       setDeletedNotification(null);
     }, 5000);
@@ -143,13 +143,17 @@ export default function NotificationsPage() {
   const handleUndo = useCallback(() => {
     if (deletedNotification && undoTimeoutRef.current) {
       clearTimeout(undoTimeoutRef.current);
+      // Cancel the pending delete in the hook — notification is still in DB
+      undoDelete(deletedNotification.id);
+      // Re-fetch to restore the notification in the UI
+      refresh();
       setDeletedNotification(null);
     }
-  }, [deletedNotification]);
+  }, [deletedNotification, undoDelete, refresh]);
 
   if (loading) {
     return (
-      <div className="min-h-screen">
+      <div className="min-h-dvh">
         <header className="sticky top-0 z-30 flex h-16 items-center border-b bg-background/90 px-4 backdrop-blur-md pt-safe">
           <Skeleton className="h-6 w-32" />
         </header>
@@ -167,7 +171,7 @@ export default function NotificationsPage() {
   }
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-dvh">
       <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b bg-background/90 px-4 backdrop-blur-md pt-safe">
         <h1 className="text-xl font-bold">Actividad</h1>
         {unreadCount > 0 && (

@@ -16,6 +16,23 @@ const QUESTIONS = [
     { question: "¿Qué actividad te gustaría compartir con tu pareja?", category: "lifestyle" },
     { question: "¿Qué es lo más importante que buscas en una pareja?", category: "values" },
     { question: "¿Cómo te gustaría que sea tu vida en 5 años?", category: "goals" },
+    { question: "¿Cuál es tu mayor miedo en una relación?", category: "growth" },
+    { question: "¿Prefieres las palabras o los hechos para demostrar amor?", category: "communication" },
+    { question: "¿Qué hábito de tu pareja más admiras?", category: "values" },
+    { question: "¿Cómo manejas el estrés en una relación?", category: "communication" },
+    { question: "¿Quéplace(s) te gustaría visitar con tu pareja?", category: "lifestyle" },
+    { question: "¿Cuál es tu forma favorita de recibir cariño?", category: "connection" },
+    { question: "¿Qué opinas sobre las relaciones a distancia?", category: "values" },
+    { question: "¿Cómo celebras los logros de tu pareja?", category: "connection" },
+    { question: "¿Qué role juega la familia en tu vida amorosa?", category: "values" },
+    { question: "¿Cuál es tu mayor fortaleza en una relación?", category: "personality" },
+    { question: "¿Cómo te gustaría conocer a tu pareja ideal?", category: "dating" },
+    { question: "¿Qué opinas sobre compartir redes sociales en pareja?", category: "values" },
+    { question: "¿Qué actividad nueva te gustaría probar con tu pareja?", category: "lifestyle" },
+    { question: "¿Cómo defines el éxito en una relación?", category: "goals" },
+    { question: "¿Qué es algo que nunca harías en una relación?", category: "values" },
+    { question: "¿Cuál es tu mayor sueño compartido?", category: "goals" },
+    { question: "¿Cómo manejas los desacuerdos financieros en pareja?", category: "communication" },
 ];
 
 export async function getTodayQuestion(timezone?: string) {

@@ -5,8 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { ShieldAlert, Heart } from 'lucide-react';
 import { useState, useEffect } from 'react';
-
-const AGE_GATE_KEY = 'alora_age_gate';
+import { AGE_GATE_KEY } from '@/lib/constants/preferences';
 
 function getAgeGateAccepted(): boolean {
     if (typeof window === 'undefined') return false;

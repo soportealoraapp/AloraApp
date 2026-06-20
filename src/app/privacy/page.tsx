@@ -3,7 +3,7 @@ import Link from 'next/link';
 
 export default function PrivacyPage() {
     return (
-        <div className="min-h-screen bg-background p-6">
+        <div className="min-h-dvh bg-background p-6">
             <div className="max-w-3xl mx-auto bg-card rounded-2xl shadow-sm border p-8 space-y-6">
                 <h1 className="text-3xl font-bold text-foreground">Política de Privacidad</h1>
                 <p className="text-sm text-muted-foreground">Última actualización: 3 de junio de 2026</p>

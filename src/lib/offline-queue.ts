@@ -124,7 +124,8 @@ function getEndpointForType(type: string): string {
 }
 
 // Auto-process queue when coming online or on app start
-if (typeof window !== 'undefined') {
+if (typeof window !== 'undefined' && !(window as any).__offlineQueueInitialized) {
+    (window as any).__offlineQueueInitialized = true;
     window.addEventListener('online', () => {
         processQueue();
     });

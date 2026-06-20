@@ -105,7 +105,7 @@ export default function AdminActivationPage() {
     ];
 
     return (
-        <div className="md:pl-60 p-6 space-y-6 bg-muted/30 min-h-screen">
+        <div className="md:pl-60 p-6 space-y-6 bg-muted/30 min-h-dvh">
             <div className="flex items-center gap-4">
                 <button
                     onClick={() => router.back()}

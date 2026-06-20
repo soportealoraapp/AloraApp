@@ -6,8 +6,7 @@ import { trackEvent } from '@/server/services/analytics';
 import { AnalyticsEvents } from '@/lib/tracking/events';
 import { LikeSchema } from '@/lib/schemas/validation';
 import { detectSpamBehavior } from '@/server/services/anti-abuse';
-
-const FREE_DAILY_LIKES_LIMIT = 50;
+import { FREE_DAILY_LIKES_LIMIT } from '@/lib/constants/preferences';
 
 // POST /api/match/like
 export async function POST(request: NextRequest) {

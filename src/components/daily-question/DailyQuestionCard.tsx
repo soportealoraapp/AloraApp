@@ -11,7 +11,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { useSendLike } from '@/hooks/use-send-like';
 import { useAuth } from '@/contexts/AuthContext';
 import { HeartArrow } from '@/components/ui/custom/HeartArrow';
-import { MatchScreen } from '@/components/ui/premium/MatchScreen';
+import dynamic from 'next/dynamic';
+const MatchScreen = dynamic(() => import('@/components/ui/premium/MatchScreen').then(m => m.MatchScreen), { ssr: false });
 import { motion, AnimatePresence } from 'framer-motion';
 import Image from 'next/image';
 import Link from 'next/link';

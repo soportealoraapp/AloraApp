@@ -51,7 +51,8 @@ export function trackEngagement(action: string, metadata?: Record<string, any>) 
 }
 
 // Flush on page unload
-if (typeof window !== 'undefined') {
+if (typeof window !== 'undefined' && !(window as any).__trackingUnloadInitialized) {
+    (window as any).__trackingUnloadInitialized = true;
     window.addEventListener('beforeunload', () => {
         if (eventCache.length > 0) {
             navigator.sendBeacon('/api/analytics/track', JSON.stringify({

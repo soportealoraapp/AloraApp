@@ -127,7 +127,7 @@ export default function TravelModePage() {
     }
 
     return (
-        <div className="p-6 space-y-6 bg-muted/50 min-h-screen">
+        <div className="p-6 space-y-6 bg-muted/50 min-h-dvh">
             <div className="flex items-center gap-4">
                 <Button variant="ghost" size="icon" onClick={() => router.back()}>
                     <ArrowLeft className="h-5 w-5" />

@@ -3,8 +3,9 @@
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Music, ExternalLink, Headphones, Disc3, RefreshCw } from 'lucide-react';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import Image from 'next/image';
+import { useRouter } from 'next/navigation';
 
 interface Track {
   id: string;
@@ -37,6 +38,7 @@ interface SpotifySectionProps {
 }
 
 export function SpotifySection({ spotify, isOwn }: SpotifySectionProps) {
+  const router = useRouter();
   const [showEmbed, setShowEmbed] = useState(false);
   const [syncing, setSyncing] = useState(false);
   const [loading, setLoading] = useState(spotify === undefined);
@@ -120,7 +122,7 @@ export function SpotifySection({ spotify, isOwn }: SpotifySectionProps) {
                 try {
                   const res = await fetch('/api/spotify/sync', { method: 'POST' });
                   if (res.ok) {
-                    window.location.reload();
+                    router.refresh();
                   }
                 } catch {}
                 setSyncing(false);

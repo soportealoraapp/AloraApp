@@ -1,6 +1,8 @@
 'use client';
 
 import { useEffect, useState, useCallback, useRef } from 'react';
+import { createClient } from '@/lib/supabase/client';
+import type { RealtimeChannel } from '@supabase/supabase-js';
 
 export interface AppNotification {
     id: string;
@@ -26,12 +28,13 @@ interface UseNotificationsResult {
     markRead: (ids: string[]) => Promise<void>;
     markAllRead: () => Promise<void>;
     deleteNotification: (id: string) => Promise<void>;
+    undoDelete: (id: string) => void;
 }
 
-const DEFAULT_POLL_MS = 30_000;
+const FALLBACK_POLL_MS = 300_000;
 
 export function useNotifications({
-    pollIntervalMs = DEFAULT_POLL_MS,
+    pollIntervalMs = FALLBACK_POLL_MS,
     enabled = true,
 }: UseNotificationsOptions = {}): UseNotificationsResult {
     const [notifications, setNotifications] = useState<AppNotification[]>([]);
@@ -39,6 +42,7 @@ export function useNotifications({
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const abortRef = useRef<AbortController | null>(null);
+    const channelRef = useRef<RealtimeChannel | null>(null);
 
     const fetchNotifications = useCallback(async (signal?: AbortSignal) => {
         try {
@@ -67,10 +71,41 @@ export function useNotifications({
         const controller = new AbortController();
         abortRef.current = controller;
         fetchNotifications(controller.signal);
+
+        // Subscribe to real-time notification inserts
+        const supabase = createClient();
+        const channel = supabase
+            .channel('notifications-realtime')
+            .on(
+                'postgres_changes',
+                { event: 'INSERT', schema: 'public', table: 'notifications' },
+                (payload) => {
+                    const n = payload.new as any;
+                    const notification: AppNotification = {
+                        id: n.id,
+                        type: n.type,
+                        title: n.title,
+                        body: n.body,
+                        data: n.data,
+                        readAt: n.readAt,
+                        createdAt: n.createdAt,
+                    };
+                    setNotifications(prev => [notification, ...prev]);
+                    if (!n.readAt) setUnreadCount(prev => prev + 1);
+                }
+            )
+            .subscribe();
+        channelRef.current = channel;
+
+        // Fallback polling (5 min) to catch any missed events
         const interval = setInterval(() => fetchNotifications(), pollIntervalMs);
         return () => {
             controller.abort();
             clearInterval(interval);
+            if (channelRef.current) {
+                supabase.removeChannel(channelRef.current);
+                channelRef.current = null;
+            }
         };
     }, [enabled, pollIntervalMs, fetchNotifications]);
 
@@ -136,25 +171,47 @@ export function useNotifications({
         }
     }, []);
 
+    const pendingDeletesRef = useRef<Map<string, NodeJS.Timeout>>(new Map());
+
     const deleteNotification = useCallback(async (id: string) => {
         // Capture current state for rollback
         let prevNotifications: AppNotification[] = [];
         
-        // Optimistic update using functional state update to avoid stale closures
+        // Optimistic update — remove from visible list immediately
         setNotifications(prev => {
             prevNotifications = prev;
             return prev.filter(n => n.id !== id);
         });
         
-        try {
-            const res = await fetch(`/api/notifications?id=${id}`, {
-                method: 'DELETE',
-            });
-            if (!res.ok) throw new Error('Failed to delete notification');
-        } catch (err) {
-            // Rollback on failure
-            setNotifications(prevNotifications);
-            console.warn('[use-notifications] deleteNotification failed:', err);
+        // Delay the actual API DELETE by 5 seconds to allow undo
+        const timeout = setTimeout(async () => {
+            pendingDeletesRef.current.delete(id);
+            try {
+                const res = await fetch(`/api/notifications?id=${id}`, {
+                    method: 'DELETE',
+                });
+                if (!res.ok) throw new Error('Failed to delete notification');
+            } catch (err) {
+                // Rollback on failure — re-add the notification
+                setNotifications(prev => {
+                    const restored = prevNotifications.find(n => n.id === id);
+                    if (restored && !prev.find(n => n.id === id)) {
+                        return [restored, ...prev];
+                    }
+                    return prev;
+                });
+                console.warn('[use-notifications] deleteNotification failed:', err);
+            }
+        }, 5000);
+
+        pendingDeletesRef.current.set(id, timeout);
+    }, []);
+
+    const undoDelete = useCallback((id: string) => {
+        const timeout = pendingDeletesRef.current.get(id);
+        if (timeout) {
+            clearTimeout(timeout);
+            pendingDeletesRef.current.delete(id);
         }
     }, []);
 
@@ -167,5 +224,6 @@ export function useNotifications({
         markRead,
         markAllRead,
         deleteNotification,
+        undoDelete,
     };
 }

@@ -72,19 +72,23 @@ export default function DiscoverPage() {
   const [filters, setFilters] = useState<Filters>(DEFAULT_FILTERS);
   const [filterOpen, setFilterOpen] = useState(false);
 
-  // Handle URL filters
+  // Handle URL filters (interest, value, music, intent)
   useEffect(() => {
     const interest = searchParams.get('interest');
     const value = searchParams.get('value');
     const music = searchParams.get('music');
+    const urlIntent = searchParams.get('intent');
 
-    if (interest || value || music) {
-      setFilters(prev => ({
-        ...prev,
-        interests: interest ? [interest] : prev.interests,
-        values: value ? [value] : prev.values,
-        musicGenres: music ? [music] : prev.musicGenres,
-      }));
+    const updates: Partial<Filters> = {};
+    if (interest) updates.interests = [interest];
+    if (value) updates.values = [value];
+    if (music) updates.musicGenres = [music];
+    if (urlIntent === 'friendship' || urlIntent === 'dating') {
+      setIntent(urlIntent);
+    }
+
+    if (Object.keys(updates).length > 0) {
+      setFilters(prev => ({ ...prev, ...updates }));
       setFilterOpen(false);
     }
   }, [searchParams]);
@@ -106,9 +110,11 @@ export default function DiscoverPage() {
   const [intentChanging, setIntentChanging] = useState(false);
   const [pendingGridAction, setPendingGridAction] = useState(false);
 
-  // Sync swipeCount with server's dailyLikesUsed on mount
+  // Sync with user profile on mount (swipeCount, intent, countryCode)
   useEffect(() => {
     if (!user?.id) return;
+
+    // Sync swipeCount with server
     fetch('/api/profile')
       .then(r => r.json())
       .then(data => {
@@ -117,26 +123,20 @@ export default function DiscoverPage() {
         }
       })
       .catch(() => {});
-  }, [user?.id]);
 
-  // Initialize intent from user's connectionModes
-  useEffect(() => {
+    // Initialize intent from user's connectionModes
     if (currentUserProfile?.connectionModes?.length) {
-      // Use the first available mode as default (don't force 'dating')
       const savedIntent = currentUserProfile.connectionModes[0];
       if (savedIntent === 'dating' || savedIntent === 'friendship') {
         setIntent(savedIntent);
       }
     }
-  }, [currentUserProfile?.connectionModes]);
 
-  // Handle URL intent (overrides profile default)
-  useEffect(() => {
-    const urlIntent = searchParams.get('intent');
-    if (urlIntent === 'friendship' || urlIntent === 'dating') {
-      setIntent(urlIntent);
+    // Auto-set countryCode from user profile
+    if (currentUserProfile?.countryCode) {
+      setFilters(prev => ({ ...prev, countryCode: currentUserProfile.countryCode }));
     }
-  }, [searchParams]);
+  }, [user?.id, currentUserProfile?.connectionModes, currentUserProfile?.countryCode]);
 
   const lastSwipeRef = useRef<{ profileId: string; direction: string } | null>(null);
   const sentinelRef = useRef<HTMLDivElement>(null);
@@ -195,16 +195,6 @@ export default function DiscoverPage() {
     if (tutorialDone) setTutorialStep(null);
   }, []);
 
-  // Auto-set countryCode from user profile (same-country matching by default)
-  useEffect(() => {
-    if (currentUserProfile?.countryCode) {
-      setFilters(prev => ({
-        ...prev,
-        countryCode: currentUserProfile.countryCode,
-      }));
-    }
-  }, [currentUserProfile?.countryCode]);
-
   // Request geolocation for distance filter (only once per session)
   useEffect(() => {
     if (geoRequestedRef.current) return;
@@ -230,15 +220,13 @@ export default function DiscoverPage() {
   const currentProfile = profiles[0]?.profile;
   const profilesRef = useRef(profiles);
 
+  // Sync intent to filters and clear intent changing state
   useEffect(() => {
     setFilters(prev => ({ ...prev, intent }));
-  }, [intent]);
-
-  useEffect(() => {
     if (!loading && intentChanging) {
       setIntentChanging(false);
     }
-  }, [loading, intentChanging]);
+  }, [intent, loading, intentChanging]);
 
   profilesRef.current = profiles;
 

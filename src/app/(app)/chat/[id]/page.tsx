@@ -41,22 +41,37 @@ export default function ChatWindowPage() {
     const [keyboardHeight, setKeyboardHeight] = useState(0);
 
     useEffect(() => {
-        if (typeof window === 'undefined' || !window.visualViewport) return;
+        if (typeof window === 'undefined') return;
 
         const handleResize = () => {
-            const viewportHeight = window.visualViewport!.height;
-            const windowHeight = window.innerHeight;
-            const heightDiff = windowHeight - viewportHeight;
-            setKeyboardHeight(heightDiff > 50 ? heightDiff : 0);
+            // Primary: visualViewport API (works in modern browsers)
+            if (window.visualViewport) {
+                const viewportHeight = window.visualViewport.height;
+                const windowHeight = window.innerHeight;
+                const heightDiff = windowHeight - viewportHeight;
+                if (heightDiff > 50) {
+                    setKeyboardHeight(heightDiff);
+                    return;
+                }
+            }
+            // Fallback: compare innerHeight to initial height (for older WebView)
+            if (!initialHeightRef.current) {
+                initialHeightRef.current = window.innerHeight;
+            }
+            const heightDiff = initialHeightRef.current - window.innerHeight;
+            setKeyboardHeight(heightDiff > 100 ? heightDiff : 0);
         };
 
-        window.visualViewport!.addEventListener('resize', handleResize);
-        window.visualViewport!.addEventListener('scroll', handleResize);
+        window.visualViewport?.addEventListener('resize', handleResize);
+        window.visualViewport?.addEventListener('scroll', handleResize);
+        window.addEventListener('resize', handleResize);
         return () => {
-            window.visualViewport!.removeEventListener('resize', handleResize);
-            window.visualViewport!.removeEventListener('scroll', handleResize);
+            window.visualViewport?.removeEventListener('resize', handleResize);
+            window.visualViewport?.removeEventListener('scroll', handleResize);
+            window.removeEventListener('resize', handleResize);
         };
     }, []);
+    const initialHeightRef = useRef<number | null>(null);
     const { matches } = useMatches();
     const { toast } = useToast();
     const messagesEndRef = useRef<HTMLDivElement>(null);

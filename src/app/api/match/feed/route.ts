@@ -33,12 +33,45 @@ export async function GET(request: NextRequest) {
                 ...(intent ? { intent } : {})
             },
             include: {
-                user1: { include: { profile: true } },
-                user2: { include: { profile: true } },
+                user1: {
+                    select: {
+                        id: true,
+                        deletedAt: true,
+                        profile: {
+                            select: {
+                                displayName: true,
+                                photos: true,
+                                isVerified: true,
+                                isShadowBanned: true,
+                            },
+                        },
+                    },
+                },
+                user2: {
+                    select: {
+                        id: true,
+                        deletedAt: true,
+                        profile: {
+                            select: {
+                                displayName: true,
+                                photos: true,
+                                isVerified: true,
+                                isShadowBanned: true,
+                            },
+                        },
+                    },
+                },
                 messages: {
                     orderBy: { createdAt: 'desc' },
-                    take: 1
-                }
+                    take: 1,
+                    select: {
+                        id: true,
+                        content: true,
+                        createdAt: true,
+                        senderId: true,
+                        type: true,
+                    },
+                },
             },
             orderBy: { updatedAt: 'desc' },
             take: 100,

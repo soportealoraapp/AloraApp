@@ -3,13 +3,7 @@ import { generateCompatibilityInsights } from '@/ai/copilot/compatibility-insigh
 import { prisma } from '@/lib/prisma';
 import { calculateCompatibility } from '@/lib/compatibility/engine';
 import { withRateLimit } from '@/server/utils/api-rate-limit';
-
-async function getServerUser() {
-    const { createClient } = await import('@/lib/supabase/server');
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    return user;
-}
+import { getServerUser } from '@/lib/middleware/auth';
 
 export async function POST(request: Request) {
     try {

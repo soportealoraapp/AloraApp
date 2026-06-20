@@ -9,7 +9,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   const isChatWindow = /^\/chat\/[^/]+/.test(pathname);
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-dvh bg-background">
       <a href="#main-content" className="skip-to-content">
         Saltar al contenido
       </a>

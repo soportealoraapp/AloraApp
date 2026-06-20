@@ -45,7 +45,7 @@ export function getCSP(): string {
         `default-src 'self'`,
         `script-src 'self' 'unsafe-inline' 'unsafe-eval' https://apis.google.com https://www.gstatic.com`,
         `style-src 'self' 'unsafe-inline' https://fonts.googleapis.com`,
-        `img-src 'self' blob: data: https://*.uploadthing.com https://utfs.io https://*.supabase.co https://lh3.googleusercontent.com https://placehold.co https://picsum.photos https://i.scdn.co`,
+        `img-src 'self' blob: data: https://*.uploadthing.com https://utfs.io https://*.supabase.co https://lh3.googleusercontent.com https://placehold.co https://picsum.photos https://i.scdn.co https://firebasestorage.googleapis.com`,
         `font-src 'self' data: https://fonts.gstatic.com`,
         `connect-src 'self' https://*.supabase.co wss://*.supabase.co https://*.uploadthing.com https://uploadthing.com https://utfs.io https://securetoken.googleapis.com https://api.spotify.com`,
         `media-src 'self' blob: https://utfs.io https://*.utfs.io`,

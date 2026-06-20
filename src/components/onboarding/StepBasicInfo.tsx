@@ -17,9 +17,10 @@ interface StepBasicInfoProps {
     data: Partial<UserProfile>;
     onUpdate: (data: Partial<UserProfile>) => void;
     onNext: () => void;
+    onPrev?: () => void;
 }
 
-export function StepBasicInfo({ data, onUpdate, onNext, userId }: StepBasicInfoProps) {
+export function StepBasicInfo({ data, onUpdate, onNext, userId, onPrev }: StepBasicInfoProps) {
     const [localData, setLocalData] = useState<Partial<UserProfile>>(data);
     const [citySearch, setCitySearch] = useState('');
     const [debouncedCitySearch, setDebouncedCitySearch] = useState('');
@@ -183,12 +184,13 @@ export function StepBasicInfo({ data, onUpdate, onNext, userId }: StepBasicInfoP
                     <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
                         Busco
                     </Label>
-                    <div className="grid grid-cols-2 gap-2">
+                    <div className="grid grid-cols-2 gap-2" role="group" aria-label="Tipo de conexión">
                         <button
                             type="button"
                             onClick={() => toggleMode('dating')}
+                            aria-pressed={selectedModes.includes('dating')}
                             className={cn(
-                                'flex items-center justify-center gap-2 rounded-2xl border-2 p-3 text-sm font-medium transition-all',
+                                'flex items-center justify-center gap-2 rounded-2xl border-2 p-3 text-sm font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
                                 selectedModes.includes('dating')
                                     ? 'border-primary bg-primary/10 text-primary'
                                     : 'border-muted text-muted-foreground hover:border-primary/30'
@@ -200,8 +202,9 @@ export function StepBasicInfo({ data, onUpdate, onNext, userId }: StepBasicInfoP
                         <button
                             type="button"
                             onClick={() => toggleMode('friendship')}
+                            aria-pressed={selectedModes.includes('friendship')}
                             className={cn(
-                                'flex items-center justify-center gap-2 rounded-2xl border-2 p-3 text-sm font-medium transition-all',
+                                'flex items-center justify-center gap-2 rounded-2xl border-2 p-3 text-sm font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
                                 selectedModes.includes('friendship')
                                     ? 'border-primary bg-primary/10 text-primary'
                                     : 'border-muted text-muted-foreground hover:border-primary/30'

@@ -17,6 +17,17 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ error: 'Missing token or platform' }, { status: 400 });
         }
 
+        // Check if token already belongs to another user — prevent token takeover
+        const existingToken = await prisma.pushToken.findUnique({
+            where: { token },
+            select: { userId: true },
+        });
+
+        if (existingToken && existingToken.userId !== user.id) {
+            // Token belongs to another user — reject to prevent hijacking
+            return NextResponse.json({ error: 'Token already registered to another account' }, { status: 409 });
+        }
+
         await prisma.pushToken.upsert({
             where: { token },
             update: {

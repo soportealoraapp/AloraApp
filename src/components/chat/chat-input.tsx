@@ -281,10 +281,10 @@ export function ChatInput({ onSend, onSendImage, onSendVoice, onTyping, disabled
       <div className="space-y-2">
         <div className="flex items-center gap-2 p-2 bg-muted rounded-2xl">
           <audio src={recordedUrl} controls className="flex-1 h-8" />
-          <Button size="sm" variant="ghost" onClick={() => { setRecordedBlob(null); setRecordedUrl(null); setRecordingTime(0); }}>
+          <Button size="sm" variant="ghost" onClick={() => { setRecordedBlob(null); setRecordedUrl(null); setRecordingTime(0); }} aria-label="Cancelar grabación">
             <X className="h-4 w-4" />
           </Button>
-          <Button size="sm" onClick={sendVoiceMessage} disabled={uploadingVoice}>
+          <Button size="sm" onClick={sendVoiceMessage} disabled={uploadingVoice} aria-label="Enviar mensaje de voz">
             {uploadingVoice ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
           </Button>
         </div>
@@ -311,10 +311,10 @@ export function ChatInput({ onSend, onSendImage, onSendVoice, onTyping, disabled
             ))}
           </div>
         </div>
-        <Button size="sm" variant="ghost" onClick={cancelRecording} className="text-red-600">
+        <Button size="sm" variant="ghost" onClick={cancelRecording} className="text-red-600" aria-label="Cancelar grabación">
           <X className="h-4 w-4" />
         </Button>
-        <Button size="sm" onClick={stopRecording} className="bg-red-500 hover:bg-red-600">
+        <Button size="sm" onClick={stopRecording} className="bg-red-500 hover:bg-red-600" aria-label="Detener grabación">
           <Square className="h-4 w-4 fill-current" />
         </Button>
       </div>

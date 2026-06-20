@@ -15,6 +15,7 @@ export async function GET(request: NextRequest) {
     try {
         const { searchParams } = new URL(request.url);
         const limit = Math.min(parseInt(searchParams.get('limit') || '10'), 50);
+        const offset = Math.max(parseInt(searchParams.get('offset') || '0'), 0);
 
         const isPlus = await prisma.profile.findUnique({
             where: { userId: user.id },
@@ -42,6 +43,7 @@ export async function GET(request: NextRequest) {
             },
             orderBy: { createdAt: 'desc' },
             take: effectiveLimit,
+            skip: offset,
         });
 
         const result = visitors
@@ -56,9 +58,12 @@ export async function GET(request: NextRequest) {
                 visitedAt: v.createdAt,
             }));
 
+        const totalCount = await prisma.profileVisit.count({ where: { visitedId: user.id } });
+
         return NextResponse.json({
             visitors: result,
-            total: await prisma.profileVisit.count({ where: { visitedId: user.id } }),
+            total: totalCount,
+            hasMore: offset + result.length < totalCount,
             isPlus: isPlus?.subscriptionStatus === 'plus',
         });
     } catch (error) {

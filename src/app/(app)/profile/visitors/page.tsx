@@ -26,27 +26,44 @@ export default function VisitorsPage() {
     const router = useRouter();
     const [visitors, setVisitors] = useState<Visitor[]>([]);
     const [total, setTotal] = useState(0);
+    const [hasMore, setHasMore] = useState(false);
     const [isPlus, setIsPlus] = useState(false);
     const [loading, setLoading] = useState(true);
+    const [loadingMore, setLoadingMore] = useState(false);
     const [showPaywall, setShowPaywall] = useState(false);
+
+    const fetchVisitors = async (offset = 0, append = false) => {
+        try {
+            const res = await fetch(`/api/profile/visitors?limit=10&offset=${offset}`);
+            const data = await res.json();
+            if (append) {
+                setVisitors(prev => [...prev, ...(data.visitors || [])]);
+            } else {
+                setVisitors(data.visitors || []);
+            }
+            setTotal(data.total || 0);
+            setHasMore(data.hasMore || false);
+            setIsPlus(data.isPlus || false);
+        } catch (err) {
+            console.error(err);
+        }
+    };
 
     useEffect(() => {
         if (!user) return;
-        fetch('/api/profile/visitors?limit=10')
-            .then(r => r.json())
-            .then(data => {
-                setVisitors(data.visitors || []);
-                setTotal(data.total || 0);
-                setIsPlus(data.isPlus || false);
-            })
-            .catch(console.error)
-            .finally(() => setLoading(false));
+        fetchVisitors().finally(() => setLoading(false));
     }, [user]);
+
+    const loadMore = async () => {
+        setLoadingMore(true);
+        await fetchVisitors(visitors.length, true);
+        setLoadingMore(false);
+    };
 
     const hiddenCount = total - visitors.length;
 
     return (
-        <div className="bg-background min-h-screen">
+        <div className="bg-background min-h-dvh">
             <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b bg-background/80 px-4 backdrop-blur-sm pt-safe">
                 <Button variant="ghost" size="icon" onClick={() => router.back()}>
                     <ArrowLeft className="h-5 w-5" />
@@ -113,6 +130,14 @@ export default function VisitorsPage() {
                                 </Button>
                             </CardContent>
                         </Card>
+                    )}
+
+                    {hasMore && isPlus && (
+                        <div className="text-center pt-4">
+                            <Button variant="outline" onClick={loadMore} disabled={loadingMore}>
+                                {loadingMore ? 'Cargando...' : 'Cargar más'}
+                            </Button>
+                        </div>
                     )}
                 </div>
             )}

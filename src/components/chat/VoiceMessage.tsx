@@ -119,6 +119,7 @@ export function VoiceMessage({ audioUrl, duration: propDuration, isOwn = false }
                     isOwn ? "hover:bg-primary-foreground/20 text-primary-foreground" : "hover:bg-muted-foreground/20"
                 )}
                 onClick={togglePlay}
+                aria-label={isPlaying ? 'Pausar' : 'Reproducir'}
             >
                 {isPlaying ? (
                     <Pause className="h-4 w-4 fill-current" />

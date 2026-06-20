@@ -49,7 +49,7 @@ export function VoicePlayer({ src, transcription }: { src: string, transcription
     return (
         <div className="bg-card rounded-xl p-3 shadow-sm border border-border max-w-xs">
             <div className="flex items-center gap-3">
-                <Button size="icon" className="rounded-full w-10 h-10 bg-primary/10 text-primary hover:bg-primary/20" onClick={togglePlay}>
+                <Button size="icon" className="rounded-full w-10 h-10 bg-primary/10 text-primary hover:bg-primary/20" onClick={togglePlay} aria-label={playing ? 'Pausar' : 'Reproducir'}>
                     {playing ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4 ml-1" />}
                 </Button>
                 <div className="h-8 w-full bg-muted rounded flex items-center justify-center overflow-hidden">

@@ -1,6 +1,7 @@
 import { UserProfile } from "@/lib/domain/types";
+import type { PlanTier } from "@/lib/domain/subscription";
 
-export type SubscriptionTier = 'free' | 'plus';
+export type SubscriptionTier = PlanTier;
 
 export const PERMISSIONS = {
   UNLIMITED_LIKES: ['plus'],

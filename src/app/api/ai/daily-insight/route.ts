@@ -2,13 +2,7 @@ import { NextResponse } from 'next/server';
 import { generateDailyInsight } from '@/ai/copilot/daily-insights';
 import { prisma } from '@/lib/prisma';
 import { withRateLimit } from '@/server/utils/api-rate-limit';
-
-async function getServerUser() {
-    const { createClient } = await import('@/lib/supabase/server');
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    return user;
-}
+import { getServerUser } from '@/lib/middleware/auth';
 
 export async function GET() {
     try {
