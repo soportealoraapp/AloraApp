@@ -277,7 +277,7 @@ export function StepBasicInfo({ data, onUpdate, onNext, userId, onPrev }: StepBa
                     {isValid ? 'Sigue, vamos bien ✨' : 'Completa los campos para continuar'}
                 </Button>
                 {!isValid && (
-                    <p className="text-xs text-amber-600 text-center mt-2">
+                    <p className="text-xs text-amber-600 dark:text-amber-400 text-center mt-2">
                         Nombre, edad, género y ciudad son necesarios para encontrar tu mejor match
                     </p>
                 )}

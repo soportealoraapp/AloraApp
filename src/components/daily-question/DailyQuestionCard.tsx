@@ -283,7 +283,7 @@ export function DailyQuestionCard() {
                                 maxLength={300}
                             />
                             <div className="flex items-center justify-between">
-                                <span className={`text-xs ${(answer.length / 300) >= 0.9 ? 'text-red-500 font-medium' : (answer.length / 300) >= 0.7 ? 'text-amber-500 font-medium' : 'text-muted-foreground'}`}>
+                                <span className={`text-xs ${(answer.length / 300) >= 0.9 ? 'text-red-500 font-medium' : (answer.length / 300) >= 0.7 ? 'text-amber-500 dark:text-amber-400 font-medium' : 'text-muted-foreground'}`}>
                                     {answer.length}/300
                                 </span>
                                 <div className="flex items-center gap-2">

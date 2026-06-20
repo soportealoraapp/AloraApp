@@ -58,7 +58,7 @@ type Category = keyof typeof QUESTIONS;
 
 const CATEGORY_LABELS: Record<Category, { label: string; color: string }> = {
     deep: { label: 'Profunda', color: 'text-purple-500' },
-    fun: { label: 'Divertida', color: 'text-orange-500' },
+    fun: { label: 'Divertida', color: 'text-orange-500 dark:text-orange-400' },
     romantic: { label: 'Romántica', color: 'text-pink-500' },
     hypothetical: { label: 'Hipotética', color: 'text-blue-500' },
 };

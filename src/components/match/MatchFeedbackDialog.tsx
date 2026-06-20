@@ -98,7 +98,7 @@ export function MatchFeedbackDialog({ matchId, partnerName, open, onClose, onSub
                             ))}
                         </div>
                         {(hovered || rating) > 0 && (
-                            <p className="text-center text-xs font-medium text-amber-600">
+                            <p className="text-center text-xs font-medium text-amber-600 dark:text-amber-400">
                                 {RATING_LABELS[hovered || rating]}
                             </p>
                         )}

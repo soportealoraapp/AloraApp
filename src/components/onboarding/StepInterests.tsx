@@ -120,7 +120,7 @@ export function StepInterests({ data, onUpdate, onNext, onPrev, userId }: StepIn
                                 );
                             })}
                         </div>
-                        <span className={`text-xs ml-2 ${(selectedInterests.length / MAX_INTERESTS) >= 0.9 ? 'text-red-500 font-medium' : (selectedInterests.length / MAX_INTERESTS) >= 0.7 ? 'text-amber-500 font-medium' : 'text-muted-foreground'}`}>
+                        <span className={`text-xs ml-2 ${(selectedInterests.length / MAX_INTERESTS) >= 0.9 ? 'text-red-500 font-medium' : (selectedInterests.length / MAX_INTERESTS) >= 0.7 ? 'text-amber-500 dark:text-amber-400 font-medium' : 'text-muted-foreground'}`}>
                             {selectedInterests.length}/{MAX_INTERESTS}
                         </span>
                     </div>

@@ -226,14 +226,25 @@ export async function notifyNewMatch(userId: string, partnerName: string, matchI
     });
 }
 
-export async function notifyLikeReceived(userId: string, fromUserName: string, fromUserId: string, intent?: string) {
+export async function notifyLikeReceived(userId: string, fromUserName: string, fromUserId: string, intent?: string, interactionType?: string) {
     const isFriendship = intent === 'friendship';
+    const isSuperlike = interactionType === 'superlike';
+    if (isSuperlike) {
+        return sendPushToUser(userId, {
+            title: isFriendship ? '🫶 ¡Alguien te eligio como amigo!' : '💘 ¡Un Flechado para ti!',
+            body: isFriendship
+                ? `${fromUserName} te eligio como amigo. ¡Revisa su perfil!`
+                : `${fromUserName} te envio un Flechado. Tu perfil destaca. ¡Revisa!`,
+            data: { type: 'like_received', fromUserId, interactionType: 'superlike' },
+            channel: 'matches',
+        });
+    }
     return sendPushToUser(userId, {
         title: isFriendship ? '🫶 Alguien te quiere conocer' : '💜 ¡A alguien le gustaste!',
         body: isFriendship
             ? `${fromUserName} te quiere conocer como amigo. ¡Revisa su perfil!`
             : `${fromUserName} te dio like. ¡Revisa su perfil y Swipea de vuelta!`,
-        data: { type: 'like_received', fromUserId },
+        data: { type: 'like_received', fromUserId, interactionType: 'like' },
         channel: 'matches',
     });
 }

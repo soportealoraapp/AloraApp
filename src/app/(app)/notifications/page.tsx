@@ -38,8 +38,10 @@ function NotificationItem({ notification, onRead, onDelete }: { notification: an
       router.push('/profile/visitors');
     } else if (type === 'daily_question') {
       router.push('/compatibility');
-    } else if (type === 'streak_at_risk' || type === 'daily_compatibility') {
-      router.push('/profile');
+    } else if (type === 'streak_at_risk') {
+      router.push('/discover');
+    } else if (type === 'daily_compatibility') {
+      router.push('/compatibility');
     } else if (type === 'boost_available' || type === 'likes_restored') {
       router.push('/discover');
     } else if (type === 'verification') {

@@ -156,7 +156,7 @@ export function ProfileActions({ userId, userName, matchId, isMuted = false, onM
                         <VolumeX className="h-4 w-4" />
                         {isMuted ? "Gestionar silencio" : "Silenciar"}
                     </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => handleAction("block")} className="gap-2 cursor-pointer text-orange-600 focus:text-orange-600">
+                    <DropdownMenuItem onClick={() => handleAction("block")} className="gap-2 cursor-pointer text-orange-600 dark:text-orange-400 focus:text-orange-600 dark:focus:text-orange-400">
                         <ShieldOff className="h-4 w-4" />
                         Bloquear
                     </DropdownMenuItem>

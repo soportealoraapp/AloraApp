@@ -230,7 +230,7 @@ export async function POST(request: NextRequest) {
             prisma.profile.findUnique({ where: { userId: user.id }, select: { displayName: true } })
                 .then((senderProfile) => {
                     if (senderProfile?.displayName) {
-                        notifyLikeReceived(toUserId, senderProfile.displayName, user.id, intent)
+                        notifyLikeReceived(toUserId, senderProfile.displayName, user.id, intent, interactionType)
                             .catch((err) => console.warn('[match/like] notifyLikeReceived failed:', err));
                     }
                 })

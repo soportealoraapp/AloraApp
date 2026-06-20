@@ -4,7 +4,6 @@ import { prisma } from '@/lib/prisma';
 import { UserProfile } from '@/lib/domain/types';
 import { getCompatibilityScore } from './compatibility/getCompatibilityScore';
 import { calculateCompleteness } from '@/lib/utils/completeness';
-import { getDistance } from '@/lib/location';
 import { getFlags } from '@/lib/product/flags';
 import { getNewUserBoost } from '@/server/services/new-user-boost';
 import { scoreCandidate } from '@/server/scoring/feed-scoring';
@@ -80,23 +79,25 @@ export async function getDynamicFeed(
             return { items: [], nextCursor: null, hasMore: false };
         }
 
-        const [blocks1, blocks2, interactions, matches1, matches2, reportsByMe, reportsOnMe] = await Promise.all([
-            prisma.block.findMany({ where: { blockerId: currentUserId }, select: { blockedId: true } }),
-            prisma.block.findMany({ where: { blockedId: currentUserId }, select: { blockerId: true } }),
+        const [blocks, interactions, matches, reportsByMe, reportsOnMe] = await Promise.all([
+            prisma.block.findMany({
+                where: { OR: [{ blockerId: currentUserId }, { blockedId: currentUserId }] },
+                select: { blockerId: true, blockedId: true }
+            }),
             prisma.interaction.findMany({ where: { fromUserId: currentUserId, deletedAt: null }, select: { toUserId: true } }),
-            prisma.match.findMany({ where: { user1Id: currentUserId }, select: { user2Id: true } }),
-            prisma.match.findMany({ where: { user2Id: currentUserId }, select: { user1Id: true } }),
+            prisma.match.findMany({
+                where: { OR: [{ user1Id: currentUserId }, { user2Id: currentUserId }] },
+                select: { user1Id: true, user2Id: true }
+            }),
             prisma.report.findMany({ where: { reporterId: currentUserId }, select: { reportedId: true } }),
             prisma.report.findMany({ where: { reportedId: currentUserId }, select: { reporterId: true } }),
         ]);
 
         const excludedIds = new Set([
             currentUserId,
-            ...blocks1.map(b => b.blockedId),
-            ...blocks2.map(b => b.blockerId),
+            ...blocks.map(b => b.blockerId === currentUserId ? b.blockedId : b.blockerId),
             ...interactions.map(i => i.toUserId),
-            ...matches1.map(m => m.user2Id),
-            ...matches2.map(m => m.user1Id),
+            ...matches.map(m => m.user1Id === currentUserId ? m.user2Id : m.user1Id),
             ...reportsByMe.map(r => r.reportedId),
             ...reportsOnMe.map(r => r.reporterId),
         ]);
@@ -215,28 +216,31 @@ export async function getDynamicFeed(
         const shouldRestrictDistance = filters?.distance && effectiveLat && effectiveLng && (!isMexicoUser || isTravelEnabled);
 
         if (shouldRestrictDistance) {
-            // Get all profiles with coordinates and filter by distance in-memory
-            const allWithCoords = await prisma.profile.findMany({
-                where: {
-                    latitude: { not: null },
-                    longitude: { not: null },
-                    userId: { notIn: Array.from(excludedIds) },
-                    trustStatus: { not: 'banned' },
-                    incognitoMode: false,
-                    showMeInDiscover: true,
-                    // Apply country/state/city prefilter when relevant
-                    ...(filters.countryCode ? { countryCode: filters.countryCode } : {}),
-                    ...(filters.stateCode ? { stateCode: filters.stateCode } : {}),
-                },
-                select: { userId: true, latitude: true, longitude: true }
-            });
+            // Use SQL Haversine to filter by distance in DB instead of loading all profiles into memory
+            const excludedArray = Array.from(excludedIds);
+            const HaversineSQL = `(
+                6371 * acos(
+                    cos(radians(${effectiveLat!})) * cos(radians(latitude)) *
+                    cos(radians(longitude) - radians(${effectiveLng!})) +
+                    sin(radians(${effectiveLat!})) * sin(radians(latitude))
+                )
+            )`;
 
-            candidateIds = allWithCoords
-                .filter(p => {
-                    const dist = getDistance(effectiveLat!, effectiveLng!, p.latitude!, p.longitude!);
-                    return dist <= filters.distance!;
-                })
-                .map(p => p.userId);
+            const nearbyProfiles = await prisma.$queryRawUnsafe<{ userId: string }[]>(
+                `SELECT "userId" FROM "Profile"
+                 WHERE latitude IS NOT NULL AND longitude IS NOT NULL
+                   AND "trustStatus" != 'banned'
+                   AND "incognitoMode" = false
+                   AND "showMeInDiscover" = true
+                   ${filters.countryCode ? `AND "countryCode" = '${filters.countryCode}'` : ''}
+                   ${filters.stateCode ? `AND "stateCode" = '${filters.stateCode}'` : ''}
+                   AND ${HaversineSQL} <= ${filters.distance!}
+                 LIMIT 500`
+            );
+
+            // Filter excluded IDs in JS (SQL IN clause with 100+ UUIDs is safe but this is simpler)
+            const excludedSet = new Set(excludedArray);
+            candidateIds = nearbyProfiles.filter(p => !excludedSet.has(p.userId)).map(p => p.userId);
 
             if (candidateIds.length === 0) {
                 return { items: [], nextCursor: null, hasMore: false };
@@ -356,16 +360,17 @@ export async function getDynamicFeed(
 
         const messagesSentMap = new Map<string, number>();
         for (const m of recentMessages) {
-            if (resultCandidateIds.includes(m.senderId)) {
-                messagesSentMap.set(m.senderId, (messagesSentMap.get(m.senderId) || 0) + (m._count || 0));
-            }
+            messagesSentMap.set(m.senderId, (messagesSentMap.get(m.senderId) || 0) + (m._count || 0));
         }
 
-        const candidateDailyAnswers = resultCandidateIds.length > 0 ? await prisma.dailyAnswer.findMany({
-            where: { userId: { in: resultCandidateIds } },
-            orderBy: { createdAt: 'desc' },
-            include: { question: { select: { question: true, category: true } } },
-        }) : [];
+        const candidateDailyAnswers = resultCandidateIds.length > 0 ? await prisma.$queryRawUnsafe<{ userId: string; answer: string; questionId: string; question: string; category: string; createdAt: Date }[]>(
+            `SELECT DISTINCT ON (da."userId")
+                da."userId", da."answer", da."questionId", dq."question", dq."category", da."createdAt"
+             FROM "DailyAnswer" da
+             JOIN "DailyQuestion" dq ON dq.id = da."questionId"
+             WHERE da."userId" IN (${resultCandidateIds.map(id => `'${id}'`).join(',')})
+             ORDER BY da."userId", da."createdAt" DESC`
+        ) : [];
         const latestAnswerMap = new Map<string, typeof candidateDailyAnswers[0]>();
         for (const da of candidateDailyAnswers) {
             if (!latestAnswerMap.has(da.userId)) {
@@ -470,7 +475,7 @@ export async function getDynamicFeed(
                     profile: candidateProfileData,
                     quizzes: candidateQuizzesMap.get(cp.userId) || [],
                     dailyAnswer: latestAnswerMap.get(cp.userId)
-                        ? { answer: latestAnswerMap.get(cp.userId)!.answer, question: latestAnswerMap.get(cp.userId)!.question }
+                        ? { answer: latestAnswerMap.get(cp.userId)!.answer, question: { question: latestAnswerMap.get(cp.userId)!.question, category: latestAnswerMap.get(cp.userId)!.category } }
                         : null,
                 };
 
@@ -480,10 +485,10 @@ export async function getDynamicFeed(
                 if (dailyAnswer) {
                     (profile as any).latestAnswer = {
                         questionId: dailyAnswer.questionId,
-                        question: dailyAnswer.question.question,
-                        category: dailyAnswer.question.category,
+                        question: dailyAnswer.question,
+                        category: dailyAnswer.category,
                         answer: dailyAnswer.answer,
-                        createdAt: dailyAnswer.createdAt.toISOString(),
+                        createdAt: dailyAnswer.createdAt instanceof Date ? dailyAnswer.createdAt.toISOString() : String(dailyAnswer.createdAt),
                     };
                 }
 
