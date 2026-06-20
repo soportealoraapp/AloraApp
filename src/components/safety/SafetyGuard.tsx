@@ -32,7 +32,18 @@ export function SafetyGuard({ children }: { children: React.ReactNode }) {
         return () => window.removeEventListener('ageGateAccepted', checkAgeGate);
     }, []);
 
-    if (!mounted || !ageGateAccepted) return null;
+    if (!mounted) return null;
+
+    if (!ageGateAccepted) {
+        return (
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-background">
+                <div className="text-center space-y-4 p-6">
+                    <p className="text-lg font-semibold">Verificación de edad requerida</p>
+                    <p className="text-sm text-muted-foreground">Debes confirmar que tienes 18 años o más para usar Alora.</p>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <>

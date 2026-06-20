@@ -123,9 +123,13 @@ function getEndpointForType(type: string): string {
     }
 }
 
-// Auto-process queue when coming online
+// Auto-process queue when coming online or on app start
 if (typeof window !== 'undefined') {
     window.addEventListener('online', () => {
         processQueue();
     });
+    // Process any pending items immediately if already online
+    if (navigator.onLine) {
+        processQueue();
+    }
 }

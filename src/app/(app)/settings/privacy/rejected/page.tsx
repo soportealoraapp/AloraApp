@@ -14,7 +14,7 @@ export default function RejectedUsersPage() {
     const { user } = useAuth();
     const { toast } = useToast();
     const [loading, setLoading] = useState(true);
-    const [blockedUsers, setBlockedUsers] = useState<any[]>([]);
+    const [rejectedUsers, setRejectedUsers] = useState<any[]>([]);
 
     useEffect(() => {
         if (user) {
@@ -29,7 +29,7 @@ export default function RejectedUsersPage() {
             const response = await fetch('/api/safety/block');
             if (response.ok) {
                 const users = await response.json();
-                setBlockedUsers(users);
+                setRejectedUsers(users);
             }
         } catch (error) {
             console.error(error);
@@ -47,7 +47,7 @@ export default function RejectedUsersPage() {
                 body: JSON.stringify({ blockedId })
             });
             if (!response.ok) throw new Error('Error al desbloquear');
-            setBlockedUsers(prev => prev.filter(u => u.id !== blockedId));
+            setRejectedUsers(prev => prev.filter(u => u.id !== blockedId));
             toast({ title: "Usuario desbloqueado" });
         } catch (error) {
             toast({ title: "Error", variant: "destructive" });
@@ -60,7 +60,7 @@ export default function RejectedUsersPage() {
                 <Button variant="ghost" size="icon" onClick={() => router.back()}>
                     <ArrowLeft className="h-5 w-5" />
                 </Button>
-                <h1 className="text-xl font-semibold">Usuarios Bloqueados</h1>
+                <h1 className="text-xl font-semibold md:text-2xl font-headline">Usuarios Rechazados</h1>
             </header>
 
             <main className="p-4 space-y-4">
@@ -68,14 +68,14 @@ export default function RejectedUsersPage() {
                     <div className="flex justify-center p-8">
                         <Loader2 className="h-8 w-8 animate-spin" />
                     </div>
-                ) : blockedUsers.length === 0 ? (
+                ) : rejectedUsers.length === 0 ? (
                     <div className="text-center p-8 text-muted-foreground">
                         <UserX className="h-12 w-12 mx-auto mb-2 opacity-50" />
                         <p>No tienes usuarios bloqueados.</p>
                     </div>
                 ) : (
                     <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                        {blockedUsers.map(u => (
+                        {rejectedUsers.map(u => (
                             <Card key={u.id}>
                                 <CardContent className="p-4 flex items-center justify-between gap-3">
                                     <div className="flex items-center gap-3">

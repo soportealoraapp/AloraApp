@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useCallback, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -21,6 +21,7 @@ const GoogleIcon = (props: React.SVGProps<SVGSVGElement>) => (
 
 export default function LoginPage() {
     const router = useRouter();
+    const searchParams = useSearchParams();
     const { toast } = useToast();
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
@@ -36,7 +37,14 @@ export default function LoginPage() {
             setEmail(stored);
             sessionStorage.removeItem('alora_signup_email');
         }
-    }, []);
+        // Handle error from OAuth callback redirect
+        const urlError = searchParams.get('error');
+        if (urlError === 'profile_creation_failed') {
+            setError('No se pudo crear tu perfil. Por favor, intenta de nuevo.');
+        } else if (urlError) {
+            setError('Ocurrió un error. Por favor, intenta de nuevo.');
+        }
+    }, [searchParams]);
 
     const handleLogin = useCallback(async (e: React.FormEvent) => {
         e.preventDefault();

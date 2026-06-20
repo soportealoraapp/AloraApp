@@ -29,15 +29,14 @@ export function useDiscover(searchTerm: string = '', filters?: FeedFilters, limi
     useEffect(() => {
         const prev = prevFiltersRef.current;
         const curr = filters;
-        // Use JSON comparison to avoid reference equality issues
         if (JSON.stringify(prev) !== JSON.stringify(curr)) {
             prevFiltersRef.current = curr;
-            // Only trigger refresh if this is not the initial render
             if (prev !== undefined) {
                 setFilterVersion(v => v + 1);
             }
         }
-    }, [filters]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [JSON.stringify(filters)]);
 
     const fetchProfiles = useCallback(async (isRefresh = false) => {
         if (!user?.id) {

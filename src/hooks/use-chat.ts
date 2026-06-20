@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Message } from '@/lib/domain/types';
-import { chatService } from '@/lib/supabase/services/chat';
+import { chatService, deduplicate } from '@/lib/supabase/services/chat';
 import { addToQueue, processQueue } from '@/lib/offline-queue';
 
 interface TypingUser {
@@ -259,13 +259,4 @@ export function useChat(matchId: string) {
         partnerTyping,
         unreadCount,
     };
-}
-
-function deduplicate(messages: Message[]): Message[] {
-    const seen = new Set<string>();
-    return messages.filter(m => {
-        if (seen.has(m.id)) return false;
-        seen.add(m.id);
-        return true;
-    });
 }

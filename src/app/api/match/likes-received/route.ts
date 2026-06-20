@@ -88,13 +88,16 @@ export async function GET(request: NextRequest) {
                     intent: like.intent,
                     createdAt: like.createdAt
                 };
-            })
-            // Priority Likes: Plus users appear first
-            .sort((a, b) => {
-                if (a.isPlus && !b.isPlus) return -1;
-                if (!a.isPlus && b.isPlus) return 1;
-                return 0;
             });
+
+        // Sort within the page: Plus users first, then by date
+        // Note: This sort applies per-page only; cross-page consistency is not guaranteed
+        // when Plus users are mixed with non-Plus across pages.
+        likers.sort((a, b) => {
+            if (a.isPlus && !b.isPlus) return -1;
+            if (!a.isPlus && b.isPlus) return 1;
+            return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+        });
 
         return NextResponse.json({
             likers,

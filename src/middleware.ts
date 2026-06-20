@@ -122,7 +122,7 @@ export async function middleware(request: NextRequest) {
                 return applySecurityHeaders(NextResponse.redirect(new URL('/onboarding', modifiedRequest.url)));
             }
         } catch {
-            return applySecurityHeaders(NextResponse.redirect(new URL('/onboarding', modifiedRequest.url)));
+            // If profile check fails due to DB error, allow through to avoid blocking all users
         }
     }
 

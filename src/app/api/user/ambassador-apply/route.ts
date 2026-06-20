@@ -2,15 +2,23 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
 export async function POST(req: NextRequest) {
+    const { createClient } = await import('@/lib/supabase/server');
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+
+    if (!user) {
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
     try {
-        const { userId, city, reason } = await req.json();
-        if (!userId || !city || !reason) {
-            return NextResponse.json({ error: 'userId, city, and reason are required' }, { status: 400 });
+        const { city, reason } = await req.json();
+        if (!city || !reason) {
+            return NextResponse.json({ error: 'city and reason are required' }, { status: 400 });
         }
 
         const application = await prisma.auditLog.create({
             data: {
-                userId,
+                userId: user.id,
                 action: 'AMBASSADOR_APPLICATION',
                 details: { city, reason },
             },

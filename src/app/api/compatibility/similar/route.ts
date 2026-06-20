@@ -27,11 +27,23 @@ export async function GET(request: NextRequest) {
             select: { values: true, interests: true },
         });
 
+        // Get blocked users to filter out
+        const blockedUsers = await prisma.block.findMany({
+            where: {
+                OR: [
+                    { blockerId: user.id },
+                    { blockedId: user.id }
+                ]
+            },
+            select: { blockerId: true, blockedId: true }
+        });
+        const blockedIds = blockedUsers.flatMap(b => [b.blockerId, b.blockedId]);
+
         const similarResults = await prisma.quizResult.findMany({
             where: {
                 quizId,
                 archetype,
-                userId: { not: user.id },
+                userId: { notIn: [user.id, ...blockedIds] },
                 score: {
                     gte: Math.max(0, score - 20),
                     lte: Math.min(100, score + 20),

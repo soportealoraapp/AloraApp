@@ -50,21 +50,22 @@ export default function FavoritesPage() {
     };
 
     return (
-        <div className="p-6 space-y-6 bg-background min-h-screen">
-            <div className="flex items-center gap-4">
+        <div className="bg-background min-h-screen">
+            <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b bg-background/80 px-4 backdrop-blur-sm pt-safe">
                 <Button variant="ghost" size="icon" onClick={() => router.back()}>
                     <ArrowLeft className="h-5 w-5" />
                 </Button>
                 <div className="flex-1">
                     <div className="flex items-center gap-2">
-                        <h1 className="text-2xl font-bold">Perfiles guardados</h1>
+                        <h1 className="text-xl font-semibold md:text-2xl font-headline">Perfiles guardados</h1>
                         <PlusBadge label="Favoritos Plus" />
                     </div>
                     <p className="text-sm text-muted-foreground">
                         {favorites.length} perfil{favorites.length !== 1 ? 'es' : ''} guardado{favorites.length !== 1 ? 's' : ''}
                     </p>
                 </div>
-            </div>
+            </header>
+            <main className="p-6 space-y-6">
 
             {loading ? (
                 <div className="text-center py-12 text-muted-foreground">Cargando...</div>
@@ -95,12 +96,13 @@ export default function FavoritesPage() {
                                     <Button
                                         size="icon"
                                         variant="destructive"
-                                        className="absolute top-2 right-2 h-11 w-11 opacity-0 group-hover:opacity-100 transition-opacity"
+                                        className="absolute top-2 right-2 h-11 w-11 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity"
                                         onClick={(e) => {
                                             e.preventDefault();
                                             e.stopPropagation();
                                             removeFavorite(fav.id);
                                         }}
+                                        aria-label={`Eliminar ${fav.name} de favoritos`}
                                     >
                                         <Trash2 className="h-4 w-4" />
                                     </Button>
@@ -114,6 +116,7 @@ export default function FavoritesPage() {
                     ))}
                 </div>
             )}
+            </main>
         </div>
     );
 }

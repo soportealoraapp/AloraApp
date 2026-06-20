@@ -95,8 +95,8 @@ export default function QuizPage() {
             <div className="h-screen flex flex-col items-center justify-center p-4">
                 <Card className="w-full max-w-md">
                     <CardHeader>
-                        <CardTitle>Juego no encontrado</CardTitle>
-                        <CardDescription>Este juego no existe o ha sido eliminado.</CardDescription>
+                        <CardTitle>Quiz no encontrado</CardTitle>
+                        <CardDescription>Este quiz no existe o ha sido eliminado.</CardDescription>
                     </CardHeader>
                     <CardContent>
                         <Button asChild className="w-full">
@@ -158,30 +158,30 @@ export default function QuizPage() {
                                 {archetypeInfo && (
                                     <div className="space-y-4 text-left">
                                         <div className="rounded-lg border p-4">
-                                            <h4 className="font-semibold text-sm mb-2 text-green-600">Fortalezas</h4>
+                                            <h4 className="font-semibold text-sm mb-2 text-green-600 dark:text-green-400">Fortalezas</h4>
                                             <div className="flex flex-wrap gap-2">
                                                 {archetypeInfo.strengths.map(s => (
-                                                    <span key={s} className="text-xs bg-green-50 text-green-700 px-2 py-1 rounded-full">{s}</span>
+                                                    <span key={s} className="text-xs bg-green-50 dark:bg-green-950 text-green-700 dark:text-green-300 px-2 py-1 rounded-full">{s}</span>
                                                 ))}
                                             </div>
                                         </div>
                                         <div className="rounded-lg border p-4">
-                                            <h4 className="font-semibold text-sm mb-2 text-orange-600">Desafíos</h4>
+                                            <h4 className="font-semibold text-sm mb-2 text-orange-600 dark:text-orange-400">Desafíos</h4>
                                             <div className="flex flex-wrap gap-2">
                                                 {archetypeInfo.risks.map(r => (
-                                                    <span key={r} className="text-xs bg-orange-50 text-orange-700 px-2 py-1 rounded-full">{r}</span>
+                                                    <span key={r} className="text-xs bg-orange-50 dark:bg-orange-950 text-orange-700 dark:text-orange-300 px-2 py-1 rounded-full">{r}</span>
                                                 ))}
                                             </div>
                                         </div>
                                         <div className="rounded-lg border p-4">
-                                            <h4 className="font-semibold text-sm mb-2 text-purple-600">Cómo te perciben</h4>
+                                            <h4 className="font-semibold text-sm mb-2 text-purple-600 dark:text-purple-400">Cómo te perciben</h4>
                                             <p className="text-sm text-muted-foreground">{archetypeInfo.perception}</p>
                                         </div>
                                         <div className="rounded-lg border p-4">
-                                            <h4 className="font-semibold text-sm mb-2 text-pink-600">Compatibilidad ideal</h4>
+                                            <h4 className="font-semibold text-sm mb-2 text-pink-600 dark:text-pink-400">Compatibilidad ideal</h4>
                                             <div className="flex flex-wrap gap-2">
                                                 {archetypeInfo.idealPartner.map(p => (
-                                                    <span key={p} className="text-xs bg-pink-50 text-pink-700 px-2 py-1 rounded-full">{p}</span>
+                                                    <span key={p} className="text-xs bg-pink-50 dark:bg-pink-950 text-pink-700 dark:text-pink-300 px-2 py-1 rounded-full">{p}</span>
                                                 ))}
                                             </div>
                                         </div>

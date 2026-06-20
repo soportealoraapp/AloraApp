@@ -17,6 +17,14 @@ const LIMITS: Record<string, { limit: number; windowSeconds: number }> = {
     ai: { limit: 10, windowSeconds: 60 },
     spotify: { limit: 10, windowSeconds: 60 },
     adminAction: { limit: 30, windowSeconds: 60 },
+    profileView: { limit: 60, windowSeconds: 60 },
+    profileRead: { limit: 30, windowSeconds: 60 },
+    matchFeed: { limit: 30, windowSeconds: 60 },
+    reaction: { limit: 30, windowSeconds: 60 },
+    notification: { limit: 30, windowSeconds: 60 },
+    match: { limit: 30, windowSeconds: 60 },
+    feedback: { limit: 10, windowSeconds: 60 },
+    discover: { limit: 30, windowSeconds: 60 },
 };
 
 export async function withRateLimit(userId: string, action: keyof typeof LIMITS): Promise<NextResponse | null> {

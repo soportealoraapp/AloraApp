@@ -21,6 +21,18 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ error: 'Missing fields' }, { status: 400 });
         }
 
+        // Validate imageUrl is from a trusted source (UploadThing or Supabase)
+        const allowedHosts = ['utfs.io', 'uploadthing.com', 'supabase.co'];
+        try {
+            const url = new URL(imageUrl);
+            const isTrusted = allowedHosts.some(host => url.hostname.includes(host));
+            if (!isTrusted || (url.protocol !== 'https:' && url.protocol !== 'http:')) {
+                return NextResponse.json({ error: 'Invalid image URL' }, { status: 400 });
+            }
+        } catch {
+            return NextResponse.json({ error: 'Invalid image URL' }, { status: 400 });
+        }
+
         // Verify match ownership
         const match = await prisma.match.findUnique({
             where: { id: matchId },

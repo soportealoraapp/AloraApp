@@ -31,6 +31,11 @@ export async function POST(request: Request) {
             return NextResponse.json({ error: 'Match not found' }, { status: 404 });
         }
 
+        // IDOR check: verify user is a participant of this match
+        if (match.user1Id !== user.id && match.user2Id !== user.id) {
+            return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+        }
+
         const userA = match.user1Id === user.id ? match.user1 : match.user2;
         const userB = match.user1Id === user.id ? match.user2 : match.user1;
 

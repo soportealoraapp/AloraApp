@@ -155,8 +155,8 @@ export default function WelcomePage() {
           Hecho con <Heart className="h-4 w-4 text-primary fill-primary" /> para una comunidad más segura.
         </p>
         <div className="text-xs text-muted-foreground space-x-4">
-          <a href="/terms" className="hover:underline">Términos</a>
-          <a href="/privacy" className="hover:underline">Privacidad</a>
+          <Link href="/terms" className="hover:underline">Términos</Link>
+          <Link href="/privacy" className="hover:underline">Privacidad</Link>
           <Link href="/support" className="hover:underline">Ayuda</Link>
           <Link href="/contact" className="hover:underline">Contacto</Link>
         </div>

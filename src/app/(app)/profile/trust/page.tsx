@@ -64,16 +64,17 @@ export default function TrustPage() {
     }
 
     return (
-        <div className="p-6 space-y-6 bg-background min-h-screen">
-            <div className="flex items-center gap-4">
+        <div className="bg-background min-h-screen">
+            <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b bg-background/80 px-4 backdrop-blur-sm pt-safe">
                 <Button variant="ghost" size="icon" onClick={() => router.back()}>
                     <ArrowLeft className="h-5 w-5" />
                 </Button>
                 <div>
-                    <h1 className="text-2xl font-bold">Tu Score de Confianza</h1>
+                    <h1 className="text-xl font-semibold md:text-2xl font-headline">Tu Score de Confianza</h1>
                     <p className="text-sm text-muted-foreground">Mide tu reputación en la comunidad</p>
                 </div>
-            </div>
+            </header>
+            <main className="p-6 space-y-6">
 
             <Card>
                 <CardContent className="p-6 text-center">
@@ -156,6 +157,7 @@ export default function TrustPage() {
                     </div>
                 </CardContent>
             </Card>
+            </main>
         </div>
     );
 }

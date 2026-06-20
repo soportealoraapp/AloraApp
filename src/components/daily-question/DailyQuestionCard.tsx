@@ -341,7 +341,7 @@ export function DailyQuestionCard() {
                         </Button>
                     </DialogHeader>
 
-                    <div className="p-5 h-[450px] flex flex-col justify-between relative overflow-hidden">
+                    <div className="p-5 min-h-[200px] max-h-[450px] flex flex-col justify-between relative overflow-hidden">
                         {loadingAnswers ? (
                             <div className="flex-1 flex items-center justify-center">
                                 <Loader2 className="animate-spin text-primary h-8 w-8" />
@@ -430,21 +430,21 @@ export function DailyQuestionCard() {
                                         <button
                                             onClick={() => handleAction(currentAnswer.profile.userId, 'pass')}
                                             className="bg-card hover:bg-muted text-destructive rounded-full w-12 h-12 flex items-center justify-center shadow-md transition-transform hover:scale-110 active:scale-95 border border-border"
-                                            title="Pasar"
+                                            aria-label="Pasar"
                                         >
                                             <X className="h-5 w-5" />
                                         </button>
                                         <button
                                             onClick={() => handleAction(currentAnswer.profile.userId, 'superlike')}
                                             className="bg-accent hover:bg-accent/90 text-white rounded-full w-14 h-14 flex items-center justify-center shadow-lg transition-transform hover:scale-110 active:scale-95 border border-accent/20"
-                                            title="Flechado"
+                                            aria-label="Flechado"
                                         >
                                             <HeartArrow className="h-6 w-6" />
                                         </button>
                                         <button
                                             onClick={() => handleAction(currentAnswer.profile.userId, 'like')}
                                             className="bg-primary hover:bg-primary/95 text-white rounded-full w-12 h-12 flex items-center justify-center shadow-md transition-transform hover:scale-110 active:scale-95"
-                                            title="Like"
+                                            aria-label="Like"
                                         >
                                             <Heart className="h-5 w-5 fill-current" />
                                         </button>

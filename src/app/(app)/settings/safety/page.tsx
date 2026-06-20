@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { ArrowLeft, Shield, ShieldCheck, ShieldAlert, AlertTriangle, Info, Phone, ExternalLink, CheckCircle, Users, FileText } from 'lucide-react';
+import { ArrowLeft, Shield, ShieldCheck, ShieldAlert, AlertTriangle, Info, Phone, ExternalLink, CheckCircle, Users, FileText, Loader2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import Link from 'next/link';
@@ -76,6 +76,12 @@ export default function SafetyCenterPage() {
             </header>
 
             <main className="p-4 space-y-6 max-w-2xl mx-auto">
+                {loading ? (
+                    <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
+                        <Loader2 className="animate-spin h-8 w-8 mb-4" />
+                        <p>Cargando...</p>
+                    </div>
+                ) : (<>
                 {/* Trust Status */}
                 {profile && (
                     <Card className="border-primary/20 bg-primary/10">
@@ -226,6 +232,8 @@ export default function SafetyCenterPage() {
                         </p>
                     </CardContent>
                 </Card>
+                </>
+                )}
             </main>
         </div>
     );

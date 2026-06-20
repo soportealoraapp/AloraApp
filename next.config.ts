@@ -31,7 +31,7 @@ const nextConfig: NextConfig = {
   },
   images: {
     formats: ['image/webp'],
-    dangerouslyAllowSVG: true,
+    dangerouslyAllowSVG: false,
     contentDispositionType: 'attachment',
     minimumCacheTTL: 31536000,
     deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
@@ -74,7 +74,7 @@ const nextConfig: NextConfig = {
         headers: [
           {
             key: 'Content-Security-Policy',
-            value: "frame-src 'self' https://open.spotify.com; img-src 'self' data: blob: https://i.scdn.co https://placehold.co https://picsum.photos https://firebasestorage.googleapis.com https://utfs.io https://*.googleusercontent.com; media-src 'self' blob: https://utfs.io https://*.utfs.io;",
+            value: "frame-src 'self' https://open.spotify.com; img-src 'self' data: blob: https://i.scdn.co https://placehold.co https://picsum.photos https://firebasestorage.googleapis.com https://utfs.io https://*.googleusercontent.com; media-src 'self' blob: https://utfs.io https://*.utfs.io; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://apis.google.com https://www.gstatic.com;",
           },
         ],
       },

@@ -10,7 +10,7 @@ type TypingCallback = (typingUserIds: string[]) => void
 const messageCache = new Map<string, { messages: Message[]; offset: number; hasMore: boolean }>()
 const typingChannels = new Map<string, { channel: any; supabase: ReturnType<typeof createClient>; userId: string }>()
 
-function deduplicate(messages: Message[]): Message[] {
+export function deduplicate(messages: Message[]): Message[] {
     const seen = new Set<string>()
     return messages.filter(m => {
         if (seen.has(m.id)) return false

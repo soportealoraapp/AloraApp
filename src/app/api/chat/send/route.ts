@@ -118,8 +118,8 @@ export async function POST(request: NextRequest) {
         let isFiltered = false;
 
         if (type === 'voice' || type === 'image') {
-            // Voice/image: cannot auto-moderate content, but flag for manual review
-            isFiltered = true;
+            // Voice/image: cannot auto-moderate content; mark as sent (not flagged)
+            isFiltered = false;
         } else {
             try {
                 const moderationResult = await filterOffensiveMessages({ text });

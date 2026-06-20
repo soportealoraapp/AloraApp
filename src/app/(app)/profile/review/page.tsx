@@ -66,16 +66,17 @@ export default function ProfileReviewPage() {
     };
 
     return (
-        <div className="p-6 space-y-6 bg-background min-h-screen">
-            <div className="flex items-center gap-4">
+        <div className="bg-background min-h-screen">
+            <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b bg-background/80 px-4 backdrop-blur-sm pt-safe">
                 <Button variant="ghost" size="icon" onClick={() => router.back()}>
                     <ArrowLeft className="h-5 w-5" />
                 </Button>
                 <div>
-                    <h1 className="text-2xl font-bold">Revisión de perfil</h1>
+                    <h1 className="text-xl font-semibold md:text-2xl font-headline">Revisión de perfil</h1>
                     <p className="text-sm text-muted-foreground">Análisis personalizado de tu perfil</p>
                 </div>
-            </div>
+            </header>
+            <main className="p-6 space-y-6">
 
             <Card className="rounded-3xl border-none shadow-lg overflow-hidden">
                 <div className={`bg-gradient-to-br ${gradeColors[data.grade]} p-8 text-white`}>
@@ -172,6 +173,7 @@ export default function ProfileReviewPage() {
                     </CardContent>
                 </Card>
             )}
+            </main>
         </div>
     );
 }

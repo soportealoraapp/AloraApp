@@ -46,19 +46,20 @@ export default function VisitorsPage() {
     const hiddenCount = total - visitors.length;
 
     return (
-        <div className="p-6 space-y-6 bg-background min-h-screen">
-            <div className="flex items-center gap-4">
+        <div className="bg-background min-h-screen">
+            <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b bg-background/80 px-4 backdrop-blur-sm pt-safe">
                 <Button variant="ghost" size="icon" onClick={() => router.back()}>
                     <ArrowLeft className="h-5 w-5" />
                 </Button>
                 <div className="flex-1">
                     <div className="flex items-center gap-2">
-                        <h1 className="text-2xl font-bold">Visitantes del perfil</h1>
+                        <h1 className="text-xl font-semibold md:text-2xl font-headline">Visitantes del perfil</h1>
                         {!isPlus && <PlusBadge label="Beneficio Plus" />}
                     </div>
                     <p className="text-sm text-muted-foreground">{total} persona{total !== 1 ? 's' : ''} visitó tu perfil</p>
                 </div>
-            </div>
+            </header>
+            <main className="p-6 space-y-6">
 
             {loading ? (
                 <div className="text-center py-12 text-muted-foreground">Cargando...</div>
@@ -117,6 +118,7 @@ export default function VisitorsPage() {
             )}
 
             <PaywallModal isOpen={showPaywall} onClose={() => setShowPaywall(false)} />
+            </main>
         </div>
     );
 }

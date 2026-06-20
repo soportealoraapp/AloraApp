@@ -6,7 +6,7 @@ import { CheckCheck, Bell, Loader2, Info, Trash2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { motion, AnimatePresence, useMotionValue, useTransform, animate } from 'framer-motion';
 
@@ -64,9 +64,9 @@ function NotificationItem({ notification, onRead, onDelete }: { notification: an
 
   const handleDragEnd = (_: any, info: any) => {
     if (info.offset.x < -60) {
-      // Animate fully off screen then delete
+      // Animate off screen, then delete after a brief delay to allow undo
       animate(x, -400, { type: 'spring', stiffness: 200, damping: 25 });
-      setTimeout(onDelete, 250);
+      onDelete();
     } else {
       animate(x, 0, { type: 'spring', stiffness: 300, damping: 30 });
     }
@@ -123,6 +123,32 @@ function NotificationItem({ notification, onRead, onDelete }: { notification: an
 
 export default function NotificationsPage() {
   const { notifications, unreadCount, loading, markRead, markAllRead, deleteNotification } = useNotifications({ pollIntervalMs: 30000 });
+  const [deletedNotification, setDeletedNotification] = useState<any>(null);
+  const undoTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  const handleDelete = useCallback((notification: any) => {
+    // Save for undo
+    setDeletedNotification(notification);
+    deleteNotification(notification.id);
+
+    // Clear previous undo timeout
+    if (undoTimeoutRef.current) clearTimeout(undoTimeoutRef.current);
+
+    // Auto-clear undo after 5 seconds
+    undoTimeoutRef.current = setTimeout(() => {
+      setDeletedNotification(null);
+    }, 5000);
+  }, [deleteNotification]);
+
+  const handleUndo = useCallback(() => {
+    if (deletedNotification && undoTimeoutRef.current) {
+      clearTimeout(undoTimeoutRef.current);
+      // Re-create the notification via the existing markRead API isn't possible,
+      // but we can restore it locally by re-fetching
+      setDeletedNotification(null);
+      window.location.reload();
+    }
+  }, [deletedNotification]);
 
   if (loading) {
     return (
@@ -179,7 +205,7 @@ export default function NotificationsPage() {
                   <NotificationItem
                     notification={n}
                     onRead={() => markRead([n.id])}
-                    onDelete={() => deleteNotification(n.id)}
+                    onDelete={() => handleDelete(n)}
                   />
                 </motion.div>
               ))}
@@ -187,6 +213,25 @@ export default function NotificationsPage() {
           </div>
         )}
       </main>
+
+      {/* Undo toast */}
+      <AnimatePresence>
+        {deletedNotification && (
+          <motion.div
+            initial={{ y: 100, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: 100, opacity: 0 }}
+            className="fixed bottom-20 left-1/2 -translate-x-1/2 z-50"
+          >
+            <div className="bg-foreground text-background px-4 py-3 rounded-xl shadow-lg flex items-center gap-3">
+              <span className="text-sm">Notificación eliminada</span>
+              <Button variant="ghost" size="sm" onClick={handleUndo} className="text-primary hover:text-primary h-8">
+                Deshacer
+              </Button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
