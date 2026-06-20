@@ -17,6 +17,17 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ error: 'Missing selfie URL' }, { status: 400 });
         }
 
+        // Validate selfieUrl is from a trusted source (UploadThing)
+        try {
+            const url = new URL(selfieUrl);
+            const isTrusted = url.hostname === 'utfs.io' || url.hostname.endsWith('.utfs.io');
+            if (!isTrusted || url.protocol !== 'https:') {
+                return NextResponse.json({ error: 'Invalid image URL' }, { status: 400 });
+            }
+        } catch {
+            return NextResponse.json({ error: 'Invalid image URL' }, { status: 400 });
+        }
+
         const validGestures = ['smile', 'v_sign', 'thumbs_up', 'open_palm'];
         const gestureValue = validGestures.includes(gesture) ? gesture : null;
 

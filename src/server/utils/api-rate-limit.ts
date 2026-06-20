@@ -25,11 +25,19 @@ const LIMITS: Record<string, { limit: number; windowSeconds: number }> = {
     match: { limit: 30, windowSeconds: 60 },
     feedback: { limit: 10, windowSeconds: 60 },
     discover: { limit: 30, windowSeconds: 60 },
+    deleteAccount: { limit: 3, windowSeconds: 60 },
+    blockRead: { limit: 30, windowSeconds: 60 },
 };
 
 export async function withRateLimit(userId: string, action: keyof typeof LIMITS): Promise<NextResponse | null> {
     const config = LIMITS[action];
-    if (!config) return null;
+    if (!config) {
+        console.error(`withRateLimit: unknown action "${action}" — blocking request as safety measure`);
+        return NextResponse.json(
+            { error: 'Internal server error' },
+            { status: 500 }
+        );
+    }
 
     const key = `${userId}_${action}`;
     const allowed = await checkRateLimit(key, config.limit, config.windowSeconds);

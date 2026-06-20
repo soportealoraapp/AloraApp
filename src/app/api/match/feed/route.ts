@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { withRateLimit } from '@/server/utils/api-rate-limit';
 
 // GET /api/match/feed
 // Returns list of established matches (for Chat list)
@@ -11,6 +12,9 @@ export async function GET(request: NextRequest) {
     if (!user) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
+
+    const rateLimitResponse = await withRateLimit(user.id, 'matchFeed');
+    if (rateLimitResponse) return rateLimitResponse;
 
     try {
         const intentParam = request.nextUrl.searchParams.get('intent');
@@ -40,36 +44,42 @@ export async function GET(request: NextRequest) {
             take: 100,
         });
 
-        // Format for frontend
-        const formattedMatches = matches.map(match => {
-            const isUser1 = match.user1Id === user.id;
-            const partner = isUser1 ? match.user2 : match.user1;
-            const partnerProfile = partner.profile;
+        // Format for frontend, filtering out deleted/shadow-banned partners
+        const formattedMatches = matches
+            .filter(match => {
+                const isUser1 = match.user1Id === user.id;
+                const partner = isUser1 ? match.user2 : match.user1;
+                return !partner.deletedAt && !partner.profile?.isShadowBanned;
+            })
+            .map(match => {
+                const isUser1 = match.user1Id === user.id;
+                const partner = isUser1 ? match.user2 : match.user1;
+                const partnerProfile = partner.profile;
 
-            return {
-                id: match.id,
-                users: [match.user1Id, match.user2Id], // Legacy array format
-                usersData: {
-                    [match.user1Id]: match.user1,
-                    [match.user2Id]: match.user2
-                },
-                lastMessage: match.messages[0] ? {
-                    ...match.messages[0],
-                    text: match.messages[0].content // Mapping content to text for frontend compat
-                } : null,
-                createdAt: match.createdAt,
-                intent: match.intent,
-                mutedUntil: match.mutedUntil,
-                mutedByUserId: match.mutedByUserId,
-                partner: {
-                    id: partner.id,
-                    displayName: partnerProfile?.displayName,
-                    photoURL: partnerProfile?.photos?.[0] || null,
-                    photos: partnerProfile?.photos || [],
-                    isVerified: partnerProfile?.isVerified,
-                }
-            };
-        });
+                return {
+                    id: match.id,
+                    users: [match.user1Id, match.user2Id],
+                    usersData: {
+                        [match.user1Id]: match.user1,
+                        [match.user2Id]: match.user2
+                    },
+                    lastMessage: match.messages[0] ? {
+                        ...match.messages[0],
+                        text: match.messages[0].content
+                    } : null,
+                    createdAt: match.createdAt,
+                    intent: match.intent,
+                    mutedUntil: match.mutedUntil,
+                    mutedByUserId: match.mutedByUserId,
+                    partner: {
+                        id: partner.id,
+                        displayName: partnerProfile?.displayName,
+                        photoURL: partnerProfile?.photos?.[0] || null,
+                        photos: partnerProfile?.photos || [],
+                        isVerified: partnerProfile?.isVerified,
+                    }
+                };
+            });
 
         return NextResponse.json(formattedMatches);
     } catch (error) {

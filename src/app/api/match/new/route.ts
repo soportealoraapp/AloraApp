@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { withRateLimit } from '@/server/utils/api-rate-limit';
 
 // GET /api/match/new
 // Returns users who liked me (for "Likes You" screen)
@@ -11,6 +12,9 @@ export async function GET(request: NextRequest) {
     if (!user) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
+
+    const rateLimitResponse = await withRateLimit(user.id, 'match');
+    if (rateLimitResponse) return rateLimitResponse;
 
     try {
         const intentParam = request.nextUrl.searchParams.get('intent');

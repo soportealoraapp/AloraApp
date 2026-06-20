@@ -25,8 +25,8 @@ export async function POST(request: NextRequest) {
         const allowedHosts = ['utfs.io', 'uploadthing.com', 'supabase.co'];
         try {
             const url = new URL(imageUrl);
-            const isTrusted = allowedHosts.some(host => url.hostname.includes(host));
-            if (!isTrusted || (url.protocol !== 'https:' && url.protocol !== 'http:')) {
+            const isTrusted = allowedHosts.some(host => url.hostname === host || url.hostname.endsWith('.' + host));
+            if (!isTrusted || url.protocol !== 'https:') {
                 return NextResponse.json({ error: 'Invalid image URL' }, { status: 400 });
             }
         } catch {

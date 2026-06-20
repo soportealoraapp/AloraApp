@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Search, Heart, X, CheckCircle, Loader2, MessageSquare, EyeOff, Bell, BellOff, Trash2 } from "lucide-react";
+import { Search, Heart, X, CheckCircle, Loader2, MessageSquare, EyeOff, Bell, BellOff, Trash2, MoreVertical } from "lucide-react";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
@@ -18,6 +18,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { LikesReceivedList } from "@/components/match/LikesReceivedList";
 import { BRAND_VOICE } from "@/lib/constants/brand-voice";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 
 export default function ChatPage() {
     const { user } = useAuth();
@@ -316,7 +317,7 @@ export default function ChatPage() {
                                                         }}
                                                         className={cn(
                                                             "h-[calc(100%-8px)] rounded-xl flex flex-col items-center justify-center px-4 transition-all text-white border-none shadow-sm",
-                                                            isMuted ? "bg-amber-500 hover:bg-amber-600" : "bg-blue-500 hover:bg-blue-600"
+                                                            isMuted ? "bg-amber-500 dark:bg-amber-600 hover:bg-amber-600 dark:hover:bg-amber-700" : "bg-blue-500 dark:bg-blue-600 hover:bg-blue-600 dark:hover:bg-blue-700"
                                                         )}
                                                     >
                                                         {isMuted ? <Bell className="h-4 w-4 mb-0.5" /> : <BellOff className="h-4 w-4 mb-0.5" />}
@@ -393,6 +394,29 @@ export default function ChatPage() {
                                                                         return null;
                                                                     })()}
                                                                 </div>
+                                                                <DropdownMenu>
+                                                                    <DropdownMenuTrigger asChild>
+                                                                        <Button
+                                                                            variant="ghost"
+                                                                            size="icon"
+                                                                            className="h-8 w-8 shrink-0 z-20"
+                                                                            onClick={(e) => e.preventDefault()}
+                                                                            aria-label="Opciones de conversación"
+                                                                        >
+                                                                            <MoreVertical className="h-4 w-4" />
+                                                                        </Button>
+                                                                    </DropdownMenuTrigger>
+                                                                    <DropdownMenuContent align="end">
+                                                                        <DropdownMenuItem onClick={() => handleMuteConversation(match.id, isMuted)}>
+                                                                            {isMuted ? <Bell className="h-4 w-4 mr-2" /> : <BellOff className="h-4 w-4 mr-2" />}
+                                                                            {isMuted ? "Activar notificaciones" : "Silenciar"}
+                                                                        </DropdownMenuItem>
+                                                                        <DropdownMenuItem onClick={() => handleHideConversation(match.id)} className="text-destructive">
+                                                                            <Trash2 className="h-4 w-4 mr-2" />
+                                                                            Eliminar
+                                                                        </DropdownMenuItem>
+                                                                    </DropdownMenuContent>
+                                                                </DropdownMenu>
                                                             </CardContent>
                                                         </Card>
                                                     </Link>

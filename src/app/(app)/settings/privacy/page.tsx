@@ -439,7 +439,7 @@ export default function PrivacySettingsPage() {
                 </Card>
 
                 {saving && (
-                    <div className="fixed bottom-4 right-4 bg-background border rounded-lg p-3 shadow-lg flex items-center gap-2">
+                    <div className="fixed bottom-20 right-4 bg-background border rounded-lg p-3 shadow-lg flex items-center gap-2 z-40 pb-safe">
                         <Loader2 className="h-4 w-4 animate-spin" />
                         <p className="text-sm">Guardando cambios...</p>
                     </div>

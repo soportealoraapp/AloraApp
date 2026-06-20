@@ -375,8 +375,8 @@ export default function ChatWindowPage() {
 
     if (loading && messages.length === 0) {
         return (
-            <div className="h-screen flex flex-col">
-                <header className="flex h-16 items-center gap-4 border-b bg-background/80 px-4 backdrop-blur-sm sm:px-6 shrink-0">
+            <div className="h-[100dvh] flex flex-col">
+                <header className="flex h-16 items-center gap-4 border-b bg-background/80 px-4 backdrop-blur-sm sm:px-6 shrink-0 pt-safe">
                     <Skeleton className="h-10 w-10 rounded-full" />
                     <Skeleton className="h-6 w-32" />
                 </header>

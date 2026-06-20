@@ -2,7 +2,7 @@
 
 import { useNotifications } from '@/hooks/use-notifications';
 import { Button } from '@/components/ui/button';
-import { CheckCheck, Bell, Loader2, Info, Trash2 } from 'lucide-react';
+import { CheckCheck, Bell, Loader2, Trash2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
@@ -143,10 +143,7 @@ export default function NotificationsPage() {
   const handleUndo = useCallback(() => {
     if (deletedNotification && undoTimeoutRef.current) {
       clearTimeout(undoTimeoutRef.current);
-      // Re-create the notification via the existing markRead API isn't possible,
-      // but we can restore it locally by re-fetching
       setDeletedNotification(null);
-      window.location.reload();
     }
   }, [deletedNotification]);
 

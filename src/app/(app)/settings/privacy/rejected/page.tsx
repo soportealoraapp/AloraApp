@@ -18,11 +18,11 @@ export default function RejectedUsersPage() {
 
     useEffect(() => {
         if (user) {
-            loadBlockedUsers();
+            loadRejectedUsers();
         }
     }, [user]);
 
-    const loadBlockedUsers = async () => {
+    const loadRejectedUsers = async () => {
         if (!user) return;
         setLoading(true);
         try {

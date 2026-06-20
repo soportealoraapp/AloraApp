@@ -46,7 +46,9 @@ export function BottomNav() {
                       {isActive && (
                         <motion.div
                           layoutId="active-special"
-                          className="absolute -inset-1 rounded-full border-2 border-primary animate-pulse"
+                          className="absolute -inset-1 rounded-full border-2 border-primary"
+                          initial={false}
+                          transition={{ type: 'spring', stiffness: 350, damping: 30 }}
                         />
                       )}
                     </div>

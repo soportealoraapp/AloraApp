@@ -228,7 +228,7 @@ export default function QuizPage() {
                                     </div>
                                 </div>
 
-                                <div className="pt-4 space-y-2">
+                                <div className="pt-4 space-y-2 pb-safe">
                                     <Button asChild className="w-full">
                                         <Link href="/discover">Ver más perfiles compatibles</Link>
                                     </Button>
