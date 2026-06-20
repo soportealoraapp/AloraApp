@@ -121,7 +121,7 @@ export function PhotoGrid({ photos, onReorder, onRemove, onCrop, maxPhotos = 6 }
                         overIndex === index && dragIndex !== index && "ring-2 ring-primary ring-offset-2"
                     )}
                 >
-                    <Image src={photo} alt={`Foto ${index + 1}`} fill className="object-cover pointer-events-none" loading="lazy" />
+                    <Image src={photo} alt={`Foto ${index + 1}`} fill sizes="(max-width: 768px) 33vw, 25vw" className="object-cover pointer-events-none" loading="lazy" />
 
                     <div className="absolute inset-0 bg-black/50 md:opacity-0 md:group-hover:opacity-100 transition-opacity flex items-center justify-center gap-1">
                         <Button

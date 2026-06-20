@@ -155,10 +155,10 @@ export default function WelcomePage() {
           Hecho con <Heart className="h-4 w-4 text-primary fill-primary" /> para una comunidad más segura.
         </p>
         <div className="text-xs text-muted-foreground space-x-4">
-          <Link href="/terms" className="hover:underline">Términos</Link>
-          <Link href="/privacy" className="hover:underline">Privacidad</Link>
-          <Link href="/support" className="hover:underline">Ayuda</Link>
-          <Link href="/contact" className="hover:underline">Contacto</Link>
+          <Link href="/terms" className="hover:underline" prefetch={false}>Términos</Link>
+          <Link href="/privacy" className="hover:underline" prefetch={false}>Privacidad</Link>
+          <Link href="/support" className="hover:underline" prefetch={false}>Ayuda</Link>
+          <Link href="/contact" className="hover:underline" prefetch={false}>Contacto</Link>
         </div>
       </footer>
     </div>

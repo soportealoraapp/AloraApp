@@ -30,7 +30,7 @@ const nextConfig: NextConfig = {
     ignoreDuringBuilds: false,
   },
   images: {
-    formats: ['image/webp'],
+    formats: ['image/avif', 'image/webp'],
     dangerouslyAllowSVG: false,
     contentDispositionType: 'attachment',
     minimumCacheTTL: 31536000,
@@ -64,7 +64,7 @@ const nextConfig: NextConfig = {
     ],
   },
   experimental: {
-    optimizePackageImports: ['lucide-react', 'date-fns', 'framer-motion'],
+    optimizePackageImports: ['lucide-react', 'date-fns', 'framer-motion', 'recharts'],
   },
 
   async headers() {

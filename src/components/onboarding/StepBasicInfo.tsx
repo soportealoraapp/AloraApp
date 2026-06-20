@@ -28,14 +28,16 @@ export function StepBasicInfo({ data, onUpdate, onNext, userId, onPrev }: StepBa
     const [citySelectedFromDropdown, setCitySelectedFromDropdown] = useState(Boolean(data?.city));
     const cityDropdownRef = useRef<HTMLDivElement>(null);
     const debounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+    const initializedRef = useRef(false);
 
     const selectedModes: ConnectionIntent[] = (localData.connectionModes || ['dating']) as ConnectionIntent[];
 
     useEffect(() => {
-        if (data && Object.keys(data).length > 0 && Object.keys(localData).length === 0) {
+        if (!initializedRef.current && data && Object.keys(data).length > 0) {
+            initializedRef.current = true;
             setLocalData({ ...data, lookingFor: data.lookingFor || (data.connectionModes?.includes('dating') ? 'serious' : 'friendship') });
         }
-    }, [data, localData]);
+    }, [data]);
 
     const handleChange = (field: keyof UserProfile, value: unknown) => {
         setLocalData((prev) => ({ ...prev, [field]: value }));

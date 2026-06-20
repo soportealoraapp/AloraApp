@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Heart, RotateCcw, UserX } from 'lucide-react';
@@ -13,7 +13,7 @@ interface SecondChanceSectionProps {
   intent?: ConnectionIntent;
 }
 
-export function SecondChanceSection({ intent = 'dating' }: SecondChanceSectionProps) {
+export const SecondChanceSection = React.memo(function SecondChanceSection({ intent = 'dating' }: SecondChanceSectionProps) {
   const [passedProfiles, setPassedProfiles] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const { sendLike } = useSendLike();
@@ -84,6 +84,7 @@ export function SecondChanceSection({ intent = 'dating' }: SecondChanceSectionPr
                   src={profile.photos?.[0] || '/placeholder.svg'}
                   alt={profile.displayName || ''}
                   fill
+                  sizes="(max-width: 640px) 50vw, 33vw"
                   className="object-cover"
                   loading="lazy"
                 />
@@ -106,4 +107,4 @@ export function SecondChanceSection({ intent = 'dating' }: SecondChanceSectionPr
       </CardContent>
     </Card>
   );
-}
+});

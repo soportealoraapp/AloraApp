@@ -391,6 +391,7 @@ export function DailyQuestionCard() {
                                                     src={currentAnswer.profile.photos?.[0] || '/placeholder.svg'}
                                                     alt={currentAnswer.profile.displayName}
                                                     fill
+                                                    sizes="48px"
                                                     className="object-cover"
                                                     loading="lazy"
                                                 />

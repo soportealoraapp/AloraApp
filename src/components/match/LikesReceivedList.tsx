@@ -68,6 +68,7 @@ export function LikesReceivedList() {
                                             src={liker.photos?.[0] || '/placeholder.svg'}
                                             alt={liker.displayName}
                                             fill
+                                            sizes="50vw"
                                             className="object-cover transition-transform duration-700 group-hover:scale-110"
                                             loading="lazy"
                                         />

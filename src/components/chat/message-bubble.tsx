@@ -73,6 +73,7 @@ const MemoizedMessageBubble = React.memo(function MessageBubble({ message, isMe,
                 src={message.content}
                 alt="Imagen compartida"
                 fill
+                sizes="(max-width: 768px) 80vw, 320px"
                 className="object-contain rounded-xl transition-transform group-hover:scale-[1.02]"
                 loading="lazy"
               />

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -27,7 +27,7 @@ interface DailyPicksProps {
     subscriptionStatus?: string;
 }
 
-export function DailyPicks({ subscriptionStatus = 'free' }: DailyPicksProps) {
+export const DailyPicks = React.memo(function DailyPicks({ subscriptionStatus = 'free' }: DailyPicksProps) {
     const [picks, setPicks] = useState<DailyPick[]>([]);
     const [loading, setLoading] = useState(true);
     const isPlus = subscriptionStatus === 'plus';
@@ -78,6 +78,7 @@ export function DailyPicks({ subscriptionStatus = 'free' }: DailyPicksProps) {
                                     src={pick.photo}
                                     alt={pick.displayName || 'Perfil'}
                                     fill
+                                    sizes="192px"
                                     className="object-cover group-hover:scale-105 transition-transform"
                                     loading="lazy"
                                 />
@@ -114,6 +115,6 @@ export function DailyPicks({ subscriptionStatus = 'free' }: DailyPicksProps) {
             </div>
         </div>
     );
-}
+});
 
 

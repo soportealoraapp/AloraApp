@@ -46,7 +46,8 @@ export function OnboardingWizard({ initialRef }: { initialRef?: string } = {}) {
             }
         }, 20000);
         return () => clearTimeout(safetyTimeout);
-    }, [isInitialized]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
     const [signupUserId, setSignupUserId] = useState<string>();
     const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
     const lastSavedRef = useRef<string>('');

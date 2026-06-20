@@ -117,6 +117,7 @@ export function FloatingMatchCard({ profile, onSwipe, onFlechado, compatibility,
                 src={photo}
                 alt={`${profile.displayName} ${index + 1}`}
                 fill
+                sizes="(max-width: 640px) 100vw, 400px"
                 className={`object-cover pointer-events-none transition-opacity duration-300 ${
                   index === currentPhotoIndex ? 'opacity-100' : 'opacity-0'
                 }`}
@@ -129,6 +130,7 @@ export function FloatingMatchCard({ profile, onSwipe, onFlechado, compatibility,
             src="/placeholder.svg"
             alt={profile.displayName}
             fill
+            sizes="(max-width: 640px) 100vw, 400px"
             className="object-cover pointer-events-none"
             priority
           />

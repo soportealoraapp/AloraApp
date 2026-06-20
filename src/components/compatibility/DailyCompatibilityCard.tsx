@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Heart, Loader2, Sparkles } from 'lucide-react';
@@ -23,7 +23,7 @@ interface DailyCompatData {
     differences?: string[];
 }
 
-export function DailyCompatibilityCard() {
+export const DailyCompatibilityCard = React.memo(function DailyCompatibilityCard() {
     const [data, setData] = useState<DailyCompatData | null>(null);
     const [loading, setLoading] = useState(true);
 
@@ -78,6 +78,7 @@ export function DailyCompatibilityCard() {
                                 src={data.profile.photos?.[0] || '/placeholder.svg'}
                                 alt={data.profile.displayName}
                                 fill
+                                sizes="56px"
                                 className="object-cover"
                                 loading="lazy"
                             />
@@ -142,4 +143,4 @@ export function DailyCompatibilityCard() {
             </CardContent>
         </Card>
     );
-}
+});
