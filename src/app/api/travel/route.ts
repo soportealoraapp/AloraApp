@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { withRateLimit } from '@/server/utils/api-rate-limit';
 
 // GET /api/travel — Get travel mode status
 export async function GET() {
@@ -10,6 +11,9 @@ export async function GET() {
     if (!user) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
+
+    const rateLimitResponse = await withRateLimit(user.id, 'profileRead');
+    if (rateLimitResponse) return rateLimitResponse;
 
     try {
         const profile = await prisma.profile.findUnique({
@@ -53,6 +57,9 @@ export async function POST(request: NextRequest) {
     if (!user) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
+
+    const rateLimitResponse = await withRateLimit(user.id, 'profileUpdate');
+    if (rateLimitResponse) return rateLimitResponse;
 
     try {
         const { ensureSubscriptionState } = await import('@/lib/subscription-helper');

@@ -9,6 +9,7 @@ import Link from 'next/link';
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { motion, AnimatePresence, useMotionValue, useTransform, animate } from 'framer-motion';
+import { BRAND_VOICE } from '@/lib/constants/brand-voice';
 
 function NotificationItem({ notification, onRead, onDelete }: { notification: any; onRead: () => void; onDelete: () => void }) {
   const router = useRouter();
@@ -57,6 +58,8 @@ function NotificationItem({ notification, onRead, onDelete }: { notification: an
         if (fallbackId) router.push(`/profile/${fallbackId}`);
       }
     } else if (type === 'reminder') {
+      router.push('/discover');
+    } else if (type === 'match_undone') {
       router.push('/discover');
     } else {
       const fallbackId = data.userId || data.fromUserId || data.id;
@@ -110,7 +113,7 @@ function NotificationItem({ notification, onRead, onDelete }: { notification: an
               {notification.body && (
                 <p className="text-xs text-muted-foreground mt-1 leading-relaxed">{notification.body}</p>
               )}
-              <p className="text-xs text-muted-foreground/60 mt-1.5">
+              <p className="text-xs text-muted-foreground mt-1.5">
                 {new Date(notification.createdAt).toLocaleDateString('es-MX', {
                   day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit'
                 })}
@@ -187,8 +190,8 @@ export default function NotificationsPage() {
         {notifications.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-24 text-muted-foreground">
             <Bell className="h-12 w-12 mb-4 opacity-50" />
-            <p className="font-medium">Sin actividad</p>
-            <p className="text-sm text-center max-w-xs mb-6">Completa tu perfil y mantente activo para recibir notificaciones.</p>
+            <p className="font-medium">{BRAND_VOICE.states.noActivity.title}</p>
+            <p className="text-sm text-center max-w-xs mb-6">{BRAND_VOICE.states.noActivity.subtitle}</p>
             <Button asChild variant="default" size="sm">
               <Link href="/profile/edit">Completar perfil</Link>
             </Button>

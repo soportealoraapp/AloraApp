@@ -154,7 +154,7 @@ export default function VerificationPage() {
                                     Obtén el badge azul de verificación para aumentar la confianza en tus conexiones.
                                 </CardDescription>
                                 <div className="bg-primary/5 rounded-lg p-3 mt-2">
-                                    <p className="text-xs font-medium text-primary">Los perfiles verificados aparecen primero en Discover y reciben hasta 3× más matches.</p>
+                                    <p className="text-xs font-medium text-primary">Los perfiles verificados generan más confianza y reciben más interacciones.</p>
                                 </div>
                             </CardHeader>
                             <CardContent className="space-y-4">

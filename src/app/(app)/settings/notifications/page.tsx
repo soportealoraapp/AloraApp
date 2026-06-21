@@ -4,9 +4,10 @@ import { useRouter } from 'next/navigation';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
-import { ArrowLeft, Loader2 } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import { useState, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
+import { Skeleton } from '@/components/ui/skeleton';
 
 interface NotificationPrefs {
     matches: boolean;
@@ -63,8 +64,32 @@ export default function NotificationsPage() {
 
     if (loading) {
         return (
-            <div className="p-6 flex justify-center py-20">
-                <Loader2 className="animate-spin text-primary h-8 w-8" />
+            <div>
+                <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b bg-background/80 px-4 backdrop-blur-sm sm:px-6 pt-safe">
+                    <Button variant="ghost" size="icon" onClick={() => router.back()}>
+                        <ArrowLeft className="h-5 w-5" />
+                    </Button>
+                    <h1 className="text-xl font-semibold md:text-2xl font-headline">Notificaciones</h1>
+                </header>
+                <main className="p-4">
+                    <Card>
+                        <CardHeader>
+                            <Skeleton className="h-5 w-40" />
+                            <Skeleton className="h-4 w-64" />
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                            {[1, 2, 3, 4, 5, 6].map(i => (
+                                <div key={i} className="flex items-center justify-between">
+                                    <div className="space-y-1">
+                                        <Skeleton className="h-4 w-32" />
+                                        <Skeleton className="h-3 w-48" />
+                                    </div>
+                                    <Skeleton className="h-5 w-10 rounded-full" />
+                                </div>
+                            ))}
+                        </CardContent>
+                    </Card>
+                </main>
             </div>
         );
     }

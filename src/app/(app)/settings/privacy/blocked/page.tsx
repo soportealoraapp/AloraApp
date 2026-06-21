@@ -8,6 +8,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { ArrowLeft, UserX, Loader2 } from "lucide-react";
 import Image from "next/image";
 import { Skeleton } from "@/components/ui/skeleton";
+import { BRAND_VOICE } from "@/lib/constants/brand-voice";
 
 export default function BlockedUsersPage() {
     const router = useRouter();
@@ -43,7 +44,10 @@ export default function BlockedUsersPage() {
                         <CardContent className="flex flex-col items-center justify-center py-12">
                             <UserX className="h-12 w-12 text-muted-foreground mb-4" />
                             <p className="text-muted-foreground text-center">
-                                No tienes usuarios bloqueados
+                                {BRAND_VOICE.states.noBlockedUsers.title}
+                            </p>
+                            <p className="text-sm text-muted-foreground text-center mt-1">
+                                {BRAND_VOICE.states.noBlockedUsers.subtitle}
                             </p>
                         </CardContent>
                     </Card>

@@ -142,7 +142,8 @@ export async function middleware(request: NextRequest) {
                 return applySecurityHeaders(NextResponse.redirect(new URL('/onboarding', modifiedRequest.url)));
             }
         } catch {
-            // If profile check fails due to DB error, allow through to avoid blocking all users
+            // If profile check fails due to DB error, redirect to onboarding as safety measure
+            return applySecurityHeaders(NextResponse.redirect(new URL('/onboarding', modifiedRequest.url)));
         }
     }
 
@@ -162,7 +163,8 @@ export async function middleware(request: NextRequest) {
                     return applySecurityHeaders(NextResponse.redirect(new URL('/onboarding', modifiedRequest.url)));
                 }
             } catch {
-                // If profile check fails, allow through to avoid blocking
+                // If profile check fails, redirect to onboarding as safety measure
+                return applySecurityHeaders(NextResponse.redirect(new URL('/onboarding', modifiedRequest.url)));
             }
         }
         return applySecurityHeaders(NextResponse.redirect(new URL('/discover', modifiedRequest.url)));

@@ -85,7 +85,7 @@ export async function updateUserProfile(userId: string, data: Partial<UserProfil
             compatibility,
             completenessScore,
             verificationStatus,
-            isCompleted,
+            isCompleted: _isCompletedBlocked,
             ...profileUpdates
         } = data;
 
@@ -105,17 +105,72 @@ export async function updateUserProfile(userId: string, data: Partial<UserProfil
             where: { userId },
             update: {
                 ...profileUpdates,
-                ...(isCompleted !== undefined ? { isCompleted } : {}),
             },
             create: {
                 userId,
                 ...profileUpdates,
-                isCompleted: isCompleted ?? false,
+                isCompleted: false,
             },
         });
         return { success: true };
     } catch (e) {
         console.error('Error updating profile', e);
+        return { success: false, error: 'Update failed' };
+    }
+}
+
+/**
+ * Complete onboarding — server-side validated.
+ * Only sets isCompleted=true if required fields are present.
+ * This is the ONLY way to set isCompleted from the client.
+ */
+export async function completeOnboarding(userId: string, data: Partial<UserProfile>) {
+    try {
+        const callerId = await getCurrentUserId();
+        if (!callerId || callerId !== userId) {
+            return { success: false, error: 'Unauthorized' };
+        }
+
+        // Validate required onboarding fields
+        const hasName = !!(data.displayName || data.name);
+        const hasPhotos = !!(data.photos && data.photos.length > 0);
+        const hasGender = !!(data.gender);
+        const hasAge = !!(data.age && data.age >= 18);
+
+        if (!hasName || !hasPhotos || !hasGender || !hasAge) {
+            return { success: false, error: 'Missing required onboarding fields' };
+        }
+
+        // Strip protected fields
+        const { id, email, isVerified, createdAt, subscriptionStatus, trustStatus, spotify, latestAnswer, compatibility, completenessScore, verificationStatus, isCompleted, ...profileUpdates } = data;
+
+        await prisma.user.upsert({
+            where: { id: userId },
+            create: {
+                id: userId,
+                email: email || `${userId}@placeholder.local`,
+                name: data.name || data.displayName || '',
+            },
+            update: {
+                name: data.name || data.displayName || undefined,
+            },
+        });
+
+        await prisma.profile.upsert({
+            where: { userId },
+            update: {
+                ...profileUpdates,
+                isCompleted: true,
+            },
+            create: {
+                userId,
+                ...profileUpdates,
+                isCompleted: true,
+            },
+        });
+        return { success: true };
+    } catch (e) {
+        console.error('Error completing onboarding', e);
         return { success: false, error: 'Update failed' };
     }
 }

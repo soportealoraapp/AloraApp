@@ -18,6 +18,22 @@ export const BRAND_VOICE = {
             title: 'Envía el primer mensaje',
             subtitle: '¡Hola! Tu match te está esperando.',
         },
+        noActivity: {
+            title: 'Sin actividad reciente',
+            subtitle: 'Cuando haya algo nuevo, aparecerá aquí.',
+        },
+        noBlockedUsers: {
+            title: 'Sin bloqueados',
+            subtitle: 'Si bloqueas a alguien, aparecerá aquí.',
+        },
+        noFilterResults: {
+            title: 'Sin resultados con estos filtros',
+            subtitle: 'Intenta ajustar tus filtros para ver más personas.',
+        },
+        noTimelineEvents: {
+            title: 'Aún no hay eventos',
+            subtitle: 'Tu línea de tiempo se llenará a medida que conectes.',
+        },
         errorGeneric: {
             title: 'Algo salió mal',
             subtitle: 'Intenta de nuevo en unos segundos.',

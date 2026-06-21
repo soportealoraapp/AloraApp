@@ -24,6 +24,7 @@ export function VoiceRecorder({ onStop, onCancel }: { onStop: (blob: Blob, durat
     const timerRef = useRef<NodeJS.Timeout | null>(null);
     const chunks = useRef<Blob[]>([]);
     const streamRef = useRef<MediaStream | null>(null);
+    const recordingStartTime = useRef<number>(0);
     const { toast } = useToast();
 
     // Cleanup on unmount
@@ -64,12 +65,13 @@ export function VoiceRecorder({ onStop, onCancel }: { onStop: (blob: Blob, durat
             mediaRecorder.current.ondataavailable = (e) => chunks.current.push(e.data);
             mediaRecorder.current.onstop = () => {
                 const blob = new Blob(chunks.current, { type: mimeType });
-                const finalDuration = duration;
+                const finalDuration = Math.floor((Date.now() - recordingStartTime.current) / 1000);
                 setDuration(0);
                 onStop(blob, finalDuration);
             };
 
             mediaRecorder.current.start();
+            recordingStartTime.current = Date.now();
             setRecording(true);
 
             timerRef.current = setInterval(() => {

@@ -372,14 +372,14 @@ export async function notifyDailyQuestion(userId: string) {
     });
 }
 
-export async function notifyMatchUndone(userId: string, undidUserName: string, intent?: string) {
+export async function notifyMatchUndone(userId: string, undidUserName: string, intent?: string, undidUserId?: string) {
     const isFriendship = intent === 'friendship';
     return sendPushToUser(userId, {
         title: isFriendship ? 'Conexión revertida 🤝' : 'Match revertido 💔',
         body: isFriendship
             ? `${undidUserName} deshizo la conexión. ¡Sigue explorando!`
             : `${undidUserName} deshizo el match. ¡Sigue explorando!`,
-        data: { type: 'match_undone' },
+        data: { type: 'match_undone', ...(undidUserId ? { userId: undidUserId } : {}) },
         channel: 'matches',
     });
 }

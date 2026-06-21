@@ -22,7 +22,7 @@ export default function SettingsPage() {
         setLoggingOut(true);
         try {
             await signOut();
-            router.push('/login');
+            router.replace('/login');
         } catch (error) {
             toast({
                 variant: "destructive",

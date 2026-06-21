@@ -751,8 +751,8 @@ export default function DiscoverPage() {
                 </div>
                 {countActiveFilters(filters) > 0 ? (
                   <>
-                    <p className="text-xl font-bold text-foreground mb-2">Sin resultados con estos filtros</p>
-                    <p className="text-muted-foreground mb-8 max-w-xs mx-auto">Prueba ajustar tus filtros para ver más personas.</p>
+                    <p className="text-xl font-bold text-foreground mb-2">{BRAND_VOICE.states.noFilterResults.title}</p>
+                    <p className="text-muted-foreground mb-8 max-w-xs mx-auto">{BRAND_VOICE.states.noFilterResults.subtitle}</p>
                     <Button onClick={() => { setFilters(DEFAULT_FILTERS); setIntent(currentUserProfile?.connectionModes?.[0] || 'dating'); }} className="px-8 py-6 rounded-2xl shadow-lg hover:shadow-xl transition-all">
                       Limpiar filtros
                     </Button>
@@ -823,8 +823,8 @@ export default function DiscoverPage() {
         />
       )}
 
-      {/* Bottom spacing for scrolling */}
-      <div className="h-20 md:hidden" />
+      {/* Bottom spacing for scrolling — layout already adds pb-20 */}
+      <div className="h-4 md:hidden" />
     </div>
   );
 }

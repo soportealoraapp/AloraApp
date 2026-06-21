@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Loader2, Sparkles, X } from 'lucide-react';
+import { BRAND_VOICE } from '@/lib/constants/brand-voice';
 
 interface TimelineEvent {
     id: string;
@@ -55,7 +56,7 @@ export function MatchTimeline({ matchId, open, onClose }: MatchTimelineProps) {
                         </div>
                     ) : events.length === 0 ? (
                         <div className="text-center py-8 text-sm text-muted-foreground">
-                            Aún no hay eventos
+                            {BRAND_VOICE.states.noTimelineEvents.title}
                         </div>
                     ) : (
                         <div className="relative pl-6 space-y-4">

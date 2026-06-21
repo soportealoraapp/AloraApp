@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { withRateLimit } from '@/server/utils/api-rate-limit';
 
 const FREE_STREAK_BOOST_DAYS = 5;
 const PLUS_STREAK_BOOST_DAYS = 3;
@@ -23,6 +24,9 @@ export async function POST() {
     if (!user) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
+
+    const rateLimitResponse = await withRateLimit(user.id, 'notification');
+    if (rateLimitResponse) return rateLimitResponse;
 
     try {
         const profile = await prisma.profile.findUnique({

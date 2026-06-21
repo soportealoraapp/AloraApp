@@ -36,14 +36,14 @@ export function applySecurityHeaders(response: NextResponse): NextResponse {
 
 /**
  * Generate a Content Security Policy string for the app.
- * Uses unsafe-inline over nonces because Next.js +
- * Supabase SSR middleware doesn't reliably propagate
- * x-nonce request headers to the React rendering pipeline.
+ * Uses unsafe-inline for styles because Next.js injects inline styles.
+ * unsafe-eval is REMOVED for security — it was a XSS vector.
+ * TODO: Migrate to nonce-based CSP when Next.js + Supabase SSR supports it.
  */
 export function getCSP(): string {
     const directives = [
         `default-src 'self'`,
-        `script-src 'self' 'unsafe-inline' 'unsafe-eval' https://apis.google.com https://www.gstatic.com`,
+        `script-src 'self' 'unsafe-inline' https://apis.google.com https://www.gstatic.com`,
         `style-src 'self' 'unsafe-inline' https://fonts.googleapis.com`,
         `img-src 'self' blob: data: https://*.uploadthing.com https://utfs.io https://*.supabase.co https://lh3.googleusercontent.com https://placehold.co https://picsum.photos https://i.scdn.co https://firebasestorage.googleapis.com`,
         `font-src 'self' data: https://fonts.gstatic.com`,

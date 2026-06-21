@@ -10,7 +10,7 @@ import {
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Check, Sparkles, Heart, Zap, ShieldCheck, RotateCcw, Globe, Eye, Star, Users, X } from 'lucide-react';
+import { Check, Sparkles, Heart, Zap, ShieldCheck, RotateCcw, Globe, Eye, Star, X } from 'lucide-react';
 
 interface PaywallModalProps {
     isOpen: boolean;
@@ -24,7 +24,7 @@ const TIERS = [
         price: 0,
         period: '',
         features: [
-            '30 likes diarios',
+            '50 likes diarios',
             'Matching y chat',
             'Daily compatibility',
             'Pregunta del día',
@@ -84,12 +84,8 @@ export function PaywallModal({ isOpen, onClose }: PaywallModalProps) {
                 <div className="px-6 pt-4 pb-2">
                     <div className="flex items-center justify-center gap-4 text-xs text-muted-foreground">
                         <div className="flex items-center gap-1">
-                            <Users className="h-3.5 w-3.5" />
-                            <span>2,000+ usuarios Plus</span>
-                        </div>
-                        <div className="flex items-center gap-1">
                             <Star className="h-3.5 w-3.5 text-amber-500 fill-amber-500" />
-                            <span>4.8 estrellas</span>
+                            <span>Calificado por nuestros usuarios</span>
                         </div>
                     </div>
                 </div>

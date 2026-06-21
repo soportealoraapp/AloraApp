@@ -390,7 +390,7 @@ export default function ChatWindowPage() {
 
     if (loading && messages.length === 0) {
         return (
-            <div className="h-[100dvh] flex flex-col">
+            <div className="flex flex-col" style={{ height: '100dvh' }}>
                 <header className="flex h-16 items-center gap-4 border-b bg-background/80 px-4 backdrop-blur-sm sm:px-6 shrink-0 pt-safe">
                     <Skeleton className="h-10 w-10 rounded-full" />
                     <Skeleton className="h-6 w-32" />
@@ -407,9 +407,9 @@ export default function ChatWindowPage() {
     }
 
     return (
-        <div className="flex flex-col h-[100dvh]">
+        <div className="flex flex-col" style={{ height: keyboardHeight > 0 ? `calc(100dvh - ${keyboardHeight}px)` : '100dvh' }}>
             {/* Header with avatar */}
-            <header className="flex h-16 items-center gap-4 border-b bg-background/80 px-4 backdrop-blur-sm sm:px-6 shrink-0 z-20">
+            <header className="flex h-16 items-center gap-4 border-b bg-background/80 px-4 backdrop-blur-sm sm:px-6 shrink-0 z-20 pt-safe">
                 <Button variant="ghost" size="icon" onClick={() => router.back()}>
                     <ArrowLeft className="h-5 w-5" />
                 </Button>
@@ -639,9 +639,9 @@ export default function ChatWindowPage() {
                                 >
                                     <div className="bg-muted rounded-2xl rounded-bl-sm px-4 py-3">
                                         <div className="flex gap-1">
-                                            <span className="h-2 w-2 rounded-full bg-muted-foreground/40 animate-bounce" style={{ animationDelay: '0ms' }} />
-                                            <span className="h-2 w-2 rounded-full bg-muted-foreground/40 animate-bounce" style={{ animationDelay: '150ms' }} />
-                                            <span className="h-2 w-2 rounded-full bg-muted-foreground/40 animate-bounce" style={{ animationDelay: '300ms' }} />
+                                            <span className="h-2 w-2 rounded-full bg-muted-foreground/60 animate-bounce" style={{ animationDelay: '0ms' }} />
+                                            <span className="h-2 w-2 rounded-full bg-muted-foreground/60 animate-bounce" style={{ animationDelay: '150ms' }} />
+                                            <span className="h-2 w-2 rounded-full bg-muted-foreground/60 animate-bounce" style={{ animationDelay: '300ms' }} />
                                         </div>
                                     </div>
                                 </motion.div>

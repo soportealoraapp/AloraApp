@@ -158,28 +158,9 @@ async function main() {
     }
 
     // ========== 5. AI PROCESSING SPIKES ==========
+    // REMOVED: relationship-copilot module deleted during cleanup
     console.log('\n🤖 AI PROCESSING SPIKE TEST\n');
-    try {
-        const { analyzeConversationQuality } = await import('../src/ai/copilot/relationship-copilot');
-        const testMessages = Array.from({ length: 50 }, (_, i) => ({
-            id: `test_${i}`,
-            senderId: i % 2 === 0 ? 'user_a' : 'user_b',
-            content: i % 3 === 0
-                ? '¿Qué es lo que más valoras en una conexión? A mí me importa la autenticidad y la confianza.'
-                : i % 3 === 1
-                    ? 'Jaja me encanta cuando la conversación fluye así de natural 😊'
-                    : 'Sí, claro, tienes toda la razón. Me hace pensar en muchas cosas.',
-            createdAt: new Date(Date.now() - (50 - i) * 60000),
-        }));
-
-        const results = await Promise.all(
-            Array.from({ length: 100 }, () => analyzeConversationQuality(testMessages))
-        );
-        assert(results.length === 100 && results.every(r => r.overallHealth >= 0),
-            'AI processing spike: 100 concurrent analyses');
-    } catch (error: any) {
-        assert(false, 'AI processing spike', error.message);
-    }
+    warn('AI processing spike', 'Skipped — relationship-copilot module removed');
 
     // ========== 6. CHAOS TESTING ==========
     console.log('\n💥 CHAOS TESTING\n');
@@ -193,15 +174,8 @@ async function main() {
     }
 
     // 6b. Queue stuck test
-    try {
-        const { jobQueue } = await import('../src/server/services/job-queue');
-        const jobId = await jobQueue.enqueue('cleanup_expired', {});
-        await jobQueue.fail(jobId, 'Simulated failure');
-        const failedJobs = await jobQueue.getFailedJobs(5);
-        assert(failedJobs.some(j => j.id === jobId), 'Chaos - Queue stuck: job failed and in DLQ');
-    } catch (error: any) {
-        assert(false, 'Chaos - Queue stuck', error.message);
-    }
+    // REMOVED: job-queue module deleted during cleanup
+    warn('Chaos - Queue stuck', 'Skipped — job-queue module removed');
 
     // 6c. Worker crash simulation (transactional safety)
     try {
@@ -271,22 +245,8 @@ async function main() {
     }
 
     // 7d. Moderation bypass
-    try {
-        const { ContentFilterService } = await import('../src/ai/copilot/content-filter');
-        const bypassAttempts = [
-            'p.u.t.a', 'p*u*t*a', 'p<puto>a', 'Puta', 'PU556A',
-            '🚫🔞', 'mierd@',
-        ];
-        for (const attempt of bypassAttempts) {
-            const result = ContentFilterService.filterContent(attempt);
-            // At minimum, should not crash
-            assert(typeof result.blocked === 'boolean',
-                `Moderation bypass attempt: "${attempt}"`);
-        }
-        assert(true, 'Moderation bypass: 6 attempts processed');
-    } catch (error: any) {
-        assert(false, 'Moderation bypass', error.message);
-    }
+    // REMOVED: content-filter module deleted during cleanup
+    warn('Moderation bypass', 'Skipped — content-filter module removed');
 
     // 7e. Replay attack simulation
     try {

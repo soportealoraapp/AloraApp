@@ -64,7 +64,7 @@ export function FloatingMatchCard({ profile, onSwipe, onFlechado, compatibility,
 
   const triggerHaptic = useCallback(() => {
     if (typeof navigator !== 'undefined' && navigator.vibrate) {
-      navigator.vibrate(10);
+      navigator.vibrate(20);
     }
   }, []);
 

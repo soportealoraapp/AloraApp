@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Progress } from "@/components/ui/progress";
 import { useAuth } from "@/contexts/AuthContext";
-import { updateUserProfile } from "@/server/actions/user";
+import { updateUserProfile, completeOnboarding } from "@/server/actions/user";
 import { useRouter } from "next/navigation";
 import { StepBasicInfo } from "./StepBasicInfo";
 import { StepInterests } from "./StepInterests";
@@ -172,17 +172,14 @@ export function OnboardingWizard({ initialRef }: { initialRef?: string } = {}) {
         setStep(2);
     }, []);
 
-    const completeOnboarding = useCallback(async () => {
+    const handleCompleteOnboarding = useCallback(async () => {
         if (hasCompletedRef.current) return;
         hasCompletedRef.current = true;
         if (debounceRef.current) clearTimeout(debounceRef.current);
         if (effectiveUserId) {
             try {
                 const finalData = formDataRef.current;
-                const result = await updateUserProfile(effectiveUserId, {
-                    ...finalData,
-                    isCompleted: true,
-                } as any);
+                const result = await completeOnboarding(effectiveUserId, finalData);
                 
                 if (!result.success) {
                     // Allow retry — unmark so user can try again
@@ -207,7 +204,7 @@ export function OnboardingWizard({ initialRef }: { initialRef?: string } = {}) {
 
     const nextStep = useCallback(async () => {
         if (step === totalSteps) {
-            await completeOnboarding();
+            await handleCompleteOnboarding();
             return;
         }
         // Save immediately when changing step (not debounced)
@@ -230,7 +227,7 @@ export function OnboardingWizard({ initialRef }: { initialRef?: string } = {}) {
             }
         }
         setStep(prev => Math.min(prev + 1, totalSteps));
-    }, [step, totalSteps, completeOnboarding, effectiveUserId]);
+    }, [step, totalSteps, handleCompleteOnboarding, effectiveUserId]);
 
     const prevStep = useCallback(() => setStep(prev => Math.max(prev - 1, 1)), []);
 
@@ -248,7 +245,7 @@ export function OnboardingWizard({ initialRef }: { initialRef?: string } = {}) {
     }
 
     return (
-        <div className="w-full min-h-dvh md:min-h-0 md:max-w-md md:mx-auto p-4 md:p-8 bg-background md:rounded-3xl md:shadow-xl md:border md:border-border/50 flex flex-col pt-safe">
+        <div className="w-full min-h-dvh md:min-h-0 md:max-w-md md:mx-auto p-4 md:p-8 bg-background md:rounded-3xl md:shadow-xl md:border md:border-border/50 flex flex-col pt-safe pb-safe">
             {step >= 1 && (
                 <div className="mb-8">
                     <div className="flex items-center justify-between mb-4">

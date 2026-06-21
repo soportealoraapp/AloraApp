@@ -168,7 +168,7 @@ export async function POST() {
                 where: { userId: user.id },
                 select: { displayName: true }
             });
-            notifyMatchUndone(otherUserId, currentUserProfile?.displayName || 'Alguien', interaction.intent).catch(() => {});
+            notifyMatchUndone(otherUserId, currentUserProfile?.displayName || 'Alguien', interaction.intent, user.id).catch(() => {});
         }
 
         return NextResponse.json({
