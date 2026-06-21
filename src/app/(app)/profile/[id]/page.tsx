@@ -46,6 +46,7 @@ export default function UserProfilePage() {
     const [isSuperMatched, setIsSuperMatched] = useState(false);
     const [processing, setProcessing] = useState(false);
     const [hasExistingMatch, setHasExistingMatch] = useState(false);
+    const [existingMatchId, setExistingMatchId] = useState<string | null>(null);
     const [compatibility, setCompatibility] = useState<{ score: number; breakdown?: Record<string, number>; explanations?: string[] } | null>(null);
 
     const source = searchParams.get("source");
@@ -69,6 +70,9 @@ export default function UserProfilePage() {
         .then(r => r.json())
         .then(data => {
           setHasExistingMatch(data.matched);
+          if (data.matchId) {
+            setExistingMatchId(data.matchId);
+          }
           // Restore like/flechado state from existing interaction
           if (data.interactionType === 'superlike') {
             setIsSuperMatched(true);
@@ -481,8 +485,8 @@ export default function UserProfilePage() {
                                 </Button>
                             </div>
                         ) : hasExistingMatch ? (
-                            <div className="flex justify-center max-w-sm mx-auto">
-                                <Link href={`/chat`} className="w-full">
+                            <div className="flex flex-col gap-2 justify-center max-w-sm mx-auto">
+                                <Link href={existingMatchId ? `/chat/${existingMatchId}` : '/chat'} className="w-full">
                                     <Button size="lg" variant="default" className="w-full min-h-[48px]">
                                         <MessageSquare className="h-5 w-5 mr-2" />
                                         Ir al chat

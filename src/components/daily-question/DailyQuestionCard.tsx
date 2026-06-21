@@ -98,6 +98,18 @@ export function DailyQuestionCard() {
         fetchQuestion();
     }, []);
 
+    // Re-fetch question at midnight for daily rollover
+    useEffect(() => {
+        const now = new Date();
+        const tomorrow = new Date(now);
+        tomorrow.setHours(24, 0, 0, 0);
+        const msUntilMidnight = tomorrow.getTime() - now.getTime();
+        const timeout = setTimeout(() => {
+            fetchQuestion();
+        }, msUntilMidnight + 1000); // +1s buffer after midnight
+        return () => clearTimeout(timeout);
+    }, [data?.questionId]);
+
     useEffect(() => {
         if (showAnswersModal && data?.questionId) {
             fetchOtherAnswers();

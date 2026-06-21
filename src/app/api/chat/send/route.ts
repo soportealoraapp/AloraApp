@@ -118,7 +118,8 @@ export async function POST(request: NextRequest) {
         let isFiltered = false;
 
         if (type === 'voice' || type === 'image') {
-            // Voice/image: cannot auto-moderate content; mark as sent (not flagged)
+            // Voice/image: cannot auto-moderate content via text filter
+            // but still run risk engine analysis
             isFiltered = false;
         } else {
             try {
@@ -128,28 +129,28 @@ export async function POST(request: NextRequest) {
             } catch (moderationError) {
                 console.error('Moderation error:', moderationError);
             }
+        }
 
-            // Risk engine analysis (love bombing, manipulation, scam detection)
-            try {
-                const riskAssessment = await analyzeMessageSafety(
-                    matchId,
-                    user.id,
-                    receiverId,
-                    content,
-                    prevMessageCount
-                );
+        // Risk engine analysis (love bombing, manipulation, scam detection) — runs for ALL message types
+        try {
+            const riskAssessment = await analyzeMessageSafety(
+                matchId,
+                user.id,
+                receiverId,
+                content,
+                prevMessageCount
+            );
 
-                if (riskAssessment.assessment.riskLevel === 'critical' || riskAssessment.assessment.riskLevel === 'high') {
-                    // Flag message for review and reduce sender reputation
-                    isFiltered = true;
-                    await prisma.profile.update({
-                        where: { userId: user.id },
-                        data: { reputationScore: { decrement: riskAssessment.assessment.riskLevel === 'critical' ? 10 : 5 } }
-                    }).catch((err) => console.warn('[chat/send] reputation decrement failed:', err));
-                }
-            } catch (riskError) {
-                console.error('Risk engine error:', riskError);
+            if (riskAssessment.assessment.riskLevel === 'critical' || riskAssessment.assessment.riskLevel === 'high') {
+                // Flag message for review and reduce sender reputation
+                isFiltered = true;
+                await prisma.profile.update({
+                    where: { userId: user.id },
+                    data: { reputationScore: { decrement: riskAssessment.assessment.riskLevel === 'critical' ? 10 : 5 } }
+                }).catch((err) => console.warn('[chat/send] reputation decrement failed:', err));
             }
+        } catch (riskError) {
+            console.error('Risk engine error:', riskError);
         }
 
         // Create Message

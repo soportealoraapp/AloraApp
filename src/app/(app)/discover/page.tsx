@@ -270,6 +270,7 @@ export default function DiscoverPage() {
   }, [hasMore, loadingMore, loading, loadMore]);
 
   const [pendingSwipe, setPendingSwipe] = useState(false);
+  const pendingSwipeTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const executeAction = useCallback(async (
     action: 'like' | 'pass' | 'superlike',
@@ -289,6 +290,9 @@ export default function DiscoverPage() {
 
     const previousProfiles = profilesRef.current;
     setPendingSwipe(true);
+    // Safety timeout: if API call takes >10s, unlock UI to prevent permanent block
+    if (pendingSwipeTimeoutRef.current) clearTimeout(pendingSwipeTimeoutRef.current);
+    pendingSwipeTimeoutRef.current = setTimeout(() => setPendingSwipe(false), 10000);
     if (action !== 'pass') {
       setSwipeCount(prev => prev + 1);
     }
@@ -331,6 +335,7 @@ export default function DiscoverPage() {
         variant: "destructive"
       });
     } finally {
+      if (pendingSwipeTimeoutRef.current) clearTimeout(pendingSwipeTimeoutRef.current);
       setPendingSwipe(false);
     }
   }, [currentUserProfile, pendingSwipe, swipeCount, intent, sendLike, track, toast, setProfiles]);

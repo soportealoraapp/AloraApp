@@ -124,7 +124,7 @@ function NotificationItem({ notification, onRead, onDelete }: { notification: an
 }
 
 export default function NotificationsPage() {
-  const { notifications, unreadCount, loading, markRead, markAllRead, deleteNotification, undoDelete, refresh } = useNotifications({ pollIntervalMs: 30000 });
+  const { notifications, unreadCount, loading, loadingMore, hasMore, markRead, markAllRead, deleteNotification, undoDelete, refresh, loadMore } = useNotifications({ pollIntervalMs: 30000 });
   const [deletedNotification, setDeletedNotification] = useState<any>(null);
   const undoTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -213,6 +213,23 @@ export default function NotificationsPage() {
                 </motion.div>
               ))}
             </AnimatePresence>
+            {hasMore && notifications.length > 0 && (
+              <div className="flex justify-center py-4">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={loadMore}
+                  disabled={loadingMore}
+                  className="text-muted-foreground"
+                >
+                  {loadingMore ? (
+                    <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Cargando...</>
+                  ) : (
+                    'Cargar más notificaciones'
+                  )}
+                </Button>
+              </div>
+            )}
           </div>
         )}
       </main>

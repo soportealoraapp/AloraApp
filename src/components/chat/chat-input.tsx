@@ -73,6 +73,7 @@ export function ChatInput({ onSend, onSendImage, onSendVoice, onTyping, disabled
       setRecordedBlob(null);
       setRecordedUrl(null);
       setRecordingTime(0);
+      toast({ title: 'Error', description: 'No se pudo subir el mensaje de voz. Intenta de nuevo.', variant: 'destructive' });
     },
   });
 

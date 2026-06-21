@@ -23,8 +23,11 @@ interface UseNotificationsResult {
     notifications: AppNotification[];
     unreadCount: number;
     loading: boolean;
+    loadingMore: boolean;
+    hasMore: boolean;
     error: string | null;
     refresh: () => Promise<void>;
+    loadMore: () => Promise<void>;
     markRead: (ids: string[]) => Promise<void>;
     markAllRead: () => Promise<void>;
     deleteNotification: (id: string) => Promise<void>;
@@ -40,26 +43,42 @@ export function useNotifications({
     const [notifications, setNotifications] = useState<AppNotification[]>([]);
     const [unreadCount, setUnreadCount] = useState(0);
     const [loading, setLoading] = useState(true);
+    const [loadingMore, setLoadingMore] = useState(false);
+    const [hasMore, setHasMore] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const offsetRef = useRef(0);
     const abortRef = useRef<AbortController | null>(null);
     const channelRef = useRef<RealtimeChannel | null>(null);
 
-    const fetchNotifications = useCallback(async (signal?: AbortSignal) => {
+    const fetchNotifications = useCallback(async (signal?: AbortSignal, reset = true) => {
         try {
-            const res = await fetch('/api/notifications?limit=30', {
+            if (reset) {
+                offsetRef.current = 0;
+                setHasMore(true);
+            }
+            const offset = reset ? 0 : offsetRef.current;
+            const res = await fetch(`/api/notifications?limit=30&offset=${offset}`, {
                 cache: 'no-store',
                 signal,
             });
             if (!res.ok) throw new Error(`status ${res.status}`);
             const data = await res.json();
-            setNotifications(data.notifications ?? []);
+            const fetched = data.notifications ?? [];
+            if (reset) {
+                setNotifications(fetched);
+            } else {
+                setNotifications(prev => [...prev, ...fetched]);
+            }
             setUnreadCount(typeof data.unreadCount === 'number' ? data.unreadCount : 0);
+            offsetRef.current = offset + fetched.length;
+            setHasMore(fetched.length >= 30);
             setError(null);
         } catch (err: unknown) {
             if (err instanceof DOMException && err.name === 'AbortError') return;
             setError(err instanceof Error ? err.message : 'fetch failed');
         } finally {
             setLoading(false);
+            setLoadingMore(false);
         }
     }, []);
 
@@ -215,12 +234,21 @@ export function useNotifications({
         }
     }, []);
 
+    const loadMore = useCallback(async () => {
+        if (loadingMore || !hasMore) return;
+        setLoadingMore(true);
+        await fetchNotifications(undefined, false);
+    }, [loadingMore, hasMore, fetchNotifications]);
+
     return {
         notifications,
         unreadCount,
         loading,
+        loadingMore,
+        hasMore,
         error,
-        refresh: () => fetchNotifications(),
+        refresh: () => fetchNotifications(undefined, true),
+        loadMore,
         markRead,
         markAllRead,
         deleteNotification,

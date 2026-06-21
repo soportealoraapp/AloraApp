@@ -1,7 +1,5 @@
 import "server-only";
 import { initializeApp, getApps, cert } from "firebase-admin/app";
-import { getFirestore } from "firebase-admin/firestore";
-import { getAuth } from "firebase-admin/auth";
 
 // Check if these are available, otherwise we might struggle with server actions
 const serviceAccount = {
@@ -25,6 +23,3 @@ export function getAdminApp() {
     }
     return getApps()[0];
 }
-
-export const adminDb = getFirestore(getAdminApp());
-export const adminAuth = getAuth(getAdminApp());

@@ -104,7 +104,8 @@ export default function CompatibilityPage() {
     setLoadingSimilar(true);
     setSimilarUsers([]);
     try {
-      const res = await fetch(`/api/compatibility/similar?archetype=${result.archetype}&quizId=${result.quizId}`);
+      const scoreParam = result.score !== undefined ? `&score=${result.score}` : '';
+      const res = await fetch(`/api/compatibility/similar?archetype=${result.archetype}&quizId=${result.quizId}${scoreParam}`);
       if (res.ok) {
         const data = await res.json();
         setSimilarUsers(Array.isArray(data.profiles) ? data.profiles : []);

@@ -18,8 +18,10 @@ import { getCSP, SECURITY_HEADERS } from '@/lib/security';
 // In-memory caches for stable DB lookups in middleware
 const profileCache = new Map<string, { isCompleted: boolean; ts: number }>();
 const roleCache = new Map<string, { role: string; ts: number }>();
-const PROFILE_CACHE_TTL = 60_000; // 1 minute
+const lastActiveCache = new Map<string, number>(); // userId -> last update timestamp
+const PROFILE_CACHE_TTL = 10_000; // 10 seconds — short TTL to avoid stale redirect after onboarding completion
 const ROLE_CACHE_TTL = 300_000; // 5 minutes
+const LAST_ACTIVE_THROTTLE = 300_000; // 5 minutes - update lastActiveAt at most every 5 min
 
 async function getCachedProfileCompleted(
     supabase: Awaited<ReturnType<typeof createClient>>,
@@ -54,6 +56,19 @@ async function getCachedAdminRole(userId: string): Promise<string | null> {
     return role;
 }
 
+function maybeUpdateLastActive(userId: string) {
+    const last = lastActiveCache.get(userId);
+    if (last && Date.now() - last < LAST_ACTIVE_THROTTLE) return;
+    lastActiveCache.set(userId, Date.now());
+    // Fire-and-forget: don't block the request
+    import('@/lib/prisma').then(({ prisma }) => {
+        prisma.profile.updateMany({
+            where: { userId },
+            data: { lastActiveAt: new Date() },
+        }).catch(() => {});
+    }).catch(() => {});
+}
+
 export async function middleware(request: NextRequest) {
     const csp = getCSP();
 
@@ -63,6 +78,11 @@ export async function middleware(request: NextRequest) {
     // updateSession creates its own response with refreshed Supabase cookies.
     // getUser() triggers automatic token refresh if the JWT is expired.
     const { supabaseResponse: response, user } = await updateSession(modifiedRequest);
+
+    // Update lastActiveAt (throttled to once per 5 min per user)
+    if (user) {
+        maybeUpdateLastActive(user.id);
+    }
 
     const pathname = modifiedRequest.nextUrl.pathname;
 

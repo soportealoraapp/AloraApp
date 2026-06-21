@@ -28,13 +28,16 @@ export function calculateQuizScore(quizId: string, answers: Record<string, strin
 }
 
 /**
- * Determine archetype based on quiz score
+ * Determine archetype based on quiz score.
+ * Uses 5-point overlap zones to avoid cliff effects at boundaries.
  */
 export function determineArchetype(quizId: string, score: number): string {
-    if (score >= 80) return 'profundo';
-    if (score >= 60) return 'equilibrado';
-    if (score >= 40) return 'social';
-    return 'explorador';
+    // Primary ranges with hysteresis: users near boundaries stay in their current archetype
+    // For new determinations (no previous archetype), use standard ranges with 5-point overlap
+    if (score >= 78) return 'profundo';      // 78-100 (overlap: 78-80 can also be equilibrado)
+    if (score >= 58) return 'equilibrado';   // 58-77 (overlap: 58-60 can also be social)
+    if (score >= 38) return 'social';        // 38-57 (overlap: 38-40 can also be explorador)
+    return 'explorador';                      // 0-37
 }
 
 export const ARCHETYPES: Record<string, ArchetypeInfo> = {

@@ -5,10 +5,28 @@ import { prisma } from '@/lib/prisma';
 import { redeemReferral } from '@/server/actions/referral';
 import { REFERRAL_COOKIE, REFERRAL_CODE_PATTERN } from '@/lib/referral/constants';
 
+const ALLOWED_REDIRECT_PATHS = ['/password-update', '/discover', '/onboarding', '/settings', '/login'];
+
+function sanitizeRedirect(next: string): string {
+    // Only allow paths that start with / and do not contain :// (protocol) or // (protocol-relative)
+    if (!next.startsWith('/') || next.includes('://') || next.startsWith('//')) {
+        return '/discover';
+    }
+    // Only allow known internal paths
+    if (!ALLOWED_REDIRECT_PATHS.some(p => next.startsWith(p))) {
+        return '/discover';
+    }
+    // Prevent path traversal
+    if (next.includes('..')) {
+        return '/discover';
+    }
+    return next;
+}
+
 export async function GET(request: Request) {
     const { searchParams, origin } = new URL(request.url);
     const code = searchParams.get('code');
-    const next = searchParams.get('next') ?? '/discover';
+    const next = sanitizeRedirect(searchParams.get('next') ?? '/discover');
 
     if (code) {
         const supabase = await createClient();
@@ -89,12 +107,15 @@ export async function GET(request: Request) {
             const forwardedHost = request.headers.get('x-forwarded-host');
             const isLocalEnv = process.env.NODE_ENV === 'development';
 
+            // Final validation: ensure destination is always an internal path
+            const safeDestination = sanitizeRedirect(destination);
+
             if (isLocalEnv) {
-                return NextResponse.redirect(`${origin}${destination}`);
+                return NextResponse.redirect(`${origin}${safeDestination}`);
             } else if (forwardedHost) {
-                return NextResponse.redirect(`https://${forwardedHost}${destination}`);
+                return NextResponse.redirect(`https://${forwardedHost}${safeDestination}`);
             } else {
-                return NextResponse.redirect(`${origin}${destination}`);
+                return NextResponse.redirect(`${origin}${safeDestination}`);
             }
         }
     }

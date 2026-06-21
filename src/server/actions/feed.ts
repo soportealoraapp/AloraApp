@@ -1,6 +1,7 @@
 'use server';
 
 import { prisma } from '@/lib/prisma';
+import { Prisma } from '@prisma/client';
 import { UserProfile } from '@/lib/domain/types';
 import { getCompatibilityScore } from './compatibility/getCompatibilityScore';
 import { calculateCompleteness } from '@/lib/utils/completeness';
@@ -218,24 +219,22 @@ export async function getDynamicFeed(
         if (shouldRestrictDistance) {
             // Use SQL Haversine to filter by distance in DB instead of loading all profiles into memory
             const excludedArray = Array.from(excludedIds);
-            const HaversineSQL = `(
-                6371 * acos(
-                    cos(radians(${effectiveLat!})) * cos(radians(latitude)) *
-                    cos(radians(longitude) - radians(${effectiveLng!})) +
-                    sin(radians(${effectiveLat!})) * sin(radians(latitude))
-                )
-            )`;
+            const lat = effectiveLat!;
+            const lng = effectiveLng!;
+            const distance = filters.distance!;
 
-            const nearbyProfiles = await prisma.$queryRawUnsafe<{ userId: string }[]>(
-                `SELECT "userId" FROM "Profile"
-                 WHERE latitude IS NOT NULL AND longitude IS NOT NULL
-                   AND "trustStatus" != 'banned'
-                   AND "incognitoMode" = false
-                   AND "showMeInDiscover" = true
-                   ${filters.countryCode ? `AND "countryCode" = '${filters.countryCode}'` : ''}
-                   ${filters.stateCode ? `AND "stateCode" = '${filters.stateCode}'` : ''}
-                   AND ${HaversineSQL} <= ${filters.distance!}
-                 LIMIT 500`
+            const nearbyProfiles = await prisma.$queryRaw<{ userId: string }[]>(
+                Prisma.sql`
+                    SELECT "userId" FROM "Profile"
+                    WHERE latitude IS NOT NULL AND longitude IS NOT NULL
+                      AND "trustStatus" != 'banned'
+                      AND "incognitoMode" = false
+                      AND "showMeInDiscover" = true
+                      ${filters.countryCode ? Prisma.sql`AND "countryCode" = ${filters.countryCode}` : Prisma.sql``}
+                      ${filters.stateCode ? Prisma.sql`AND "stateCode" = ${filters.stateCode}` : Prisma.sql``}
+                      AND (6371 * acos(cos(radians(${lat})) * cos(radians(latitude)) * cos(radians(longitude) - radians(${lng})) + sin(radians(${lat})) * sin(radians(latitude)))) <= ${distance}
+                    LIMIT 500
+                `
             );
 
             // Filter excluded IDs in JS (SQL IN clause with 100+ UUIDs is safe but this is simpler)
@@ -363,12 +362,12 @@ export async function getDynamicFeed(
             messagesSentMap.set(m.senderId, (messagesSentMap.get(m.senderId) || 0) + (m._count || 0));
         }
 
-        const candidateDailyAnswers = resultCandidateIds.length > 0 ? await prisma.$queryRawUnsafe<{ userId: string; answer: string; questionId: string; question: string; category: string; createdAt: Date }[]>(
-            `SELECT DISTINCT ON (da."userId")
+        const candidateDailyAnswers = resultCandidateIds.length > 0 ? await prisma.$queryRaw<{ userId: string; answer: string; questionId: string; question: string; category: string; createdAt: Date }[]>(
+            Prisma.sql`SELECT DISTINCT ON (da."userId")
                 da."userId", da."answer", da."questionId", dq."question", dq."category", da."createdAt"
              FROM "DailyAnswer" da
              JOIN "DailyQuestion" dq ON dq.id = da."questionId"
-             WHERE da."userId" IN (${resultCandidateIds.map(id => `'${id}'`).join(',')})
+             WHERE da."userId" IN (${Prisma.join(resultCandidateIds.map(id => Prisma.sql`${id}`))})
              ORDER BY da."userId", da."createdAt" DESC`
         ) : [];
         const latestAnswerMap = new Map<string, typeof candidateDailyAnswers[0]>();
