@@ -36,8 +36,13 @@ export function LikesCounter({
     }, []);
 
     // Detect reset (new day) and trigger callback
+    // Use .getTime() comparison to avoid reference equality issues
     useEffect(() => {
-        if (prevResetRef.current !== resetAt) {
+        const prevTime = prevResetRef.current instanceof Date
+            ? prevResetRef.current.getTime()
+            : new Date(prevResetRef.current).getTime();
+        const currentTime = resetAt instanceof Date ? resetAt.getTime() : new Date(resetAt).getTime();
+        if (prevTime !== currentTime) {
             prevResetRef.current = resetAt;
             onReset?.();
         }

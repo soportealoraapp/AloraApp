@@ -93,8 +93,14 @@ export async function GET(request: NextRequest) {
                     id: match.id,
                     users: [match.user1Id, match.user2Id],
                     usersData: {
-                        [match.user1Id]: match.user1,
-                        [match.user2Id]: match.user2
+                        [match.user1Id]: {
+                            id: match.user1.id,
+                            profile: match.user1.profile,
+                        },
+                        [match.user2Id]: {
+                            id: match.user2.id,
+                            profile: match.user2.profile,
+                        },
                     },
                     lastMessage: match.messages[0] ? {
                         ...match.messages[0],

@@ -15,7 +15,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       </a>
       <main
         id="main-content"
-        className={`md:pl-60 pb-safe ${isChatWindow ? '' : 'pb-20 md:pb-0'}`}
+        className={`md:pl-60 pb-safe overflow-x-hidden ${isChatWindow ? '' : 'pb-20 md:pb-0'}`}
       >
         <ErrorBoundary>{children}</ErrorBoundary>
       </main>

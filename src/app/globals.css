@@ -5,6 +5,7 @@
 body {
   font-family: var(--font-pt-sans), Arial, Helvetica, sans-serif;
   @apply text-base md:text-sm;
+  overscroll-behavior: none;
 }
 
 html {

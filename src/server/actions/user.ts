@@ -73,6 +73,53 @@ export async function updateUserProfile(userId: string, data: Partial<UserProfil
             return { success: false, error: 'Unauthorized' };
         }
 
+        // Sanitize and validate fields
+        const sanitizedData: Record<string, unknown> = {};
+        if (data.displayName !== undefined) {
+            const name = String(data.displayName).trim();
+            if (name.length > 0 && name.length <= 50) sanitizedData.displayName = name;
+        }
+        if (data.bio !== undefined) {
+            const bio = String(data.bio).trim();
+            if (bio.length <= 500) sanitizedData.bio = bio;
+        }
+        if (data.age !== undefined) {
+            const age = Number(data.age);
+            if (age >= 18 && age <= 120 && !isNaN(age)) sanitizedData.age = age;
+        }
+        if (data.gender !== undefined) {
+            const validGenders = ['woman', 'man', 'non-binary'];
+            if (validGenders.includes(data.gender as string)) sanitizedData.gender = data.gender;
+        }
+        if (data.city !== undefined) sanitizedData.city = String(data.city).trim().substring(0, 200);
+        if (data.photos !== undefined && Array.isArray(data.photos)) {
+            sanitizedData.photos = data.photos.slice(0, 6);
+        }
+        if (data.interests !== undefined && Array.isArray(data.interests)) {
+            sanitizedData.interests = data.interests.slice(0, 20);
+        }
+        if (data.values !== undefined && Array.isArray(data.values)) {
+            sanitizedData.values = data.values.slice(0, 10);
+        }
+        if (data.musicGenres !== undefined && Array.isArray(data.musicGenres)) {
+            sanitizedData.musicGenres = data.musicGenres.slice(0, 10);
+        }
+        if (data.connectionModes !== undefined && Array.isArray(data.connectionModes)) {
+            const validModes = ['dating', 'friendship'];
+            sanitizedData.connectionModes = data.connectionModes.filter(m => validModes.includes(m as string));
+        }
+        if (data.lookingFor !== undefined) {
+            const validLooking = ['casual', 'serious', 'unsure', 'friendship'];
+            if (validLooking.includes(data.lookingFor as string)) sanitizedData.lookingFor = data.lookingFor;
+        }
+        if (data.voiceIntro !== undefined) sanitizedData.voiceIntro = data.voiceIntro || null;
+        if (data.zodiacSign !== undefined) sanitizedData.zodiacSign = String(data.zodiacSign).substring(0, 50);
+        if (data.education !== undefined) sanitizedData.education = String(data.education).substring(0, 100);
+        if (data.smoking !== undefined) sanitizedData.smoking = String(data.smoking).substring(0, 50);
+        if (data.drinking !== undefined) sanitizedData.drinking = String(data.drinking).substring(0, 50);
+        if (data.children !== undefined) sanitizedData.children = String(data.children).substring(0, 50);
+        if (data.religion !== undefined) sanitizedData.religion = String(data.religion).substring(0, 100);
+
         const {
             id,
             email,
@@ -87,7 +134,7 @@ export async function updateUserProfile(userId: string, data: Partial<UserProfil
             verificationStatus,
             isCompleted: _isCompletedBlocked,
             ...profileUpdates
-        } = data;
+        } = sanitizedData as Partial<UserProfile>;
 
         await prisma.$transaction([
             prisma.user.upsert({
@@ -134,12 +181,12 @@ export async function completeOnboarding(userId: string, data: Partial<UserProfi
         }
 
         // Validate required onboarding fields
+        // Photos are recommended but not required — user can skip during onboarding
         const hasName = !!(data.displayName || data.name);
-        const hasPhotos = !!(data.photos && data.photos.length > 0);
         const hasGender = !!(data.gender);
         const hasAge = !!(data.age && data.age >= 18);
 
-        if (!hasName || !hasPhotos || !hasGender || !hasAge) {
+        if (!hasName || !hasGender || !hasAge) {
             return { success: false, error: 'Missing required onboarding fields' };
         }
 

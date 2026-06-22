@@ -15,12 +15,34 @@ import { NextResponse, NextRequest } from 'next/server';
 import { updateSession, createClient } from '@/lib/supabase/middleware';
 import { getCSP, SECURITY_HEADERS } from '@/lib/security';
 
-// In-memory caches for stable DB lookups in middleware
-const profileCache = new Map<string, { isCompleted: boolean; ts: number }>();
-const roleCache = new Map<string, { role: string; ts: number }>();
-const lastActiveCache = new Map<string, number>(); // userId -> last update timestamp
+// LRU-style in-memory caches with max size and TTL eviction
+const MAX_CACHE_SIZE = 1000;
+
+function createCache<T>(maxSize: number) {
+    const map = new Map<string, T>();
+    return {
+        get(key: string): T | undefined {
+            return map.get(key);
+        },
+        set(key: string, value: T) {
+            if (map.size >= maxSize) {
+                // Evict oldest entry (first inserted)
+                const firstKey = map.keys().next().value;
+                if (firstKey !== undefined) map.delete(firstKey);
+            }
+            map.set(key, value);
+        },
+        delete(key: string) {
+            map.delete(key);
+        },
+    };
+}
+
+const profileCache = createCache<{ isCompleted: boolean; ts: number }>(MAX_CACHE_SIZE);
+const roleCache = createCache<{ role: string; ts: number }>(MAX_CACHE_SIZE);
+const lastActiveCache = createCache<number>(MAX_CACHE_SIZE);
 const PROFILE_CACHE_TTL = 10_000; // 10 seconds — short TTL to avoid stale redirect after onboarding completion
-const ROLE_CACHE_TTL = 300_000; // 5 minutes
+const ROLE_CACHE_TTL = 30_000; // 30 seconds — reduced from 5min to limit stale privilege access
 const LAST_ACTIVE_THROTTLE = 300_000; // 5 minutes - update lastActiveAt at most every 5 min
 
 async function getCachedProfileCompleted(
@@ -142,8 +164,8 @@ export async function middleware(request: NextRequest) {
                 return applySecurityHeaders(NextResponse.redirect(new URL('/onboarding', modifiedRequest.url)));
             }
         } catch {
-            // If profile check fails due to DB error, redirect to onboarding as safety measure
-            return applySecurityHeaders(NextResponse.redirect(new URL('/onboarding', modifiedRequest.url)));
+            // DB error — let the request through rather than redirecting to onboarding
+            // which could overwrite existing profile data
         }
     }
 
@@ -163,8 +185,7 @@ export async function middleware(request: NextRequest) {
                     return applySecurityHeaders(NextResponse.redirect(new URL('/onboarding', modifiedRequest.url)));
                 }
             } catch {
-                // If profile check fails, redirect to onboarding as safety measure
-                return applySecurityHeaders(NextResponse.redirect(new URL('/onboarding', modifiedRequest.url)));
+                // DB error — let the request through
             }
         }
         return applySecurityHeaders(NextResponse.redirect(new URL('/discover', modifiedRequest.url)));

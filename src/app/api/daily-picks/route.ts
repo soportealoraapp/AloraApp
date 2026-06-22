@@ -117,6 +117,9 @@ export async function GET(request: NextRequest) {
                 trustStatus: { not: 'banned' },
                 incognitoMode: false,
                 showMeInDiscover: true,
+                // Gender filter based on user's seeking preference
+                ...(currentUserProfile.seeking === 'women' ? { gender: 'woman' } :
+                    currentUserProfile.seeking === 'men' ? { gender: 'man' } : {}),
             },
             select: {
                 userId: true,
@@ -133,13 +136,31 @@ export async function GET(request: NextRequest) {
                 longitude: true,
                 reputationScore: true,
             },
-            take: 50,
+            take: 100,
         });
+
+        // Filter by distance (Haversine) if user has location
+        const MAX_DISTANCE_KM = 100;
+        const userLat = currentUserProfile.latitude;
+        const userLon = currentUserProfile.longitude;
+        const filteredCandidates = userLat != null && userLon != null
+            ? candidates.filter(c => {
+                if (c.latitude == null || c.longitude == null) return true;
+                const R = 6371;
+                const dLat = (c.latitude - userLat) * Math.PI / 180;
+                const dLon = (c.longitude - userLon) * Math.PI / 180;
+                const a = Math.sin(dLat / 2) ** 2 +
+                    Math.cos(userLat * Math.PI / 180) * Math.cos(c.latitude * Math.PI / 180) *
+                    Math.sin(dLon / 2) ** 2;
+                const dist = R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+                return dist <= MAX_DISTANCE_KM;
+            })
+            : candidates;
 
         const oneWeekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
         const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
 
-        const scored = candidates.map(c => {
+        const scored = filteredCandidates.map(c => {
             let score = 0;
 
             const sharedInterests = (currentUserProfile.interests || []).filter(i =>

@@ -18,29 +18,15 @@ interface StepCreateAccountProps {
     initialRef?: string;
 }
 
-function readReferralCookie(): string {
-    if (typeof document === 'undefined') return '';
-    const match = document.cookie
-        .split(';')
-        .map(c => c.trim())
-        .find(c => c.startsWith(`${REFERRAL_COOKIE}=`));
-    if (!match) return '';
-    const raw = decodeURIComponent(match.substring(REFERRAL_COOKIE.length + 1));
-    return REFERRAL_CODE_PATTERN.test(raw) ? raw : '';
-}
-
-function persistReferral(code: string) {
-    if (typeof document === 'undefined') return;
-    if (!REFERRAL_CODE_PATTERN.test(code)) return;
-    const oneMonth = 60 * 60 * 24 * 30;
-    document.cookie = `${REFERRAL_COOKIE}=${encodeURIComponent(code)}; path=/; max-age=${oneMonth}; samesite=lax`;
-    try { sessionStorage.setItem(REFERRAL_SESSION_KEY, code); } catch { /* noop */ }
-}
-
 export function StepCreateAccount({ onAccountCreated, initialRef }: StepCreateAccountProps) {
-    const referralCode = readReferralCookie() || initialRef || '';
     useEffect(() => {
-        if (initialRef) persistReferral(initialRef);
+        if (initialRef) {
+            try {
+                const oneMonth = 60 * 60 * 24 * 30;
+                document.cookie = `${REFERRAL_COOKIE}=${encodeURIComponent(initialRef)}; path=/; max-age=${oneMonth}; samesite=lax`;
+                sessionStorage.setItem(REFERRAL_SESSION_KEY, initialRef);
+            } catch { /* noop */ }
+        }
     }, [initialRef]);
     const router = useRouter();
     const { toast } = useToast();
@@ -70,7 +56,7 @@ export function StepCreateAccount({ onAccountCreated, initialRef }: StepCreateAc
     const [verifying, setVerifying] = useState(false);
     const [resending, setResending] = useState(false);
     const pollingRef = useRef<ReturnType<typeof setInterval> | null>(null);
-    const supabase = createClient();
+    const supabaseRef = useRef(createClient());
 
     const startEmailPolling = useCallback((userId: string) => {
         if (pollingRef.current) clearInterval(pollingRef.current);
@@ -87,7 +73,7 @@ export function StepCreateAccount({ onAccountCreated, initialRef }: StepCreateAc
                 return;
             }
             try {
-                const { data: { user } } = await supabase.auth.getUser();
+                const { data: { user } } = await supabaseRef.current.auth.getUser();
                 if (user?.email_confirmed_at) {
                     if (pollingRef.current) clearInterval(pollingRef.current);
                     pollingRef.current = null;
@@ -98,7 +84,7 @@ export function StepCreateAccount({ onAccountCreated, initialRef }: StepCreateAc
                 // poll again next cycle
             }
         }, 3000);
-    }, [supabase, onAccountCreated]);
+    }, [onAccountCreated]);
 
     useEffect(() => {
         return () => {
@@ -132,7 +118,6 @@ export function StepCreateAccount({ onAccountCreated, initialRef }: StepCreateAc
                 throw new Error('No se pudo crear la cuenta. Intenta de nuevo.');
             }
 
-            sessionStorage.setItem('alora_signup_email', email);
             setShowEmailSent(true);
             setPendingUserId(result.id);
 

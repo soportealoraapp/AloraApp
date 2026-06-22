@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { withRateLimit } from '@/server/utils/api-rate-limit';
 import type { Message } from '@/lib/domain/types';
 
 export const dynamic = 'force-dynamic';
@@ -37,6 +38,9 @@ export async function GET(
     if (!user) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
+
+    const rateLimitResponse = await withRateLimit(user.id, 'match');
+    if (rateLimitResponse) return rateLimitResponse;
 
     const { matchId } = await params;
     if (!matchId) {

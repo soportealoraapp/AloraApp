@@ -73,17 +73,7 @@ export async function POST(request: NextRequest) {
             }
         }
 
-        // Delete all from UploadThing
-        if (filesToDelete.length > 0) {
-            try {
-                await utapi.deleteFiles(filesToDelete);
-            } catch (deleteErr) {
-                console.error('Failed to delete user files from UploadThing:', deleteErr);
-            }
-        }
-
-        // Delete Supabase auth user to prevent continued authentication
-        // Requires service_role key — anon key cannot delete auth users
+        // Delete Supabase auth user first to prevent continued authentication
         const { createClient: createServiceClient } = await import('@supabase/supabase-js');
         const supabaseAdmin = createServiceClient(
             process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -92,9 +82,9 @@ export async function POST(request: NextRequest) {
         const { error: deleteAuthError } = await supabaseAdmin.auth.admin.deleteUser(user.id);
         if (deleteAuthError) {
             console.error('Failed to delete Supabase auth user:', deleteAuthError);
-            // Continue with Prisma deletion even if auth deletion fails
         }
 
+        // Delete all database records in a single transaction FIRST
         await prisma.$transaction([
             prisma.notification.deleteMany({ where: { userId: user.id } }),
             prisma.notificationPreference.deleteMany({ where: { userId: user.id } }),
@@ -143,6 +133,17 @@ export async function POST(request: NextRequest) {
             prisma.profile.deleteMany({ where: { userId: user.id } }),
             prisma.user.delete({ where: { id: user.id } })
         ]);
+
+        // Delete files from UploadThing AFTER DB transaction succeeds
+        // This prevents orphaned files if the transaction fails
+        if (filesToDelete.length > 0) {
+            try {
+                await utapi.deleteFiles(filesToDelete);
+            } catch (deleteErr) {
+                console.error('Failed to delete user files from UploadThing (DB already deleted):', deleteErr);
+                // Files are orphaned but user data is deleted — acceptable tradeoff
+            }
+        }
 
         return NextResponse.json({ success: true });
     } catch (error) {

@@ -71,6 +71,7 @@ export default function DiscoverPage() {
   const searchParams = useSearchParams();
   const [filters, setFilters] = useState<Filters>(DEFAULT_FILTERS);
   const [filterOpen, setFilterOpen] = useState(false);
+  const [intent, setIntent] = useState<'dating' | 'friendship'>('dating');
 
   // Handle URL filters (interest, value, music, intent)
   useEffect(() => {
@@ -106,7 +107,6 @@ export default function DiscoverPage() {
   const [rewindedProfileId, setRewindedProfileId] = useState<string | null>(null);
   const [tutorialStep, setTutorialStep] = useState<number | null>(1);
   const [browseMode, setBrowseMode] = useState<'swipe' | 'grid'>('swipe');
-  const [intent, setIntent] = useState<'dating' | 'friendship'>('dating');
   const [intentChanging, setIntentChanging] = useState(false);
   const [pendingGridAction, setPendingGridAction] = useState(false);
 

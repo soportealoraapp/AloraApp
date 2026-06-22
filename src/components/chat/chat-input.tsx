@@ -130,7 +130,7 @@ export function ChatInput({ onSend, onSendImage, onSendVoice, onTyping, disabled
       setIsRecording(true);
       setRecordingTime(0);
 
-      const MAX_RECORDING_SECONDS = 120;
+      const MAX_RECORDING_SECONDS = 60;
       recordingTimerRef.current = setInterval(() => {
         setRecordingTime(prev => {
           if (prev + 1 >= MAX_RECORDING_SECONDS) {
@@ -254,9 +254,9 @@ export function ChatInput({ onSend, onSendImage, onSendVoice, onTyping, disabled
       return;
     }
 
-    const MAX_SIZE = 10 * 1024 * 1024;
+    const MAX_SIZE = 4 * 1024 * 1024;
     if (file.size > MAX_SIZE) {
-      toast({ title: 'Imagen muy grande', description: 'El tamaño máximo es 10 MB.', variant: 'destructive' });
+      toast({ title: 'Imagen muy grande', description: 'El tamaño máximo es 4 MB.', variant: 'destructive' });
       if (fileInputRef.current) fileInputRef.current.value = '';
       return;
     }

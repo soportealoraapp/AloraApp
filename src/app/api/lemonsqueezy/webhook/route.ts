@@ -34,6 +34,16 @@ export async function POST(request: Request) {
             return NextResponse.json({ error: 'No user_id in custom_data' }, { status: 400 });
         }
 
+        // Validate that the user actually exists before processing payment
+        const existingUser = await prisma.user.findUnique({
+            where: { id: userId },
+            select: { id: true },
+        });
+        if (!existingUser) {
+            console.warn(`[webhook] User ${userId} not found — ignoring event`);
+            return NextResponse.json({ received: true, ignored: true });
+        }
+
         switch (event) {
             case 'order_created':
             case 'subscription_created':

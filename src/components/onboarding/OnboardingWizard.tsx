@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Progress } from "@/components/ui/progress";
 import { useAuth } from "@/contexts/AuthContext";
@@ -41,7 +41,8 @@ export function OnboardingWizard({ initialRef }: { initialRef?: string } = {}) {
     useEffect(() => {
         const safetyTimeout = setTimeout(() => {
             if (!isInitialized) {
-                console.warn('OnboardingWizard: safety timeout — forcing initialization');
+                console.warn('OnboardingWizard: safety timeout — forcing initialization with empty state');
+                // Don't overwrite existing profile data — just stop the spinner
                 setIsInitialized(true);
             }
         }, 20000);
@@ -58,8 +59,8 @@ export function OnboardingWizard({ initialRef }: { initialRef?: string } = {}) {
     }, [formData]);
 
     // OAuth users (Google) already have a user from auth context at mount
-    // Email signup users start without a user
-    const isOAuthUser = Boolean(user);
+    // Memoize to prevent flipping if auth resolves after safety timeout
+    const isOAuthUser = useMemo(() => Boolean(user), [Boolean(user)]);
     const totalSteps = isOAuthUser ? 3 : 4;
     const STEP_LABELS = isOAuthUser ? STEP_LABELS_OAUTH : STEP_LABELS_ALL;
     const STEP_WELCOME = isOAuthUser ? STEP_WELCOME_OAUTH : STEP_WELCOME_ALL;
@@ -199,7 +200,7 @@ export function OnboardingWizard({ initialRef }: { initialRef?: string } = {}) {
         }
         trackEvent('onboarding_completed', { userId: effectiveUserId });
         
-        router.push('/discover');
+        router.replace('/discover');
     }, [effectiveUserId, refreshProfile, router]);
 
     const nextStep = useCallback(async () => {

@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getDynamicFeed } from '@/server/actions/feed';
+import { withRateLimit } from '@/server/utils/api-rate-limit';
+
+const MAX_DISCOVER_LIMIT = 30;
 
 // GET /api/discover
 export async function GET(request: NextRequest) {
@@ -11,6 +14,9 @@ export async function GET(request: NextRequest) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    const rateLimitResponse = await withRateLimit(user.id, 'discover');
+    if (rateLimitResponse) return rateLimitResponse;
+
     const { ensureSubscriptionState } = await import('@/lib/subscription-helper');
     await ensureSubscriptionState(user.id);
 
@@ -18,7 +24,8 @@ export async function GET(request: NextRequest) {
         const { searchParams } = new URL(request.url);
         const search = searchParams.get('search') || undefined;
         const cursor = searchParams.get('cursor') || undefined;
-        const limit = parseInt(searchParams.get('limit') || '10');
+        const rawLimit = parseInt(searchParams.get('limit') || '10');
+        const limit = Math.min(Math.max(1, isNaN(rawLimit) ? 10 : rawLimit), MAX_DISCOVER_LIMIT);
         const connectionModesParam = searchParams.get('connectionModes');
         const connectionModes = connectionModesParam
             ? connectionModesParam.split(',') as ('dating' | 'friendship')[]

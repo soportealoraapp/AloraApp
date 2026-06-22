@@ -545,7 +545,7 @@ export default function CompatibilityPage() {
                             <button
                               onClick={() => handleLikeSimilar(u.id, 'like')}
                               disabled={interactingId === u.id}
-                              className="h-9 w-9 rounded-xl bg-muted hover:bg-primary/10 hover:text-primary flex items-center justify-center transition-all active:scale-95"
+                              className="min-h-[44px] min-w-[44px] h-11 w-11 rounded-xl bg-muted hover:bg-primary/10 hover:text-primary flex items-center justify-center transition-all active:scale-95"
                             >
                               {interactingId === u.id ? (
                                 <Loader2 className="h-4 w-4 animate-spin" />
@@ -556,7 +556,7 @@ export default function CompatibilityPage() {
                             <button
                               onClick={() => handleLikeSimilar(u.id, 'superlike')}
                               disabled={interactingId === u.id}
-                              className="h-9 w-9 rounded-xl bg-muted hover:bg-pink-100 hover:text-pink-500 dark:hover:bg-pink-950/40 flex items-center justify-center transition-all active:scale-95"
+                              className="min-h-[44px] min-w-[44px] h-11 w-11 rounded-xl bg-muted hover:bg-pink-100 hover:text-pink-500 dark:hover:bg-pink-950/40 flex items-center justify-center transition-all active:scale-95"
                             >
                               <svg viewBox="0 0 24 24" className="h-4 w-4 fill-current" xmlns="http://www.w3.org/2000/svg">
                                 <path d="M12 21.593c-5.63-5.539-11-10.297-11-14.402 0-3.791 3.068-5.191 5.281-5.191 1.312 0 4.151.501 5.719 4.457 1.59-3.968 4.464-4.447 5.726-4.447 2.54 0 5.274 1.621 5.274 5.181 0 4.069-5.136 8.625-11 14.402zM7.6 2c-2.497 0-4.6 1.939-4.6 4.191 0 3.633 4.87 8.044 9 12.384 4.13-4.34 9-8.75 9-12.384 0-2.25-2.067-4.181-4.274-4.181-1.164 0-3.422.576-4.726 4.063l-.5 1.3-.5-1.3C10.195 2.58 8.97 2 7.6 2z"/>

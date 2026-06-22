@@ -43,7 +43,7 @@ export default function SettingsPage() {
                 <h1 className="text-xl font-semibold md:text-2xl font-headline">Configuración</h1>
             </header>
             <main className="mx-auto max-w-3xl p-4 space-y-6 sm:p-6">
-                 <Card className="border-0 bg-card/80 shadow-sm">
+                 <Card className="border-border/50 bg-card/80 shadow-sm">
                     <CardHeader className="pb-2">
                         <CardTitle className="text-lg">Cuenta</CardTitle>
                         <CardDescription className="text-xs">Edita tu perfil y tus preferencias principales.</CardDescription>
@@ -57,7 +57,7 @@ export default function SettingsPage() {
                     </CardContent>
                 </Card>
 
-                 <Card className="border-0 bg-card/80 shadow-sm">
+                 <Card className="border-border/50 bg-card/80 shadow-sm">
                     <CardHeader className="pb-2">
                         <CardTitle className="text-lg">Apariencia</CardTitle>
                         <CardDescription className="text-xs">Ajusta el look general de la app.</CardDescription>
@@ -74,7 +74,7 @@ export default function SettingsPage() {
                 </Card>
 
 
-                         <Card className="border-0 bg-card/80 shadow-sm">
+                         <Card className="border-border/50 bg-card/80 shadow-sm">
                     <CardHeader className="pb-2">
                         <CardTitle className="text-lg">Soporte y Legal</CardTitle>
                         <CardDescription className="text-xs">Ayuda, contacto y documentación legal.</CardDescription>

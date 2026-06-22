@@ -20,10 +20,11 @@ export const SecondChanceSection = React.memo(function SecondChanceSection({ int
   const { toast } = useToast();
 
   useEffect(() => {
+    setLoading(true);
     fetch(`/api/match/passed?intent=${intent}`)
       .then(r => r.json())
       .then(data => { setPassedProfiles(data.profiles || []); })
-      .catch(() => {})
+      .catch(() => { setPassedProfiles([]); })
       .finally(() => setLoading(false));
   }, [intent]);
 

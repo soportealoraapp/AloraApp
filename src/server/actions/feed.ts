@@ -225,7 +225,7 @@ export async function getDynamicFeed(
 
             const nearbyProfiles = await prisma.$queryRaw<{ userId: string }[]>(
                 Prisma.sql`
-                    SELECT "userId" FROM "Profile"
+                    SELECT "userId" FROM "profiles"
                     WHERE latitude IS NOT NULL AND longitude IS NOT NULL
                       AND "trustStatus" != 'banned'
                       AND "incognitoMode" = false
@@ -365,8 +365,8 @@ export async function getDynamicFeed(
         const candidateDailyAnswers = resultCandidateIds.length > 0 ? await prisma.$queryRaw<{ userId: string; answer: string; questionId: string; question: string; category: string; createdAt: Date }[]>(
             Prisma.sql`SELECT DISTINCT ON (da."userId")
                 da."userId", da."answer", da."questionId", dq."question", dq."category", da."createdAt"
-             FROM "DailyAnswer" da
-             JOIN "DailyQuestion" dq ON dq.id = da."questionId"
+             FROM "daily_answers" da
+             JOIN "daily_questions" dq ON dq.id = da."questionId"
              WHERE da."userId" IN (${Prisma.join(resultCandidateIds.map(id => Prisma.sql`${id}`))})
              ORDER BY da."userId", da."createdAt" DESC`
         ) : [];

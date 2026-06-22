@@ -57,10 +57,10 @@ const TIERS = [
 export function PaywallModal({ isOpen, onClose }: PaywallModalProps) {
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>
-            <DialogContent className="sm:max-w-[500px] max-w-[95vw] p-0 overflow-hidden border-none rounded-3xl shadow-2xl">
+            <DialogContent className="sm:max-w-[500px] max-w-[95vw] p-0 overflow-y-auto overflow-hidden border-none rounded-3xl shadow-2xl max-h-[90vh]">
                 <DialogClose asChild>
                     <button
-                        className="absolute right-4 top-4 z-10 rounded-full bg-white/20 p-1.5 text-white hover:bg-white/30 transition-colors backdrop-blur-md"
+                        className="absolute right-4 top-4 z-10 rounded-full bg-background/20 p-1.5 text-foreground hover:bg-background/30 transition-colors backdrop-blur-md"
                         aria-label="Cerrar"
                     >
                         <X className="h-4 w-4" />
@@ -73,7 +73,7 @@ export function PaywallModal({ isOpen, onClose }: PaywallModalProps) {
 
                 {/* Hero */}
                 <div className="bg-gradient-to-br from-primary via-primary/90 to-accent p-6 text-primary-foreground text-center">
-                    <div className="bg-white/20 w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-3 backdrop-blur-md">
+                    <div className="bg-background/20 w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-3 backdrop-blur-md">
                         <Sparkles className="h-8 w-8 text-white fill-white" />
                     </div>
                     <h2 className="text-2xl font-bold mb-1">Elige tu plan</h2>
@@ -116,7 +116,7 @@ export function PaywallModal({ isOpen, onClose }: PaywallModalProps) {
                                                 <span className="text-xs text-muted-foreground">{tier.period}</span>
                                             </div>
                                             {'annualPrice' in tier && tier.annualPrice && (
-                                                <p className="text-xs text-green-600 font-medium mt-0.5">
+                                                <p className="text-xs text-emerald-600 dark:text-emerald-400 font-medium mt-0.5">
                                                     Anual: ${tier.annualPrice}/mes — Ahorra {Math.round((1 - tier.annualPrice / tier.price) * 100)}%
                                                 </p>
                                             )}

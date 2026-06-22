@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { withRateLimit } from '@/server/utils/api-rate-limit';
 
 export async function GET(request: NextRequest) {
   const { createClient } = await import('@/lib/supabase/server');
@@ -9,6 +10,9 @@ export async function GET(request: NextRequest) {
   if (!user) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
+
+  const rateLimitResponse = await withRateLimit(user.id, 'match');
+  if (rateLimitResponse) return rateLimitResponse;
 
   const targetUserId = request.nextUrl.searchParams.get('targetUserId');
   const intent = request.nextUrl.searchParams.get('intent') as 'dating' | 'friendship' | null;
