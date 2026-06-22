@@ -7,6 +7,22 @@ import { REFERRAL_COOKIE, REFERRAL_CODE_PATTERN } from '@/lib/referral/constants
 
 const ALLOWED_REDIRECT_PATHS = ['/password-update', '/discover', '/onboarding', '/settings', '/login'];
 
+const ALLOWED_HOSTS = [
+    process.env.NEXT_PUBLIC_APP_URL?.replace(/^https?:\/\//, ''),
+    'alora.app',
+    'www.alora.app',
+    'alora-web.web.app',
+    'localhost:3000',
+].filter(Boolean);
+
+function sanitizeHost(host: string): string | null {
+    const lower = host.toLowerCase();
+    if (ALLOWED_HOSTS.some(allowed => lower === allowed || lower.endsWith('.' + allowed))) {
+        return lower;
+    }
+    return null;
+}
+
 function sanitizeRedirect(next: string): string {
     // Only allow paths that start with / and do not contain :// (protocol) or // (protocol-relative)
     if (!next.startsWith('/') || next.includes('://') || next.startsWith('//')) {
@@ -113,7 +129,11 @@ export async function GET(request: Request) {
             if (isLocalEnv) {
                 return NextResponse.redirect(`${origin}${safeDestination}`);
             } else if (forwardedHost) {
-                return NextResponse.redirect(`https://${forwardedHost}${safeDestination}`);
+                const safeHost = sanitizeHost(forwardedHost);
+                if (!safeHost) {
+                    return NextResponse.redirect(`${origin}${safeDestination}`);
+                }
+                return NextResponse.redirect(`https://${safeHost}${safeDestination}`);
             } else {
                 return NextResponse.redirect(`${origin}${safeDestination}`);
             }

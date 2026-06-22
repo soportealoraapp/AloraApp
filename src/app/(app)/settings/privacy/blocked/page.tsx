@@ -2,10 +2,9 @@
 
 import { useRouter } from "next/navigation";
 import { useBlock } from "@/hooks/use-block";
-import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { ArrowLeft, UserX, Loader2 } from "lucide-react";
+import { ArrowLeft, UserX } from "lucide-react";
 import Image from "next/image";
 import { Skeleton } from "@/components/ui/skeleton";
 import { BRAND_VOICE } from "@/lib/constants/brand-voice";

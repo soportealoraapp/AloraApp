@@ -80,7 +80,12 @@ export function VoiceMessage({ audioUrl, duration: propDuration, isOwn = false }
             if (currentlyPlayingAudio && currentlyPlayingAudio !== audio) {
                 currentlyPlayingAudio.pause();
             }
-            audio.play();
+            audio.play().catch(() => {
+                setIsPlaying(false);
+                if (currentlyPlayingAudio === audio) {
+                    currentlyPlayingAudio = null;
+                }
+            });
             setIsPlaying(true);
             currentlyPlayingAudio = audio;
         }

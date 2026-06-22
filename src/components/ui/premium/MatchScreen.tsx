@@ -128,7 +128,7 @@ export function MatchScreen({ userProfile, matchedProfile, onChat, onKeepSwiping
 
     return (
         <div
-            className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-background/90 sm:backdrop-blur-sm text-white overflow-y-auto"
+            className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-black/80 sm:backdrop-blur-sm text-white overflow-y-auto"
             role="dialog"
             aria-modal="true"
             aria-label="Nuevo match"

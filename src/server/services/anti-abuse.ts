@@ -33,24 +33,24 @@ export async function recordDeviceFingerprint(userId: string, input: DeviceFinge
     });
 
     if (otherUsersWithDevice.length > 0) {
-        // Flag potential multi-account abuse
-        await prisma.auditLog.create({
-            data: {
-                userId,
-                action: 'multi_account_detected',
-                details: {
-                    deviceHash,
-                    sharedWithUsers: otherUsersWithDevice.map(u => u.userId),
-                    timestamp: new Date().toISOString(),
-                },
-            }
-        });
-
-        // Reduce reputation for multi-account users
-        await prisma.profile.update({
-            where: { userId },
-            data: { reputationScore: { decrement: 15 } },
-        });
+        // Use transaction for atomicity
+        await prisma.$transaction([
+            prisma.auditLog.create({
+                data: {
+                    userId,
+                    action: 'multi_account_detected',
+                    details: {
+                        deviceHash,
+                        sharedWithUsers: otherUsersWithDevice.map(u => u.userId),
+                        timestamp: new Date().toISOString(),
+                    },
+                }
+            }),
+            prisma.profile.update({
+                where: { userId },
+                data: { reputationScore: { decrement: 15 } },
+            }),
+        ]);
     }
 
     // Upsert fingerprint
@@ -184,30 +184,40 @@ export async function applyAutoActions(userId: string) {
     const score = profile.reputationScore;
 
     if (score < 20) {
-        // Heavy restrictions
-        await prisma.profile.update({
-            where: { userId },
-            data: { isShadowBanned: true, trustStatus: 'watchlist' },
-        });
+        // Heavy restrictions - use transaction
+        await prisma.$transaction([
+            prisma.profile.update({
+                where: { userId },
+                data: { isShadowBanned: true, trustStatus: 'watchlist' },
+            }),
+            prisma.auditLog.create({
+                data: {
+                    userId,
+                    action: 'auto_action_shadowban',
+                    details: { score, reason: 'reputation below 20' },
+                }
+            }),
+        ]);
     } else if (score < 30) {
-        // Significant restrictions: reduce daily likes to 10, flag for review
-        await prisma.profile.update({
-            where: { userId },
-            data: {
-                trustStatus: 'watchlist',
-                dailyLikesUsed: 0,
-            },
-        });
-        await prisma.auditLog.create({
-            data: {
-                userId,
-                action: 'auto_action_restricted',
-                details: { score, reason: 'reputation below 30' },
-            }
-        });
+        // Significant restrictions - use transaction
+        await prisma.$transaction([
+            prisma.profile.update({
+                where: { userId },
+                data: {
+                    trustStatus: 'watchlist',
+                    dailyLikesUsed: 0,
+                },
+            }),
+            prisma.auditLog.create({
+                data: {
+                    userId,
+                    action: 'auto_action_restricted',
+                    details: { score, reason: 'reputation below 30' },
+                }
+            }),
+        ]);
     } else if (score < 40) {
-        // Moderate restrictions: reduce discover visibility (handled in feed scoring)
-        // Add audit log for monitoring
+        // Moderate restrictions
         await prisma.auditLog.create({
             data: {
                 userId,

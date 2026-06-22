@@ -50,6 +50,7 @@ export function ProfileActions({ userId, userName, matchId, isMuted = false, onM
     const { user: currentUser } = useAuth();
     const [showMuteDialog, setShowMute] = useState(false);
     const [showReportDialog, setShowReportDialog] = useState(false);
+    const [showBlockConfirm, setShowBlockConfirm] = useState(false);
 
     const handleMute = async (duration: number | null) => {
         if (!currentUser || !matchId) return;
@@ -106,32 +107,38 @@ export function ProfileActions({ userId, userName, matchId, isMuted = false, onM
     const handleAction = async (type: "report" | "block" | "mute") => {
         if (!currentUser) return;
 
-        try {
-            if (type === 'report') {
-                setShowReportDialog(true);
-            } else if (type === 'block') {
-                const res = await fetch('/api/safety/block', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ blockedId: userId })
-                });
-                if (!res.ok) throw new Error('Error al bloquear usuario');
+        if (type === 'report') {
+            setShowReportDialog(true);
+        } else if (type === 'block') {
+            setShowBlockConfirm(true);
+        } else {
+            if (!matchId) {
                 toast({
-                    title: "Usuario bloqueado",
-                    description: BRAND_VOICE.safety.blockConfirm,
+                    title: "Sin conversación activa",
+                    description: "No hay una conversación activa para silenciar.",
                     variant: "destructive"
                 });
-            } else {
-                if (!matchId) {
-                    toast({
-                        title: "Sin conversación activa",
-                        description: "No hay una conversación activa para silenciar.",
-                        variant: "destructive"
-                    });
-                    return;
-                }
-                setShowMute(true);
+                return;
             }
+            setShowMute(true);
+        }
+    };
+
+    const handleConfirmBlock = async () => {
+        if (!currentUser) return;
+        setShowBlockConfirm(false);
+        try {
+            const res = await fetch('/api/safety/block', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ blockedId: userId })
+            });
+            if (!res.ok) throw new Error('Error al bloquear usuario');
+            toast({
+                title: "Usuario bloqueado",
+                description: BRAND_VOICE.safety.blockConfirm,
+                variant: "destructive"
+            });
         } catch (error) {
             toast({
                 title: "Error",
@@ -196,6 +203,24 @@ export function ProfileActions({ userId, userName, matchId, isMuted = false, onM
                     <DialogFooter>
                         <Button variant="ghost" onClick={() => setShowReportDialog(false)}>
                             Cancelar
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
+            <Dialog open={showBlockConfirm} onOpenChange={setShowBlockConfirm}>
+                <DialogContent className="sm:max-w-[400px]">
+                    <DialogHeader>
+                        <DialogTitle>¿Bloquear a {userName}?</DialogTitle>
+                        <DialogDescription>
+                            {userName} no podrá ver tu perfil ni enviarte mensajes. Esta acción se puede revertir desde Ajustes.
+                        </DialogDescription>
+                    </DialogHeader>
+                    <DialogFooter className="gap-2 sm:gap-0">
+                        <Button variant="ghost" onClick={() => setShowBlockConfirm(false)}>
+                            Cancelar
+                        </Button>
+                        <Button variant="destructive" onClick={handleConfirmBlock}>
+                            Bloquear
                         </Button>
                     </DialogFooter>
                 </DialogContent>

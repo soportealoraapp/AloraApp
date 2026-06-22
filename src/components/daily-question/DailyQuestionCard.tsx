@@ -188,17 +188,18 @@ export function DailyQuestionCard() {
 
         // Capture profile before changing index
         const currentAnswerItem = otherAnswers[currentIndex];
-        
-        // Advance deck index
-        setCurrentIndex(prev => prev + 1);
 
         if (actionType === 'pass') {
+            // Advance deck immediately for pass (no API dependency for UX)
+            setCurrentIndex(prev => prev + 1);
             await sendLike(targetUserId, 'pass', 'dating').catch(() => {});
             return;
         }
 
         try {
             const result = await sendLike(targetUserId, actionType, 'dating');
+            // Only advance deck after API success
+            setCurrentIndex(prev => prev + 1);
             if (result?.matched && currentAnswerItem?.profile) {
                 setMatchedProfile(currentAnswerItem.profile);
                 setMatchId(result.matchId);
@@ -206,6 +207,7 @@ export function DailyQuestionCard() {
             }
         } catch (err) {
             console.error('Failed to process interaction:', err);
+            // Don't advance on error
         }
     };
 

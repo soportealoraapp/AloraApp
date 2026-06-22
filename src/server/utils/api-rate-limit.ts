@@ -49,3 +49,26 @@ export async function withRateLimit(userId: string, action: keyof typeof LIMITS)
     }
     return null;
 }
+
+/**
+ * Rate limit by IP address — for endpoints that may not have a userId yet.
+ */
+export async function withIpRateLimit(ip: string, action: keyof typeof LIMITS): Promise<NextResponse | null> {
+    const config = LIMITS[action];
+    if (!config) {
+        return NextResponse.json(
+            { error: 'Internal server error' },
+            { status: 500 }
+        );
+    }
+
+    const key = `ip_${ip}_${action}`;
+    const allowed = await checkRateLimit(key, config.limit, config.windowSeconds);
+    if (!allowed) {
+        return NextResponse.json(
+            { error: 'Demasiadas solicitudes. Por favor, espera un momento.' },
+            { status: 429 }
+        );
+    }
+    return null;
+}

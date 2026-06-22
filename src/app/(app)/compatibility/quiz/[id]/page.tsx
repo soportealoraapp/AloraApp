@@ -88,7 +88,7 @@ export default function QuizPage() {
         })();
 
         return () => { cancelled = true; };
-    }, [showResults, quiz, answers, user, toast]);
+    }, [showResults, quiz, answers, user]);
 
     if (!quiz) {
         return (

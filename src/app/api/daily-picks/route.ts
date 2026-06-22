@@ -189,7 +189,7 @@ export async function GET(request: NextRequest) {
                 lastActiveAt: c.lastActiveAt,
                 bio: c.bio,
                 photo: c.photos?.[0] || '/placeholder.svg',
-                score,
+                score: Math.min(100, score),
                 reason: reasons.join(' · ') || 'Compatible',
             };
         });

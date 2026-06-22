@@ -35,15 +35,17 @@ export function VoicePlayer({ src, transcription }: { src: string, transcription
         if (!audioRef.current) return;
         if (playing) {
             audioRef.current.pause();
+            setPlaying(false);
         } else {
-            audioRef.current.play().catch(() => {
+            audioRef.current.play().then(() => {
+                setPlaying(true);
+            }).catch(() => {
                 toast({
                     title: "Error al reproducir audio",
                     variant: "destructive"
                 });
             });
         }
-        setPlaying(!playing);
     };
 
     return (

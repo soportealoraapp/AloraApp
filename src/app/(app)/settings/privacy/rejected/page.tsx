@@ -26,10 +26,10 @@ export default function RejectedUsersPage() {
         if (!user) return;
         setLoading(true);
         try {
-            const response = await fetch('/api/safety/block');
+            const response = await fetch('/api/profile/favorites');
             if (response.ok) {
-                const users = await response.json();
-                setRejectedUsers(users);
+                const data = await response.json();
+                setRejectedUsers(data.favorites || []);
             }
         } catch (error) {
             console.error(error);
@@ -71,7 +71,7 @@ export default function RejectedUsersPage() {
                 ) : rejectedUsers.length === 0 ? (
                     <div className="text-center p-8 text-muted-foreground">
                         <UserX className="h-12 w-12 mx-auto mb-2 opacity-50" />
-                        <p>No tienes usuarios bloqueados.</p>
+                        <p>No tienes usuarios rechazados.</p>
                     </div>
                 ) : (
                     <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -84,7 +84,7 @@ export default function RejectedUsersPage() {
                                         </div>
                                         <div>
                                             <p className="font-medium">{u.displayName}</p>
-                                            <p className="text-xs text-muted-foreground">Bloqueado</p>
+                                            <p className="text-xs text-muted-foreground">Rechazado</p>
                                         </div>
                                     </div>
                                     <Button size="sm" variant="outline" onClick={() => handleUnblock(u.id)}>

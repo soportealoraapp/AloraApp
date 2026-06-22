@@ -77,16 +77,22 @@ export async function getActivationFunnel(): Promise<ActivationFunnel> {
         where: { event: 'first_reply', createdAt: { gte: thirtyDaysAgo } }
     });
 
-    // Step 8: Active conversation (5+ messages)
+    // Step 8: Active conversation (5+ messages) — batch with groupBy to avoid N+1
     const matchesWith5Messages = await prisma.match.findMany({
         where: { createdAt: { gte: thirtyDaysAgo } },
         select: { id: true },
     });
 
     let activeConversations = 0;
-    for (const m of matchesWith5Messages.slice(0, 100)) {
-        const count = await prisma.message.count({ where: { matchId: m.id } });
-        if (count >= 5) activeConversations++;
+    if (matchesWith5Messages.length > 0) {
+        const matchIds = matchesWith5Messages.map(m => m.id);
+        const messageCounts = await prisma.message.groupBy({
+            by: ['matchId'],
+            where: { matchId: { in: matchIds } },
+            _count: { id: true },
+            having: { id: { _count: { gte: 5 } } },
+        });
+        activeConversations = messageCounts.length;
     }
 
     const steps: ActivationFunnelStep[] = [

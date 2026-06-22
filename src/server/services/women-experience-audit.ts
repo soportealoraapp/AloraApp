@@ -166,7 +166,7 @@ export async function getWomenExperienceAudit(): Promise<WomenExperienceMetrics>
         vsMale: {
             timeToMatch: maleMatchCount > 0 ? Math.round((totalMaleMatchTime / maleMatchCount) * 10) / 10 : 0,
             replyRate: maleTotalChecked > 0 ? Math.round((maleReplies / maleTotalChecked) * 100 * 10) / 10 : 0,
-            conversationLength: 15, // approximation
+            conversationLength: 0, // requires separate male conversation analysis
         },
     };
 }

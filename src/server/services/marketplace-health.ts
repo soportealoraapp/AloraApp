@@ -2,22 +2,21 @@ import { prisma } from '@/lib/prisma';
 
 /**
  * Get marketplace health metrics.
+ * Uses aggregation to avoid loading all profiles into memory.
  */
 export async function getMarketplaceHealth() {
     const totalUsers = await prisma.user.count();
-    const profiles = await prisma.profile.findMany({
-        select: { gender: true, isVerified: true, subscriptionStatus: true, lastActiveAt: true, trustStatus: true }
-    });
-
     const now = new Date();
-    const oneDayAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000);
     const oneWeekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
 
-    const maleUsers = profiles.filter(p => p.gender === 'man').length;
-    const femaleUsers = profiles.filter(p => p.gender === 'woman').length;
-    const activeUsers = profiles.filter(p => p.lastActiveAt && p.lastActiveAt > oneWeekAgo).length;
-    const verifiedUsers = profiles.filter(p => p.isVerified).length;
-    const premiumUsers = profiles.filter(p => p.subscriptionStatus === 'plus' || p.subscriptionStatus === 'premium').length;
+    // Aggregate counts in DB instead of loading all rows
+    const [maleCount, femaleCount, activeCount, verifiedCount, premiumCount] = await Promise.all([
+        prisma.profile.count({ where: { gender: 'man' } }),
+        prisma.profile.count({ where: { gender: 'woman' } }),
+        prisma.profile.count({ where: { lastActiveAt: { gte: oneWeekAgo } } }),
+        prisma.profile.count({ where: { isVerified: true } }),
+        prisma.profile.count({ where: { subscriptionStatus: { in: ['plus', 'premium'] } } }),
+    ]);
 
     // Conversation metrics
     const totalMatches = await prisma.match.count();
@@ -28,8 +27,9 @@ export async function getMarketplaceHealth() {
     const conversationRate = totalMatches > 0 ? (matchesWithMessages / totalMatches) * 100 : 0;
 
     // Response rate
+    const oneWeekAgo2 = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
     const recentMessages = await prisma.message.findMany({
-        where: { createdAt: { gte: oneWeekAgo } },
+        where: { createdAt: { gte: oneWeekAgo2 } },
         select: { matchId: true, senderId: true, createdAt: true },
         orderBy: { createdAt: 'asc' },
         take: 500,
@@ -70,15 +70,15 @@ export async function getMarketplaceHealth() {
     const ghostingRate = matchIds.length > 0 ? (ghosted / matchIds.length) * 100 : 0;
 
     // Gender ratio alert
-    const ratio = femaleUsers > 0 ? maleUsers / femaleUsers : maleUsers;
+    const ratio = femaleCount > 0 ? maleCount / femaleCount : maleCount;
     const genderAlert = ratio > 3 ? 'high_imbalance' : ratio > 2 ? 'moderate_imbalance' : 'healthy';
 
     return {
-        maleUsers,
-        femaleUsers,
-        activeUsers,
-        verifiedUsers,
-        premiumUsers,
+        maleUsers: maleCount,
+        femaleUsers: femaleCount,
+        activeUsers: activeCount,
+        verifiedUsers: verifiedCount,
+        premiumUsers: premiumCount,
         totalUsers,
         conversationRate: Math.round(conversationRate * 10) / 10,
         responseRate: Math.round(responseRate * 10) / 10,

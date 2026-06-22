@@ -187,37 +187,68 @@ export async function getExtendedRetention(days = 30): Promise<ExtendedRetention
     dayBuckets.get(dayKey)!.userIds.add(s.userId);
   }
 
-  const rows: ExtendedRetentionRow[] = [];
+  // Collect all userIds and date ranges for batch queries
+  const allUserIds = new Set<string>();
+  const dateRanges: { dayKey: string; date: Date; ranges: { offset: number; window: number }[] }[] = [];
+
+  const offsets = [
+    { offset: 0, window: 24 },     // D1
+    { offset: 24, window: 48 },    // D3
+    { offset: 72, window: 96 },    // D7
+    { offset: 168, window: 168 },  // D14
+    { offset: 336, window: 384 },  // D30
+  ];
+
   for (const [dayKey, bucket] of dayBuckets) {
+    for (const uid of bucket.userIds) allUserIds.add(uid);
+    dateRanges.push({ dayKey, date: bucket.date, ranges: offsets });
+  }
+
+  const allUserIdsArray = Array.from(allUserIds);
+  if (allUserIdsArray.length === 0) return [];
+
+  // Batch: fetch all daily_active events for all users in the full range
+  const maxEnd = new Date(Date.now() + 31 * 24 * 60 * 60 * 1000);
+  const allDailyActive = await prisma.analyticsEvent.findMany({
+    where: {
+      userId: { in: allUserIdsArray },
+      event: 'daily_active',
+      createdAt: { gte: since, lte: maxEnd },
+    },
+    select: { userId: true, createdAt: true },
+  });
+
+  const rows: ExtendedRetentionRow[] = [];
+  for (const range of dateRanges) {
+    const bucket = dayBuckets.get(range.dayKey)!;
     const userIds = Array.from(bucket.userIds);
     const newUsers = userIds.length;
     if (newUsers === 0) continue;
 
-    async function countActive(offsetHours: number, windowHours: number): Promise<number> {
-      const lower = new Date(bucket.date.getTime() + offsetHours * 60 * 60 * 1000);
+    const userSet = new Set(userIds);
+
+    async function countActiveBatch(offsetHours: number, windowHours: number): Promise<number> {
+      const lower = new Date(range.date.getTime() + offsetHours * 60 * 60 * 1000);
       const upper = new Date(lower.getTime() + windowHours * 60 * 60 * 1000);
-      const raw = await prisma.$queryRaw<{ cnt: bigint }[]>`
-        SELECT COUNT(DISTINCT user_id) as cnt
-        FROM analytics_events
-        WHERE user_id = ANY(${userIds}::text[])
-        AND event = 'daily_active'
-        AND created_at >= ${lower}
-        AND created_at < ${upper}
-      `;
-      return Number(raw[0]?.cnt || 0);
+      const activeUserIds = new Set<string>();
+      for (const e of allDailyActive) {
+        if (e.userId && userSet.has(e.userId) && e.createdAt >= lower && e.createdAt < upper) {
+          activeUserIds.add(e.userId);
+        }
+      }
+      return activeUserIds.size;
     }
 
-    // Ventanas no-superpuestas, secuenciales, basadas en cohorte de registro
     const [d1, d3, d7, d14, d30] = await Promise.all([
-      countActive(0, 24),    // D1:  primeras 24h
-      countActive(24, 48),   // D3:  horas 24-72 (días 2-3)
-      countActive(72, 96),   // D7:  horas 72-168 (días 4-7)
-      countActive(168, 168), // D14: horas 168-336 (días 8-14)
-      countActive(336, 384), // D30: horas 336-720 (días 15-30)
+      countActiveBatch(0, 24),
+      countActiveBatch(24, 48),
+      countActiveBatch(72, 96),
+      countActiveBatch(168, 168),
+      countActiveBatch(336, 384),
     ]);
 
     rows.push({
-      date: dayKey,
+      date: range.dayKey,
       newUsers,
       d1: { active: d1, rate: Math.round((d1 / newUsers) * 100) },
       d3: { active: d3, rate: Math.round((d3 / newUsers) * 100) },

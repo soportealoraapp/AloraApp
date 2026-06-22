@@ -32,8 +32,12 @@ export default function NotificationsPage() {
     const fetchPrefs = async () => {
         try {
             const res = await fetch('/api/notifications/preferences');
-            const data = await res.json();
-            setPrefs(data);
+            if (res.ok) {
+                const data = await res.json();
+                setPrefs(data);
+            } else {
+                console.error('Failed to fetch preferences:', res.status);
+            }
         } catch (error) {
             console.error('Error fetching preferences:', error);
         } finally {

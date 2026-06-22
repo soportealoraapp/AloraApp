@@ -5,7 +5,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { ArrowLeft, Eye, Lock, Sparkles } from 'lucide-react';
+import { ArrowLeft, Eye, Lock, Sparkles, Loader2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { PaywallModal } from '@/components/premium/PaywallModal';
@@ -79,7 +79,9 @@ export default function VisitorsPage() {
             <main className="p-6 space-y-6">
 
             {loading ? (
-                <div className="text-center py-12 text-muted-foreground">Cargando...</div>
+                <div className="flex justify-center py-12">
+                    <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                </div>
             ) : visitors.length === 0 ? (
                 <Card>
                     <CardContent className="flex flex-col items-center justify-center py-12">

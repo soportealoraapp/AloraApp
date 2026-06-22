@@ -131,40 +131,78 @@ export async function getRetentionData(days: number = 30): Promise<RetentionRow[
         dayBuckets.get(dayKey)!.userIds.add(s.userId);
     }
 
+    // Collect all userIds and date ranges for batch queries
+    const allUserIds = new Set<string>();
+    const dateRanges: { dayKey: string; date: Date; d1Date: Date; d7Date: Date; d30Date: Date }[] = [];
+
     for (const [dayKey, bucket] of dayBuckets) {
+        for (const uid of bucket.userIds) allUserIds.add(uid);
+        dateRanges.push({
+            dayKey,
+            date: bucket.date,
+            d1Date: new Date(bucket.date.getTime() + 1 * 24 * 60 * 60 * 1000),
+            d7Date: new Date(bucket.date.getTime() + 7 * 24 * 60 * 60 * 1000),
+            d30Date: new Date(bucket.date.getTime() + 30 * 24 * 60 * 60 * 1000),
+        });
+    }
+
+    const allUserIdsArray = Array.from(allUserIds);
+    if (allUserIdsArray.length === 0) return [];
+
+    // Batch: fetch all daily_active events for all users in the range
+    const allDailyActive = await prisma.analyticsEvent.findMany({
+        where: {
+            userId: { in: allUserIdsArray },
+            event: 'daily_active',
+            createdAt: { gte: since, lte: new Date(Date.now() + 31 * 24 * 60 * 60 * 1000) },
+        },
+        select: { userId: true, createdAt: true },
+    });
+
+    const allWeeklyActive = await prisma.analyticsEvent.findMany({
+        where: {
+            userId: { in: allUserIdsArray },
+            event: 'weekly_active',
+            createdAt: { gte: since, lte: new Date(Date.now() + 31 * 24 * 60 * 60 * 1000) },
+        },
+        select: { userId: true, createdAt: true },
+    });
+
+    const allMonthlyActive = await prisma.analyticsEvent.findMany({
+        where: {
+            userId: { in: allUserIdsArray },
+            event: 'monthly_active',
+            createdAt: { gte: since, lte: new Date(Date.now() + 31 * 24 * 60 * 60 * 1000) },
+        },
+        select: { userId: true, createdAt: true },
+    });
+
+    for (const range of dateRanges) {
+        const bucket = dayBuckets.get(range.dayKey)!;
         const userIds = Array.from(bucket.userIds);
         const newUsers = userIds.length;
+        const userSet = new Set(userIds);
 
-        const d1Date = new Date(bucket.date.getTime() + 1 * 24 * 60 * 60 * 1000);
-        const d7Date = new Date(bucket.date.getTime() + 7 * 24 * 60 * 60 * 1000);
-        const d30Date = new Date(bucket.date.getTime() + 30 * 24 * 60 * 60 * 1000);
+        const d1Count = allDailyActive.filter(e =>
+            e.userId && userSet.has(e.userId) &&
+            e.createdAt >= range.date &&
+            e.createdAt < range.d1Date
+        ).length;
 
-        const [d1Count, d7Count, d30Count] = await Promise.all([
-            prisma.analyticsEvent.count({
-                where: {
-                    userId: { in: userIds },
-                    event: 'daily_active',
-                    createdAt: { gte: bucket.date, lt: d1Date },
-                },
-            }),
-            prisma.analyticsEvent.count({
-                where: {
-                    userId: { in: userIds },
-                    event: 'weekly_active',
-                    createdAt: { gte: d1Date, lt: d7Date },
-                },
-            }),
-            prisma.analyticsEvent.count({
-                where: {
-                    userId: { in: userIds },
-                    event: 'monthly_active',
-                    createdAt: { gte: d7Date, lt: d30Date },
-                },
-            }),
-        ]);
+        const d7Count = allWeeklyActive.filter(e =>
+            e.userId && userSet.has(e.userId) &&
+            e.createdAt >= range.d1Date &&
+            e.createdAt < range.d7Date
+        ).length;
+
+        const d30Count = allMonthlyActive.filter(e =>
+            e.userId && userSet.has(e.userId) &&
+            e.createdAt >= range.d7Date &&
+            e.createdAt < range.d30Date
+        ).length;
 
         rows.push({
-            date: dayKey,
+            date: range.dayKey,
             newUsers,
             d1: d1Count,
             d1Percent: newUsers > 0 ? Math.round((d1Count / newUsers) * 100) : 0,
@@ -228,16 +266,7 @@ export interface ActiveUsersPoint {
 export async function getActiveUsersOverTime(days: number = 90): Promise<ActiveUsersPoint[]> {
     const since = new Date(Date.now() - days * 24 * 60 * 60 * 1000);
 
-    const dailyEvents = await prisma.analyticsEvent.groupBy({
-        by: ['createdAt'],
-        where: {
-            event: 'daily_active',
-            createdAt: { gte: since },
-        },
-        _count: { id: true },
-    });
-    // GroupBy by DateTime isn't ideal; use raw query for production.
-    // Instead, count distinct userId per day:
+    // Single raw query for DAU per day
     const raw = await prisma.$queryRaw<{ date: string; cnt: bigint }[]>`
         SELECT DATE("created_at") as date, COUNT(DISTINCT "user_id") as cnt
         FROM "analytics_events"
@@ -246,36 +275,48 @@ export async function getActiveUsersOverTime(days: number = 90): Promise<ActiveU
         ORDER BY date ASC
     `;
 
-    const points: ActiveUsersPoint[] = [];
-    let cumulativeWau = 0;
-    let cumulativeMau = 0;
+    // Single raw query for WAU (distinct users active in rolling 7-day windows)
+    const wauRaw = await prisma.$queryRaw<{ date: string; cnt: bigint }[]>`
+        WITH daily_dates AS (
+            SELECT DISTINCT DATE("created_at") as date
+            FROM "analytics_events"
+            WHERE event = 'daily_active' AND "created_at" >= ${since}
+        )
+        SELECT dd.date, COUNT(DISTINCT ae."user_id") as cnt
+        FROM daily_dates dd
+        JOIN "analytics_events" ae ON ae.event = 'weekly_active'
+            AND ae."created_at" >= (dd.date::timestamp - INTERVAL '7 days')
+            AND ae."created_at" <= dd.date::timestamp
+        GROUP BY dd.date
+        ORDER BY dd.date ASC
+    `;
+    const wauMap = new Map(wauRaw.map(r => [String(r.date), Number(r.cnt)]));
 
+    // Single raw query for MAU (distinct users active in rolling 30-day windows)
+    const mauRaw = await prisma.$queryRaw<{ date: string; cnt: bigint }[]>`
+        WITH daily_dates AS (
+            SELECT DISTINCT DATE("created_at") as date
+            FROM "analytics_events"
+            WHERE event = 'daily_active' AND "created_at" >= ${since}
+        )
+        SELECT dd.date, COUNT(DISTINCT ae."user_id") as cnt
+        FROM daily_dates dd
+        JOIN "analytics_events" ae ON ae.event = 'monthly_active'
+            AND ae."created_at" >= (dd.date::timestamp - INTERVAL '30 days')
+            AND ae."created_at" <= dd.date::timestamp
+        GROUP BY dd.date
+        ORDER BY dd.date ASC
+    `;
+    const mauMap = new Map(mauRaw.map(r => [String(r.date), Number(r.cnt)]));
+
+    const points: ActiveUsersPoint[] = [];
     for (const row of raw) {
         const dateStr = typeof row.date === 'string' ? row.date : String(row.date);
-        const dau = Number(row.cnt);
-
-        // Weekly and monthly are approximations from daily data
-        const dateObj = new Date(dateStr);
-        const weekAgo = new Date(dateObj.getTime() - 7 * 24 * 60 * 60 * 1000);
-        const monthAgo = new Date(dateObj.getTime() - 30 * 24 * 60 * 60 * 1000);
-
-        const wauResult = await prisma.$queryRaw<{ cnt: bigint }[]>`
-            SELECT COUNT(DISTINCT "user_id") as cnt
-            FROM "analytics_events"
-            WHERE event = 'weekly_active' AND "created_at" >= ${weekAgo} AND "created_at" <= ${dateObj}
-        `;
-
-        const mauResult = await prisma.$queryRaw<{ cnt: bigint }[]>`
-            SELECT COUNT(DISTINCT "user_id") as cnt
-            FROM "analytics_events"
-            WHERE event = 'monthly_active' AND "created_at" >= ${monthAgo} AND "created_at" <= ${dateObj}
-        `;
-
         points.push({
             date: dateStr,
-            dau,
-            wau: Number(wauResult[0]?.cnt || 0),
-            mau: Number(mauResult[0]?.cnt || 0),
+            dau: Number(row.cnt),
+            wau: wauMap.get(dateStr) || 0,
+            mau: mauMap.get(dateStr) || 0,
         });
     }
 

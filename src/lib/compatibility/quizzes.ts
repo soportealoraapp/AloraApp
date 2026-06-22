@@ -28,16 +28,35 @@ export function calculateQuizScore(quizId: string, answers: Record<string, strin
 }
 
 /**
- * Determine archetype based on quiz score.
- * Uses 5-point overlap zones to avoid cliff effects at boundaries.
+ * Determine archetype based on quiz score and quiz category.
+ * Different categories weight archetypes differently:
+ * - Valores/Familia/Emocional → more 'profundo'
+ * - Comunicación/Conflictos → more 'equilibrado'
+ * - Relaciones → more 'social'
+ * - Estilo de Vida/Tiempo Libre/Metas → more 'explorador'
  */
 export function determineArchetype(quizId: string, score: number): string {
-    // Primary ranges with hysteresis: users near boundaries stay in their current archetype
-    // For new determinations (no previous archetype), use standard ranges with 5-point overlap
-    if (score >= 78) return 'profundo';      // 78-100 (overlap: 78-80 can also be equilibrado)
-    if (score >= 58) return 'equilibrado';   // 58-77 (overlap: 58-60 can also be social)
-    if (score >= 38) return 'social';        // 38-57 (overlap: 38-40 can also be explorador)
-    return 'explorador';                      // 0-37
+    const quiz = COMPATIBILITY_QUIZZES.find(q => q.id === quizId);
+    const category = quiz?.category || '';
+
+    // Category-based offset: positive = push toward profundo, negative = push toward explorador
+    let offset = 0;
+    if (category === 'Valores' || category === 'Familia' || category === 'Compatibilidad Emocional') {
+        offset = 8;    // Easier to reach 'profundo'
+    } else if (category === 'Comunicación' || category === 'Resolución de Conflictos') {
+        offset = 3;    // Slight lean toward 'profundo'/'equilibrado'
+    } else if (category === 'Relaciones') {
+        offset = -2;   // Slight lean toward 'social'
+    } else if (category === 'Estilo de Vida' || category === 'Tiempo Libre' || category === 'Metas Personales') {
+        offset = -8;   // Easier to reach 'explorador'
+    }
+
+    const adjusted = score + offset;
+
+    if (adjusted >= 78) return 'profundo';
+    if (adjusted >= 58) return 'equilibrado';
+    if (adjusted >= 38) return 'social';
+    return 'explorador';
 }
 
 export const ARCHETYPES: Record<string, ArchetypeInfo> = {

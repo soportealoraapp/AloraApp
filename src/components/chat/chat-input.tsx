@@ -58,14 +58,14 @@ export function ChatInput({ onSend, onSendImage, onSendVoice, onTyping, disabled
     onClientUploadComplete: async (res: any) => {
       if (res && res.length > 0) {
         const url = res[0].url;
-        const duration = recordingTime;
+        // Use functional update to avoid stale closure on recordingTime
         setRecordedBlob(null);
         setRecordedUrl(null);
         setUploadingVoice(false);
-        setRecordingTime(0);
         if (onSendVoice) {
-          await onSendVoice(url, duration);
+          await onSendVoice(url, recordingTime);
         }
+        setRecordingTime(0);
       }
     },
     onUploadError: () => {
@@ -110,7 +110,11 @@ export function ChatInput({ onSend, onSendImage, onSendVoice, onTyping, disabled
         const type = MediaRecorder.isTypeSupported(mimeType) ? mimeType : 'audio/webm';
         const blob = new Blob(audioChunksRef.current, { type });
         setRecordedBlob(blob);
-        setRecordedUrl(URL.createObjectURL(blob));
+        // Revoke previous object URL before creating new one to prevent memory leak
+        setRecordedUrl(prev => {
+          if (prev) URL.revokeObjectURL(prev);
+          return URL.createObjectURL(blob);
+        });
         stream.getTracks().forEach(track => track.stop());
       };
 

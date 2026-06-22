@@ -55,19 +55,18 @@ export async function getRegionalHealth(region: string, regionType: 'city' | 'co
 
 /**
  * Get global marketplace health.
+ * Uses aggregation to avoid loading all profiles into memory.
  */
 export async function getGlobalMarketplaceHealth(): Promise<RegionalHealth> {
     const oneWeekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
 
-    const profiles = await prisma.profile.findMany({
-        where: { lastActiveAt: { gte: oneWeekAgo } },
-        select: { gender: true, isVerified: true }
-    });
-
-    const activeMen = profiles.filter(p => p.gender === 'man').length;
-    const activeWomen = profiles.filter(p => p.gender === 'woman').length;
-    const activeVerifiedMen = profiles.filter(p => p.gender === 'man' && p.isVerified).length;
-    const activeVerifiedWomen = profiles.filter(p => p.gender === 'woman' && p.isVerified).length;
+    const [activeMen, activeWomen, activeVerifiedMen, activeVerifiedWomen, totalActive] = await Promise.all([
+        prisma.profile.count({ where: { lastActiveAt: { gte: oneWeekAgo }, gender: 'man' } }),
+        prisma.profile.count({ where: { lastActiveAt: { gte: oneWeekAgo }, gender: 'woman' } }),
+        prisma.profile.count({ where: { lastActiveAt: { gte: oneWeekAgo }, gender: 'man', isVerified: true } }),
+        prisma.profile.count({ where: { lastActiveAt: { gte: oneWeekAgo }, gender: 'woman', isVerified: true } }),
+        prisma.profile.count({ where: { lastActiveAt: { gte: oneWeekAgo } } }),
+    ]);
 
     const ratio = activeWomen > 0 ? activeMen / activeWomen : activeMen;
     const saturationLevel = getSaturationLevel(ratio);
@@ -83,7 +82,7 @@ export async function getGlobalMarketplaceHealth(): Promise<RegionalHealth> {
         ratio: Math.round(ratio * 10) / 10,
         saturationLevel,
         recommendation,
-        totalUsers: profiles.length,
+        totalUsers: totalActive,
     };
 }
 

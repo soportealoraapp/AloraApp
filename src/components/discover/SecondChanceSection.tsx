@@ -69,7 +69,9 @@ export const SecondChanceSection = React.memo(function SecondChanceSection({ int
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ profileId })
-    }).catch(() => {});
+    }).catch(() => {
+      toast({ title: 'Error al descartar', variant: 'destructive' });
+    });
   };
 
   return (

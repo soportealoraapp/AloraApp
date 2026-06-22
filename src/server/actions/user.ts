@@ -89,29 +89,31 @@ export async function updateUserProfile(userId: string, data: Partial<UserProfil
             ...profileUpdates
         } = data;
 
-        await prisma.user.upsert({
-            where: { id: userId },
-            create: {
-                id: userId,
-                email: email || `${userId}@placeholder.local`,
-                name: data.name || data.displayName || '',
-            },
-            update: {
-                name: data.name || data.displayName || undefined,
-            },
-        });
+        await prisma.$transaction([
+            prisma.user.upsert({
+                where: { id: userId },
+                create: {
+                    id: userId,
+                    email: email || `${userId}@placeholder.local`,
+                    name: data.name || data.displayName || '',
+                },
+                update: {
+                    name: data.name || data.displayName || undefined,
+                },
+            }),
+            prisma.profile.upsert({
+                where: { userId },
+                update: {
+                    ...profileUpdates,
+                },
+                create: {
+                    userId,
+                    ...profileUpdates,
+                    isCompleted: false,
+                },
+            }),
+        ]);
 
-        await prisma.profile.upsert({
-            where: { userId },
-            update: {
-                ...profileUpdates,
-            },
-            create: {
-                userId,
-                ...profileUpdates,
-                isCompleted: false,
-            },
-        });
         return { success: true };
     } catch (e) {
         console.error('Error updating profile', e);
@@ -144,30 +146,32 @@ export async function completeOnboarding(userId: string, data: Partial<UserProfi
         // Strip protected fields
         const { id, email, isVerified, createdAt, subscriptionStatus, trustStatus, spotify, latestAnswer, compatibility, completenessScore, verificationStatus, isCompleted, ...profileUpdates } = data;
 
-        await prisma.user.upsert({
-            where: { id: userId },
-            create: {
-                id: userId,
-                email: email || `${userId}@placeholder.local`,
-                name: data.name || data.displayName || '',
-            },
-            update: {
-                name: data.name || data.displayName || undefined,
-            },
-        });
+        await prisma.$transaction([
+            prisma.user.upsert({
+                where: { id: userId },
+                create: {
+                    id: userId,
+                    email: email || `${userId}@placeholder.local`,
+                    name: data.name || data.displayName || '',
+                },
+                update: {
+                    name: data.name || data.displayName || undefined,
+                },
+            }),
+            prisma.profile.upsert({
+                where: { userId },
+                update: {
+                    ...profileUpdates,
+                    isCompleted: true,
+                },
+                create: {
+                    userId,
+                    ...profileUpdates,
+                    isCompleted: true,
+                },
+            }),
+        ]);
 
-        await prisma.profile.upsert({
-            where: { userId },
-            update: {
-                ...profileUpdates,
-                isCompleted: true,
-            },
-            create: {
-                userId,
-                ...profileUpdates,
-                isCompleted: true,
-            },
-        });
         return { success: true };
     } catch (e) {
         console.error('Error completing onboarding', e);

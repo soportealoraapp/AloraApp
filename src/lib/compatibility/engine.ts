@@ -56,7 +56,7 @@ export interface CompatibilityResult {
  * Jaccard similarity between two string arrays.
  */
 function jaccardSimilarity(a: string[], b: string[]): number {
-    if (a.length === 0 && b.length === 0) return 0;
+    if (a.length === 0 && b.length === 0) return 50;
     const setA = new Set(a.map(s => s.toLowerCase()));
     const setB = new Set(b.map(s => s.toLowerCase()));
     const intersection = [...setA].filter(x => setB.has(x)).length;
@@ -153,6 +153,9 @@ async function scoreQuizzes(userIdA: string, userIdB: string, quizzesA?: any[], 
 
     if (sharedQuizzes.length === 0) return 50;
 
+    // Import quiz data once outside the loop
+    const { COMPATIBILITY_QUIZZES } = await import('@/data/quizzes-data');
+
     let totalSimilarity = 0;
     for (const quizB of sharedQuizzes) {
         const quizA = qa.find(q => q.quizId === quizB.quizId);
@@ -161,8 +164,6 @@ async function scoreQuizzes(userIdA: string, userIdB: string, quizzesA?: any[], 
         // Compare answers by score (not by option ID) for accurate compatibility
         const answersA = quizA.answers as Record<string, string>;
         const answersB = quizB.answers as Record<string, string>;
-        // Import quiz data to resolve option scores
-        const { COMPATIBILITY_QUIZZES } = await import('@/data/quizzes-data');
         const quizDef = COMPATIBILITY_QUIZZES.find(q => q.id === quizB.quizId);
         const allKeys = new Set([...Object.keys(answersA), ...Object.keys(answersB)]);
         let totalScoreDiff = 0;

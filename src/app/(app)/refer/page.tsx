@@ -1,8 +1,9 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Gift, Copy, Share2, Users } from "lucide-react";
+import { Gift, Copy, Share2, Users, ArrowLeft } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
@@ -11,6 +12,7 @@ import { useState, useEffect } from "react";
 import { getReferralCode, generateReferralLink } from "@/server/actions/referral";
 
 export default function ReferPage() {
+    const router = useRouter();
     const { user } = useAuth();
     const { toast } = useToast();
     const [referralCode, setReferralCode] = useState("");
@@ -50,6 +52,9 @@ export default function ReferPage() {
     return (
         <div>
             <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b bg-background/80 px-4 backdrop-blur-sm sm:px-6 pt-safe">
+                <Button variant="ghost" size="icon" onClick={() => router.back()}>
+                    <ArrowLeft className="h-5 w-5" />
+                </Button>
                 <h1 className="text-xl font-semibold md:text-2xl font-headline">Recomienda y Gana</h1>
             </header>
             <main className="p-4 space-y-6">
@@ -77,7 +82,7 @@ export default function ReferPage() {
                         <div className="max-w-sm mx-auto space-y-2">
                             <Label htmlFor="referral-link">Enlace de invitación</Label>
                             <div className="flex space-x-2">
-                                <Input id="referral-link" value={referralLink} readOnly className="text-xs" />
+                                <Input id="referral-link" value={referralLink} readOnly className="text-xs break-all" />
                                 <Button size="icon" variant="outline" onClick={copyLink}>
                                     <Copy className="h-4 w-4" />
                                 </Button>
