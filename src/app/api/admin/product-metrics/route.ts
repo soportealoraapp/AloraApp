@@ -7,10 +7,19 @@ import {
   getVerificationImpact,
   getActivationBySegment,
 } from '@/server/services/product-metrics';
+import { withRateLimit } from '@/server/utils/api-rate-limit';
 
 export async function GET(request: Request) {
   const auth = await requireModerator();
   if (auth) return auth;
+
+  const { createClient } = await import('@/lib/supabase/server');
+  const supabase = await createClient();
+  const { data: { user: adminUser } } = await supabase.auth.getUser();
+  if (!adminUser) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+
+  const rateLimitResponse = await withRateLimit(adminUser.id, 'adminAction');
+  if (rateLimitResponse) return rateLimitResponse;
 
   const url = new URL(request.url);
   const days = Math.min(Math.max(parseInt(url.searchParams.get('days') || '30'), 1), 90);

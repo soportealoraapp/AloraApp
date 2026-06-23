@@ -60,8 +60,8 @@ export function LikesCounterModal({ isOpen, onClose, remaining, dailyLikesLimit,
             <Dialog open={isOpen} onOpenChange={onClose}>
                 <DialogContent className="sm:max-w-[380px] max-w-[95vw]" aria-labelledby="likes-modal-title" aria-describedby="likes-modal-desc">
                     <DialogHeader>
-                        <DialogTitle className="sr-only">Likes para dar hoy</DialogTitle>
-                        <DialogDescription className="sr-only" id="likes-modal-desc">Control de likes diarios</DialogDescription>
+                        <DialogTitle className="sr-only">Me gusta para dar hoy</DialogTitle>
+                        <DialogDescription className="sr-only" id="likes-modal-desc">Control de Me gusta diarios</DialogDescription>
                     </DialogHeader>
 
                     <div className="p-6 space-y-6">
@@ -70,7 +70,7 @@ export function LikesCounterModal({ isOpen, onClose, remaining, dailyLikesLimit,
                                 <Heart className={isEmpty ? "h-8 w-8 text-muted-foreground" : "h-8 w-8 text-primary fill-primary"} />
                             </div>
                             <h2 className="text-lg font-bold text-foreground" id="likes-modal-title">
-                                {isEmpty ? 'Likes agotados' : 'Likes para dar hoy'}
+                                {isEmpty ? 'Me gusta agotados' : 'Me gusta para dar hoy'}
                             </h2>
                             <p className="text-3xl font-bold mt-2">
                                 <span className={isEmpty ? "text-muted-foreground" : isLow ? "text-warning" : "text-primary"}>
@@ -111,7 +111,7 @@ export function LikesCounterModal({ isOpen, onClose, remaining, dailyLikesLimit,
                                     }}
                                 >
                                     <Sparkles className="h-4 w-4 mr-2" />
-                                    {isEmpty ? 'Obtener más likes con Alora+' : 'Subir de nivel con Alora+'}
+                                    {isEmpty ? 'Obtener más Me gusta con Alora+' : 'Subir de nivel con Alora+'}
                                 </Button>
                             )}
                             <Button variant="outline" className="w-full rounded-2xl" onClick={onClose}>

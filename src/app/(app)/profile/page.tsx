@@ -181,13 +181,13 @@ export default function ProfilePage() {
           {profileStats.likesReceived > 0 && (
           <div className="text-center">
             <p className="text-2xl font-bold text-primary">{profileStats.likesReceived}</p>
-            <p className="text-xs text-muted-foreground">Likes</p>
+            <p className="text-xs text-muted-foreground">Me gusta</p>
           </div>
           )}
           {profileStats.matchesCount > 0 && (
           <div className="text-center">
             <p className="text-2xl font-bold text-primary">{profileStats.matchesCount}</p>
-            <p className="text-xs text-muted-foreground">Matches</p>
+            <p className="text-xs text-muted-foreground">Conexiones</p>
           </div>
           )}
           {profileStats.profileViews > 0 && (

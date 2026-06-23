@@ -50,7 +50,7 @@ export const PLANS: Record<PlanTier, Plan> = {
         currency: 'MXN',
         interval: 'month',
         features: [
-            '50 likes diarios',
+            '50 Me gusta diarios',
             'Ver quién te gusta',
             'Filtros de búsqueda',
             'Chat ilimitado',
@@ -67,7 +67,7 @@ export const PLANS: Record<PlanTier, Plan> = {
         currency: 'MXN',
         interval: 'month',
         features: [
-            'Likes ilimitados sin límite diario',
+            'Me gusta ilimitados sin límite diario',
             'Prioridad en Discover (+15 puntos)',
             'Boost de visibilidad cada 7 días de racha',
             'Rewind: deshacer 3 swipes al día',

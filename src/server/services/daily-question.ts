@@ -35,44 +35,57 @@ const QUESTIONS = [
     { question: "¿Cómo manejas los desacuerdos financieros en pareja?", category: "communication" },
 ];
 
-export async function getTodayQuestion(timezone?: string) {
-    const now = new Date();
-    let dayOfYear: number;
-
-    if (timezone && timezone !== 'UTC') {
-        // Get the date in the user's timezone
-        const localDateStr = now.toLocaleString('en-US', { timeZone: timezone });
-        const localDate = new Date(localDateStr);
-        const start = new Date(localDate.getFullYear(), 0, 0);
-        const diff = localDate.getTime() - start.getTime();
-        const oneDay = 1000 * 60 * 60 * 24;
-        dayOfYear = Math.floor(diff / oneDay);
-    } else {
-        // Default to UTC
-        const start = new Date(now.getFullYear(), 0, 0);
-        const diff = now.getTime() - start.getTime();
-        const oneDay = 1000 * 60 * 60 * 24;
-        dayOfYear = Math.floor(diff / oneDay);
-    }
-
-    const questionIndex = dayOfYear % QUESTIONS.length;
-    const todayQuestion = QUESTIONS[questionIndex];
-
-    // Check if question exists in DB, create if not
-    let dbQuestion = await prisma.dailyQuestion.findFirst({
-        where: { question: todayQuestion.question }
-    });
-
-    if (!dbQuestion) {
-        dbQuestion = await prisma.dailyQuestion.create({
-            data: {
-                question: todayQuestion.question,
-                category: todayQuestion.category,
-            }
+export async function ensureQuestionsSeeded() {
+    for (const q of QUESTIONS) {
+        await prisma.dailyQuestion.upsert({
+            where: { question: q.question },
+            update: { category: q.category },
+            create: { question: q.question, category: q.category, isActive: false },
         });
     }
+}
 
-    return dbQuestion;
+export async function rotateDailyQuestion(): Promise<{ previousId: string | null; newId: string } | null> {
+    // Deactivate current active question
+    const current = await prisma.dailyQuestion.findFirst({ where: { isActive: true } });
+    if (current) {
+        await prisma.dailyQuestion.update({ where: { id: current.id }, data: { isActive: false } });
+    }
+
+    // Get all questions ordered by ID for stable rotation
+    const allQuestions = await prisma.dailyQuestion.findMany({ orderBy: { createdAt: 'asc' } });
+    if (allQuestions.length === 0) {
+        await ensureQuestionsSeeded();
+        const seeded = await prisma.dailyQuestion.findMany({ orderBy: { createdAt: 'asc' } });
+        if (seeded.length === 0) return null;
+        const first = seeded[0];
+        await prisma.dailyQuestion.update({ where: { id: first.id }, data: { isActive: true } });
+        return { previousId: null, newId: first.id };
+    }
+
+    // Find current index, rotate to next
+    const currentIndex = allQuestions.findIndex(q => q.id === current?.id);
+    const nextIndex = (currentIndex + 1) % allQuestions.length;
+    const next = allQuestions[nextIndex];
+
+    await prisma.dailyQuestion.update({ where: { id: next.id }, data: { isActive: true } });
+    return { previousId: current?.id ?? null, newId: next.id };
+}
+
+export async function getTodayQuestion() {
+    // First, ensure there is an active question (rotate if none)
+    let activeQuestion = await prisma.dailyQuestion.findFirst({ where: { isActive: true } });
+
+    if (!activeQuestion) {
+        await ensureQuestionsSeeded();
+        const next = await prisma.dailyQuestion.findFirst({ orderBy: { createdAt: 'asc' } });
+        if (next) {
+            await prisma.dailyQuestion.update({ where: { id: next.id }, data: { isActive: true } });
+            activeQuestion = await prisma.dailyQuestion.findUnique({ where: { id: next.id } });
+        }
+    }
+
+    return activeQuestion;
 }
 
 export async function getUserAnswer(userId: string, questionId: string) {
@@ -89,8 +102,13 @@ export async function submitAnswer(userId: string, questionId: string, answer: s
     });
 }
 
-export async function getDailyQuestionForUser(userId: string, timezone?: string) {
-    const question = await getTodayQuestion(timezone);
+export async function getDailyQuestionForUser(userId: string) {
+    const question = await getTodayQuestion();
+
+    if (!question) {
+        return null;
+    }
+
     const userAnswer = await getUserAnswer(userId, question.id);
 
     return {

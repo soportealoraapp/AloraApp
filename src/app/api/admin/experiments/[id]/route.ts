@@ -1,11 +1,20 @@
 import { NextResponse } from 'next/server';
 import { requireSuperAdmin } from '@/lib/middleware/admin';
 import { prisma } from '@/lib/prisma';
+import { withRateLimit } from '@/server/utils/api-rate-limit';
 
 export async function PUT(request: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const auth = await requireSuperAdmin();
   if (auth) return auth;
+
+  const { createClient } = await import('@/lib/supabase/server');
+  const supabase = await createClient();
+  const { data: { user: adminUser } } = await supabase.auth.getUser();
+  if (!adminUser) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+
+  const rateLimitResponse = await withRateLimit(adminUser.id, 'adminAction');
+  if (rateLimitResponse) return rateLimitResponse;
 
   try {
     const body = await request.json();
@@ -73,6 +82,14 @@ export async function DELETE(request: Request, { params }: { params: Promise<{ i
   const { id } = await params;
   const auth = await requireSuperAdmin();
   if (auth) return auth;
+
+  const { createClient } = await import('@/lib/supabase/server');
+  const supabase = await createClient();
+  const { data: { user: adminUser } } = await supabase.auth.getUser();
+  if (!adminUser) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+
+  const rateLimitResponse = await withRateLimit(adminUser.id, 'adminAction');
+  if (rateLimitResponse) return rateLimitResponse;
 
   try {
     await prisma.experimentAssignment.deleteMany({ where: { experimentId: id } });

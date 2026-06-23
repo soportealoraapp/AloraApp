@@ -6,12 +6,12 @@ import { CheckCheck, Bell, Loader2, Trash2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef, memo } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { motion, AnimatePresence, useMotionValue, useTransform, animate } from 'framer-motion';
 import { BRAND_VOICE } from '@/lib/constants/brand-voice';
 
-function NotificationItem({ notification, onRead, onDelete }: { notification: any; onRead: () => void; onDelete: () => void }) {
+function NotificationItemInner({ notification, onRead, onDelete }: { notification: any; onRead: () => void; onDelete: () => void }) {
   const router = useRouter();
   const isUnread = !notification.readAt;
   const x = useMotionValue(0);
@@ -171,9 +171,11 @@ export default function NotificationsPage() {
             </div>
           ))}
         </main>
-      </div>
-    );
-  }
+    </div>
+  );
+}
+
+const NotificationItem = memo(NotificationItemInner);
 
   return (
     <div className="min-h-dvh">

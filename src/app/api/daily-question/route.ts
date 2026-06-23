@@ -12,9 +12,10 @@ export async function GET(request: NextRequest) {
     }
 
     try {
-        // Get timezone from header or default to UTC
-        const timezone = request.headers.get('x-timezone') || 'UTC';
-        const data = await getDailyQuestionForUser(user.id, timezone);
+        const data = await getDailyQuestionForUser(user.id);
+        if (!data) {
+            return NextResponse.json({ error: 'No active question found' }, { status: 404 });
+        }
         return NextResponse.json(data);
     } catch (error) {
         console.error('Error getting daily question:', error);

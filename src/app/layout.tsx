@@ -9,6 +9,7 @@ import { SafetyGuard } from '@/components/safety/SafetyGuard';
 import { OfflineBanner } from '@/components/offline/OfflineBanner';
 import { AgeGate } from '@/components/auth/AgeGate';
 import { AnalyticsProvider } from '@/components/analytics/AnalyticsProvider';
+import { QueryProvider } from '@/components/QueryProvider';
 
 export const metadata: Metadata = {
   title: {
@@ -49,8 +50,9 @@ export default async function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <AuthProvider>
-            <AnalyticsProvider>
+          <QueryProvider>
+            <AuthProvider>
+              <AnalyticsProvider>
               <AgeGate />
               <AuthGate>
                 <SafetyGuard>
@@ -59,8 +61,9 @@ export default async function RootLayout({
                 </SafetyGuard>
               </AuthGate>
             </AnalyticsProvider>
-            <Toaster />
-          </AuthProvider>
+              <Toaster />
+            </AuthProvider>
+          </QueryProvider>
         </ThemeProvider>
       </body>
     </html>

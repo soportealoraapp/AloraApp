@@ -1,12 +1,21 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { requireModerator } from '@/lib/middleware/admin';
+import { withRateLimit } from '@/server/utils/api-rate-limit';
 
 export const dynamic = 'force-dynamic';
 
 export async function GET(request: NextRequest) {
     const auth = await requireModerator();
     if (auth) return auth;
+
+    const { createClient } = await import('@/lib/supabase/server');
+    const supabase = await createClient();
+    const { data: { user: adminUser } } = await supabase.auth.getUser();
+    if (!adminUser) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+
+    const rateLimitResponse = await withRateLimit(adminUser.id, 'adminAction');
+    if (rateLimitResponse) return rateLimitResponse;
 
     try {
         const stories = await prisma.successStory.findMany({
@@ -23,6 +32,14 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
     const auth = await requireModerator();
     if (auth) return auth;
+
+    const { createClient } = await import('@/lib/supabase/server');
+    const supabase = await createClient();
+    const { data: { user: adminUser } } = await supabase.auth.getUser();
+    if (!adminUser) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+
+    const rateLimitResponse = await withRateLimit(adminUser.id, 'adminAction');
+    if (rateLimitResponse) return rateLimitResponse;
 
     try {
         const { title, story, photoUrl, authorId, approved } = await request.json();
@@ -52,6 +69,14 @@ export async function PATCH(request: NextRequest) {
     const auth = await requireModerator();
     if (auth) return auth;
 
+    const { createClient } = await import('@/lib/supabase/server');
+    const supabase = await createClient();
+    const { data: { user: adminUser } } = await supabase.auth.getUser();
+    if (!adminUser) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+
+    const rateLimitResponse = await withRateLimit(adminUser.id, 'adminAction');
+    if (rateLimitResponse) return rateLimitResponse;
+
     try {
         const { id, approved, title, story, photoUrl } = await request.json();
 
@@ -79,6 +104,14 @@ export async function PATCH(request: NextRequest) {
 export async function DELETE(request: NextRequest) {
     const auth = await requireModerator();
     if (auth) return auth;
+
+    const { createClient } = await import('@/lib/supabase/server');
+    const supabase = await createClient();
+    const { data: { user: adminUser } } = await supabase.auth.getUser();
+    if (!adminUser) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+
+    const rateLimitResponse = await withRateLimit(adminUser.id, 'adminAction');
+    if (rateLimitResponse) return rateLimitResponse;
 
     try {
         const { searchParams } = new URL(request.url);

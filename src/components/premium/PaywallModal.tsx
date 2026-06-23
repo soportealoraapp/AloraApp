@@ -131,8 +131,6 @@ export function PaywallModal({ isOpen, onClose }: PaywallModalProps) {
                                     onClick={() => {
                                         if (tier.id === 'plus') {
                                             window.location.href = process.env.NEXT_PUBLIC_LEMONSQUEEZY_CHECKOUT_URL || 'https://alora-app.lemonsqueezy.com/checkout/buy/67dd777a-6ae1-4169-a2a1-8a1f105899e7';
-                                        } else if (tier.id === 'premium') {
-                                            window.location.href = process.env.NEXT_PUBLIC_LEMONSQUEEZY_CHECKOUT_URL || 'https://alora-app.lemonsqueezy.com/checkout/buy/67dd777a-6ae1-4169-a2a1-8a1f105899e7';
                                         } else {
                                             onClose();
                                         }

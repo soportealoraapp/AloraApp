@@ -53,31 +53,28 @@ export async function recordDeviceFingerprint(userId: string, input: DeviceFinge
         ]);
     }
 
-    // Upsert fingerprint
-    const existing = await prisma.deviceFingerprint.findFirst({
-        where: { userId, deviceHash },
+    // Atomic upsert to prevent race conditions
+    await prisma.deviceFingerprint.upsert({
+        where: {
+            userId_deviceHash: { userId, deviceHash },
+        },
+        update: {
+            lastSeen: new Date(),
+            ipAddress: input.ipAddress,
+            userAgent: input.userAgent,
+        },
+        create: {
+            userId,
+            deviceHash,
+            os: input.platform,
+            browser: input.userAgent?.split('/')[0],
+            timezone: input.timezone,
+            language: input.language,
+            screenSize: input.screenSize,
+            ipAddress: input.ipAddress,
+            userAgent: input.userAgent,
+        },
     });
-
-    if (existing) {
-        await prisma.deviceFingerprint.update({
-            where: { id: existing.id },
-            data: { lastSeen: new Date(), ipAddress: input.ipAddress, userAgent: input.userAgent },
-        });
-    } else {
-        await prisma.deviceFingerprint.create({
-            data: {
-                userId,
-                deviceHash,
-                os: input.platform,
-                browser: input.userAgent?.split('/')[0],
-                timezone: input.timezone,
-                language: input.language,
-                screenSize: input.screenSize,
-                ipAddress: input.ipAddress,
-                userAgent: input.userAgent,
-            }
-        });
-    }
 
     return { deviceHash, sharedAccounts: otherUsersWithDevice.length };
 }

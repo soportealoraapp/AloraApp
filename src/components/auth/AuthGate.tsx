@@ -3,7 +3,8 @@
 import { useAuth } from "@/contexts/AuthContext";
 import { useRouter, usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
-import { Loader2 } from "lucide-react";
+import { Loader2, RefreshCw, AlertTriangle } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 const PUBLIC_ROUTES = ['/login', '/signup', '/auth/callback', '/', '/onboarding'];
 
@@ -19,7 +20,6 @@ export function AuthGate({ children }: { children: React.ReactNode }) {
         setHasChecked(true);
     }, [loading]);
 
-    // Safety timeout: if authLoading never resolves, force check after 15s
     useEffect(() => {
         if (hasChecked) return;
         const timeout = setTimeout(() => {
@@ -36,6 +36,8 @@ export function AuthGate({ children }: { children: React.ReactNode }) {
 
         const isPublicRoute = PUBLIC_ROUTES.includes(pathname);
 
+        if (timedOut && !user) return;
+
         if (!user && !isPublicRoute) {
             router.replace('/login');
         } else if (user && profile && (pathname === '/login' || pathname === '/signup')) {
@@ -49,7 +51,7 @@ export function AuthGate({ children }: { children: React.ReactNode }) {
         } else if (user && !profile && !isPublicRoute && pathname !== '/onboarding') {
             router.replace('/onboarding');
         }
-    }, [user, profile, hasChecked, pathname, router]);
+    }, [user, profile, hasChecked, pathname, router, timedOut]);
 
     if (loading && !hasChecked) {
         return (
@@ -66,6 +68,32 @@ export function AuthGate({ children }: { children: React.ReactNode }) {
     }
 
     const isPublicRoute = PUBLIC_ROUTES.includes(pathname);
+
+    if (timedOut && !user && !isPublicRoute) {
+        return (
+            <div className="h-screen w-full flex flex-col items-center justify-center bg-background px-6">
+                <div className="text-center max-w-sm">
+                    <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-destructive/10">
+                        <AlertTriangle className="h-8 w-8 text-destructive" />
+                    </div>
+                    <h2 className="text-lg font-semibold mb-2">Error de conexión</h2>
+                    <p className="text-sm text-muted-foreground mb-6">
+                        No pudimos conectar con el servidor. Verifica tu conexión a internet e inténtalo de nuevo.
+                    </p>
+                    <div className="flex gap-3 justify-center">
+                        <Button variant="outline" onClick={() => router.replace('/login')}>
+                            Ir al inicio
+                        </Button>
+                        <Button onClick={() => window.location.reload()}>
+                            <RefreshCw className="mr-2 h-4 w-4" />
+                            Reintentar
+                        </Button>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
     if (!user && !isPublicRoute && hasChecked) return null;
 
     return <>{children}</>;

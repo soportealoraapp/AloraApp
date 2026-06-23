@@ -10,7 +10,7 @@ import { useNotifications } from '@/hooks/use-notifications';
 
 const navItems = [
   { href: '/discover', icon: Compass, label: 'Descubrir' },
-  { href: '/matches', icon: Heart, label: 'Matches' },
+  { href: '/matches', icon: Heart, label: 'Conexiones' },
   { href: '/compatibility', icon: Sparkles, label: 'Almas', special: true },
   { href: '/notifications', icon: Bell, label: 'Actividad' },
   { href: '/profile', icon: User, label: 'Perfil' },

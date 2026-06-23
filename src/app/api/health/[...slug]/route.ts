@@ -15,7 +15,7 @@ async function checkAdmin() {
         select: { role: true }
     });
 
-    return dbUser?.role === 'admin' || dbUser?.role === 'moderator';
+    return dbUser?.role === 'admin' || dbUser?.role === 'moderator' || dbUser?.role === 'super_admin';
 }
 
 export async function GET(request: Request) {

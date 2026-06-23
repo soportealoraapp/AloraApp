@@ -132,6 +132,11 @@ export async function PATCH(request: NextRequest) {
             data: updates,
         });
 
+        if (updates.status === 'resolved' || updates.status === 'dismissed') {
+            const { notifyReportResolved } = await import('@/server/services/push');
+            await notifyReportResolved(report.reporterId).catch(() => {});
+        }
+
         await prisma.auditLog.create({
             data: {
                 userId: adminUser.id,

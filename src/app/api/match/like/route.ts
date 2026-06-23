@@ -64,7 +64,7 @@ export async function POST(request: NextRequest) {
                         {
                             error: 'Daily like limit reached',
                             retryAfter,
-                            message: `Has alcanzado el límite de ${FREE_DAILY_LIKES_LIMIT} likes diarios. Tus likes se reinician mañana.`
+                            message: `Has alcanzado el límite de ${FREE_DAILY_LIKES_LIMIT} Me gusta diarios. Tus Me gusta se reinician mañana.`
                         },
                         { status: 429 }
                     );
@@ -87,7 +87,7 @@ export async function POST(request: NextRequest) {
                     return NextResponse.json(
                         {
                             error: 'Daily like limit reached',
-                            message: `Has alcanzado el límite de ${FREE_DAILY_LIKES_LIMIT} likes diarios.`
+                            message: `Has alcanzado el límite de ${FREE_DAILY_LIKES_LIMIT} Me gusta diarios.`
                         },
                         { status: 429 }
                     );

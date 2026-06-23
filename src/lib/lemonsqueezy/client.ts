@@ -125,16 +125,18 @@ export function createLemonSqueezyClient() {
         },
 
         /**
-         * Verify a webhook signature.
+         * Verify a webhook signature using HMAC-SHA256.
          */
         verifyWebhook(body: string, signature: string): boolean {
-            // Lemon Squeezy uses a simple secret-based verification
-            // In production, use crypto.createHmac to verify
             const secret = process.env.LEMON_SQUEEZY_WEBHOOK_SECRET;
             if (!secret) return false;
 
-            // Basic verification - in production implement proper HMAC
-            return signature === secret;
+            const crypto = require('crypto');
+            const expected = crypto.createHmac('sha256', secret).update(body).digest('hex');
+            const sigBuf = Buffer.from(signature, 'utf8');
+            const expBuf = Buffer.from(expected, 'utf8');
+            if (sigBuf.length !== expBuf.length) return false;
+            return crypto.timingSafeEqual(sigBuf, expBuf);
         },
 
         /**

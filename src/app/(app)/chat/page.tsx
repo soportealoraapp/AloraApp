@@ -355,6 +355,7 @@ export default function ChatPage() {
                                                                         src={partnerPhoto}
                                                                         alt={partnerName}
                                                                         fill
+                                                                        sizes="64px"
                                                                         className="object-cover"
                                                                         loading="lazy"
                                                                     />
@@ -455,6 +456,7 @@ export default function ChatPage() {
                                                             src={like.photoURL || '/placeholder.svg'}
                                                             alt={like.displayName || 'Perfil'}
                                                             fill
+                                                            sizes="56px"
                                                             className="object-cover"
                                                             loading="lazy"
                                                         />

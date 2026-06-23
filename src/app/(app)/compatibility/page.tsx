@@ -170,7 +170,7 @@ export default function CompatibilityPage() {
     setInteractingId(targetId);
     try {
       await sendLike(targetId, type, 'dating', false);
-      toast({ title: type === 'superlike' ? '💘 Flechado enviado' : '❤️ Like enviado' });
+      toast({ title: type === 'superlike' ? '💘 Flechado enviado' : '❤️ Me gusta enviado' });
       setSimilarUsers(prev => prev.filter(u => u.id !== targetId));
     } catch {
       toast({ title: 'Error', description: 'No se pudo enviar', variant: 'destructive' });

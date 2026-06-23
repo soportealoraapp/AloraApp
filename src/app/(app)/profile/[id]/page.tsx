@@ -263,6 +263,7 @@ export default function UserProfilePage() {
                                                 src={photo}
                                                 alt={`Foto de ${profile.displayName} ${index + 1}`}
                                                 fill
+                                                sizes="(max-width: 640px) 100vw, 400px"
                                                 className="object-cover"
                                                 priority={index === 0}
                                             />

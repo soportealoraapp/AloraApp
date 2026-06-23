@@ -225,7 +225,7 @@ export async function sendPushToMultipleUsers(userIds: string[], payload: PushPa
 export async function notifyNewMatch(userId: string, partnerName: string, matchId: string, intent?: string) {
     const isFriendship = intent === 'friendship';
     return sendPushToUser(userId, {
-        title: isFriendship ? '¡Tenés una nueva amistad! 🤝' : '¡Tenés un match! 💖',
+        title: isFriendship ? '¡Tienes una nueva amistad! 🤝' : '¡Tienes un match! 💖',
         body: isFriendship
             ? `Tú y ${partnerName} quieren conocerse como amigos. ¡Ahora di hola!`
             : `Tú y ${partnerName} se gustaron mutuamente. ¡Ahora di hola!`,
@@ -239,10 +239,10 @@ export async function notifyLikeReceived(userId: string, fromUserName: string, f
     const isSuperlike = interactionType === 'superlike';
     if (isSuperlike) {
         return sendPushToUser(userId, {
-            title: isFriendship ? '🫶 ¡Alguien te eligio como amigo!' : '💘 ¡Un Flechado para ti!',
+            title: isFriendship ? '🫶 ¡Alguien te eligió como amigo!' : '💘 ¡Un Flechado para ti!',
             body: isFriendship
-                ? `${fromUserName} te eligio como amigo. ¡Revisa su perfil!`
-                : `${fromUserName} te envio un Flechado. Tu perfil destaca. ¡Revisa!`,
+                ? `${fromUserName} te eligió como amigo. ¡Revisa su perfil!`
+                : `${fromUserName} te envió un Flechado. Tu perfil destaca. ¡Revisa!`,
             data: { type: 'like_received', fromUserId, interactionType: 'superlike' },
             channel: 'matches',
         });
@@ -251,7 +251,7 @@ export async function notifyLikeReceived(userId: string, fromUserName: string, f
         title: isFriendship ? '🫶 Alguien te quiere conocer' : '💜 ¡A alguien le gustaste!',
         body: isFriendship
             ? `${fromUserName} te quiere conocer como amigo. ¡Revisa su perfil!`
-            : `${fromUserName} te dio like. ¡Revisa su perfil y Swipea de vuelta!`,
+            : `${fromUserName} te dio Me gusta. ¡Revisa su perfil y desliza de vuelta!`,
         data: { type: 'like_received', fromUserId, interactionType: 'like' },
         channel: 'matches',
     });
@@ -329,7 +329,7 @@ export async function notifyReportResolved(userId: string) {
 export async function notifyLikesRestored(userId: string) {
     return sendPushToUser(userId, {
         title: '❤️ Tus likes ya están listos',
-        body: '¡Tus 50 likes del día se renovaron! Sal a descubrir personas increíbles.',
+        body: '¡Tus 50 Me gusta del día se renovaron! Sal a descubrir personas increíbles.',
         data: { type: 'likes_restored' },
         channel: 'engagement',
     });

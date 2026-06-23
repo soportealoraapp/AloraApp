@@ -55,7 +55,7 @@ export const SecondChanceSection = React.memo(function SecondChanceSection({ int
       if (result?.matched) {
         toast({ title: '¡Match!', description: '¡Ahora pueden chatear!', duration: 5000 });
       } else {
-        toast({ title: '¡Like enviado!' });
+        toast({ title: '¡Me gusta enviado!' });
       }
       setPassedProfiles(prev => prev.filter(p => p.id !== profileId));
     } catch {

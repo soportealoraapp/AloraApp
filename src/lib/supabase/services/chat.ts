@@ -131,34 +131,6 @@ export const chatService = {
         }
     },
 
-    subscribeToNewMessage(matchId: string, callback: NewMessageCallback) {
-        const supabase = createClient()
-        const seenIds = new Set<string>()
-
-        const channel = supabase
-            .channel(`match:new:${matchId}`)
-            .on(
-                'postgres_changes' as any,
-                {
-                    event: 'INSERT',
-                    schema: 'public',
-                    table: 'messages',
-                    filter: `matchId=eq.${matchId}`,
-                },
-                (payload: RealtimePostgresChangesPayload<{ [key: string]: any }>) => {
-                    const newMsg = payload.new as any
-                    if (!newMsg || !newMsg.id || seenIds.has(newMsg.id)) return
-                    seenIds.add(newMsg.id)
-                    callback(normalizeMessage(newMsg))
-                }
-            )
-            .subscribe()
-
-        return () => {
-            supabase.removeChannel(channel)
-        }
-    },
-
     /**
      * Subscribe to typing indicators using Supabase presence.
      *

@@ -75,7 +75,7 @@ export function LikesCounter({
         return (
             <div className={cn("flex items-center gap-2 text-xs text-muted-foreground", className)}>
                 <Heart className="h-3.5 w-3.5 text-primary fill-primary" />
-                <span className="font-medium">Likes ilimitados</span>
+                <span className="font-medium">Me gusta ilimitados</span>
             </div>
         );
     }
@@ -93,7 +93,7 @@ export function LikesCounter({
                             isEmpty ? "text-muted-foreground" : isLow ? "text-warning" : "text-primary fill-primary"
                         )} />
                         <span className="text-xs font-medium text-foreground/80">
-                            {remaining} de {dailyLikesLimit} likes para dar hoy
+                            {remaining} de {dailyLikesLimit} Me gusta para dar hoy
                         </span>
                     </div>
                     {timeUntilReset && (

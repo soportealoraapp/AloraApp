@@ -43,14 +43,14 @@ export const BADGE_DEFINITIONS: Record<BadgeKey, Omit<Badge, 'id' | 'unlockedAt'
         name: 'Perfil Honesto',
         description: 'Perfil 100% completo y verificado',
         icon: '✅',
-        reward: { type: 'likes', value: 5, description: '+5 likes diarios' },
+        reward: { type: 'likes', value: 5, description: '+5 Me gusta diarios' },
     },
     early_bird: {
         key: 'early_bird',
         name: 'Madrugador',
         description: 'Check-in 7 días seguidos',
         icon: '🌅',
-        reward: { type: 'likes', value: 10, description: '+10 likes diarios' },
+        reward: { type: 'likes', value: 10, description: '+10 Me gusta diarios' },
     },
     night_owl: {
         key: 'night_owl',

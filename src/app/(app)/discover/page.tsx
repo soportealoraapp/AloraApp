@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect, useCallback, useMemo } from "react";
+import { useState, useRef, useEffect, useCallback, useMemo, Suspense } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import dynamic from "next/dynamic";
 import { useVirtualizer } from "@tanstack/react-virtual";
@@ -351,7 +351,7 @@ export default function DiscoverPage() {
       } else if (action === 'superlike') {
         toast({ title: '¡💘 Flechado enviado!', description: `${profileToActOn.displayName} recibirá tu interés destacado.` });
       } else {
-        toast({ title: 'Like enviado', description: '¡Esperamos que sea mutuo!' });
+        toast({ title: 'Me gusta enviado', description: '¡Esperamos que sea mutuo!' });
       }
 
       if (result?.matched) {
@@ -875,21 +875,29 @@ export default function DiscoverPage() {
         )}
       </main>
 
-      {/* Secondary sections — below the feed */}
+      {/* Secondary sections — below the feed, wrapped in Suspense for progressive rendering */}
       <div className="px-4 pb-3 max-w-sm mx-auto w-full">
-        <DailyCompatibilityCard />
+        <Suspense fallback={null}>
+          <DailyCompatibilityCard />
+        </Suspense>
       </div>
 
       <div className="px-4 pb-3 max-w-sm mx-auto w-full">
-        <PostOnboardingJourney />
+        <Suspense fallback={null}>
+          <PostOnboardingJourney />
+        </Suspense>
       </div>
 
       <div className="px-4 pb-3 max-w-sm mx-auto w-full">
-        <DailyPicks subscriptionStatus={currentUserProfile?.subscriptionStatus ?? 'free'} />
+        <Suspense fallback={null}>
+          <DailyPicks subscriptionStatus={currentUserProfile?.subscriptionStatus ?? 'free'} />
+        </Suspense>
       </div>
 
       <div className="px-4 pb-3 max-w-sm mx-auto w-full">
-        <SecondChanceSection intent={effectiveIntent} />
+        <Suspense fallback={null}>
+          <SecondChanceSection intent={effectiveIntent} />
+        </Suspense>
       </div>
 
       <DiscoverFilters

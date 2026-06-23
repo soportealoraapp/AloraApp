@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
-import { preferencesService } from "@/lib/firebase/preferences-service";
+import { preferencesService } from "@/lib/preferences-service";
 import { setVerifiedOnlyFilter } from "@/server/actions/user";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";

@@ -530,7 +530,7 @@ model AuditLog {
 
 model DailyQuestion {
   id        String        @id @default(uuid())
-  question  String
+  question  String        @unique
   category  String
   isActive  Boolean       @default(true)
   createdAt DateTime      @default(now())
@@ -724,6 +724,7 @@ model DeviceFingerprint {
   firstSeen DateTime @default(now())
   lastSeen  DateTime @default(now())
 
+  @@unique([userId, deviceHash])
   @@index([userId])
   @@index([deviceHash])
   @@map("device_fingerprints")

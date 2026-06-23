@@ -81,9 +81,24 @@ self.addEventListener('push', async (event) => {
 
 self.addEventListener('notificationclick', (event) => {
     event.notification.close();
-    const url = event.notification.data?.matchId
-        ? `/chat/${event.notification.data.matchId}`
-        : '/discover';
+    const data = event.notification.data || {};
+
+    let url = '/discover';
+    if (data.matchId) {
+        url = `/chat/${data.matchId}`;
+    } else if (data.type === 'like_received' && data.fromUserId) {
+        url = `/profile/${data.fromUserId}`;
+    } else if (data.type === 'profile_visit' && data.visitorId) {
+        url = `/profile/visitors`;
+    } else if (data.type === 'verification') {
+        url = `/settings/verification`;
+    } else if (data.type === 'daily_question' || data.type === 'daily_compatibility') {
+        url = `/compatibility`;
+    } else if (data.type === 'safety') {
+        url = `/settings/safety`;
+    } else if (data.type === 'boost_available' || data.type === 'likes_restored' || data.type === 'streak_at_risk') {
+        url = `/discover`;
+    }
 
     event.waitUntil(
         self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clients) => {
