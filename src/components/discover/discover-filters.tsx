@@ -42,7 +42,6 @@ export interface Filters {
   city?: string;
   withVoiceIntro?: boolean;
   withQuiz?: boolean;
-  featuredOnly?: boolean;
   highCompatibility?: boolean;
   activeToday?: boolean;
   intent?: 'dating' | 'friendship' | 'both';
@@ -74,7 +73,6 @@ export function DiscoverFilters({ open, onOpenChange, onApplyFilters, initialFil
   const [selectedReligion, setSelectedReligion] = useState<string | undefined>(initialFilters.religion);
   const [withVoiceIntro, setWithVoiceIntro] = useState(initialFilters.withVoiceIntro || false);
   const [withQuiz, setWithQuiz] = useState(initialFilters.withQuiz || false);
-  const [featuredOnly, setFeaturedOnly] = useState(initialFilters.featuredOnly || false);
   const [highCompatibility, setHighCompatibility] = useState(initialFilters.highCompatibility || false);
   const [activeToday, setActiveToday] = useState(initialFilters.activeToday || false);
 
@@ -109,7 +107,6 @@ export function DiscoverFilters({ open, onOpenChange, onApplyFilters, initialFil
       religion: selectedReligion,
       withVoiceIntro,
       withQuiz,
-      featuredOnly,
       highCompatibility,
       activeToday,
       userLat: initialFilters.userLat,
@@ -137,7 +134,6 @@ export function DiscoverFilters({ open, onOpenChange, onApplyFilters, initialFil
       religion: undefined,
       withVoiceIntro: false,
       withQuiz: false,
-      featuredOnly: false,
       highCompatibility: false,
       activeToday: false,
       intent: intent || 'dating',
@@ -161,7 +157,6 @@ export function DiscoverFilters({ open, onOpenChange, onApplyFilters, initialFil
     setSelectedReligion(defaultFilters.religion);
     setWithVoiceIntro(false);
     setWithQuiz(false);
-    setFeaturedOnly(false);
     setHighCompatibility(false);
     setActiveToday(false);
     // Don't reset intent here — let the parent handle it via DEFAULT_FILTERS
@@ -267,14 +262,6 @@ export function DiscoverFilters({ open, onOpenChange, onApplyFilters, initialFil
               <div className="flex items-center space-x-2 rounded-lg border p-3">
                 <Switch id="active-today" checked={activeToday} onCheckedChange={setActiveToday} />
                 <Label htmlFor="active-today" className="flex-grow cursor-pointer">🟢 Activo hoy</Label>
-              </div>
-
-              <div className="flex items-center space-x-2 rounded-lg border p-3 bg-accent/50">
-                <Switch id="featured" checked={featuredOnly} onCheckedChange={setFeaturedOnly} />
-                <Label htmlFor="featured" className="flex-grow cursor-pointer">
-                  ⭐ Perfil destacado
-                  <span className="block text-xs text-muted-foreground">Completitud 90%+</span>
-                </Label>
               </div>
 
               <div className="flex items-center space-x-2 rounded-lg border p-3 bg-accent/50">

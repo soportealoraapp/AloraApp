@@ -18,7 +18,6 @@ interface Mission {
   icon: React.ReactNode;
   action: string;
   route: string;
-  reward: string;
   completed: boolean;
 }
 
@@ -31,7 +30,6 @@ const getMissions = (profile: any): Mission[] => [
     icon: <BookOpen className="h-5 w-5" />,
     action: 'Escribir bio',
     route: '/profile/edit',
-    reward: '+5 likes diarios',
     completed: (profile?.bio?.length ?? 0) > 50,
   },
   {
@@ -42,7 +40,6 @@ const getMissions = (profile: any): Mission[] => [
     icon: <Heart className="h-5 w-5" />,
     action: 'Seleccionar intereses',
     route: '/profile/edit',
-    reward: '+Visibilidad en discover',
     completed: (profile?.interests?.length ?? 0) >= 3,
   },
   {
@@ -53,7 +50,6 @@ const getMissions = (profile: any): Mission[] => [
     icon: <Sparkles className="h-5 w-5" />,
     action: 'Seleccionar valores',
     route: '/profile/edit',
-    reward: 'Desbloquea daily compatibility',
     completed: (profile?.values?.length ?? 0) >= 2,
   },
   {
@@ -64,7 +60,6 @@ const getMissions = (profile: any): Mission[] => [
     icon: <MessageCircle className="h-5 w-5" />,
     action: 'Responder pregunta',
     route: '/discover',
-    reward: 'Aparece en tu perfil',
     completed: profile?.latestAnswer?.answered ?? false,
   },
   {
@@ -75,19 +70,17 @@ const getMissions = (profile: any): Mission[] => [
     icon: <Camera className="h-5 w-5" />,
     action: 'Subir fotos',
     route: '/profile/edit',
-    reward: '+10% compatibility score',
     completed: (profile?.photos?.length ?? 0) >= 3,
   },
   {
     id: 'quiz',
     day: 6,
     title: 'Haz un quiz',
-    description: 'Descubre tu estilo de conexión y desbloquea icebreakers IA',
+    description: 'Descubre tu estilo de conexión y mejora tu compatibilidad',
     icon: <BookOpen className="h-5 w-5" />,
     action: 'Hacer quiz',
     route: '/compatibility',
-    reward: 'Icebreakers IA',
-    completed: false,
+    completed: (profile?.completedQuizzes ?? 0) > 0,
   },
   {
     id: 'verification',
@@ -97,7 +90,6 @@ const getMissions = (profile: any): Mission[] => [
     icon: <Shield className="h-5 w-5" />,
     action: 'Verificar identidad',
     route: '/settings/verification',
-    reward: 'Badge + prioridad',
     completed: profile?.isVerified ?? false,
   },
 ];

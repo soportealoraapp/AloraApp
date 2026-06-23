@@ -10,7 +10,8 @@ import {
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Check, Sparkles, Heart, Zap, ShieldCheck, RotateCcw, Globe, Eye, Star, X } from 'lucide-react';
+import { Check, Sparkles, Star, X } from 'lucide-react';
+import { PLANS } from '@/lib/domain/subscription';
 
 interface PaywallModalProps {
     isOpen: boolean;
@@ -20,35 +21,20 @@ interface PaywallModalProps {
 const TIERS = [
     {
         id: 'free',
-        name: 'Alora Free',
+        name: PLANS.free.name,
         price: 0,
         period: '',
-        features: [
-            '50 likes diarios',
-            'Matching y chat',
-            'Daily compatibility',
-            'Pregunta del día',
-        ],
+        features: PLANS.free.features,
         highlighted: false,
     },
     {
         id: 'plus',
-        name: 'Alora+',
-        price: 99,
-        period: 'MXN / mes',
-        annualPrice: 79,
-        annualPeriod: 'MXN / mes (anual)',
-        features: [
-            'Likes ilimitados',
-            'Prioridad en Discover',
-            'Boost de visibilidad',
-            'Rewind (3 al día)',
-            'Modo Viaje',
-            'Coaching IA personalizado',
-            'Insights de compatibilidad profundos',
-            'Historial de quién te visitó',
-            'Modo incógnito',
-        ],
+        name: PLANS.plus.name,
+        price: PLANS.plus.price,
+        period: `${PLANS.plus.currency} / mes`,
+        annualPrice: Math.round(PLANS.plus.price * 0.8),
+        annualPeriod: `${PLANS.plus.currency} / mes (anual)`,
+        features: PLANS.plus.features,
         highlighted: true,
         popular: true,
     },

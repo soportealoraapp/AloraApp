@@ -5,6 +5,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Heart, RotateCcw, UserX } from 'lucide-react';
 import Image from 'next/image';
+import Link from 'next/link';
 import { useSendLike } from '@/hooks/use-send-like';
 import { useToast } from '@/hooks/use-toast';
 import { ConnectionIntent } from '@/lib/domain/types';
@@ -86,7 +87,7 @@ export const SecondChanceSection = React.memo(function SecondChanceSection({ int
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
           {passedProfiles.map((profile) => (
             <Card key={profile.id} className="rounded-2xl overflow-hidden shadow-sm border">
-              <div className="aspect-[3/4] relative">
+              <Link href={`/profile/${profile.id}?source=second-chance`} className="block aspect-[3/4] relative">
                 <Image
                   src={profile.photos?.[0] || '/placeholder.svg'}
                   alt={profile.displayName || ''}
@@ -99,7 +100,7 @@ export const SecondChanceSection = React.memo(function SecondChanceSection({ int
                 <div className="absolute bottom-2 left-2 text-white text-xs font-bold">
                   {profile.displayName}, {profile.age}
                 </div>
-              </div>
+              </Link>
               <div className="flex gap-1 p-1.5">
                 <Button size="sm" variant="ghost" className="flex-1 h-11" onClick={() => handleLike(profile.id, (profile.intent as ConnectionIntent) || 'dating')} aria-label="Dar like">
                   <Heart className="h-4 w-4 text-primary" />

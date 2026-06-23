@@ -60,7 +60,6 @@ function countActiveFilters(f: Filters): number {
   if (f.religion) count++;
   if (f.withVoiceIntro) count++;
   if (f.withQuiz) count++;
-  if (f.featuredOnly) count++;
   if (f.highCompatibility) count++;
   if (f.activeToday) count++;
   return count;
@@ -407,7 +406,7 @@ export default function DiscoverPage() {
         }
         setSwipeCount(prev => Math.max(0, prev - 1));
         lastSwipeRef.current = null;
-        toast({ title: "Deshecho", description: "Último swipe revertido." });
+        toast({ title: "Deshecho", description: "Último swipe revertido. Si había match, también se deshizo." });
       } else {
         const data = await res.json();
         toast({ title: "No se pudo deshacer", description: data.error || "Intenta de nuevo.", variant: "destructive" });
@@ -468,7 +467,7 @@ export default function DiscoverPage() {
         </div>
         <div className="flex items-center gap-1">
           <div className="hidden md:flex items-center gap-1">
-            <Button variant="ghost" size="icon" onClick={handleRewind} disabled={!lastSwipeRef.current || rewinding} title={`Rewind: deshace el último swipe (${rewindsRemaining}/${maxRewinds} disponibles)`} aria-label="Deshacer último swipe">
+            <Button variant="ghost" size="icon" onClick={handleRewind} disabled={!lastSwipeRef.current || rewinding} title={`Deshacer: revierte el último swipe (${rewindsRemaining}/${maxRewinds} disponibles)`} aria-label="Deshacer último swipe">
               <RotateCcw className="h-5 w-5 text-muted-foreground" />
             </Button>
             <span className="text-[11px] text-muted-foreground font-bold -ml-1">{rewindsRemaining}</span>
@@ -483,7 +482,7 @@ export default function DiscoverPage() {
           </div>
           <div className="md:hidden flex items-center gap-0.5">
             <div className="flex items-center">
-              <Button variant="ghost" size="icon" onClick={handleRewind} disabled={!lastSwipeRef.current || rewinding} title={`Rewind: deshace el último swipe (${rewindsRemaining}/${maxRewinds} disponibles)`} aria-label="Deshacer último swipe" className="touch-target">
+              <Button variant="ghost" size="icon" onClick={handleRewind} disabled={!lastSwipeRef.current || rewinding} title={`Deshacer: revierte el último swipe (${rewindsRemaining}/${maxRewinds} disponibles)`} aria-label="Deshacer último swipe" className="touch-target">
                 <RotateCcw className="h-4 w-4 text-muted-foreground" />
               </Button>
               <span className="text-[11px] text-muted-foreground font-bold">{rewindsRemaining}</span>

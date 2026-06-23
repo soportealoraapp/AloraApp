@@ -101,12 +101,9 @@ export function generateExplanations(
         explanations.push('Los quizzes confirman alta compatibilidad');
     }
 
-    // Ensure at least 2 explanations
+    // Ensure at least 1 explanation
     if (explanations.length === 0) {
-        explanations.push('Aún necesitan conocerse mejor');
-    }
-    if (explanations.length === 1) {
-        explanations.push('Hay potencial para una conexión genuina');
+        explanations.push('Completa tu perfil para obtener una compatibilidad más precisa');
     }
 
     return explanations.slice(0, 5);

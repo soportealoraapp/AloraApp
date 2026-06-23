@@ -57,7 +57,6 @@ export interface FeedFilters {
     city?: string;
     withVoiceIntro?: boolean;
     withQuiz?: boolean;
-    featuredOnly?: boolean;
     highCompatibility?: boolean;
     activeToday?: boolean;
     intent?: 'dating' | 'friendship' | 'both';
@@ -80,12 +79,13 @@ export async function getDynamicFeed(
             return { items: [], nextCursor: null, hasMore: false };
         }
 
-        const [blocks, interactions, matches, reportsByMe, reportsOnMe] = await Promise.all([
+        const [blocks, interactions, definitivePasses, matches, reportsByMe, reportsOnMe] = await Promise.all([
             prisma.block.findMany({
                 where: { OR: [{ blockerId: currentUserId }, { blockedId: currentUserId }] },
                 select: { blockerId: true, blockedId: true }
             }),
             prisma.interaction.findMany({ where: { fromUserId: currentUserId, deletedAt: null }, select: { toUserId: true } }),
+            prisma.interaction.findMany({ where: { fromUserId: currentUserId, type: 'pass', deletedAt: { not: null } }, select: { toUserId: true } }),
             prisma.match.findMany({
                 where: { OR: [{ user1Id: currentUserId }, { user2Id: currentUserId }] },
                 select: { user1Id: true, user2Id: true }
@@ -98,6 +98,7 @@ export async function getDynamicFeed(
             currentUserId,
             ...blocks.map(b => b.blockerId === currentUserId ? b.blockedId : b.blockerId),
             ...interactions.map(i => i.toUserId),
+            ...definitivePasses.map(i => i.toUserId),
             ...matches.map(m => m.user1Id === currentUserId ? m.user2Id : m.user1Id),
             ...reportsByMe.map(r => r.reportedId),
             ...reportsOnMe.map(r => r.reporterId),
