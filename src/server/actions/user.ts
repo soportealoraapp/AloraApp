@@ -144,7 +144,7 @@ export async function updateUserProfile(userId: string, data: Partial<UserProfil
                 where: { id: userId },
                 create: {
                     id: userId,
-                    email: email || `${userId}@placeholder.local`,
+                    email: email || `no-email-${userId.slice(0, 8)}@alora.app`,
                     name: data.name || data.displayName || '',
                 },
                 update: {
@@ -210,7 +210,7 @@ export async function completeOnboarding(userId: string, data: Partial<UserProfi
                 where: { id: userId },
                 create: {
                     id: userId,
-                    email: email || `${userId}@placeholder.local`,
+                    email: email || `no-email-${userId.slice(0, 8)}@alora.app`,
                     name: data.name || data.displayName || '',
                 },
                 update: {

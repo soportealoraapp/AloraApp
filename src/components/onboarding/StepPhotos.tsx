@@ -198,7 +198,7 @@ export function StepPhotos({ userId, data, onUpdate, onNext, onPrev }: any) {
                 </div>
                 {photos.length === 0 && (
                     <p className="text-xs text-center text-muted-foreground px-4">
-                        * Podrás añadir fotos más tarde desde tu perfil para empezar a recibir matches.
+                        * Sin fotos no aparecerás en las recomendaciones de otros usuarios. Podrás añadirlas después desde tu perfil.
                     </p>
                 )}
             </div>

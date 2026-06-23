@@ -90,7 +90,7 @@ export async function GET(request: Request) {
                             where: { id: user.id },
                             create: {
                                 id: user.id,
-                                email: user.email || `${user.id}@placeholder.local`,
+                                email: user.email || `no-email-${user.id.slice(0, 8)}@alora.app`,
                                 name: displayName,
                             },
                             update: {},

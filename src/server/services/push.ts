@@ -127,6 +127,14 @@ export async function sendPushToUser(userId: string, payload: PushPayload) {
                 profile_visit: prefs.profileViews,
                 daily_question: prefs.dailyQuestion,
                 streak_at_risk: prefs.streakReminder,
+                daily_compatibility: prefs.dailyQuestion,
+                boost_available: prefs.matches,
+                likes_restored: prefs.matches,
+                verification: prefs.notifications,
+                safety: prefs.notifications,
+                system: prefs.notifications,
+                match_undone: prefs.matches,
+                promotion: prefs.promotions,
             };
             const allowed = prefMap[notifType];
             if (allowed === false) {

@@ -85,7 +85,14 @@ export default function QADashboard() {
                     <Button variant="outline" size="sm" onClick={() => setIsA11yVisible(!isA11yVisible)} className={cn(isA11yVisible && "bg-primary/20 text-primary border-primary")}>
                         <Eye className="mr-2 h-4 w-4" /> A11y Audit
                     </Button>
-                    <Button variant="default" size="sm" className="bg-primary shadow-lg hover:shadow-primary/20">
+                    <Button variant="default" size="sm" className="bg-primary shadow-lg hover:shadow-primary/20" onClick={() => {
+                        const report = { timestamp: new Date().toISOString(), version: '3.7.0', status: 'audit-complete' };
+                        const blob = new Blob([JSON.stringify(report, null, 2)], { type: 'application/json' });
+                        const url = URL.createObjectURL(blob);
+                        const a = document.createElement('a');
+                        a.href = url; a.download = `alora-qa-report-${Date.now()}.json`; a.click();
+                        URL.revokeObjectURL(url);
+                    }}>
                         <Download className="mr-2 h-4 w-4" /> Export Report
                     </Button>
                 </div>
@@ -309,7 +316,7 @@ export default function QADashboard() {
                                         <span className="flex items-center gap-1"><Badge variant="outline" className="text-[11px] h-4">Virtualization</Badge> Enabled</span>
                                         <span className="flex items-center gap-1"><Badge variant="outline" className="text-[11px] h-4">History</Badge> 500+ Messages</span>
                                     </div>
-                                    <Button variant="ghost" size="sm" className="text-xs">
+                                    <Button variant="ghost" size="sm" className="text-xs" onClick={() => logEvent('QA_SIMULATE_LOAD_MORE')}>
                                         Simulate Load More
                                     </Button>
                                 </div>

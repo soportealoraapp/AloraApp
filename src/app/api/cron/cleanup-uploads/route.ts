@@ -52,7 +52,10 @@ export async function GET(request: NextRequest) {
                     referencedUrls.add(url);
                 }
             } catch {
-                // Plain text content, skip
+                // Plain text content — check if it's a direct URL (image messages store URL as plain string)
+                if (msg.content && (msg.content.includes('utfs.io') || msg.content.includes('uploadthing.com'))) {
+                    referencedUrls.add(msg.content);
+                }
             }
         }
 

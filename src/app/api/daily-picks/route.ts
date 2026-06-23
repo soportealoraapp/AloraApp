@@ -231,8 +231,8 @@ export async function GET(request: NextRequest) {
             }));
         }
 
-        for (const pick of topPicks) {
-            await prisma.dailyPick.upsert({
+        await Promise.all(topPicks.map(pick =>
+            prisma.dailyPick.upsert({
                 where: {
                     userId_profileId_date: {
                         userId: user.id,
@@ -248,8 +248,8 @@ export async function GET(request: NextRequest) {
                     reason: pick.reason,
                     date: today,
                 },
-            });
-        }
+            })
+        ));
 
         return NextResponse.json({ picks: topPicks, cached: false });
     } catch (error) {

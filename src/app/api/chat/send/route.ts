@@ -42,7 +42,7 @@ export async function POST(request: NextRequest) {
         }
 
         // Validate message type
-        const validTypes = ['text', 'voice', 'image'];
+        const validTypes = ['text', 'voice', 'image', 'icebreaker'];
         const messageType = validTypes.includes(type) ? type : 'text';
 
         // Validate message content

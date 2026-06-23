@@ -8,7 +8,7 @@ import { TrustBadge } from './TrustBadge';
 import { ProfileActions } from '../../match/ProfileActions';
 import { Clock, MessageCircle, Heart, X, Music } from 'lucide-react';
 import { HeartArrow } from '../custom/HeartArrow';
-import { useState, useCallback, useEffect, useRef } from 'react';
+import React, { useState, useCallback, useEffect, useRef } from 'react';
 
 interface FloatingMatchCardProps {
   profile: UserProfile;
@@ -28,7 +28,7 @@ interface FloatingMatchCardProps {
   priorInteraction?: 'like' | 'superlike' | 'pass' | null;
 }
 
-export function FloatingMatchCard({ profile, onSwipe, onFlechado, compatibility, compatibilityDetails, superlikesRemaining, explanations, hasExistingMatch, priorInteraction }: FloatingMatchCardProps) {
+export const FloatingMatchCard = React.memo(function FloatingMatchCard({ profile, onSwipe, onFlechado, compatibility, compatibilityDetails, superlikesRemaining, explanations, hasExistingMatch, priorInteraction }: FloatingMatchCardProps) {
   const controls = useAnimation();
   const [dragX, setDragX] = useState(0);
   const [likeBurst, setLikeBurst] = useState(false);
@@ -341,4 +341,4 @@ export function FloatingMatchCard({ profile, onSwipe, onFlechado, compatibility,
       </div>
     </motion.div>
   );
-}
+});

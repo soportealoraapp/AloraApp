@@ -25,7 +25,7 @@ export async function POST() {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const rateLimitResponse = await withRateLimit(user.id, 'notification');
+    const rateLimitResponse = await withRateLimit(user.id, 'streakCheckin');
     if (rateLimitResponse) return rateLimitResponse;
 
     try {

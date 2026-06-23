@@ -24,8 +24,37 @@ export async function GET(request: NextRequest) {
 
         const effectiveLimit = isPlus?.subscriptionStatus === 'plus' ? limit : 3;
 
+        // Get distinct visitor IDs with their most recent visit, then fetch full data
+        const distinctVisitorIds = await prisma.$queryRaw<{ visitorId: string }[]>`
+            SELECT DISTINCT "visitorId"
+            FROM "profile_visits"
+            WHERE "visitedId" = ${user.id}
+            ORDER BY MAX("createdAt") DESC
+            LIMIT ${effectiveLimit}
+            OFFSET ${offset}
+        `;
+
+        const visitorIds = distinctVisitorIds.map(v => v.visitorId);
+
+        if (visitorIds.length === 0) {
+            const totalCount = await prisma.$queryRaw<{ count: bigint }[]>`
+                SELECT COUNT(DISTINCT "visitorId") as count
+                FROM "profile_visits"
+                WHERE "visitedId" = ${user.id}
+            `;
+            return NextResponse.json({
+                visitors: [],
+                total: Number(totalCount[0]?.count || 0),
+                hasMore: false,
+                isPlus: isPlus?.subscriptionStatus === 'plus',
+            });
+        }
+
         const visitors = await prisma.profileVisit.findMany({
-            where: { visitedId: user.id },
+            where: {
+                visitedId: user.id,
+                visitorId: { in: visitorIds },
+            },
             include: {
                 visitor: {
                     include: {
@@ -42,12 +71,16 @@ export async function GET(request: NextRequest) {
                 },
             },
             orderBy: { createdAt: 'desc' },
-            take: effectiveLimit,
-            skip: offset,
         });
 
+        // Deduplicate: keep only the most recent visit per visitorId
+        const seen = new Set<string>();
         const result = visitors
-            .filter(v => v.visitor.profile && v.visitor.profile.photos && v.visitor.profile.photos.length > 0)
+            .filter(v => {
+                if (seen.has(v.visitorId)) return false;
+                seen.add(v.visitorId);
+                return v.visitor.profile && v.visitor.profile.photos && v.visitor.profile.photos.length > 0;
+            })
             .map(v => ({
                 id: v.visitorId,
                 name: v.visitor.profile!.displayName,
@@ -58,12 +91,16 @@ export async function GET(request: NextRequest) {
                 visitedAt: v.createdAt,
             }));
 
-        const totalCount = await prisma.profileVisit.count({ where: { visitedId: user.id } });
+        const totalCount = await prisma.$queryRaw<{ count: bigint }[]>`
+            SELECT COUNT(DISTINCT "visitorId") as count
+            FROM "profile_visits"
+            WHERE "visitedId" = ${user.id}
+        `;
 
         return NextResponse.json({
             visitors: result,
-            total: totalCount,
-            hasMore: offset + result.length < totalCount,
+            total: Number(totalCount[0]?.count || 0),
+            hasMore: offset + result.length < Number(totalCount[0]?.count || 0),
             isPlus: isPlus?.subscriptionStatus === 'plus',
         });
     } catch (error) {

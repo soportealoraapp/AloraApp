@@ -32,6 +32,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const [profileLoading, setProfileLoading] = useState(false);
     const supabaseRef = useRef(createClient());
     const userRef = useRef<User | null>(null);
+    const profileFetchControllerRef = useRef<AbortController | null>(null);
 
     const supabase = supabaseRef.current;
 
@@ -123,6 +124,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
             const userChanged = !previousUser || currentUser.id !== previousUser.id;
             if (userChanged) {
+                // Cancel any in-flight profile fetch to prevent stale data overwriting
+                if (profileFetchControllerRef.current) {
+                    profileFetchControllerRef.current.abort();
+                }
+                const controller = new AbortController();
+                profileFetchControllerRef.current = controller;
+
                 setProfileLoading(true);
                 try {
                     const PROFILE_TIMEOUT_MS = 10000;
@@ -132,12 +140,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                             setTimeout(() => reject(new Error('Profile fetch on auth change timed out')), PROFILE_TIMEOUT_MS)
                         ),
                     ]);
-                    if (!cancelled) setProfile(userProfile as UserProfile);
+                    if (!cancelled && !controller.signal.aborted) setProfile(userProfile as UserProfile);
                 } catch (e) {
                     console.error("Profile fetch on auth change failed", e);
-                    if (!cancelled) setProfile(null);
+                    if (!cancelled && !controller.signal.aborted) setProfile(null);
                 } finally {
-                    if (!cancelled) setProfileLoading(false);
+                    if (!cancelled && !controller.signal.aborted) setProfileLoading(false);
                 }
             }
         });

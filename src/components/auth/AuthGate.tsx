@@ -12,11 +12,24 @@ export function AuthGate({ children }: { children: React.ReactNode }) {
     const router = useRouter();
     const pathname = usePathname();
     const [hasChecked, setHasChecked] = useState(false);
+    const [timedOut, setTimedOut] = useState(false);
 
     useEffect(() => {
         if (loading) return;
         setHasChecked(true);
     }, [loading]);
+
+    // Safety timeout: if authLoading never resolves, force check after 15s
+    useEffect(() => {
+        if (hasChecked) return;
+        const timeout = setTimeout(() => {
+            if (!hasChecked) {
+                setTimedOut(true);
+                setHasChecked(true);
+            }
+        }, 15000);
+        return () => clearTimeout(timeout);
+    }, [hasChecked]);
 
     useEffect(() => {
         if (!hasChecked) return;
