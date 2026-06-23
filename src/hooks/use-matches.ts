@@ -83,7 +83,11 @@ export function useMatches() {
                     }
                 }
             )
-            .subscribe();
+            .subscribe((status) => {
+                if (status === 'CHANNEL_ERROR') {
+                    console.warn('[use-matches] Realtime channel error, will retry on next reconnect');
+                }
+            });
 
         channelRef.current = channel;
 

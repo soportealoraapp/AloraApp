@@ -33,12 +33,19 @@ export const DailyPicks = React.memo(function DailyPicks({ subscriptionStatus = 
     const isPlus = subscriptionStatus === 'plus';
 
     useEffect(() => {
+        if (!isPlus) {
+            setLoading(false);
+            return;
+        }
         fetch('/api/daily-picks')
-            .then(r => r.json())
+            .then(r => {
+                if (!r.ok) throw new Error(r.statusText);
+                return r.json();
+            })
             .then(data => setPicks(data.picks || []))
             .catch(() => logger.warn('Failed to fetch daily picks'))
             .finally(() => setLoading(false));
-    }, []);
+    }, [isPlus]);
 
     if (loading) {
         if (!isPlus) return null;

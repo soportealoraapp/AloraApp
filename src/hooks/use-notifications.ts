@@ -113,7 +113,11 @@ export function useNotifications({
                     if (!n.readAt) setUnreadCount(prev => prev + 1);
                 }
             )
-            .subscribe();
+            .subscribe((status) => {
+                if (status === 'CHANNEL_ERROR') {
+                    console.warn('[use-notifications] Realtime channel error, relying on poll fallback');
+                }
+            });
         channelRef.current = channel;
 
         // Fallback polling (5 min) to catch any missed events

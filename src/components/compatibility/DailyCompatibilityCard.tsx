@@ -34,6 +34,10 @@ export const DailyCompatibilityCard = React.memo(function DailyCompatibilityCard
     const fetchCompatibility = async () => {
         try {
             const res = await fetch('/api/daily-compatibility');
+            if (!res.ok) {
+                setData(null);
+                return;
+            }
             const result = await res.json();
             setData(result);
         } catch (error) {

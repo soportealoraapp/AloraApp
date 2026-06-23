@@ -59,10 +59,10 @@ export function useDiscover(searchTerm: string = '', filters?: FeedFilters, limi
                 filtersRef.current
             );
 
-            cursorRef.current = result.nextCursor;
-            setHasMore(result.hasMore);
+            cursorRef.current = result?.nextCursor ?? null;
+            setHasMore(result?.hasMore ?? false);
 
-            const mapped: DiscoverProfile[] = result.items.map(item => {
+            const mapped: DiscoverProfile[] = (result?.items ?? []).map(item => {
                 const realCompatibility = item.score?.details?.quizzes;
                 const totalScore = item.score?.total;
                 const compatibility =
