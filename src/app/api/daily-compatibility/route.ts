@@ -12,12 +12,7 @@ export async function GET(request: NextRequest) {
     }
 
     const { ensureSubscriptionState } = await import('@/lib/subscription-helper');
-    const { subscriptionStatus } = await ensureSubscriptionState(user.id);
-
-    // Daily compatibility is a Plus feature
-    if (subscriptionStatus !== 'plus') {
-        return NextResponse.json({ error: 'Requiere Alora Plus', code: 'subscription_required' }, { status: 403 });
-    }
+    await ensureSubscriptionState(user.id);
 
     const timezone = request.headers.get('x-timezone') || undefined;
 

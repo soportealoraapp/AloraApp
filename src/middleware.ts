@@ -144,8 +144,16 @@ export async function middleware(request: NextRequest) {
 
     const isApiRoute = pathname.startsWith('/api/');
 
+    // Public API routes accessible without authentication
+    const isPublicApiRoute = pathname.startsWith('/api/public/') ||
+        pathname.startsWith('/api/spotify/callback') ||
+        pathname.startsWith('/api/lemonsqueezy/webhook') ||
+        pathname.startsWith('/api/cron/') ||
+        pathname.startsWith('/api/health') ||
+        pathname.startsWith('/api/uploadthing');
+
     if (!user) {
-        if (isApiRoute) {
+        if (isApiRoute && !isPublicApiRoute) {
             return applySecurityHeaders(NextResponse.json(
                 { error: 'Authentication required' },
                 { status: 401 }
