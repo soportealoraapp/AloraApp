@@ -1,80 +1,63 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/contexts/AuthContext';
 import { UserProfile } from '@/lib/domain/types';
 
 export function useProfile(userId?: string) {
     const { user, profile: currentUserProfile } = useAuth();
-    const [profile, setProfile] = useState<UserProfile | null>(null);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
+    const queryClient = useQueryClient();
 
-    useEffect(() => {
-        async function fetchProfile() {
-            try {
-                // Si no hay userId, usar el perfil del usuario actual
-                if (!userId || typeof userId !== 'string' || userId.trim() === '' || userId === 'undefined' || userId === 'null') {
-                    if (!userId || userId === 'undefined' || userId === 'null') {
-                        setError('ID de usuario inválido');
-                    } else {
-                        setProfile(currentUserProfile);
-                    }
-                    setLoading(false);
-                    return;
+    const targetUserId = userId && typeof userId === 'string' && userId.trim() !== '' && userId !== 'undefined' && userId !== 'null'
+        ? userId
+        : undefined;
+
+    const isValidId = !!targetUserId;
+    const isSelf = user && targetUserId === user.id;
+    const skipFetch = !isValidId || (isValidId && (!user || targetUserId === user.id));
+
+    const { data: profile, isLoading: loading, error: queryError } = useQuery({
+        queryKey: ['profile', targetUserId || user?.id],
+        queryFn: async (): Promise<UserProfile | null> => {
+            if (!isValidId) {
+                if (targetUserId === 'undefined' || targetUserId === 'null') {
+                    throw new Error('ID de usuario inválido');
                 }
-
-                // Si el userId es el del usuario actual, usar el del context
-                if (user && userId === user.id) {
-                    setProfile(currentUserProfile);
-                    setLoading(false);
-                    return;
-                }
-                // Cookie auth handles authentication automatically
-                const response = await fetch(`/api/profile/${userId}`);
-
-                if (!response.ok) {
-                    throw new Error('Error al cargar el perfil');
-                }
-
-                const data = await response.json();
-                setProfile(data);
-            } catch (err) {
-                setError(err instanceof Error ? err.message : 'Error desconocido');
-            } finally {
-                setLoading(false);
+                return currentUserProfile;
             }
-        }
+            if (isSelf) return currentUserProfile;
 
-        fetchProfile();
-    }, [userId, user, currentUserProfile]);
+            const response = await fetch(`/api/profile/${targetUserId}`);
+            if (!response.ok) throw new Error('Error al cargar el perfil');
+            return response.json();
+        },
+        enabled: !!user,
+        staleTime: 30_000,
+        placeholderData: skipFetch ? currentUserProfile : undefined,
+    });
 
-    const updateProfile = async (updates: Partial<UserProfile>) => {
-        try {
-            // Cookie auth handles authentication automatically
+    const error = queryError instanceof Error ? queryError.message : queryError ? 'Error desconocido' : null;
+
+    const { mutateAsync: updateProfile } = useMutation({
+        mutationFn: async (updates: Partial<UserProfile>) => {
             const response = await fetch('/api/profile', {
                 method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(updates),
             });
-
-            if (!response.ok) {
-                throw new Error('Error al actualizar el perfil');
+            if (!response.ok) throw new Error('Error al actualizar el perfil');
+            return response.json() as Promise<UserProfile>;
+        },
+        onSuccess: (updated) => {
+            queryClient.setQueryData(['profile', user?.id], updated);
+            if (targetUserId && targetUserId !== user?.id) {
+                queryClient.setQueryData(['profile', targetUserId], updated);
             }
-
-            const updatedProfile = await response.json();
-            setProfile(updatedProfile);
-            return updatedProfile;
-        } catch (err) {
-            setError(err instanceof Error ? err.message : 'Error desconocido');
-            throw err;
-        }
-    };
+        },
+    });
 
     return {
-        profile,
+        profile: profile ?? null,
         loading,
         error,
         updateProfile,

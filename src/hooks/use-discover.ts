@@ -1,31 +1,23 @@
 'use client';
 
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
+import { useInfiniteQuery, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/contexts/AuthContext';
 import { UserProfile } from '@/lib/domain/types';
 import { getDynamicFeed, FeedItem, FeedFilters } from '@/server/actions/feed';
 
-interface DiscoverProfile {
+export interface DiscoverProfile {
     profile: UserProfile;
     compatibility: number | null;
     score?: any;
 }
 
-export function useDiscover(searchTerm: string = '', filters?: FeedFilters, limit: number = 10) {
+export function useDiscover(searchTerm = '', filters?: FeedFilters, limit = 10) {
     const { user } = useAuth();
-    const [profilesData, setProfilesData] = useState<DiscoverProfile[]>([]);
-    const [loading, setLoading] = useState(true);
-    const [loadingMore, setLoadingMore] = useState(false);
-    const [error, setError] = useState<string | null>(null);
-    const [retryCount, setRetryCount] = useState(0);
-    const [filterVersion, setFilterVersion] = useState(0);
-    const [hasMore, setHasMore] = useState(true);
-    const cursorRef = useRef<string | null>(null);
-    const filtersRef = useRef(filters);
+    const queryClient = useQueryClient();
     const prevFiltersRef = useRef(filters);
-    filtersRef.current = filters;
+    const [filterVersion, setFilterVersion] = useState(0);
 
-    // Detect filter changes and trigger refresh
     useEffect(() => {
         const prev = prevFiltersRef.current;
         const curr = filters;
@@ -35,89 +27,87 @@ export function useDiscover(searchTerm: string = '', filters?: FeedFilters, limi
                 setFilterVersion(v => v + 1);
             }
         }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [JSON.stringify(filters)]);
+    }, [filters]);
 
-    const fetchProfiles = useCallback(async (isRefresh = false) => {
-        if (!user?.id) {
-            setLoading(false);
-            return;
-        }
-
-        try {
-            if (isRefresh) {
-                setLoading(true);
-                cursorRef.current = null;
-                setHasMore(true);
-            }
-
+    const {
+        data,
+        isLoading: loading,
+        isFetchingNextPage: loadingMore,
+        hasNextPage: hasMore,
+        fetchNextPage: loadMore,
+        error: queryError,
+        refetch,
+    } = useInfiniteQuery({
+        queryKey: ['discover', user?.id, searchTerm, filterVersion],
+        queryFn: async ({ pageParam }) => {
             const result = await getDynamicFeed(
-                user.id,
+                user!.id,
                 searchTerm || undefined,
-                isRefresh ? undefined : cursorRef.current || undefined,
+                pageParam as string | undefined,
                 limit,
-                filtersRef.current
+                filters
             );
 
-            cursorRef.current = result?.nextCursor ?? null;
-            setHasMore(result?.hasMore ?? false);
-
-            const mapped: DiscoverProfile[] = (result?.items ?? []).map(item => {
-                const realCompatibility = item.score?.details?.quizzes;
-                const totalScore = item.score?.total;
-                const compatibility =
-                    typeof realCompatibility === 'number'
+            const mapped: DiscoverProfile[] = (result?.items ?? []).map(item => ({
+                profile: {
+                    ...item.profile,
+                    activeNow: item.signals?.activeNow,
+                    highResponseRate: item.signals?.highResponseRate,
+                    sharedInterests: item.signals?.sharedInterests,
+                    messageResponseRate: item.signals?.messageResponseRate,
+                    lastActiveHours: item.signals?.lastActiveHours,
+                } as UserProfile,
+                compatibility: (() => {
+                    const realCompatibility = item.score?.details?.quizzes;
+                    const totalScore = item.score?.total;
+                    return typeof realCompatibility === 'number'
                         ? realCompatibility
                         : typeof totalScore === 'number'
                             ? totalScore
                             : null;
-                return {
-                    profile: {
-                        ...item.profile,
-                        activeNow: item.signals?.activeNow,
-                        highResponseRate: item.signals?.highResponseRate,
-                        sharedInterests: item.signals?.sharedInterests,
-                        messageResponseRate: item.signals?.messageResponseRate,
-                        lastActiveHours: item.signals?.lastActiveHours,
-                    },
-                    compatibility,
-                    score: item.score,
-                };
-            });
+                })(),
+                score: item.score,
+            }));
 
-            if (isRefresh || !cursorRef.current) {
-                setProfilesData(mapped);
-            } else {
-                setProfilesData(prev => [...prev, ...mapped]);
-            }
+            return {
+                profiles: mapped,
+                nextCursor: result?.nextCursor ?? null,
+                hasMore: result?.hasMore ?? false,
+            };
+        },
+        initialPageParam: null as string | null,
+        getNextPageParam: (lastPage) => lastPage.hasMore ? lastPage.nextCursor : undefined,
+        enabled: !!user?.id,
+        staleTime: 60_000,
+        gcTime: 5 * 60_000,
+    });
 
-            setError(null);
-        } catch (err) {
-            console.error('Discover fetch error:', err);
-            setError('No pudimos cargar nuevos perfiles. Verifica tu conexión.');
-        } finally {
-            setLoading(false);
-            setLoadingMore(false);
-        }
-    }, [user?.id, searchTerm, limit]);
-
-    useEffect(() => {
-        fetchProfiles(true);
-    }, [fetchProfiles, retryCount, filterVersion]);
-
-    const loadMore = useCallback(() => {
-        if (loadingMore || !hasMore) return;
-        setLoadingMore(true);
-        fetchProfiles(false);
-    }, [loadingMore, hasMore, fetchProfiles]);
+    const profiles: DiscoverProfile[] = data?.pages.flatMap(p => p.profiles) ?? [];
+    const error = queryError instanceof Error ? queryError.message : queryError ? 'No pudimos cargar nuevos perfiles. Verifica tu conexión.' : null;
 
     const refresh = useCallback(() => {
-        setRetryCount(prev => prev + 1);
-    }, []);
+        refetch();
+    }, [refetch]);
+
+    const setProfiles = useCallback((updater: DiscoverProfile[] | ((prev: DiscoverProfile[]) => DiscoverProfile[])) => {
+        queryClient.setQueryData(
+            ['discover', user?.id, searchTerm, filterVersion],
+            (old: any) => {
+                if (!old) return old;
+                const newFirstPage = typeof updater === 'function'
+                    ? updater(old.pages[0].profiles)
+                    : updater;
+                return {
+                    ...old,
+                    pages: [{ ...old.pages[0], profiles: newFirstPage }, ...old.pages.slice(1)],
+                };
+            }
+        );
+    }, [queryClient, user?.id, searchTerm, filterVersion]);
 
     return {
-        profiles: profilesData,
-        setProfiles: setProfilesData,
+        profiles,
+        setProfiles,
         loading,
         loadingMore,
         error,

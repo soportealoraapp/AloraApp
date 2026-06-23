@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback, useRef } from 'react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/contexts/AuthContext';
 import { ConnectionIntent, Match } from '@/lib/domain/types';
 import { authFetch } from '@/lib/utils';
@@ -18,49 +19,37 @@ interface LikePreview {
 
 export function useMatches() {
     const { user } = useAuth();
-    const [matches, setMatches] = useState<Match[]>([]);
-    const [newMatches, setNewMatches] = useState<LikePreview[]>([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
+    const queryClient = useQueryClient();
     const channelRef = useRef<any>(null);
+    const [intent, setIntent] = useState<ConnectionIntent | undefined>(undefined);
 
-    const fetchMatches = useCallback(async (intent?: ConnectionIntent) => {
-        if (!user) {
-            setLoading(false);
-            return;
-        }
-
-        try {
-            setLoading(true);
-
+    const { data: matchesData, isLoading: loading, error: queryError } = useQuery({
+        queryKey: ['matches', user?.id, intent],
+        queryFn: async () => {
             const suffix = intent ? `?intent=${intent}` : '';
             const [matchesResponse, newMatchesResponse] = await Promise.all([
                 authFetch(`/api/match/feed${suffix}`),
                 authFetch(`/api/match/new${suffix}`),
             ]);
-
             if (!matchesResponse.ok || !newMatchesResponse.ok) {
                 throw new Error('Error al cargar matches');
             }
+            const [matches, newMatches] = await Promise.all([
+                matchesResponse.json(),
+                newMatchesResponse.json(),
+            ]);
+            return { matches: matches as Match[], newMatches: newMatches as LikePreview[] };
+        },
+        enabled: !!user?.id,
+        staleTime: 15_000,
+        placeholderData: (prev) => prev,
+    });
 
-            const matchesData = await matchesResponse.json();
-            const newMatchesData = await newMatchesResponse.json();
+    const matches = matchesData?.matches ?? [];
+    const newMatches = matchesData?.newMatches ?? [];
+    const error = queryError instanceof Error ? queryError.message : queryError ? 'Error desconocido' : null;
 
-            setMatches(matchesData);
-            setNewMatches(newMatchesData);
-            setError(null);
-        } catch (err) {
-            setError(err instanceof Error ? err.message : 'Error desconocido');
-        } finally {
-            setLoading(false);
-        }
-    }, [user]);
-
-    useEffect(() => {
-        fetchMatches();
-    }, [fetchMatches]);
-
-    // Realtime subscription for new matches
+    // Realtime subscription for new matches — invalidates query on insert
     useEffect(() => {
         if (!user?.id) return;
 
@@ -69,17 +58,11 @@ export function useMatches() {
             .channel(`matches:${user.id}`)
             .on(
                 'postgres_changes',
-                {
-                    event: 'INSERT',
-                    schema: 'public',
-                    table: 'matches',
-                },
+                { event: 'INSERT', schema: 'public', table: 'matches' },
                 (payload) => {
                     const match = payload.new as any;
-                    // Only process matches where this user is a participant
                     if (match.user1Id === user.id || match.user2Id === user.id) {
-                        // Refresh matches to get full data
-                        fetchMatches();
+                        queryClient.invalidateQueries({ queryKey: ['matches', user.id] });
                     }
                 }
             )
@@ -97,19 +80,19 @@ export function useMatches() {
                 channelRef.current = null;
             }
         };
-    }, [user?.id, fetchMatches]);
+    }, [user?.id, queryClient]);
 
-    const { sendLike: baseSendLike } = useSendLike((intent) => {
-        fetchMatches(intent);
+    const { sendLike: baseSendLike } = useSendLike(() => {
+        queryClient.invalidateQueries({ queryKey: ['matches', user?.id] });
     });
 
     const sendLike = useCallback(async (
         toUserId: string,
         type: 'like' | 'superlike' | 'pass' = 'like',
-        intent: ConnectionIntent = 'dating',
-        showToast: boolean = true
+        intentLike: ConnectionIntent = 'dating',
+        showToast = true
     ) => {
-        return baseSendLike(toUserId, type, intent, showToast);
+        return baseSendLike(toUserId, type, intentLike, showToast);
     }, [baseSendLike]);
 
     return {
@@ -118,6 +101,6 @@ export function useMatches() {
         loading,
         error,
         sendLike,
-        refresh: fetchMatches,
+        refresh: () => queryClient.invalidateQueries({ queryKey: ['matches', user?.id] }),
     };
 }
