@@ -16,6 +16,7 @@ interface NotificationPrefs {
     promotions: boolean;
     dailyQuestion: boolean;
     streakReminder: boolean;
+    readReceipts: boolean;
 }
 
 export default function NotificationsPage() {
@@ -105,6 +106,7 @@ export default function NotificationsPage() {
         { key: 'dailyQuestion' as const, label: "Pregunta del día", description: "Recordatorio de la pregunta diaria." },
         { key: 'streakReminder' as const, label: "Recordatorio de racha", description: "No pierdas tu racha diaria." },
         { key: 'promotions' as const, label: "Promociones", description: "Noticias y ofertas de Alora." },
+        { key: 'readReceipts' as const, label: "Confirmaciones de lectura", description: "Mostrar cuando alguien lee tus mensajes." },
     ];
 
     return (
@@ -119,7 +121,7 @@ export default function NotificationsPage() {
                 <Card>
                     <CardHeader>
                         <CardTitle>Notificaciones Push</CardTitle>
-                        <CardDescription>Elige como quieres que te notifiquemos.</CardDescription>
+                        <CardDescription>Elige cómo quieres que te notifiquemos.</CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-4 divide-y">
                         {settings.map(setting => (

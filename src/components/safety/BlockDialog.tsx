@@ -63,10 +63,10 @@ export function BlockDialog({ isOpen, onClose, blockedId, onSuccess }: BlockDial
                     <DialogDescription>
                         Al bloquear:
                         <ul className="list-disc list-inside mt-2 space-y-1">
-                            <li>El match se deshará inmediatamente.</li>
+                            <li>El match se deshará inmediatamente y no se recuperará.</li>
                             <li>Ya no podrán ver sus perfiles ni enviarse mensajes.</li>
                         </ul>
-                        <p className="mt-2 text-xs text-muted-foreground">Puedes desbloquear a esta persona desde Ajustes → Seguridad en cualquier momento.</p>
+                        <p className="mt-2 text-xs text-muted-foreground">Puedes desbloquear desde Ajustes → Privacidad, pero el historial de conversación no se restaurará.</p>
                     </DialogDescription>
                 </DialogHeader>
 

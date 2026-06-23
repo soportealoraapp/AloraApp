@@ -1,22 +1,33 @@
 "use client";
 
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ArrowLeft, Bell, FileText, HelpCircle, Mail, Palette, Shield, User, LogOut, Loader2, Plane } from "lucide-react";
 import { ThemeToggle } from '@/components/theme-toggle';
 import { SettingsSectionLink } from '@/components/settings/SettingsSectionLink';
 import { useAuth } from '@/contexts/AuthContext';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 
 export default function SettingsPage() {
     const router = useRouter();
+    const searchParams = useSearchParams();
     const { signOut } = useAuth();
     const { toast } = useToast();
     const [loggingOut, setLoggingOut] = useState(false);
     const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
+
+    useEffect(() => {
+        const spotify = searchParams.get('spotify');
+        if (spotify === 'connected') {
+            toast({ title: 'Spotify conectado', description: 'Tu cuenta de Spotify se vinculó correctamente.' });
+        } else if (spotify === 'error') {
+            const reason = searchParams.get('reason') || 'unknown';
+            toast({ title: 'Error al conectar Spotify', description: reason === 'user_denied' ? 'Conexión cancelada.' : 'No se pudo conectar. Intenta de nuevo.', variant: 'destructive' });
+        }
+    }, []);
 
     const handleLogout = async () => {
         setLoggingOut(true);

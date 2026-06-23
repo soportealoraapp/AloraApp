@@ -318,8 +318,8 @@ export default function ProfilePage() {
           )}
 
           {/* 5. Spotify Section */}
-          {(profile as any).spotify && (
-            <SpotifySection spotify={(profile as any).spotify} />
+          {((profile as any).spotify || true) && (
+            <SpotifySection spotify={(profile as any).spotify ?? null} isOwn={true} />
           )}
 
           {/* 6. Completeness CTA — ALWAYS visible */}

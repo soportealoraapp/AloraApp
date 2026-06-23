@@ -27,6 +27,7 @@ import { Handshake } from "lucide-react";
 import { useAnalytics, AnalyticsEvents } from "@/hooks/use-analytics";
 import { DailyCompatibilityCard } from "@/components/compatibility/DailyCompatibilityCard";
 import { SecondChanceSection } from "@/components/discover/SecondChanceSection";
+import { PaywallModal } from "@/components/premium/PaywallModal";
 
 
 
@@ -101,6 +102,7 @@ export default function DiscoverPage() {
   const [matchedProfile, setMatchedProfile] = useState<UserProfile | null>(null);
   const [matchId, setMatchId] = useState<string | undefined>(undefined);
   const [showMatchScreen, setShowMatchScreen] = useState(false);
+  const [showPaywall, setShowPaywall] = useState(false);
   const [swipeCount, setSwipeCount] = useState(0);
   const [rewinding, setRewinding] = useState(false);
   const [rewindedProfileId, setRewindedProfileId] = useState<string | null>(null);
@@ -114,7 +116,8 @@ export default function DiscoverPage() {
   }>({ hasExistingMatch: false, priorInteraction: null });
 
   // Convert 'both' intent to undefined for API calls that expect ConnectionIntent
-  const effectiveIntent = intent === 'both' ? undefined : intent;
+  // When 'both', send 'dating' as default since the swipe UI doesn't distinguish per-profile
+  const effectiveIntent = intent === 'both' ? ('dating' as const) : intent;
 
   // Sync with user profile on mount (swipeCount, intent, countryCode)
   useEffect(() => {
@@ -264,6 +267,13 @@ export default function DiscoverPage() {
         setCurrentInteractionState({ hasExistingMatch: false, priorInteraction: null });
       });
   }, [currentProfile?.id, user?.id, intent]);
+
+  // Listen for open-paywall events from DailyPicks, DailyCompatibilityCard, etc.
+  useEffect(() => {
+    const handler = () => setShowPaywall(true);
+    window.addEventListener('open-paywall', handler);
+    return () => window.removeEventListener('open-paywall', handler);
+  }, []);
 
   profilesRef.current = profiles;
 
@@ -925,6 +935,8 @@ export default function DiscoverPage() {
 
       {/* Bottom spacing for scrolling — layout already adds pb-20 */}
       <div className="h-4 md:hidden" />
+
+      <PaywallModal isOpen={showPaywall} onClose={() => setShowPaywall(false)} />
     </div>
   );
 }

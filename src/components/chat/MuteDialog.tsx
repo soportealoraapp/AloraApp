@@ -21,10 +21,12 @@ const MUTE_OPTIONS = [
 ];
 
 export function MuteDialog({ isOpen, onClose, onMute, isMuted }: MuteDialogProps) {
-    const [selectedDuration, setSelectedDuration] = useState<number | null>(null);
+    const [selectedDuration, setSelectedDuration] = useState<number | null | undefined>(undefined);
 
     const handleMute = () => {
-        onMute(selectedDuration);
+        if (selectedDuration !== undefined) {
+            onMute(selectedDuration);
+        }
         onClose();
     };
 
@@ -76,7 +78,7 @@ export function MuteDialog({ isOpen, onClose, onMute, isMuted }: MuteDialogProps
                 <DialogFooter>
                     <Button variant="outline" onClick={onClose}>Cancelar</Button>
                     {!isMuted && (
-                        <Button onClick={handleMute} disabled={selectedDuration === null}>
+                        <Button onClick={handleMute} disabled={selectedDuration === undefined}>
                             Silenciar
                         </Button>
                     )}

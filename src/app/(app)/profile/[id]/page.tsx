@@ -436,7 +436,7 @@ export default function UserProfilePage() {
                         </Card>
                     )}
 
-                    {(profile as any).spotify && <SpotifySection spotify={(profile as any).spotify} />}
+                    {(profile as any).spotify && <SpotifySection spotify={(profile as any).spotify} isOwn={false} />}
 
                     {profile.personalGuide && profile.personalGuide.length > 0 && (
                         <Card>

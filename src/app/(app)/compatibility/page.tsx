@@ -15,6 +15,7 @@ import { Loader2, CheckCircle2, Heart, MessageCircle, Zap, Target, ArrowRight, A
 import { ARCHETYPES } from '@/lib/compatibility/quizzes';
 import { DailyQuestionCard } from '@/components/daily-question/DailyQuestionCard';
 import { DailyCompatibilityCard } from '@/components/compatibility/DailyCompatibilityCard';
+import { PaywallModal } from '@/components/premium/PaywallModal';
 import { Lightbulb, Star } from 'lucide-react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
@@ -66,6 +67,7 @@ export default function CompatibilityPage() {
   const [similarUsers, setSimilarUsers] = useState<SimilarUser[]>([]);
   const [loadingSimilar, setLoadingSimilar] = useState(false);
   const [interactingId, setInteractingId] = useState<string | null>(null);
+  const [showPaywall, setShowPaywall] = useState(false);
 
   useEffect(() => {
     if (!user) {
@@ -92,6 +94,12 @@ export default function CompatibilityPage() {
     })();
     return () => { cancelled = true; };
   }, [user]);
+
+  useEffect(() => {
+    const handler = () => setShowPaywall(true);
+    window.addEventListener('open-paywall', handler);
+    return () => window.removeEventListener('open-paywall', handler);
+  }, []);
 
   const handleStartQuiz = (quiz: Quiz) => {
     setSelectedQuiz(quiz);
@@ -582,6 +590,7 @@ export default function CompatibilityPage() {
           )}
         </DialogContent>
       </Dialog>
+      <PaywallModal isOpen={showPaywall} onClose={() => setShowPaywall(false)} />
     </>
   );
 }

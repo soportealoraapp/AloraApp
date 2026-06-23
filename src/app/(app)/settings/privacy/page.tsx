@@ -254,7 +254,7 @@ export default function PrivacySettingsPage() {
                             <Switch
                                 checked={incognitoMode}
                                 onCheckedChange={handleToggleIncognito}
-                                disabled={saving}
+                                disabled={saving || profile?.subscriptionStatus !== 'plus'}
                             />
                         </div>
 

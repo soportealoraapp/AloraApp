@@ -28,6 +28,7 @@ const LIMITS: Record<string, { limit: number; windowSeconds: number }> = {
     deleteAccount: { limit: 3, windowSeconds: 60 },
     blockRead: { limit: 30, windowSeconds: 60 },
     streakCheckin: { limit: 5, windowSeconds: 60 },
+    publicStats: { limit: 30, windowSeconds: 60 },
 };
 
 export async function withRateLimit(userId: string, action: keyof typeof LIMITS): Promise<NextResponse | null> {

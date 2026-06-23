@@ -10,11 +10,15 @@ export async function GET(request: NextRequest) {
     }
 
     const { ensureSubscriptionState } = await import('@/lib/subscription-helper');
-    await ensureSubscriptionState(user.id);
+    const { subscriptionStatus } = await ensureSubscriptionState(user.id);
 
     const targetId = request.nextUrl.searchParams.get('targetId');
     if (!targetId) {
         return NextResponse.json({ error: 'Missing targetId' }, { status: 400 });
+    }
+
+    if (subscriptionStatus !== 'plus') {
+        return NextResponse.json({ error: 'Compatibilidad premium requiere Alora Plus', code: 'subscription_required' }, { status: 403 });
     }
 
     try {

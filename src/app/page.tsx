@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { Logo } from '@/components/logo';
@@ -22,17 +23,50 @@ const pillars = [
   {
     icon: MessageCircle,
     title: 'Conversaciones que fluyen',
-    description: 'Rompehelos personalizados para que nunca separes en blanco.',
+    description: 'Rompehielos personalizados para que nunca te quedes en blanco.',
   },
 ];
 
-const stats = [
-  { value: '10K+', label: 'Personas activas' },
-  { value: '50K+', label: 'Matches creados' },
-  { value: '4.8', label: 'Calificación promedio' },
-];
+interface PublicStats {
+  activeUsers: number;
+  totalMatches: number;
+  avgRating: number | null;
+}
+
+function formatCount(n: number): string {
+  if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M`;
+  if (n >= 1_000) return `${(n / 100).toFixed(0)}K`;
+  return n.toLocaleString('es-MX');
+}
 
 export default function WelcomePage() {
+  const [stats, setStats] = useState<PublicStats | null>(null);
+  const [statsLoaded, setStatsLoaded] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    fetch('/api/public/stats')
+      .then((res) => res.json())
+      .then((data) => {
+        if (!cancelled && !data.error) {
+          setStats(data);
+        }
+      })
+      .catch(() => {})
+      .finally(() => {
+        if (!cancelled) setStatsLoaded(true);
+      });
+    return () => { cancelled = true; };
+  }, []);
+
+  const displayStats = stats
+    ? [
+        { value: formatCount(stats.activeUsers), label: 'Personas activas' },
+        { value: formatCount(stats.totalMatches), label: 'Matches creados' },
+        { value: stats.avgRating != null ? stats.avgRating.toFixed(1) : '—', label: 'Calificación promedio' },
+      ]
+    : null;
+
   return (
     <div className="flex min-h-dvh w-full flex-col items-center bg-background">
       <div className="absolute top-4 right-4 z-10">
@@ -86,21 +120,25 @@ export default function WelcomePage() {
       </main>
 
       {/* Stats */}
-      <motion.section 
-        className="w-full max-w-2xl px-4 pb-16"
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6, delay: 0.4 }}
-      >
-        <div className="grid grid-cols-3 gap-4">
-          {stats.map((stat) => (
-            <div key={stat.label} className="text-center">
-              <p className="text-2xl md:text-3xl font-bold text-primary">{stat.value}</p>
-              <p className="text-xs md:text-sm text-muted-foreground mt-1">{stat.label}</p>
-            </div>
-          ))}
-        </div>
-      </motion.section>
+      {displayStats && (
+        <motion.section
+          className="w-full max-w-2xl px-4 pb-16"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.4 }}
+        >
+          <div className="grid grid-cols-3 gap-4">
+            {displayStats.map((stat) => (
+              <div key={stat.label} className="text-center">
+                <p className="text-2xl md:text-3xl font-bold text-primary">
+                  {statsLoaded ? stat.value : <span className="inline-block w-16 h-7 bg-muted animate-pulse rounded" />}
+                </p>
+                <p className="text-xs md:text-sm text-muted-foreground mt-1">{stat.label}</p>
+              </div>
+            ))}
+          </div>
+        </motion.section>
+      )}
 
       {/* 3 Pillars */}
       <section className="w-full max-w-3xl px-4 pb-20">

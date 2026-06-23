@@ -56,6 +56,23 @@ export async function GET(request: NextRequest) {
       },
     });
 
+    // Trigger initial sync after connect
+    try {
+      const { refreshAccessToken, getTopTracks, getTopArtists, decryptToken } = await import('@/lib/spotify');
+      const decrypted = decryptToken(refreshTokenEncrypted);
+      const tokenResult = await refreshAccessToken(decrypted);
+      const [tracks, artists] = await Promise.all([
+        getTopTracks(tokenResult.accessToken),
+        getTopArtists(tokenResult.accessToken),
+      ]);
+      await prisma.spotifyAccount.update({
+        where: { userId: user.id },
+        data: { topTracks: tracks as any, topArtists: artists as any, lastSyncedAt: new Date() },
+      });
+    } catch (syncErr) {
+      console.warn('[spotify/callback] Initial sync failed (non-fatal):', syncErr);
+    }
+
     return NextResponse.redirect(new URL('/settings?spotify=connected', request.url));
   } catch (err) {
     console.error('[spotify/callback] Error:', err);
