@@ -100,29 +100,23 @@ export default function ChatWindowPage() {
 
     useEffect(() => {
         if (!matchId) return;
-        fetch(`/api/chat/health?matchId=${matchId}`)
-            .then(r => r.json())
-            .then(data => setMatchHealth(data.score || 0))
-            .catch(() => {});
-    }, [matchId]);
+        // Parallelize independent fetch calls for faster initial load
+        Promise.allSettled([
+            fetch(`/api/chat/health?matchId=${matchId}`).then(r => r.json()),
+            otherUserId ? fetch(`/api/profile/${otherUserId}`).then(r => r.json()) : Promise.resolve(null),
+        ]).then(([healthResult, profileResult]) => {
+            if (healthResult.status === 'fulfilled') {
+                setMatchHealth(healthResult.value.score || 0);
+            }
+            if (profileResult.status === 'fulfilled' && profileResult.value?.latestAnswer?.question && profileResult.value?.latestAnswer?.answer) {
+                setPartnerAnswer({
+                    question: profileResult.value.latestAnswer.question,
+                    answer: profileResult.value.latestAnswer.answer,
+                });
+            }
+        }).catch(() => {});
 
-    useEffect(() => {
-        if (!otherUserId) return;
-        fetch(`/api/profile/${otherUserId}`)
-            .then(r => r.json())
-            .then(data => {
-                if (data?.latestAnswer?.question && data?.latestAnswer?.answer) {
-                    setPartnerAnswer({
-                        question: data.latestAnswer.question,
-                        answer: data.latestAnswer.answer,
-                    });
-                }
-            })
-            .catch(() => {});
-    }, [otherUserId]);
-
-    useEffect(() => {
-        if (!matchId) return;
+        // Match feedback check (delayed)
         const checkFeedback = async () => {
             try {
                 const res = await fetch(`/api/match/feedback?matchId=${matchId}`);
@@ -135,7 +129,7 @@ export default function ChatWindowPage() {
         };
         const timer = setTimeout(checkFeedback, 1500);
         return () => clearTimeout(timer);
-    }, [matchId]);
+    }, [matchId, otherUserId]);
 
     const [autoScroll, setAutoScroll] = useState(true);
     const { track } = useAnalytics();

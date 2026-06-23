@@ -194,8 +194,8 @@ export default function CompatibilityPage() {
         {question.type === 'scale' && (
           <div className="flex flex-col space-y-4">
             <div className="flex justify-between text-xs text-muted-foreground px-1">
-              <span>Sinceramente No</span>
-              <span>Totalmente Sí</span>
+              <span>Totalmente en desacuerdo</span>
+              <span>Totalmente de acuerdo</span>
             </div>
             <div className="flex justify-between gap-2">
               {[1, 2, 3, 4, 5].map(val => (

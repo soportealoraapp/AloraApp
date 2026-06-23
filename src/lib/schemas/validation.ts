@@ -16,9 +16,24 @@ const MAX_CITY_LENGTH = 100;
 const MIN_AGE = 18;
 const MAX_AGE = 120;
 
+/**
+ * Strip HTML tags and dangerous characters from user-generated content.
+ * Prevents stored XSS in display names, bios, and messages.
+ */
+export function stripHtml(input: string): string {
+    return input
+        .replace(/<[^>]*>/g, '')           // Remove HTML tags
+        .replace(/&[a-zA-Z]+;/g, '')       // Remove HTML entities
+        .replace(/javascript:/gi, '')       // Remove javascript: URIs
+        .replace(/on\w+\s*=/gi, '')         // Remove on* event handlers
+        .replace(/data:/gi, '')             // Remove data: URIs
+        .replace(/vbscript:/gi, '')         // Remove vbscript: URIs
+        .trim();
+}
+
 export const EditableProfileSchema = z.object({
-    displayName: z.string().min(1, 'Display name is required').max(MAX_DISPLAY_NAME_LENGTH).trim(),
-    bio: z.string().max(MAX_BIO_LENGTH, `Bio must be ${MAX_BIO_LENGTH} characters or less`).trim().optional().default(''),
+    displayName: z.string().min(1, 'Display name is required').max(MAX_DISPLAY_NAME_LENGTH).trim().transform(stripHtml),
+    bio: z.string().max(MAX_BIO_LENGTH, `Bio must be ${MAX_BIO_LENGTH} characters or less`).trim().optional().default('').transform(stripHtml),
     age: z.number().int().min(MIN_AGE, `Must be at least ${MIN_AGE}`).max(MAX_AGE, `Must be at most ${MAX_AGE}`).optional(),
     gender: z.enum(ALLOWED_GENDERS).optional(),
     photos: z.array(z.string().url('Each photo must be a valid URL')).max(MAX_PHOTOS, `Maximum ${MAX_PHOTOS} photos`).optional().default([]),
@@ -57,9 +72,16 @@ export const BLOCKED_FIELDS = new Set([
 export function sanitizeProfileUpdates(body: Record<string, unknown>): Record<string, unknown> {
     const allowed: Record<string, unknown> = {};
     const allowedKeys = new Set(Object.keys(EditableProfileSchema.shape));
+    // Text fields that should be sanitized against XSS
+    const textFields = new Set(['displayName', 'bio', 'status', 'city', 'zodiacSign', 'education', 'smoking', 'drinking', 'children', 'religion']);
     for (const [key, value] of Object.entries(body)) {
         if (allowedKeys.has(key) && !BLOCKED_FIELDS.has(key)) {
-            allowed[key] = value;
+            // Strip HTML from all text fields to prevent stored XSS
+            if (textFields.has(key) && typeof value === 'string') {
+                allowed[key] = stripHtml(value);
+            } else {
+                allowed[key] = value;
+            }
         }
     }
     return allowed;

@@ -130,7 +130,7 @@ export function ChatInput({ onSend, onSendImage, onSendVoice, onTyping, disabled
       setIsRecording(true);
       setRecordingTime(0);
 
-      const MAX_RECORDING_SECONDS = 60;
+      const MAX_RECORDING_SECONDS = 120;
       recordingTimerRef.current = setInterval(() => {
         setRecordingTime(prev => {
           if (prev + 1 >= MAX_RECORDING_SECONDS) {

@@ -5,6 +5,112 @@
 -- NOTA: Prisma mapea String → text en PostgreSQL.
 -- auth.uid() retorna uuid. Se usa CAST (auth.uid()::text)
 -- para comparar con columnas text.
+--
+-- ACTUALIZACIÓN: Se agregaron policies para tablas críticas
+-- (users, profiles, matches, messages, interactions, blocks,
+-- reports, notifications, audit_logs, push_tokens,
+-- device_fingerprints)
+-- ============================================================
+
+-- ============================================================
+-- CRITICAL TABLES (NUEVAS)
+-- ============================================================
+
+-- 0a. users — solo service_role
+ALTER TABLE public.users ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "service_role_full_access_users"
+  ON public.users FOR ALL
+  USING (auth.role() = 'service_role');
+
+-- 0b. profiles — lectura pública autenticada, service_role escribe
+ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "authenticated_read_all_profiles"
+  ON public.profiles FOR SELECT TO authenticated
+  USING (true);
+CREATE POLICY "service_role_full_access_profiles"
+  ON public.profiles FOR ALL
+  USING (auth.role() = 'service_role');
+
+-- 0c. matches — solo participantes
+ALTER TABLE public.matches ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "participants_select_own_matches"
+  ON public.matches FOR SELECT TO authenticated
+  USING (auth.uid()::text = "user1Id" OR auth.uid()::text = "user2Id");
+CREATE POLICY "service_role_full_access_matches"
+  ON public.matches FOR ALL
+  USING (auth.role() = 'service_role');
+
+-- 0d. messages — solo participantes del match
+ALTER TABLE public.messages ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "participants_select_own_messages"
+  ON public.messages FOR SELECT TO authenticated
+  USING (
+    EXISTS (
+      SELECT 1 FROM public.matches
+      WHERE id = "matchId"
+        AND (auth.uid()::text = "user1Id" OR auth.uid()::text = "user2Id")
+    )
+  );
+CREATE POLICY "service_role_full_access_messages"
+  ON public.messages FOR ALL
+  USING (auth.role() = 'service_role');
+
+-- 0e. interactions — solo el emisor
+ALTER TABLE public.interactions ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "sender_select_own_interactions"
+  ON public.interactions FOR SELECT TO authenticated
+  USING (auth.uid()::text = "fromUserId");
+CREATE POLICY "service_role_full_access_interactions"
+  ON public.interactions FOR ALL
+  USING (auth.role() = 'service_role');
+
+-- 0f. blocks — solo el bloqueador
+ALTER TABLE public.blocks ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "blocker_select_own_blocks"
+  ON public.blocks FOR SELECT TO authenticated
+  USING (auth.uid()::text = "blockerId");
+CREATE POLICY "service_role_full_access_blocks"
+  ON public.blocks FOR ALL
+  USING (auth.role() = 'service_role');
+
+-- 0g. reports — solo el reportador + service_role
+ALTER TABLE public.reports ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "reporter_select_own_reports"
+  ON public.reports FOR SELECT TO authenticated
+  USING (auth.uid()::text = "reporterId");
+CREATE POLICY "service_role_full_access_reports"
+  ON public.reports FOR ALL
+  USING (auth.role() = 'service_role');
+
+-- 0h. notifications — solo el propietario
+ALTER TABLE public.notifications ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "owner_select_own_notifications"
+  ON public.notifications FOR SELECT TO authenticated
+  USING (auth.uid()::text = "userId");
+CREATE POLICY "service_role_full_access_notifications"
+  ON public.notifications FOR ALL
+  USING (auth.role() = 'service_role');
+
+-- 0i. audit_logs — solo service_role
+ALTER TABLE public.audit_logs ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "service_role_full_access_audit_logs"
+  ON public.audit_logs FOR ALL
+  USING (auth.role() = 'service_role');
+
+-- 0j. push_tokens — solo service_role
+ALTER TABLE public.push_tokens ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "service_role_full_access_push_tokens"
+  ON public.push_tokens FOR ALL
+  USING (auth.role() = 'service_role');
+
+-- 0k. device_fingerprints — solo service_role
+ALTER TABLE public.device_fingerprints ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "service_role_full_access_device_fingerprints"
+  ON public.device_fingerprints FOR ALL
+  USING (auth.role() = 'service_role');
+
+-- ============================================================
+-- EXISTING TABLES
 -- ============================================================
 
 -- 1. favorites

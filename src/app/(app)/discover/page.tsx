@@ -71,7 +71,7 @@ export default function DiscoverPage() {
   const searchParams = useSearchParams();
   const [filters, setFilters] = useState<Filters>(DEFAULT_FILTERS);
   const [filterOpen, setFilterOpen] = useState(false);
-  const [intent, setIntent] = useState<'dating' | 'friendship'>('dating');
+  const [intent, setIntent] = useState<'dating' | 'friendship' | 'both'>('dating');
 
   // Handle URL filters (interest, value, music, intent)
   useEffect(() => {
@@ -109,6 +109,13 @@ export default function DiscoverPage() {
   const [browseMode, setBrowseMode] = useState<'swipe' | 'grid'>('swipe');
   const [intentChanging, setIntentChanging] = useState(false);
   const [pendingGridAction, setPendingGridAction] = useState(false);
+  const [currentInteractionState, setCurrentInteractionState] = useState<{
+    hasExistingMatch: boolean;
+    priorInteraction: 'like' | 'superlike' | 'pass' | null;
+  }>({ hasExistingMatch: false, priorInteraction: null });
+
+  // Convert 'both' intent to undefined for API calls that expect ConnectionIntent
+  const effectiveIntent = intent === 'both' ? undefined : intent;
 
   // Sync with user profile on mount (swipeCount, intent, countryCode)
   useEffect(() => {
@@ -126,9 +133,11 @@ export default function DiscoverPage() {
 
     // Initialize intent from user's connectionModes
     if (currentUserProfile?.connectionModes?.length) {
-      const savedIntent = currentUserProfile.connectionModes[0];
-      if (savedIntent === 'dating' || savedIntent === 'friendship') {
-        setIntent(savedIntent);
+      const modes = currentUserProfile.connectionModes;
+      if (modes.includes('dating') && modes.includes('friendship')) {
+        setIntent('both');
+      } else if (modes[0] === 'dating' || modes[0] === 'friendship') {
+        setIntent(modes[0]);
       }
     }
 
@@ -222,11 +231,40 @@ export default function DiscoverPage() {
 
   // Sync intent to filters and clear intent changing state
   useEffect(() => {
-    setFilters(prev => ({ ...prev, intent }));
+    // When intent is 'both', don't filter by intent — show all profiles
+    if (intent === 'both') {
+      setFilters(prev => {
+        const { intent: _, ...rest } = prev;
+        return rest;
+      });
+    } else {
+      setFilters(prev => ({ ...prev, intent }));
+    }
     if (!loading && intentChanging) {
       setIntentChanging(false);
     }
   }, [intent, loading, intentChanging]);
+
+  // Fetch interaction state for current profile (match/like/superlike detection)
+  useEffect(() => {
+    if (!currentProfile?.id || !user?.id) {
+      setCurrentInteractionState({ hasExistingMatch: false, priorInteraction: null });
+      return;
+    }
+    // Reset state when profile changes
+    setCurrentInteractionState({ hasExistingMatch: false, priorInteraction: null });
+    fetch(`/api/match/check?targetUserId=${currentProfile.id}&intent=${intent === 'both' ? '' : intent}`)
+      .then(r => r.json())
+      .then(data => {
+        setCurrentInteractionState({
+          hasExistingMatch: data.matched || false,
+          priorInteraction: data.interactionType || null,
+        });
+      })
+      .catch(() => {
+        setCurrentInteractionState({ hasExistingMatch: false, priorInteraction: null });
+      });
+  }, [currentProfile?.id, user?.id, intent]);
 
   profilesRef.current = profiles;
 
@@ -304,12 +342,12 @@ export default function DiscoverPage() {
       const analyticsEvent = action === 'pass' ? AnalyticsEvents.PASS_SENT
         : action === 'superlike' ? AnalyticsEvents.SUPERLIKE_SENT
         : AnalyticsEvents.LIKE_SENT;
-      track(analyticsEvent, { targetUserId: profileToActOn.id, intent });
-      const result = await sendLike(profileToActOn.id, action, intent, false);
+      track(analyticsEvent, { targetUserId: profileToActOn.id, intent: effectiveIntent });
+      const result = await sendLike(profileToActOn.id, action, effectiveIntent, false);
       lastSwipeRef.current = { profileId: profileToActOn.id, direction };
 
       if (action === 'pass') {
-        toast({ title: 'Descartado', description: 'Perfil descartado.' });
+        toast({ title: 'Perfil descartado', description: 'Puedes verlo más tarde en Segunda Oportunidad' });
       } else if (action === 'superlike') {
         toast({ title: '¡💘 Flechado enviado!', description: `${profileToActOn.displayName} recibirá tu interés destacado.` });
       } else {
@@ -317,7 +355,7 @@ export default function DiscoverPage() {
       }
 
       if (result?.matched) {
-        track(AnalyticsEvents.MATCH_CREATED, { partnerId: profileToActOn.id, intent });
+        track(AnalyticsEvents.MATCH_CREATED, { partnerId: profileToActOn.id, intent: effectiveIntent });
         setMatchedProfile(profileToActOn);
         setMatchId((result as any)?.matchId);
         setShowMatchScreen(true);
@@ -395,7 +433,7 @@ export default function DiscoverPage() {
   };
 
   const handleApplyFilters = (newFilters: Filters) => {
-    setFilters({ ...newFilters, intent });
+    setFilters({ ...newFilters, intent: effectiveIntent });
     setFilterOpen(false);
   };
 
@@ -465,7 +503,43 @@ export default function DiscoverPage() {
 
       {/* Likes counter — compact, above feed */}
       <div className="px-4 pt-2 max-w-sm mx-auto w-full space-y-3">
-        {intent === 'dating' && (
+        {/* Mode selector — 3 options: dating, friendship, both */}
+        {(currentUserProfile?.connectionModes?.includes('dating') && currentUserProfile?.connectionModes?.includes('friendship')) && (
+          <div className="flex gap-1 p-1 bg-muted/50 rounded-xl">
+            <button
+              onClick={() => { setIntent('dating'); setIntentChanging(true); }}
+              className={`flex-1 py-1.5 px-2 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all ${
+                intent === 'dating'
+                  ? 'bg-primary text-primary-foreground shadow-sm'
+                  : 'text-muted-foreground hover:text-foreground'
+              }`}
+            >
+              Citas
+            </button>
+            <button
+              onClick={() => { setIntent('both'); setIntentChanging(true); }}
+              className={`flex-1 py-1.5 px-2 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all ${
+                intent === 'both'
+                  ? 'bg-amber-500 text-white shadow-sm'
+                  : 'text-muted-foreground hover:text-foreground'
+              }`}
+            >
+              Ambos
+            </button>
+            <button
+              onClick={() => { setIntent('friendship'); setIntentChanging(true); }}
+              className={`flex-1 py-1.5 px-2 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all ${
+                intent === 'friendship'
+                  ? 'bg-blue-500 text-white shadow-sm'
+                  : 'text-muted-foreground hover:text-foreground'
+              }`}
+            >
+              Amistad
+            </button>
+          </div>
+        )}
+
+        {intent === 'dating' && !(currentUserProfile?.connectionModes?.includes('dating') && currentUserProfile?.connectionModes?.includes('friendship')) && (
           <Card className="border-none bg-gradient-to-r from-blue-500/10 to-indigo-500/10 dark:from-blue-500/5 dark:to-indigo-500/5 rounded-2xl overflow-hidden cursor-pointer hover:bg-indigo-500/20 dark:hover:bg-indigo-500/10 transition-all" onClick={() => setIntent('friendship')}>
             <CardContent className="p-3 flex items-center justify-between">
               <div className="flex items-center gap-3">
@@ -482,7 +556,7 @@ export default function DiscoverPage() {
           </Card>
         )}
 
-        {intent === 'friendship' && (
+        {intent === 'friendship' && !(currentUserProfile?.connectionModes?.includes('dating') && currentUserProfile?.connectionModes?.includes('friendship')) && (
           <Card className="border-none bg-gradient-to-r from-pink-500/10 to-primary/10 dark:from-pink-500/5 dark:to-primary/5 rounded-2xl overflow-hidden cursor-pointer hover:bg-primary/20 dark:hover:bg-primary/10 transition-all" onClick={() => setIntent('dating')}>
             <CardContent className="p-3 flex items-center justify-between">
               <div className="flex items-center gap-3">
@@ -495,6 +569,23 @@ export default function DiscoverPage() {
                 </div>
               </div>
               <ArrowRight className="h-4 w-4 text-primary/40 dark:text-primary/30" />
+            </CardContent>
+          </Card>
+        )}
+
+        {intent === 'both' && (
+          <Card className="border-none bg-gradient-to-r from-amber-500/10 to-orange-500/10 dark:from-amber-500/5 dark:to-orange-500/5 rounded-2xl overflow-hidden cursor-pointer hover:bg-amber-500/20 dark:hover:bg-amber-500/10 transition-all" onClick={() => setIntent('dating')}>
+            <CardContent className="p-3 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="h-10 w-10 rounded-xl bg-amber-500/20 dark:bg-amber-400/10 flex items-center justify-center text-amber-600 dark:text-amber-400">
+                  <Sparkles className="h-5 w-5" />
+                </div>
+                <div>
+                  <p className="text-xs font-black uppercase tracking-widest text-amber-700 dark:text-amber-400">Modo Ambos</p>
+                  <p className="text-[10px] text-amber-600/80 dark:text-amber-400/60">Explora citas y amistad juntos</p>
+                </div>
+              </div>
+              <ArrowRight className="h-4 w-4 text-amber-400 dark:text-amber-500" />
             </CardContent>
           </Card>
         )}
@@ -622,8 +713,8 @@ export default function DiscoverPage() {
                                   setPendingGridAction(true);
                                   const previousGridProfiles = profiles;
                                   try {
-                                    track(AnalyticsEvents.PASS_SENT, { targetUserId: p.id, intent });
-                                    await sendLike(p.id, 'pass', intent);
+                                    track(AnalyticsEvents.PASS_SENT, { targetUserId: p.id, intent: effectiveIntent });
+                                    await sendLike(p.id, 'pass', effectiveIntent);
                                     setProfiles(prev => prev.filter(item => item.profile.id !== p.id));
                                   } catch (error) {
                                     setProfiles(previousGridProfiles);
@@ -643,13 +734,13 @@ export default function DiscoverPage() {
                                   setPendingGridAction(true);
                                   const previousGridProfiles = profiles;
                                   try {
-                                    track(AnalyticsEvents.SUPERLIKE_SENT, { targetUserId: p.id, intent });
-                                    const result = await sendLike(p.id, 'superlike', intent);
+                                    track(AnalyticsEvents.SUPERLIKE_SENT, { targetUserId: p.id, intent: effectiveIntent });
+                                    const result = await sendLike(p.id, 'superlike', effectiveIntent);
                                     setSwipeCount(prev => prev + 1);
                                     setProfiles(prev => prev.filter(item => item.profile.id !== p.id));
                                     toast({ title: '¡💘 Flechado enviado!', description: `${p.displayName} recibirá tu interés destacado.` });
                                     if (result?.matched) {
-                                      track(AnalyticsEvents.MATCH_CREATED, { partnerId: p.id, intent });
+                                      track(AnalyticsEvents.MATCH_CREATED, { partnerId: p.id, intent: effectiveIntent });
                                       setMatchedProfile(p);
                                       setMatchId((result as any)?.matchId);
                                       setShowMatchScreen(true);
@@ -673,12 +764,12 @@ export default function DiscoverPage() {
                                   setPendingGridAction(true);
                                   const previousGridProfiles = profiles;
                                   try {
-                                    track(AnalyticsEvents.LIKE_SENT, { targetUserId: p.id, intent });
-                                    const result = await sendLike(p.id, 'like', intent);
+                                    track(AnalyticsEvents.LIKE_SENT, { targetUserId: p.id, intent: effectiveIntent });
+                                    const result = await sendLike(p.id, 'like', effectiveIntent);
                                     setSwipeCount(prev => prev + 1);
                                     setProfiles(prev => prev.filter(item => item.profile.id !== p.id));
                                     if (result?.matched) {
-                                      track(AnalyticsEvents.MATCH_CREATED, { partnerId: p.id, intent });
+                                      track(AnalyticsEvents.MATCH_CREATED, { partnerId: p.id, intent: effectiveIntent });
                                       setMatchedProfile(p);
                                       setMatchId((result as any)?.matchId);
                                       setShowMatchScreen(true);
@@ -739,6 +830,8 @@ export default function DiscoverPage() {
                   onSwipe={handleSwipe}
                   onFlechado={handleFlechado}
                   superlikesRemaining={currentUserProfile?.superlikesRemaining}
+                  hasExistingMatch={currentInteractionState.hasExistingMatch}
+                  priorInteraction={currentInteractionState.priorInteraction}
                 />
                 </motion.div>
               </div>
@@ -796,7 +889,7 @@ export default function DiscoverPage() {
       </div>
 
       <div className="px-4 pb-3 max-w-sm mx-auto w-full">
-        <SecondChanceSection intent={intent} />
+        <SecondChanceSection intent={effectiveIntent} />
       </div>
 
       <DiscoverFilters

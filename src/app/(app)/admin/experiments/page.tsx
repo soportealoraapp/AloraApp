@@ -180,7 +180,7 @@ export default function AdminExperimentsPage() {
                         vs[i].name = e.target.value;
                         setNewVariants(vs);
                       }}
-                      className="flex-1 px-3 py-2 rounded-lg border bg-white text-sm"
+                      className="flex-1 px-3 py-2 rounded-lg border bg-input text-sm"
                       placeholder="nombre"
                     />
                     <input
@@ -191,7 +191,7 @@ export default function AdminExperimentsPage() {
                         vs[i].trafficPct = Number(e.target.value);
                         setNewVariants(vs);
                       }}
-                      className="w-20 px-3 py-2 rounded-lg border bg-white text-sm text-right"
+                      className="w-20 px-3 py-2 rounded-lg border bg-input text-sm text-right"
                     />
                     <span className="text-xs text-muted-foreground self-center">%</span>
                     {newVariants.length > 2 && (

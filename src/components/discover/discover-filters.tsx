@@ -45,7 +45,7 @@ export interface Filters {
   featuredOnly?: boolean;
   highCompatibility?: boolean;
   activeToday?: boolean;
-  intent?: 'dating' | 'friendship';
+  intent?: 'dating' | 'friendship' | 'both';
 }
 
 interface DiscoverFiltersProps {
@@ -55,8 +55,8 @@ interface DiscoverFiltersProps {
   initialFilters: Filters;
   browseMode: 'swipe' | 'grid';
   onBrowseModeChange: (mode: 'swipe' | 'grid') => void;
-  intent?: 'dating' | 'friendship';
-  onIntentChange?: (intent: 'dating' | 'friendship') => void;
+  intent?: 'dating' | 'friendship' | 'both';
+  onIntentChange?: (intent: 'dating' | 'friendship' | 'both') => void;
 }
 
 export function DiscoverFilters({ open, onOpenChange, onApplyFilters, initialFilters, browseMode, onBrowseModeChange, intent, onIntentChange }: DiscoverFiltersProps) {

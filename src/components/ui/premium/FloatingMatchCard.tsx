@@ -22,9 +22,13 @@ interface FloatingMatchCardProps {
   };
   superlikesRemaining?: number;
   explanations?: string[];
+  /** Whether the current user already has a match with this profile */
+  hasExistingMatch?: boolean;
+  /** Whether the current user already sent a like/superlike to this profile */
+  priorInteraction?: 'like' | 'superlike' | 'pass' | null;
 }
 
-export function FloatingMatchCard({ profile, onSwipe, onFlechado, compatibility, compatibilityDetails, superlikesRemaining, explanations }: FloatingMatchCardProps) {
+export function FloatingMatchCard({ profile, onSwipe, onFlechado, compatibility, compatibilityDetails, superlikesRemaining, explanations, hasExistingMatch, priorInteraction }: FloatingMatchCardProps) {
   const controls = useAnimation();
   const [dragX, setDragX] = useState(0);
   const [likeBurst, setLikeBurst] = useState(false);
@@ -176,6 +180,35 @@ export function FloatingMatchCard({ profile, onSwipe, onFlechado, compatibility,
         <div className="absolute top-4 right-4 z-20">
           <ProfileActions userId={profile.id} userName={profile.displayName} />
         </div>
+
+        {/* Prior interaction/match indicator */}
+        {hasExistingMatch && (
+          <motion.div
+            initial={{ scale: 0.8, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            className="absolute top-4 left-4 z-20 bg-green-500/90 backdrop-blur-md text-white px-2.5 py-1 rounded-full text-[11px] font-bold flex items-center gap-1 border border-green-400/30 shadow-sm"
+          >
+            <Heart className="h-3 w-3 fill-current" /> Match
+          </motion.div>
+        )}
+        {!hasExistingMatch && priorInteraction === 'like' && (
+          <motion.div
+            initial={{ scale: 0.8, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            className="absolute top-4 left-4 z-20 bg-primary/90 backdrop-blur-md text-primary-foreground px-2.5 py-1 rounded-full text-[11px] font-bold flex items-center gap-1 border border-primary/30 shadow-sm"
+          >
+            <Heart className="h-3 w-3 fill-current" /> Ya le diste like
+          </motion.div>
+        )}
+        {!hasExistingMatch && priorInteraction === 'superlike' && (
+          <motion.div
+            initial={{ scale: 0.8, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            className="absolute top-4 left-4 z-20 bg-amber-500/90 backdrop-blur-md text-white px-2.5 py-1 rounded-full text-[11px] font-bold flex items-center gap-1 border border-amber-400/30 shadow-sm"
+          >
+            <HeartArrow className="h-3 w-3" /> Flechado enviado
+          </motion.div>
+        )}
 
         {/* Single priority badge - top left */}
         {(() => {

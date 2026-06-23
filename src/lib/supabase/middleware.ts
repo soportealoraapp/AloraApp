@@ -12,7 +12,10 @@ export async function createClient(request: NextRequest, response: NextResponse)
                 },
                 setAll(cookiesToSet) {
                     cookiesToSet.forEach(({ name, value, options }) =>
-                        response.cookies.set(name, value, options)
+                        response.cookies.set(name, value, {
+                            ...options,
+                            sameSite: 'strict',
+                        })
                     )
                 },
             },

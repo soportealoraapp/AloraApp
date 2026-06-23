@@ -20,7 +20,7 @@ const QUESTIONS = [
     { question: "¿Prefieres las palabras o los hechos para demostrar amor?", category: "communication" },
     { question: "¿Qué hábito de tu pareja más admiras?", category: "values" },
     { question: "¿Cómo manejas el estrés en una relación?", category: "communication" },
-    { question: "¿Quéplace(s) te gustaría visitar con tu pareja?", category: "lifestyle" },
+    { question: "¿Qué lugar(es) te gustaría visitar con tu pareja?", category: "lifestyle" },
     { question: "¿Cuál es tu forma favorita de recibir cariño?", category: "connection" },
     { question: "¿Qué opinas sobre las relaciones a distancia?", category: "values" },
     { question: "¿Cómo celebras los logros de tu pareja?", category: "connection" },

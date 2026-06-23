@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireModerator } from '@/lib/middleware/admin';
+import { withRateLimit } from '@/server/utils/api-rate-limit';
 import {
     getFunnelData,
     getRetentionData,
@@ -10,12 +11,22 @@ import {
 } from '@/server/services/analytics';
 
 export async function GET(request: NextRequest) {
-    const admin = await requireModerator();
-    if (admin) return admin;
+    const auth = await requireModerator();
+    if (auth) return auth;
+
+    // Rate limit admin analytics queries
+    const { createClient } = await import('@/lib/supabase/server');
+    const supabase = await createClient();
+    const { data: { user: adminUser } } = await supabase.auth.getUser();
+    if (!adminUser) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+
+    const rateLimitResponse = await withRateLimit(adminUser.id, 'adminAction');
+    if (rateLimitResponse) return rateLimitResponse;
 
     const { searchParams } = new URL(request.url);
     const type = searchParams.get('type') || 'funnel';
-    const days = parseInt(searchParams.get('days') || '30', 10);
+    const rawDays = parseInt(searchParams.get('days') || '30', 10);
+    const days = Math.min(Math.max(1, isNaN(rawDays) ? 30 : rawDays), 90);
     const format = searchParams.get('format');
 
     try {

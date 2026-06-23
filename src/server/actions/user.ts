@@ -133,6 +133,9 @@ export async function updateUserProfile(userId: string, data: Partial<UserProfil
             completenessScore,
             verificationStatus,
             isCompleted: _isCompletedBlocked,
+            // Sensitive fields — must NEVER be updated via client
+            superlikesRemaining, boostExpiresAt, dailyLikesUsed, dailyLikesResetAt,
+            lastSwipeAt, incomplete_media,
             ...profileUpdates
         } = sanitizedData as Partial<UserProfile>;
 
@@ -185,13 +188,22 @@ export async function completeOnboarding(userId: string, data: Partial<UserProfi
         const hasName = !!(data.displayName || data.name);
         const hasGender = !!(data.gender);
         const hasAge = !!(data.age && data.age >= 18);
+        const hasConnectionModes = !!(data.connectionModes && (data.connectionModes as string[]).length > 0);
 
-        if (!hasName || !hasGender || !hasAge) {
+        if (!hasName || !hasGender || !hasAge || !hasConnectionModes) {
             return { success: false, error: 'Missing required onboarding fields' };
         }
 
-        // Strip protected fields
-        const { id, email, isVerified, createdAt, subscriptionStatus, trustStatus, spotify, latestAnswer, compatibility, completenessScore, verificationStatus, isCompleted, ...profileUpdates } = data;
+        // Strip ALL protected and sensitive fields — prevent field injection attacks
+        const {
+            id, email, isVerified, createdAt, subscriptionStatus, trustStatus,
+            spotify, latestAnswer, compatibility, completenessScore, verificationStatus,
+            isCompleted,
+            // Sensitive fields that must NEVER be set via onboarding
+            superlikesRemaining, boostExpiresAt, dailyLikesUsed, dailyLikesResetAt,
+            lastSwipeAt, incomplete_media,
+            ...profileUpdates
+        } = data;
 
         await prisma.$transaction([
             prisma.user.upsert({

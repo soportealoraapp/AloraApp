@@ -63,7 +63,7 @@ export default function ReferPage() {
                         <div className="mx-auto bg-primary/10 rounded-full h-20 w-20 flex items-center justify-center mb-4">
                             <Gift className="h-10 w-10 text-primary" />
                         </div>
-                        <CardTitle className="text-2xl font-headline">Invita a tus Amigas, Gana Recompensas</CardTitle>
+                        <CardTitle className="text-2xl font-headline">Invita a tus Amigos, Gana Recompensas</CardTitle>
                         <CardDescription className="max-w-md mx-auto">
                             Ayúdanos a hacer crecer nuestra comunidad segura. Cuando tu amiga se una con tu código, ¡ambas obtienen una función premium gratis por 1 semana!
                         </CardDescription>

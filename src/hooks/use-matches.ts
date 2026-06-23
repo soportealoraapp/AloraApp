@@ -1,10 +1,11 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { ConnectionIntent, Match } from '@/lib/domain/types';
 import { authFetch } from '@/lib/utils';
 import { useSendLike } from './use-send-like';
+import { createClient } from '@/lib/supabase/client';
 
 interface LikePreview {
     id: string;
@@ -21,6 +22,7 @@ export function useMatches() {
     const [newMatches, setNewMatches] = useState<LikePreview[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const channelRef = useRef<any>(null);
 
     const fetchMatches = useCallback(async (intent?: ConnectionIntent) => {
         if (!user) {
@@ -57,6 +59,41 @@ export function useMatches() {
     useEffect(() => {
         fetchMatches();
     }, [fetchMatches]);
+
+    // Realtime subscription for new matches
+    useEffect(() => {
+        if (!user?.id) return;
+
+        const supabase = createClient();
+        const channel = supabase
+            .channel(`matches:${user.id}`)
+            .on(
+                'postgres_changes',
+                {
+                    event: 'INSERT',
+                    schema: 'public',
+                    table: 'matches',
+                },
+                (payload) => {
+                    const match = payload.new as any;
+                    // Only process matches where this user is a participant
+                    if (match.user1Id === user.id || match.user2Id === user.id) {
+                        // Refresh matches to get full data
+                        fetchMatches();
+                    }
+                }
+            )
+            .subscribe();
+
+        channelRef.current = channel;
+
+        return () => {
+            if (channelRef.current) {
+                supabase.removeChannel(channelRef.current);
+                channelRef.current = null;
+            }
+        };
+    }, [user?.id, fetchMatches]);
 
     const { sendLike: baseSendLike } = useSendLike((intent) => {
         fetchMatches(intent);

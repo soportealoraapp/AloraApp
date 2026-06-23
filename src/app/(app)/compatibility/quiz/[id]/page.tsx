@@ -100,7 +100,7 @@ export default function QuizPage() {
                     </CardHeader>
                     <CardContent>
                         <Button asChild className="w-full">
-                            <Link href="/compatibility">Volver a los juegos</Link>
+                            <Link href="/compatibility">Volver a Almas</Link>
                         </Button>
                     </CardContent>
                 </Card>

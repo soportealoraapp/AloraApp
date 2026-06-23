@@ -142,7 +142,7 @@ export default function ChatPage() {
             refresh();
 
             toast({
-                title: "Conversación eliminada",
+                title: "Conversación ocultada",
                 description: "La conversación se ocultó de tu lista",
             });
         } catch (error) {
@@ -367,17 +367,24 @@ export default function ChatPage() {
                                                                 <div className="flex-1 min-w-0">
                                                                     <div className="flex items-center justify-between mb-1">
                                                                         <p className="font-bold text-foreground truncate">{partnerName}</p>
-                                                                        {match.lastMessage?.createdAt && (() => {
-                                                                            const hours = (Date.now() - new Date(match.lastMessage.createdAt).getTime()) / (1000 * 60 * 60);
-                                                                            if (hours >= 72) {
-                                                                                return (
-                                                                                    <Badge variant="outline" className="ml-2 text-[10px] px-1.5 py-0 border-amber-500/50 text-amber-600 dark:text-amber-400 whitespace-nowrap">
-                                                                                        Esperando respuesta
-                                                                                    </Badge>
-                                                                                );
-                                                                            }
-                                                                            return null;
-                                                                        })()}
+                                                                        <div className="flex items-center gap-2">
+                                                                            {match.unreadCount && match.unreadCount > 0 ? (
+                                                                                <Badge variant="default" className="rounded-full h-5 min-w-[20px] flex items-center justify-center p-0.5 text-[10px] font-bold">
+                                                                                    {match.unreadCount > 99 ? '99+' : match.unreadCount}
+                                                                                </Badge>
+                                                                            ) : null}
+                                                                            {match.lastMessage?.createdAt && (() => {
+                                                                                const hours = (Date.now() - new Date(match.lastMessage.createdAt).getTime()) / (1000 * 60 * 60);
+                                                                                if (hours >= 72) {
+                                                                                    return (
+                                                                                        <Badge variant="outline" className="text-[10px] px-1.5 py-0 border-amber-500/50 text-amber-600 dark:text-amber-400 whitespace-nowrap">
+                                                                                            Esperando
+                                                                                        </Badge>
+                                                                                    );
+                                                                                }
+                                                                                return null;
+                                                                            })()}
+                                                                        </div>
                                                                     </div>
                                                                     <p className="text-xs text-muted-foreground truncate italic">
                                                                         {match.lastMessage?.content || (match.intent === 'friendship' ? '¡Nueva amistad!' : `¡Es un match! ${BRAND_VOICE.nudges.newMatch}`)}
@@ -388,7 +395,7 @@ export default function ChatPage() {
                                                                             return (
                                                                                 <p className="text-xs text-muted-foreground mt-1 flex items-center gap-1">
                                                                                     <span className="inline-block h-1.5 w-1.5 rounded-full bg-muted-foreground/50" />
-                                                                                    Sin respuesta por {Math.round(hours / 24)} día(s)
+                                                                                    Sin respuesta por {Math.round(hours / 24) === 1 ? '1 día' : `${Math.round(hours / 24)} días`}
                                                                                 </p>
                                                                             );
                                                                         }

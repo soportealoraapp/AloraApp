@@ -72,6 +72,16 @@ export async function GET(request: NextRequest) {
                         type: true,
                     },
                 },
+                _count: {
+                    select: {
+                        messages: {
+                            where: {
+                                senderId: { not: user.id },
+                                readAt: null,
+                            },
+                        },
+                    },
+                },
             },
             orderBy: { updatedAt: 'desc' },
             take: 100,
@@ -116,7 +126,8 @@ export async function GET(request: NextRequest) {
                         photoURL: partnerProfile?.photos?.[0] || null,
                         photos: partnerProfile?.photos || [],
                         isVerified: partnerProfile?.isVerified,
-                    }
+                    },
+                    unreadCount: match._count.messages,
                 };
             });
 

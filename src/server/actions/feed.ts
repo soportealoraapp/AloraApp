@@ -60,7 +60,7 @@ export interface FeedFilters {
     featuredOnly?: boolean;
     highCompatibility?: boolean;
     activeToday?: boolean;
-    intent?: 'dating' | 'friendship';
+    intent?: 'dating' | 'friendship' | 'both';
 }
 
 export async function getDynamicFeed(

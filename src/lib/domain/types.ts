@@ -166,6 +166,7 @@ export interface Match {
         photos?: string[];
         isVerified?: boolean;
     };
+    unreadCount?: number;
 }
 
 export interface Message {

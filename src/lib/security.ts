@@ -24,6 +24,7 @@ export const SECURITY_HEADERS = {
     'Permissions-Policy': 'camera=(self), microphone=(self), geolocation=(self)',
     'Cross-Origin-Opener-Policy': 'same-origin',
     'Cross-Origin-Resource-Policy': 'same-origin',
+    'Strict-Transport-Security': 'max-age=63072000; includeSubDomains; preload',
 };
 
 export function applySecurityHeaders(response: NextResponse): NextResponse {

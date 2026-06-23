@@ -9,6 +9,7 @@ import { trackEvent } from '@/server/services/analytics';
 import { AnalyticsEvents } from '@/lib/tracking/events';
 import { detectSpamBehavior } from '@/server/services/anti-abuse';
 import { ensureSubscriptionState } from '@/lib/subscription-helper';
+import { stripHtml } from '@/lib/schemas/validation';
 
 // POST /api/chat/send
 export const dynamic = 'force-dynamic';
@@ -53,10 +54,13 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ error: 'Message too long (max 1000 characters)' }, { status: 400 });
         }
 
+        // Sanitize message content — strip HTML/scripts to prevent stored XSS
+        const sanitizedText = stripHtml(trimmedText);
+
         // Idempotency: use client-provided stable key if available, otherwise fall back to time-based
         const idempotencyKey = clientMessageId
             ? `${matchId}:${user.id}:${clientMessageId}`
-            : `${matchId}:${user.id}:${text.slice(0, 50)}:${Math.floor(Date.now() / 60000)}`;
+            : `${matchId}:${user.id}:${sanitizedText.slice(0, 50)}:${Math.floor(Date.now() / 60000)}`;
         const idempotencyResult = await checkIdempotency(idempotencyKey, user.id, 'chat_send');
         if (!idempotencyResult.ok) {
             return NextResponse.json(idempotencyResult.body, { status: idempotencyResult.status || 200 });
@@ -114,7 +118,7 @@ export async function POST(request: NextRequest) {
         }
 
         // Moderate message content
-        let content = text;
+        let content = sanitizedText;
         let isFiltered = false;
 
         if (type === 'voice' || type === 'image') {

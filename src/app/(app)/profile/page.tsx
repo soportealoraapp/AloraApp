@@ -51,8 +51,6 @@ export default function ProfilePage() {
         .catch(() => logger.warn('Failed to fetch profile stats'));
     };
     fetchStats();
-    const interval = setInterval(fetchStats, 30000);
-    return () => clearInterval(interval);
   }, [user?.id]);
 
   useEffect(() => {
