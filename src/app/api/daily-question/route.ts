@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getDailyQuestionForUser, submitAnswer } from '@/server/services/daily-question';
+import { withRateLimit } from '@/server/utils/api-rate-limit';
 
 // GET /api/daily-question — Get today's question
 export async function GET(request: NextRequest) {
@@ -32,6 +33,9 @@ export async function POST(request: NextRequest) {
     if (!user) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
+
+    const rateLimitResponse = await withRateLimit(user.id, 'profileUpdate');
+    if (rateLimitResponse) return rateLimitResponse;
 
     try {
         const { questionId, answer } = await request.json();

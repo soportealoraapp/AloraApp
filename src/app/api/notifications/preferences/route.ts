@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { withRateLimit } from '@/server/utils/api-rate-limit';
 
 // GET /api/notifications/preferences — Get user notification preferences
 export async function GET() {
@@ -39,6 +40,9 @@ export async function PUT(request: NextRequest) {
     if (!user) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
+
+    const rateLimitResponse = await withRateLimit(user.id, 'notification');
+    if (rateLimitResponse) return rateLimitResponse;
 
     try {
         const body = await request.json();

@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { assignVariant } from '@/lib/product/experiments';
 import { createClient } from '@/lib/supabase/server';
+import { withRateLimit } from '@/server/utils/api-rate-limit';
 
 export async function POST(request: Request) {
   try {
@@ -9,6 +10,9 @@ export async function POST(request: Request) {
     if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
+
+    const rateLimitResponse = await withRateLimit(user.id, 'analytics');
+    if (rateLimitResponse) return rateLimitResponse;
 
     const { experimentName } = await request.json();
     if (!experimentName || typeof experimentName !== 'string') {

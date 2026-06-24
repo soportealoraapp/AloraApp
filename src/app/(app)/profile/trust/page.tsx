@@ -25,11 +25,11 @@ interface TrustData {
 }
 
 const LEVEL_COLORS: Record<string, string> = {
-    'Nuevo': 'text-gray-500',
-    'Activo': 'text-blue-500',
-    'Confiable': 'text-green-500',
-    'Premium': 'text-purple-500',
-    'Embajador': 'text-yellow-500',
+    'Nuevo': 'text-muted-foreground',
+    'Activo': 'text-blue-500 dark:text-blue-400',
+    'Confiable': 'text-green-600 dark:text-green-400',
+    'Premium': 'text-purple-500 dark:text-purple-400',
+    'Embajador': 'text-yellow-600 dark:text-yellow-400',
 };
 
 export default function TrustPage() {
@@ -78,7 +78,7 @@ export default function TrustPage() {
 
             <Card>
                 <CardContent className="p-6 text-center">
-                    <div className={cn("text-6xl font-bold mb-2", LEVEL_COLORS[trust.level] || 'text-gray-500')}>
+                    <div className={cn("text-6xl font-bold mb-2", LEVEL_COLORS[trust.level] || 'text-muted-foreground')}>
                         {trust.score}
                     </div>
                     <p className="text-muted-foreground mb-1">de 100</p>

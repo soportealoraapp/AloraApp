@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { calculateQuizScore, determineArchetype } from '@/lib/compatibility/quizzes';
 import { getServerUser } from '@/lib/middleware/auth';
+import { withRateLimit } from '@/server/utils/api-rate-limit';
 
 export async function POST(request: Request) {
     try {
@@ -9,6 +10,9 @@ export async function POST(request: Request) {
         if (!user) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
+
+        const rateLimitResponse = await withRateLimit(user.id, 'profileUpdate');
+        if (rateLimitResponse) return rateLimitResponse;
 
         const { quizId, answers } = await request.json();
 

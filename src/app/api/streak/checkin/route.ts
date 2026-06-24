@@ -184,6 +184,9 @@ export async function GET() {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    const rateLimitResponse = await withRateLimit(user.id, 'streakCheckin');
+    if (rateLimitResponse) return rateLimitResponse;
+
     try {
         const profile = await prisma.profile.findUnique({
             where: { userId: user.id },

@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { generatePostMatchData } from '@/server/services/post-match';
 import { getServerUser } from '@/lib/middleware/auth';
+import { withRateLimit } from '@/server/utils/api-rate-limit';
 
 export async function POST(request: Request) {
     try {
@@ -8,6 +9,9 @@ export async function POST(request: Request) {
         if (!user) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
+
+        const rateLimitResponse = await withRateLimit(user.id, 'match');
+        if (rateLimitResponse) return rateLimitResponse;
 
         const { matchId } = await request.json();
         if (!matchId) {

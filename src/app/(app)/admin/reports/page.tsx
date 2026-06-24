@@ -47,18 +47,18 @@ export default function AdminReportsPage() {
         switch (s) {
             case 'pending': return 'bg-amber-500/10 text-amber-400 border-amber-500/20';
             case 'reviewed': return 'bg-blue-500/10 text-blue-400 border-blue-500/20';
-            case 'dismissed': return 'bg-gray-500/10 text-gray-400 border-gray-500/20';
-            case 'resolved': return 'bg-green-500/10 text-green-400 border-green-500/20';
-            default: return 'bg-gray-500/10 text-gray-400';
+            case 'dismissed': return 'bg-muted-foreground/10 text-muted-foreground border-muted-foreground/20';
+            case 'resolved': return 'bg-green-500/10 text-green-500 dark:text-green-400 border-green-500/20';
+            default: return 'bg-muted-foreground/10 text-muted-foreground';
         }
     };
 
     const trustColor = (s: string) => {
         switch (s) {
-            case 'clean': return 'text-green-400';
-            case 'watchlist': return 'text-amber-400';
-            case 'banned': return 'text-red-400';
-            default: return 'text-gray-400';
+            case 'clean': return 'text-green-500 dark:text-green-400';
+            case 'watchlist': return 'text-amber-500 dark:text-amber-400';
+            case 'banned': return 'text-red-500 dark:text-red-400';
+            default: return 'text-muted-foreground';
         }
     };
 

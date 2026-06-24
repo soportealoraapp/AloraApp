@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { prisma } from '@/lib/prisma';
+import { withRateLimit } from '@/server/utils/api-rate-limit';
 
 export async function POST(request: Request) {
     try {
@@ -10,6 +11,9 @@ export async function POST(request: Request) {
         if (!user) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
+
+        const rateLimitResponse = await withRateLimit(user.id, 'analytics');
+        if (rateLimitResponse) return rateLimitResponse;
 
         const body = await request.json();
         const { version } = body;

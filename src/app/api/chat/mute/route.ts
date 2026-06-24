@@ -77,6 +77,9 @@ export async function DELETE(request: NextRequest) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    const rateLimitResponse = await withRateLimit(user.id, 'notification');
+    if (rateLimitResponse) return rateLimitResponse;
+
     try {
         const { searchParams } = new URL(request.url);
         const matchId = searchParams.get('matchId');

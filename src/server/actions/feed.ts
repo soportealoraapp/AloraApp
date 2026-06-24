@@ -120,7 +120,7 @@ export async function getDynamicFeed(
             return null; // marker for "check in-memory"
         })();
 
-        const searchFilter = searchTerm
+        const searchFilter = searchTerm && searchTerm.length <= 100
             ? {
                 OR: [
                     { displayName: { contains: searchTerm, mode: 'insensitive' as const } },

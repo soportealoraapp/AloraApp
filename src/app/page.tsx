@@ -12,8 +12,8 @@ import { motion } from 'framer-motion';
 const pillars = [
   {
     icon: Shield,
-    title: 'Verificación real',
-    description: 'Cada perfil es verificado. Conoces personas reales, no bots.',
+    title: 'Perfiles verificados',
+    description: 'Opcional. Verifica tu perfil para destacar y generar más confianza.',
   },
   {
     icon: Sparkles,

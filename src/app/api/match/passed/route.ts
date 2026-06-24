@@ -72,6 +72,9 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
+  const rateLimitResponse = await withRateLimit(user.id, 'passedRead');
+  if (rateLimitResponse) return rateLimitResponse;
+
   try {
     const { profileId } = await request.json();
 

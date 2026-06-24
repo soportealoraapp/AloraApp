@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { withRateLimit } from '@/server/utils/api-rate-limit';
 
 export async function POST(request: NextRequest) {
     const { createClient } = await import('@/lib/supabase/server');
@@ -9,6 +10,9 @@ export async function POST(request: NextRequest) {
     if (!user) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
+
+    const rateLimitResponse = await withRateLimit(user.id, 'notification');
+    if (rateLimitResponse) return rateLimitResponse;
 
     try {
         const { token, platform, deviceId } = await request.json();
@@ -59,6 +63,9 @@ export async function DELETE(request: NextRequest) {
     if (!user) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
+
+    const rateLimitResponse = await withRateLimit(user.id, 'notification');
+    if (rateLimitResponse) return rateLimitResponse;
 
     try {
         const { token } = await request.json();
