@@ -1,0 +1,6 @@
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /api/
+Disallow: /chat
+Sitemap: https://alora-app-kappa.vercel.app/sitemap.xml
