@@ -17,6 +17,9 @@ function PageFallback() {
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const isChatWindow = /^\/chat\/[^/]+/.test(pathname);
+  const isProfileView = /^\/profile\/[^/]+/.test(pathname);
+  const isEditProfile = pathname === '/profile/edit';
+  const hideBottomNav = isChatWindow || isProfileView || isEditProfile;
 
   return (
     <div className="min-h-dvh bg-background">
@@ -25,7 +28,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       </a>
       <main
         id="main-content"
-        className={`md:pl-60 pb-safe overflow-x-hidden ${isChatWindow ? '' : 'pb-20 md:pb-0'}`}
+        className={`md:pl-60 pb-safe overflow-x-hidden ${hideBottomNav ? '' : 'pb-20 md:pb-0'}`}
       >
         <ErrorBoundary>
           <Suspense fallback={<PageFallback />}>
@@ -33,7 +36,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
           </Suspense>
         </ErrorBoundary>
       </main>
-      {!isChatWindow && <BottomNav />}
+      {!hideBottomNav && <BottomNav />}
     </div>
   );
 }

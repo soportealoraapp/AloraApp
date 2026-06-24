@@ -18,6 +18,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { createClient } from "@/lib/supabase/client";
+import { cn } from "@/lib/utils";
 
 export default function PrivacySettingsPage() {
     const router = useRouter();
@@ -262,7 +263,16 @@ export default function PrivacySettingsPage() {
                             <UpgradePrompt trigger="incognito" />
                         )}
 
-                        <div className="flex items-center justify-between p-3 rounded-lg border">
+                        {user && profile?.subscriptionStatus === 'plus' && incognitoMode && (
+                            <p className="text-xs text-muted-foreground italic px-1">
+                                El Modo Incógnito está activo. "Mostrar mi perfil en Descubrir" está desactivado mientras dure.
+                            </p>
+                        )}
+
+                        <div className={cn(
+                            "flex items-center justify-between p-3 rounded-lg border",
+                            profile?.subscriptionStatus === 'plus' && incognitoMode && "opacity-50 pointer-events-none"
+                        )}>
                             <div className="flex-1">
                                 <div className="flex items-center gap-2 mb-1">
                                     <Eye className="h-4 w-4 text-muted-foreground" />
@@ -275,7 +285,7 @@ export default function PrivacySettingsPage() {
                             <Switch
                                 checked={showMe}
                                 onCheckedChange={handleToggleShowMe}
-                                disabled={saving}
+                                disabled={saving || (profile?.subscriptionStatus === 'plus' && incognitoMode)}
                             />
                         </div>
 

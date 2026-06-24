@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { searchNominatim } from '@/lib/location/nominatim';
+import { searchNominatim, reverseGeocodeNominatim } from '@/lib/location/nominatim';
 import { searchCities } from '@/lib/location';
 import { searchMapTiler, reverseGeocodeMapTiler } from '@/lib/location/maptiler';
 
@@ -40,6 +40,15 @@ export async function GET(request: NextRequest) {
                 return NextResponse.json({ results: [maptilerResult], source: 'maptiler' });
             }
         } catch {}
+
+        try {
+            const nominatimResult = await reverseGeocodeNominatim(parseFloat(lat), parseFloat(lng));
+            if (nominatimResult) {
+                return NextResponse.json({ results: [nominatimResult], source: 'nominatim' });
+            }
+        } catch {}
+
+        return NextResponse.json({ results: [] });
     }
 
     if (!query || query.length < 2) {

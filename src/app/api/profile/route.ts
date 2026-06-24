@@ -21,8 +21,35 @@ export async function GET(request: NextRequest) {
     if (rateLimitResponse) return rateLimitResponse;
 
     try {
-        const [profile, spotifyAccount] = await Promise.all([
-            prisma.profile.findUnique({ where: { userId: user.id } }),
+        const profile = await prisma.profile.findUnique({ where: { userId: user.id } });
+
+        if (!profile) {
+            return NextResponse.json({ error: 'Profile not found' }, { status: 404 });
+        }
+
+        const now = new Date();
+        const lastReset = profile.dailyLikesResetAt;
+        const isNewDay = !lastReset || now.toDateString() !== new Date(lastReset).toDateString();
+
+        if (isNewDay && profile.subscriptionStatus === 'free') {
+            await prisma.profile.update({
+                where: { userId: user.id },
+                data: {
+                    dailyLikesUsed: 0,
+                    dailyLikesResetAt: now,
+                    superlikesRemaining: 3,
+                    rewindsUsed: 0,
+                    rewindsResetAt: now,
+                }
+            });
+            profile.dailyLikesUsed = 0;
+            profile.dailyLikesResetAt = now;
+            profile.superlikesRemaining = 3;
+            profile.rewindsUsed = 0;
+            profile.rewindsResetAt = now;
+        }
+
+        const [spotifyAccount] = await Promise.all([
             prisma.spotifyAccount.findUnique({
                 where: { userId: user.id },
                 select: {
@@ -34,10 +61,6 @@ export async function GET(request: NextRequest) {
                 },
             }),
         ]);
-
-        if (!profile) {
-            return NextResponse.json({ error: 'Profile not found' }, { status: 404 });
-        }
 
         return NextResponse.json({ ...profile, spotify: spotifyAccount || null });
     } catch (error) {

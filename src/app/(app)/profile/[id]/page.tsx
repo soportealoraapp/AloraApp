@@ -462,7 +462,7 @@ export default function UserProfilePage() {
                 </div>
 
                 {id !== user?.id && !isPreview && (
-                    <div className="fixed bottom-0 pb-safe sm:bottom-0 left-0 right-0 z-40 p-4 bg-background/80 backdrop-blur-sm border-t pb-[max(env(safe-area-inset-bottom,0px),16px)] md:sticky md:bottom-0 md:z-auto md:bg-transparent md:border-none md:p-0 md:mt-4 md:px-4 md:pb-0">
+                    <div className="fixed bottom-0 left-0 right-0 z-50 p-4 bg-background/95 backdrop-blur-md border-t md:sticky md:bottom-0 md:z-auto md:bg-transparent md:border-none md:p-0 md:mt-4 md:px-4 md:pb-0">
                         {hasExistingMatch ? (
                             <div className="flex flex-col gap-2 justify-center max-w-sm mx-auto">
                                 <Link href={existingMatchId ? `/chat/${existingMatchId}` : '/chat'} className="w-full">

@@ -582,23 +582,6 @@ export default function DiscoverPage() {
           </Card>
         )}
 
-        {intent === 'both' && (
-          <Card className="border-none bg-gradient-to-r from-amber-500/10 to-orange-500/10 dark:from-amber-500/5 dark:to-orange-500/5 rounded-2xl overflow-hidden cursor-pointer hover:bg-amber-500/20 dark:hover:bg-amber-500/10 transition-all" onClick={() => setIntent('dating')}>
-            <CardContent className="p-3 flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="h-10 w-10 rounded-xl bg-amber-500/20 dark:bg-amber-400/10 flex items-center justify-center text-amber-600 dark:text-amber-400">
-                  <Sparkles className="h-5 w-5" />
-                </div>
-                <div>
-                  <p className="text-xs font-black uppercase tracking-widest text-amber-700 dark:text-amber-400">Citas y amistad</p>
-                  <p className="text-[10px] text-amber-600/80 dark:text-amber-400/60">Explora ambas opciones a la vez</p>
-                </div>
-              </div>
-              <ArrowRight className="h-4 w-4 text-amber-400 dark:text-amber-500" />
-            </CardContent>
-          </Card>
-        )}
-
         <LikesCounter
           dailyLikesUsed={currentUserProfile?.dailyLikesUsed ?? 0}
           dailyLikesLimit={SWIPE_LIMIT}

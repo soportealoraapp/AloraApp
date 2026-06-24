@@ -182,22 +182,22 @@ export default function ProfilePage() {
         {profileStats && (profileStats.likesReceived > 0 || profileStats.matchesCount > 0 || profileStats.profileViews > 0) && (
         <div className="grid grid-cols-3 gap-4 px-4 py-4 border-b">
           {profileStats.likesReceived > 0 && (
-          <div className="text-center">
+          <Link href="/matches" className="text-center hover:opacity-80 transition-opacity">
             <p className="text-2xl font-bold text-primary">{profileStats.likesReceived}</p>
             <p className="text-xs text-muted-foreground">Me gusta</p>
-          </div>
+          </Link>
           )}
           {profileStats.matchesCount > 0 && (
-          <div className="text-center">
+          <Link href="/matches" className="text-center hover:opacity-80 transition-opacity">
             <p className="text-2xl font-bold text-primary">{profileStats.matchesCount}</p>
             <p className="text-xs text-muted-foreground">Conexiones</p>
-          </div>
+          </Link>
           )}
           {profileStats.profileViews > 0 && (
-          <div className="text-center">
+          <Link href="/profile/visitors" className="text-center hover:opacity-80 transition-opacity">
             <p className="text-2xl font-bold text-primary">{profileStats.profileViews}</p>
             <p className="text-xs text-muted-foreground">Visitas</p>
-          </div>
+          </Link>
           )}
         </div>
         )}

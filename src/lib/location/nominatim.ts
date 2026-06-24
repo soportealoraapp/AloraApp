@@ -111,3 +111,66 @@ export async function searchNominatim(query: string, limit: number = 10): Promis
         return [];
     }
 }
+
+export async function reverseGeocodeNominatim(lat: number, lng: number): Promise<LocationResult | null> {
+    const cacheKey = `nominatim-reverse:${lat.toFixed(3)},${lng.toFixed(3)}`;
+    const cached = getCached(cacheKey);
+    if (cached) return cached[0] || null;
+
+    try {
+        const params = new URLSearchParams({
+            lat: String(lat),
+            lon: String(lng),
+            format: 'json',
+            addressdetails: '1',
+            'accept-language': 'es',
+        });
+
+        const response = await fetch(`https://nominatim.openstreetmap.org/reverse?${params}`, {
+            headers: {
+                'User-Agent': 'AloraApp/1.0 (dating-app)',
+            },
+        });
+
+        if (!response.ok) return null;
+
+        const data = await response.json();
+        if (!data || data.error) return null;
+
+        const address = data.address || {};
+        const cityName = extractCityName(address);
+        if (!cityName) return null;
+
+        const countryCode = address.country_code
+            ? address.country_code.toUpperCase()
+            : '';
+
+        const country = COUNTRIES.find(c => c.code === countryCode) || {
+            code: countryCode,
+            name: address.country || '',
+            lat: parseFloat(data.lat),
+            lng: parseFloat(data.lon),
+        };
+
+        const stateCode = address.state || '';
+
+        const result: LocationResult = {
+            city: {
+                id: `nominatim-reverse-${data.place_id}`,
+                name: cityName,
+                stateCode,
+                countryCode,
+                lat: parseFloat(data.lat),
+                lng: parseFloat(data.lon),
+                population: 0,
+            },
+            country,
+        };
+
+        setCache(cacheKey, [result]);
+        return result;
+    } catch (error) {
+        console.error('Nominatim reverse geocode error:', error);
+        return null;
+    }
+}
