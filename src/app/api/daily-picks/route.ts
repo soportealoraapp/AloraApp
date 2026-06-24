@@ -13,11 +13,6 @@ export async function GET(request: NextRequest) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { subscriptionStatus } = await ensureSubscriptionState(user.id);
-    if (subscriptionStatus !== 'plus') {
-        return NextResponse.json({ error: 'Requiere Alora Plus', code: 'subscription_required' }, { status: 403 });
-    }
-
     try {
         const today = new Date();
         today.setHours(0, 0, 0, 0);

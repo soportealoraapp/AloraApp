@@ -590,8 +590,8 @@ export default function DiscoverPage() {
                   <Sparkles className="h-5 w-5" />
                 </div>
                 <div>
-                  <p className="text-xs font-black uppercase tracking-widest text-amber-700 dark:text-amber-400">Modo Ambos</p>
-                  <p className="text-[10px] text-amber-600/80 dark:text-amber-400/60">Explora citas y amistad juntos</p>
+                  <p className="text-xs font-black uppercase tracking-widest text-amber-700 dark:text-amber-400">Citas y amistad</p>
+                  <p className="text-[10px] text-amber-600/80 dark:text-amber-400/60">Explora ambas opciones a la vez</p>
                 </div>
               </div>
               <ArrowRight className="h-4 w-4 text-amber-400 dark:text-amber-500" />

@@ -2,13 +2,11 @@
 
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Sparkles, Lock } from 'lucide-react';
+import { Sparkles } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { cn } from '@/lib/utils';
-import { PlusBadge } from '@/components/premium/PlusBadge';
 import { logger } from '@/lib/logger';
 
 interface DailyPick {
@@ -29,13 +27,8 @@ interface DailyPicksProps {
 export const DailyPicks = React.memo(function DailyPicks({ subscriptionStatus = 'free' }: DailyPicksProps) {
     const [picks, setPicks] = useState<DailyPick[]>([]);
     const [loading, setLoading] = useState(true);
-    const isPlus = subscriptionStatus === 'plus';
 
     useEffect(() => {
-        if (!isPlus) {
-            setLoading(false);
-            return;
-        }
         fetch('/api/daily-picks')
             .then(r => {
                 if (!r.ok) throw new Error(r.statusText);
@@ -44,12 +37,7 @@ export const DailyPicks = React.memo(function DailyPicks({ subscriptionStatus = 
             .then(data => setPicks(data.picks || []))
             .catch(() => logger.warn('Failed to fetch daily picks'))
             .finally(() => setLoading(false));
-    }, [isPlus]);
-
-    const openPaywall = () => {
-        const event = new CustomEvent('open-paywall');
-        window.dispatchEvent(event);
-    };
+    }, []);
 
     if (loading) {
         return (
@@ -67,43 +55,6 @@ export const DailyPicks = React.memo(function DailyPicks({ subscriptionStatus = 
         );
     }
 
-    if (!isPlus) {
-        return (
-            <div className="space-y-3">
-                <div className="flex items-center gap-2">
-                    <Sparkles className="h-4 w-4 text-primary" />
-                    <span className="font-bold text-sm">Para ti hoy</span>
-                </div>
-                <Card className="relative overflow-hidden">
-                    <div className="absolute inset-0 bg-background/80 backdrop-blur-sm z-10 flex flex-col items-center justify-center gap-3 p-6">
-                        <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
-                            <Lock className="h-5 w-5 text-primary" />
-                        </div>
-                        <div className="text-center">
-                            <p className="text-sm font-semibold">Selecciones diarias</p>
-                            <p className="text-xs text-muted-foreground">Perfiles seleccionados por compatibilidad para ti</p>
-                        </div>
-                        <Button size="sm" className="rounded-full" onClick={openPaywall}>
-                            <Sparkles className="h-3.5 w-3.5 mr-1.5" />
-                            Desbloquear con Alora+
-                        </Button>
-                    </div>
-                    <div className="flex gap-3 overflow-x-auto pb-2 p-4 opacity-40">
-                        {[1, 2, 3].map(i => (
-                            <Card key={i} className="flex-shrink-0 w-48 overflow-hidden">
-                                <div className="relative h-40 bg-muted" />
-                                <CardContent className="p-3">
-                                    <p className="text-sm font-bold">••••••</p>
-                                    <p className="text-xs text-muted-foreground">••••</p>
-                                </CardContent>
-                            </Card>
-                        ))}
-                    </div>
-                </Card>
-            </div>
-        );
-    }
-
     if (picks.length === 0) return null;
 
     return (
@@ -111,8 +62,7 @@ export const DailyPicks = React.memo(function DailyPicks({ subscriptionStatus = 
             <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                     <Sparkles className="h-4 w-4 text-primary" />
-                    <span className="font-bold text-sm">Para ti hoy</span>
-                    <PlusBadge label="Avanzado" />
+                    <span className="font-bold text-sm">Selecciones diarias</span>
                 </div>
                 <span className="text-xs text-muted-foreground">Basado en compatibilidad</span>
             </div>
