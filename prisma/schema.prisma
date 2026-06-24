@@ -529,12 +529,13 @@ model AuditLog {
 }
 
 model DailyQuestion {
-  id        String        @id @default(uuid())
-  question  String        @unique
-  category  String
-  isActive  Boolean       @default(true)
-  createdAt DateTime      @default(now())
-  answers   DailyAnswer[]
+  id          String        @id @default(uuid())
+  question    String        @unique
+  category    String
+  isActive    Boolean       @default(true)
+  activatedAt DateTime?
+  createdAt   DateTime      @default(now())
+  answers     DailyAnswer[]
 
   @@map("daily_questions")
 }

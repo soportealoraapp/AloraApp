@@ -250,7 +250,7 @@ const NotificationItem = memo(NotificationItemInner);
           >
             <div className="bg-foreground text-background px-4 py-3 rounded-xl shadow-lg flex items-center gap-3">
               <span className="text-sm">Notificación eliminada</span>
-              <Button variant="ghost" size="sm" onClick={handleUndo} className="text-primary hover:text-primary h-8">
+              <Button variant="ghost" size="sm" onClick={handleUndo} className="text-primary hover:text-primary h-11 min-h-[44px]">
                 Deshacer
               </Button>
             </div>

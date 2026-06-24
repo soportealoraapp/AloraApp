@@ -59,7 +59,7 @@ export async function rotateDailyQuestion(): Promise<{ previousId: string | null
         const seeded = await prisma.dailyQuestion.findMany({ orderBy: { createdAt: 'asc' } });
         if (seeded.length === 0) return null;
         const first = seeded[0];
-        await prisma.dailyQuestion.update({ where: { id: first.id }, data: { isActive: true } });
+        await prisma.dailyQuestion.update({ where: { id: first.id }, data: { isActive: true, activatedAt: new Date() } });
         return { previousId: null, newId: first.id };
     }
 
@@ -68,7 +68,7 @@ export async function rotateDailyQuestion(): Promise<{ previousId: string | null
     const nextIndex = (currentIndex + 1) % allQuestions.length;
     const next = allQuestions[nextIndex];
 
-    await prisma.dailyQuestion.update({ where: { id: next.id }, data: { isActive: true } });
+    await prisma.dailyQuestion.update({ where: { id: next.id }, data: { isActive: true, activatedAt: new Date() } });
     return { previousId: current?.id ?? null, newId: next.id };
 }
 
@@ -80,7 +80,7 @@ export async function getTodayQuestion() {
         await ensureQuestionsSeeded();
         const next = await prisma.dailyQuestion.findFirst({ orderBy: { createdAt: 'asc' } });
         if (next) {
-            await prisma.dailyQuestion.update({ where: { id: next.id }, data: { isActive: true } });
+            await prisma.dailyQuestion.update({ where: { id: next.id }, data: { isActive: true, activatedAt: new Date() } });
             activeQuestion = await prisma.dailyQuestion.findUnique({ where: { id: next.id } });
         }
     }

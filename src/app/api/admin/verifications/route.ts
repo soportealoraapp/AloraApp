@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { requireAdmin } from '@/lib/middleware/admin';
+import { sendPushToUser, notifyVerificationApproved, notifyVerificationRejected } from '@/server/services/push';
 import { utapi } from '../../uploadthing/core';
 import { withRateLimit } from '@/server/utils/api-rate-limit';
 
@@ -71,25 +72,13 @@ export async function POST(request: NextRequest) {
                 where: { userId: submission.userId },
                 data: { isVerified: true, trustStatus: 'trusted' },
             });
-            const { sendPushToUser } = await import('@/server/services/push');
-            await sendPushToUser(submission.userId, {
-                title: '¡Identidad verificada!',
-                body: 'Tu verificación ha sido aprobada. Ahora tienes el badge azul en tu perfil.',
-                data: { type: 'verification', screen: '/settings/verification' },
-                channel: 'safety',
-            });
+            await notifyVerificationApproved(submission.userId);
         } else if (action === 'reject') {
             await prisma.verificationSubmission.update({
                 where: { id: submissionId },
                 data: { status: 'rejected', reason: reason || 'Selfie no clara', reviewedBy: adminUser.id, reviewedAt: new Date() },
             });
-            const { sendPushToUser } = await import('@/server/services/push');
-            await sendPushToUser(submission.userId, {
-                title: 'Verificación rechazada',
-                body: reason || 'No pudimos verificar tu identidad. Intenta de nuevo con una selfie más clara.',
-                data: { type: 'verification', screen: '/settings/verification' },
-                channel: 'safety',
-            });
+            await notifyVerificationRejected(submission.userId, reason || 'No pudimos verificar tu identidad. Intenta de nuevo con una selfie más clara.');
             // Delete the rejected selfie from UploadThing
             try {
                 await utapi.deleteFiles([submission.selfieUrl]);

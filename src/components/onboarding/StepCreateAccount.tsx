@@ -2,6 +2,7 @@
 
 import { useState, useCallback, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -352,9 +353,9 @@ export function StepCreateAccount({ onAccountCreated, initialRef }: StepCreateAc
 
             <p className="text-center text-xs text-muted-foreground">
                 ¿Ya tienes cuenta?{' '}
-                <a href="/login" className="text-primary hover:underline font-semibold">
+                <Link href="/login" className="text-primary hover:underline font-semibold">
                     Inicia sesión
-                </a>
+                </Link>
             </p>
         </div>
     );

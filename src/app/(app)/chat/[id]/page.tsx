@@ -708,7 +708,7 @@ export default function ChatWindowPage() {
                                 variant="ghost"
                                 size="icon"
                                 disabled={loadingIcebreakers}
-                                className="shrink-0 h-10 w-10 rounded-full text-primary hover:bg-primary/10"
+                                className="shrink-0 h-11 w-11 rounded-full text-primary hover:bg-primary/10 min-h-[44px] min-w-[44px]"
                                 title="Sugerir rompehielos"
                             >
                                 {loadingIcebreakers ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}

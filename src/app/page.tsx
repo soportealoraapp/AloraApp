@@ -80,7 +80,9 @@ export default function WelcomePage() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
         >
-          <Logo className="mb-6 h-20 w-20 text-primary" />
+          <Link href="/" aria-label="Alora — Inicio">
+            <Logo className="mb-6 h-20 w-20 text-primary" />
+          </Link>
         </motion.div>
         
         <motion.h1 

@@ -39,11 +39,32 @@ export async function GET(request: NextRequest) {
         });
         const blockedIds = blockedUsers.flatMap(b => [b.blockerId, b.blockedId]);
 
+        // Get existing matches and interactions to filter out
+        const existingMatches = await prisma.match.findMany({
+            where: {
+                OR: [
+                    { user1Id: user.id },
+                    { user2Id: user.id },
+                ],
+                deletedAt: null,
+            },
+            select: { user1Id: true, user2Id: true },
+        });
+        const matchedUserIds = existingMatches.flatMap(m => [m.user1Id, m.user2Id]).filter(uid => uid !== user.id);
+
+        const existingInteractions = await prisma.interaction.findMany({
+            where: { fromUserId: user.id },
+            select: { toUserId: true },
+        });
+        const interactedIds = existingInteractions.map(i => i.toUserId);
+
+        const excludedIds = [...new Set([user.id, ...blockedIds, ...matchedUserIds, ...interactedIds])];
+
         const similarResults = await prisma.quizResult.findMany({
             where: {
                 quizId,
                 archetype,
-                userId: { notIn: [user.id, ...blockedIds] },
+                userId: { notIn: excludedIds },
                 score: {
                     gte: Math.max(0, score - 20),
                     lte: Math.min(100, score + 20),

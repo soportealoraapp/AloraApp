@@ -8,7 +8,7 @@ import { BadgeChipList } from "@/components/profile/BadgeChip";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Settings, Edit, Eye, Music, CheckCircle, ChevronRight, Shield, Sparkles, MessageCircle, X, Mic } from "lucide-react";
+import { Settings, Edit, Eye, Music, CheckCircle, ChevronRight, Shield, Sparkles, MessageCircle, X, Mic, LogOut } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -21,7 +21,7 @@ import { VoicePlayer } from "@/components/audio/VoicePlayer";
 import { SpotifySection } from "@/components/profile/SpotifySection";
 
 export default function ProfilePage() {
-  const { user, profile, authLoading, profileLoading } = useAuth();
+  const { user, profile, authLoading, profileLoading, signOut } = useAuth();
   const router = useRouter();
   const loading = authLoading || profileLoading;
   const [latestAnswer, setLatestAnswer] = useState<{
@@ -121,6 +121,9 @@ export default function ProfilePage() {
       <header className="sticky top-0 z-30 flex h-16 items-center gap-2 border-b bg-background/90 px-3 backdrop-blur-md sm:px-6 pt-safe">
         <h1 className="text-xl font-bold md:text-2xl text-foreground shrink-0">Mi Perfil</h1>
         <div className="ml-auto flex items-center gap-1 sm:gap-2 min-w-0">
+          <Button size="icon" variant="ghost" className="shrink-0" onClick={async () => { await signOut(); router.replace('/login'); }} title="Cerrar sesión">
+            <LogOut className="h-5 w-5" />
+          </Button>
           <Button size="icon" variant="ghost" asChild className="shrink-0">
             <Link href="/settings">
               <Settings className="h-5 w-5" />

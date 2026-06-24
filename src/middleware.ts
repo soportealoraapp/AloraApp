@@ -120,21 +120,16 @@ export async function middleware(request: NextRequest) {
 
     const isAppRoute = pathname.startsWith('/discover') ||
         pathname.startsWith('/profile') ||
-        pathname.startsWith('/messages') ||
         pathname.startsWith('/chat') ||
         pathname.startsWith('/settings') ||
         pathname.startsWith('/notifications') ||
-        pathname.startsWith('/qa') ||
         pathname.startsWith('/admin') ||
         pathname.startsWith('/compatibility') ||
-        pathname.startsWith('/match') ||
-        pathname.startsWith('/events') ||
+        pathname.startsWith('/matches') ||
         pathname.startsWith('/success-stories') ||
-        pathname.startsWith('/why-alora') ||
-        pathname.startsWith('/refer') ||
-        pathname.startsWith('/app');
+        pathname.startsWith('/refer');
 
-    const isAdminRoute = pathname.startsWith('/admin') || pathname.startsWith('/qa');
+    const isAdminRoute = pathname.startsWith('/admin');
 
     const isAuthRoute = pathname.startsWith('/login') ||
         pathname.startsWith('/signup') ||

@@ -13,6 +13,7 @@ interface WomenStrategyData {
     referredWomen: number;
     retentionD7: number;
     conversionToActive: number;
+    verificationRate: number;
 }
 
 export default function WomenStrategyPage() {
@@ -26,11 +27,12 @@ export default function WomenStrategyPage() {
         ]).then(([retention, health]) => {
             setData({
                 totalWomen: health.femaleUsers || 0,
-                activeWomen: Math.round((health.femaleUsers || 0) * 0.6),
-                verifiedWomen: Math.round((health.femaleUsers || 0) * 0.3),
-                referredWomen: Math.round((health.femaleUsers || 0) * 0.15),
+                activeWomen: retention.activeFemaleD7 || 0,
+                verifiedWomen: Math.round((retention.totalFemale || 0) * (retention.verificationRate || 0) / 100),
+                referredWomen: 0,
                 retentionD7: retention.retentionD7 || 0,
-                conversionToActive: 45,
+                conversionToActive: Math.round(retention.retentionD1 || 0),
+                verificationRate: retention.verificationRate || 0,
             });
             setLoading(false);
         }).catch(() => setLoading(false));

@@ -73,10 +73,15 @@ export default function AdminReportsPage() {
                     <h1 className="text-xl font-bold">Reportes</h1>
                 </div>
                 <div className="flex gap-2 ml-auto">
-                    {['pending', 'reviewed', 'dismissed', 'resolved'].map(s => (
-                        <Button key={s} variant={filter === s ? 'default' : 'outline'} size="sm" onClick={() => setFilter(s)}
-                            className={filter === s ? '' : 'border-border text-muted-foreground'}>
-                            {s.charAt(0).toUpperCase() + s.slice(1)}
+                    {[
+                        { key: 'pending', label: 'Pendientes' },
+                        { key: 'reviewed', label: 'Revisados' },
+                        { key: 'dismissed', label: 'Descartados' },
+                        { key: 'resolved', label: 'Resueltos' },
+                    ].map(({ key, label }) => (
+                        <Button key={key} variant={filter === key ? 'default' : 'outline'} size="sm" onClick={() => setFilter(key)}
+                            className={filter === key ? '' : 'border-border text-muted-foreground'}>
+                            {label}
                         </Button>
                     ))}
                 </div>
@@ -97,7 +102,7 @@ export default function AdminReportsPage() {
                                 <div className="flex items-start gap-4">
                                     <div className="relative h-10 w-10 rounded-full overflow-hidden bg-muted flex-shrink-0">
                                         {report.reported?.profile?.photos?.[0] ? (
-                                            <Image src={report.reported.profile.photos[0]} alt="" fill className="object-cover" loading="lazy" />
+                                            <Image src={report.reported.profile.photos[0]} alt="Foto de perfil" fill className="object-cover" loading="lazy" />
                                         ) : (
                                             <div className="h-full w-full flex items-center justify-center text-muted-foreground text-xs">
                                                 {report.reported?.profile?.displayName?.[0] || '?'}
@@ -106,7 +111,7 @@ export default function AdminReportsPage() {
                                     </div>
                                     <div>
                                         <div className="flex items-center gap-2">
-                                            <span className="font-semibold">{report.reported?.profile?.displayName || 'Unknown'}</span>
+                                            <span className="font-semibold">{report.reported?.profile?.displayName || 'Desconocido'}</span>
                                             <Badge variant="outline" className={trustColor(report.reported?.profile?.trustStatus || '')}>
                                                 {report.reported?.profile?.trustStatus}
                                             </Badge>
@@ -121,7 +126,7 @@ export default function AdminReportsPage() {
                                             <p className="text-xs text-muted-foreground mt-1 line-clamp-1">{report.details}</p>
                                         )}
                                         <div className="text-xs text-muted-foreground/60 mt-1">
-                                            Reportado por: {report.reporter?.email || 'Unknown'}
+                                            Reportado por: {report.reporter?.email || 'Desconocido'}
                                         </div>
                                     </div>
                                 </div>

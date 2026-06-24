@@ -377,7 +377,7 @@ export default function PrivacySettingsPage() {
                                         Eliminar Cuenta
                                     </DialogTitle>
                                     <DialogDescription>
-                                        Esta acción es irreversible. Se eliminarán tu perfil, fotos, mensajes y matches.
+                                        Esta acción es irreversible. Se eliminarán tu perfil, fotos, mensajes y conexiones.
                                         No podrás recuperar tu cuenta.
                                     </DialogDescription>
                                 </DialogHeader>
@@ -387,7 +387,7 @@ export default function PrivacySettingsPage() {
                                         <ul className="list-disc pl-4 mt-2 space-y-1 text-muted-foreground">
                                             <li>Perfil y fotos</li>
                                             <li>Mensajes y conversaciones</li>
-                                            <li>Matches y conexiones</li>
+                                            <li>Conexiones</li>
                                             <li>Preferencias y ajustes</li>
                                         </ul>
                                     </div>

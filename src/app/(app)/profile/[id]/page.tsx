@@ -44,6 +44,7 @@ export default function UserProfilePage() {
 
     const [isLiked, setIsLiked] = useState(false);
     const [isSuperMatched, setIsSuperMatched] = useState(false);
+    const [isPassed, setIsPassed] = useState(false);
     const [processing, setProcessing] = useState(false);
     const [hasExistingMatch, setHasExistingMatch] = useState(false);
     const [existingMatchId, setExistingMatchId] = useState<string | null>(null);
@@ -73,11 +74,14 @@ export default function UserProfilePage() {
           if (data.matchId) {
             setExistingMatchId(data.matchId);
           }
-          // Restore like/flechado state from existing interaction
+          // Restore like/flechado/pass state from existing interaction
           if (data.interactionType === 'superlike') {
             setIsSuperMatched(true);
+            setIsLiked(true);
           } else if (data.interactionType === 'like') {
             setIsLiked(true);
+          } else if (data.interactionType === 'pass') {
+            setIsPassed(true);
           }
         })
         .catch(() => {});
@@ -144,7 +148,7 @@ export default function UserProfilePage() {
 
             if (result.matched) {
                 toast({
-                    title: `¡Match con ${profile.displayName}! 🎉`,
+                    title: `¡Conexión con ${profile.displayName}! 🎉`,
                     description: "Ahora pueden chatear",
                 });
                 router.push(`/chat/${result.matchId}`);
@@ -188,7 +192,7 @@ export default function UserProfilePage() {
             const result = await sendLike(id as string, "like", intent, false);
 
             toast({
-                title: `¡Nuevo match con ${profile.displayName}! 🎉`,
+                title: `¡Nueva conexión con ${profile.displayName}! 🎉`,
                     description: "Ahora pueden chatear",
             });
 
@@ -197,7 +201,7 @@ export default function UserProfilePage() {
             }
         } catch (error) {
             console.error("Error accepting match:", error);
-            toast({ title: "Error", description: "No se pudo aceptar el match. Intenta de nuevo.", variant: "destructive" });
+            toast({ title: "Error", description: "No se pudo aceptar la conexión. Intenta de nuevo.", variant: "destructive" });
         } finally {
             setProcessing(false);
         }
@@ -459,7 +463,16 @@ export default function UserProfilePage() {
 
                 {id !== user?.id && !isPreview && (
                     <div className="fixed bottom-0 pb-safe sm:bottom-0 left-0 right-0 z-40 p-4 bg-background/80 backdrop-blur-sm border-t pb-[max(env(safe-area-inset-bottom,0px),16px)] md:sticky md:bottom-0 md:z-auto md:bg-transparent md:border-none md:p-0 md:mt-4 md:px-4 md:pb-0">
-                        {isFromNewMatch ? (
+                        {hasExistingMatch ? (
+                            <div className="flex flex-col gap-2 justify-center max-w-sm mx-auto">
+                                <Link href={existingMatchId ? `/chat/${existingMatchId}` : '/chat'} className="w-full">
+                                    <Button size="lg" variant="default" className="w-full min-h-[48px]">
+                                        <MessageSquare className="h-5 w-5 mr-2" />
+                                        Ir al chat
+                                    </Button>
+                                </Link>
+                            </div>
+                        ) : isFromNewMatch ? (
                             <div className="flex justify-around items-center max-w-md mx-auto gap-3">
                                 <Button
                                     size="lg"
@@ -485,14 +498,20 @@ export default function UserProfilePage() {
                                     Hacer Match
                                 </Button>
                             </div>
-                        ) : hasExistingMatch ? (
-                            <div className="flex flex-col gap-2 justify-center max-w-sm mx-auto">
-                                <Link href={existingMatchId ? `/chat/${existingMatchId}` : '/chat'} className="w-full">
-                                    <Button size="lg" variant="default" className="w-full min-h-[48px]">
-                                        <MessageSquare className="h-5 w-5 mr-2" />
-                                        Ir al chat
+                        ) : isPassed ? (
+                            <div className="flex justify-center max-w-sm mx-auto">
+                                <div className="flex items-center gap-3 bg-muted/50 rounded-full px-6 py-3">
+                                    <span className="text-sm text-muted-foreground">Ya pasaste este perfil</span>
+                                    <Button
+                                        size="sm"
+                                        variant="outline"
+                                        className="rounded-full text-xs"
+                                        onClick={handleLike}
+                                        disabled={processing}
+                                    >
+                                        Cambiar a Like
                                     </Button>
-                                </Link>
+                                </div>
                             </div>
                         ) : (
                             <div className="flex justify-around items-center max-w-sm mx-auto gap-3">

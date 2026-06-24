@@ -17,11 +17,11 @@ export default function MatchesPage() {
 
     return (
         <div className="min-h-dvh bg-background pb-20 md:pb-0 md:ml-60">
-            <header className="sticky top-0 z-30 border-b bg-background/95 backdrop-blur-xl">
+            <header className="sticky top-0 z-30 border-b bg-background/95 backdrop-blur-xl pt-safe">
                 <div className="flex items-center justify-between px-4 py-3 max-w-lg mx-auto">
-                    <h1 className="text-xl font-headline font-bold">Matches</h1>
+                    <h1 className="text-xl font-headline font-bold">Conexiones</h1>
                     <span className="text-sm text-muted-foreground">
-                        {matches.length} match{matches.length !== 1 ? 'es' : ''}
+                        {matches.length} conexión{matches.length !== 1 ? 'es' : ''}
                     </span>
                 </div>
             </header>
@@ -38,7 +38,7 @@ export default function MatchesPage() {
                             <section>
                                 <h2 className="text-sm font-bold uppercase tracking-widest text-muted-foreground mb-3 flex items-center gap-2">
                                     <Sparkles className="h-4 w-4 text-primary" />
-                                    Nuevos Matches
+                                    Nuevas Conexiones
                                 </h2>
                                 <div className="flex gap-3 overflow-x-auto pb-2 -mx-4 px-4 snap-x">
                                     {newMatches.map((match) => (
@@ -73,13 +73,13 @@ export default function MatchesPage() {
                         {/* All Matches Grid */}
                         <section>
                             <h2 className="text-sm font-bold uppercase tracking-widest text-muted-foreground mb-3">
-                                Todos tus Matches
+                                Todas tus Conexiones
                             </h2>
                             {matches.length === 0 ? (
                                 <Card className="border-dashed">
                                     <CardContent className="flex flex-col items-center justify-center py-12 text-center">
                                         <Heart className="h-12 w-12 text-muted-foreground/30 mb-4" />
-                                        <p className="text-lg font-bold mb-1">Sin matches aún</p>
+                                        <p className="text-lg font-bold mb-1">Sin conexiones aún</p>
                                         <p className="text-sm text-muted-foreground mb-4">
                                             Sigue explorando perfiles para encontrar tu conexión
                                         </p>
@@ -106,7 +106,7 @@ export default function MatchesPage() {
                                                 >
                                                     <Image
                                                         src={otherUser?.photoURL || '/placeholder.svg'}
-                                                        alt={otherUser?.displayName || 'Match'}
+                                                        alt={otherUser?.displayName || 'Conexión'}
                                                         fill
                                                         sizes="(max-width: 640px) 50vw, 25vw"
                                                         className="object-cover transition-transform group-hover:scale-105"

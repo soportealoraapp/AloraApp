@@ -53,10 +53,14 @@ export default function AdminVerificationsPage() {
                     <h1 className="text-xl font-bold">Verificaciones</h1>
                 </div>
                 <div className="flex gap-2 ml-auto">
-                    {['pending', 'approved', 'rejected'].map(s => (
-                        <Button key={s} variant={filter === s ? 'default' : 'outline'} size="sm" onClick={() => setFilter(s)}
-                            className={filter === s ? '' : 'border-border text-muted-foreground'}>
-                            {s.charAt(0).toUpperCase() + s.slice(1)}
+                    {[
+                        { key: 'pending', label: 'Pendientes' },
+                        { key: 'approved', label: 'Aprobadas' },
+                        { key: 'rejected', label: 'Rechazadas' },
+                    ].map(({ key, label }) => (
+                        <Button key={key} variant={filter === key ? 'default' : 'outline'} size="sm" onClick={() => setFilter(key)}
+                            className={filter === key ? '' : 'border-border text-muted-foreground'}>
+                            {label}
                         </Button>
                     ))}
                 </div>
@@ -75,19 +79,19 @@ export default function AdminVerificationsPage() {
                         <div key={sub.id} className="bg-card border border-border rounded-xl p-5 space-y-4">
                             <div className="flex items-start gap-6">
                                 <div className="relative h-40 w-32 rounded-xl overflow-hidden bg-muted flex-shrink-0">
-                                    <Image src={sub.selfieUrl} alt="Selfie" fill className="object-cover" loading="lazy" />
+                                    <Image src={sub.selfieUrl} alt="Selfie de verificación" fill className="object-cover" loading="lazy" />
                                 </div>
                                 <div className="flex-1">
                                     <div className="flex items-center gap-2 mb-2">
                                         <div className="relative h-10 w-10 rounded-full overflow-hidden bg-muted">
                                             {sub.user.profile?.photos?.[0] ? (
-                                                <Image src={sub.user.profile.photos[0]} alt="" fill className="object-cover" loading="lazy" />
+                                                <Image src={sub.user.profile.photos[0]} alt="Foto de perfil" fill className="object-cover" loading="lazy" />
                                             ) : (
                                                 <div className="h-full w-full flex items-center justify-center text-muted-foreground text-xs">?</div>
                                             )}
                                         </div>
                                         <div>
-                                            <span className="font-semibold">{sub.user.profile?.displayName || 'Unknown'}</span>
+                                            <span className="font-semibold">{sub.user.profile?.displayName || 'Desconocido'}</span>
                                             <div className="text-xs text-muted-foreground">
                                                 {sub.user.email} · {sub.user.profile?.age} años · {sub.user.profile?.gender}
                                             </div>
@@ -95,7 +99,7 @@ export default function AdminVerificationsPage() {
                                     </div>
                                     <div className="flex items-center gap-2 text-sm text-muted-foreground mt-2">
                                         <Badge variant="outline" className={`text-xs ${sub.user.profile?.isVerified ? 'border-emerald-500/30 text-emerald-400' : 'border-border text-muted-foreground'}`}>
-                                            {sub.user.profile?.isVerified ? 'Verified' : 'Unverified'}
+                                            {sub.user.profile?.isVerified ? 'Verificado' : 'No verificado'}
                                         </Badge>
                                         <Badge variant="outline" className="text-xs border-border">{sub.user.profile?.trustStatus}</Badge>
                                         <span className="text-xs">Enviado: {new Date(sub.createdAt).toLocaleDateString()}</span>
@@ -105,7 +109,7 @@ export default function AdminVerificationsPage() {
                                         <div className="flex gap-2 mt-3">
                                             {sub.user.profile.photos.slice(0, 4).map((photo, i) => (
                                                 <div key={i} className="relative h-14 w-14 rounded-lg overflow-hidden bg-muted">
-                                                    <Image src={photo} alt={`Photo ${i}`} fill className="object-cover" loading="lazy" />
+                                                    <Image src={photo} alt={`Foto ${i + 1}`} fill className="object-cover" loading="lazy" />
                                                 </div>
                                             ))}
                                         </div>

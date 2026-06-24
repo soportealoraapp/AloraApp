@@ -278,7 +278,7 @@ export function StepBasicInfo({ data, onUpdate, onNext, userId, onPrev }: StepBa
                 </Button>
                 {!isValid && (
                     <p className="text-xs text-amber-600 dark:text-amber-400 text-center mt-2">
-                        Nombre, edad, género y ciudad son necesarios para encontrar tu mejor match
+                        Nombre, edad, género y ciudad son necesarios para encontrar tu mejor conexión
                     </p>
                 )}
             </div>

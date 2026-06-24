@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -93,9 +93,23 @@ export function DailyQuestionCard() {
     const [matchedProfile, setMatchedProfile] = useState<UserProfile | null>(null);
     const [matchId, setMatchId] = useState<string | undefined>(undefined);
     const [showMatchScreen, setShowMatchScreen] = useState(false);
+    const [nextQuestionCountdown, setNextQuestionCountdown] = useState('');
+
+    const updateCountdown = useCallback(() => {
+        const now = new Date();
+        const tomorrow = new Date(now);
+        tomorrow.setHours(24, 0, 0, 0);
+        const msUntilMidnight = tomorrow.getTime() - now.getTime();
+        const hours = Math.floor(msUntilMidnight / (1000 * 60 * 60));
+        const minutes = Math.floor((msUntilMidnight % (1000 * 60 * 60)) / (1000 * 60));
+        setNextQuestionCountdown(`${hours}h ${minutes}m`);
+    }, []);
 
     useEffect(() => {
         fetchQuestion();
+        updateCountdown();
+        const interval = setInterval(updateCountdown, 60000);
+        return () => clearInterval(interval);
     }, []);
 
     // Re-fetch question at midnight for daily rollover
@@ -255,6 +269,11 @@ export function DailyQuestionCard() {
                             {CATEGORY_LABELS[data.category] || data.category}
                         </Badge>
                     </div>
+                    {data.answered && nextQuestionCountdown && (
+                        <p className="text-xs text-muted-foreground mt-1">
+                            Siguiente pregunta en: {nextQuestionCountdown}
+                        </p>
+                    )}
                 </CardHeader>
                 <CardContent className="space-y-3">
                     <p className="text-sm font-medium text-foreground">

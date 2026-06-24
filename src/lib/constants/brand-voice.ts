@@ -49,7 +49,7 @@ export const BRAND_VOICE = {
     },
 
     nudges: {
-        newMatch: '¡Es un Match!',
+        newMatch: '¡Es una Conexión!',
         firstMessageWoman: 'Escribe algo que lo haga sonreír.',
         firstMessageMan: 'Espera a que la otra persona esté lista.',
         inactivity: 'Parece que se enfrió. ¿Un mensaje nuevo?',

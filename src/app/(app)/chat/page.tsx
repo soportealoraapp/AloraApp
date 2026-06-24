@@ -388,7 +388,7 @@ export default function ChatPage() {
                                                                         </div>
                                                                     </div>
                                                                     <p className="text-xs text-muted-foreground truncate italic">
-                                                                        {match.lastMessage?.content || (match.intent === 'friendship' ? '¡Nueva amistad!' : `¡Es un match! ${BRAND_VOICE.nudges.newMatch}`)}
+                                                                        {match.lastMessage?.content || (match.intent === 'friendship' ?                                                 '¡Nueva amistad!' : `¡Es una conexión! ${BRAND_VOICE.nudges.newMatch}`)}
                                                                     </p>
                                                                     {match.lastMessage?.createdAt && (() => {
                                                                         const hours = (Date.now() - new Date(match.lastMessage.createdAt).getTime()) / (1000 * 60 * 60);
@@ -442,9 +442,9 @@ export default function ChatPage() {
                         <LikesReceivedList />
 
                         <div className="pt-4 border-t">
-                            <h4 className="font-bold text-sm mb-3 text-muted-foreground">Matches Recientes</h4>
+                            <h4 className="font-bold text-sm mb-3 text-muted-foreground">Conexiones Recientes</h4>
                             {newMatches.length === 0 ? (
-                                <p className="text-center py-8 text-sm text-muted-foreground">No tienes matches pendientes de respuesta.</p>
+                                <p className="text-center py-8 text-sm text-muted-foreground">No tienes conexiones pendientes de respuesta.</p>
                             ) : (
                                 <div className="space-y-2">
                                     {newMatches.map((like: any) => (
@@ -471,7 +471,7 @@ export default function ChatPage() {
                                                               )}
                                                         </div>
                                                         <p className="text-sm text-muted-foreground">
-                                                            {like.intent === 'friendship' ? 'Amistad mutua' : 'Match mutuo'} • Chatea ahora
+                                                            {like.intent === 'friendship' ? 'Amistad mutua' : 'Conexión mutua'} • Chatea ahora
                                                         </p>
                                                     </div>
                                                 </Link>
@@ -517,7 +517,7 @@ export default function ChatPage() {
             <AlertDialog open={rejectDialogOpen} onOpenChange={setRejectDialogOpen}>
                 <AlertDialogContent>
                     <AlertDialogHeader>
-                        <AlertDialogTitle>¿Rechazar match?</AlertDialogTitle>
+                        <AlertDialogTitle>¿Rechazar conexión?</AlertDialogTitle>
                         <AlertDialogDescription>
                             No volverás a ver este perfil. Esta acción no se puede deshacer.
                         </AlertDialogDescription>
