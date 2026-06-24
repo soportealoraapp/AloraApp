@@ -60,9 +60,6 @@ export default function ContactPage() {
                     <Button variant="outline" asChild className="flex-1">
                         <Link href="/support">Centro de Ayuda</Link>
                     </Button>
-                    <Button variant="outline" asChild className="flex-1">
-                        <Link href="/settings">Configuración</Link>
-                    </Button>
                 </div>
             </main>
         </div>

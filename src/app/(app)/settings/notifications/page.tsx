@@ -69,7 +69,7 @@ export default function NotificationsPage() {
 
     if (loading) {
         return (
-            <div>
+            <div className="h-dvh overflow-y-auto">
                 <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b bg-background/80 px-4 backdrop-blur-sm sm:px-6 pt-safe">
                     <Button variant="ghost" size="icon" onClick={() => router.back()}>
                         <ArrowLeft className="h-5 w-5" />
@@ -109,9 +109,9 @@ export default function NotificationsPage() {
         { key: 'readReceipts' as const, label: "Confirmaciones de lectura", description: "Mostrar cuando alguien lee tus mensajes." },
     ];
 
-    return (
-        <div>
-            <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b bg-background/80 px-4 backdrop-blur-sm sm:px-6 pt-safe">
+        return (
+            <div className="h-dvh overflow-y-auto">
+                <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b bg-background/80 px-4 backdrop-blur-sm sm:px-6 pt-safe">
                 <Button variant="ghost" size="icon" onClick={() => router.back()}>
                     <ArrowLeft className="h-5 w-5" />
                 </Button>

@@ -1,11 +1,23 @@
+"use client";
+
 import Link from 'next/link';
-import { BackToHome } from '@/components/nav/BackToHome';
+import { useRouter } from 'next/navigation';
+import { ArrowLeft } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 export default function TermsPage() {
+    const router = useRouter();
+
     return (
-        <div className="min-h-dvh bg-background p-6">
-            <div className="max-w-3xl mx-auto bg-card rounded-2xl shadow-sm border p-8 space-y-6">
-                <h1 className="text-3xl font-bold text-foreground">Términos y Condiciones</h1>
+        <div className="h-dvh flex flex-col overflow-y-auto bg-background">
+            <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b bg-background/80 px-4 backdrop-blur-md pt-safe">
+                <Button variant="ghost" size="icon" onClick={() => router.back()}>
+                    <ArrowLeft className="h-5 w-5" />
+                </Button>
+                <h1 className="text-xl font-bold">Términos y Condiciones</h1>
+            </header>
+
+            <main className="max-w-3xl mx-auto p-6 space-y-6 w-full">
                 <p className="text-sm text-muted-foreground">Última actualización: 3 de junio de 2026</p>
 
                 <section className="space-y-4">
@@ -48,10 +60,10 @@ export default function TermsPage() {
                     <p className="text-muted-foreground">Para preguntas sobre estos términos, contáctanos en <a href="mailto:soporte.alora.app@gmail.com" className="text-primary underline">soporte.alora.app@gmail.com</a>.</p>
                 </section>
 
-                <div className="pt-4 border-t">
-                    <BackToHome />
+                <div className="pt-4 border-t flex items-center gap-4">
+                    <Link href="/privacy" className="text-primary hover:underline text-sm">Política de Privacidad</Link>
                 </div>
-            </div>
+            </main>
         </div>
     );
 }

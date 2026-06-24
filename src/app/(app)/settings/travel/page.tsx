@@ -127,7 +127,8 @@ export default function TravelModePage() {
     }
 
     return (
-        <div className="p-6 space-y-6 bg-muted/50 min-h-dvh">
+        <div className="h-dvh overflow-y-auto bg-muted/50">
+            <div className="p-6 space-y-6">
             <div className="flex items-center gap-4">
                 <Button variant="ghost" size="icon" onClick={() => router.back()}>
                     <ArrowLeft className="h-5 w-5" />
@@ -213,6 +214,7 @@ export default function TravelModePage() {
             </Card>
 
             <PaywallModal isOpen={showPaywall} onClose={() => setShowPaywall(false)} />
+            </div>
         </div>
     );
 }

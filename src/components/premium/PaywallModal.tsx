@@ -43,7 +43,7 @@ const TIERS = [
 export function PaywallModal({ isOpen, onClose }: PaywallModalProps) {
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>
-            <DialogContent className="sm:max-w-[500px] max-w-[95vw] p-0 overflow-y-auto overflow-hidden border-none rounded-3xl shadow-2xl max-h-[90dvh]" aria-describedby="paywall-desc">
+            <DialogContent className="sm:max-w-[500px] max-w-[95vw] p-0 overflow-y-auto border-none rounded-3xl shadow-2xl max-h-[90dvh]" aria-describedby="paywall-desc">
                 <DialogClose asChild>
                     <button
                         className="absolute right-4 top-4 z-10 rounded-full bg-background/20 p-1.5 text-foreground hover:bg-background/30 transition-colors backdrop-blur-md"
