@@ -117,6 +117,7 @@ export async function GET(request: NextRequest) {
                         text: match.messages[0].content
                     } : null,
                     createdAt: match.createdAt,
+                    score: match.score,
                     intent: match.intent,
                     mutedUntil: match.mutedUntil,
                     mutedByUserId: match.mutedByUserId,

@@ -125,7 +125,7 @@ export function ConversationRoulette({ onSend, disabled }: ConversationRouletteP
                     className="w-full"
                 >
                     <Dice1 className={cn("h-4 w-4 mr-2", isSpinning && "animate-spin")} />
-                    {isSpinning ? 'Generando...' : '🎲 Pregunta aleatoria'}
+                    {isSpinning ? 'Buscando...' : '🎲 Pregunta aleatoria'}
                 </Button>
             )}
         </div>

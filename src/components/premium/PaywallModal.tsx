@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import {
     Dialog,
     DialogContent,
@@ -10,8 +11,9 @@ import {
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Check, Sparkles, Star, X } from 'lucide-react';
+import { Check, Sparkles, Star, X, Loader2 } from 'lucide-react';
 import { PLANS } from '@/lib/domain/subscription';
+import { authFetch } from '@/lib/utils';
 
 interface PaywallModalProps {
     isOpen: boolean;
@@ -41,6 +43,21 @@ const TIERS = [
 ];
 
 export function PaywallModal({ isOpen, onClose }: PaywallModalProps) {
+    const [loading, setLoading] = useState(false);
+
+    const handleCheckout = async () => {
+        setLoading(true);
+        try {
+            const response = await authFetch('/api/lemonsqueezy/checkout', { method: 'POST' });
+            const data = await response.json();
+            if (data.url) {
+                window.location.href = data.url;
+            }
+        } catch {
+            setLoading(false);
+        }
+    };
+
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>
             <DialogContent className="sm:max-w-[500px] max-w-[95vw] p-0 overflow-y-auto border-none rounded-3xl shadow-2xl max-h-[90dvh]" aria-describedby="paywall-desc">
@@ -114,15 +131,20 @@ export function PaywallModal({ isOpen, onClose }: PaywallModalProps) {
                                 <Button
                                     variant={tier.highlighted ? 'default' : 'outline'}
                                     className={`rounded-xl px-6 ${tier.highlighted ? 'bg-primary text-primary-foreground' : ''}`}
+                                    disabled={loading}
                                     onClick={() => {
                                         if (tier.id === 'plus') {
-                                            window.location.href = process.env.NEXT_PUBLIC_LEMONSQUEEZY_CHECKOUT_URL || 'https://alora-app.lemonsqueezy.com/checkout/buy/67dd777a-6ae1-4169-a2a1-8a1f105899e7';
+                                            handleCheckout();
                                         } else {
                                             onClose();
                                         }
                                     }}
                                 >
-                                    {tier.price > 0 ? 'Suscribirse' : 'Continuar'}
+                                    {loading ? (
+                                        <Loader2 className="h-4 w-4 animate-spin" />
+                                    ) : (
+                                        tier.price > 0 ? 'Suscribirse' : 'Continuar'
+                                    )}
                                 </Button>
                             </div>
                             <div className="space-y-1.5">

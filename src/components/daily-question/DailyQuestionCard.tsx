@@ -98,7 +98,7 @@ export function DailyQuestionCard() {
     const updateCountdown = useCallback(() => {
         const now = new Date();
         const tomorrow = new Date(now);
-        tomorrow.setHours(24, 0, 0, 0);
+        tomorrow.setUTCHours(24, 0, 0, 0);
         const msUntilMidnight = tomorrow.getTime() - now.getTime();
         const hours = Math.floor(msUntilMidnight / (1000 * 60 * 60));
         const minutes = Math.floor((msUntilMidnight % (1000 * 60 * 60)) / (1000 * 60));
@@ -112,11 +112,11 @@ export function DailyQuestionCard() {
         return () => clearInterval(interval);
     }, []);
 
-    // Re-fetch question at midnight for daily rollover
+    // Re-fetch question at midnight UTC for daily rollover
     useEffect(() => {
         const now = new Date();
         const tomorrow = new Date(now);
-        tomorrow.setHours(24, 0, 0, 0);
+        tomorrow.setUTCHours(24, 0, 0, 0);
         const msUntilMidnight = tomorrow.getTime() - now.getTime();
         const timeout = setTimeout(() => {
             fetchQuestion();

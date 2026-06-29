@@ -467,8 +467,8 @@ export async function calculateCompatibility(
 
     if (!profileA || !profileB) {
         return {
-            totalScore: 50,
-            dimensions: { values: 50, relationshipGoals: 50, personality: 50, quizzes: 50, interests: 50, lifestyle: 50, dailyQuestion: 50 },
+            totalScore: 30,
+            dimensions: { values: 30, relationshipGoals: 30, personality: 30, quizzes: 30, interests: 30, lifestyle: 30, dailyQuestion: 30 },
             explanations: ['Perfiles incompletos — no se puede calcular compatibilidad'],
             sharedItems: { values: [], interests: [], music: [], lifestyle: [] },
             differences: { values: [], lifestyle: [] },

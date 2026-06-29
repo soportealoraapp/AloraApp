@@ -157,6 +157,7 @@ export interface Match {
     stage?: string;
     intent?: ConnectionIntent;
     compatibility?: number;
+    score?: number;
     mutedUntil?: string | Date | null;
     mutedByUserId?: string | null;
     partner?: {

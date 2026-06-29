@@ -190,8 +190,8 @@ function buildResult(
     const candidateValues = candidate.values || [];
     const candidateInterests = candidate.interests || [];
 
-    const sharedValues = userValues.filter(v => candidateValues.includes(v));
-    const sharedInterests = userInterests.filter(i => candidateInterests.includes(i));
+    const sharedValues = userValues.filter((v: string) => candidateValues.some((cv: string) => cv.toLowerCase() === v.toLowerCase()));
+    const sharedInterests = userInterests.filter((i: string) => candidateInterests.some((ci: string) => ci.toLowerCase() === i.toLowerCase()));
 
     const allValues = [...new Set([...userValues, ...candidateValues])];
     const differences = allValues.filter(v => !sharedValues.includes(v)).slice(0, 2);

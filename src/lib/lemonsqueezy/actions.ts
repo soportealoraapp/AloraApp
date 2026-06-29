@@ -33,9 +33,18 @@ export async function createCheckout(userId: string, email: string) {
 /**
  * Handle a successful payment from Lemon Squeezy webhook.
  */
-export async function handlePaymentSuccess(userId: string, subscriptionId: string) {
+export async function handlePaymentSuccess(userId: string, subscriptionId: string, interval?: string, intervalCount?: number) {
     try {
-        await grantPlus(userId, 30);
+        let durationDays = 30;
+        if (interval === 'year') {
+            durationDays = 365;
+        } else if (interval === 'week') {
+            durationDays = 7 * (intervalCount || 1);
+        } else if (interval === 'month') {
+            durationDays = 30 * (intervalCount || 1);
+        }
+
+        await grantPlus(userId, durationDays);
 
         revalidatePath('/profile');
         // revalidatePath disabled — subscription route deprecated in V3.4

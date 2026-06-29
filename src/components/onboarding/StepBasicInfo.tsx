@@ -253,6 +253,12 @@ export function StepBasicInfo({ data, onUpdate, onNext, userId, onPrev }: StepBa
                                         className="w-full text-left px-4 py-2.5 text-sm hover:bg-muted transition-colors first:rounded-t-xl last:rounded-b-xl"
                                         onClick={() => {
                                             handleChange('city', city.name);
+                                            handleChange('cityId', city.id);
+                                            handleChange('countryCode', city.countryCode);
+                                            if ('lat' in city && 'lng' in city) {
+                                                handleChange('latitude', (city as { lat: number }).lat);
+                                                handleChange('longitude', (city as { lng: number }).lng);
+                                            }
                                             setCitySearch('');
                                             setShowCityDropdown(false);
                                             setCitySelectedFromDropdown(true);

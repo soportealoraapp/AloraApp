@@ -42,7 +42,7 @@ export function useSendLike(onMatchCreated?: (intent: ConnectionIntent) => void)
                 onMatchCreated?.(intent);
             } else if (showToast && type !== 'pass') {
                 toast({
-                    title: type === 'superlike' ? '¡Flechado enviado! ✨' : 'Like enviado ❤️',
+                    title: type === 'superlike' ? '¡Flechado enviado! ✨' : 'Me gusta enviado ❤️',
                     description: '¡Ojalá hagan match!',
                 });
             }

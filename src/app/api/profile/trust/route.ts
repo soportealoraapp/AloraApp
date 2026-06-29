@@ -78,7 +78,7 @@ export async function GET(request: NextRequest) {
         }
 
         const responseRate = totalMessages > 0
-            ? Math.round((sentMessages / totalMessages) * 100)
+            ? Math.round((sentMessages / Math.min(totalMessages, sentMessages * 3)) * 100)
             : 50;
 
         const oneWeekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);

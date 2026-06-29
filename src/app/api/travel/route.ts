@@ -65,7 +65,7 @@ export async function POST(request: NextRequest) {
         const { ensureSubscriptionState } = await import('@/lib/subscription-helper');
         await ensureSubscriptionState(user.id);
 
-        const { enabled, cityId } = await request.json();
+        const { enabled, cityId, cityName, latitude, longitude, countryCode } = await request.json();
 
         const profile = await prisma.profile.findUnique({
             where: { userId: user.id },
@@ -85,22 +85,34 @@ export async function POST(request: NextRequest) {
 
         if (enabled) {
             if (cityId) {
-                // Look up city from our static data
+                // Look up city from our static data first
                 const { getCityById } = await import('@/lib/location');
                 const result = getCityById(cityId);
 
-                if (!result) {
-                    return NextResponse.json({ error: 'City not found' }, { status: 404 });
+                if (result) {
+                    updateData = {
+                        travelModeEnabled: true,
+                        travelCity: result.city.name,
+                        travelCountryCode: result.city.countryCode,
+                        travelLatitude: result.city.lat,
+                        travelLongitude: result.city.lng,
+                        travelStartedAt: new Date(),
+                    };
+                } else {
+                    // Fallback: accept city data from request body (MapTiler/Nominatim results)
+                    if (cityName && latitude && longitude) {
+                        updateData = {
+                            travelModeEnabled: true,
+                            travelCity: cityName,
+                            travelCountryCode: countryCode || null,
+                            travelLatitude: latitude,
+                            travelLongitude: longitude,
+                            travelStartedAt: new Date(),
+                        };
+                    } else {
+                        return NextResponse.json({ error: 'City not found' }, { status: 404 });
+                    }
                 }
-
-                updateData = {
-                    travelModeEnabled: true,
-                    travelCity: result.city.name,
-                    travelCountryCode: result.city.countryCode,
-                    travelLatitude: result.city.lat,
-                    travelLongitude: result.city.lng,
-                    travelStartedAt: new Date(),
-                };
             } else {
                 // Re-enable with existing travel data (city already configured from a previous call)
                 const existing = await prisma.profile.findUnique({

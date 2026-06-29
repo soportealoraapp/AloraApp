@@ -98,6 +98,9 @@ export async function PATCH(request: NextRequest) {
                 if (!['user', 'moderator', 'admin'].includes(value)) {
                     return NextResponse.json({ error: 'Invalid role' }, { status: 400 });
                 }
+                if (!reason) {
+                    return NextResponse.json({ error: 'Reason is required for role changes' }, { status: 400 });
+                }
                 await prisma.user.update({ where: { id: userId }, data: { role: value } });
                 break;
             default:

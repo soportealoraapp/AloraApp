@@ -50,8 +50,18 @@ export async function POST(request: Request) {
             case 'subscription_updated': {
                 const status = body.data?.attributes?.status;
                 if (status === 'active') {
+                    // Idempotency check: skip if user already has active Plus
+                    const profile = await prisma.profile.findUnique({
+                        where: { userId },
+                        select: { subscriptionStatus: true, subscriptionExpiresAt: true },
+                    });
+                    if (profile?.subscriptionStatus === 'plus' && profile.subscriptionExpiresAt && profile.subscriptionExpiresAt > new Date()) {
+                        return NextResponse.json({ received: true, skipped: true, reason: 'already_active' });
+                    }
                     const subscriptionId = body.data?.id;
-                    await handlePaymentSuccess(userId, subscriptionId);
+                    const interval = body.data?.attributes?.interval;
+                    const intervalCount = body.data?.attributes?.interval_count;
+                    await handlePaymentSuccess(userId, subscriptionId, interval, intervalCount);
                 }
                 break;
             }

@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Message } from '@/lib/domain/types';
 import { chatService, deduplicate } from '@/lib/supabase/services/chat';
-import { addToQueue, processQueue } from '@/lib/offline-queue';
+import { addToQueue } from '@/lib/offline-queue';
 
 interface TypingUser {
     userId: string;

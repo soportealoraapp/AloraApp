@@ -434,8 +434,8 @@ export default function ChatWindowPage() {
                                 ) : (
                                     <Sparkles className="h-3 w-3 text-primary" />
                                 )}
-                                {match?.compatibility && !isPartnerOnline && (
-                                    <>{match.compatibility}% compatible</>
+                                {match?.score != null && match.score > 0 && !isPartnerOnline && (
+                                    <>{Math.round(match.score)}% compatible</>
                                 )}
                                 {matchHealth > 0 && (
                                     <span className={cn(
