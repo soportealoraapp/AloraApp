@@ -29,6 +29,15 @@ export async function POST(request: NextRequest) {
             if (!isTrusted || url.protocol !== 'https:') {
                 return NextResponse.json({ error: 'Invalid image URL' }, { status: 400 });
             }
+
+            // Validate file size via HEAD request (max 4MB)
+            const headResponse = await fetch(imageUrl, { method: 'HEAD' }).catch(() => null);
+            if (headResponse) {
+                const contentLength = parseInt(headResponse.headers.get('content-length') || '0', 10);
+                if (contentLength > 4 * 1024 * 1024) {
+                    return NextResponse.json({ error: 'File too large (max 4MB)' }, { status: 400 });
+                }
+            }
         } catch {
             return NextResponse.json({ error: 'Invalid image URL' }, { status: 400 });
         }

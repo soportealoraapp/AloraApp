@@ -189,8 +189,9 @@ export async function completeOnboarding(userId: string, data: Partial<UserProfi
         const hasGender = !!(data.gender);
         const hasAge = !!(data.age && data.age >= 18);
         const hasConnectionModes = !!(data.connectionModes && (data.connectionModes as string[]).length > 0);
+        const hasCity = !!(data.city && (data.city as string).trim().length > 0);
 
-        if (!hasName || !hasGender || !hasAge || !hasConnectionModes) {
+        if (!hasName || !hasGender || !hasAge || !hasConnectionModes || !hasCity) {
             return { success: false, error: 'Missing required onboarding fields' };
         }
 

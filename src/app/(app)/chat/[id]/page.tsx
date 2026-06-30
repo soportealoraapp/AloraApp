@@ -35,7 +35,7 @@ import Image from "next/image";
 export default function ChatWindowPage() {
     const params = useParams();
     const router = useRouter();
-    const { user, profile } = useAuth();
+    const { user } = useAuth();
     const matchId = params.id as string;
     const { messages, setMessages, loading, sending, sendMessage, emitTyping, markAsRead, loadMore, hasMore, loadingMore, isPartnerOnline, partnerTyping } = useChat(matchId);
     const [keyboardHeight, setKeyboardHeight] = useState(0);

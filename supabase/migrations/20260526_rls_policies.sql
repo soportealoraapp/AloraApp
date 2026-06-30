@@ -9,10 +9,10 @@ CREATE SCHEMA IF NOT EXISTS private;
 
 CREATE OR REPLACE FUNCTION private.is_admin()
 RETURNS BOOLEAN
-LANGUAGE sql STABLE SECURITY DEFINER SET search_path = ''
+LANGUAGE sql STABLE SECURITY INVOKER SET search_path = ''
 AS $$
   SELECT EXISTS (
-    SELECT 1 FROM public.users WHERE id = auth.uid()::text AND "role" IN ('admin', 'moderator')
+    SELECT 1 FROM public.users WHERE id = auth.uid()::text AND "role" IN ('admin', 'super_admin', 'moderator')
   );
 $$;
 

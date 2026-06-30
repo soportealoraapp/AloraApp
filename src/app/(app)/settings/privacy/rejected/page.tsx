@@ -14,22 +14,22 @@ export default function RejectedUsersPage() {
     const { user } = useAuth();
     const { toast } = useToast();
     const [loading, setLoading] = useState(true);
-    const [rejectedUsers, setRejectedUsers] = useState<any[]>([]);
+    const [blockedUsers, setBlockedUsers] = useState<any[]>([]);
 
     useEffect(() => {
         if (user) {
-            loadRejectedUsers();
+            loadBlockedUsers();
         }
     }, [user]);
 
-    const loadRejectedUsers = async () => {
+    const loadBlockedUsers = async () => {
         if (!user) return;
         setLoading(true);
         try {
-            const response = await fetch('/api/profile/favorites');
+            const response = await fetch('/api/safety/status');
             if (response.ok) {
                 const data = await response.json();
-                setRejectedUsers(data.favorites || []);
+                setBlockedUsers(data.blockedUsers || []);
             }
         } catch (error) {
             console.error(error);
@@ -47,7 +47,7 @@ export default function RejectedUsersPage() {
                 body: JSON.stringify({ blockedId })
             });
             if (!response.ok) throw new Error('Error al desbloquear');
-            setRejectedUsers(prev => prev.filter(u => u.id !== blockedId));
+            setBlockedUsers(prev => prev.filter(u => u.id !== blockedId));
             toast({ title: "Usuario desbloqueado" });
         } catch (error) {
             toast({ title: "Error", variant: "destructive" });
@@ -60,7 +60,7 @@ export default function RejectedUsersPage() {
                 <Button variant="ghost" size="icon" onClick={() => router.back()}>
                     <ArrowLeft className="h-5 w-5" />
                 </Button>
-                <h1 className="text-xl font-semibold md:text-2xl font-headline">Usuarios Rechazados</h1>
+                <h1 className="text-xl font-semibold md:text-2xl font-headline">Usuarios Bloqueados</h1>
             </header>
 
             <main className="p-4 space-y-4">
@@ -68,23 +68,23 @@ export default function RejectedUsersPage() {
                     <div className="flex justify-center p-8">
                         <Loader2 className="h-8 w-8 animate-spin" />
                     </div>
-                ) : rejectedUsers.length === 0 ? (
+                ) : blockedUsers.length === 0 ? (
                     <div className="text-center p-8 text-muted-foreground">
                         <UserX className="h-12 w-12 mx-auto mb-2 opacity-50" />
-                        <p>No tienes usuarios rechazados.</p>
+                        <p>No tienes usuarios bloqueados.</p>
                     </div>
                 ) : (
                     <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                        {rejectedUsers.map(u => (
+                        {blockedUsers.map(u => (
                             <Card key={u.id}>
                                 <CardContent className="p-4 flex items-center justify-between gap-3">
                                     <div className="flex items-center gap-3">
                                         <div className="relative h-10 w-10 rounded-full overflow-hidden bg-muted">
-                                            {u.photoUrl && <Image src={u.photoUrl} alt={u.displayName} fill className="object-cover" loading="lazy" />}
+                                            {u.photos?.[0] && <Image src={u.photos[0]} alt={u.displayName} fill className="object-cover" loading="lazy" />}
                                         </div>
                                         <div>
                                             <p className="font-medium">{u.displayName}</p>
-                                            <p className="text-xs text-muted-foreground">Rechazado</p>
+                                            <p className="text-xs text-muted-foreground">Bloqueado</p>
                                         </div>
                                     </div>
                                     <Button size="sm" variant="outline" onClick={() => handleUnblock(u.id)}>

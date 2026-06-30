@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getDailyCompatibility } from '@/server/services/daily-compatibility';
+import { withRateLimit } from '@/server/utils/api-rate-limit';
 
 // GET /api/daily-compatibility — Get today's featured connection
 export async function GET(request: NextRequest) {
@@ -10,6 +11,9 @@ export async function GET(request: NextRequest) {
     if (!user) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
+
+    const rateLimitResponse = await withRateLimit(user.id, 'discover');
+    if (rateLimitResponse) return rateLimitResponse;
 
     const { ensureSubscriptionState } = await import('@/lib/subscription-helper');
     await ensureSubscriptionState(user.id);

@@ -187,8 +187,8 @@ export function VerificationUpload({ gesture, onComplete }: VerificationUploadPr
     if (submitted) {
         return (
             <div className="flex flex-col items-center justify-center py-8 text-center">
-                <div className="rounded-full bg-green-100 p-4 mb-4">
-                    <CheckCircle className="h-10 w-10 text-green-600" />
+                <div className="rounded-full bg-green-100 dark:bg-green-900/30 p-4 mb-4">
+                    <CheckCircle className="h-10 w-10 text-green-600 dark:text-green-400" />
                 </div>
                 <h3 className="font-bold text-lg mb-2">¡Verificación enviada!</h3>
                 <p className="text-sm text-muted-foreground max-w-xs">
@@ -216,9 +216,9 @@ export function VerificationUpload({ gesture, onComplete }: VerificationUploadPr
                 />
             )}
 
-            <div className="rounded-2xl bg-blue-50 border border-blue-100 p-4 flex gap-3">
-                <Shield className="h-5 w-5 text-blue-500 flex-shrink-0 mt-0.5" />
-                <div className="text-xs text-blue-700">
+            <div className="rounded-2xl bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800/30 p-4 flex gap-3">
+                <Shield className="h-5 w-5 text-blue-500 dark:text-blue-400 flex-shrink-0 mt-0.5" />
+                <div className="text-xs text-blue-700 dark:text-blue-300">
                     <p className="font-semibold mb-1">Tu privacidad es importante</p>
                     <p>Tu selfie se usa solo para verificar tu identidad. Nunca se muestra en tu perfil y se elimina tras la revisión.</p>
                 </div>

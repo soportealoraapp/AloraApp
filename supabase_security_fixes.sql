@@ -73,7 +73,7 @@ AS $$
   SELECT EXISTS (
     SELECT 1 FROM public.users
     WHERE id = auth.uid()::text
-      AND role IN ('admin', 'super_admin')
+      AND role IN ('admin', 'super_admin', 'moderator')
   );
 $$;
 

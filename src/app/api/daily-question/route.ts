@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getDailyQuestionForUser, submitAnswer } from '@/server/services/daily-question';
 import { withRateLimit } from '@/server/utils/api-rate-limit';
+import { stripHtml } from '@/lib/schemas/validation';
 
 // GET /api/daily-question — Get today's question
 export async function GET(request: NextRequest) {
@@ -48,7 +49,8 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ error: 'Answer too long (max 300 chars)' }, { status: 400 });
         }
 
-        const result = await submitAnswer(user.id, questionId, answer.trim());
+        const sanitizedAnswer = stripHtml(answer.trim());
+        const result = await submitAnswer(user.id, questionId, sanitizedAnswer);
 
         // Track analytics
         const { prisma } = await import('@/lib/prisma');

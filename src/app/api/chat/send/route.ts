@@ -127,8 +127,8 @@ export async function POST(request: NextRequest) {
             isFiltered = false;
         } else {
             try {
-                const moderationResult = await filterOffensiveMessages({ text });
-                content = moderationResult.filteredText;
+                const moderationResult = await filterOffensiveMessages({ text: sanitizedText });
+                content = moderationResult.filteredText || sanitizedText;
                 isFiltered = moderationResult.isOffensive;
             } catch (moderationError) {
                 console.error('Moderation error:', moderationError);
