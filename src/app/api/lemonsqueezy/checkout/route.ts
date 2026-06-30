@@ -10,7 +10,7 @@ export async function POST(request: Request) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
-        const rateLimitResponse = await withRateLimit(user.id, 'boost');
+        const rateLimitResponse = await withRateLimit(user.id, 'checkout');
         if (rateLimitResponse) return rateLimitResponse;
 
         const result = await createCheckout(user.id, user.email || '');

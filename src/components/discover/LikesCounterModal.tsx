@@ -66,7 +66,7 @@ export function LikesCounterModal({ isOpen, onClose, remaining, dailyLikesLimit,
 
                     <div className="p-6 space-y-6">
                         <div className="text-center">
-                            <div className="mx-auto w-16 h-16 rounded-full bg-gradient-to-br from-pink-100 to-pink-200 flex items-center justify-center mb-4">
+                            <div className="mx-auto w-16 h-16 rounded-full bg-gradient-to-br from-pink-100 to-pink-200 dark:from-pink-900/30 dark:to-pink-900/20 flex items-center justify-center mb-4">
                                 <Heart className={isEmpty ? "h-8 w-8 text-muted-foreground" : "h-8 w-8 text-primary fill-primary"} />
                             </div>
                             <h2 className="text-lg font-bold text-foreground" id="likes-modal-title">

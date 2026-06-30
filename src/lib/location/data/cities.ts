@@ -79,7 +79,7 @@ export const CITIES: City[] = [
     { id: 'mx-matamoros', name: 'Matamoros', stateCode: 'TAM', countryCode: 'MX', lat: 25.8797, lng: -97.5046, population: 500000, active: true },
     { id: 'mx-san-luis-rio-colorado', name: 'San Luis Río Colorado', stateCode: 'SON', countryCode: 'MX', lat: 32.4564, lng: -114.7719, population: 200000, active: true },
     { id: 'mx-valle-de-bravo', name: 'Valle de Bravo', stateCode: 'MEX', countryCode: 'MX', lat: 19.1919, lng: -100.1328, population: 100000, active: true },
-    { id: 'mx-tepito', name: 'Tepoztlán', stateCode: 'MOR', countryCode: 'MX', lat: 18.9846, lng: -99.0976, population: 100000, active: true },
+    { id: 'mx-tepozotlan', name: 'Tepoztlán', stateCode: 'MOR', countryCode: 'MX', lat: 18.9846, lng: -99.0976, population: 100000, active: true },
     { id: 'mx-taxco', name: 'Taxco de Alarcón', stateCode: 'GRO', countryCode: 'MX', lat: 18.5588, lng: -99.6044, population: 100000, active: true },
     { id: 'mx-san-cristobal', name: 'San Cristóbal de las Casas', stateCode: 'CHP', countryCode: 'MX', lat: 16.7371, lng: -92.6376, population: 150000, active: true },
     { id: 'mx-huatulco', name: 'Huatulco', stateCode: 'OAX', countryCode: 'MX', lat: 15.8437, lng: -96.3281, population: 100000, active: true },

@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { withRateLimit } from '@/server/utils/api-rate-limit';
 
 export async function GET(request: NextRequest) {
     const { createClient } = await import('@/lib/supabase/server');
@@ -8,6 +9,9 @@ export async function GET(request: NextRequest) {
     if (!user) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
+
+    const rateLimitResponse = await withRateLimit(user.id, 'discover');
+    if (rateLimitResponse) return rateLimitResponse;
 
     const { ensureSubscriptionState } = await import('@/lib/subscription-helper');
     const { subscriptionStatus } = await ensureSubscriptionState(user.id);

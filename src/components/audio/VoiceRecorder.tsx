@@ -6,7 +6,7 @@ import { Mic, Square, Trash2 } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 
-const MAX_DURATION = 120; // 2 minutes
+const MAX_DURATION = 30; // 30 seconds (matches VoiceIntro limit)
 
 function getAudioMimeType(): string {
     if (typeof navigator !== 'undefined') {

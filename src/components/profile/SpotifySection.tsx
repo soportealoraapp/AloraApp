@@ -27,8 +27,6 @@ interface Artist {
 interface SpotifyData {
   topTracks: Track[];
   topArtists: Artist[];
-  playlistId?: string | null;
-  playlistUrl?: string | null;
   lastSyncedAt?: string | null;
 }
 
@@ -39,7 +37,6 @@ interface SpotifySectionProps {
 
 export function SpotifySection({ spotify, isOwn }: SpotifySectionProps) {
   const router = useRouter();
-  const [showEmbed, setShowEmbed] = useState(false);
   const [syncing, setSyncing] = useState(false);
   const [loading, setLoading] = useState(spotify === undefined);
 
@@ -209,37 +206,6 @@ export function SpotifySection({ spotify, isOwn }: SpotifySectionProps) {
                 </a>
               ))}
             </div>
-          </div>
-        )}
-
-        {spotify.playlistUrl && !showEmbed && (
-          <Button
-            variant="ghost"
-            size="sm"
-            className="mt-3 w-full text-xs"
-            onClick={() => setShowEmbed(true)}
-          >
-            Mostrar playlist
-          </Button>
-        )}
-
-        {spotify.playlistId && showEmbed && (
-          <div className="mt-3">
-            <iframe
-              src={`https://open.spotify.com/embed/playlist/${spotify.playlistId}`}
-              width="100%"
-              height="152"
-              allow="encrypted-media"
-              className="rounded-xl"
-            />
-            <Button
-              variant="ghost"
-              size="sm"
-              className="w-full text-xs mt-1"
-              onClick={() => setShowEmbed(false)}
-            >
-              Ocultar playlist
-            </Button>
           </div>
         )}
       </CardContent>

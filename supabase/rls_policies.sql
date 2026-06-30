@@ -179,8 +179,8 @@ CREATE POLICY "service_role_manage_beta_codes" ON public.beta_codes
 ALTER TABLE public.profile_visits ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "users_select_own_profile_visits" ON public.profile_visits
     FOR SELECT USING (auth.uid()::text = "visitedId");
-CREATE POLICY "anyone_insert_profile_visits" ON public.profile_visits
-    FOR INSERT WITH CHECK (true);
+CREATE POLICY "authenticated_insert_profile_visits" ON public.profile_visits
+    FOR INSERT WITH CHECK (auth.uid()::text = "visitorId");
 
 -- 11. quiz_results
 ALTER TABLE public.quiz_results ENABLE ROW LEVEL SECURITY;
@@ -211,7 +211,7 @@ CREATE POLICY "users_select_own_story_views" ON public.story_views
 
 -- 14. waitlist_entries
 ALTER TABLE public.waitlist_entries ENABLE ROW LEVEL SECURITY;
-CREATE POLICY "anyone_insert_waitlist_entries" ON public.waitlist_entries
-    FOR INSERT WITH CHECK (true);
+CREATE POLICY "authenticated_insert_waitlist_entries" ON public.waitlist_entries
+    FOR INSERT WITH CHECK (auth.uid()::text = "userId");
 CREATE POLICY "users_select_own_waitlist_entries" ON public.waitlist_entries
     FOR SELECT USING (auth.uid()::text = "userId");

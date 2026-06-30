@@ -19,18 +19,33 @@ import { getCSP, SECURITY_HEADERS } from '@/lib/security';
 const MAX_CACHE_SIZE = 1000;
 
 function createCache<T>(maxSize: number) {
-    const map = new Map<string, T>();
+    const map = new Map<string, T & { _ts: number }>();
+    let lastCleanup = Date.now();
+    const CLEANUP_INTERVAL = 60_000; // cleanup every 60s
+
+    function cleanup() {
+        const now = Date.now();
+        if (now - lastCleanup < CLEANUP_INTERVAL) return;
+        lastCleanup = now;
+        for (const [key, val] of map) {
+            if (now - val._ts > 300_000) map.delete(key); // evict entries older than 5min
+        }
+    }
+
     return {
         get(key: string): T | undefined {
-            return map.get(key);
+            const entry = map.get(key);
+            if (!entry) return undefined;
+            const { _ts, ...value } = entry;
+            return value as T;
         },
         set(key: string, value: T) {
+            cleanup();
             if (map.size >= maxSize) {
-                // Evict oldest entry (first inserted)
                 const firstKey = map.keys().next().value;
                 if (firstKey !== undefined) map.delete(firstKey);
             }
-            map.set(key, value);
+            map.set(key, { ...value, _ts: Date.now() } as T & { _ts: number });
         },
         delete(key: string) {
             map.delete(key);

@@ -18,6 +18,23 @@ const SILENT_HOURS_END = 8;    // 8 AM
 
 const deduplicationCache = new Map<string, number>();
 const rateLimitCache = new Map<string, { count: number; resetAt: number }>();
+const DEDUP_CACHE_MAX = 1000;
+const RATE_LIMIT_CACHE_MAX = 1000;
+
+function cleanupCaches() {
+    const now = Date.now();
+    if (deduplicationCache.size > DEDUP_CACHE_MAX) {
+        const cutoff = now - DEDUP_WINDOW_MINUTES * 60 * 1000;
+        for (const [key, ts] of deduplicationCache) {
+            if (ts < cutoff) deduplicationCache.delete(key);
+        }
+    }
+    if (rateLimitCache.size > RATE_LIMIT_CACHE_MAX) {
+        for (const [key, val] of rateLimitCache) {
+            if (val.resetAt < now) rateLimitCache.delete(key);
+        }
+    }
+}
 
 function isQuietHours(timezone?: string): boolean {
     try {
@@ -46,10 +63,7 @@ function isDeduplicated(userId: string, type: string, fromUserId?: string): bool
 function markSent(userId: string, type: string, fromUserId?: string): void {
     const key = getDeduplicationKey(userId, type, fromUserId);
     deduplicationCache.set(key, Date.now());
-    if (deduplicationCache.size > 1000) {
-        const firstKey = deduplicationCache.keys().next().value;
-        if (firstKey) deduplicationCache.delete(firstKey);
-    }
+    cleanupCaches();
 }
 
 function isRateLimited(userId: string): boolean {
