@@ -90,6 +90,11 @@ model User {
   profileVisitsReceived   ProfileVisit[]           @relation("ProfileVisitVisited")
   waitlistEntries         WaitlistEntry[]
 
+  // Sprint 5 Relations
+  favorites       Favorite[]
+  dailyPicks      DailyPick[]
+  matchFeedbacks  MatchFeedback[]
+
   @@map("users")
 }
 
