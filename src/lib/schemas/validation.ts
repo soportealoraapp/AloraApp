@@ -74,11 +74,16 @@ export function sanitizeProfileUpdates(body: Record<string, unknown>): Record<st
     const allowedKeys = new Set(Object.keys(EditableProfileSchema.shape));
     // Text fields that should be sanitized against XSS
     const textFields = new Set(['displayName', 'bio', 'status', 'city', 'zodiacSign', 'education', 'smoking', 'drinking', 'children', 'religion']);
+    // Array fields where each element should be sanitized
+    const arrayFields = new Set(['interests', 'values', 'musicGenres']);
     for (const [key, value] of Object.entries(body)) {
         if (allowedKeys.has(key) && !BLOCKED_FIELDS.has(key)) {
             // Strip HTML from all text fields to prevent stored XSS
             if (textFields.has(key) && typeof value === 'string') {
                 allowed[key] = stripHtml(value);
+            } else if (arrayFields.has(key) && Array.isArray(value)) {
+                // Sanitize each element in array fields
+                allowed[key] = value.map(item => typeof item === 'string' ? stripHtml(item) : item);
             } else {
                 allowed[key] = value;
             }

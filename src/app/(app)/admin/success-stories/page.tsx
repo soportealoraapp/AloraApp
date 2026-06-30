@@ -194,11 +194,11 @@ export default function AdminSuccessStoriesPage() {
                                         <div className="flex items-center gap-2 mb-1">
                                             <h3 className="font-bold truncate">{s.title}</h3>
                                             {s.approved ? (
-                                                <span className="text-xs font-bold bg-green-100 text-green-700 px-2 py-0.5 rounded-full">
+                                                <span className="text-xs font-bold bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 px-2 py-0.5 rounded-full">
                                                     Aprobada
                                                 </span>
                                             ) : (
-                                                <span className="text-xs font-bold bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full">
+                                                <span className="text-xs font-bold bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 px-2 py-0.5 rounded-full">
                                                     Pendiente
                                                 </span>
                                             )}

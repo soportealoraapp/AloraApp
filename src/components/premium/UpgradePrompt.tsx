@@ -7,7 +7,7 @@ import { Sparkles, X } from 'lucide-react';
 import { PaywallModal } from './PaywallModal';
 
 interface UpgradePromptProps {
-    trigger: 'likes_exhausted' | 'rewind_used' | 'travel_mode' | 'incognito';
+    trigger: 'likes_exhausted' | 'travel_mode' | 'incognito';
     className?: string;
 }
 
@@ -15,10 +15,6 @@ const TRIGGER_CONFIG = {
     likes_exhausted: {
         title: 'Likes agotados',
         description: 'Con Alora+ tienes likes ilimitados para conectar sin límites.',
-    },
-    rewind_used: {
-        title: '¿Te pasaste de swipe?',
-        description: 'Con Alora+ tienes 3 rewinds diarios para deshacer.',
     },
     travel_mode: {
         title: 'Explora otras ciudades',

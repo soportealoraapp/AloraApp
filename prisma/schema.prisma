@@ -902,6 +902,7 @@ model Favorite {
   profileId String
   createdAt DateTime @default(now())
 
+  user       User    @relation(fields: [userId], references: [id], onDelete: Cascade)
   @@unique([userId, profileId])
   @@index([userId])
   @@index([profileId])
@@ -919,6 +920,7 @@ model DailyPick {
   liked     Boolean?
   createdAt DateTime @default(now())
 
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
   @@unique([userId, profileId, date])
   @@index([userId, date])
   @@map("daily_picks")
@@ -932,6 +934,7 @@ model MatchFeedback {
   comment   String?
   createdAt DateTime @default(now())
 
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
   @@unique([matchId, userId])
   @@index([matchId])
   @@map("match_feedback")

@@ -48,7 +48,7 @@ export default function MarketplaceCommandPage() {
             <SectionTitle title="Marketplace Command Center" subtitle="Vista unificada del estado del marketplace" />
 
             {/* Health Status */}
-            <Card className={`${marketplace.genderAlert === 'healthy' ? 'border-green-200 bg-green-50' : marketplace.genderAlert === 'moderate_imbalance' ? 'border-yellow-200 bg-yellow-50' : 'border-red-200 bg-red-50'}`}>
+            <Card className={`${marketplace.genderAlert === 'healthy' ? 'border-green-200 dark:border-green-800/30 bg-green-50 dark:bg-green-900/20' : marketplace.genderAlert === 'moderate_imbalance' ? 'border-yellow-200 dark:border-yellow-800/30 bg-yellow-50 dark:bg-yellow-900/20' : 'border-red-200 dark:border-red-800/30 bg-red-50 dark:bg-red-900/20'}`}>
                 <CardContent className="p-4">
                     <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
@@ -63,9 +63,9 @@ export default function MarketplaceCommandPage() {
                             </div>
                         </div>
                         <Badge className={
-                            marketplace.genderAlert === 'healthy' ? 'bg-green-100 text-green-700' :
-                            marketplace.genderAlert === 'moderate_imbalance' ? 'bg-yellow-100 text-yellow-700' :
-                            'bg-red-100 text-red-700'
+                            marketplace.genderAlert === 'healthy' ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400' :
+                            marketplace.genderAlert === 'moderate_imbalance' ? 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400' :
+                            'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400'
                         }>
                             {marketplace.genderRatio}:1
                         </Badge>
@@ -172,7 +172,7 @@ export default function MarketplaceCommandPage() {
                                 <span className="font-bold">{marketplace.premiumUsers}</span>
                             </div>
                             <div className="flex justify-between items-center">
-                                <span className="text-sm">Ghosting rate</span>
+                                <span className="text-sm">Tasa de ghosting</span>
                                 <span className="font-bold">{marketplace.ghostingRate}%</span>
                             </div>
                         </div>

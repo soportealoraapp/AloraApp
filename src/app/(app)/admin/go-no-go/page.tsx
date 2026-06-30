@@ -35,9 +35,9 @@ export default function GoNoGoPage() {
     }
 
     const verdictConfig = {
-        GO: { color: 'bg-green-100 text-green-700', icon: CheckCircle, label: 'LISTO PARA BETA PÚBLICA' },
-        'NO-GO': { color: 'bg-red-100 text-red-700', icon: XCircle, label: 'NO LISTO' },
-        CONDITIONAL: { color: 'bg-yellow-100 text-yellow-700', icon: AlertTriangle, label: 'CONDICIONAL' },
+        GO: { color: 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400', icon: CheckCircle, label: 'LISTO PARA BETA PÚBLICA' },
+        'NO-GO': { color: 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400', icon: XCircle, label: 'NO LISTO' },
+        CONDITIONAL: { color: 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400', icon: AlertTriangle, label: 'CONDICIONAL' },
     };
 
     const config = verdictConfig[data.verdict as keyof typeof verdictConfig] || verdictConfig['NO-GO'];

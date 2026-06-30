@@ -265,11 +265,11 @@ export default function NorthStarDashboard() {
               {experiments.filter(e => e.status === 'running').slice(0, 4).map(exp => {
                 const best = exp.results?.variants?.reduce((a, b) => a.metricValue > b.metricValue ? a : b);
                 return (
-                  <div key={exp.id} className="p-3 rounded-xl bg-purple-50 border border-purple-100">
+                  <div key={exp.id} className="p-3 rounded-xl bg-purple-50 dark:bg-purple-900/20 border border-purple-100 dark:border-purple-800/30">
                     <div className="flex items-center justify-between mb-2">
                       <p className="text-sm font-bold">{exp.name}</p>
-                      <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full font-medium">
-                        {exp._count.assignments} users
+                      <span className="text-xs bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 px-2 py-0.5 rounded-full font-medium">
+                        {exp._count.assignments} usuarios
                       </span>
                     </div>
                     <p className="text-xs text-muted-foreground mb-1">Métrica: {exp.metric}</p>
@@ -327,7 +327,7 @@ export default function NorthStarDashboard() {
                       <p className={`text-2xl font-bold bg-gradient-to-r ${colors[i]} bg-clip-text text-transparent`}>
                         {val.rate}%
                       </p>
-                      <p className="text-xs text-muted-foreground">{val.active} users</p>
+                      <p className="text-xs text-muted-foreground">{val.active} usuarios</p>
                     </div>
                   );
                 })}

@@ -73,17 +73,6 @@ export async function POST(request: NextRequest) {
             }
         }
 
-        // Delete Supabase auth user first to prevent continued authentication
-        const { createClient: createServiceClient } = await import('@supabase/supabase-js');
-        const supabaseAdmin = createServiceClient(
-            process.env.NEXT_PUBLIC_SUPABASE_URL!,
-            process.env.SUPABASE_SERVICE_ROLE_KEY!
-        );
-        const { error: deleteAuthError } = await supabaseAdmin.auth.admin.deleteUser(user.id);
-        if (deleteAuthError) {
-            console.error('Failed to delete Supabase auth user:', deleteAuthError);
-        }
-
         // Delete all database records in a single transaction FIRST
         await prisma.$transaction([
             prisma.notification.deleteMany({ where: { userId: user.id } }),
@@ -143,6 +132,18 @@ export async function POST(request: NextRequest) {
                 console.error('Failed to delete user files from UploadThing (DB already deleted):', deleteErr);
                 // Files are orphaned but user data is deleted — acceptable tradeoff
             }
+        }
+
+        // Delete Supabase auth user AFTER all DB records are deleted
+        // If this fails, the user data is already gone but they can still authenticate into an empty state
+        const { createClient: createServiceClient } = await import('@supabase/supabase-js');
+        const supabaseAdmin = createServiceClient(
+            process.env.NEXT_PUBLIC_SUPABASE_URL!,
+            process.env.SUPABASE_SERVICE_ROLE_KEY!
+        );
+        const { error: deleteAuthError } = await supabaseAdmin.auth.admin.deleteUser(user.id);
+        if (deleteAuthError) {
+            console.error('Failed to delete Supabase auth user (DB records already deleted):', deleteAuthError);
         }
 
         return NextResponse.json({ success: true });

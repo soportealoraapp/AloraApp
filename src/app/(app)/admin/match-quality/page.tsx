@@ -61,7 +61,7 @@ export default function MatchQualityPage() {
 
     return (
         <div className="md:pl-60 p-6 space-y-6">
-            <SectionTitle title="Match Quality Analytics" subtitle="Métricas de calidad de conexiones" />
+            <SectionTitle title="Análisis de Calidad de Matches" subtitle="Métricas de calidad de conexiones" />
             <div className="grid gap-4 md:grid-cols-3 lg:grid-cols-5">
                 {cards.map((card) => (
                     <Card key={card.title}>
@@ -102,7 +102,7 @@ export default function MatchQualityPage() {
                             </p>
                         </div>
                         <div className="p-4 bg-muted/50 rounded-lg">
-                            <h4 className="font-medium mb-2">Response Rate</h4>
+                            <h4 className="font-medium mb-2">Tasa de Respuesta</h4>
                             <p className="text-sm text-muted-foreground">
                                 {metrics.responseRate >= 70
                                     ? 'Los usuarios responden consistentemente'

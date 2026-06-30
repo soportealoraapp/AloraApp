@@ -132,7 +132,7 @@ export default function AdminExperimentsPage() {
       </div>
 
       {showCreate && (
-        <Card className="border-purple-200 bg-purple-50">
+        <Card className="border-purple-200 dark:border-purple-800/30 bg-purple-50 dark:bg-purple-900/20">
           <CardHeader>
             <CardTitle className="text-base">Crear experimento</CardTitle>
           </CardHeader>
@@ -236,10 +236,10 @@ export default function AdminExperimentsPage() {
                       <div className="flex items-center gap-2 mb-1">
                         <h3 className="font-bold">{exp.name}</h3>
                         <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
-                          exp.status === 'running' ? 'bg-green-100 text-green-700' :
-                          exp.status === 'completed' ? 'bg-blue-100 text-blue-700' :
+                          exp.status === 'running' ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400' :
+                          exp.status === 'completed' ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400' :
                           exp.status === 'draft' ? 'bg-muted-foreground/10 text-muted-foreground' :
-                          'bg-yellow-100 text-yellow-700'
+                          'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400'
                         }`}>
                           {exp.status}
                         </span>
@@ -289,10 +289,10 @@ export default function AdminExperimentsPage() {
                       <p className="text-xs font-medium mb-2">Resultados</p>
                       <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
                         {exp.results.variants.map((v: VariantResult) => (
-                          <div key={v.variantName} className={`p-2 rounded-lg ${v.variantName === exp.results?.winner ? 'bg-green-50 border border-green-200' : 'bg-muted/50'}`}>
+                          <div key={v.variantName} className={`p-2 rounded-lg ${v.variantName === exp.results?.winner ? 'bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800/30' : 'bg-muted/50'}`}>
                             <p className="text-xs font-bold uppercase">{v.variantName}</p>
                             <p className="text-lg font-bold">{v.metricValue}</p>
-                            <p className="text-xs text-muted-foreground">{v.userCount} users</p>
+                            <p className="text-xs text-muted-foreground">{v.userCount} usuarios</p>
                             {v.variantName === exp.results?.winner && (
                               <span className="text-[11px] text-green-600 font-bold">🏆 Ganador ({exp.results.confidence}%)</span>
                             )}
