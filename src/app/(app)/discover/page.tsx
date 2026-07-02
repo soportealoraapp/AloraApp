@@ -166,7 +166,8 @@ export default function DiscoverPage() {
   const [tutorialStep, setTutorialStep] = useState<number | null>(1);
   const [browseMode, setBrowseMode] = useState<'swipe' | 'grid'>('swipe');
   const [intentChanging, setIntentChanging] = useState(false);
-  const [pendingGridAction, setPendingGridAction] = useState(false);
+  const [pendingGridActions, setPendingGridActions] = useState<Set<string>>(new Set());
+  const [gridInteractionBadges, setGridInteractionBadges] = useState<Map<string, { matched: boolean; interactionType: string | null }>>(new Map());
   const [currentInteractionState, setCurrentInteractionState] = useState<{
     hasExistingMatch: boolean;
     priorInteraction: 'like' | 'superlike' | 'pass' | null;
@@ -333,6 +334,35 @@ export default function DiscoverPage() {
         setCurrentInteractionState({ hasExistingMatch: false, priorInteraction: null });
       });
   }, [currentProfile?.id, user?.id, intent]);
+
+  // Batch fetch interaction states for grid badges
+  useEffect(() => {
+    if (browseMode !== 'grid' || !user?.id || profiles.length === 0) {
+      setGridInteractionBadges(new Map());
+      return;
+    }
+    const profileIds = profiles.map(p => p.profile.id).filter(Boolean);
+    if (profileIds.length === 0) return;
+
+    const controller = new AbortController();
+    fetch('/api/match/check-batch', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ targetUserIds: profileIds, intent: intent !== 'both' ? intent : undefined }),
+      signal: controller.signal,
+    })
+      .then(r => r.json())
+      .then(data => {
+        const map = new Map<string, { matched: boolean; interactionType: string | null }>();
+        for (const [id, state] of Object.entries(data)) {
+          const s = state as { matched: boolean; interactionType: string | null };
+          map.set(id, { matched: s.matched, interactionType: s.interactionType });
+        }
+        setGridInteractionBadges(map);
+      })
+      .catch(() => {});
+    return () => controller.abort();
+  }, [browseMode, user?.id, profiles.length, intent]);
 
   // Listen for open-paywall events from DailyPicks, DailyCompatibilityCard, etc.
   useEffect(() => {
@@ -745,6 +775,15 @@ export default function DiscoverPage() {
                                 tabIndex={0}
                                 role="button"
                                 aria-label={`Ver perfil de ${p.displayName || ''}`}
+                                onTouchStart={(e) => {
+                                  const timer = setTimeout(() => {
+                                    import('@/lib/mobile').then(m => m.hapticsHeavy());
+                                    router.push(`/profile/${p.id}?source=discover&intent=${intent}`);
+                                  }, 500);
+                                  (e.currentTarget as any)._lpTimer = timer;
+                                }}
+                                onTouchEnd={(e) => { clearTimeout((e.currentTarget as any)._lpTimer); }}
+                                onTouchMove={(e) => { clearTimeout((e.currentTarget as any)._lpTimer); }}
                               >
                                 <SafeImage
                                   src={p.photos?.[0] || '/placeholder.svg'}
@@ -774,6 +813,21 @@ export default function DiscoverPage() {
                                     🎵 Voz
                                   </div>
                                 )}
+                                {gridInteractionBadges.get(p.id)?.matched && (
+                                  <div className="absolute top-2 left-2 z-10 bg-green-500/90 backdrop-blur-sm text-white text-[11px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1">
+                                    <Heart className="h-3 w-3 fill-white" /> Match
+                                  </div>
+                                )}
+                                {!gridInteractionBadges.get(p.id)?.matched && gridInteractionBadges.get(p.id)?.interactionType === 'superlike' && (
+                                  <div className="absolute top-2 left-2 z-10 bg-amber-500/90 backdrop-blur-sm text-white text-[11px] font-bold px-2 py-0.5 rounded-full">
+                                    💘 Flechado enviado
+                                  </div>
+                                )}
+                                {!gridInteractionBadges.get(p.id)?.matched && gridInteractionBadges.get(p.id)?.interactionType === 'like' && (
+                                  <div className="absolute top-2 left-2 z-10 bg-primary/90 backdrop-blur-sm text-primary-foreground text-[11px] font-bold px-2 py-0.5 rounded-full">
+                                    ❤️ Like enviado
+                                  </div>
+                                )}
                                 <div className="absolute bottom-2 left-2 right-2">
                                   <div className="text-white text-xs font-bold leading-tight">{p.displayName}, {p.age}</div>
                                   {p.city && <div className="text-white/70 text-xs">{p.city}</div>}
@@ -783,13 +837,13 @@ export default function DiscoverPage() {
                                 </div>
                               </div>
                               <div className="flex gap-1 p-1.5">
-                                <Button size="sm" variant="ghost" className="flex-1 h-11" aria-label={`Descartar a ${p.displayName || ''}`} disabled={pendingGridAction} onClick={async () => {
-                                  if (pendingGridAction) return;
+                                <Button size="sm" variant="ghost" className="flex-1 h-11" aria-label={`Descartar a ${p.displayName || ''}`} disabled={pendingGridActions.has(p.id)} onClick={async () => {
+                                  if (pendingGridActions.has(p.id)) return;
                                   if (swipeCount >= SWIPE_LIMIT) {
                                     toast({ title: "¡Tómate un respiro!", description: "Has visto muchos perfiles. Vuelve en un momento.", variant: "default" });
                                     return;
                                   }
-                                  setPendingGridAction(true);
+                                  setPendingGridActions(prev => new Set(prev).add(p.id));
                                   const previousGridProfiles = profiles;
                                   try {
                                     track(AnalyticsEvents.PASS_SENT, { targetUserId: p.id, intent: getEffectiveIntent(p.connectionModes) });
@@ -799,18 +853,18 @@ export default function DiscoverPage() {
                                     setProfiles(previousGridProfiles);
                                     toast({ title: "Error", description: "No se pudo descartar. Inténtalo de nuevo.", variant: "destructive" });
                                   } finally {
-                                    setPendingGridAction(false);
+                                    setPendingGridActions(prev => { const next = new Set(prev); next.delete(p.id); return next; });
                                   }
                                 }}>
                                   <X className="h-5 w-5 text-destructive" />
                                 </Button>
-                                <Button size="sm" variant="ghost" className="flex-1 h-11" aria-label={`Flechado a ${p.displayName || ''}`} disabled={pendingGridAction} onClick={async () => {
-                                  if (pendingGridAction) return;
+                                <Button size="sm" variant="ghost" className="flex-1 h-11" aria-label={`Flechado a ${p.displayName || ''}`} disabled={pendingGridActions.has(p.id)} onClick={async () => {
+                                  if (pendingGridActions.has(p.id)) return;
                                   if (swipeCount >= SWIPE_LIMIT) {
                                     toast({ title: "¡Tómate un respiro!", description: "Has visto muchos perfiles. Vuelve en un momento.", variant: "default" });
                                     return;
                                   }
-                                  setPendingGridAction(true);
+                                  setPendingGridActions(prev => new Set(prev).add(p.id));
                                   const previousGridProfiles = profiles;
                                   try {
                                     track(AnalyticsEvents.SUPERLIKE_SENT, { targetUserId: p.id, intent: getEffectiveIntent(p.connectionModes) });
@@ -829,18 +883,18 @@ export default function DiscoverPage() {
                                     setSwipeCount(prev => prev - 1);
                                     toast({ title: "Error", description: "No se pudo enviar el Flechado. Inténtalo de nuevo.", variant: "destructive" });
                                   } finally {
-                                    setPendingGridAction(false);
+                                    setPendingGridActions(prev => { const next = new Set(prev); next.delete(p.id); return next; });
                                   }
                                 }}>
                                   <HeartArrow className="h-5 w-5 text-amber-500 fill-amber-500" />
                                 </Button>
-                                <Button size="sm" variant="ghost" className="flex-1 h-11" aria-label={`Dar like a ${p.displayName || ''}`} disabled={pendingGridAction} onClick={async () => {
-                                  if (pendingGridAction) return;
+                                <Button size="sm" variant="ghost" className="flex-1 h-11" aria-label={`Dar like a ${p.displayName || ''}`} disabled={pendingGridActions.has(p.id)} onClick={async () => {
+                                  if (pendingGridActions.has(p.id)) return;
                                   if (swipeCount >= SWIPE_LIMIT) {
                                     toast({ title: "¡Tómate un respiro!", description: "Has visto muchos perfiles. Vuelve en un momento.", variant: "default" });
                                     return;
                                   }
-                                  setPendingGridAction(true);
+                                  setPendingGridActions(prev => new Set(prev).add(p.id));
                                   const previousGridProfiles = profiles;
                                   try {
                                     track(AnalyticsEvents.LIKE_SENT, { targetUserId: p.id, intent: getEffectiveIntent(p.connectionModes) });
@@ -858,7 +912,7 @@ export default function DiscoverPage() {
                                     setSwipeCount(prev => prev - 1);
                                     toast({ title: "Error", description: "No se pudo enviar el like. Inténtalo de nuevo.", variant: "destructive" });
                                   } finally {
-                                    setPendingGridAction(false);
+                                    setPendingGridActions(prev => { const next = new Set(prev); next.delete(p.id); return next; });
                                   }
                                 }}>
                                   <Heart className="h-5 w-5 text-primary fill-primary" />

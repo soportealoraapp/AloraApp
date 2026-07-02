@@ -1,16 +1,18 @@
 'use client';
 
-import { motion, PanInfo, useAnimation, AnimatePresence } from 'framer-motion';
+import { motion, PanInfo, useAnimation, AnimatePresence, useReducedMotion } from 'framer-motion';
 import { SoftCard } from '../custom/SoftCard';
 import { UserProfile } from '@/lib/domain/types';
 import { SafeImage } from '@/components/ui/safe-image';
 import { TrustBadge } from './TrustBadge';
 import { ProfileActions } from '../../match/ProfileActions';
-import { Clock, MessageCircle, Heart, X, Music } from 'lucide-react';
+import { Clock, MessageCircle, Heart, X, Music, Eye, Ban } from 'lucide-react';
 import { HeartArrow } from '../custom/HeartArrow';
 import React, { useState, useCallback, useEffect, useRef } from 'react';
-import { hapticsLight, hapticsMedium } from '@/lib/mobile';
+import { hapticsLight, hapticsMedium, hapticsHeavy } from '@/lib/mobile';
 import { playLikeSound, playFlechadoSound } from '@/lib/sounds';
+import { EMOTIONAL_MOTION } from '@/lib/constants/motion-config';
+import Link from 'next/link';
 
 interface FloatingMatchCardProps {
   profile: UserProfile;
@@ -37,11 +39,30 @@ export const FloatingMatchCard = React.memo(function FloatingMatchCard({ profile
   const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0);
   const photos = profile.photos || [];
   const likeTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const longPressTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const shouldReduceMotion = useReducedMotion();
+  const [showLongPressMenu, setShowLongPressMenu] = useState(false);
 
   useEffect(() => {
     return () => {
       if (likeTimeoutRef.current) clearTimeout(likeTimeoutRef.current);
+      if (longPressTimerRef.current) clearTimeout(longPressTimerRef.current);
     };
+  }, []);
+
+  // Long press handler — 500ms hold triggers context menu
+  const handleLongPressStart = useCallback((e: React.TouchEvent | React.MouseEvent) => {
+    longPressTimerRef.current = setTimeout(() => {
+      hapticsHeavy();
+      setShowLongPressMenu(true);
+    }, 500);
+  }, []);
+
+  const handleLongPressEnd = useCallback(() => {
+    if (longPressTimerRef.current) {
+      clearTimeout(longPressTimerRef.current);
+      longPressTimerRef.current = null;
+    }
   }, []);
 
   const handleFlechadoClick = useCallback((e: React.MouseEvent) => {
@@ -77,11 +98,11 @@ export const FloatingMatchCard = React.memo(function FloatingMatchCard({ profile
     const threshold = velocity > 500 ? 30 : 100;
     if (info.offset.x > threshold) {
       hapticsLight();
-      await controls.start({ x: 500, opacity: 0, rotate: 20 });
+      await controls.start(EMOTIONAL_MOTION.swipeRight);
       onSwipe('right');
     } else if (info.offset.x < -threshold) {
       hapticsLight();
-      await controls.start({ x: -500, opacity: 0, rotate: -20 });
+      await controls.start(EMOTIONAL_MOTION.swipeLeft);
       onSwipe('left');
     } else {
       controls.start({ x: 0, opacity: 1, rotate: 0 });
@@ -99,17 +120,23 @@ export const FloatingMatchCard = React.memo(function FloatingMatchCard({ profile
 
   return (
     <motion.div
-      drag="x"
+      drag={shouldReduceMotion ? false : "x"}
       dragConstraints={{ left: 0, right: 0 }}
-      onDrag={handleDrag}
-      onDragEnd={handleDragEnd}
+      onDrag={shouldReduceMotion ? undefined : handleDrag}
+      onDragEnd={shouldReduceMotion ? undefined : handleDragEnd}
       animate={controls}
-      initial={{ scale: 0.95, opacity: 0 }}
-      whileInView={{ scale: 1, opacity: 1 }}
-      transition={{ type: "spring", stiffness: 180, damping: 35 }}
+      initial={shouldReduceMotion ? false : EMOTIONAL_MOTION.cardEntry.initial}
+      whileInView={shouldReduceMotion ? undefined : EMOTIONAL_MOTION.cardEntry.animate}
+      transition={shouldReduceMotion ? { duration: 0 } : EMOTIONAL_MOTION.cardEntry.transition}
       className="absolute w-full h-full max-w-sm cursor-grab active:cursor-grabbing flex flex-col"
-      whileHover={{ scale: 1.01 }}
-      whileTap={{ scale: 0.98 }}
+      whileHover={shouldReduceMotion ? undefined : { scale: 1.01 }}
+      whileTap={shouldReduceMotion ? undefined : { scale: 0.98 }}
+      onTouchStart={handleLongPressStart}
+      onTouchEnd={handleLongPressEnd}
+      onTouchMove={handleLongPressEnd}
+      onMouseDown={handleLongPressStart}
+      onMouseUp={handleLongPressEnd}
+      onMouseLeave={handleLongPressEnd}
     >
       <SoftCard className="flex-1 min-h-0 overflow-hidden relative border-none shadow-xl rounded-2xl bg-card">
         {photos.length > 0 ? (
@@ -355,6 +382,55 @@ export const FloatingMatchCard = React.memo(function FloatingMatchCard({ profile
           </AnimatePresence>
         </button>
       </div>
+
+      {/* Long Press Context Menu */}
+      <AnimatePresence>
+        {showLongPressMenu && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.9 }}
+            transition={{ duration: 0.15 }}
+            className="absolute inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm rounded-2xl"
+            onClick={(e) => { e.stopPropagation(); setShowLongPressMenu(false); }}
+          >
+            <div className="bg-card rounded-2xl shadow-2xl border p-2 min-w-[180px] space-y-1" onClick={(e) => e.stopPropagation()}>
+              <p className="text-xs font-bold text-muted-foreground px-3 py-1">{profile.displayName}</p>
+              <Link
+                href={`/profile/${profile.id}?source=discover`}
+                className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-muted transition-colors text-sm"
+                onClick={() => setShowLongPressMenu(false)}
+              >
+                <Eye className="h-4 w-4 text-muted-foreground" />
+                <span>Ver perfil</span>
+              </Link>
+              <button
+                className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-muted transition-colors text-sm"
+                onClick={(e) => { e.stopPropagation(); setShowLongPressMenu(false); onSwipe('right'); }}
+              >
+                <Heart className="h-4 w-4 text-primary" />
+                <span>Dar Like</span>
+              </button>
+              {onFlechado && (
+                <button
+                  className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-muted transition-colors text-sm"
+                  onClick={(e) => { e.stopPropagation(); setShowLongPressMenu(false); onFlechado(); }}
+                >
+                  <HeartArrow className="h-4 w-4 text-amber-500" />
+                  <span>Flechado</span>
+                </button>
+              )}
+              <button
+                className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-muted transition-colors text-sm"
+                onClick={(e) => { e.stopPropagation(); setShowLongPressMenu(false); onSwipe('left'); }}
+              >
+                <X className="h-4 w-4 text-destructive" />
+                <span>Pasar</span>
+              </button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </motion.div>
   );
 });

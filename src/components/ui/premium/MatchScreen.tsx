@@ -1,6 +1,6 @@
 'use client';
 
-import { motion } from 'framer-motion';
+import { motion, useReducedMotion } from 'framer-motion';
 import { AvatarGlow } from '../custom/AvatarGlow';
 import { PinkButton } from '../custom/PinkButton';
 import { UserProfile } from '@/lib/domain/types';
@@ -15,6 +15,16 @@ import { hapticsNotification } from '@/lib/mobile';
 
 const SimpleConfetti = () => {
     const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
+    const [particles] = useState(() =>
+        Array.from({ length: 40 }, (_, i) => ({
+            shape: ['circle', 'square', 'triangle'][i % 3],
+            color: ['#ff69b4', '#ff1493', '#ffb6c1', '#ffc0cb', '#ff85a2', '#e879a8', '#f472b6'][i % 7],
+            size: 6 + Math.floor(Math.random() * 15),
+            left: Math.random() * 100,
+            delay: Math.random() * 3,
+            duration: 2.5 + Math.random() * 2,
+        }))
+    );
     useEffect(() => {
         const mql = window.matchMedia('(prefers-reduced-motion: reduce)');
         setPrefersReducedMotion(mql.matches);
@@ -25,33 +35,22 @@ const SimpleConfetti = () => {
     if (prefersReducedMotion) return null;
     return (
         <div className="fixed inset-0 pointer-events-none overflow-hidden z-50">
-            {Array.from({ length: 40 }).map((_, i) => {
-            const shapes = ['circle', 'square', 'triangle'];
-            const shape = shapes[i % 3];
-            const colors = ['#ff69b4', '#ff1493', '#ffb6c1', '#ffc0cb', '#ff85a2', '#e879a8', '#f472b6'];
-            const color = colors[i % colors.length];
-            const size = 6 + (i % 5) * 3;
-            const left = (i * 2.5) % 100;
-            const delay = (i * 0.12) % 3;
-            const duration = 2.5 + (i % 4) * 0.5;
-            
-            return (
+            {particles.map((p, i) => (
                 <div
                     key={i}
                     className="absolute"
                     style={{
-                        left: `${left}%`,
-                        width: `${size}px`,
-                        height: `${size}px`,
-                        backgroundColor: color,
-                        borderRadius: shape === 'circle' ? '50%' : shape === 'square' ? '2px' : '0',
-                        clipPath: shape === 'triangle' ? 'polygon(50% 0%, 0% 100%, 100% 100%)' : undefined,
-                        animation: `confetti-fall ${duration}s ease-out ${delay}s infinite`,
+                        left: `${p.left}%`,
+                        width: `${p.size}px`,
+                        height: `${p.size}px`,
+                        backgroundColor: p.color,
+                        borderRadius: p.shape === 'circle' ? '50%' : p.shape === 'square' ? '2px' : '0',
+                        clipPath: p.shape === 'triangle' ? 'polygon(50% 0%, 0% 100%, 100% 100%)' : undefined,
+                        animation: `confetti-fall ${p.duration}s ease-out ${p.delay}s infinite`,
                         opacity: 0.9,
                     }}
                 />
-            );
-        })}
+            ))}
         </div>
     );
 };
@@ -72,6 +71,7 @@ export function MatchScreen({ userProfile, matchedProfile, onChat, onKeepSwiping
     const [compatExplanations, setCompatExplanations] = useState<string[]>([]);
     const router = useRouter();
     const { toast } = useToast();
+    const shouldReduceMotion = useReducedMotion();
 
     useEffect(() => {
         playMatchSound();
@@ -146,9 +146,9 @@ export function MatchScreen({ userProfile, matchedProfile, onChat, onKeepSwiping
             </div>
 
             <motion.div
-                initial={EMOTIONAL_MOTION.matchReveal.initial}
-                animate={EMOTIONAL_MOTION.matchReveal.animate}
-                transition={EMOTIONAL_MOTION.matchReveal.transition as any}
+                initial={shouldReduceMotion ? false : EMOTIONAL_MOTION.matchReveal.initial}
+                animate={shouldReduceMotion ? { opacity: 1 } : EMOTIONAL_MOTION.matchReveal.animate}
+                transition={shouldReduceMotion ? { duration: 0 } : EMOTIONAL_MOTION.matchReveal.transition as any}
                 className="z-10 text-center mb-6"
             >
                 <h1 className="text-5xl md:text-6xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-accent drop-shadow-lg">
@@ -159,9 +159,9 @@ export function MatchScreen({ userProfile, matchedProfile, onChat, onKeepSwiping
 
             {compatScore !== null && (
                 <motion.div
-                    initial={{ opacity: 0, scale: 0.8 }}
+                    initial={shouldReduceMotion ? false : { opacity: 0, scale: 0.8 }}
                     animate={{ opacity: 1, scale: 1 }}
-                    transition={{ delay: 0.6 }}
+                    transition={shouldReduceMotion ? { duration: 0 } : { delay: 0.6 }}
                     className="z-10 mb-4 bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl px-5 py-3 max-w-sm w-full mx-4"
                 >
                     <div className="flex items-center justify-between mb-1">
@@ -180,31 +180,31 @@ export function MatchScreen({ userProfile, matchedProfile, onChat, onKeepSwiping
 
             <div className="flex items-center justify-center gap-4 md:gap-8 mb-6 relative z-10">
                 <motion.div
-                    initial={{ x: -150, opacity: 0, rotate: -15 }}
-                    animate={{ x: 0, opacity: 1, rotate: 0 }}
-                    transition={{ type: "spring", damping: 15, delay: 0.2 }}
+                    initial={shouldReduceMotion ? false : { x: -150, opacity: 0, rotate: -15 }}
+                    animate={shouldReduceMotion ? { opacity: 1 } : { x: 0, opacity: 1, rotate: 0 }}
+                    transition={shouldReduceMotion ? { duration: 0 } : { type: "spring", damping: 15, delay: 0.2 }}
                 >
                     <AvatarGlow src={userProfile.photos[0]} size="xl" className="border-4 border-white rounded-full shadow-[0_0_50px_hsl(var(--primary)/0.6)]" />
                 </motion.div>
 
                     <motion.div
-                        initial={{ scale: 0 }}
-                        animate={{ scale: [0, 1.2, 1] }}
-                        transition={{ delay: 0.8, type: "spring" }}
+                        initial={shouldReduceMotion ? false : { scale: 0 }}
+                        animate={shouldReduceMotion ? { scale: 1 } : { scale: [0, 1.2, 1] }}
+                        transition={shouldReduceMotion ? { duration: 0 } : { delay: 0.8, type: "spring" }}
                         className="text-4xl md:text-5xl"
                     >
                         <motion.div
-                            animate={{ scale: [1, 1.2, 1] }}
-                            transition={{ repeat: 4, duration: 1.5 }}
+                            animate={shouldReduceMotion ? {} : { scale: [1, 1.2, 1] }}
+                            transition={shouldReduceMotion ? {} : { repeat: 4, duration: 1.5 }}
                         >
                             ❤️
                         </motion.div>
                     </motion.div>
 
                 <motion.div
-                    initial={{ x: 150, opacity: 0, rotate: 15 }}
-                    animate={{ x: 0, opacity: 1, rotate: 0 }}
-                    transition={{ type: "spring", damping: 15, delay: 0.2 }}
+                    initial={shouldReduceMotion ? false : { x: 150, opacity: 0, rotate: 15 }}
+                    animate={shouldReduceMotion ? { opacity: 1 } : { x: 0, opacity: 1, rotate: 0 }}
+                    transition={shouldReduceMotion ? { duration: 0 } : { type: "spring", damping: 15, delay: 0.2 }}
                 >
                     <AvatarGlow src={matchedProfile.photos[0]} size="xl" className="border-4 border-white rounded-full shadow-[0_0_50px_hsl(var(--accent)/0.6)]" />
                 </motion.div>

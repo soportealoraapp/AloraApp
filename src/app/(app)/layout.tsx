@@ -5,6 +5,8 @@ import { BottomNav } from '@/components/layout/bottom-nav';
 import { ErrorBoundary } from '@/components/ui/error-boundary';
 import { usePathname } from 'next/navigation';
 import { Loader2 } from 'lucide-react';
+import { useCapacitor } from '@/hooks/use-capacitor';
+import { useEdgeSwipeBack } from '@/hooks/use-edge-swipe-back';
 
 function PageFallback() {
   return (
@@ -16,6 +18,8 @@ function PageFallback() {
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  useCapacitor();
+  useEdgeSwipeBack();
   const isChatWindow = /^\/chat\/[^/]+/.test(pathname);
   const isProfileView = /^\/profile\/[^/]+/.test(pathname);
   const isEditProfile = pathname === '/profile/edit';
