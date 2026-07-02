@@ -246,8 +246,8 @@ export default function ChatWindowPage() {
         } catch (error: any) {
             if (error?.code === 'first_message_restriction') {
                 toast({
-                    title: "Espera la primera vez",
-                    description: "Alguien debe iniciar la conversación para conectar.",
+                    title: "Ella da el primer paso",
+                    description: "En conexiones entre hombres y mujeres, ella envía el primer mensaje. Espera a que inicie la conversación.",
                     variant: "default"
                 });
             } else {
@@ -519,8 +519,11 @@ export default function ChatWindowPage() {
                             <Sparkles className="h-12 w-12 text-primary" />
                         </div>
                         <h3 className="font-semibold text-lg mb-2">¡Es un match!</h3>
-                        <p className="text-muted-foreground mb-4 max-w-xs">
+                        <p className="text-muted-foreground mb-2 max-w-xs">
                             Empieza la conversación con algo especial. Tu mensaje puede ser el inicio de algo increíble.
+                        </p>
+                        <p className="text-xs text-muted-foreground/80 mb-4 max-w-xs">
+                            En Alora, ella da el primer paso. Esto crea un espacio más seguro y cómodo para todas.
                         </p>
                         <Button
                             onClick={fetchIcebreakers}

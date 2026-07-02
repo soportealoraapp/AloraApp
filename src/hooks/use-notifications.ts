@@ -18,6 +18,7 @@ export interface AppNotification {
 interface UseNotificationsOptions {
     pollIntervalMs?: number;
     enabled?: boolean;
+    pageSize?: number;
 }
 
 interface UseNotificationsResult {
@@ -38,10 +39,12 @@ interface UseNotificationsResult {
 export function useNotifications({
     pollIntervalMs = 300_000,
     enabled = true,
+    pageSize = 30,
 }: UseNotificationsOptions = {}): UseNotificationsResult {
     const queryClient = useQueryClient();
     const channelRef = useRef<RealtimeChannel | null>(null);
     const pendingDeletesRef = useRef<Map<string, NodeJS.Timeout>>(new Map());
+    const loadingMoreRef = useRef(false);
 
     const {
         data,
@@ -51,7 +54,7 @@ export function useNotifications({
     } = useQuery({
         queryKey: ['notifications'],
         queryFn: async ({ signal }) => {
-            const res = await fetch('/api/notifications?limit=30&offset=0', {
+            const res = await fetch(`/api/notifications?limit=${pageSize}&offset=0`, {
                 cache: 'no-store',
                 signal,
             });
@@ -61,6 +64,7 @@ export function useNotifications({
             return {
                 notifications: fetched as AppNotification[],
                 unreadCount: typeof json.unreadCount === 'number' ? json.unreadCount : 0,
+                hasMore: json.hasMore === true,
             };
         },
         enabled,
@@ -70,6 +74,7 @@ export function useNotifications({
 
     const notifications = data?.notifications ?? [];
     const unreadCount = data?.unreadCount ?? 0;
+    const hasMore = data?.hasMore ?? false;
     const error = queryError instanceof Error ? queryError.message : queryError ? 'fetch failed' : null;
 
     // Realtime subscription
@@ -152,15 +157,48 @@ export function useNotifications({
         }
     }, []);
 
+    const loadMore = useCallback(async () => {
+        if (loadingMoreRef.current || !hasMore) return;
+        loadingMoreRef.current = true;
+        try {
+            const currentOffset = notifications.length;
+            const res = await fetch(`/api/notifications?limit=${pageSize}&offset=${currentOffset}`, {
+                cache: 'no-store',
+            });
+            if (!res.ok) throw new Error(`status ${res.status}`);
+            const json = await res.json();
+            const newItems = (json.notifications ?? []) as AppNotification[];
+            if (newItems.length > 0) {
+                queryClient.setQueryData(['notifications'], (old: any) => {
+                    if (!old) return old;
+                    return {
+                        ...old,
+                        notifications: [...old.notifications, ...newItems],
+                        hasMore: json.hasMore === true,
+                    };
+                });
+            } else {
+                queryClient.setQueryData(['notifications'], (old: any) => {
+                    if (!old) return old;
+                    return { ...old, hasMore: false };
+                });
+            }
+        } catch (err) {
+            console.warn('[use-notifications] loadMore failed:', err);
+        } finally {
+            loadingMoreRef.current = false;
+        }
+    }, [hasMore, notifications.length, pageSize, queryClient]);
+
     return {
         notifications,
         unreadCount,
         loading,
-        loadingMore: false,
-        hasMore: false,
+        loadingMore: loadingMoreRef.current,
+        hasMore,
         error,
         refresh: async () => { await refetch(); },
-        loadMore: async () => { },
+        loadMore,
         markRead,
         markAllRead,
         deleteNotification,

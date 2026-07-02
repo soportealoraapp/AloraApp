@@ -20,16 +20,20 @@ export async function GET(request: Request) {
 
     const url = new URL(request.url);
     const limitParam = url.searchParams.get('limit');
+    const offsetParam = url.searchParams.get('offset');
     const onlyUnread = url.searchParams.get('unread') === 'true';
     let limit = Number.parseInt(limitParam ?? '', 10);
     if (!Number.isFinite(limit) || limit <= 0) limit = 20;
     if (limit > MAX_LIMIT) limit = MAX_LIMIT;
+    let offset = Number.parseInt(offsetParam ?? '', 10);
+    if (!Number.isFinite(offset) || offset < 0) offset = 0;
 
-    const [items, unreadCount] = await Promise.all([
+    const [items, unreadCount, totalCount] = await Promise.all([
         prisma.notification.findMany({
             where: { userId, ...(onlyUnread ? { readAt: null } : {}) },
             orderBy: { createdAt: 'desc' },
             take: limit,
+            skip: offset,
             select: {
                 id: true,
                 type: true,
@@ -41,6 +45,7 @@ export async function GET(request: Request) {
             },
         }),
         prisma.notification.count({ where: { userId, readAt: null } }),
+        prisma.notification.count({ where: { userId, ...(onlyUnread ? { readAt: null } : {}) } }),
     ]);
 
     return NextResponse.json({
@@ -50,6 +55,7 @@ export async function GET(request: Request) {
             readAt: n.readAt?.toISOString() ?? null,
         })),
         unreadCount,
+        hasMore: offset + items.length < totalCount,
     });
 }
 

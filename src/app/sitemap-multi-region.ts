@@ -1,13 +1,20 @@
 export default function generateSitemap() {
-    const baseUrl = 'https://alora.com';
-    const regions = ['es', 'en', 'fr', 'de', 'pt-br', 'jp'];
+    const baseUrl = 'https://alora.app';
 
-    const urls = regions.map(lang => ({
-        url: `${baseUrl}/${lang}`,
+    const pages = [
+        '',
+        '/login',
+        '/signup',
+        '/terms',
+        '/privacy',
+        '/support',
+        '/contact',
+    ];
+
+    return pages.map(path => ({
+        url: `${baseUrl}${path}`,
         lastModified: new Date(),
-        changeFrequency: 'daily',
-        priority: 1,
+        changeFrequency: 'weekly',
+        priority: path === '' ? 1 : 0.5,
     }));
-
-    return urls;
 }

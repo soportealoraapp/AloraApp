@@ -195,16 +195,33 @@ export async function middleware(request: NextRequest) {
     }
 
     if (isAuthRoute && user && !pathname.startsWith('/auth/callback')) {
-        if (!pathname.startsWith('/onboarding')) {
+        if (pathname.startsWith('/onboarding')) {
+            // Allow authenticated users with incomplete profiles to stay on /onboarding.
+            // Only redirect to /discover if their profile is already completed.
             try {
                 const supabase = await createClient(modifiedRequest, response);
                 const isCompleted = await getCachedProfileCompleted(supabase, user.id);
-                if (!isCompleted) {
-                    return applySecurityHeaders(NextResponse.redirect(new URL('/onboarding', modifiedRequest.url)));
+                if (isCompleted) {
+                    return applySecurityHeaders(NextResponse.redirect(new URL('/discover', modifiedRequest.url)));
                 }
+                // Profile not completed — allow access to /onboarding
+                applySecurityHeaders(response);
+                return response;
             } catch {
-                // DB error — let the request through
+                // DB error — allow access to /onboarding rather than risk redirect loop
+                applySecurityHeaders(response);
+                return response;
             }
+        }
+        // For other auth routes (login, signup, etc.), redirect completed users to /discover
+        try {
+            const supabase = await createClient(modifiedRequest, response);
+            const isCompleted = await getCachedProfileCompleted(supabase, user.id);
+            if (!isCompleted) {
+                return applySecurityHeaders(NextResponse.redirect(new URL('/onboarding', modifiedRequest.url)));
+            }
+        } catch {
+            // DB error — let the request through
         }
         return applySecurityHeaders(NextResponse.redirect(new URL('/discover', modifiedRequest.url)));
     }

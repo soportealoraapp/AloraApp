@@ -177,10 +177,12 @@ export default function WelcomePage() {
           <CardContent className="p-8">
             <Users className="h-10 w-10 text-primary mx-auto mb-4" />
             <h2 className="text-xl font-bold text-foreground mb-2">
-              Miles de personas ya conectan en Alora
+              {stats && stats.activeUsers > 0
+                ? `Únete a ${formatCount(stats.activeUsers)}+ personas en Alora`
+                : 'Sé de las primeras personas en Alora'}
             </h2>
             <p className="text-muted-foreground mb-6">
-              Únete a la comunidad de dating más auténtica de México.
+              Conecta con personas que buscan algo real y auténtico.
             </p>
             <Button asChild size="lg" className="font-bold px-8 h-12 rounded-full">
               <Link href="/signup">Empezar ahora</Link>

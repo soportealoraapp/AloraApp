@@ -3,4 +3,10 @@ Allow: /
 Disallow: /admin
 Disallow: /api/
 Disallow: /chat
-Sitemap: https://alora-app-kappa.vercel.app/sitemap.xml
+Disallow: /discover
+Disallow: /profile
+Disallow: /settings
+Disallow: /notifications
+Disallow: /matches
+Disallow: /compatibility
+Sitemap: https://alora.app/sitemap.xml

@@ -53,7 +53,7 @@ export function generateAuthUrl(state: string): string {
     redirect_uri: getRedirectUri(),
     state,
     scope: SCOPES,
-    show_dialog: 'true',
+    show_dialog: 'false',
   });
   return `${SPOTIFY_AUTH_URL}?${params.toString()}`;
 }
@@ -94,6 +94,7 @@ export async function exchangeCode(code: string): Promise<{
 export async function refreshAccessToken(refreshToken: string): Promise<{
   accessToken: string;
   expiresIn: number;
+  newRefreshToken?: string;
 }> {
   const basic = Buffer.from(`${getClientId()}:${getClientSecret()}`).toString('base64');
 
@@ -118,6 +119,8 @@ export async function refreshAccessToken(refreshToken: string): Promise<{
   return {
     accessToken: data.access_token,
     expiresIn: data.expires_in,
+    // Spotify may rotate the refresh token — return it if present
+    newRefreshToken: data.refresh_token || undefined,
   };
 }
 

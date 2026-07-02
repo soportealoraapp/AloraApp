@@ -45,6 +45,49 @@ const DEFAULT_FILTERS: Filters = {
 
 const SWIPE_LIMIT = 50;
 
+function filtersToSearchParams(filters: Filters, intent: string): URLSearchParams {
+  const params = new URLSearchParams();
+  if (filters.ageRange[0] !== 18 || filters.ageRange[1] !== 60) params.set('age', `${filters.ageRange[0]}-${filters.ageRange[1]}`);
+  if (filters.distance !== 100) params.set('dist', String(filters.distance));
+  if (filters.seeking !== 'all') params.set('seeking', filters.seeking);
+  if (filters.verifiedOnly) params.set('verified', '1');
+  if (filters.interests.length > 0) params.set('interests', filters.interests.join(','));
+  if (filters.values.length > 0) params.set('values', filters.values.join(','));
+  if (filters.musicGenres && filters.musicGenres.length > 0) params.set('music', filters.musicGenres.join(','));
+  if (filters.highCompatibility) params.set('compat', '1');
+  if (filters.activeToday) params.set('active', '1');
+  if (filters.withVoiceIntro) params.set('voice', '1');
+  if (filters.withQuiz) params.set('quiz', '1');
+  if (intent !== 'dating') params.set('intent', intent);
+  return params;
+}
+
+function searchParamsToFilters(params: URLSearchParams): { filters: Partial<Filters>; intent: string | null } {
+  const filters: Partial<Filters> = {};
+  const age = params.get('age');
+  if (age) {
+    const [min, max] = age.split('-').map(Number);
+    if (min >= 18 && max >= min) filters.ageRange = [min, max];
+  }
+  const dist = params.get('dist');
+  if (dist) { const d = Number(dist); if (d > 0) filters.distance = d; }
+  const seeking = params.get('seeking');
+  if (seeking === 'women' || seeking === 'men' || seeking === 'all') filters.seeking = seeking;
+  if (params.get('verified') === '1') filters.verifiedOnly = true;
+  const interests = params.get('interests');
+  if (interests) filters.interests = interests.split(',').filter(Boolean);
+  const values = params.get('values');
+  if (values) filters.values = values.split(',').filter(Boolean);
+  const music = params.get('music');
+  if (music) filters.musicGenres = music.split(',').filter(Boolean);
+  if (params.get('compat') === '1') filters.highCompatibility = true;
+  if (params.get('active') === '1') filters.activeToday = true;
+  if (params.get('voice') === '1') filters.withVoiceIntro = true;
+  if (params.get('quiz') === '1') filters.withQuiz = true;
+  const intent = params.get('intent');
+  return { filters, intent: (intent === 'friendship' || intent === 'both' || intent === 'dating') ? intent : null };
+}
+
 function countActiveFilters(f: Filters): number {
   let count = 0;
   if (f.ageRange && (f.ageRange[0] !== 18 || f.ageRange[1] !== 60)) count++;
@@ -69,34 +112,46 @@ function countActiveFilters(f: Filters): number {
 export default function DiscoverPage() {
   const { user, profile: currentUserProfile } = useAuth();
   const searchParams = useSearchParams();
-  const [filters, setFilters] = useState<Filters>(DEFAULT_FILTERS);
-  const [filterOpen, setFilterOpen] = useState(false);
-  const [intent, setIntent] = useState<'dating' | 'friendship' | 'both'>('dating');
+  const router = useRouter();
 
-  // Handle URL filters (interest, value, music, intent)
+  // Initialize filters from URL params on mount
+  const [filters, setFilters] = useState<Filters>(() => {
+    const { filters: urlFilters } = searchParamsToFilters(searchParams);
+    return { ...DEFAULT_FILTERS, ...urlFilters };
+  });
+  const [filterOpen, setFilterOpen] = useState(false);
+  const [intent, setIntent] = useState<'dating' | 'friendship' | 'both'>(() => {
+    const { intent: urlIntent } = searchParamsToFilters(searchParams);
+    if (urlIntent === 'friendship' || urlIntent === 'both') return urlIntent;
+    return 'dating';
+  });
+
+  // Handle URL filters (interest, value, music) from profile badge clicks
   useEffect(() => {
     const interest = searchParams.get('interest');
     const value = searchParams.get('value');
     const music = searchParams.get('music');
-    const urlIntent = searchParams.get('intent');
 
     const updates: Partial<Filters> = {};
     if (interest) updates.interests = [interest];
     if (value) updates.values = [value];
     if (music) updates.musicGenres = [music];
-    if (urlIntent === 'friendship' || urlIntent === 'dating') {
-      setIntent(urlIntent);
-    }
 
     if (Object.keys(updates).length > 0) {
       setFilters(prev => ({ ...prev, ...updates }));
       setFilterOpen(false);
     }
   }, [searchParams]);
+
+  // Sync filters to URL when they change
+  useEffect(() => {
+    const params = filtersToSearchParams(filters, intent);
+    const newUrl = params.toString() ? `/discover?${params.toString()}` : '/discover';
+    router.replace(newUrl, { scroll: false });
+  }, [filters, intent, router]);
   const { profiles, loading, loadingMore, refresh, loadMore, hasMore, setProfiles, error } = useDiscover("", filters);
   const { sendLike } = useSendLike();
   const { toast } = useToast();
-  const router = useRouter();
   const { track } = useAnalytics();
 
   const [matchedProfile, setMatchedProfile] = useState<UserProfile | null>(null);

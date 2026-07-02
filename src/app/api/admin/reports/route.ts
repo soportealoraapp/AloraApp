@@ -77,6 +77,14 @@ export async function PATCH(request: NextRequest) {
             return NextResponse.json({ error: 'Missing reportId or action' }, { status: 400 });
         }
 
+        // Destructive actions require admin+ (not just moderator)
+        const destructiveActions = ['shadowban', 'suspend', 'ban'];
+        if (destructiveActions.includes(action)) {
+            const { requireAdmin } = await import('@/lib/middleware/admin');
+            const adminAuth = await requireAdmin();
+            if (adminAuth) return adminAuth;
+        }
+
         const report = await prisma.report.findUnique({ where: { id: reportId } });
         if (!report) {
             return NextResponse.json({ error: 'Report not found' }, { status: 404 });

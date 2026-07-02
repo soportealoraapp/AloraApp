@@ -77,8 +77,10 @@ export async function GET(request: NextRequest) {
             });
         }
 
+        // Response rate: percentage of messages sent by the user in their active matches.
+        // Healthy range: 30-60% (balanced conversation). Clamped to 0-100.
         const responseRate = totalMessages > 0
-            ? Math.round((sentMessages / Math.min(totalMessages, sentMessages * 3)) * 100)
+            ? Math.min(100, Math.round((sentMessages / totalMessages) * 100))
             : 50;
 
         const oneWeekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);

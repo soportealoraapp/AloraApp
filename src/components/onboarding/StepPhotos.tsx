@@ -13,33 +13,64 @@ function compressImage(file: File, maxWidth = 1080, quality = 0.8): Promise<Blob
     return new Promise((resolve, reject) => {
         const reader = new FileReader();
         reader.onerror = () => reject(new Error('Failed to read file'));
-        reader.onload = () => {
-            const img = document.createElement('img');
-            img.onerror = () => reject(new Error('Failed to load image'));
-            img.onload = () => {
-                const canvas = document.createElement('canvas');
-                let width = img.width;
-                let height = img.height;
-                if (width > maxWidth) {
-                    height = (height * maxWidth) / width;
-                    width = maxWidth;
-                }
-                canvas.width = width;
-                canvas.height = height;
-                const ctx = canvas.getContext('2d');
-                if (!ctx) { reject(new Error('Could not get canvas context')); return; }
-                ctx.drawImage(img, 0, 0, width, height);
-                canvas.toBlob((blob) => {
-                    if (blob) resolve(blob);
-                    else {
-                        canvas.toBlob((b) => {
-                            if (b) resolve(b);
-                            else reject(new Error('Compression failed'));
-                        }, 'image/png');
+        reader.onload = async () => {
+            try {
+                const img = document.createElement('img');
+                img.onerror = () => reject(new Error('Failed to load image'));
+                img.onload = async () => {
+                    try {
+                        // Use createImageBitmap for proper EXIF orientation handling
+                        let sourceWidth = img.naturalWidth;
+                        let sourceHeight = img.naturalHeight;
+
+                        // createImageBitmap handles EXIF orientation automatically
+                        let bitmap: ImageBitmap;
+                        try {
+                            bitmap = await createImageBitmap(img, { imageOrientation: 'from-image' });
+                            sourceWidth = bitmap.width;
+                            sourceHeight = bitmap.height;
+                        } catch {
+                            // Fallback to img element if createImageBitmap not available
+                            bitmap = null as any;
+                        }
+
+                        let width = sourceWidth;
+                        let height = sourceHeight;
+                        if (width > maxWidth) {
+                            height = Math.round((height * maxWidth) / width);
+                            width = maxWidth;
+                        }
+
+                        const canvas = document.createElement('canvas');
+                        canvas.width = width;
+                        canvas.height = height;
+                        const ctx = canvas.getContext('2d');
+                        if (!ctx) { reject(new Error('Could not get canvas context')); return; }
+
+                        if (bitmap) {
+                            ctx.drawImage(bitmap, 0, 0, width, height);
+                            bitmap.close();
+                        } else {
+                            ctx.drawImage(img, 0, 0, width, height);
+                        }
+
+                        canvas.toBlob((blob) => {
+                            if (blob) resolve(blob);
+                            else {
+                                canvas.toBlob((b) => {
+                                    if (b) resolve(b);
+                                    else reject(new Error('Compression failed'));
+                                }, 'image/png');
+                            }
+                        }, 'image/jpeg', quality);
+                    } catch (drawErr) {
+                        reject(drawErr);
                     }
-                }, 'image/jpeg', quality);
-            };
-            img.src = reader.result as string;
+                };
+                img.src = reader.result as string;
+            } catch (loadErr) {
+                reject(loadErr);
+            }
         };
         reader.readAsDataURL(file);
     });

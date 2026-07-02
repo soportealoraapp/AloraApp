@@ -19,6 +19,7 @@ export default async function SignupPage({
       maxAge: 60 * 60 * 24 * 30,
       sameSite: 'lax',
       httpOnly: false,
+      secure: process.env.NODE_ENV === 'production',
     });
   }
 

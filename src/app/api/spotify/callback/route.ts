@@ -58,9 +58,16 @@ export async function GET(request: NextRequest) {
 
     // Trigger initial sync after connect
     try {
-      const { refreshAccessToken, getTopTracks, getTopArtists, decryptToken } = await import('@/lib/spotify');
+      const { refreshAccessToken, getTopTracks, getTopArtists, decryptToken, encryptToken } = await import('@/lib/spotify');
       const decrypted = decryptToken(refreshTokenEncrypted);
       const tokenResult = await refreshAccessToken(decrypted);
+      // Store rotated refresh token if Spotify issued a new one
+      if (tokenResult.newRefreshToken) {
+        await prisma.spotifyAccount.update({
+          where: { userId: user.id },
+          data: { refreshTokenEncrypted: encryptToken(tokenResult.newRefreshToken) },
+        });
+      }
       const [tracks, artists] = await Promise.all([
         getTopTracks(tokenResult.accessToken),
         getTopArtists(tokenResult.accessToken),

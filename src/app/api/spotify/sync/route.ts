@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { withRateLimit } from '@/server/utils/api-rate-limit';
-import { decryptToken, refreshAccessToken, getTopTracks, getTopArtists } from '@/lib/spotify';
+import { decryptToken, encryptToken, refreshAccessToken, getTopTracks, getTopArtists } from '@/lib/spotify';
 
 export async function POST(request: NextRequest) {
   const { createClient } = await import('@/lib/supabase/server');
@@ -25,7 +25,15 @@ export async function POST(request: NextRequest) {
     }
 
     const refreshToken = decryptToken(spotifyAccount.refreshTokenEncrypted);
-    const { accessToken } = await refreshAccessToken(refreshToken);
+    const { accessToken, newRefreshToken } = await refreshAccessToken(refreshToken);
+
+    // Store rotated refresh token if Spotify issued a new one
+    if (newRefreshToken) {
+      await prisma.spotifyAccount.update({
+        where: { userId: user.id },
+        data: { refreshTokenEncrypted: encryptToken(newRefreshToken) },
+      });
+    }
 
     const [topTracks, topArtists] = await Promise.all([
       getTopTracks(accessToken, 10),
