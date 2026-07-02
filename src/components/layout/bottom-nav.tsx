@@ -18,7 +18,7 @@ const navItems = [
 
 export function BottomNav() {
   const pathname = usePathname();
-  const { unreadCount } = useNotifications({ pollIntervalMs: 300000 }); // 5 minutes instead of 30s to reduce re-renders
+  const { unreadCount } = useNotifications({ pollIntervalMs: 60000 });
 
   return (
     <>

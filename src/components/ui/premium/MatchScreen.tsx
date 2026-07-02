@@ -10,6 +10,7 @@ import { BRAND_VOICE } from '@/lib/constants/brand-voice';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2, MessageCircle, Send, Sparkles } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { playMatchSound } from '@/lib/sounds';
 
 const SimpleConfetti = () => {
     const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
@@ -70,6 +71,10 @@ export function MatchScreen({ userProfile, matchedProfile, onChat, onKeepSwiping
     const [compatExplanations, setCompatExplanations] = useState<string[]>([]);
     const router = useRouter();
     const { toast } = useToast();
+
+    useEffect(() => {
+        playMatchSound();
+    }, []);
 
     useEffect(() => {
         if (!matchedProfile?.id) return;

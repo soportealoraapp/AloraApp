@@ -37,7 +37,7 @@ interface UseNotificationsResult {
 }
 
 export function useNotifications({
-    pollIntervalMs = 300_000,
+    pollIntervalMs = 60_000,
     enabled = true,
     pageSize = 30,
 }: UseNotificationsOptions = {}): UseNotificationsResult {

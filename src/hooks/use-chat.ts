@@ -76,10 +76,10 @@ export function useChat(matchId: string) {
                 setPartnerTyping(isPartnerTyping);
                 if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
                 if (isPartnerTyping) {
-                    // Auto-clear after 3s of no signal
+                    // Auto-clear after 5s of no signal
                     typingTimeoutRef.current = setTimeout(() => {
                         if (mountedRef.current) setPartnerTyping(false);
-                    }, 3000);
+                    }, 5000);
                 }
             }
         );

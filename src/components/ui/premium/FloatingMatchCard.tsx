@@ -9,6 +9,8 @@ import { ProfileActions } from '../../match/ProfileActions';
 import { Clock, MessageCircle, Heart, X, Music } from 'lucide-react';
 import { HeartArrow } from '../custom/HeartArrow';
 import React, { useState, useCallback, useEffect, useRef } from 'react';
+import { hapticsLight, hapticsMedium } from '@/lib/mobile';
+import { playLikeSound, playFlechadoSound } from '@/lib/sounds';
 
 interface FloatingMatchCardProps {
   profile: UserProfile;
@@ -46,7 +48,8 @@ export const FloatingMatchCard = React.memo(function FloatingMatchCard({ profile
     e.stopPropagation();
     if (!onFlechado) return;
     setLikeBurst(true);
-    // Play a heart sound effect could be added here if assets were available
+    hapticsMedium();
+    playFlechadoSound();
     likeTimeoutRef.current = setTimeout(() => {
       setLikeBurst(false);
       onFlechado();
@@ -56,6 +59,8 @@ export const FloatingMatchCard = React.memo(function FloatingMatchCard({ profile
   const handleLike = useCallback((e: React.MouseEvent) => {
     e.stopPropagation();
     setLikeBurst(true);
+    hapticsLight();
+    playLikeSound();
     likeTimeoutRef.current = setTimeout(() => {
       setLikeBurst(false);
       onSwipe('right');
@@ -66,22 +71,16 @@ export const FloatingMatchCard = React.memo(function FloatingMatchCard({ profile
     setDragX(info.offset.x);
   };
 
-  const triggerHaptic = useCallback(() => {
-    if (typeof navigator !== 'undefined' && navigator.vibrate) {
-      navigator.vibrate(20);
-    }
-  }, []);
-
   const handleDragEnd = async (event: any, info: PanInfo) => {
     setDragX(0);
     const velocity = Math.abs(info.velocity.x);
     const threshold = velocity > 500 ? 30 : 100;
     if (info.offset.x > threshold) {
-      triggerHaptic();
+      hapticsLight();
       await controls.start({ x: 500, opacity: 0, rotate: 20 });
       onSwipe('right');
     } else if (info.offset.x < -threshold) {
-      triggerHaptic();
+      hapticsLight();
       await controls.start({ x: -500, opacity: 0, rotate: -20 });
       onSwipe('left');
     } else {

@@ -471,7 +471,7 @@ export default function ChatPage() {
                                                               )}
                                                         </div>
                                                         <p className="text-sm text-muted-foreground">
-                                                            {like.intent === 'friendship' ? 'Amistad mutua' : 'Conexión mutua'} • Chatea ahora
+                                                            {like.intent === 'friendship' ? 'Le gustaste como amigo' : 'Le gustaste'} • Toca para ver perfil
                                                         </p>
                                                     </div>
                                                 </Link>

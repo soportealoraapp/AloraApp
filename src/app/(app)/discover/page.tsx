@@ -27,6 +27,7 @@ import { Handshake } from "lucide-react";
 import { useAnalytics, AnalyticsEvents } from "@/hooks/use-analytics";
 import { DailyCompatibilityCard } from "@/components/compatibility/DailyCompatibilityCard";
 import { SecondChanceSection } from "@/components/discover/SecondChanceSection";
+import { LikesSentSection } from "@/components/discover/LikesSentSection";
 import { PaywallModal } from "@/components/premium/PaywallModal";
 
 
@@ -315,7 +316,7 @@ export default function DiscoverPage() {
     }
     // Reset state when profile changes
     setCurrentInteractionState({ hasExistingMatch: false, priorInteraction: null });
-    fetch(`/api/match/check?targetUserId=${currentProfile.id}&intent=${intent === 'both' ? '' : intent}`)
+    fetch(`/api/match/check?targetUserId=${currentProfile.id}${intent !== 'both' ? `&intent=${intent}` : ''}`)
       .then(r => r.json())
       .then(data => {
         setCurrentInteractionState({
@@ -518,10 +519,10 @@ export default function DiscoverPage() {
       style={{ overscrollBehavior: 'contain' } as React.CSSProperties}
     >
       {pullToRefresh > 0 && (
-        <div className="flex items-center justify-center py-2 -mb-2">
-          <div className="flex items-center gap-2 text-xs text-muted-foreground">
-            <Loader2 className={`h-3.5 w-3.5 ${pullToRefresh >= 1 ? 'animate-spin' : ''}`} style={{ transform: `rotate(${pullToRefresh * 180}deg)` }} />
-            {pullToRefresh >= 1 ? 'Actualizando...' : 'Suelta para actualizar'}
+        <div className="flex items-center justify-center py-3 -mb-2">
+          <div className="flex items-center gap-2 text-sm text-muted-foreground bg-muted/50 rounded-full px-4 py-2 shadow-sm">
+            <Loader2 className={`h-5 w-5 ${pullToRefresh >= 1 ? 'animate-spin text-primary' : ''}`} style={{ transform: `rotate(${pullToRefresh * 180}deg)` }} />
+            <span className="font-medium">{pullToRefresh >= 1 ? 'Actualizando...' : 'Suelta para actualizar'}</span>
           </div>
         </div>
       )}
@@ -537,7 +538,7 @@ export default function DiscoverPage() {
         </div>
         <div className="flex items-center gap-1">
           <div className="hidden md:flex items-center gap-1">
-            <Button variant="ghost" size="icon" onClick={handleRewind} disabled={!lastSwipeRef.current || rewinding} title={`Deshacer: revierte el último swipe (${rewindsRemaining}/${maxRewinds} disponibles)`} aria-label="Deshacer último swipe">
+            <Button variant="ghost" size="icon" onClick={handleRewind} disabled={!lastSwipeRef.current || rewinding}     title={`Deshacer último swipe — ventana de 5 min (${rewindsRemaining}/${maxRewinds} disponibles)`} aria-label="Deshacer último swipe">
               <RotateCcw className="h-5 w-5 text-muted-foreground" />
             </Button>
             <span className="text-[11px] text-muted-foreground font-bold -ml-1">{rewindsRemaining}</span>
@@ -552,7 +553,7 @@ export default function DiscoverPage() {
           </div>
           <div className="md:hidden flex items-center gap-0.5">
             <div className="flex items-center">
-              <Button variant="ghost" size="icon" onClick={handleRewind} disabled={!lastSwipeRef.current || rewinding} title={`Deshacer: revierte el último swipe (${rewindsRemaining}/${maxRewinds} disponibles)`} aria-label="Deshacer último swipe" className="touch-target">
+              <Button variant="ghost" size="icon" onClick={handleRewind} disabled={!lastSwipeRef.current || rewinding} title={`Deshacer último swipe — ventana de 5 min (${rewindsRemaining}/${maxRewinds} disponibles)`} aria-label="Deshacer último swipe" className="touch-target">
                 <RotateCcw className="h-4 w-4 text-muted-foreground" />
               </Button>
               <span className="text-[11px] text-muted-foreground font-bold">{rewindsRemaining}</span>
@@ -646,7 +647,10 @@ export default function DiscoverPage() {
           dailyLikesUsed={currentUserProfile?.dailyLikesUsed ?? 0}
           dailyLikesLimit={SWIPE_LIMIT}
           superlikesRemaining={currentUserProfile?.superlikesRemaining ?? 0}
-          resetAt={new Date(new Date().setHours(24, 0, 0, 0))}
+          resetAt={currentUserProfile?.dailyLikesResetAt
+            ? new Date(new Date(currentUserProfile.dailyLikesResetAt).setHours(24, 0, 0, 0))
+            : new Date(new Date().setHours(24, 0, 0, 0))
+          }
           subscriptionStatus={currentUserProfile?.subscriptionStatus ?? 'free'}
           onReset={() => refresh()}
         />
@@ -854,7 +858,7 @@ export default function DiscoverPage() {
                   <div className="bg-foreground/90 text-background px-5 py-3 rounded-2xl text-sm font-medium shadow-lg max-w-[260px]">
                     {tutorialStep === 1 && <p className="flex items-center gap-2"><ArrowRight className="h-4 w-4" /> Desliza a la derecha para dar <strong>Like</strong></p>}
                     {tutorialStep === 2 && <p className="flex items-center gap-2"><ArrowLeft className="h-4 w-4" /> Desliza a la izquierda para <strong>Pasar</strong></p>}
-                    {tutorialStep === 3 && <p className="flex items-center gap-2"><HeartArrow className="h-4 w-4 text-amber-500 fill-amber-500" /> Toca el corazón flechado para enviar un <strong>Flechado</strong></p>}
+                    {tutorialStep === 3 && <p className="flex items-center gap-2"><HeartArrow className="h-4 w-4 text-amber-500 fill-amber-500" /> El <strong>Flechado</strong> destaca tu interés con una notificación especial. Tienes 3 por día.</p>}
                     <div className="flex justify-between items-center mt-2.5">
                       <span className="text-xs opacity-50">{tutorialStep}/3</span>
                       <button onClick={tutorialStep === 3 ? dismissTutorial : nextTutorialStep} className="text-[11px] font-bold underline">
@@ -949,6 +953,12 @@ export default function DiscoverPage() {
       <div className="px-4 pb-3 max-w-sm mx-auto w-full">
         <Suspense fallback={null}>
           <SecondChanceSection intent={effectiveIntent} />
+        </Suspense>
+      </div>
+
+      <div className="px-4 pb-3 max-w-sm mx-auto w-full">
+        <Suspense fallback={null}>
+          <LikesSentSection intent={effectiveIntent} />
         </Suspense>
       </div>
 

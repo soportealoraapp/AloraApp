@@ -49,16 +49,18 @@ export function useMatches() {
     const newMatches = matchesData?.newMatches ?? [];
     const error = queryError instanceof Error ? queryError.message : queryError ? 'Error desconocido' : null;
 
-    // Realtime subscription for new matches — invalidates query on insert
+    // Realtime subscription for new matches and interactions — invalidates query on insert/update
     useEffect(() => {
         if (!user?.id) return;
 
         const supabase = createClient();
-        const channel = supabase
+
+        // Listen for new matches AND match updates (unmatch, stage changes)
+        const matchesChannel = supabase
             .channel(`matches:${user.id}`)
             .on(
                 'postgres_changes',
-                { event: 'INSERT', schema: 'public', table: 'matches' },
+                { event: '*', schema: 'public', table: 'matches' },
                 (payload) => {
                     const match = payload.new as any;
                     if (match.user1Id === user.id || match.user2Id === user.id) {
@@ -68,17 +70,30 @@ export function useMatches() {
             )
             .subscribe((status) => {
                 if (status === 'CHANNEL_ERROR') {
-                    console.warn('[use-matches] Realtime channel error, will retry on next reconnect');
+                    console.warn('[use-matches] Realtime matches channel error, will retry on next reconnect');
                 }
             });
 
-        channelRef.current = channel;
+        // Listen for new incoming likes (someone liked me)
+        const interactionsChannel = supabase
+            .channel(`interactions:${user.id}`)
+            .on(
+                'postgres_changes',
+                { event: 'INSERT', schema: 'public', table: 'interactions' },
+                (payload) => {
+                    const interaction = payload.new as any;
+                    if (interaction.toUserId === user.id && interaction.type !== 'pass') {
+                        queryClient.invalidateQueries({ queryKey: ['matches', user.id] });
+                    }
+                }
+            )
+            .subscribe();
+
+        channelRef.current = matchesChannel;
 
         return () => {
-            if (channelRef.current) {
-                supabase.removeChannel(channelRef.current);
-                channelRef.current = null;
-            }
+            supabase.removeChannel(matchesChannel);
+            supabase.removeChannel(interactionsChannel);
         };
     }, [user?.id, queryClient]);
 

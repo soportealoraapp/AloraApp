@@ -33,18 +33,19 @@ export default function MatchesPage() {
                     </div>
                 ) : (
                     <>
-                        {/* New Matches Section */}
+                        {/* Incoming Likes Section */}
                         {newMatches.length > 0 && (
                             <section>
                                 <h2 className="text-sm font-bold uppercase tracking-widest text-muted-foreground mb-3 flex items-center gap-2">
                                     <Sparkles className="h-4 w-4 text-primary" />
-                                    Nuevas Conexiones
+                                    Personas que te gustaron
                                 </h2>
+                                <p className="text-xs text-muted-foreground mb-3">Da like para crear una conexión</p>
                                 <div className="flex gap-3 overflow-x-auto pb-2 -mx-4 px-4 snap-x">
                                     {newMatches.map((match) => (
                                         <Link
                                             key={match.id}
-                                            href={`/chat/${match.id}`}
+                                            href={`/profile/${match.id}?source=likes-received`}
                                             className="snap-start shrink-0"
                                         >
                                             <motion.div
@@ -59,6 +60,11 @@ export default function MatchesPage() {
                                                         sizes="80px"
                                                         className="object-cover"
                                                     />
+                                                    {match.type === 'superlike' && (
+                                                        <div className="absolute -bottom-0.5 -right-0.5 bg-amber-500 text-white rounded-full p-0.5 shadow-sm border border-background">
+                                                            <span className="text-[8px]">💘</span>
+                                                        </div>
+                                                    )}
                                                 </div>
                                                 <span className="text-xs font-medium text-center max-w-[80px] truncate">
                                                     {match.displayName}
