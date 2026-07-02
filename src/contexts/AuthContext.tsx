@@ -132,17 +132,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                 profileFetchControllerRef.current = controller;
 
                 setProfileLoading(true);
+                const PROFILE_TIMEOUT_MS = 15000;
+                const fetchWithTimeout = () => Promise.race([
+                    profileService.getProfile(currentUser.id),
+                    new Promise<never>((_, reject) =>
+                        setTimeout(() => reject(new Error('Profile fetch timed out')), PROFILE_TIMEOUT_MS)
+                    ),
+                ]);
                 try {
-                    const PROFILE_TIMEOUT_MS = 10000;
-                    const userProfile = await Promise.race([
-                        profileService.getProfile(currentUser.id),
-                        new Promise<never>((_, reject) =>
-                            setTimeout(() => reject(new Error('Profile fetch on auth change timed out')), PROFILE_TIMEOUT_MS)
-                        ),
-                    ]);
-                    if (!cancelled && !controller.signal.aborted) setProfile(userProfile as UserProfile);
+                    let userProfile: UserProfile | null = null;
+                    try {
+                        userProfile = await fetchWithTimeout() as UserProfile;
+                    } catch {
+                        // Retry once on timeout
+                        userProfile = await fetchWithTimeout() as UserProfile;
+                    }
+                    if (!cancelled && !controller.signal.aborted) setProfile(userProfile);
                 } catch (e) {
-                    console.error("Profile fetch on auth change failed", e);
                     if (!cancelled && !controller.signal.aborted) setProfile(null);
                 } finally {
                     if (!cancelled && !controller.signal.aborted) setProfileLoading(false);
