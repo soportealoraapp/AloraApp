@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { withRateLimit } from '@/server/utils/api-rate-limit';
 import { applyAutoActions, updateReputation } from '@/server/services/anti-abuse';
+import { logger } from '@/lib/logger';
 
 const VALID_CATEGORIES = [
     'spam',
@@ -99,7 +100,7 @@ export async function POST(request: NextRequest) {
 
         return NextResponse.json({ id: report.id, status: 'pending' });
     } catch (error) {
-        console.error('Error submitting report:', error);
+        logger.error('Error submitting report', { metadata: { error: error instanceof Error ? error.message : String(error) } });
         return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
     }
 }

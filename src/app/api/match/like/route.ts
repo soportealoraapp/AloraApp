@@ -7,6 +7,7 @@ import { AnalyticsEvents } from '@/lib/tracking/events';
 import { LikeSchema } from '@/lib/schemas/validation';
 import { detectSpamBehavior } from '@/server/services/anti-abuse';
 import { FREE_DAILY_LIKES_LIMIT } from '@/lib/constants/preferences';
+import { logger } from '@/lib/logger';
 
 // POST /api/match/like
 export async function POST(request: NextRequest) {
@@ -274,7 +275,7 @@ export async function POST(request: NextRequest) {
     } catch (error) {
         const message = error instanceof Error ? error.message : 'Unknown error';
         const stack = error instanceof Error ? error.stack : '';
-        console.error('[match/like] Error:', message, '\nStack:', stack);
+        logger.error('[match/like] Error: ' + message, { metadata: { error: error instanceof Error ? error.message : String(error), stack } });
         return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
     }
 }

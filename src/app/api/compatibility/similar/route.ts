@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { withRateLimit } from '@/server/utils/api-rate-limit';
+import { logger } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
@@ -127,7 +128,7 @@ export async function GET(request: NextRequest) {
 
         return NextResponse.json({ profiles });
     } catch (error) {
-        console.error('Error finding similar profiles:', error);
+        logger.error('Error finding similar profiles', { metadata: { error: error instanceof Error ? error.message : String(error) } });
         return NextResponse.json({ profiles: [] });
     }
 }

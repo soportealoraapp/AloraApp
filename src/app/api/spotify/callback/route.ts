@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 import { prisma } from '@/lib/prisma';
 import { exchangeCode, getSpotifyProfile, encryptToken } from '@/lib/spotify';
+import { logger } from '@/lib/logger';
 
 export async function GET(request: NextRequest) {
   const { createClient } = await import('@/lib/supabase/server');
@@ -82,7 +83,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.redirect(new URL('/settings?spotify=connected', request.url));
   } catch (err) {
-    console.error('[spotify/callback] Error:', err);
+    logger.error('[spotify/callback] Error', { metadata: { error: err instanceof Error ? err.message : String(err) } });
     return NextResponse.redirect(new URL('/settings?spotify=error&reason=exchange_failed', request.url));
   }
 }

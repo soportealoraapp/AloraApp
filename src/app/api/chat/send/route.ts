@@ -10,6 +10,7 @@ import { AnalyticsEvents } from '@/lib/tracking/events';
 import { detectSpamBehavior } from '@/server/services/anti-abuse';
 import { ensureSubscriptionState } from '@/lib/subscription-helper';
 import { stripHtml } from '@/lib/schemas/validation';
+import { logger } from '@/lib/logger';
 
 // POST /api/chat/send
 export const dynamic = 'force-dynamic';
@@ -131,7 +132,7 @@ export async function POST(request: NextRequest) {
                 content = moderationResult.filteredText || sanitizedText;
                 isFiltered = moderationResult.isOffensive;
             } catch (moderationError) {
-                console.error('Moderation error:', moderationError);
+                logger.error('Moderation error', { metadata: { error: moderationError instanceof Error ? moderationError.message : String(moderationError) } });
             }
         }
 
@@ -154,7 +155,7 @@ export async function POST(request: NextRequest) {
                 }).catch((err) => console.warn('[chat/send] reputation decrement failed:', err));
             }
         } catch (riskError) {
-            console.error('Risk engine error:', riskError);
+            logger.error('Risk engine error', { metadata: { error: riskError instanceof Error ? riskError.message : String(riskError) } });
         }
 
         // Create Message
@@ -202,7 +203,7 @@ export async function POST(request: NextRequest) {
         return NextResponse.json(message);
 
     } catch (error) {
-        console.error('Error sending message:', error);
+        logger.error('Error sending message', { metadata: { error: error instanceof Error ? error.message : String(error) } });
         return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
     }
 }

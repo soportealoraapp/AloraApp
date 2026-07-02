@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { handlePaymentSuccess, handleSubscriptionCancel } from '@/lib/lemonsqueezy/actions';
 import { prisma } from '@/lib/prisma';
+import { logger } from '@/lib/logger';
 
 export async function POST(request: Request) {
     try {
@@ -13,7 +14,7 @@ export async function POST(request: Request) {
         const signature = request.headers.get('x-signature');
         const secret = process.env.LEMON_SQUEEZY_WEBHOOK_SECRET;
         if (!secret) {
-            console.error('[webhook] LEMON_SQUEEZY_WEBHOOK_SECRET not configured');
+            logger.error('[webhook] LEMON_SQUEEZY_WEBHOOK_SECRET not configured');
             return NextResponse.json({ error: 'Server misconfigured' }, { status: 500 });
         }
         if (!signature) {
@@ -79,7 +80,7 @@ export async function POST(request: Request) {
 
         return NextResponse.json({ received: true });
     } catch (error) {
-        console.error('Error processing webhook:', error);
+        logger.error('Error processing webhook', { metadata: { error: error instanceof Error ? error.message : String(error) } });
         return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
     }
 }

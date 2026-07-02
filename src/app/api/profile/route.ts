@@ -3,6 +3,7 @@ import { prisma } from '@/lib/prisma';
 import { EditableProfileSchema, sanitizeProfileUpdates } from '@/lib/schemas/validation';
 import { withRateLimit } from '@/server/utils/api-rate-limit';
 import { utapi } from '../uploadthing/core';
+import { logger } from '@/lib/logger';
 
 async function getUser() {
     const { createClient } = await import('@/lib/supabase/server');
@@ -64,7 +65,7 @@ export async function GET(request: NextRequest) {
 
         return NextResponse.json({ ...profile, spotify: spotifyAccount || null });
     } catch (error) {
-        console.error('Error getting profile:', error);
+        logger.error('Error getting profile', { metadata: { error: error instanceof Error ? error.message : String(error) } });
         return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
     }
 }
@@ -104,7 +105,7 @@ export async function PUT(request: NextRequest) {
             try {
                 await utapi.deleteFiles(photosToDelete);
             } catch (deleteErr) {
-                console.error('Failed to delete old photos from UploadThing:', deleteErr);
+                logger.error('Failed to delete old photos from UploadThing', { metadata: { error: deleteErr instanceof Error ? deleteErr.message : String(deleteErr) } });
             }
         }
 
@@ -119,7 +120,7 @@ export async function PUT(request: NextRequest) {
 
         return NextResponse.json(updated);
     } catch (error) {
-        console.error('Error updating profile:', error);
+        logger.error('Error updating profile', { metadata: { error: error instanceof Error ? error.message : String(error) } });
         return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
     }
 }

@@ -109,7 +109,7 @@ export async function GET(
         if (!isPreview) {
             // Record visit (async, don't block response)
             recordProfileVisit(user.id, targetUserId).catch(err => {
-                console.error('Error recording visit:', err);
+                logger.error('Error recording visit', { metadata: { error: err instanceof Error ? err.message : String(err) } });
             });
         }
 
@@ -174,7 +174,7 @@ export async function GET(
                 : null,
         });
     } catch (error) {
-        console.error('Error getting profile:', error);
+        logger.error('Error getting profile', { metadata: { error: error instanceof Error ? error.message : String(error) } });
         return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
     }
 }

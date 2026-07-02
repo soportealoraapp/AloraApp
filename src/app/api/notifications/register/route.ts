@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { withRateLimit } from '@/server/utils/api-rate-limit';
+import { logger } from '@/lib/logger';
 
 export async function POST(request: NextRequest) {
     const { createClient } = await import('@/lib/supabase/server');
@@ -50,7 +51,7 @@ export async function POST(request: NextRequest) {
 
         return NextResponse.json({ success: true });
     } catch (error) {
-        console.error('Error registering push token:', error);
+        logger.error('Error registering push token', { metadata: { error: error instanceof Error ? error.message : String(error) } });
         return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
     }
 }
@@ -78,7 +79,7 @@ export async function DELETE(request: NextRequest) {
 
         return NextResponse.json({ success: true });
     } catch (error) {
-        console.error('Error removing push token:', error);
+        logger.error('Error removing push token', { metadata: { error: error instanceof Error ? error.message : String(error) } });
         return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
     }
 }

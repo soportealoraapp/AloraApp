@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { requireModerator } from '@/lib/middleware/admin';
 import { withRateLimit } from '@/server/utils/api-rate-limit';
+import { logger } from '@/lib/logger';
 
 export async function GET(request: NextRequest) {
     const auth = await requireModerator();
@@ -54,7 +55,7 @@ export async function GET(request: NextRequest) {
             totalPages: Math.ceil(total / limit),
         });
     } catch (error) {
-        console.error('Error fetching reports:', error);
+        logger.error('Error fetching reports', { metadata: { error: error instanceof Error ? error.message : String(error) } });
         return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
     }
 }
@@ -155,7 +156,7 @@ export async function PATCH(request: NextRequest) {
 
         return NextResponse.json({ success: true });
     } catch (error) {
-        console.error('Error updating report:', error);
+        logger.error('Error updating report', { metadata: { error: error instanceof Error ? error.message : String(error) } });
         return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
     }
 }

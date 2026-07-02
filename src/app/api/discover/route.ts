@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getDynamicFeed } from '@/server/actions/feed';
 import { withRateLimit } from '@/server/utils/api-rate-limit';
+import { logger } from '@/lib/logger';
 
 const MAX_DISCOVER_LIMIT = 30;
 
@@ -34,7 +35,7 @@ export async function GET(request: NextRequest) {
         const result = await getDynamicFeed(user.id, search, cursor, limit, connectionModes && connectionModes.length > 0 ? { intent: connectionModes[0] } : undefined);
         return NextResponse.json(result);
     } catch (error) {
-        console.error('Error getting discover feed:', error);
+        logger.error('Error getting discover feed', { metadata: { error: error instanceof Error ? error.message : String(error) } });
         return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
     }
 }

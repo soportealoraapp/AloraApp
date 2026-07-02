@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { withRateLimit } from '@/server/utils/api-rate-limit';
+import { logger } from '@/lib/logger';
 
 const FREE_STREAK_BOOST_DAYS = 5;
 const PLUS_STREAK_BOOST_DAYS = 3;
@@ -169,7 +170,7 @@ export async function POST() {
         });
 
     } catch (error) {
-        console.error('Error checking in streak:', error);
+        logger.error('Error checking in streak', { metadata: { error: error instanceof Error ? error.message : String(error) } });
         return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
     }
 }
@@ -229,7 +230,7 @@ export async function GET() {
         });
 
     } catch (error) {
-        console.error('Error getting streak status:', error);
+        logger.error('Error getting streak status', { metadata: { error: error instanceof Error ? error.message : String(error) } });
         return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
     }
 }

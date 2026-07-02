@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { withRateLimit } from '@/server/utils/api-rate-limit';
+import { logger } from '@/lib/logger';
 
 export async function POST(request: NextRequest) {
     const { createClient } = await import('@/lib/supabase/server');
@@ -66,7 +67,7 @@ export async function POST(request: NextRequest) {
             message: 'Tu verificación ha sido recibida. La revisaremos en 24-48 horas.',
         });
     } catch (error) {
-        console.error('Error submitting verification:', error);
+        logger.error('Error submitting verification', { metadata: { error: error instanceof Error ? error.message : String(error) } });
         return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
     }
 }

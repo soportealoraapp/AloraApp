@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { utapi } from '../../uploadthing/core';
 import { withRateLimit } from '@/server/utils/api-rate-limit';
+import { logger } from '@/lib/logger';
 
 async function getUser() {
     const { createClient } = await import('@/lib/supabase/server');
@@ -129,7 +130,7 @@ export async function POST(request: NextRequest) {
             try {
                 await utapi.deleteFiles(filesToDelete);
             } catch (deleteErr) {
-                console.error('Failed to delete user files from UploadThing (DB already deleted):', deleteErr);
+                logger.error('Failed to delete user files from UploadThing (DB already deleted)', { metadata: { error: deleteErr instanceof Error ? deleteErr.message : String(deleteErr) } });
                 // Files are orphaned but user data is deleted — acceptable tradeoff
             }
         }
@@ -143,12 +144,12 @@ export async function POST(request: NextRequest) {
         );
         const { error: deleteAuthError } = await supabaseAdmin.auth.admin.deleteUser(user.id);
         if (deleteAuthError) {
-            console.error('Failed to delete Supabase auth user (DB records already deleted):', deleteAuthError);
+            logger.error('Failed to delete Supabase auth user (DB records already deleted)', { metadata: { error: deleteAuthError instanceof Error ? deleteAuthError.message : String(deleteAuthError) } });
         }
 
         return NextResponse.json({ success: true });
     } catch (error) {
-        console.error('Error deleting user account:', error);
+        logger.error('Error deleting user account', { metadata: { error: error instanceof Error ? error.message : String(error) } });
         return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
     }
 }

@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { withRateLimit } from '@/server/utils/api-rate-limit';
+import { logger } from '@/lib/logger';
 
 const REWIND_WINDOW_MINUTES = 5;
 const FREE_DAILY_REWINDS = 1;
@@ -182,7 +183,7 @@ export async function POST() {
         });
 
     } catch (error) {
-        console.error('Error rewinding swipe:', error);
+        logger.error('Error rewinding swipe', { metadata: { error: error instanceof Error ? error.message : String(error) } });
         return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
     }
 }

@@ -67,6 +67,9 @@ export function StepInterests({ data, onUpdate, onNext, onPrev, userId }: StepIn
                 <p className="text-sm text-muted-foreground">
                     Cuéntanos tus gustos, valores y música — así encontramos personas afines
                 </p>
+                <p className="text-xs text-primary/80 mt-1">
+                    Tus selecciones alimentan nuestro sistema de compatibilidad para encontrar mejores matches
+                </p>
             </div>
 
             <div className="flex-1 overflow-y-auto space-y-6">

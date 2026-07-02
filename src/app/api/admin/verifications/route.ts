@@ -4,6 +4,7 @@ import { requireAdmin } from '@/lib/middleware/admin';
 import { sendPushToUser, notifyVerificationApproved, notifyVerificationRejected } from '@/server/services/push';
 import { utapi } from '../../uploadthing/core';
 import { withRateLimit } from '@/server/utils/api-rate-limit';
+import { logger } from '@/lib/logger';
 
 export async function GET(request: NextRequest) {
     const auth = await requireAdmin();
@@ -35,7 +36,7 @@ export async function GET(request: NextRequest) {
 
         return NextResponse.json({ submissions, total, page, totalPages: Math.ceil(total / limit) });
     } catch (error) {
-        console.error('Error fetching verifications:', error);
+        logger.error('Error fetching verifications', { metadata: { error: error instanceof Error ? error.message : String(error) } });
         return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
     }
 }
@@ -83,7 +84,7 @@ export async function POST(request: NextRequest) {
             try {
                 await utapi.deleteFiles([submission.selfieUrl]);
             } catch (deleteErr) {
-                console.error('Failed to delete rejected verification selfie from UploadThing:', deleteErr);
+                logger.error('Failed to delete rejected verification selfie from UploadThing', { metadata: { error: deleteErr instanceof Error ? deleteErr.message : String(deleteErr) } });
             }
         } else {
             return NextResponse.json({ error: 'Invalid action' }, { status: 400 });
@@ -99,7 +100,7 @@ export async function POST(request: NextRequest) {
 
         return NextResponse.json({ success: true });
     } catch (error) {
-        console.error('Error updating verification:', error);
+        logger.error('Error updating verification', { metadata: { error: error instanceof Error ? error.message : String(error) } });
         return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
     }
 }

@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { ensureSubscriptionState } from '@/lib/subscription-helper';
 import { withRateLimit } from '@/server/utils/api-rate-limit';
+import { logger } from '@/lib/logger';
+import { calculateCompatibility } from '@/lib/compatibility/engine';
 
 export const dynamic = 'force-dynamic';
 
@@ -159,43 +161,50 @@ export async function GET(request: NextRequest) {
         const oneWeekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
         const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
 
-        const scored = filteredCandidates.map(c => {
+        // Heuristic pre-filter: score candidates quickly to get top 20
+        const preScored = filteredCandidates.map(c => {
             let score = 0;
-
             const sharedInterests = (currentUserProfile.interests || []).filter(i =>
                 (c.interests || []).includes(i)
             ).length;
             score += sharedInterests * 10;
-
             const sharedValues = (currentUserProfile.values || []).filter(v =>
                 (c.values || []).includes(v)
             ).length;
             score += sharedValues * 15;
-
-            if (c.lastActiveAt && new Date(c.lastActiveAt) > oneDayAgo) {
-                score += 20;
-            } else if (c.lastActiveAt && new Date(c.lastActiveAt) > oneWeekAgo) {
-                score += 10;
-            }
-
+            if (c.lastActiveAt && new Date(c.lastActiveAt) > oneDayAgo) score += 20;
+            else if (c.lastActiveAt && new Date(c.lastActiveAt) > oneWeekAgo) score += 10;
             if (c.isVerified) score += 15;
             if ((c.reputationScore ?? 100) >= 80) score += 10;
+            return { id: c.userId, preScore: score, candidate: c };
+        });
 
-            if (currentUserProfile.latitude && currentUserProfile.longitude && c.latitude && c.longitude) {
-                const dist = getDistance(
-                    currentUserProfile.latitude, currentUserProfile.longitude,
-                    c.latitude, c.longitude
-                );
-                if (dist < 10) score += 15;
-                else if (dist < 30) score += 10;
-                else if (dist < 50) score += 5;
+        preScored.sort((a, b) => b.preScore - a.preScore);
+        const topCandidates = preScored.slice(0, 20);
+
+        // Use compatibility engine for accurate scoring on top candidates
+        const scored = await Promise.all(topCandidates.map(async ({ id, candidate: c }) => {
+            let engineScore = 0;
+            let explanations: string[] = [];
+
+            try {
+                const compat = await calculateCompatibility(user.id, id);
+                engineScore = compat.totalScore;
+                explanations = compat.explanations;
+            } catch {
+                // Fallback to heuristic if engine fails
+                engineScore = preScored.find(p => p.id === id)?.preScore ?? 0;
             }
 
-            const reasons: string[] = [];
-            if (sharedInterests > 0) reasons.push(`${sharedInterests} interés${sharedInterests > 1 ? 'es' : ''} en común`);
-            if (sharedValues > 0) reasons.push(`${sharedValues} valor${sharedValues > 1 ? 'es' : ''} compartido${sharedValues > 1 ? 's' : ''}`);
-            if (c.isVerified) reasons.push('Verificado');
-            if (c.lastActiveAt && new Date(c.lastActiveAt) > oneDayAgo) reasons.push('Activo hoy');
+            const reasons: string[] = explanations.length > 0
+                ? explanations.slice(0, 2)
+                : [];
+            if (c.isVerified && !reasons.some(r => r.toLowerCase().includes('verificado'))) {
+                reasons.push('Perfil verificado');
+            }
+            if (c.lastActiveAt && new Date(c.lastActiveAt) > oneDayAgo && !reasons.some(r => r.toLowerCase().includes('activo'))) {
+                reasons.push('Activo hoy');
+            }
 
             return {
                 id: c.userId,
@@ -209,26 +218,13 @@ export async function GET(request: NextRequest) {
                 lastActiveAt: c.lastActiveAt,
                 bio: c.bio,
                 photo: c.photos?.[0] || '/placeholder.svg',
-                score: Math.min(100, score),
-                reason: reasons.join(' · ') || 'Compatible',
+                score: Math.min(100, engineScore),
+                reason: reasons.join(' · ') || 'Compatible contigo',
             };
-        });
+        }));
 
         scored.sort((a, b) => b.score - a.score);
         const topPicks = scored.slice(0, 3);
-
-        // Replace reasons with real compatibility engine explanations (if flag enabled)
-        const { getFlag } = await import('@/lib/product/flags');
-        const reasoning = await getFlag(user.id, 'dailyPickReasoning');
-        if (reasoning === 'engine') {
-            const { calculateCompatibility } = await import('@/lib/compatibility/engine');
-            await Promise.all(topPicks.map(async (pick) => {
-                const compat = await calculateCompatibility(user.id, pick.id);
-                if (compat.explanations.length > 0) {
-                    pick.reason = compat.explanations.slice(0, 2).join(' · ');
-                }
-            }));
-        }
 
         await Promise.all(topPicks.map(pick =>
             prisma.dailyPick.upsert({
@@ -252,17 +248,7 @@ export async function GET(request: NextRequest) {
 
         return NextResponse.json({ picks: topPicks, cached: false });
     } catch (error) {
-        console.error('Error generating daily picks:', error);
+        logger.error('Error generating daily picks', { metadata: { error: error instanceof Error ? error.message : String(error) } });
         return NextResponse.json({ picks: [], cached: false });
     }
-}
-
-function getDistance(lat1: number, lng1: number, lat2: number, lng2: number): number {
-    const R = 6371;
-    const dLat = (lat2 - lat1) * Math.PI / 180;
-    const dLng = (lng2 - lng1) * Math.PI / 180;
-    const a = Math.sin(dLat / 2) ** 2 +
-        Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-        Math.sin(dLng / 2) ** 2;
-    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 }

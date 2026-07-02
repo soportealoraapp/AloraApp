@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { utapi } from '../../uploadthing/core';
 import { withRateLimit } from '@/server/utils/api-rate-limit';
+import { logger } from '@/lib/logger';
 
 async function getUser() {
     const { createClient } = await import('@/lib/supabase/server');
@@ -41,7 +42,7 @@ export async function GET() {
             createdAt: blocks.find(b => b.blockedId === p.userId)?.createdAt
         })));
     } catch (error) {
-        console.error('Error fetching blocked users:', error);
+        logger.error('Error fetching blocked users', { metadata: { error: error instanceof Error ? error.message : String(error) } });
         return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
     }
 }
@@ -68,7 +69,7 @@ export async function DELETE(request: NextRequest) {
 
         return NextResponse.json({ success: true });
     } catch (error) {
-        console.error('Error unblocking user:', error);
+        logger.error('Error unblocking user', { metadata: { error: error instanceof Error ? error.message : String(error) } });
         return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
     }
 }
@@ -177,14 +178,14 @@ export async function POST(request: NextRequest) {
 
             if (filesToDelete.length > 0) {
                 utapi.deleteFiles(filesToDelete).catch(err =>
-                    console.error('Failed to delete chat media from UploadThing:', err)
+                    logger.error('Failed to delete chat media from UploadThing', { metadata: { error: err instanceof Error ? err.message : String(err) } })
                 );
             }
         }
 
         return NextResponse.json({ success: true });
     } catch (error) {
-        console.error('Error blocking user:', error);
+        logger.error('Error blocking user', { metadata: { error: error instanceof Error ? error.message : String(error) } });
         return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
     }
 }

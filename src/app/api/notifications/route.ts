@@ -3,6 +3,7 @@ import { prisma } from '@/lib/prisma';
 import { getCurrentUserId } from '@/lib/auth/session';
 import { ensureSubscriptionState } from '@/lib/subscription-helper';
 import { withRateLimit } from '@/server/utils/api-rate-limit';
+import { logger } from '@/lib/logger';
 
 const MAX_LIMIT = 50;
 const MAX_BATCH_IDS = 50;
@@ -121,7 +122,7 @@ export async function DELETE(request: Request) {
 
         return NextResponse.json({ success: true });
     } catch (error) {
-        console.error('Error deleting notification:', error);
+        logger.error('Error deleting notification', { metadata: { error: error instanceof Error ? error.message : String(error) } });
         return NextResponse.json({ error: 'Failed to delete' }, { status: 500 });
     }
 }

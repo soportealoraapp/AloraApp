@@ -3,6 +3,7 @@ import { prisma } from '@/lib/prisma';
 import { requireSuperAdmin } from '@/lib/middleware/admin';
 import { grantPlus, revokePlus } from '@/lib/subscription-helper';
 import { withRateLimit } from '@/server/utils/api-rate-limit';
+import { logger } from '@/lib/logger';
 
 export async function GET(request: NextRequest) {
     const auth = await requireSuperAdmin();
@@ -45,7 +46,7 @@ export async function GET(request: NextRequest) {
 
         return NextResponse.json({ users, total, page, totalPages: Math.ceil(total / limit) });
     } catch (error) {
-        console.error('Error fetching users:', error);
+        logger.error('Error fetching users', { metadata: { error: error instanceof Error ? error.message : String(error) } });
         return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
     }
 }
@@ -117,7 +118,7 @@ export async function PATCH(request: NextRequest) {
 
         return NextResponse.json({ success: true });
     } catch (error) {
-        console.error('Error updating user:', error);
+        logger.error('Error updating user', { metadata: { error: error instanceof Error ? error.message : String(error) } });
         return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
     }
 }
