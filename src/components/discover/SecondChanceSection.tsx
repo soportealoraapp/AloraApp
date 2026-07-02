@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Heart, RotateCcw, UserX } from 'lucide-react';
-import Image from 'next/image';
+import { SafeImage } from '@/components/ui/safe-image';
 import Link from 'next/link';
 import { useSendLike } from '@/hooks/use-send-like';
 import { useToast } from '@/hooks/use-toast';
@@ -88,7 +88,7 @@ export const SecondChanceSection = React.memo(function SecondChanceSection({ int
           {passedProfiles.map((profile) => (
             <Card key={profile.id} className="rounded-2xl overflow-hidden shadow-sm border">
               <Link href={`/profile/${profile.id}?source=second-chance`} className="block aspect-[3/4] relative">
-                <Image
+                <SafeImage
                   src={profile.photos?.[0] || '/placeholder.svg'}
                   alt={profile.displayName || ''}
                   fill

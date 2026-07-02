@@ -5,7 +5,7 @@ import { useMatches } from '@/hooks/use-matches';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Heart, MessageSquare, Loader2, Sparkles } from 'lucide-react';
-import Image from 'next/image';
+import { SafeImage } from '@/components/ui/safe-image';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 
@@ -53,7 +53,7 @@ export default function MatchesPage() {
                                                 className="flex flex-col items-center gap-2"
                                             >
                                                 <div className="relative h-20 w-20 rounded-full overflow-hidden ring-2 ring-primary ring-offset-2 ring-offset-background">
-                                                    <Image
+                                                    <SafeImage
                                                         src={match.photoURL || '/placeholder.svg'}
                                                         alt={match.displayName}
                                                         fill
@@ -110,7 +110,7 @@ export default function MatchesPage() {
                                                     whileTap={{ scale: 0.97 }}
                                                     className="relative aspect-[3/4] rounded-2xl overflow-hidden bg-muted group"
                                                 >
-                                                    <Image
+                                                    <SafeImage
                                                         src={otherUser?.photoURL || '/placeholder.svg'}
                                                         alt={otherUser?.displayName || 'Conexión'}
                                                         fill

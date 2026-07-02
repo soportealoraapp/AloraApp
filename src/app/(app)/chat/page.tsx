@@ -10,7 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Search, Heart, X, CheckCircle, Loader2, MessageSquare, EyeOff, Bell, BellOff, Trash2, MoreVertical } from "lucide-react";
-import Image from "next/image";
+import { SafeImage } from "@/components/ui/safe-image";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { useToast } from "@/hooks/use-toast";
@@ -351,7 +351,7 @@ export default function ChatPage() {
                                                         <Card className="rounded-2xl border shadow-sm hover:shadow-md transition-all cursor-pointer group active:scale-[0.98]">
                                                             <CardContent className="flex items-center gap-4 p-4">
                                                                 <div className="relative h-16 w-16 rounded-full overflow-hidden flex-shrink-0 border-2 border-muted">
-                                                                    <Image
+                                                                    <SafeImage
                                                                         src={partnerPhoto}
                                                                         alt={partnerName}
                                                                         fill
@@ -452,7 +452,7 @@ export default function ChatPage() {
                                             <CardContent className="flex items-center gap-4 p-4">
                                                 <Link href={`/profile/${like.fromUserId || like.id}?source=new-match`} className="flex items-center gap-4 flex-1">
                                                     <div className="relative h-14 w-14 rounded-full overflow-hidden flex-shrink-0 border-2 border-muted">
-                                                        <Image
+                                                        <SafeImage
                                                             src={like.photoURL || '/placeholder.svg'}
                                                             alt={like.displayName || 'Perfil'}
                                                             fill

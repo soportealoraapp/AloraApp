@@ -53,44 +53,78 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     useEffect(() => {
         let cancelled = false;
 
-        // Initial session check with defensive timeout
-        const checkSession = async () => {
-            const SESSION_TIMEOUT_MS = 15000;
+        const SESSION_TIMEOUT_MS = 15000;
 
+        const withTimeout = <T,>(promise: Promise<T>, ms: number, label: string): Promise<T> =>
+            Promise.race([
+                promise,
+                new Promise<never>((_, reject) =>
+                    setTimeout(() => reject(new Error(`${label} timed out`)), ms)
+                ),
+            ]);
+
+        const checkSession = async () => {
             try {
-                // Separate timeout for session restore only
-                const { data: { session } } = await Promise.race([
-                    supabase.auth.getSession(),
-                    new Promise<never>((_, reject) =>
-                        setTimeout(() => reject(new Error('Session check timed out')), SESSION_TIMEOUT_MS)
-                    ),
-                ]);
+                // Try getSession() — retry once on timeout
+                let session = null;
+                try {
+                    const { data } = await withTimeout(supabase.auth.getSession(), SESSION_TIMEOUT_MS, 'Session check');
+                    session = data.session;
+                } catch {
+                    // Retry once
+                    const { data } = await withTimeout(supabase.auth.getSession(), SESSION_TIMEOUT_MS, 'Session check retry');
+                    session = data.session;
+                }
                 if (cancelled) return;
 
                 const currentUser = session?.user ?? null;
                 setUser(currentUser);
                 setAuthLoading(false);
 
-                // Independent profile fetch with its own timeout
                 if (currentUser) {
-                    setProfileLoading(true);
-                    try {
-                        const userProfile = await Promise.race([
-                            profileService.getProfile(currentUser.id),
-                            new Promise<never>((_, reject) =>
-                                setTimeout(() => reject(new Error('Profile fetch timed out')), 10000)
-                            ),
-                        ]);
-                        if (!cancelled) setProfile(userProfile as UserProfile);
-                    } catch (profileError) {
-                        console.error('Profile fetch error', profileError);
-                    } finally {
-                        if (!cancelled) setProfileLoading(false);
-                    }
+                    await fetchProfile(currentUser.id);
                 }
             } catch (error) {
-                console.error("Session check error", error);
-                if (!cancelled) setAuthLoading(false);
+                // getSession failed twice — try getUser() as fallback (works server-side)
+                try {
+                    const { data: { user: fallbackUser } } = await withTimeout(
+                        supabase.auth.getUser(),
+                        SESSION_TIMEOUT_MS,
+                        'getUser fallback'
+                    );
+                    if (cancelled) return;
+                    if (fallbackUser) {
+                        setUser(fallbackUser);
+                        setAuthLoading(false);
+                        await fetchProfile(fallbackUser.id);
+                        return;
+                    }
+                } catch {
+                    // Both methods failed — likely a corrupted or expired token
+                    console.error("Session restore failed, clearing session", error);
+                }
+                if (cancelled) return;
+                // Clear corrupted state so the app can proceed to login
+                await supabase.auth.signOut().catch(() => {});
+                setUser(null);
+                setProfile(null);
+                setAuthLoading(false);
+            }
+        };
+
+        const fetchProfile = async (userId: string) => {
+            setProfileLoading(true);
+            try {
+                const userProfile = await withTimeout(
+                    profileService.getProfile(userId),
+                    10000,
+                    'Profile fetch'
+                );
+                if (!cancelled) setProfile(userProfile as UserProfile);
+            } catch (profileError) {
+                console.error('Profile fetch error', profileError);
+            } finally {
+                if (!cancelled) setProfileLoading(false);
             }
         };
 

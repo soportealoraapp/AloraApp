@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Heart, Loader2 } from 'lucide-react';
-import Image from 'next/image';
+import { SafeImage } from '@/components/ui/safe-image';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { TrustBadge } from '../ui/premium/TrustBadge';
@@ -64,7 +64,7 @@ export function LikesReceivedList() {
                                     onClick={() => router.push(`/profile/${liker.id}`)}
                                 >
                                     <div className="aspect-[4/5] relative">
-                                        <Image
+                                        <SafeImage
                                             src={liker.photos?.[0] || '/placeholder.svg'}
                                             alt={liker.displayName}
                                             fill

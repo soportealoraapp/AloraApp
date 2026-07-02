@@ -9,7 +9,7 @@ import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Settings, Edit, Eye, Music, CheckCircle, ChevronRight, Shield, Sparkles, MessageCircle, X, Mic, LogOut } from "lucide-react";
-import Image from "next/image";
+import { SafeImage } from "@/components/ui/safe-image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -153,7 +153,7 @@ export default function ProfilePage() {
                 {profile.photos?.map((photo, index) => (
                   <CarouselItem key={index}>
                     <div className="w-full aspect-[4/5] relative">
-                      <Image
+                      <SafeImage
                         src={photo}
                         alt={`${profile.displayName} ${index + 1}`}
                         fill
@@ -168,7 +168,7 @@ export default function ProfilePage() {
               <CarouselNext className="right-2 z-10 shadow-lg" />
             </Carousel>
           ) : (
-            <Image
+            <SafeImage
               src={profile.photos?.[0] || '/placeholder.svg'}
               alt={profile.displayName}
               width={600}

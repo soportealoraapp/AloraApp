@@ -14,7 +14,7 @@ import { HeartArrow } from '@/components/ui/custom/HeartArrow';
 import dynamic from 'next/dynamic';
 const MatchScreen = dynamic(() => import('@/components/ui/premium/MatchScreen').then(m => m.MatchScreen), { ssr: false });
 import { motion, AnimatePresence } from 'framer-motion';
-import Image from 'next/image';
+import { SafeImage } from '@/components/ui/safe-image';
 import Link from 'next/link';
 import { UserProfile } from '@/lib/domain/types';
 
@@ -420,7 +420,7 @@ export function DailyQuestionCard() {
                                                 className="relative h-12 w-12 rounded-full overflow-hidden border-2 border-primary/20 shrink-0 hover:opacity-90 transition-opacity"
                                                 onClick={() => setShowAnswersModal(false)}
                                             >
-                                                <Image
+                                                <SafeImage
                                                     src={currentAnswer.profile.photos?.[0] || '/placeholder.svg'}
                                                     alt={currentAnswer.profile.displayName}
                                                     fill

@@ -3,7 +3,7 @@
 import { motion, PanInfo, useAnimation, AnimatePresence } from 'framer-motion';
 import { SoftCard } from '../custom/SoftCard';
 import { UserProfile } from '@/lib/domain/types';
-import Image from 'next/image';
+import { SafeImage } from '@/components/ui/safe-image';
 import { TrustBadge } from './TrustBadge';
 import { ProfileActions } from '../../match/ProfileActions';
 import { Clock, MessageCircle, Heart, X, Music } from 'lucide-react';
@@ -115,7 +115,7 @@ export const FloatingMatchCard = React.memo(function FloatingMatchCard({ profile
         {photos.length > 0 ? (
           photos.map((photo, index) => (
             Math.abs(index - currentPhotoIndex) <= 1 && (
-              <Image
+              <SafeImage
                 key={index}
                 src={photo}
                 alt={`${profile.displayName} ${index + 1}`}
@@ -129,7 +129,7 @@ export const FloatingMatchCard = React.memo(function FloatingMatchCard({ profile
             )
           ))
         ) : (
-          <Image
+          <SafeImage
             src="/placeholder.svg"
             alt={profile.displayName}
             fill

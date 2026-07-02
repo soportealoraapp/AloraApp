@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Heart, Send } from 'lucide-react';
 import { HeartArrow } from '@/components/ui/custom/HeartArrow';
-import Image from 'next/image';
+import { SafeImage } from '@/components/ui/safe-image';
 import Link from 'next/link';
 import { ConnectionIntent } from '@/lib/domain/types';
 
@@ -72,7 +72,7 @@ export const LikesSentSection = React.memo(function LikesSentSection({ intent = 
             <Link key={like.id} href={`/profile/${like.targetUserId}?source=likes-sent`} className="block">
               <Card className="rounded-2xl overflow-hidden shadow-sm border group">
                 <div className="aspect-[3/4] relative">
-                  <Image
+                  <SafeImage
                     src={like.photos?.[0] || '/placeholder.svg'}
                     alt={like.displayName || ''}
                     fill

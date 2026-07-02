@@ -3,7 +3,7 @@
 import { Button } from "@/components/ui/button";
 import { useState, useCallback, useRef } from "react";
 import { Plus, X, Loader2, AlertCircle } from "lucide-react";
-import Image from "next/image";
+import { SafeImage } from "@/components/ui/safe-image";
 import { useUploadThing } from "@/utils/uploadthing";
 import { useToast } from "@/hooks/use-toast";
 import { trackEvent } from "@/lib/tracking/client";
@@ -175,7 +175,7 @@ export function StepPhotos({ userId, data, onUpdate, onNext, onPrev }: any) {
             <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                 {photos.map((url: string, index: number) => (
                     <div key={url} className="relative aspect-[3/4] rounded-xl overflow-hidden shadow-sm group bg-muted transition-transform hover:scale-[1.02] active:scale-[0.98]">
-                        <Image src={url} alt={`Photo ${index}`} fill sizes="(max-width: 640px) 50vw, 200px" className="object-cover" loading="lazy" />
+                        <SafeImage src={url} alt={`Photo ${index}`} fill sizes="(max-width: 640px) 50vw, 200px" className="object-cover" loading="lazy" />
                         <button
                             onClick={() => removePhoto(index)}
                             className="absolute top-2 right-2 bg-black/50 text-white rounded-full p-2 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity z-10"

@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Heart, Loader2, Sparkles } from 'lucide-react';
-import Image from 'next/image';
+import { SafeImage } from '@/components/ui/safe-image';
 import Link from 'next/link';
 
 interface DailyCompatData {
@@ -79,7 +79,7 @@ export const DailyCompatibilityCard = React.memo(function DailyCompatibilityCard
                 <Link href={`/profile/${data.profile.id}`} className="block">
                     <div className="flex items-center gap-3 p-2 rounded-xl hover:bg-muted/50 transition-colors">
                         <div className="relative h-14 w-14 rounded-full overflow-hidden flex-shrink-0">
-                            <Image
+                            <SafeImage
                                 src={data.profile.photos?.[0] || '/placeholder.svg'}
                                 alt={data.profile.displayName}
                                 fill

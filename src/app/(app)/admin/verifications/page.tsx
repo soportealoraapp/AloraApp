@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ArrowLeft, ShieldCheck, CheckCircle, XCircle, ExternalLink } from 'lucide-react';
-import Image from 'next/image';
+import { SafeImage } from '@/components/ui/safe-image';
 
 interface Submission {
     id: string; selfieUrl: string; status: string; reason: string | null; createdAt: string;
@@ -79,13 +79,13 @@ export default function AdminVerificationsPage() {
                         <div key={sub.id} className="bg-card border border-border rounded-xl p-5 space-y-4">
                             <div className="flex items-start gap-6">
                                 <div className="relative h-40 w-32 rounded-xl overflow-hidden bg-muted flex-shrink-0">
-                                    <Image src={sub.selfieUrl} alt="Selfie de verificación" fill className="object-cover" loading="lazy" />
+                                    <SafeImage src={sub.selfieUrl} alt="Selfie de verificación" fill className="object-cover" loading="lazy" />
                                 </div>
                                 <div className="flex-1">
                                     <div className="flex items-center gap-2 mb-2">
                                         <div className="relative h-10 w-10 rounded-full overflow-hidden bg-muted">
                                             {sub.user.profile?.photos?.[0] ? (
-                                                <Image src={sub.user.profile.photos[0]} alt="Foto de perfil" fill className="object-cover" loading="lazy" />
+                                                <SafeImage src={sub.user.profile.photos[0]} alt="Foto de perfil" fill className="object-cover" loading="lazy" />
                                             ) : (
                                                 <div className="h-full w-full flex items-center justify-center text-muted-foreground text-xs">?</div>
                                             )}
@@ -109,7 +109,7 @@ export default function AdminVerificationsPage() {
                                         <div className="flex gap-2 mt-3">
                                             {sub.user.profile.photos.slice(0, 4).map((photo, i) => (
                                                 <div key={i} className="relative h-14 w-14 rounded-lg overflow-hidden bg-muted">
-                                                    <Image src={photo} alt={`Foto ${i + 1}`} fill className="object-cover" loading="lazy" />
+                                                    <SafeImage src={photo} alt={`Foto ${i + 1}`} fill className="object-cover" loading="lazy" />
                                                 </div>
                                             ))}
                                         </div>

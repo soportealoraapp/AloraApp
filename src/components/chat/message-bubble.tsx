@@ -14,7 +14,7 @@ interface MessageBubbleProps {
 }
 
 import { motion, AnimatePresence } from 'framer-motion';
-import Image from 'next/image';
+import { SafeImage } from '@/components/ui/safe-image';
 
 function formatTime(date: Date | string): string {
   const d = new Date(date);
@@ -70,7 +70,7 @@ const MemoizedMessageBubble = React.memo(function MessageBubble({ message, isMe,
             onClick={() => !isFlagged && setShowImagePreview(true)}
           >
             <div className="relative w-[280px] h-[280px] md:w-[320px] md:h-[320px] bg-muted">
-              <Image
+              <SafeImage
                 src={message.content}
                 alt="Imagen compartida"
                 fill
@@ -214,7 +214,7 @@ const MemoizedMessageBubble = React.memo(function MessageBubble({ message, isMe,
               className="relative max-w-full max-h-full"
               onClick={e => e.stopPropagation()}
             >
-              <Image
+              <SafeImage
                 src={message.content}
                 alt="Imagen ampliada"
                 width={800}

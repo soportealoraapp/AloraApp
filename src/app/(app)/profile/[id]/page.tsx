@@ -16,7 +16,7 @@ import { ProfileHighlights } from "@/components/profile/ProfileHighlights";
 import { FavoriteButton } from "@/components/profile/FavoriteButton";
 import { TrustBadge } from "@/components/ui/premium/TrustBadge";
 import { VoicePlayer } from "@/components/audio/VoicePlayer";
-import Image from "next/image";
+import { SafeImage } from "@/components/ui/safe-image";
 import Link from "next/link";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
@@ -264,7 +264,7 @@ export default function UserProfilePage() {
                                 {profile.photos.map((photo, index) => (
                                     <CarouselItem key={index}>
                                         <div className="w-full aspect-[4/5] relative">
-                                            <Image
+                                            <SafeImage
                                                 src={photo}
                                                 alt={`Foto de ${profile.displayName} ${index + 1}`}
                                                 fill
@@ -280,7 +280,7 @@ export default function UserProfilePage() {
                             <CarouselNext className="right-2 z-10 shadow-lg" />
                         </Carousel>
                     ) : (
-                        <Image
+                        <SafeImage
                             src={mainPhoto}
                             alt={`Foto de ${profile.displayName}`}
                             width={600}

@@ -4,7 +4,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Music, ExternalLink, Headphones, Disc3, RefreshCw } from 'lucide-react';
 import { useState, useEffect, useCallback } from 'react';
-import Image from 'next/image';
+import { SafeImage } from '@/components/ui/safe-image';
 import { useRouter } from 'next/navigation';
 
 interface Track {
@@ -166,7 +166,7 @@ export function SpotifySection({ spotify, isOwn }: SpotifySectionProps) {
                   className="inline-flex items-center gap-1.5 bg-muted/50 rounded-full px-3 py-1.5 text-sm hover:bg-muted transition-colors"
                 >
                   {artist.imageUrl && (
-                    <Image
+                    <SafeImage
                       src={artist.imageUrl}
                       alt={artist.name}
                       width={20}
@@ -201,7 +201,7 @@ export function SpotifySection({ spotify, isOwn }: SpotifySectionProps) {
                   className="flex items-center gap-3 p-2 rounded-xl hover:bg-muted/50 transition-colors group"
                 >
                   {track.imageUrl && (
-                    <Image
+                    <SafeImage
                       src={track.imageUrl}
                       alt={track.name}
                       width={40}

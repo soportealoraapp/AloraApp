@@ -17,7 +17,7 @@ import { DailyQuestionCard } from '@/components/daily-question/DailyQuestionCard
 import { DailyCompatibilityCard } from '@/components/compatibility/DailyCompatibilityCard';
 import { PaywallModal } from '@/components/premium/PaywallModal';
 import { Lightbulb, Star } from 'lucide-react';
-import Image from 'next/image';
+import { SafeImage } from "@/components/ui/safe-image";
 import { useRouter } from 'next/navigation';
 import { cn } from '@/lib/utils';
 
@@ -536,7 +536,7 @@ export default function CompatibilityPage() {
                             onClick={() => { setSelectedResult(null); router.push(`/profile/${u.id}`); }}
                           >
                             {u.photo ? (
-                              <Image src={u.photo} alt={u.name} width={48} height={48} className="w-full h-full object-cover" loading="lazy" />
+                              <SafeImage src={u.photo} alt={u.name} width={48} height={48} className="w-full h-full object-cover" loading="lazy" />
                             ) : (
                               <div className="w-full h-full bg-primary/20 flex items-center justify-center text-primary font-bold">
                                 {u.name?.charAt(0)}

@@ -11,7 +11,7 @@ import { Loader2, RefreshCcw, Sparkles, SlidersHorizontal, RotateCcw, Heart, X, 
 import { HeartArrow } from "@/components/ui/custom/HeartArrow";
 import { DiscoverFilters, Filters } from "@/components/discover/discover-filters";
 import { Card, CardContent } from "@/components/ui/card";
-import Image from "next/image";
+import { SafeImage } from "@/components/ui/safe-image";
 import { useDiscover } from "@/hooks/use-discover";
 import { useAuth } from "@/contexts/AuthContext";
 import { useSendLike } from "@/hooks/use-send-like";
@@ -723,7 +723,7 @@ export default function DiscoverPage() {
                                 role="button"
                                 aria-label={`Ver perfil de ${p.displayName || ''}`}
                               >
-                                <Image
+                                <SafeImage
                                   src={p.photos?.[0] || '/placeholder.svg'}
                                   alt={p.displayName || ''}
                                   fill

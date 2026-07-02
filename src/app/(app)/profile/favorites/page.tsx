@@ -8,7 +8,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { ArrowLeft, Heart, Trash2, Loader2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import Image from 'next/image';
+import { SafeImage } from "@/components/ui/safe-image";
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
 import { PlusBadge } from '@/components/premium/PlusBadge';
@@ -88,7 +88,7 @@ export default function FavoritesPage() {
                         <Link key={fav.id} href={`/profile/${fav.id}`}>
                             <Card className="hover:shadow-md transition-shadow cursor-pointer group overflow-hidden">
                                 <div className="relative h-48 overflow-hidden">
-                                    <Image
+                                    <SafeImage
                                         src={fav.photo}
                                         alt={fav.name}
                                         fill

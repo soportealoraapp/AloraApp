@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ArrowLeft, Flag, ShieldAlert, Shield, Ban, EyeOff, AlertTriangle, CheckCircle, XCircle } from 'lucide-react';
-import Image from 'next/image';
+import { SafeImage } from '@/components/ui/safe-image';
 
 interface Report {
     id: string; reason: string; status: string; createdAt: string; reportCount: number; details?: string;
@@ -102,7 +102,7 @@ export default function AdminReportsPage() {
                                 <div className="flex items-start gap-4">
                                     <div className="relative h-10 w-10 rounded-full overflow-hidden bg-muted flex-shrink-0">
                                         {report.reported?.profile?.photos?.[0] ? (
-                                            <Image src={report.reported.profile.photos[0]} alt="Foto de perfil" fill className="object-cover" loading="lazy" />
+                                            <SafeImage src={report.reported.profile.photos[0]} alt="Foto de perfil" fill className="object-cover" loading="lazy" />
                                         ) : (
                                             <div className="h-full w-full flex items-center justify-center text-muted-foreground text-xs">
                                                 {report.reported?.profile?.displayName?.[0] || '?'}

@@ -5,7 +5,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Sparkles } from 'lucide-react';
 import Link from 'next/link';
-import Image from 'next/image';
+import { SafeImage } from '@/components/ui/safe-image';
 import { cn } from '@/lib/utils';
 import { logger } from '@/lib/logger';
 
@@ -71,7 +71,7 @@ export const DailyPicks = React.memo(function DailyPicks({ subscriptionStatus = 
                     <Link key={pick.id} href={`/profile/${encodeURIComponent(pick.id)}?source=daily-pick`}>
                         <Card className="flex-shrink-0 w-48 hover:shadow-lg transition-all cursor-pointer group overflow-hidden">
                             <div className="relative h-40 overflow-hidden">
-                                <Image
+                                <SafeImage
                                     src={pick.photo}
                                     alt={pick.displayName || 'Perfil'}
                                     fill

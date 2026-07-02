@@ -5,7 +5,7 @@ import { useBlock } from "@/hooks/use-block";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { ArrowLeft, UserX } from "lucide-react";
-import Image from "next/image";
+import { SafeImage } from "@/components/ui/safe-image";
 import { Skeleton } from "@/components/ui/skeleton";
 import { BRAND_VOICE } from "@/lib/constants/brand-voice";
 
@@ -55,7 +55,7 @@ export default function BlockedUsersPage() {
                         <Card key={block.id}>
                             <CardContent className="flex items-center gap-4 p-4">
                                 <div className="relative h-14 w-14 rounded-full overflow-hidden flex-shrink-0">
-                                    <Image
+                                    <SafeImage
                                         src={block.photoUrl || "/placeholder.svg"}
                                         alt={block.displayName || "Profile"}
                                         fill

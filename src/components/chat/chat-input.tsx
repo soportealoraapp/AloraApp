@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Send, Loader2, Image as ImageIcon, X, Mic, Square } from "lucide-react";
 import { useUploadThing } from "@/utils/uploadthing";
-import Image from "next/image";
+import { SafeImage } from "@/components/ui/safe-image";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
@@ -337,7 +337,7 @@ export function ChatInput({ onSend, onSendImage, onSendVoice, onTyping, disabled
             className="relative inline-block rounded-xl overflow-hidden border border-muted"
           >
             <div className="relative h-20 w-20">
-              <Image src={previewImage} alt="Preview" fill sizes="(max-width: 640px) 80vw, 300px" className="object-cover" loading="lazy" />
+              <SafeImage src={previewImage} alt="Preview" fill sizes="(max-width: 640px) 80vw, 300px" className="object-cover" loading="lazy" />
             </div>
             {uploadingImage && (
               <div className="absolute inset-0 bg-black/40 flex items-center justify-center">

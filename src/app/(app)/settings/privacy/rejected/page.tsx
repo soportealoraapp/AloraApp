@@ -6,7 +6,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { ArrowLeft, Loader2, UserX } from "lucide-react";
-import Image from "next/image";
+import { SafeImage } from "@/components/ui/safe-image";
 import { useToast } from "@/hooks/use-toast";
 
 export default function RejectedUsersPage() {
@@ -80,7 +80,7 @@ export default function RejectedUsersPage() {
                                 <CardContent className="p-4 flex items-center justify-between gap-3">
                                     <div className="flex items-center gap-3">
                                         <div className="relative h-10 w-10 rounded-full overflow-hidden bg-muted">
-                                            {u.photos?.[0] && <Image src={u.photos[0]} alt={u.displayName} fill className="object-cover" loading="lazy" />}
+                                            {u.photos?.[0] && <SafeImage src={u.photos[0]} alt={u.displayName} fill className="object-cover" loading="lazy" />}
                                         </div>
                                         <div>
                                             <p className="font-medium">{u.displayName}</p>

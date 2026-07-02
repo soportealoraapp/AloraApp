@@ -7,7 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ArrowLeft, Users, Search, Ban, ShieldAlert, EyeOff, CheckCircle, Shield, Flag } from 'lucide-react';
-import Image from 'next/image';
+import { SafeImage } from '@/components/ui/safe-image';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 
 interface AdminUser {
@@ -89,7 +89,7 @@ export default function AdminUsersPage() {
                         <div key={u.id} className="bg-card border border-border rounded-xl p-4 flex items-center gap-4">
                             <div className="relative h-12 w-12 rounded-full overflow-hidden bg-muted flex-shrink-0">
                                  {u.profile?.photos?.[0] ? (
-                                    <Image src={u.profile.photos[0]} alt="Foto de perfil" fill className="object-cover" loading="lazy" />
+                                    <SafeImage src={u.profile.photos[0]} alt="Foto de perfil" fill className="object-cover" loading="lazy" />
                                 ) : (
                                     <div className="h-full w-full flex items-center justify-center text-muted-foreground">?</div>
                                 )}
