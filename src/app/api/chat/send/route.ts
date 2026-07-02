@@ -92,6 +92,16 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ error: 'Interaction not available' }, { status: 403 });
         }
 
+        // Shadow-ban check: shadow-banned users cannot send messages
+        const senderProfileCheck = await prisma.profile.findUnique({
+            where: { userId: user.id },
+            select: { isShadowBanned: true }
+        });
+        if (senderProfileCheck?.isShadowBanned) {
+            // Silently accept but don't deliver — the sender thinks it sent
+            return NextResponse.json({ id: 'shadow-hidden', status: 'sent', content: sanitizedText }, { status: 200 });
+        }
+
         // Women-first: in heterosexual matches, only the woman can send the first message
         const prevMessageCount = await prisma.message.count({ where: { matchId } });
         if (prevMessageCount === 0) {
@@ -184,6 +194,15 @@ export async function POST(request: NextRequest) {
             select: { displayName: true }
         });
         notifyNewMessage(receiverId, senderProfile?.displayName || 'Alguien', matchId, content)
+            .then((pushResult) => {
+                // Mark as 'delivered' if push was successfully sent to at least one device
+                if (pushResult && 'succeeded' in pushResult && pushResult.succeeded > 0) {
+                    prisma.message.update({
+                        where: { id: message.id },
+                        data: { status: 'delivered' }
+                    }).catch(() => {});
+                }
+            })
             .catch((err) => console.warn('[chat/send] notifyNewMessage failed:', err));
 
         // Analytics: track first_message and first_reply

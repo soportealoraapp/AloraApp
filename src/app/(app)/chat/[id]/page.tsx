@@ -558,6 +558,17 @@ export default function ChatWindowPage() {
                             {loadingIcebreakers ? <Loader2 className="animate-spin mr-2" /> : <Sparkles className="mr-2 h-4 w-4" />}
                             Sugerir rompehielos
                         </Button>
+                        <div className="mt-6 space-y-2 max-w-xs">
+                            <p className="text-[11px] text-muted-foreground/70 flex items-center gap-2">
+                                <span className="text-base">🎤</span> Mantén presionado el micrófono para enviar un mensaje de voz
+                            </p>
+                            <p className="text-[11px] text-muted-foreground/70 flex items-center gap-2">
+                                <span className="text-base">🎲</span> Usa el botón de dados para una pregunta aleatoria
+                            </p>
+                            <p className="text-[11px] text-muted-foreground/70 flex items-center gap-2">
+                                <span className="text-base">⋯</span> En el menú puedes silenciar, reportar o bloquear
+                            </p>
+                        </div>
                     </div>
                 ) : (
                     <div className="flex flex-col gap-1">

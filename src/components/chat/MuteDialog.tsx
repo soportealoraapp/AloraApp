@@ -57,6 +57,7 @@ export function MuteDialog({ isOpen, onClose, onMute, isMuted }: MuteDialogProps
                     </div>
                 ) : (
                     <div className="space-y-3">
+                        <p className="text-xs text-muted-foreground">Solo se silencian las notificaciones push. Los mensajes seguirán llegando al chat.</p>
                         {MUTE_OPTIONS.map((option) => (
                             <button
                                 key={option.label}

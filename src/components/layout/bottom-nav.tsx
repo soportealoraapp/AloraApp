@@ -7,6 +7,7 @@ import { cn } from '@/lib/utils';
 import { motion } from 'framer-motion';
 import { Logo } from '../logo';
 import { useNotifications } from '@/hooks/use-notifications';
+import { hapticsLight } from '@/lib/mobile';
 
 const navItems = [
   { href: '/discover', icon: Compass, label: 'Descubrir' },
@@ -31,7 +32,7 @@ export function BottomNav() {
             
             if (special) {
               return (
-                <Link key={href} href={href} className="flex-1 flex flex-col items-center justify-center relative -top-3" aria-current={isActive ? 'page' : undefined}>
+                <Link key={href} href={href} className="flex-1 flex flex-col items-center justify-center relative -top-3" aria-current={isActive ? 'page' : undefined} onClick={() => hapticsLight()}>
                   <motion.div
                     whileTap={{ scale: 0.9 }}
                     className="flex flex-col items-center"
@@ -64,7 +65,7 @@ export function BottomNav() {
             }
 
             return (
-              <Link key={href} href={href} className="flex-1 flex flex-col items-center justify-center relative" aria-current={isActive ? 'page' : undefined}>
+                <Link key={href} href={href} className="flex-1 flex flex-col items-center justify-center relative" aria-current={isActive ? 'page' : undefined} onClick={() => hapticsLight()}>
                 <motion.div
                   whileTap={{ scale: 0.9 }}
                   className={cn(

@@ -91,6 +91,13 @@ export function useNotifications({
                     queryClient.invalidateQueries({ queryKey: ['notifications'] });
                 }
             )
+            .on(
+                'postgres_changes',
+                { event: 'UPDATE', schema: 'public', table: 'notifications' },
+                () => {
+                    queryClient.invalidateQueries({ queryKey: ['notifications'] });
+                }
+            )
             .subscribe((status) => {
                 if (status === 'CHANNEL_ERROR') {
                     console.warn('[use-notifications] Realtime channel error, relying on poll fallback');
@@ -109,29 +116,45 @@ export function useNotifications({
     const markRead = useCallback(async (ids: string[]) => {
         if (ids.length === 0) return;
         try {
+            // Optimistic update: immediately decrement unreadCount in cache
+            queryClient.setQueryData(['notifications'], (old: any) => {
+                if (!old) return old;
+                return { ...old, unreadCount: Math.max(0, old.unreadCount - ids.length) };
+            });
             const res = await fetch('/api/notifications', {
                 method: 'PATCH',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ ids }),
             });
             if (!res.ok) throw new Error('Failed to mark as read');
+            queryClient.invalidateQueries({ queryKey: ['notifications'] });
         } catch (err) {
+            // Rollback: refetch to restore correct state
+            queryClient.invalidateQueries({ queryKey: ['notifications'] });
             console.warn('[use-notifications] markRead failed:', err);
         }
-    }, []);
+    }, [queryClient]);
 
     const markAllRead = useCallback(async () => {
         try {
+            // Optimistic update: set unreadCount to 0 immediately
+            queryClient.setQueryData(['notifications'], (old: any) => {
+                if (!old) return old;
+                return { ...old, unreadCount: 0 };
+            });
             const res = await fetch('/api/notifications', {
                 method: 'PATCH',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ markAll: true }),
             });
             if (!res.ok) throw new Error('Failed to mark all as read');
+            queryClient.invalidateQueries({ queryKey: ['notifications'] });
         } catch (err) {
+            // Rollback: refetch to restore correct state
+            queryClient.invalidateQueries({ queryKey: ['notifications'] });
             console.warn('[use-notifications] markAllRead failed:', err);
         }
-    }, []);
+    }, [queryClient]);
 
     const deleteNotification = useCallback(async (id: string) => {
         const timeout = setTimeout(async () => {

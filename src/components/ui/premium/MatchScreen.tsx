@@ -11,6 +11,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Loader2, MessageCircle, Send, Sparkles } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { playMatchSound } from '@/lib/sounds';
+import { hapticsNotification } from '@/lib/mobile';
 
 const SimpleConfetti = () => {
     const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
@@ -74,6 +75,7 @@ export function MatchScreen({ userProfile, matchedProfile, onChat, onKeepSwiping
 
     useEffect(() => {
         playMatchSound();
+        hapticsNotification('success');
     }, []);
 
     useEffect(() => {

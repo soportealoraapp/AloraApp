@@ -34,14 +34,16 @@ export async function POST(request: NextRequest) {
         const { toUserId, type, intent } = parsed.data;
         const interactionType = type || 'like';
 
-        // Daily likes limit for free users (atomic check-and-increment to prevent race conditions)
+        // Daily likes limit for free users — pre-check only (atomic increment happens after interaction creation)
+        let isFreeUser = false;
         if (interactionType !== 'pass') {
             const profileBefore = await prisma.profile.findUnique({
                 where: { userId: user.id },
-                select: { subscriptionStatus: true, dailyLikesUsed: true, dailyLikesResetAt: true }
+                select: { subscriptionStatus: true, dailyLikesUsed: true, dailyLikesResetAt: true, superlikesRemaining: true }
             });
 
             if (profileBefore && profileBefore.subscriptionStatus === 'free') {
+                isFreeUser = true;
                 const now = new Date();
                 const lastReset = profileBefore.dailyLikesResetAt;
                 const isNewDay = !lastReset || now.toDateString() !== lastReset.toDateString();
@@ -71,47 +73,10 @@ export async function POST(request: NextRequest) {
                     );
                 }
 
-                // Atomic increment to prevent race conditions between concurrent requests
-                const updated = await prisma.profile.updateMany({
-                    where: {
-                        userId: user.id,
-                        dailyLikesUsed: { lt: FREE_DAILY_LIKES_LIMIT }
-                    },
-                    data: {
-                        dailyLikesUsed: { increment: 1 },
-                        lastSwipeAt: new Date(),
-                    }
-                });
-
-                if (updated.count === 0) {
-                    // Race condition caught: another request consumed the last like
-                    return NextResponse.json(
-                        {
-                            error: 'Daily like limit reached',
-                            message: `Has alcanzado el límite de ${FREE_DAILY_LIKES_LIMIT} Me gusta diarios.`
-                        },
-                        { status: 429 }
-                    );
-                }
-            }
-
-            // Superlike limit: 3 per day for free users — atomic check-and-decrement
-            if (interactionType === 'superlike') {
-                const profileSuper = await prisma.profile.findUnique({
-                    where: { userId: user.id },
-                    select: { subscriptionStatus: true }
-                });
-                if (profileSuper?.subscriptionStatus === 'free') {
-                    const updated = await prisma.profile.updateMany({
-                        where: {
-                            userId: user.id,
-                            superlikesRemaining: { gt: 0 }
-                        },
-                        data: {
-                            superlikesRemaining: { decrement: 1 }
-                        }
-                    });
-                    if (updated.count === 0) {
+                // Superlike limit pre-check for free users
+                if (interactionType === 'superlike') {
+                    const currentSuperlikes = isNewDay ? 3 : profileBefore.superlikesRemaining;
+                    if (currentSuperlikes <= 0) {
                         return NextResponse.json(
                             { error: 'Flechado limit reached', message: 'Has agotado tus Flechados diarios.' },
                             { status: 429 }
@@ -173,6 +138,58 @@ export async function POST(request: NextRequest) {
                 intent
             }
         });
+
+        // Atomic counter increment AFTER interaction creation succeeds (fixes counter drift on failure)
+        if (interactionType !== 'pass' && isFreeUser) {
+            const counterUpdated = await prisma.profile.updateMany({
+                where: {
+                    userId: user.id,
+                    dailyLikesUsed: { lt: FREE_DAILY_LIKES_LIMIT }
+                },
+                data: {
+                    dailyLikesUsed: { increment: 1 },
+                    lastSwipeAt: new Date(),
+                }
+            });
+
+            if (counterUpdated.count === 0) {
+                // Race condition: another request consumed the last like. Revert the interaction.
+                await prisma.interaction.update({
+                    where: { id: interaction.id },
+                    data: { type: 'pass', deletedAt: new Date() }
+                }).catch(() => {});
+                return NextResponse.json(
+                    {
+                        error: 'Daily like limit reached',
+                        message: `Has alcanzado el límite de ${FREE_DAILY_LIKES_LIMIT} Me gusta diarios.`
+                    },
+                    { status: 429 }
+                );
+            }
+
+            // Superlike counter decrement for free users
+            if (interactionType === 'superlike') {
+                const superUpdated = await prisma.profile.updateMany({
+                    where: { userId: user.id, superlikesRemaining: { gt: 0 } },
+                    data: { superlikesRemaining: { decrement: 1 } }
+                });
+                if (superUpdated.count === 0) {
+                    // Revert interaction and daily counter
+                    await prisma.interaction.update({
+                        where: { id: interaction.id },
+                        data: { type: 'pass', deletedAt: new Date() }
+                    }).catch(() => {});
+                    await prisma.profile.update({
+                        where: { userId: user.id },
+                        data: { dailyLikesUsed: { decrement: 1 } }
+                    }).catch(() => {});
+                    return NextResponse.json(
+                        { error: 'Flechado limit reached', message: 'Has agotado tus Flechados diarios.' },
+                        { status: 429 }
+                    );
+                }
+            }
+        }
 
         // Track last swipe
         await prisma.profile.update({

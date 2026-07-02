@@ -113,6 +113,23 @@ export const FloatingMatchCard = React.memo(function FloatingMatchCard({ profile
     >
       <SoftCard className="flex-1 min-h-0 overflow-hidden relative border-none shadow-xl rounded-2xl bg-card">
         {photos.length > 0 ? (
+          <div
+            className="absolute inset-0 z-10"
+            onClick={(e) => {
+              // Tap-left/right to cycle photos
+              const rect = e.currentTarget.getBoundingClientRect();
+              const x = e.clientX - rect.left;
+              const isLeftThird = x < rect.width / 3;
+              const isRightThird = x > (rect.width * 2) / 3;
+              if (isLeftThird && currentPhotoIndex > 0) {
+                setCurrentPhotoIndex(prev => prev - 1);
+              } else if (isRightThird && currentPhotoIndex < photos.length - 1) {
+                setCurrentPhotoIndex(prev => prev + 1);
+              }
+            }}
+          />
+        ) : null}
+        {photos.length > 0 ? (
           photos.map((photo, index) => (
             Math.abs(index - currentPhotoIndex) <= 1 && (
               <SafeImage

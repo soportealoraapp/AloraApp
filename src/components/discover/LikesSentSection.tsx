@@ -7,6 +7,7 @@ import { HeartArrow } from '@/components/ui/custom/HeartArrow';
 import { SafeImage } from '@/components/ui/safe-image';
 import Link from 'next/link';
 import { ConnectionIntent } from '@/lib/domain/types';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 interface SentLike {
   id: string;
@@ -65,6 +66,14 @@ export const LikesSentSection = React.memo(function LikesSentSection({ intent = 
         <div className="flex items-center gap-2 mb-2">
           <Send className="h-5 w-5 text-primary" />
           <h3 className="font-bold text-lg">Likes Enviados</h3>
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <span className="text-muted-foreground cursor-help text-sm">?</span>
+              </TooltipTrigger>
+              <TooltipContent side="top"><p className="text-xs max-w-[200px]">Likes y Flechados que enviaste. Recibirás un match si te dan like de vuelta.</p></TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
         </div>
         <p className="text-sm text-muted-foreground mb-4">Esperando respuesta de estas personas</p>
         <div className="grid grid-cols-3 sm:grid-cols-4 gap-3">

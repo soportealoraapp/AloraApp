@@ -16,24 +16,39 @@ const MAX_RETRY_ATTEMPTS = 1;
 const SILENT_HOURS_START = 22; // 10 PM
 const SILENT_HOURS_END = 8;    // 8 AM
 
-const deduplicationCache = new Map<string, number>();
-const rateLimitCache = new Map<string, { count: number; resetAt: number }>();
-const DEDUP_CACHE_MAX = 1000;
-const RATE_LIMIT_CACHE_MAX = 1000;
+// DB-backed deduplication — survives multi-instance/serverless deployments
+async function isDeduplicated(userId: string, type: string, fromUserId?: string): Promise<boolean> {
+    const key = fromUserId ? `push:${userId}:${type}:${fromUserId}` : `push:${userId}:${type}`;
+    const cutoff = new Date(Date.now() - DEDUP_WINDOW_MINUTES * 60 * 1000);
+    const existing = await prisma.idempotencyKey.findFirst({
+        where: { key, action: 'push_dedup', createdAt: { gt: cutoff } },
+        select: { id: true }
+    });
+    return !!existing;
+}
 
-function cleanupCaches() {
-    const now = Date.now();
-    if (deduplicationCache.size > DEDUP_CACHE_MAX) {
-        const cutoff = now - DEDUP_WINDOW_MINUTES * 60 * 1000;
-        for (const [key, ts] of deduplicationCache) {
-            if (ts < cutoff) deduplicationCache.delete(key);
-        }
-    }
-    if (rateLimitCache.size > RATE_LIMIT_CACHE_MAX) {
-        for (const [key, val] of rateLimitCache) {
-            if (val.resetAt < now) rateLimitCache.delete(key);
-        }
-    }
+async function markSent(userId: string, type: string, fromUserId?: string): Promise<void> {
+    const key = fromUserId ? `push:${userId}:${type}:${fromUserId}` : `push:${userId}:${type}`;
+    await prisma.idempotencyKey.create({
+        data: { key, action: 'push_dedup', userId }
+    }).catch(() => {});
+}
+
+// DB-backed rate limiting — survives multi-instance/serverless deployments
+async function isRateLimited(userId: string): Promise<boolean> {
+    const key = `push_rate:${userId}`;
+    const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000);
+    const count = await prisma.idempotencyKey.count({
+        where: { key, action: 'push_rate', createdAt: { gt: oneHourAgo } }
+    });
+    return count >= RATE_LIMIT_PER_HOUR;
+}
+
+async function incrementRateLimit(userId: string): Promise<void> {
+    const key = `push_rate:${userId}`;
+    await prisma.idempotencyKey.create({
+        data: { key, action: 'push_rate', userId }
+    }).catch(() => {});
 }
 
 function isQuietHours(timezone?: string): boolean {
@@ -49,51 +64,15 @@ function isQuietHours(timezone?: string): boolean {
     }
 }
 
-function getDeduplicationKey(userId: string, type: string, fromUserId?: string): string {
-    return fromUserId ? `${userId}:${type}:${fromUserId}` : `${userId}:${type}`;
-}
-
-function isDeduplicated(userId: string, type: string, fromUserId?: string): boolean {
-    const key = getDeduplicationKey(userId, type, fromUserId);
-    const lastSent = deduplicationCache.get(key);
-    if (!lastSent) return false;
-    return (Date.now() - lastSent) < DEDUP_WINDOW_MINUTES * 60 * 1000;
-}
-
-function markSent(userId: string, type: string, fromUserId?: string): void {
-    const key = getDeduplicationKey(userId, type, fromUserId);
-    deduplicationCache.set(key, Date.now());
-    cleanupCaches();
-}
-
-function isRateLimited(userId: string): boolean {
-    const entry = rateLimitCache.get(userId);
-    if (!entry) return false;
-    if (Date.now() > entry.resetAt) {
-        rateLimitCache.delete(userId);
-        return false;
-    }
-    return entry.count >= RATE_LIMIT_PER_HOUR;
-}
-
-function incrementRateLimit(userId: string): void {
-    const entry = rateLimitCache.get(userId);
-    if (!entry || Date.now() > entry.resetAt) {
-        rateLimitCache.set(userId, { count: 1, resetAt: Date.now() + 60 * 60 * 1000 });
-    } else {
-        entry.count++;
-    }
-}
-
 export async function sendPushToUser(userId: string, payload: PushPayload) {
     try {
         const notifType = payload.data?.type || 'system';
 
-        if (isDeduplicated(userId, notifType, payload.data?.fromUserId)) {
+        if (await isDeduplicated(userId, notifType, payload.data?.fromUserId)) {
             return { succeeded: 0, failed: 0, deduplicated: true };
         }
 
-        if (isRateLimited(userId)) {
+        if (await isRateLimited(userId)) {
             return { succeeded: 0, failed: 0, rateLimited: true };
         }
 
@@ -219,8 +198,8 @@ export async function sendPushToUser(userId: string, payload: PushPayload) {
             }
         }
 
-        markSent(userId, notifType, payload.data?.fromUserId);
-        incrementRateLimit(userId);
+        await markSent(userId, notifType, payload.data?.fromUserId);
+        await incrementRateLimit(userId);
 
         return { succeeded, failed };
     } catch (error) {

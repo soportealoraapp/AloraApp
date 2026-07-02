@@ -8,6 +8,7 @@ import { ArrowLeft } from "lucide-react";
 import { useState, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { Skeleton } from '@/components/ui/skeleton';
+import { isSoundEnabled, setSoundEnabled as setSoundPref } from '@/lib/sounds';
 
 interface NotificationPrefs {
     matches: boolean;
@@ -25,9 +26,11 @@ export default function NotificationsPage() {
     const [prefs, setPrefs] = useState<NotificationPrefs | null>(null);
     const [loading, setLoading] = useState(true);
     const [updating, setUpdating] = useState<string | null>(null);
+    const [soundOn, setSoundOn] = useState(true);
 
     useEffect(() => {
         fetchPrefs();
+        setSoundOn(isSoundEnabled());
     }, []);
 
     const fetchPrefs = async () => {
@@ -137,6 +140,29 @@ export default function NotificationsPage() {
                                 />
                             </div>
                         ))}
+                    </CardContent>
+                </Card>
+
+                <Card className="mt-4">
+                    <CardHeader>
+                        <CardTitle>Sonidos</CardTitle>
+                        <CardDescription>Controla los sonidos de la aplicación.</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                        <div className="flex items-center justify-between">
+                            <div className="flex-grow">
+                                <p className="font-medium">Sonidos de la app</p>
+                                <p className="text-sm text-muted-foreground">Reproducir sonidos al dar like, recibir matches y mensajes.</p>
+                            </div>
+                            <Switch
+                                checked={soundOn}
+                                onCheckedChange={(v) => {
+                                    setSoundOn(v);
+                                    setSoundPref(v);
+                                    toast({ title: v ? 'Sonidos activados' : 'Sonidos desactivados' });
+                                }}
+                            />
+                        </div>
                     </CardContent>
                 </Card>
             </main>

@@ -9,6 +9,7 @@ import Link from 'next/link';
 import { useSendLike } from '@/hooks/use-send-like';
 import { useToast } from '@/hooks/use-toast';
 import { ConnectionIntent } from '@/lib/domain/types';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 interface SecondChanceSectionProps {
   intent?: ConnectionIntent;
@@ -65,15 +66,20 @@ export const SecondChanceSection = React.memo(function SecondChanceSection({ int
   };
 
   const handleDefinitivePass = async (profileId: string) => {
+    const previousProfiles = passedProfiles;
     setPassedProfiles(prev => prev.filter(p => p.id !== profileId));
     toast({ title: 'Descartado definitivamente' });
-    await fetch('/api/match/passed', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ profileId })
-    }).catch(() => {
+    try {
+      const res = await fetch('/api/match/passed', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ profileId })
+      });
+      if (!res.ok) throw new Error('Failed');
+    } catch {
+      setPassedProfiles(previousProfiles);
       toast({ title: 'Error al descartar', variant: 'destructive' });
-    });
+    }
   };
 
   return (
@@ -82,6 +88,14 @@ export const SecondChanceSection = React.memo(function SecondChanceSection({ int
         <div className="flex items-center gap-2 mb-4">
           <RotateCcw className="h-5 w-5 text-primary" />
           <h3 className="font-bold text-lg">Segunda Oportunidad</h3>
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <span className="text-muted-foreground cursor-help text-sm">?</span>
+              </TooltipTrigger>
+              <TooltipContent side="top"><p className="text-xs max-w-[200px]">Perfiles que descartaste. Si cambiaste de opinión, dales like. Descártalos definitivamente para no verlos de nuevo.</p></TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
         </div>
         <p className="text-sm text-muted-foreground mb-4">Personas que pasaste. ¿Seguro que no te interesan?</p>
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">

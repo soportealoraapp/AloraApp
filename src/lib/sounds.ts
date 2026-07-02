@@ -29,7 +29,7 @@ function isReducedMotion(): boolean {
  * Subtle "pop" sound for like actions.
  */
 export function playLikeSound() {
-  if (isReducedMotion()) return;
+  if (isReducedMotion() || !isSoundEnabled()) return;
   const ctx = getAudioContext();
   if (!ctx) return;
 
@@ -55,7 +55,7 @@ export function playLikeSound() {
  * Brighter, more impactful sound for flechado/superlike.
  */
 export function playFlechadoSound() {
-  if (isReducedMotion()) return;
+  if (isReducedMotion() || !isSoundEnabled()) return;
   const ctx = getAudioContext();
   if (!ctx) return;
 
@@ -91,7 +91,7 @@ export function playFlechadoSound() {
  * Celebratory chord for match events.
  */
 export function playMatchSound() {
-  if (isReducedMotion()) return;
+  if (isReducedMotion() || !isSoundEnabled()) return;
   const ctx = getAudioContext();
   if (!ctx) return;
 
@@ -115,4 +115,103 @@ export function playMatchSound() {
     gain.gain.setValueAtTime(0.2, ctx.currentTime);
     gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.5);
   } catch {}
+}
+
+/**
+ * Gentle "ding" for incoming messages.
+ */
+export function playMessageSound() {
+  if (isReducedMotion()) return;
+  const ctx = getAudioContext();
+  if (!ctx) return;
+
+  try {
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(880, ctx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(1100, ctx.currentTime + 0.06);
+
+    gain.gain.setValueAtTime(0.1, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.2);
+
+    osc.start(ctx.currentTime);
+    osc.stop(ctx.currentTime + 0.2);
+  } catch {}
+}
+
+/**
+ * Soft chime for in-app notifications.
+ */
+export function playNotificationSound() {
+  if (isReducedMotion()) return;
+  const ctx = getAudioContext();
+  if (!ctx) return;
+
+  try {
+    // Two-note ascending chime
+    const notes = [659.25, 987.77]; // E5, B5
+    const gain = ctx.createGain();
+    gain.connect(ctx.destination);
+    gain.gain.setValueAtTime(0.12, ctx.currentTime);
+
+    notes.forEach((freq, i) => {
+      const osc = ctx.createOscillator();
+      osc.connect(gain);
+      osc.type = 'sine';
+      const startTime = ctx.currentTime + i * 0.1;
+      osc.frequency.setValueAtTime(freq, startTime);
+      osc.start(startTime);
+      osc.stop(startTime + 0.2);
+    });
+
+    gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.4);
+  } catch {}
+}
+
+/**
+ * Subtle low tone for errors.
+ */
+export function playErrorSound() {
+  if (isReducedMotion()) return;
+  const ctx = getAudioContext();
+  if (!ctx) return;
+
+  try {
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(300, ctx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(200, ctx.currentTime + 0.15);
+
+    gain.gain.setValueAtTime(0.1, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.2);
+
+    osc.start(ctx.currentTime);
+    osc.stop(ctx.currentTime + 0.2);
+  } catch {}
+}
+
+// Sound toggle (respects user preference stored in localStorage)
+let soundEnabled: boolean | null = null;
+
+export function isSoundEnabled(): boolean {
+  if (typeof window === 'undefined') return true;
+  if (soundEnabled === null) {
+    soundEnabled = localStorage.getItem('soundEnabled') !== 'false';
+  }
+  return soundEnabled;
+}
+
+export function setSoundEnabled(enabled: boolean) {
+  soundEnabled = enabled;
+  if (typeof window !== 'undefined') {
+    localStorage.setItem('soundEnabled', String(enabled));
+  }
 }
