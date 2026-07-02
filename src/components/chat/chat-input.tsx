@@ -40,7 +40,7 @@ export function ChatInput({ onSend, onSendImage, onSendVoice, onTyping, disabled
   const { startUpload } = useUploadThing("chatImageUploader", {
     onClientUploadComplete: async (res: any) => {
       if (res && res.length > 0) {
-        const url = res[0].url;
+        const url = res[0].ufsUrl ?? res[0].url;
         setPreviewImage(null);
         setUploadingImage(false);
         if (onSendImage) {
@@ -57,7 +57,7 @@ export function ChatInput({ onSend, onSendImage, onSendVoice, onTyping, disabled
   const { startUpload: startVoiceUpload } = useUploadThing("voiceUploader", {
     onClientUploadComplete: async (res: any) => {
       if (res && res.length > 0) {
-        const url = res[0].url;
+        const url = res[0].ufsUrl ?? res[0].url;
         // Use functional update to avoid stale closure on recordingTime
         setRecordedBlob(null);
         setRecordedUrl(null);

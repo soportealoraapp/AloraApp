@@ -40,7 +40,7 @@ export function VoiceIntro({ audioUrl, duration, onSave, onDelete, isOwn = true 
     const { startUpload } = useUploadThing("voiceUploader", {
         onClientUploadComplete: async (res: any) => {
             if (res && res.length > 0) {
-                onSave(res[0].url, previewDurationRef.current);
+                onSave(res[0].ufsUrl ?? res[0].url, previewDurationRef.current);
                 setPreviewBlob(null);
                 toast({ title: "Presentación guardada" });
             }

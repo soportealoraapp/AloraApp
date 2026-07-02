@@ -38,7 +38,7 @@ export const ourFileRouter = {
         .onUploadComplete(async ({ metadata, file }) => {
             return {
                 uploadedBy: metadata.userId,
-                url: (file as unknown as { url: string }).url,
+                url: (file as any).ufsUrl ?? (file as any).url,
                 type: 'image',
             };
         }),
@@ -49,7 +49,7 @@ export const ourFileRouter = {
             return { userId, type: 'verification' };
         })
         .onUploadComplete(async ({ metadata, file }) => {
-            return { uploadedBy: metadata.userId, url: (file as unknown as { url: string }).url };
+            return { uploadedBy: metadata.userId, url: (file as any).ufsUrl ?? (file as any).url };
         }),
 
     voiceUploader: f({ audio: { maxFileSize: "2MB", maxFileCount: 1 } })
@@ -60,7 +60,7 @@ export const ourFileRouter = {
         .onUploadComplete(async ({ metadata, file }) => {
             return {
                 uploadedBy: metadata.userId,
-                url: (file as unknown as { url: string }).url,
+                url: (file as any).ufsUrl ?? (file as any).url,
                 type: 'voice',
             };
         }),

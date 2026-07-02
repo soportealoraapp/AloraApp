@@ -355,6 +355,31 @@ export default function ChatWindowPage() {
         }
     };
 
+    const handleRetry = useCallback(async (failedMessage: any) => {
+        if (!otherUserId || !user) return;
+        const retryId = failedMessage.id;
+        setMessages(prev => prev.map(m => m.id === retryId ? { ...m, status: 'pending' } : m));
+        try {
+            const response = await fetch('/api/chat/send', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    matchId,
+                    receiverId: otherUserId,
+                    text: failedMessage.content,
+                    type: failedMessage.type || 'text',
+                    clientMessageId: retryId,
+                }),
+            });
+            if (!response.ok) throw new Error('Retry failed');
+            const data = await response.json();
+            setMessages(prev => prev.map(m => m.id === retryId ? { ...data, createdAt: new Date(data.created_at || data.createdAt) } : m));
+        } catch {
+            setMessages(prev => prev.map(m => m.id === retryId ? { ...m, status: 'failed' } : m));
+            toast({ title: 'Error', description: 'No se pudo reenviar el mensaje.', variant: 'destructive' });
+        }
+    }, [otherUserId, user, matchId, setMessages, toast]);
+
     const handleMute = async (duration: number | null) => {
         try {
             const response = await fetch('/api/chat/mute', {
@@ -571,6 +596,7 @@ export default function ChatWindowPage() {
                                                         isMe={isMe}
                                                         currentUserId={user?.id}
                                                         onReact={handleReact}
+                                                        onRetry={handleRetry}
                                                     />
                                                 );
                                             } catch {
@@ -585,6 +611,7 @@ export default function ChatWindowPage() {
                                                         isMe={isMe}
                                                         currentUserId={user?.id}
                                                         onReact={handleReact}
+                                                        onRetry={handleRetry}
                                                     />
                                                 );
                                             }
@@ -600,6 +627,7 @@ export default function ChatWindowPage() {
                                                 isMe={isMe}
                                                 currentUserId={user?.id}
                                                 onReact={handleReact}
+                                                        onRetry={handleRetry}
                                             />
                                         );
                                     })();

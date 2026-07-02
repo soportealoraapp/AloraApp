@@ -67,7 +67,7 @@ export function VerificationUpload({ gesture, onComplete }: VerificationUploadPr
         onClientUploadComplete: async (res: any) => {
             if (res && res.length > 0) {
                 setUploadProgress(100);
-                const selfieUrl = res[0].url;
+                const selfieUrl = res[0].ufsUrl ?? res[0].url;
                 try {
                     const response = await fetch('/api/verification/submit', {
                         method: 'POST',

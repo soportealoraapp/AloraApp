@@ -23,6 +23,7 @@ export default function AdminUsersPage() {
     const [search, setSearch] = useState('');
     const [trustFilter, setTrustFilter] = useState('all');
     const [roleConfirmUser, setRoleConfirmUser] = useState<AdminUser | null>(null);
+    const [destructiveConfirm, setDestructiveConfirm] = useState<{ user: AdminUser; action: string } | null>(null);
 
     const fetchUsers = async () => {
         setLoading(true);
@@ -118,11 +119,11 @@ export default function AdminUsersPage() {
                             </div>
                             <div className="flex gap-1.5 flex-shrink-0">
                                 <Button variant="ghost" size="sm" className="text-muted-foreground h-8 text-xs"
-                                    onClick={() => handleAction(u.id, 'shadowban')} title="Sombreado">
+                                    onClick={() => setDestructiveConfirm({ user: u, action: 'shadowban' })} title="Sombreado">
                                     <EyeOff className="h-3 w-3" />
                                 </Button>
                                 <Button variant="ghost" size="sm" className="text-muted-foreground h-8 text-xs"
-                                    onClick={() => handleAction(u.id, 'suspend')} title="Suspender">
+                                    onClick={() => setDestructiveConfirm({ user: u, action: 'suspend' })} title="Suspender">
                                     <ShieldAlert className="h-3 w-3" />
                                 </Button>
                                 <Button variant="ghost" size="sm" className="text-muted-foreground h-8 text-xs"
@@ -130,7 +131,7 @@ export default function AdminUsersPage() {
                                     <Shield className="h-3 w-3" />
                                 </Button>
                                 <Button variant="ghost" size="sm" className="text-red-500 h-8 text-xs"
-                                    onClick={() => handleAction(u.id, 'ban')} title="Expulsar">
+                                    onClick={() => setDestructiveConfirm({ user: u, action: 'ban' })} title="Expulsar">
                                     <Ban className="h-3 w-3" />
                                 </Button>
                             </div>
@@ -158,6 +159,37 @@ export default function AdminUsersPage() {
                             if (roleConfirmUser) {
                                 handleAction(roleConfirmUser.id, 'set_role', roleConfirmUser.role === 'admin' ? 'user' : 'admin');
                                 setRoleConfirmUser(null);
+                            }
+                        }}>
+                            Confirmar
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
+
+            <AlertDialog open={!!destructiveConfirm} onOpenChange={(open) => { if (!open) setDestructiveConfirm(null); }}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>
+                            {destructiveConfirm?.action === 'ban' ? 'Expulsar usuario' :
+                             destructiveConfirm?.action === 'suspend' ? 'Suspender usuario' :
+                             'Sombreado de usuario'}
+                        </AlertDialogTitle>
+                        <AlertDialogDescription>
+                            {destructiveConfirm?.action === 'ban'
+                                ? `¿Estás seguro de que deseas expulsar a ${destructiveConfirm?.user?.profile?.displayName || destructiveConfirm?.user?.email}? Esta acción desactivará todos sus matches y es irreversible desde la UI.`
+                                : destructiveConfirm?.action === 'suspend'
+                                ? `¿Estás seguro de que deseas suspender a ${destructiveConfirm?.user?.profile?.displayName || destructiveConfirm?.user?.email}? Su reputación se reducirá en 50 puntos.`
+                                : `¿Estás seguro de que deseas aplicar sombreado a ${destructiveConfirm?.user?.profile?.displayName || destructiveConfirm?.user?.email}? Su contenido será oculto de otros usuarios.`
+                            }
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel onClick={() => setDestructiveConfirm(null)}>Cancelar</AlertDialogCancel>
+                        <AlertDialogAction onClick={() => {
+                            if (destructiveConfirm) {
+                                handleAction(destructiveConfirm.user.id, destructiveConfirm.action);
+                                setDestructiveConfirm(null);
                             }
                         }}>
                             Confirmar

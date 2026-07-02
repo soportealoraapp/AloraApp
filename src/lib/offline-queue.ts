@@ -34,6 +34,16 @@ function saveQueue(queue: QueueItem[]) {
 
 export function addToQueue(type: QueueItem['type'], payload: any) {
     const queue = getQueue();
+    // Dedup: skip if an identical pending item already exists (same type + matchId + text/content)
+    if (type === 'message' && payload?.matchId && payload?.text) {
+        const duplicate = queue.find(
+            item => item.type === 'message'
+                && item.status === 'pending'
+                && item.payload?.matchId === payload.matchId
+                && item.payload?.text === payload.text
+        );
+        if (duplicate) return queue.length;
+    }
     queue.push({
         id: `${type}_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
         type,

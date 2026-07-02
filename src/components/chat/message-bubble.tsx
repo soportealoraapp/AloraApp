@@ -10,6 +10,7 @@ interface MessageBubbleProps {
   isMe: boolean;
   currentUserId?: string;
   onReact?: (messageId: string, emoji: string) => void;
+  onRetry?: (message: Message) => void;
 }
 
 import { motion, AnimatePresence } from 'framer-motion';
@@ -27,7 +28,7 @@ function formatTime(date: Date | string): string {
   return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 }
 
-const MemoizedMessageBubble = React.memo(function MessageBubble({ message, isMe, currentUserId, onReact }: MessageBubbleProps) {
+const MemoizedMessageBubble = React.memo(function MessageBubble({ message, isMe, currentUserId, onReact, onRetry }: MessageBubbleProps) {
   const isPending = message.status === 'pending';
   const isFlagged = message.status === 'flagged';
   const isFailed = message.status === 'failed';
@@ -93,6 +94,16 @@ const MemoizedMessageBubble = React.memo(function MessageBubble({ message, isMe,
               </span>
               {isMe && (
                 isPending ? <Loader2 className="h-2.5 w-2.5 animate-spin" /> :
+                isFailed ? (
+                  <button
+                    onClick={() => onRetry?.(message)}
+                    className="h-3 w-3 text-destructive hover:text-destructive/80 transition-colors cursor-pointer"
+                    title="Toca para reenviar"
+                    aria-label="Reenviar mensaje"
+                  >
+                    <AlertCircle className="h-3 w-3" />
+                  </button>
+                ) :
                 isRead ? <CheckCheck className="h-3 w-3 text-blue-300" /> :
                 <Check className={cn('h-3 w-3', isDelivered ? 'text-primary-foreground/70' : 'opacity-40')} />
               )}
@@ -148,7 +159,14 @@ const MemoizedMessageBubble = React.memo(function MessageBubble({ message, isMe,
                   {isPending ? (
                     <Loader2 className="h-2.5 w-2.5 animate-spin" />
                   ) : isFailed ? (
-                    <AlertCircle className="h-3 w-3 text-destructive" />
+                    <button
+                      onClick={() => onRetry?.(message)}
+                      className="h-3 w-3 text-destructive hover:text-destructive/80 transition-colors cursor-pointer"
+                      title="Toca para reenviar"
+                      aria-label="Reenviar mensaje"
+                    >
+                      <AlertCircle className="h-3 w-3" />
+                    </button>
                   ) : isRead ? (
                     <CheckCheck className="h-3 w-3 text-blue-300" />
                   ) : (

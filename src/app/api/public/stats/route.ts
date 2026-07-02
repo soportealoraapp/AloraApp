@@ -13,7 +13,7 @@ export async function GET(request: NextRequest) {
     if (rateLimitResponse) return rateLimitResponse;
 
     try {
-        const [activeUsers, totalMatches, avgRatingResult] = await Promise.all([
+        const [activeUsers, totalMatches, totalLikes] = await Promise.all([
             prisma.profile.count({
                 where: {
                     isCompleted: true,
@@ -24,19 +24,15 @@ export async function GET(request: NextRequest) {
             prisma.match.count({
                 where: { deletedAt: null },
             }),
-            prisma.matchFeedback.aggregate({
-                _avg: { rating: true },
+            prisma.interaction.count({
+                where: { type: { in: ['like', 'superlike'] }, deletedAt: null },
             }),
         ]);
-
-        const avgRating = avgRatingResult._avg.rating
-            ? Math.round(avgRatingResult._avg.rating * 10) / 10
-            : null;
 
         const response = NextResponse.json({
             activeUsers,
             totalMatches,
-            avgRating,
+            totalLikes,
         });
 
         response.headers.set('Cache-Control', 'public, max-age=60, stale-while-revalidate=300');

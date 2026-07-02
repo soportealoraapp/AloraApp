@@ -94,12 +94,16 @@ export function useDiscover(searchTerm = '', filters?: FeedFilters, limit = 10) 
             ['discover', user?.id, searchTerm, filterVersion],
             (old: any) => {
                 if (!old) return old;
-                const newFirstPage = typeof updater === 'function'
-                    ? updater(old.pages[0].profiles)
-                    : updater;
+                // Flatten all pages into a single list, apply the update, then re-split
+                const allProfiles: DiscoverProfile[] = old.pages.flatMap((p: any) => p.profiles);
+                const updated = typeof updater === 'function' ? updater(allProfiles) : updater;
+                // Put all updated profiles into the first page, clear the rest
                 return {
                     ...old,
-                    pages: [{ ...old.pages[0], profiles: newFirstPage }, ...old.pages.slice(1)],
+                    pages: [
+                        { ...old.pages[0], profiles: updated, nextCursor: old.pages[0].nextCursor, hasMore: old.pages[0].hasMore },
+                        ...old.pages.slice(1),
+                    ],
                 };
             }
         );

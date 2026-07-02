@@ -72,6 +72,8 @@ export function SpotifySection({ spotify, isOwn }: SpotifySectionProps) {
 
   if (!spotify || (!spotify.topTracks?.length && !spotify.topArtists?.length)) {
     if (!isOwn) return null;
+    // spotify is null = never connected. spotify exists but empty = connected but sync failed.
+    const isConnected = spotify !== null && spotify !== undefined;
     return (
       <Card className="rounded-3xl">
         <CardContent className="p-6 text-center">
@@ -80,16 +82,31 @@ export function SpotifySection({ spotify, isOwn }: SpotifySectionProps) {
               <Music className="h-6 w-6 text-primary" />
             </div>
             <div>
-              <h3 className="font-semibold text-lg mb-1">Conecta tu Spotify</h3>
+              <h3 className="font-semibold text-lg mb-1">
+                {isConnected ? 'Sincroniza tu Spotify' : 'Conecta tu Spotify'}
+              </h3>
               <p className="text-sm text-muted-foreground mb-3">
-                Muestra tus artistas y canciones favoritas en tu perfil
+                {isConnected
+                  ? 'Tus datos de Spotify están conectados pero no se pudieron cargar. Sincroniza de nuevo.'
+                  : 'Muestra tus artistas y canciones favoritas en tu perfil'}
               </p>
               <Button
                 size="sm"
                 variant="outline"
-                onClick={() => window.location.href = '/api/spotify/connect'}
+                onClick={() => {
+                  if (isConnected) {
+                    setSyncing(true);
+                    fetch('/api/spotify/sync', { method: 'POST' })
+                      .then(() => window.location.reload())
+                      .catch(() => setSyncing(false));
+                  } else {
+                    window.location.href = '/api/spotify/connect';
+                  }
+                }}
+                disabled={syncing}
               >
-                <Music className="h-4 w-4 mr-2" /> Conectar Spotify
+                {syncing ? <RefreshCw className="h-4 w-4 mr-2 animate-spin" /> : <Music className="h-4 w-4 mr-2" />}
+                {isConnected ? 'Sincronizar' : 'Conectar Spotify'}
               </Button>
             </div>
           </div>

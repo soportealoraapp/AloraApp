@@ -37,7 +37,7 @@ export default function UserProfilePage() {
     const params = useParams();
     const router = useRouter();
     const searchParams = useSearchParams();
-    const { user } = useAuth();
+    const { user, profile: currentUserProfile } = useAuth();
     const { id } = params;
     const { toast } = useToast();
     const { sendLike } = useSendLike();
@@ -89,6 +89,7 @@ export default function UserProfilePage() {
 
     useEffect(() => {
       if (!id || !user || isPreview || id === user?.id) return;
+      if (currentUserProfile?.subscriptionStatus !== 'plus') return;
       fetch(`/api/compatibility/score?targetId=${id}`)
         .then(r => r.json())
         .then(data => {
@@ -97,7 +98,7 @@ export default function UserProfilePage() {
           }
         })
         .catch(() => {});
-    }, [id, user, isPreview]);
+    }, [id, user, isPreview, currentUserProfile?.subscriptionStatus]);
 
     if (loading) {
         return (

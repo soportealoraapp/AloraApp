@@ -86,7 +86,7 @@ export function StepPhotos({ userId, data, onUpdate, onNext, onPrev }: any) {
     const { startUpload, isUploading } = useUploadThing("imageUploader", {
         onClientUploadComplete: (res: any) => {
             if (res && res.length > 0) {
-                const newUrls = res.map((r: any) => r.url);
+                const newUrls = res.map((r: any) => r.ufsUrl ?? r.url);
                 setPhotos(prev => {
                     const updated = [...prev, ...newUrls];
                     onUpdate({ photos: updated });

@@ -73,6 +73,7 @@ export function MatchScreen({ userProfile, matchedProfile, onChat, onKeepSwiping
 
     useEffect(() => {
         if (!matchedProfile?.id) return;
+        if (userProfile.subscriptionStatus !== 'plus') return;
         fetch(`/api/compatibility/score?targetId=${matchedProfile.id}`)
             .then(r => r.json())
             .then(data => {
@@ -82,7 +83,7 @@ export function MatchScreen({ userProfile, matchedProfile, onChat, onKeepSwiping
                 }
             })
             .catch(() => {});
-    }, [matchedProfile?.id]);
+    }, [matchedProfile?.id, userProfile.subscriptionStatus]);
 
     useEffect(() => {
         if (!matchId) return;

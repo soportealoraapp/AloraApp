@@ -235,23 +235,34 @@ export async function GET() {
 }
 
 async function buildWeekHistory(userId: string, now: Date): Promise<boolean[]> {
-    const history: boolean[] = [];
+    const sevenDaysAgo = new Date(now);
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 6);
+    sevenDaysAgo.setHours(0, 0, 0, 0);
 
+    // Single query to get all activity in the last 7 days
+    const events = await prisma.analyticsEvent.findMany({
+        where: {
+            userId,
+            event: { in: VALID_STREAK_ACTIONS },
+            createdAt: { gte: sevenDaysAgo }
+        },
+        select: { createdAt: true }
+    });
+
+    // Bucket events by day
+    const activeDays = new Set<string>();
+    for (const event of events) {
+        const d = new Date(event.createdAt);
+        activeDays.add(`${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`);
+    }
+
+    // Build 7-day history array
+    const history: boolean[] = [];
     for (let i = 6; i >= 0; i--) {
         const date = new Date(now);
         date.setDate(date.getDate() - i);
-        const dayStart = new Date(date.getFullYear(), date.getMonth(), date.getDate());
-        const dayEnd = new Date(date.getFullYear(), date.getMonth(), date.getDate(), 23, 59, 59, 999);
-
-        const hasActivity = await prisma.analyticsEvent.findFirst({
-            where: {
-                userId,
-                event: { in: VALID_STREAK_ACTIONS },
-                createdAt: { gte: dayStart, lte: dayEnd }
-            },
-            select: { id: true }
-        });
-        history.push(!!hasActivity);
+        const key = `${date.getFullYear()}-${date.getMonth()}-${date.getDate()}`;
+        history.push(activeDays.has(key));
     }
 
     return history;

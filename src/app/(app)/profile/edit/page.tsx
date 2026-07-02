@@ -137,7 +137,7 @@ export default function ProfileEditPage() {
             const result = await uploadFiles('imageUploader', {
                 files: Array.from(files),
             });
-            const newUrls = result.map((r: any) => r.url);
+            const newUrls = result.map((r: any) => r.ufsUrl ?? r.url);
             setPhotos([...photos, ...newUrls]);
             markDirty();
 
@@ -175,7 +175,7 @@ export default function ProfileEditPage() {
             const { uploadFiles } = await import('@/utils/uploadthing');
             const file = new File([blob], `crop-${Date.now()}.jpg`, { type: 'image/jpeg' });
             const result = await uploadFiles('imageUploader', { files: [file] });
-            const permanentUrl = (result as any)[0]?.url;
+            const permanentUrl = (result as any)[0]?.ufsUrl ?? (result as any)[0]?.url;
             if (permanentUrl) {
                 const newPhotos = [...photos];
                 newPhotos[cropIndex] = permanentUrl;

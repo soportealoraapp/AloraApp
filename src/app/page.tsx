@@ -30,7 +30,7 @@ const pillars = [
 interface PublicStats {
   activeUsers: number;
   totalMatches: number;
-  avgRating: number | null;
+  totalLikes: number;
 }
 
 function formatCount(n: number): string {
@@ -63,7 +63,7 @@ export default function WelcomePage() {
     ? [
         { value: formatCount(stats.activeUsers), label: 'Personas activas' },
         { value: formatCount(stats.totalMatches), label: 'Matches creados' },
-        { value: stats.avgRating != null ? stats.avgRating.toFixed(1) : '—', label: 'Calificación promedio' },
+        { value: formatCount(stats.totalLikes), label: 'Likes enviados' },
       ]
     : null;
 

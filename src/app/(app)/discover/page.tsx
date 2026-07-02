@@ -264,6 +264,7 @@ export default function DiscoverPage() {
   // Request geolocation for distance filter (only once per session)
   useEffect(() => {
     if (geoRequestedRef.current) return;
+    if (typeof window !== 'undefined' && localStorage.getItem('geoDenied') === 'permanent') return;
     if ('geolocation' in navigator) {
       geoRequestedRef.current = true;
       navigator.geolocation.getCurrentPosition(
@@ -274,9 +275,13 @@ export default function DiscoverPage() {
             userLng: pos.coords.longitude
           }));
         },
-        () => {
-          console.warn('Geolocation denied or unavailable — using default distance filter');
-          toast({ title: 'Ubicación no disponible', description: 'Usando distancia predeterminada de 100 km' });
+        (error) => {
+          if (error?.code === 1) {
+            localStorage.setItem('geoDenied', 'permanent');
+          } else {
+            console.warn('Geolocation denied or unavailable — using default distance filter');
+            toast({ title: 'Ubicación no disponible', description: 'Usando distancia predeterminada de 100 km' });
+          }
         },
         { enableHighAccuracy: false, timeout: 10000 }
       );
@@ -724,7 +729,7 @@ export default function DiscoverPage() {
                                 />
                                 <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
                                 {p.activeNow && (
-                                  <div className="absolute top-2 left-2 bg-primary/90 backdrop-blur-sm text-primary-foreground text-[11px] font-bold px-1.5 py-0.5 rounded-full flex items-center gap-1 border border-primary/30">
+                                  <div title="En línea ahora" className="absolute top-2 left-2 bg-primary/90 backdrop-blur-sm text-primary-foreground text-[11px] font-bold px-1.5 py-0.5 rounded-full flex items-center gap-1 border border-primary/30">
                                     <span className="relative flex h-1.5 w-1.5">
                                       <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary/75 opacity-75" />
                                       <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-primary-foreground" />
@@ -733,12 +738,12 @@ export default function DiscoverPage() {
                                   </div>
                                 )}
                                 {(p as any).latestAnswer && (
-                                  <div className="absolute top-2 right-2 bg-accent/90 backdrop-blur-sm text-accent-foreground text-[11px] font-bold px-1.5 py-0.5 rounded-full">
+                                  <div title="Respondió la pregunta del día" className="absolute top-2 right-2 bg-accent/90 backdrop-blur-sm text-accent-foreground text-[11px] font-bold px-1.5 py-0.5 rounded-full">
                                     💬 Resp.
                                   </div>
                                 )}
                                 {p.voiceIntro && (
-                                  <div className="absolute top-8 left-2 bg-muted/90 backdrop-blur-sm text-muted-foreground text-[11px] font-bold px-1.5 py-0.5 rounded-full">
+                                  <div title="Tiene presentación de voz" className="absolute top-8 left-2 bg-muted/90 backdrop-blur-sm text-muted-foreground text-[11px] font-bold px-1.5 py-0.5 rounded-full">
                                     🎵 Voz
                                   </div>
                                 )}

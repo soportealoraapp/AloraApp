@@ -18,6 +18,7 @@ import { logger } from "@/lib/logger";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 import { ProfileHighlights } from "@/components/profile/ProfileHighlights";
 import { VoicePlayer } from "@/components/audio/VoicePlayer";
+import { ErrorBoundary } from "@/components/ui/error-boundary";
 import { SpotifySection } from "@/components/profile/SpotifySection";
 
 export default function ProfilePage() {
@@ -322,7 +323,9 @@ export default function ProfilePage() {
 
           {/* 5. Spotify Section */}
           {((profile as any).spotify || true) && (
-            <SpotifySection spotify={(profile as any).spotify ?? null} isOwn={true} />
+            <ErrorBoundary fallback={null}>
+              <SpotifySection spotify={(profile as any).spotify ?? null} isOwn={true} />
+            </ErrorBoundary>
           )}
 
           {/* 6. Completeness CTA — ALWAYS visible */}
