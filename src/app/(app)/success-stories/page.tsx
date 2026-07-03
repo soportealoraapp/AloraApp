@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Heart, Loader2, ArrowLeft, Sparkles, Quote } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { SafeImage } from '@/components/ui/safe-image';
 
 interface Story {
     id: string;
@@ -71,10 +72,11 @@ export default function SuccessStoriesPage() {
                             <Card key={s.id} className="rounded-3xl border-none shadow-sm hover:shadow-md transition-shadow overflow-hidden">
                                 {s.photoUrl && (
                                     <div className="aspect-[16/9] relative overflow-hidden bg-muted">
-                                        <img
+                                        <SafeImage
                                             src={s.photoUrl}
                                             alt={s.title}
-                                            className="absolute inset-0 w-full h-full object-cover"
+                                            fill
+                                            className="object-cover"
                                         />
                                     </div>
                                 )}

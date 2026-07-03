@@ -12,7 +12,7 @@ export default function ContactPage() {
     return (
         <div className="min-h-dvh bg-gradient-to-br from-background to-muted/30">
             <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b bg-background/80 px-4 backdrop-blur-md pt-safe">
-                <Button variant="ghost" size="icon" onClick={() => router.back()}>
+                <Button variant="ghost" size="icon" onClick={() => { if (window.history.length > 1) router.back(); else router.push('/'); }} aria-label="Volver">
                     <ArrowLeft className="h-5 w-5" />
                 </Button>
                 <h1 className="text-xl font-bold">Contacto</h1>
@@ -22,8 +22,8 @@ export default function ContactPage() {
                 <Card className="rounded-3xl">
                     <CardContent className="p-6 space-y-4">
                         <div className="flex items-center gap-3">
-                            <div className="p-3 rounded-2xl bg-pink-100 dark:bg-pink-900/30">
-                                <Mail className="h-6 w-6 text-pink-600 dark:text-pink-400" />
+                            <div className="p-3 rounded-2xl bg-primary/10 dark:bg-primary/20">
+                                <Mail className="h-6 w-6 text-primary dark:text-primary" />
                             </div>
                             <div>
                                 <h2 className="font-bold text-lg">Soporte de Alora</h2>

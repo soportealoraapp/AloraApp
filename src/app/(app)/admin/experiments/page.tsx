@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, Loader2, Plus, Play, Pause, CheckCircle, Trash2 } from 'lucide-react';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { useRouter } from 'next/navigation';
 
 interface Variant {
@@ -72,8 +73,16 @@ export default function AdminExperimentsPage() {
     } catch (e) { console.error(e); }
   };
 
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState<string | null>(null);
+
   const deleteExperiment = async (id: string) => {
-    if (!confirm('¿Eliminar este experimento? Se borrarán todas las asignaciones.')) return;
+    setShowDeleteConfirm(id);
+  };
+
+  const confirmDeleteExperiment = async () => {
+    const id = showDeleteConfirm;
+    if (!id) return;
+    setShowDeleteConfirm(null);
     try {
       const res = await fetch(`/api/admin/experiments/${id}`, { method: 'DELETE' });
       if (res.ok) loadExperiments();
@@ -115,6 +124,7 @@ export default function AdminExperimentsPage() {
   }
 
   return (
+    <>
     <div className="md:pl-60 p-6 space-y-6 min-h-dvh">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
@@ -308,5 +318,22 @@ export default function AdminExperimentsPage() {
         </div>
       )}
     </div>
+      <AlertDialog open={!!showDeleteConfirm} onOpenChange={(open) => { if (!open) setShowDeleteConfirm(null); }}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>¿Eliminar este experimento?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Se borrarán todas las asignaciones de este experimento. Esta acción no se puede deshacer.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setShowDeleteConfirm(null)}>Cancelar</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmDeleteExperiment} className="bg-destructive hover:bg-destructive/90">
+              Eliminar
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
   );
 }

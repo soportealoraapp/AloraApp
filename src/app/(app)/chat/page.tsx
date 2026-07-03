@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useMatches } from "@/hooks/use-matches";
 import { useAuth } from "@/contexts/AuthContext";
@@ -35,8 +35,7 @@ export default function ChatPage() {
     const [hideDialogOpen, setHideDialogOpen] = useState(false);
     const [hideTargetId, setHideTargetId] = useState<string | null>(null);
 
-    const filteredMatches = matches.filter((match) => {
-        // hiddenMatches are already filtered server-side via hiddenBy field
+    const filteredMatches = useMemo(() => matches.filter((match) => {
         if (searchTerm.trim()) {
             const partnerName = match.partner?.displayName || '';
             if (!partnerName.toLowerCase().includes(searchTerm.toLowerCase())) return false;
@@ -48,22 +47,21 @@ export default function ChatPage() {
             if (hours < 72) return false;
         }
         return true;
-    });
+    }), [matches, searchTerm, showStaleOnly]);
 
-    const staleMatches = matches.filter((match) => {
+    const staleMatches = useMemo(() => matches.filter((match) => {
         const lastMsg = match.lastMessage?.createdAt;
         if (!lastMsg) return false;
         const hours = (Date.now() - new Date(lastMsg).getTime()) / (1000 * 60 * 60);
         return hours >= 72;
-    });
+    }), [matches]);
 
-    const recentStaleMatches = matches.filter((match) => {
-        // hiddenMatches are already filtered server-side via hiddenBy field
+    const recentStaleMatches = useMemo(() => matches.filter((match) => {
         const lastMsg = match.lastMessage?.createdAt;
         if (!lastMsg) return false;
         const hours = (Date.now() - new Date(lastMsg).getTime()) / (1000 * 60 * 60);
         return hours >= 72 && hours <= 168;
-    });
+    }), [matches]);
 
     const handleAcceptMatch = async (like: any) => {
         setProcessingMatch(like.fromUserId);

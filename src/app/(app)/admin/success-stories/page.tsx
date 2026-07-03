@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { ArrowLeft, Loader2, CheckCircle, XCircle, Trash2, Edit2, Plus, Heart } from 'lucide-react';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { useRouter } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
 
@@ -58,8 +59,16 @@ export default function AdminSuccessStoriesPage() {
         }
     };
 
+    const [showDeleteConfirm, setShowDeleteConfirm] = useState<string | null>(null);
+
     const handleDelete = async (id: string) => {
-        if (!confirm('¿Eliminar historia?')) return;
+        setShowDeleteConfirm(id);
+    };
+
+    const confirmDeleteStory = async () => {
+        const id = showDeleteConfirm;
+        if (!id) return;
+        setShowDeleteConfirm(null);
         try {
             await fetch(`/api/admin/success-stories?id=${id}`, { method: 'DELETE' });
             toast({ title: 'Historia eliminada' });
@@ -129,6 +138,7 @@ export default function AdminSuccessStoriesPage() {
     }
 
     return (
+        <>
         <div className="md:pl-60 p-6 space-y-6 bg-muted/30 min-h-dvh">
             <div className="flex items-center gap-4">
                 <Button variant="ghost" size="icon" onClick={() => router.back()}>
@@ -241,5 +251,22 @@ export default function AdminSuccessStoriesPage() {
                 </div>
             )}
         </div>
+            <AlertDialog open={!!showDeleteConfirm} onOpenChange={(open) => { if (!open) setShowDeleteConfirm(null); }}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>¿Eliminar historia?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            Esta acción no se puede deshacer. La historia se eliminará permanentemente.
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel onClick={() => setShowDeleteConfirm(null)}>Cancelar</AlertDialogCancel>
+                        <AlertDialogAction onClick={confirmDeleteStory} className="bg-destructive hover:bg-destructive/90">
+                            Eliminar
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
+        </>
     );
 }

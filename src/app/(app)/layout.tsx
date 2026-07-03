@@ -3,6 +3,7 @@
 import { Suspense } from 'react';
 import { BottomNav } from '@/components/layout/bottom-nav';
 import { ErrorBoundary } from '@/components/ui/error-boundary';
+import { OfflineBanner } from '@/components/offline/OfflineBanner';
 import { usePathname } from 'next/navigation';
 import { Loader2 } from 'lucide-react';
 import { useCapacitor } from '@/hooks/use-capacitor';
@@ -30,6 +31,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       <a href="#main-content" className="skip-to-content">
         Saltar al contenido
       </a>
+      <OfflineBanner />
       <main
         id="main-content"
         className={`md:pl-60 pb-safe overflow-x-hidden ${hideBottomNav ? '' : 'pb-20 md:pb-0'}`}

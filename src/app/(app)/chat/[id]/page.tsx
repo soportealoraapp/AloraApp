@@ -100,7 +100,6 @@ export default function ChatWindowPage() {
 
     useEffect(() => {
         if (!matchId) return;
-        // Parallelize independent fetch calls for faster initial load
         Promise.allSettled([
             fetch(`/api/chat/health?matchId=${matchId}`).then(r => r.json()),
             otherUserId ? fetch(`/api/profile/${otherUserId}`).then(r => r.json()) : Promise.resolve(null),
@@ -116,7 +115,6 @@ export default function ChatWindowPage() {
             }
         }).catch(() => {});
 
-        // Match feedback check (delayed)
         const checkFeedback = async () => {
             try {
                 const res = await fetch(`/api/match/feedback?matchId=${matchId}`);

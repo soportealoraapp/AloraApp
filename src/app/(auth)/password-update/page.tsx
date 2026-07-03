@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import { Button } from '@/components/ui/button';
@@ -21,10 +21,10 @@ export default function PasswordUpdatePage() {
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirm, setShowConfirm] = useState(false);
     const router = useRouter();
+    const supabaseRef = useRef(createClient());
 
     useEffect(() => {
-        const supabase = createClient();
-        supabase.auth.getSession().then(({ data: { session } }) => {
+        supabaseRef.current.auth.getSession().then(({ data: { session } }) => {
             if (!session) {
                 router.replace('/login');
                 return;
@@ -50,8 +50,7 @@ export default function PasswordUpdatePage() {
         setLoading(true);
 
         try {
-            const supabase = createClient();
-            const { error } = await supabase.auth.updateUser({ password });
+            const { error } = await supabaseRef.current.auth.updateUser({ password });
             if (error) throw error;
             setSuccess(true);
             setTimeout(() => router.push('/login'), 3000);
@@ -121,7 +120,6 @@ export default function PasswordUpdatePage() {
                                 type="button"
                                 onClick={() => setShowPassword(!showPassword)}
                                 className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
-                                tabIndex={-1}
                                 aria-label={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
                             >
                                 {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}

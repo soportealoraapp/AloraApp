@@ -69,7 +69,7 @@ export default function SupportPage() {
     return (
         <div className="h-dvh flex flex-col overflow-y-auto bg-gradient-to-br from-background to-muted/30">
             <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b bg-background/80 px-4 backdrop-blur-md pt-safe">
-                <Button variant="ghost" size="icon" onClick={() => router.back()}>
+                <Button variant="ghost" size="icon" onClick={() => { if (window.history.length > 1) router.back(); else router.push('/'); }} aria-label="Volver">
                     <ArrowLeft className="h-5 w-5" />
                 </Button>
                 <h1 className="text-xl font-bold">Centro de Ayuda</h1>

@@ -10,7 +10,7 @@ import { SpotifySection } from "@/components/profile/SpotifySection";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, Heart, MessageSquare, Sparkles, MapPin, Briefcase, Cigarette, GlassWater, Baby, Star, BookOpen, Music, X, UserCheck, Loader2, ChevronLeft, ChevronRight, Mic } from "lucide-react";
+import { ArrowLeft, Heart, MessageSquare, Sparkles, MapPin, Cigarette, GlassWater, Baby, Star, BookOpen, Music, X, UserCheck, Loader2, ChevronLeft, ChevronRight, Mic, Church } from "lucide-react";
 import { HeartArrow } from "@/components/ui/custom/HeartArrow";
 import { ProfileHighlights } from "@/components/profile/ProfileHighlights";
 import { FavoriteButton } from "@/components/profile/FavoriteButton";
@@ -30,7 +30,7 @@ const detailIcons: { [key: string]: React.ElementType } = {
     smoking: Cigarette,
     drinking: GlassWater,
     children: Baby,
-    religion: Briefcase,
+    religion: Church,
 };
 
 export default function UserProfilePage() {
