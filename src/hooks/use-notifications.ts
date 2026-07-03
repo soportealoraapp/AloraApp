@@ -3,6 +3,7 @@
 import { useEffect, useCallback, useRef } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { createClient } from '@/lib/supabase/client';
+import { subscribeWithReconnect } from '@/lib/supabase/realtime-reconnect';
 import type { RealtimeChannel } from '@supabase/supabase-js';
 
 export interface AppNotification {
@@ -43,6 +44,7 @@ export function useNotifications({
 }: UseNotificationsOptions = {}): UseNotificationsResult {
     const queryClient = useQueryClient();
     const channelRef = useRef<RealtimeChannel | null>(null);
+    const cleanupRef = useRef<(() => void) | null>(null);
     const pendingDeletesRef = useRef<Map<string, NodeJS.Timeout>>(new Map());
     const loadingMoreRef = useRef(false);
 
@@ -77,39 +79,43 @@ export function useNotifications({
     const hasMore = data?.hasMore ?? false;
     const error = queryError instanceof Error ? queryError.message : queryError ? 'fetch failed' : null;
 
-    // Realtime subscription
+    // Realtime subscription with reconnection
     useEffect(() => {
         if (!enabled) return;
 
         const supabase = createClient();
-        const channel = supabase
-            .channel('notifications-realtime')
-            .on(
-                'postgres_changes',
-                { event: 'INSERT', schema: 'public', table: 'notifications' },
-                () => {
-                    queryClient.invalidateQueries({ queryKey: ['notifications'] });
-                }
-            )
-            .on(
-                'postgres_changes',
-                { event: 'UPDATE', schema: 'public', table: 'notifications' },
-                () => {
-                    queryClient.invalidateQueries({ queryKey: ['notifications'] });
-                }
-            )
-            .subscribe((status) => {
+        const { channel, cleanup } = subscribeWithReconnect(
+            supabase,
+            'notifications-realtime',
+            (ch) =>
+                ch
+                    .on(
+                        'postgres_changes',
+                        { event: 'INSERT', schema: 'public', table: 'notifications' },
+                        () => {
+                            queryClient.invalidateQueries({ queryKey: ['notifications'] });
+                        }
+                    )
+                    .on(
+                        'postgres_changes',
+                        { event: 'UPDATE', schema: 'public', table: 'notifications' },
+                        () => {
+                            queryClient.invalidateQueries({ queryKey: ['notifications'] });
+                        }
+                    ),
+            { onStatusChange: (status) => {
                 if (status === 'CHANNEL_ERROR') {
                     console.warn('[use-notifications] Realtime channel error, relying on poll fallback');
                 }
-            });
+            }},
+        );
         channelRef.current = channel;
+        cleanupRef.current = cleanup;
 
         return () => {
-            if (channelRef.current) {
-                supabase.removeChannel(channelRef.current);
-                channelRef.current = null;
-            }
+            cleanupRef.current?.();
+            channelRef.current = null;
+            cleanupRef.current = null;
         };
     }, [enabled, queryClient]);
 

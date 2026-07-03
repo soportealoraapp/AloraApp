@@ -1,6 +1,7 @@
 import { createClient } from '../client'
 import { Message } from '@/lib/domain/types'
 import { RealtimePostgresChangesPayload } from '@supabase/supabase-js'
+import { subscribeWithReconnect } from '../realtime-reconnect'
 
 type MessageCallback = (messages: Message[]) => void
 type NewMessageCallback = (message: Message) => void
@@ -73,60 +74,59 @@ export const chatService = {
         })
 
         // Realtime subscription for new messages and status updates
-        const channel = supabase
-            .channel(`match:${matchId}`)
-            .on(
-                'postgres_changes' as any,
-                {
-                    event: 'INSERT',
-                    schema: 'public',
-                    table: 'messages',
-                    filter: `matchId=eq.${matchId}`,
-                },
-                (payload: RealtimePostgresChangesPayload<{ [key: string]: any }>) => {
-                    const newMsg = payload.new as any
-                    if (!newMsg || !newMsg.id) return
-                    if (knownIds.has(newMsg.id)) return
-                    knownIds.add(newMsg.id)
+        const { channel, cleanup: cleanupChannel } = subscribeWithReconnect(
+            supabase,
+            `match:${matchId}`,
+            (ch) =>
+                ch
+                    .on(
+                        'postgres_changes' as any,
+                        {
+                            event: 'INSERT',
+                            schema: 'public',
+                            table: 'messages',
+                            filter: `matchId=eq.${matchId}`,
+                        },
+                        (payload: RealtimePostgresChangesPayload<{ [key: string]: any }>) => {
+                            const newMsg = payload.new as any
+                            if (!newMsg || !newMsg.id) return
+                            if (knownIds.has(newMsg.id)) return
+                            knownIds.add(newMsg.id)
 
-                    const message = normalizeMessage(newMsg)
-                    const cached = messageCache.get(cacheKey)
-                    if (cached) {
-                        cached.messages = deduplicate([...cached.messages, message])
-                        callback(cached.messages)
-                    } else {
-                        callback([message])
-                    }
-                }
-            )
-            .on(
-                'postgres_changes' as any,
-                {
-                    event: 'UPDATE',
-                    schema: 'public',
-                    table: 'messages',
-                    filter: `matchId=eq.${matchId}`,
-                },
-                (payload: RealtimePostgresChangesPayload<{ [key: string]: any }>) => {
-                    const updatedMsg = payload.new as any
-                    if (!updatedMsg || !updatedMsg.id) return
+                            const message = normalizeMessage(newMsg)
+                            const cached = messageCache.get(cacheKey)
+                            if (cached) {
+                                cached.messages = deduplicate([...cached.messages, message])
+                                callback(cached.messages)
+                            } else {
+                                callback([message])
+                            }
+                        }
+                    )
+                    .on(
+                        'postgres_changes' as any,
+                        {
+                            event: 'UPDATE',
+                            schema: 'public',
+                            table: 'messages',
+                            filter: `matchId=eq.${matchId}`,
+                        },
+                        (payload: RealtimePostgresChangesPayload<{ [key: string]: any }>) => {
+                            const updatedMsg = payload.new as any
+                            if (!updatedMsg || !updatedMsg.id) return
 
-                    const message = normalizeMessage(updatedMsg)
-                    const cached = messageCache.get(cacheKey)
-                    if (cached) {
-                        cached.messages = cached.messages.map(m => m.id === message.id ? message : m)
-                        callback(cached.messages)
-                    }
-                }
-            )
-            .subscribe((status) => {
-                if (status !== 'SUBSCRIBED') {
-                    console.warn('Realtime subscription status:', status)
-                }
-            })
+                            const message = normalizeMessage(updatedMsg)
+                            const cached = messageCache.get(cacheKey)
+                            if (cached) {
+                                cached.messages = cached.messages.map(m => m.id === message.id ? message : m)
+                                callback(cached.messages)
+                            }
+                        }
+                    ),
+        )
 
         return () => {
-            supabase.removeChannel(channel)
+            cleanupChannel()
             messageCache.delete(cacheKey)
         }
     },
@@ -305,33 +305,36 @@ export const chatService = {
             }, 250)
         }
 
-        const channel = supabase
-            .channel(`unread:${matchId}:${userId}`)
-            .on(
-                'postgres_changes' as any,
-                {
-                    event: 'INSERT',
-                    schema: 'public',
-                    table: 'messages',
-                    filter: `matchId=eq.${matchId}`,
-                },
-                refresh
-            )
-            .on(
-                'postgres_changes' as any,
-                {
-                    event: 'UPDATE',
-                    schema: 'public',
-                    table: 'messages',
-                    filter: `matchId=eq.${matchId}`,
-                },
-                refresh
-            )
-            .subscribe()
+        const { cleanup } = subscribeWithReconnect(
+            supabase,
+            `unread:${matchId}:${userId}`,
+            (ch) =>
+                ch
+                    .on(
+                        'postgres_changes' as any,
+                        {
+                            event: 'INSERT',
+                            schema: 'public',
+                            table: 'messages',
+                            filter: `matchId=eq.${matchId}`,
+                        },
+                        refresh
+                    )
+                    .on(
+                        'postgres_changes' as any,
+                        {
+                            event: 'UPDATE',
+                            schema: 'public',
+                            table: 'messages',
+                            filter: `matchId=eq.${matchId}`,
+                        },
+                        refresh
+                    ),
+        )
 
         return () => {
             if (debounceTimer) clearTimeout(debounceTimer)
-            supabase.removeChannel(channel)
+            cleanup()
         }
     },
 }

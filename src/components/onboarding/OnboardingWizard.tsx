@@ -41,11 +41,13 @@ export function OnboardingWizard({ initialRef }: { initialRef?: string } = {}) {
     useEffect(() => {
         const safetyTimeout = setTimeout(() => {
             if (!isInitialized) {
-                console.warn('OnboardingWizard: safety timeout — forcing initialization with empty state');
-                // Don't overwrite existing profile data — just stop the spinner
+                console.warn(
+                    'OnboardingWizard: safety timeout — forcing initialization with empty state',
+                    { authLoading, profileLoading, hasUser: Boolean(user), hasProfile: Boolean(profile) }
+                );
                 setIsInitialized(true);
             }
-        }, 20000);
+        }, 15_000);
         return () => clearTimeout(safetyTimeout);
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);

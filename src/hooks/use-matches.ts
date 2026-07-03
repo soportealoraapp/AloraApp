@@ -7,6 +7,7 @@ import { ConnectionIntent, Match } from '@/lib/domain/types';
 import { authFetch } from '@/lib/utils';
 import { useSendLike } from './use-send-like';
 import { createClient } from '@/lib/supabase/client';
+import { subscribeWithReconnect } from '@/lib/supabase/realtime-reconnect';
 
 interface LikePreview {
     id: string;
@@ -54,46 +55,53 @@ export function useMatches() {
         if (!user?.id) return;
 
         const supabase = createClient();
+        const cleanups: (() => void)[] = [];
 
         // Listen for new matches AND match updates (unmatch, stage changes)
-        const matchesChannel = supabase
-            .channel(`matches:${user.id}`)
-            .on(
-                'postgres_changes',
-                { event: '*', schema: 'public', table: 'matches' },
-                (payload) => {
-                    const match = payload.new as any;
-                    if (match.user1Id === user.id || match.user2Id === user.id) {
-                        queryClient.invalidateQueries({ queryKey: ['matches', user.id] });
+        const { channel: matchesChannel, cleanup: cleanupMatches } = subscribeWithReconnect(
+            supabase,
+            `matches:${user.id}`,
+            (ch) =>
+                ch.on(
+                    'postgres_changes',
+                    { event: '*', schema: 'public', table: 'matches' },
+                    (payload) => {
+                        const match = payload.new as any;
+                        if (match.user1Id === user.id || match.user2Id === user.id) {
+                            queryClient.invalidateQueries({ queryKey: ['matches', user.id] });
+                        }
                     }
-                }
-            )
-            .subscribe((status) => {
+                ),
+            { onStatusChange: (status) => {
                 if (status === 'CHANNEL_ERROR') {
                     console.warn('[use-matches] Realtime matches channel error, will retry on next reconnect');
                 }
-            });
+            }},
+        );
+        cleanups.push(cleanupMatches);
 
         // Listen for new incoming likes (someone liked me)
-        const interactionsChannel = supabase
-            .channel(`interactions:${user.id}`)
-            .on(
-                'postgres_changes',
-                { event: 'INSERT', schema: 'public', table: 'interactions' },
-                (payload) => {
-                    const interaction = payload.new as any;
-                    if (interaction.toUserId === user.id && interaction.type !== 'pass') {
-                        queryClient.invalidateQueries({ queryKey: ['matches', user.id] });
+        const { cleanup: cleanupInteractions } = subscribeWithReconnect(
+            supabase,
+            `interactions:${user.id}`,
+            (ch) =>
+                ch.on(
+                    'postgres_changes',
+                    { event: 'INSERT', schema: 'public', table: 'interactions' },
+                    (payload) => {
+                        const interaction = payload.new as any;
+                        if (interaction.toUserId === user.id && interaction.type !== 'pass') {
+                            queryClient.invalidateQueries({ queryKey: ['matches', user.id] });
+                        }
                     }
-                }
-            )
-            .subscribe();
+                ),
+        );
+        cleanups.push(cleanupInteractions);
 
         channelRef.current = matchesChannel;
 
         return () => {
-            supabase.removeChannel(matchesChannel);
-            supabase.removeChannel(interactionsChannel);
+            cleanups.forEach((fn) => fn());
         };
     }, [user?.id, queryClient]);
 
