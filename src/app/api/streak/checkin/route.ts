@@ -105,13 +105,22 @@ export async function POST() {
             const rewardKey = `boost_streak_${newStreak}`;
             if (!streakRewardsClaimed.includes(rewardKey)) {
                 newRewards.push(rewardKey);
-                await prisma.profile.update({
-                    where: { userId: user.id },
-                    data: {
-                        boostExpiresAt: new Date(now.getTime() + 30 * 60 * 1000),
-                        totalBoosts: { increment: 1 },
-                    }
-                });
+                if (isPlus) {
+                    await prisma.profile.update({
+                        where: { userId: user.id },
+                        data: {
+                            boostExpiresAt: new Date(now.getTime() + 30 * 60 * 1000),
+                            totalBoosts: { increment: 1 },
+                        }
+                    });
+                } else {
+                    await prisma.profile.update({
+                        where: { userId: user.id },
+                        data: {
+                            totalBoosts: { increment: 1 },
+                        }
+                    });
+                }
             }
         }
 

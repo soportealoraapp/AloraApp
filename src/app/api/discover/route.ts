@@ -32,7 +32,11 @@ export async function GET(request: NextRequest) {
             ? connectionModesParam.split(',') as ('dating' | 'friendship')[]
             : undefined;
 
-        const result = await getDynamicFeed(user.id, search, cursor, limit, connectionModes && connectionModes.length > 0 ? { intent: connectionModes[0] } : undefined);
+        const effectiveIntent = connectionModes && connectionModes.length > 0
+            ? (connectionModes.length === 2 ? 'both' : connectionModes[0])
+            : undefined;
+
+        const result = await getDynamicFeed(user.id, search, cursor, limit, effectiveIntent ? { intent: effectiveIntent } : undefined);
         return NextResponse.json(result);
     } catch (error) {
         logger.error('Error getting discover feed', { metadata: { error: error instanceof Error ? error.message : String(error) } });

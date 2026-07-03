@@ -116,6 +116,16 @@ export const reducer = (state: State, action: Action): State => {
       }
     }
     case "REMOVE_TOAST":
+      if (action.toastId) {
+        const existingTimeout = toastTimeouts.get(action.toastId);
+        if (existingTimeout) {
+          clearTimeout(existingTimeout);
+          toastTimeouts.delete(action.toastId);
+        }
+      } else {
+        toastTimeouts.forEach((timeout) => clearTimeout(timeout));
+        toastTimeouts.clear();
+      }
       if (action.toastId === undefined) {
         return {
           ...state,

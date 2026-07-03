@@ -22,8 +22,14 @@ export const preferencesService = {
     },
 
     updatePreferences: async (userId: string, prefs: { incognito?: boolean; showMe?: boolean; readReceipts?: boolean; notifications?: boolean }) => {
+        const { subscriptionStatus } = await ensureSubscriptionState(userId);
         const profileData: Record<string, unknown> = {};
-        if (prefs.incognito !== undefined) profileData.incognitoMode = prefs.incognito;
+        if (prefs.incognito !== undefined) {
+            if (prefs.incognito && subscriptionStatus !== 'plus') {
+                return { success: false, error: 'subscription_required', message: 'Modo Incógnito requiere Alora Plus' };
+            }
+            profileData.incognitoMode = prefs.incognito;
+        }
         if (prefs.showMe !== undefined) profileData.showMeInDiscover = prefs.showMe;
         
         const notifData: Record<string, unknown> = {};

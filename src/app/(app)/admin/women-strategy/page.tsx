@@ -10,7 +10,6 @@ interface WomenStrategyData {
     totalWomen: number;
     activeWomen: number;
     verifiedWomen: number;
-    referredWomen: number;
     retentionD7: number;
     conversionToActive: number;
     verificationRate: number;
@@ -29,7 +28,6 @@ export default function WomenStrategyPage() {
                 totalWomen: health.femaleUsers || 0,
                 activeWomen: retention.activeFemaleD7 || 0,
                 verifiedWomen: Math.round((retention.totalFemale || 0) * (retention.verificationRate || 0) / 100),
-                referredWomen: 0,
                 retentionD7: retention.retentionD7 || 0,
                 conversionToActive: Math.round(retention.retentionD1 || 0),
                 verificationRate: retention.verificationRate || 0,
@@ -87,12 +85,12 @@ export default function WomenStrategyPage() {
                 <Card>
                     <CardHeader className="pb-2">
                         <CardTitle className="text-sm flex items-center gap-2">
-                            <Target className="h-4 w-4 text-purple-500" /> Meta 1000
+                            <Target className="h-4 w-4 text-purple-500" /> Verificadas
                         </CardTitle>
                     </CardHeader>
                     <CardContent>
-                        <p className="text-3xl font-bold">{Math.min(100, Math.round(data.activeWomen / 10))}%</p>
-                        <p className="text-xs text-muted-foreground">{data.activeWomen}/1000 activas</p>
+                        <p className="text-3xl font-bold">{data.verifiedWomen}</p>
+                        <p className="text-xs text-muted-foreground">{data.verificationRate}% de verificación</p>
                     </CardContent>
                 </Card>
             </div>

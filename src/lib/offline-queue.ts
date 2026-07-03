@@ -2,7 +2,7 @@
 
 /**
  * Offline queue for persisting pending actions when the user is offline.
- * Stores items in localStorage and retries when online.
+ * Stores items in localStorage per-user and retries when online.
  */
 
 interface QueueItem {
@@ -14,12 +14,32 @@ interface QueueItem {
     status: 'pending' | 'failed';
 }
 
-const QUEUE_KEY = 'alora_offline_queue';
+const QUEUE_KEY_PREFIX = 'alora_offline_queue';
 const MAX_RETRIES = 5;
+
+let _currentUserId: string | null = null;
+
+function getQueueKey(): string {
+    if (!_currentUserId) {
+        throw new Error('offline-queue: currentUserId not set. Call setCurrentUserId() first.');
+    }
+    return `${QUEUE_KEY_PREFIX}_${_currentUserId}`;
+}
+
+export function setCurrentUserId(userId: string | null) {
+    const previousUserId = _currentUserId;
+    _currentUserId = userId;
+    if (userId !== previousUserId && previousUserId) {
+        clearQueueForUser(previousUserId);
+    }
+    if (userId && navigator.onLine) {
+        processQueue();
+    }
+}
 
 function getQueue(): QueueItem[] {
     try {
-        const raw = localStorage.getItem(QUEUE_KEY);
+        const raw = localStorage.getItem(getQueueKey());
         return raw ? JSON.parse(raw) : [];
     } catch {
         return [];
@@ -28,13 +48,12 @@ function getQueue(): QueueItem[] {
 
 function saveQueue(queue: QueueItem[]) {
     try {
-        localStorage.setItem(QUEUE_KEY, JSON.stringify(queue));
+        localStorage.setItem(getQueueKey(), JSON.stringify(queue));
     } catch {}
 }
 
 export function addToQueue(type: QueueItem['type'], payload: any) {
     const queue = getQueue();
-    // Dedup: skip if an identical pending item already exists (same type + matchId + text/content)
     if (type === 'message' && payload?.matchId && payload?.text) {
         const duplicate = queue.find(
             item => item.type === 'message'
@@ -95,10 +114,16 @@ export function incrementRetry(id: string): boolean {
 }
 
 export function clearQueue() {
-    localStorage.removeItem(QUEUE_KEY);
+    localStorage.removeItem(getQueueKey());
+}
+
+function clearQueueForUser(userId: string) {
+    localStorage.removeItem(`${QUEUE_KEY_PREFIX}_${userId}`);
 }
 
 export async function processQueue() {
+    if (!_currentUserId) return;
+
     const queue = getQueue();
     if (queue.length === 0) return;
 
@@ -133,14 +158,19 @@ function getEndpointForType(type: string): string {
     }
 }
 
-// Auto-process queue when coming online or on app start
-if (typeof window !== 'undefined' && !(window as any).__offlineQueueInitialized) {
-    (window as any).__offlineQueueInitialized = true;
-    window.addEventListener('online', () => {
-        processQueue();
-    });
-    // Process any pending items immediately if already online
-    if (navigator.onLine) {
-        processQueue();
+let onlineEventListenerRegistered = false;
+
+export function initOfflineQueue(userId: string) {
+    setCurrentUserId(userId);
+
+    if (typeof window !== 'undefined' && !onlineEventListenerRegistered) {
+        onlineEventListenerRegistered = true;
+        window.addEventListener('online', () => {
+            processQueue();
+        });
     }
+}
+
+export function destroyOfflineQueue() {
+    setCurrentUserId(null);
 }

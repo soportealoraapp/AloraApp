@@ -360,14 +360,36 @@ export default function ChatWindowPage() {
         const retryId = failedMessage.id;
         setMessages(prev => prev.map(m => m.id === retryId ? { ...m, status: 'pending' } : m));
         try {
+            let textContent: string;
+            let messageType: string;
+
+            if (failedMessage.type === 'voice') {
+                try {
+                    const voiceData = typeof failedMessage.content === 'string'
+                        ? JSON.parse(failedMessage.content)
+                        : failedMessage.content;
+                    textContent = JSON.stringify(voiceData);
+                    messageType = 'voice';
+                } catch {
+                    textContent = failedMessage.content;
+                    messageType = 'voice';
+                }
+            } else if (failedMessage.type === 'image') {
+                textContent = failedMessage.content;
+                messageType = 'image';
+            } else {
+                textContent = failedMessage.content;
+                messageType = failedMessage.type || 'text';
+            }
+
             const response = await fetch('/api/chat/send', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     matchId,
                     receiverId: otherUserId,
-                    text: failedMessage.content,
-                    type: failedMessage.type || 'text',
+                    text: textContent,
+                    type: messageType,
                     clientMessageId: retryId,
                 }),
             });

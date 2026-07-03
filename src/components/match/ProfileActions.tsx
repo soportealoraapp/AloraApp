@@ -1,8 +1,10 @@
-"use client";
+'use client';
 
 import { useState } from "react";
 import { AlertTriangle, ShieldOff, VolumeX } from "lucide-react";
 import { MuteDialog } from "@/components/chat/MuteDialog";
+import { ReportDialog } from "@/components/safety/ReportDialog";
+import { BlockDialog } from "@/components/safety/BlockDialog";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import { BRAND_VOICE } from "@/lib/constants/brand-voice";
@@ -14,28 +16,8 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu";
-import {
-    Dialog,
-    DialogContent,
-    DialogHeader,
-    DialogTitle,
-    DialogDescription,
-    DialogFooter
-} from "@/components/ui/dialog";
 import { MoreVertical } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-
-const REPORT_CATEGORIES = [
-    { value: 'spam', label: 'Spam o contenido no deseado' },
-    { value: 'harassment', label: 'Acoso o intimidación' },
-    { value: 'offensive_language', label: 'Lenguaje ofensivo' },
-    { value: 'sexual_content', label: 'Contenido sexual no deseado' },
-    { value: 'impersonation', label: 'Suplantación de identidad' },
-    { value: 'fake_identity', label: 'Identidad falsa' },
-    { value: 'violence', label: 'Amenazas o violencia' },
-    { value: 'minor', label: 'Menor de edad' },
-    { value: 'other', label: 'Otro motivo' },
-] as const;
 
 interface ProfileActionsProps {
     userId: string;
@@ -43,14 +25,15 @@ interface ProfileActionsProps {
     matchId?: string;
     isMuted?: boolean;
     onMuteChange?: () => void;
+    onBlockSuccess?: () => void;
 }
 
-export function ProfileActions({ userId, userName, matchId, isMuted = false, onMuteChange }: ProfileActionsProps) {
+export function ProfileActions({ userId, userName, matchId, isMuted = false, onMuteChange, onBlockSuccess }: ProfileActionsProps) {
     const { toast } = useToast();
     const { user: currentUser } = useAuth();
     const [showMuteDialog, setShowMute] = useState(false);
     const [showReportDialog, setShowReportDialog] = useState(false);
-    const [showBlockConfirm, setShowBlockConfirm] = useState(false);
+    const [showBlockDialog, setShowBlockDialog] = useState(false);
 
     const handleMute = async (duration: number | null) => {
         if (!currentUser || !matchId) return;
@@ -80,37 +63,13 @@ export function ProfileActions({ userId, userName, matchId, isMuted = false, onM
         }
     };
 
-    const handleReport = async (category: string) => {
-        if (!currentUser) return;
-
-        try {
-            const res = await fetch('/api/safety/report', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ reportedId: userId, category })
-            });
-            if (!res.ok) throw new Error('Error al enviar reporte');
-            toast({
-                title: "Reporte enviado",
-                description: BRAND_VOICE.safety.reportThankYou,
-            });
-            setShowReportDialog(false);
-        } catch (error) {
-            toast({
-                title: "Error",
-                description: "No se pudo enviar el reporte. Inténtalo de nuevo.",
-                variant: "destructive"
-            });
-        }
-    };
-
-    const handleAction = async (type: "report" | "block" | "mute") => {
+    const handleAction = (type: "report" | "block" | "mute") => {
         if (!currentUser) return;
 
         if (type === 'report') {
             setShowReportDialog(true);
         } else if (type === 'block') {
-            setShowBlockConfirm(true);
+            setShowBlockDialog(true);
         } else {
             if (!matchId) {
                 toast({
@@ -121,30 +80,6 @@ export function ProfileActions({ userId, userName, matchId, isMuted = false, onM
                 return;
             }
             setShowMute(true);
-        }
-    };
-
-    const handleConfirmBlock = async () => {
-        if (!currentUser) return;
-        setShowBlockConfirm(false);
-        try {
-            const res = await fetch('/api/safety/block', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ blockedId: userId })
-            });
-            if (!res.ok) throw new Error('Error al bloquear usuario');
-            toast({
-                title: "Usuario bloqueado",
-                description: BRAND_VOICE.safety.blockConfirm,
-                variant: "destructive"
-            });
-        } catch (error) {
-            toast({
-                title: "Error",
-                description: "No se pudo procesar la acción. Inténtalo de nuevo.",
-                variant: "destructive"
-            });
         }
     };
 
@@ -180,51 +115,21 @@ export function ProfileActions({ userId, userName, matchId, isMuted = false, onM
                 onMute={handleMute}
                 isMuted={isMuted}
             />
-            <Dialog open={showReportDialog} onOpenChange={setShowReportDialog}>
-                <DialogContent className="sm:max-w-[400px]">
-                    <DialogHeader>
-                        <DialogTitle>¿Por qué reportas a {userName}?</DialogTitle>
-                        <DialogDescription>
-                            Selecciona el motivo de tu reporte. Esto nos ayuda a mantener la comunidad segura.
-                        </DialogDescription>
-                    </DialogHeader>
-                    <div className="space-y-2 py-2">
-                        {REPORT_CATEGORIES.map((cat) => (
-                            <Button
-                                key={cat.value}
-                                variant="outline"
-                                className="w-full justify-start text-left h-auto py-3"
-                                onClick={() => handleReport(cat.value)}
-                            >
-                                {cat.label}
-                            </Button>
-                        ))}
-                    </div>
-                    <DialogFooter>
-                        <Button variant="ghost" onClick={() => setShowReportDialog(false)}>
-                            Cancelar
-                        </Button>
-                    </DialogFooter>
-                </DialogContent>
-            </Dialog>
-            <Dialog open={showBlockConfirm} onOpenChange={setShowBlockConfirm}>
-                <DialogContent className="sm:max-w-[400px]">
-                    <DialogHeader>
-                        <DialogTitle>¿Bloquear a {userName}?</DialogTitle>
-                        <DialogDescription>
-                            {userName} no podrá ver tu perfil ni enviarte mensajes. Esta acción se puede revertir desde Ajustes.
-                        </DialogDescription>
-                    </DialogHeader>
-                    <DialogFooter className="gap-2 sm:gap-0">
-                        <Button variant="ghost" onClick={() => setShowBlockConfirm(false)}>
-                            Cancelar
-                        </Button>
-                        <Button variant="destructive" onClick={handleConfirmBlock}>
-                            Bloquear
-                        </Button>
-                    </DialogFooter>
-                </DialogContent>
-            </Dialog>
+            <ReportDialog
+                isOpen={showReportDialog}
+                onClose={() => setShowReportDialog(false)}
+                reportedId={userId}
+                matchId={matchId}
+            />
+            <BlockDialog
+                isOpen={showBlockDialog}
+                onClose={() => setShowBlockDialog(false)}
+                blockedId={userId}
+                onSuccess={() => {
+                    setShowBlockDialog(false);
+                    onBlockSuccess?.();
+                }}
+            />
         </>
     );
 }

@@ -322,11 +322,9 @@ export default function ProfilePage() {
           )}
 
           {/* 5. Spotify Section */}
-          {((profile as any).spotify || true) && (
-            <ErrorBoundary fallback={null}>
-              <SpotifySection spotify={(profile as any).spotify ?? null} isOwn={true} />
-            </ErrorBoundary>
-          )}
+          <ErrorBoundary fallback={null}>
+            <SpotifySection spotify={(profile as any).spotify ?? null} isOwn={true} />
+          </ErrorBoundary>
 
           {/* 6. Completeness CTA — ALWAYS visible */}
           {completenessScore < 100 && (

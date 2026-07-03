@@ -1,5 +1,6 @@
 import { Logo } from "@/components/logo";
 import Link from "next/link";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 export default function AuthLayout({
   children,
@@ -13,6 +14,9 @@ export default function AuthLayout({
           <Logo className="h-8 w-8 text-primary" />
           <span className="font-headline text-xl font-bold">Alora</span>
         </Link>
+      </div>
+      <div className="absolute right-4 top-4 md:right-8 md:top-8">
+        <ThemeToggle />
       </div>
       <main className="w-full max-w-md">{children}</main>
     </div>

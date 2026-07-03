@@ -37,9 +37,6 @@ export async function POST(request: Request) {
         }
 
         const isPlus = subscriptionStatus === 'plus';
-        if (!isPlus) {
-            return NextResponse.json({ error: 'Requiere Alora Plus', code: 'subscription_required' }, { status: 403 });
-        }
         const now = new Date();
 
         // Check if boost is already active
@@ -51,6 +48,16 @@ export async function POST(request: Request) {
                 boostExpiresAt: profile.boostExpiresAt,
                 remainingMinutes
             }, { status: 409 });
+        }
+
+        // For free users, check if they have earned boosts available
+        if (!isPlus) {
+            if (!profile.totalBoosts || profile.totalBoosts <= 0) {
+                return NextResponse.json({
+                    error: 'No tienes boosts disponibles. Gana boosts con tu racha diaria o suscríbete a Alora Plus.',
+                    code: 'no_boosts_available'
+                }, { status: 403 });
+            }
         }
 
         // Check cooldown
@@ -77,7 +84,7 @@ export async function POST(request: Request) {
             data: {
                 boostExpiresAt,
                 lastBoostAt: now,
-                totalBoosts: { increment: 1 },
+                totalBoosts: isPlus ? { increment: 1 } : { decrement: 1 },
                 lastActiveAt: now
             }
         });
@@ -90,7 +97,7 @@ export async function POST(request: Request) {
                 metadata: {
                     timestamp: now.toISOString(),
                     isPlus,
-                    totalBoosts: (profile.totalBoosts || 0) + 1
+                    totalBoosts: isPlus ? (profile.totalBoosts || 0) + 1 : (profile.totalBoosts || 0) - 1
                 }
             }
         }).catch(() => {});
@@ -99,7 +106,7 @@ export async function POST(request: Request) {
             success: true,
             boostExpiresAt,
             durationMinutes: BOOST_DURATION_MINUTES,
-            totalBoosts: (profile.totalBoosts || 0) + 1
+            totalBoosts: isPlus ? (profile.totalBoosts || 0) + 1 : (profile.totalBoosts || 0) - 1
         });
     } catch (error) {
         console.error('Error activating boost:', error);

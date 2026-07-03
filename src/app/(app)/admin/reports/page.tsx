@@ -5,8 +5,9 @@ import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import { ArrowLeft, Flag, ShieldAlert, Shield, Ban, EyeOff, AlertTriangle, CheckCircle, XCircle } from 'lucide-react';
+import { ArrowLeft, Flag, ShieldAlert, Ban, EyeOff, AlertTriangle, CheckCircle, XCircle } from 'lucide-react';
 import { SafeImage } from '@/components/ui/safe-image';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 
 interface Report {
     id: string; reason: string; status: string; createdAt: string; reportCount: number; details?: string;
@@ -14,11 +15,28 @@ interface Report {
     reported: { id: string; email: string; name: string | null; profile: { displayName: string | null; photos: string[]; trustStatus: string; isVerified: boolean; reputationScore: number } | null };
 }
 
+const ACTION_LABELS: Record<string, string> = {
+    ignore: 'Ignorar',
+    warn: 'Advertir',
+    shadowban: 'Aplicar Shadowban',
+    suspend: 'Suspender',
+    ban: 'Banear',
+};
+
+const ACTION_DESCRIPTIONS: Record<string, string> = {
+    ignore: 'El reporte será marcado como ignorado sin afectar al usuario.',
+    warn: 'Se enviará una advertencia al usuario reportado.',
+    shadowban: 'El contenido del usuario será oculto de otros usuarios.',
+    suspend: 'El usuario será suspendido y su reputación se reducirá en 50 puntos.',
+    ban: 'El usuario será expulsado permanentemente. Esta acción desactivará todos sus matches.',
+};
+
 export default function AdminReportsPage() {
     const router = useRouter();
     const [reports, setReports] = useState<Report[]>([]);
     const [loading, setLoading] = useState(true);
     const [filter, setFilter] = useState('pending');
+    const [actionConfirm, setActionConfirm] = useState<{ reportId: string; action: string; userName: string } | null>(null);
 
     const fetchReports = async (status: string) => {
         setLoading(true);
@@ -43,6 +61,16 @@ export default function AdminReportsPage() {
         } catch (e) { console.error(e); }
     };
 
+    const executeAction = (reportId: string, action: string) => {
+        const report = reports.find(r => r.id === reportId);
+        const userName = report?.reported?.profile?.displayName || report?.reported?.email || 'Desconocido';
+        if (action === 'ignore') {
+            handleAction(reportId, action);
+        } else {
+            setActionConfirm({ reportId, action, userName });
+        }
+    };
+
     const statusColor = (s: string) => {
         switch (s) {
             case 'pending': return 'bg-amber-500/10 text-amber-400 border-amber-500/20';
@@ -59,6 +87,28 @@ export default function AdminReportsPage() {
             case 'watchlist': return 'text-amber-500 dark:text-amber-400';
             case 'banned': return 'text-red-500 dark:text-red-400';
             default: return 'text-muted-foreground';
+        }
+    };
+
+    const actionButtonStyle = (action: string) => {
+        switch (action) {
+            case 'ignore': return 'border-border text-muted-foreground hover:text-foreground';
+            case 'warn': return 'border-amber-500/30 text-amber-400 hover:text-amber-300';
+            case 'shadowban': return 'border-border text-muted-foreground hover:text-foreground';
+            case 'suspend': return 'border-orange-500/30 text-orange-400 hover:text-orange-300';
+            case 'ban': return 'border-red-500/30 text-red-400 hover:text-red-300';
+            default: return '';
+        }
+    };
+
+    const actionIcon = (action: string) => {
+        switch (action) {
+            case 'ignore': return <XCircle className="h-3 w-3 mr-1" />;
+            case 'warn': return <AlertTriangle className="h-3 w-3 mr-1" />;
+            case 'shadowban': return <EyeOff className="h-3 w-3 mr-1" />;
+            case 'suspend': return <ShieldAlert className="h-3 w-3 mr-1" />;
+            case 'ban': return <Ban className="h-3 w-3 mr-1" />;
+            default: return null;
         }
     };
 
@@ -137,32 +187,56 @@ export default function AdminReportsPage() {
 
                             {filter === 'pending' && (
                                 <div className="flex gap-2 pt-2 border-t border-border">
-                                    <Button variant="outline" size="sm" onClick={() => handleAction(report.id, 'ignore')}
-                                        className="border-border text-muted-foreground hover:text-foreground text-xs">
-                                        <XCircle className="h-3 w-3 mr-1" /> Ignorar
-                                    </Button>
-                                    <Button variant="outline" size="sm" onClick={() => handleAction(report.id, 'warn')}
-                                        className="border-amber-500/30 text-amber-400 hover:text-amber-300 text-xs">
-                                        <AlertTriangle className="h-3 w-3 mr-1" /> Advertir
-                                    </Button>
-                                    <Button variant="outline" size="sm" onClick={() => handleAction(report.id, 'shadowban')}
-                                        className="border-border text-muted-foreground hover:text-foreground text-xs">
-                                        <EyeOff className="h-3 w-3 mr-1" /> Shadowban
-                                    </Button>
-                                    <Button variant="outline" size="sm" onClick={() => handleAction(report.id, 'suspend')}
-                                        className="border-orange-500/30 text-orange-400 hover:text-orange-300 text-xs">
-                                        <ShieldAlert className="h-3 w-3 mr-1" /> Suspender
-                                    </Button>
-                                    <Button variant="outline" size="sm" onClick={() => handleAction(report.id, 'ban')}
-                                        className="border-red-500/30 text-red-400 hover:text-red-300 text-xs">
-                                        <Ban className="h-3 w-3 mr-1" /> Banear
-                                    </Button>
+                                    {(['ignore', 'warn', 'shadowban', 'suspend', 'ban'] as const).map(action => (
+                                        <Button
+                                            key={action}
+                                            variant="outline"
+                                            size="sm"
+                                            onClick={() => executeAction(report.id, action)}
+                                            className={`${actionButtonStyle(action)} text-xs`}
+                                        >
+                                            {actionIcon(action)} {ACTION_LABELS[action]}
+                                        </Button>
+                                    ))}
                                 </div>
                             )}
                         </div>
                     ))
                 )}
             </main>
+
+            <AlertDialog open={!!actionConfirm} onOpenChange={(open) => { if (!open) setActionConfirm(null); }}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle className="flex items-center gap-2">
+                            <AlertTriangle className="h-5 w-5 text-destructive" />
+                            Confirmar acción: {actionConfirm ? ACTION_LABELS[actionConfirm.action] : ''}
+                        </AlertDialogTitle>
+                        <AlertDialogDescription>
+                            <p className="mb-2">
+                                {actionConfirm ? ACTION_DESCRIPTIONS[actionConfirm.action] : ''}
+                            </p>
+                            <p className="font-medium">
+                                Usuario: {actionConfirm?.userName}
+                            </p>
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel onClick={() => setActionConfirm(null)}>Cancelar</AlertDialogCancel>
+                        <AlertDialogAction
+                            className={actionConfirm?.action === 'ban' ? 'bg-destructive hover:bg-destructive/90' : ''}
+                            onClick={() => {
+                                if (actionConfirm) {
+                                    handleAction(actionConfirm.reportId, actionConfirm.action);
+                                    setActionConfirm(null);
+                                }
+                            }}
+                        >
+                            Confirmar {actionConfirm ? ACTION_LABELS[actionConfirm.action] : ''}
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
         </div>
     );
 }

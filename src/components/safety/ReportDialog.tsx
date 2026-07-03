@@ -99,7 +99,6 @@ export function ReportDialog({ isOpen, onClose, reportedId, matchId, messageIds 
                                 <SelectItem value="sexual_content">Contenido sexual inapropiado</SelectItem>
                                 <SelectItem value="impersonation">Suplantación de identidad</SelectItem>
                                 <SelectItem value="spam_fraud">Spam o fraude</SelectItem>
-                                <SelectItem value="spam">Spam</SelectItem>
                                 <SelectItem value="minor">Menor de edad</SelectItem>
                                 <SelectItem value="violence">Violencia</SelectItem>
                                 <SelectItem value="fake_identity">Identidad falsa</SelectItem>

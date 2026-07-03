@@ -185,7 +185,11 @@ export async function getDynamicFeed(
 
         // Connection intent filter
         if (filters?.intent) {
-            dynamicFilters.connectionModes = { has: filters.intent };
+            if (filters.intent === 'both') {
+                dynamicFilters.connectionModes = { hasSome: ['dating', 'friendship'] };
+            } else {
+                dynamicFilters.connectionModes = { has: filters.intent };
+            }
         }
 
         // Country / state / city filters

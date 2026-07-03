@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -73,6 +74,7 @@ const cardVariants = {
 
 export function DailyQuestionCard() {
     const { toast } = useToast();
+    const router = useRouter();
     const { sendLike } = useSendLike();
     const { profile: currentUserProfile } = useAuth();
     const [data, setData] = useState<DailyQuestionData | null>(null);
@@ -500,7 +502,7 @@ export function DailyQuestionCard() {
                     onChat={() => {
                         setShowMatchScreen(false);
                         setShowAnswersModal(false);
-                        window.location.href = `/chat/${matchId}`;
+                        router.push(`/chat/${matchId}`);
                     }}
                     onKeepSwiping={() => {
                         setShowMatchScreen(false);

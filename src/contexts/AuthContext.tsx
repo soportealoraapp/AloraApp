@@ -6,6 +6,7 @@ import { createClient } from '@/lib/supabase/client';
 import { profileService } from '@/lib/supabase/services/profile';
 import { UserProfile } from '@/lib/domain/types';
 import { useWebPush } from '@/hooks/use-web-push';
+import { initOfflineQueue, destroyOfflineQueue } from '@/lib/offline-queue';
 
 interface AuthContextType {
     user: User | null;
@@ -38,6 +39,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     // Auto-register web push token when user is authenticated (PWA only)
     useWebPush(user?.id ?? null);
+
+    // Initialize offline queue when user is authenticated
+    useEffect(() => {
+        if (user?.id) {
+            initOfflineQueue(user.id);
+        } else {
+            destroyOfflineQueue();
+        }
+        return () => {
+            destroyOfflineQueue();
+        };
+    }, [user?.id]);
 
     const refreshProfile = useCallback(async () => {
         if (user) {

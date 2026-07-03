@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useCallback, useRef } from 'react';
+import { useEffect, useCallback, useRef, useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { createClient } from '@/lib/supabase/client';
 import { subscribeWithReconnect } from '@/lib/supabase/realtime-reconnect';
@@ -46,7 +46,7 @@ export function useNotifications({
     const channelRef = useRef<RealtimeChannel | null>(null);
     const cleanupRef = useRef<(() => void) | null>(null);
     const pendingDeletesRef = useRef<Map<string, NodeJS.Timeout>>(new Map());
-    const loadingMoreRef = useRef(false);
+    const [loadingMore, setLoadingMore] = useState(false);
 
     const {
         data,
@@ -187,8 +187,8 @@ export function useNotifications({
     }, []);
 
     const loadMore = useCallback(async () => {
-        if (loadingMoreRef.current || !hasMore) return;
-        loadingMoreRef.current = true;
+        if (loadingMore || !hasMore) return;
+        setLoadingMore(true);
         try {
             const currentOffset = notifications.length;
             const res = await fetch(`/api/notifications?limit=${pageSize}&offset=${currentOffset}`, {
@@ -215,15 +215,23 @@ export function useNotifications({
         } catch (err) {
             console.warn('[use-notifications] loadMore failed:', err);
         } finally {
-            loadingMoreRef.current = false;
+            setLoadingMore(false);
         }
-    }, [hasMore, notifications.length, pageSize, queryClient]);
+    }, [hasMore, notifications.length, pageSize, queryClient, loadingMore]);
+
+    // Cleanup pending deletes on unmount
+    useEffect(() => {
+        return () => {
+            pendingDeletesRef.current.forEach(timeout => clearTimeout(timeout));
+            pendingDeletesRef.current.clear();
+        };
+    }, []);
 
     return {
         notifications,
         unreadCount,
         loading,
-        loadingMore: loadingMoreRef.current,
+        loadingMore,
         hasMore,
         error,
         refresh: async () => { await refetch(); },
