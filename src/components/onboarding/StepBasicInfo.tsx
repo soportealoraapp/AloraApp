@@ -10,7 +10,7 @@ import { Heart, Handshake } from "lucide-react";
 import { motion } from "framer-motion";
 import { UserProfile, ConnectionIntent } from "@/lib/domain/types";
 import { cn } from "@/lib/utils";
-import { CITIES } from "@/lib/location/data/cities";
+import type { City } from "@/lib/location/data/cities";
 
 interface StepBasicInfoProps {
     userId?: string;
@@ -26,9 +26,14 @@ export function StepBasicInfo({ data, onUpdate, onNext, userId, onPrev }: StepBa
     const [debouncedCitySearch, setDebouncedCitySearch] = useState('');
     const [showCityDropdown, setShowCityDropdown] = useState(false);
     const [citySelectedFromDropdown, setCitySelectedFromDropdown] = useState(Boolean(data?.city));
+    const [cities, setCities] = useState<City[]>([]);
     const cityDropdownRef = useRef<HTMLDivElement>(null);
     const debounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
     const initializedRef = useRef(false);
+
+    useEffect(() => {
+        import("@/lib/location/data/cities").then(m => setCities(m.CITIES));
+    }, []);
 
     const selectedModes: ConnectionIntent[] = (localData.connectionModes || ['dating']) as ConnectionIntent[];
 
@@ -78,10 +83,11 @@ export function StepBasicInfo({ data, onUpdate, onNext, userId, onPrev }: StepBa
     );
 
     const filteredCities = useMemo(() => {
-        if (!debouncedCitySearch.trim()) return CITIES.slice(0, 8);
+        if (cities.length === 0) return [];
+        if (!debouncedCitySearch.trim()) return cities.slice(0, 8);
         const query = debouncedCitySearch.toLowerCase();
-        return CITIES.filter(c => c.name.toLowerCase().includes(query)).slice(0, 8);
-    }, [debouncedCitySearch]);
+        return cities.filter(c => c.name.toLowerCase().includes(query)).slice(0, 8);
+    }, [debouncedCitySearch, cities]);
 
     // Debounce city search
     useEffect(() => {

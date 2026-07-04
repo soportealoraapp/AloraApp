@@ -32,7 +32,7 @@ export default function MatchQualityPage() {
 
     if (loading) {
         return (
-            <div className="md:pl-60 p-6 flex items-center justify-center">
+            <div className="md:pl-sidebar p-6 flex items-center justify-center">
                 <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
             </div>
         );
@@ -40,7 +40,7 @@ export default function MatchQualityPage() {
 
     if (!metrics) {
         return (
-            <div className="md:pl-60 p-6">
+            <div className="md:pl-sidebar p-6">
                 <p className="text-muted-foreground">No se pudieron cargar las métricas</p>
             </div>
         );
@@ -60,7 +60,7 @@ export default function MatchQualityPage() {
     ];
 
     return (
-        <div className="md:pl-60 p-6 space-y-6">
+        <div className="md:pl-sidebar p-6 space-y-6">
             <SectionTitle title="Análisis de Calidad de Matches" subtitle="Métricas de calidad de conexiones" />
             <div className="grid gap-4 md:grid-cols-3 lg:grid-cols-5">
                 {cards.map((card) => (

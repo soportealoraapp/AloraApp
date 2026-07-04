@@ -336,7 +336,7 @@ export default function ProfilePage() {
                     <span className="font-bold text-sm text-foreground">Tu perfil al {completenessScore}%</span>
                   </div>
                 </div>
-                <Progress value={completenessScore} className="h-1.5 mb-3" />
+                <Progress value={completenessScore} className="h-1.5 mb-3" role="progressbar" aria-valuenow={completenessScore} aria-valuemin={0} aria-valuemax={100} aria-label="Completitud del perfil" />
                 <div className="space-y-2 text-sm">
                   {[
                     { label: 'Foto principal', done: (profile as any)?.photos?.length > 0 },

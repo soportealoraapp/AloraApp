@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { ArrowLeft, MoreVertical, Sparkles, Loader2, Circle, History } from "lucide-react";
 import { ChatInput } from "@/components/chat/chat-input";
-import { VoiceMessage } from "@/components/chat/VoiceMessage";
+import { MessageRenderer } from "@/components/chat/MessageRenderer";
 import { MuteDialog } from "@/components/chat/MuteDialog";
 import { ConversationRoulette } from "@/components/chat/ConversationRoulette";
 import { MatchTimeline } from "@/components/chat/MatchTimeline";
@@ -27,7 +27,6 @@ import { useAnalytics, AnalyticsEvents } from "@/hooks/use-analytics";
 import Link from "next/link";
 import { Skeleton } from "@/components/ui/skeleton";
 
-import { MessageBubble } from "@/components/chat/message-bubble";
 import { ReportDialog } from "@/components/safety/ReportDialog";
 import { BlockDialog } from "@/components/safety/BlockDialog";
 import { SafeImage } from "@/components/ui/safe-image";
@@ -601,67 +600,16 @@ export default function ChatWindowPage() {
                                 </div>
                                 {group.messages.map((message) => {
                                     const isMe = message.senderId === user?.id;
-                                    const messageElement = (() => {
-                                        if (message.type === 'voice') {
-                                            try {
-                                                const voiceData = typeof message.content === 'string'
-                                                    ? JSON.parse(message.content)
-                                                    : message.content;
-                                                if (voiceData && typeof voiceData === 'object' && voiceData.audioUrl) {
-                                                    return (
-                                                        <VoiceMessage
-                                                            audioUrl={voiceData.audioUrl}
-                                                            duration={voiceData.duration}
-                                                            isOwn={isMe}
-                                                        />
-                                                    );
-                                                }
-                                                return (
-                                                    <MessageBubble
-                                                        message={{
-                                                            ...message,
-                                                            content: typeof message.content === 'string'
-                                                                ? message.content
-                                                                : JSON.stringify(message.content)
-                                                        }}
-                                                        isMe={isMe}
-                                                        currentUserId={user?.id}
-                                                        onReact={handleReact}
-                                                        onRetry={handleRetry}
-                                                    />
-                                                );
-                                            } catch {
-                                                return (
-                                                    <MessageBubble
-                                                        message={{
-                                                            ...message,
-                                                            content: typeof message.content === 'string'
-                                                                ? message.content
-                                                                : JSON.stringify(message.content)
-                                                        }}
-                                                        isMe={isMe}
-                                                        currentUserId={user?.id}
-                                                        onReact={handleReact}
-                                                        onRetry={handleRetry}
-                                                    />
-                                                );
-                                            }
-                                        }
-                                        return (
-                                            <MessageBubble
-                                                message={{
-                                                    ...message,
-                                                    content: typeof message.content === 'string'
-                                                        ? message.content
-                                                        : JSON.stringify(message.content)
-                                                }}
-                                                isMe={isMe}
-                                                currentUserId={user?.id}
-                                                onReact={handleReact}
-                                                        onRetry={handleRetry}
-                                            />
-                                        );
-                                    })();
+
+                                    const messageElement = (
+                                        <MessageRenderer
+                                            message={message}
+                                            isMe={isMe}
+                                            currentUserId={user?.id}
+                                            onReact={handleReact}
+                                            onRetry={handleRetry}
+                                        />
+                                    );
 
                                     if (isMe) {
                                         return (

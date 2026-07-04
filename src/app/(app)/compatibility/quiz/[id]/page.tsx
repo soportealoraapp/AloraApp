@@ -241,7 +241,7 @@ export default function QuizPage() {
                     ) : (
                         <>
                             <CardHeader>
-                                <Progress value={progress} className="mb-4" />
+                                <Progress value={progress} className="mb-4" role="progressbar" aria-valuenow={progress} aria-valuemin={0} aria-valuemax={100} aria-label="Progreso del quiz" />
                                 <CardDescription className="text-xs">
                                     Pregunta {currentQuestion + 1} de {quiz.questions.length}
                                 </CardDescription>

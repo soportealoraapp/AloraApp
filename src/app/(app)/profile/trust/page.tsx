@@ -85,7 +85,7 @@ export default function TrustPage() {
                     <p className={cn("font-bold text-lg", LEVEL_COLORS[trust.level])}>
                         {trust.level}
                     </p>
-                    <Progress value={trust.score} className="mt-4 h-3" />
+                    <Progress value={trust.score} className="mt-4 h-3" role="progressbar" aria-valuenow={trust.score} aria-valuemin={0} aria-valuemax={100} aria-label="Score de confianza" />
                 </CardContent>
             </Card>
 

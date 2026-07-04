@@ -34,17 +34,17 @@ export default function MarketplaceCommandPage() {
     }, []);
 
     if (loading) {
-        return <div className="md:pl-60 p-6 flex items-center justify-center"><Loader2 className="h-8 w-8 animate-spin" /></div>;
+        return <div className="md:pl-sidebar p-6 flex items-center justify-center"><Loader2 className="h-8 w-8 animate-spin" /></div>;
     }
 
     if (!data) {
-        return <div className="md:pl-60 p-6">No se pudieron cargar los datos</div>;
+        return <div className="md:pl-sidebar p-6">No se pudieron cargar los datos</div>;
     }
 
     const { marketplace, retention } = data;
 
     return (
-        <div className="md:pl-60 p-6 space-y-6">
+        <div className="md:pl-sidebar p-6 space-y-6">
             <SectionTitle title="Marketplace Command Center" subtitle="Vista unificada del estado del marketplace" />
 
             {/* Health Status */}

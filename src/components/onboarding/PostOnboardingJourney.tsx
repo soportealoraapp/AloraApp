@@ -144,7 +144,7 @@ export function PostOnboardingJourney() {
         </Badge>
       </div>
 
-      <Progress value={progress} className="h-1.5 mb-3" />
+      <Progress value={progress} className="h-1.5 mb-3" role="progressbar" aria-valuenow={progress} aria-valuemin={0} aria-valuemax={100} aria-label="Progreso de misiones" />
 
       {nextMission && (
         <motion.div

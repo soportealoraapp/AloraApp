@@ -37,15 +37,15 @@ export default function WomenStrategyPage() {
     }, []);
 
     if (loading) {
-        return <div className="md:pl-60 p-6 flex items-center justify-center"><Loader2 className="h-8 w-8 animate-spin" /></div>;
+        return <div className="md:pl-sidebar p-6 flex items-center justify-center"><Loader2 className="h-8 w-8 animate-spin" /></div>;
     }
 
     if (!data) {
-        return <div className="md:pl-60 p-6">No se pudieron cargar los datos</div>;
+        return <div className="md:pl-sidebar p-6">No se pudieron cargar los datos</div>;
     }
 
     return (
-        <div className="md:pl-60 p-6 space-y-6">
+        <div className="md:pl-sidebar p-6 space-y-6">
             <SectionTitle title="Estrategia 1000 Mujeres" subtitle="Panel operativo para crecimiento femenino" />
 
             <div className="grid gap-4 md:grid-cols-4">

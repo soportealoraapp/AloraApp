@@ -272,22 +272,38 @@ export default function ChatPage() {
 
                     <TabsContent value="conversations" className="space-y-3 mt-4">
                         {filteredMatches.length === 0 ? (
-                            <Card className="rounded-2xl border bg-muted/20">
-                                <CardContent className="flex flex-col items-center justify-center py-16 px-8">
-                                    <div className="bg-card p-4 rounded-full shadow-sm mb-6">
-                                        <MessageSquare className="h-10 w-10 text-muted-foreground" />
-                                    </div>
-                                    <p className="text-xl font-bold text-foreground text-center mb-2">
-                                        {BRAND_VOICE.states.noMatches.title}
-                                    </p>
-                                    <p className="text-sm text-muted-foreground text-center max-w-xs mb-8">
-                                        {BRAND_VOICE.states.noMatches.subtitle}
-                                    </p>
-                                    <Button asChild className="rounded-full px-8 h-12">
-                                        <Link href="/discover">Explorar perfiles</Link>
-                                    </Button>
-                                </CardContent>
-                            </Card>
+                            searchTerm.trim() ? (
+                                <Card className="rounded-2xl border bg-muted/20">
+                                    <CardContent className="flex flex-col items-center justify-center py-16 px-8">
+                                        <div className="bg-card p-4 rounded-full shadow-sm mb-6">
+                                            <MessageSquare className="h-10 w-10 text-muted-foreground" />
+                                        </div>
+                                        <p className="text-xl font-bold text-foreground text-center mb-2">
+                                            Sin resultados
+                                        </p>
+                                        <p className="text-sm text-muted-foreground text-center max-w-xs mb-8">
+                                            No se encontraron conversaciones para "{searchTerm.trim()}"
+                                        </p>
+                                    </CardContent>
+                                </Card>
+                            ) : (
+                                <Card className="rounded-2xl border bg-muted/20">
+                                    <CardContent className="flex flex-col items-center justify-center py-16 px-8">
+                                        <div className="bg-card p-4 rounded-full shadow-sm mb-6">
+                                            <MessageSquare className="h-10 w-10 text-muted-foreground" />
+                                        </div>
+                                        <p className="text-xl font-bold text-foreground text-center mb-2">
+                                            {BRAND_VOICE.states.noMatches.title}
+                                        </p>
+                                        <p className="text-sm text-muted-foreground text-center max-w-xs mb-8">
+                                            {BRAND_VOICE.states.noMatches.subtitle}
+                                        </p>
+                                        <Button asChild className="rounded-full px-8 h-12">
+                                            <Link href="/discover">Explorar perfiles</Link>
+                                        </Button>
+                                    </CardContent>
+                                </Card>
+                            )
                         ) : (
                             <div className="space-y-2">
                                 <AnimatePresence>

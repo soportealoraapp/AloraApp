@@ -44,7 +44,7 @@ export default function AdminActivationPage() {
 
     if (loading) {
         return (
-            <div className="md:pl-60 p-6 flex justify-center py-20">
+            <div className="md:pl-sidebar p-6 flex justify-center py-20">
                 <Loader2 className="animate-spin text-primary h-8 w-8" />
             </div>
         );
@@ -52,7 +52,7 @@ export default function AdminActivationPage() {
 
     if (!data) {
         return (
-            <div className="md:pl-60 p-6">
+            <div className="md:pl-sidebar p-6">
                 <p className="text-muted-foreground">No se pudieron cargar las métricas</p>
             </div>
         );
@@ -105,7 +105,7 @@ export default function AdminActivationPage() {
     ];
 
     return (
-        <div className="md:pl-60 p-6 space-y-6 bg-muted/30 min-h-dvh">
+        <div className="md:pl-sidebar p-6 space-y-6 bg-muted/30 min-h-dvh">
             <div className="flex items-center gap-4">
                 <button
                     onClick={() => router.back()}

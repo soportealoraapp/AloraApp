@@ -34,7 +34,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       <OfflineBanner />
       <main
         id="main-content"
-        className={`md:pl-60 pb-safe overflow-x-hidden ${hideBottomNav ? '' : 'pb-20 md:pb-0'}`}
+        className={`md:pl-sidebar pb-safe overflow-x-hidden ${hideBottomNav ? '' : 'pb-20 md:pb-0'}`}
       >
         <ErrorBoundary>
           <Suspense fallback={<PageFallback />}>

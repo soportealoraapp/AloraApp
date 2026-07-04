@@ -27,11 +27,11 @@ export default function GoNoGoPage() {
     }, []);
 
     if (loading) {
-        return <div className="md:pl-60 p-6 flex items-center justify-center"><Loader2 className="h-8 w-8 animate-spin" /></div>;
+        return <div className="md:pl-sidebar p-6 flex items-center justify-center"><Loader2 className="h-8 w-8 animate-spin" /></div>;
     }
 
     if (!data) {
-        return <div className="md:pl-60 p-6">No se pudieron generar los datos</div>;
+        return <div className="md:pl-sidebar p-6">No se pudieron generar los datos</div>;
     }
 
     const verdictConfig = {
@@ -44,7 +44,7 @@ export default function GoNoGoPage() {
     const Icon = config.icon;
 
     return (
-        <div className="md:pl-60 p-6 space-y-6">
+        <div className="md:pl-sidebar p-6 space-y-6">
             <SectionTitle title="Go / No-Go Report" subtitle="Evaluación automática de readiness para beta pública" />
 
             <Card className={`${config.color} border-none`}>

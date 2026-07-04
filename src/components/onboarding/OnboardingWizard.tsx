@@ -279,7 +279,7 @@ export function OnboardingWizard({ initialRef }: { initialRef?: string } = {}) {
                             <span className="text-xs text-destructive">Error al guardar</span>
                         )}
                     </div>
-                    <Progress value={((step - 1) / (totalSteps - 1)) * 100} className="h-1.5" />
+                    <Progress value={((step - 1) / (totalSteps - 1)) * 100} className="h-1.5" role="progressbar" aria-valuenow={((step - 1) / (totalSteps - 1)) * 100} aria-valuemin={0} aria-valuemax={100} aria-label="Progreso de registro" />
                     <div className="flex justify-between items-center mt-2">
                         <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
                             {STEP_WELCOME[step - 1]}
