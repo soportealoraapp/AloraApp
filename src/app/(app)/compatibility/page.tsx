@@ -180,6 +180,14 @@ export default function CompatibilityPage() {
         </div>
 
         <div className="space-y-6">
+          {loadError && (
+            <div className="p-4 rounded-2xl bg-destructive/10 border border-destructive/20 text-sm text-destructive text-center">
+              No se pudieron cargar los cuestionarios.{' '}
+              <button onClick={() => window.location.reload()} className="underline font-medium">
+                Intentar de nuevo
+              </button>
+            </div>
+          )}
           <div className="flex items-end justify-between px-1">
             <div>
               <h2 className="text-xs font-black uppercase tracking-[0.2em] text-muted-foreground">Viaje de Autodescubrimiento</h2>

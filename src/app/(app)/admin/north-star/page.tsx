@@ -9,6 +9,7 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 
 interface ExperimentSummary {
   id: string;
@@ -231,6 +232,7 @@ export default function NorthStarDashboard() {
         <CardContent>
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
+              <caption className="sr-only">Activación por segmento de usuarios</caption>
               <thead>
                 <tr className="border-b">
                   <th className="text-left py-2 pr-4 font-medium text-muted-foreground">Paso</th>
@@ -291,12 +293,12 @@ export default function NorthStarDashboard() {
                 );
               })}
             </div>
-            <button
-              onClick={() => router.push('/admin/experiments')}
-              className="mt-3 text-xs text-purple-600 font-medium hover:underline"
+            <Link
+              href="/admin/experiments"
+              className="mt-3 text-xs text-purple-600 font-medium hover:underline inline-block"
             >
               Gestionar experimentos →
-            </button>
+            </Link>
           </CardContent>
         </Card>
       )}
@@ -339,6 +341,7 @@ export default function NorthStarDashboard() {
               </div>
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
+                  <caption className="sr-only">Retención de usuarios por cohorte</caption>
                   <thead>
                     <tr className="border-b">
                       <th className="text-left py-2 pr-4 font-medium text-muted-foreground">Fecha</th>

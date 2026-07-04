@@ -15,6 +15,7 @@ import { BRAND_VOICE } from '@/lib/constants/brand-voice';
 function NotificationItemInner({ notification, onRead, onDelete }: { notification: any; onRead: () => void; onDelete: () => void }) {
   const router = useRouter();
   const isUnread = !notification.readAt;
+  const type = notification.type || '';
   const x = useMotionValue(0);
   const background = useTransform(x, [-80, 0], ['hsl(var(--destructive))', 'hsl(var(--background))']);
   const deleteOpacity = useTransform(x, [-80, -30], [1, 0]);
@@ -22,7 +23,6 @@ function NotificationItemInner({ notification, onRead, onDelete }: { notificatio
   const handleClick = () => {
     if (isUnread) onRead();
 
-    const type = notification.type || '';
     const data = (notification.data as any) || {};
 
     if (type === 'match' || type === 'new_match') {
@@ -104,6 +104,7 @@ function NotificationItemInner({ notification, onRead, onDelete }: { notificatio
             isUnread ? 'bg-primary/5 font-medium' : ''
           )}
           onClick={handleClick}
+          aria-label={`Notificación: ${notification.text || type}${isUnread ? ' (sin leer)' : ''}`}
         >
           <div className="flex items-start gap-3">
             {isUnread && (
@@ -259,7 +260,7 @@ const NotificationItem = memo(NotificationItemInner);
           >
             <div className="bg-foreground text-background px-4 py-3 rounded-xl shadow-lg flex items-center gap-3">
               <span className="text-sm">Notificación eliminada</span>
-              <Button variant="ghost" size="sm" onClick={handleUndo} className="text-primary hover:text-primary h-11 min-h-[44px]">
+              <Button variant="ghost" size="sm" onClick={handleUndo} className="text-primary hover:text-primary h-11 min-h-[44px]" aria-label="Deshacer eliminación de notificación">
                 Deshacer
               </Button>
             </div>

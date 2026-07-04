@@ -618,6 +618,7 @@ export default function DiscoverPage() {
               <TooltipTrigger asChild>
             <button
               onClick={() => { setIntent('dating'); setIntentChanging(true); }}
+              aria-pressed={intent === 'dating'}
               className={`flex-1 py-1.5 px-2 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all ${
                 intent === 'dating'
                   ? 'bg-primary text-primary-foreground shadow-sm'
@@ -633,6 +634,7 @@ export default function DiscoverPage() {
               <TooltipTrigger asChild>
             <button
               onClick={() => { setIntent('both'); setIntentChanging(true); }}
+              aria-pressed={intent === 'both'}
               className={`flex-1 py-1.5 px-2 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all ${
                 intent === 'both'
                   ? 'bg-amber-500 text-white shadow-sm'
@@ -648,6 +650,7 @@ export default function DiscoverPage() {
               <TooltipTrigger asChild>
             <button
               onClick={() => { setIntent('friendship'); setIntentChanging(true); }}
+              aria-pressed={intent === 'friendship'}
               className={`flex-1 py-1.5 px-2 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all ${
                 intent === 'friendship'
                   ? 'bg-blue-500 text-white shadow-sm'

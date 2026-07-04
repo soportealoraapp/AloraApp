@@ -130,7 +130,7 @@ export default function TravelModePage() {
         <div className="h-dvh overflow-y-auto bg-muted/50">
             <div className="p-6 space-y-6">
             <div className="flex items-center gap-4">
-                <Button variant="ghost" size="icon" onClick={() => router.back()}>
+                <Button variant="ghost" size="icon" onClick={() => router.back()} aria-label="Volver">
                     <ArrowLeft className="h-5 w-5" />
                 </Button>
                 <div className="flex-1">

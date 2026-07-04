@@ -149,8 +149,9 @@ export default function AdminExperimentsPage() {
           <CardContent>
             <div className="space-y-4">
               <div>
-                <label className="text-xs font-medium">Nombre</label>
+                <label htmlFor="exp-name" className="text-xs font-medium">Nombre</label>
                 <input
+                  id="exp-name"
                   value={newName}
                   onChange={e => setNewName(e.target.value)}
                   className="w-full mt-1 px-3 py-2 rounded-lg border bg-background text-sm"
@@ -158,8 +159,9 @@ export default function AdminExperimentsPage() {
                 />
               </div>
               <div>
-                <label className="text-xs font-medium">Descripción</label>
+                <label htmlFor="exp-desc" className="text-xs font-medium">Descripción</label>
                 <input
+                  id="exp-desc"
                   value={newDescription}
                   onChange={e => setNewDescription(e.target.value)}
                   className="w-full mt-1 px-3 py-2 rounded-lg border bg-background text-sm"
@@ -167,8 +169,9 @@ export default function AdminExperimentsPage() {
                 />
               </div>
               <div>
-                <label className="text-xs font-medium">Métrica objetivo</label>
+                <label htmlFor="exp-metric" className="text-xs font-medium">Métrica objetivo</label>
                 <select
+                  id="exp-metric"
                   value={newMetric}
                   onChange={e => setNewMetric(e.target.value)}
                   className="w-full mt-1 px-3 py-2 rounded-lg border bg-background text-sm"
@@ -274,26 +277,26 @@ export default function AdminExperimentsPage() {
                     </div>
                     <div className="flex items-center gap-1">
                       {exp.status === 'draft' && (
-                        <Button size="sm" variant="ghost" onClick={() => updateStatus(exp.id, 'running')} title="Iniciar">
+                        <Button size="sm" variant="ghost" onClick={() => updateStatus(exp.id, 'running')} title="Iniciar" aria-label="Iniciar experimento">
                           <Play className="h-4 w-4 text-green-600" />
                         </Button>
                       )}
                       {exp.status === 'running' && (
-                        <Button size="sm" variant="ghost" onClick={() => updateStatus(exp.id, 'paused')} title="Pausar">
+                        <Button size="sm" variant="ghost" onClick={() => updateStatus(exp.id, 'paused')} title="Pausar" aria-label="Pausar experimento">
                           <Pause className="h-4 w-4 text-yellow-600" />
                         </Button>
                       )}
                       {exp.status === 'paused' && (
-                        <Button size="sm" variant="ghost" onClick={() => updateStatus(exp.id, 'running')} title="Reanudar">
+                        <Button size="sm" variant="ghost" onClick={() => updateStatus(exp.id, 'running')} title="Reanudar" aria-label="Reanudar experimento">
                           <Play className="h-4 w-4 text-green-600" />
                         </Button>
                       )}
                       {(exp.status === 'running' || exp.status === 'paused') && (
-                        <Button size="sm" variant="ghost" onClick={() => updateStatus(exp.id, 'completed')} title="Finalizar">
+                        <Button size="sm" variant="ghost" onClick={() => updateStatus(exp.id, 'completed')} title="Finalizar" aria-label="Finalizar experimento">
                           <CheckCircle className="h-4 w-4 text-blue-600" />
                         </Button>
                       )}
-                      <Button size="sm" variant="ghost" onClick={() => deleteExperiment(exp.id)} title="Eliminar">
+                      <Button size="sm" variant="ghost" onClick={() => deleteExperiment(exp.id)} title="Eliminar" aria-label="Eliminar experimento">
                         <Trash2 className="h-4 w-4 text-red-500" />
                       </Button>
                     </div>

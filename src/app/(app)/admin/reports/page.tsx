@@ -179,7 +179,7 @@ export default function AdminReportsPage() {
                                             <p className="text-xs text-muted-foreground mt-1 line-clamp-1">{report.details}</p>
                                         )}
                                         <div className="text-xs text-muted-foreground/60 mt-1">
-                                            Reportado por: {report.reporter?.email || 'Desconocido'}
+                                            Reportado por usuario verificado
                                         </div>
                                     </div>
                                 </div>

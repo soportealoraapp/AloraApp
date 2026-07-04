@@ -4,7 +4,7 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useState, useEffect, useMemo, useRef, useCallback } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { trackEvent } from "@/lib/tracking/client";
 import { Heart, Handshake } from "lucide-react";
 import { motion } from "framer-motion";
@@ -126,10 +126,11 @@ export function StepBasicInfo({ data, onUpdate, onNext, userId, onPrev }: StepBa
                     transition={{ delay: 0.1 }}
                     className="space-y-2"
                 >
-                    <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                    <Label htmlFor="displayName" className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
                         ¿Cómo te llamas?
                     </Label>
                     <Input
+                        id="displayName"
                         placeholder="Tu nombre"
                         value={localData.displayName || ''}
                         onChange={(e) => handleChange('displayName', e.target.value)}
@@ -145,8 +146,9 @@ export function StepBasicInfo({ data, onUpdate, onNext, userId, onPrev }: StepBa
                     className="grid grid-cols-2 gap-4"
                 >
                     <div className="space-y-2">
-                        <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Edad</Label>
+                        <Label htmlFor="age" className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Edad</Label>
                         <Input
+                            id="age"
                             type="number"
                             placeholder="24"
                             value={localData.age ?? ''}
@@ -166,12 +168,12 @@ export function StepBasicInfo({ data, onUpdate, onNext, userId, onPrev }: StepBa
                         )}
                     </div>
                     <div className="space-y-2">
-                        <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Género</Label>
+                        <Label htmlFor="gender" className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Género</Label>
                         <Select
                             value={localData.gender || undefined}
                             onValueChange={(value) => handleChange('gender', value)}
                         >
-                            <SelectTrigger className="h-12 rounded-2xl border-muted bg-background/50">
+                            <SelectTrigger id="gender" className="h-12 rounded-2xl border-muted bg-background/50">
                                 <SelectValue placeholder="Seleccionar" />
                             </SelectTrigger>
                             <SelectContent>
@@ -234,11 +236,12 @@ export function StepBasicInfo({ data, onUpdate, onNext, userId, onPrev }: StepBa
                     className="space-y-2"
                     ref={cityDropdownRef}
                 >
-                    <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                    <Label htmlFor="city" className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
                         Ciudad
                     </Label>
                     <div className="relative">
                         <Input
+                            id="city"
                             placeholder="Busca tu ciudad"
                             value={localData.city || citySearch}
                             onChange={(e) => {
@@ -251,11 +254,13 @@ export function StepBasicInfo({ data, onUpdate, onNext, userId, onPrev }: StepBa
                             className="rounded-2xl h-12 border-muted focus-visible:ring-primary/20 bg-background/50"
                         />
                         {showCityDropdown && filteredCities.length > 0 && (
-                            <div className="absolute z-50 mt-1 w-full rounded-xl border bg-background shadow-lg max-h-48 overflow-y-auto">
+                            <div className="absolute z-50 mt-1 w-full rounded-xl border bg-background shadow-lg max-h-48 overflow-y-auto" role="listbox" aria-label="Ciudades disponibles">
                                 {filteredCities.map((city) => (
                                     <button
                                         key={city.id}
                                         type="button"
+                                        role="option"
+                                        aria-selected={localData.city === city.name}
                                         className="w-full text-left px-4 py-2.5 text-sm hover:bg-muted transition-colors first:rounded-t-xl last:rounded-b-xl"
                                         onClick={() => {
                                             handleChange('city', city.name);

@@ -21,7 +21,7 @@ interface StepCreateAccountProps {
 
 export function StepCreateAccount({ onAccountCreated, initialRef }: StepCreateAccountProps) {
     useEffect(() => {
-        if (initialRef) {
+        if (initialRef && REFERRAL_CODE_PATTERN.test(initialRef)) {
             try {
                 const oneMonth = 60 * 60 * 24 * 30;
                 document.cookie = `${REFERRAL_COOKIE}=${encodeURIComponent(initialRef)}; path=/; max-age=${oneMonth}; samesite=lax`;
@@ -331,6 +331,7 @@ export function StepCreateAccount({ onAccountCreated, initialRef }: StepCreateAc
                         initial={{ opacity: 0, y: -5 }}
                         animate={{ opacity: 1, y: 0 }}
                         className="p-3 rounded-xl bg-destructive/10 border border-destructive/20 text-xs text-destructive"
+                        role="alert"
                     >
                         {error}
                         {error.includes('ya está registrado') && (

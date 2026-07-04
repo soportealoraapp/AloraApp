@@ -4,13 +4,11 @@ import { useEffect, useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { ArrowLeft, Heart, Trash2, Loader2 } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { SafeImage } from "@/components/ui/safe-image";
-import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
 import { PlusBadge } from '@/components/premium/PlusBadge';
 

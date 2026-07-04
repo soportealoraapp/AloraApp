@@ -448,7 +448,7 @@ export default function ChatWindowPage() {
         <div className="flex flex-col" style={{ height: keyboardHeight > 0 ? `calc(100dvh - ${keyboardHeight}px)` : '100dvh' }}>
             {/* Header with avatar */}
             <header className="flex h-16 items-center gap-4 border-b bg-background/80 px-4 backdrop-blur-sm sm:px-6 shrink-0 z-20 pt-safe">
-                <Button variant="ghost" size="icon" onClick={() => router.back()}>
+                <Button variant="ghost" size="icon" onClick={() => router.back()} aria-label="Volver">
                     <ArrowLeft className="h-5 w-5" />
                 </Button>
 
@@ -463,7 +463,7 @@ export default function ChatWindowPage() {
                         <span className="font-semibold truncate flex items-center gap-2">
                             {partnerName}
                             {partnerTyping && (
-                                <span className="text-xs text-muted-foreground animate-pulse font-normal">
+                                <span className="text-xs text-muted-foreground animate-pulse font-normal" aria-live="polite">
                                     escribiendo...
                                 </span>
                             )}

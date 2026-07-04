@@ -166,17 +166,20 @@ export default function AdminSuccessStoriesPage() {
                             placeholder="Título"
                             value={form.title}
                             onChange={(e) => setForm({ ...form, title: e.target.value })}
+                            aria-label="Título de la historia"
                         />
                         <Textarea
                             placeholder="Historia"
                             value={form.story}
                             onChange={(e) => setForm({ ...form, story: e.target.value })}
                             rows={6}
+                            aria-label="Contenido de la historia"
                         />
                         <Input
                             placeholder="URL de foto (opcional)"
                             value={form.photoUrl}
                             onChange={(e) => setForm({ ...form, photoUrl: e.target.value })}
+                            aria-label="URL de foto de la historia"
                         />
                         <div className="flex gap-2">
                             <Button onClick={handleSave}>{editing ? 'Guardar' : 'Crear'}</Button>
@@ -197,7 +200,7 @@ export default function AdminSuccessStoriesPage() {
             ) : (
                 <div className="space-y-3">
                     {stories.map((s) => (
-                        <Card key={s.id} className={s.approved ? 'border-green-200' : 'border-amber-200'}>
+                        <Card key={s.id} className={s.approved ? 'border-green-200 dark:border-green-800/30' : 'border-amber-200 dark:border-amber-800/30'}>
                             <CardContent className="p-4 space-y-2">
                                 <div className="flex items-start justify-between gap-3">
                                     <div className="flex-1 min-w-0">

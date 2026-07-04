@@ -1,8 +1,7 @@
 'use client';
 
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { useState, useMemo } from "react";
+import { useState } from "react";
 import { trackEvent } from "@/lib/tracking/client";
 import { motion } from "framer-motion";
 import { UserProfile } from "@/lib/domain/types";

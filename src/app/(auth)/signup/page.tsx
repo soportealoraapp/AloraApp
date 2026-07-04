@@ -1,6 +1,6 @@
 import { cookies } from 'next/headers';
 import { OnboardingWizardLazy } from "@/components/onboarding/OnboardingWizardLazy";
-import { REFERRAL_COOKIE } from '@/lib/referral/constants';
+import { REFERRAL_COOKIE, REFERRAL_CODE_PATTERN } from '@/lib/referral/constants';
 
 export const dynamic = 'force-dynamic';
 
@@ -12,7 +12,7 @@ export default async function SignupPage({
   const params = await searchParams;
   const refCode = typeof params.ref === 'string' ? params.ref.trim() : '';
 
-  if (refCode) {
+  if (refCode && REFERRAL_CODE_PATTERN.test(refCode)) {
     const cookieStore = await cookies();
     cookieStore.set(REFERRAL_COOKIE, refCode, {
       path: '/',
