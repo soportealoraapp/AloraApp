@@ -141,7 +141,7 @@ export default function AdminSuccessStoriesPage() {
         <>
         <div className="md:pl-sidebar p-6 space-y-6 bg-muted/30 min-h-dvh">
             <div className="flex items-center gap-4">
-                <Button variant="ghost" size="icon" onClick={() => router.back()}>
+                <Button variant="ghost" size="icon" onClick={() => router.back()} aria-label="Volver">
                     <ArrowLeft className="h-5 w-5" />
                 </Button>
                 <div className="flex-1">

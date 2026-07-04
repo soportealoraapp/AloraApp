@@ -417,8 +417,9 @@ export default function ProfileEditPage() {
                             <Input
                                 id="displayName"
                                 value={displayName}
-                                onChange={(e) => setDisplayName(e.target.value)}
+                                onChange={(e) => setDisplayName(e.target.value.replace(/<[^>]*>/g, '').slice(0, 50))}
                                 placeholder="Tu nombre"
+                                maxLength={50}
                             />
                         </div>
 
@@ -510,7 +511,7 @@ export default function ProfileEditPage() {
                             <Input
                                 id="status"
                                 value={status}
-                                onChange={(e) => setStatus(e.target.value)}
+                                onChange={(e) => setStatus(e.target.value.replace(/<[^>]*>/g, '').slice(0, 50))}
                                 placeholder="Conociendo gente nueva"
                                 maxLength={50}
                             />
@@ -521,7 +522,7 @@ export default function ProfileEditPage() {
                             <Textarea
                                 id="bio"
                                 value={bio}
-                                onChange={(e) => setBio(e.target.value)}
+                                onChange={(e) => setBio(e.target.value.replace(/<[^>]*>/g, '').slice(0, 500))}
                                 placeholder="Cuéntanos sobre ti..."
                                 rows={4}
                                 maxLength={500}

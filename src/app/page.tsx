@@ -44,19 +44,17 @@ export default function WelcomePage() {
   const [statsLoaded, setStatsLoaded] = useState(false);
 
   useEffect(() => {
-    let cancelled = false;
-    fetch('/api/public/stats')
+    const controller = new AbortController();
+    fetch('/api/public/stats', { signal: controller.signal })
       .then((res) => res.json())
       .then((data) => {
-        if (!cancelled && !data.error) {
+        if (!data.error) {
           setStats(data);
         }
       })
       .catch(() => {})
-      .finally(() => {
-        if (!cancelled) setStatsLoaded(true);
-      });
-    return () => { cancelled = true; };
+      .finally(() => setStatsLoaded(true));
+    return () => controller.abort();
   }, []);
 
   const displayStats = stats

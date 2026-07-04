@@ -10,6 +10,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
 import { useState, useEffect } from "react";
 import { getReferralCode, generateReferralLink } from "@/server/actions/referral";
+import { Loader2 } from "lucide-react";
 
 export default function ReferPage() {
     const router = useRouter();
@@ -17,11 +18,18 @@ export default function ReferPage() {
     const { toast } = useToast();
     const [referralCode, setReferralCode] = useState("");
     const [referralLink, setReferralLink] = useState("");
+    const [loadingReferral, setLoadingReferral] = useState(true);
 
     useEffect(() => {
         if (user?.id) {
-            getReferralCode(user.id).then(setReferralCode);
-            generateReferralLink(user.id).then(setReferralLink);
+            setLoadingReferral(true);
+            Promise.all([
+                getReferralCode(user.id),
+                generateReferralLink(user.id),
+            ]).then(([code, link]) => {
+                setReferralCode(code);
+                setReferralLink(link);
+            }).finally(() => setLoadingReferral(false));
         }
     }, [user?.id]);
 
@@ -69,6 +77,12 @@ export default function ReferPage() {
                         </CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-6">
+                        {loadingReferral ? (
+                            <div className="flex items-center justify-center py-8">
+                                <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+                                <span className="ml-2 text-sm text-muted-foreground">Cargando...</span>
+                            </div>
+                        ) : (<>
                         <div className="max-w-sm mx-auto space-y-2">
                             <Label htmlFor="referral-code">Tu código de recomendación</Label>
                             <div className="flex space-x-2">
@@ -105,6 +119,7 @@ export default function ReferPage() {
                                 <li>Ambas reciben 1 semana de Alora Plus gratis</li>
                             </ol>
                         </div>
+                        </>)}
                     </CardContent>
                 </Card>
             </main>

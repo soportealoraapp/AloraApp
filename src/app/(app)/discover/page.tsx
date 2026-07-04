@@ -259,7 +259,8 @@ export default function DiscoverPage() {
       el.removeEventListener('touchmove', handleTouchMove);
       el.removeEventListener('touchend', handleTouchEnd);
     };
-  }, [loading, refresh]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [refresh]);
 
 
 

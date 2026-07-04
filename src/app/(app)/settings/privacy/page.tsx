@@ -365,7 +365,7 @@ export default function PrivacySettingsPage() {
                                     </div>
                                 </div>
                                 <DialogFooter>
-                                    <Button variant="outline" onClick={() => setPasswordDialogOpen(false)} disabled={changingPassword}>Cancelar</Button>
+                                    <Button variant="outline" onClick={() => { setPasswordDialogOpen(false); setCurrentPassword(""); setNewPassword(""); setConfirmPassword(""); }} disabled={changingPassword}>Cancelar</Button>
                                     <Button onClick={handleChangePassword} disabled={changingPassword}>
                                         {changingPassword ? <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Cambiando...</> : "Cambiar Contraseña"}
                                     </Button>

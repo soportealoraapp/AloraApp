@@ -128,7 +128,7 @@ export default function AdminExperimentsPage() {
     <div className="md:pl-sidebar p-6 space-y-6 min-h-dvh">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <button onClick={() => router.back()} className="inline-flex items-center justify-center h-10 w-10 rounded-md hover:bg-muted">
+          <button onClick={() => router.back()} className="inline-flex items-center justify-center h-10 w-10 rounded-md hover:bg-muted" aria-label="Volver">
             <ArrowLeft className="h-5 w-5" />
           </button>
           <div>

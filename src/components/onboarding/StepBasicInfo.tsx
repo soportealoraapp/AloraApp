@@ -275,6 +275,11 @@ export function StepBasicInfo({ data, onUpdate, onNext, userId, onPrev }: StepBa
                                 ))}
                             </div>
                         )}
+                        {showCityDropdown && filteredCities.length === 0 && citySearch.length >= 2 && (
+                            <div className="absolute z-50 mt-1 w-full rounded-xl border bg-background shadow-lg p-4 text-center">
+                                <p className="text-sm text-muted-foreground">No se encontraron ciudades. Intenta con otro nombre.</p>
+                            </div>
+                        )}
                     </div>
                 </motion.div>
 

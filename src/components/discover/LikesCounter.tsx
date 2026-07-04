@@ -97,7 +97,7 @@ export function LikesCounter({
                         </span>
                     </div>
                     {timeUntilReset && (
-                    <span className="text-[11px] text-muted-foreground">
+                    <span className="text-[11px] text-muted-foreground" aria-live="polite">
                         Se reinician en {timeUntilReset}
                     </span>
                     )}

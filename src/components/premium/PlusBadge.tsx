@@ -25,6 +25,7 @@ export function PlusBadge({ className, size = 'sm', variant = 'default', label =
                     : 'bg-primary/10 text-primary border border-primary/20',
                 className
             )}
+            aria-label={`Función ${label}`}
         >
             <Sparkles className={size === 'sm' ? 'h-2.5 w-2.5' : 'h-3 w-3'} aria-hidden="true" />
             {label}

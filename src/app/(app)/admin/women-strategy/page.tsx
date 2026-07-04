@@ -56,7 +56,7 @@ export default function WomenStrategyPage() {
     return (
         <div className="md:pl-sidebar p-6 space-y-6">
             <div className="flex items-center">
-                <Button variant="ghost" size="sm" onClick={() => router.back()} className="mr-2"><ArrowLeft className="h-4 w-4" /></Button>
+                <Button variant="ghost" size="sm" onClick={() => router.back()} className="mr-2" aria-label="Volver"><ArrowLeft className="h-4 w-4" /></Button>
                 <SectionTitle title="Estrategia 1000 Mujeres" subtitle="Panel operativo para crecimiento femenino" />
             </div>
 

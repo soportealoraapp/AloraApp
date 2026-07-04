@@ -114,6 +114,7 @@ export default function AdminActivationPage() {
                 <button
                     onClick={() => router.back()}
                     className="inline-flex items-center justify-center h-10 w-10 rounded-md hover:bg-muted"
+                    aria-label="Volver"
                 >
                     <ArrowLeft className="h-5 w-5" />
                 </button>
@@ -168,7 +169,13 @@ export default function AdminActivationPage() {
                                     {data.retention.d1.active} de {data.retention.d1.total}
                                 </p>
                             </div>
-                            <div className="h-2 bg-muted rounded-full mt-2 overflow-hidden">
+                            <div className="h-2 bg-muted rounded-full mt-2 overflow-hidden"
+                                role="progressbar"
+                                aria-valuenow={Math.min(100, data.retention.d1.rate)}
+                                aria-valuemin={0}
+                                aria-valuemax={100}
+                                aria-label={`Retención D1: ${data.retention.d1.rate}%`}
+                            >
                                 <div
                                     className="h-full bg-gradient-to-r from-blue-500 to-cyan-500"
                                     style={{ width: `${Math.min(100, data.retention.d1.rate)}%` }}
@@ -183,7 +190,13 @@ export default function AdminActivationPage() {
                                     {data.retention.d7.active} de {data.retention.d7.total}
                                 </p>
                             </div>
-                            <div className="h-2 bg-muted rounded-full mt-2 overflow-hidden">
+                            <div className="h-2 bg-muted rounded-full mt-2 overflow-hidden"
+                                role="progressbar"
+                                aria-valuenow={Math.min(100, data.retention.d7.rate)}
+                                aria-valuemin={0}
+                                aria-valuemax={100}
+                                aria-label={`Retención D7: ${data.retention.d7.rate}%`}
+                            >
                                 <div
                                     className="h-full bg-gradient-to-r from-purple-500 to-pink-500"
                                     style={{ width: `${Math.min(100, data.retention.d7.rate)}%` }}
@@ -235,7 +248,13 @@ export default function AdminActivationPage() {
                                             )}
                                         </div>
                                     </div>
-                                    <div className="h-2 bg-muted rounded-full overflow-hidden">
+                                    <div className="h-2 bg-muted rounded-full overflow-hidden"
+                                        role="progressbar"
+                                        aria-valuenow={Math.min(100, Math.round(widthPct))}
+                                        aria-valuemin={0}
+                                        aria-valuemax={100}
+                                        aria-label={`${step.name}: ${step.count} usuarios`}
+                                    >
                                         <div
                                             className="h-full bg-gradient-to-r from-primary to-purple-500 transition-all"
                                             style={{ width: `${widthPct}%` }}

@@ -31,19 +31,23 @@ export function UpgradePrompt({ trigger, className }: UpgradePromptProps) {
     const [dismissed, setDismissed] = useState(false);
 
     useEffect(() => {
-        const dismissalKey = `upgrade_prompt_${trigger}_dismissed`;
-        const dismissedAt = localStorage.getItem(dismissalKey);
-        if (dismissedAt) {
-            const hoursSinceDismissal = (Date.now() - parseInt(dismissedAt)) / (1000 * 60 * 60);
-            if (hoursSinceDismissal < 24) {
-                setDismissed(true);
+        try {
+            const dismissalKey = `upgrade_prompt_${trigger}_dismissed`;
+            const dismissedAt = localStorage.getItem(dismissalKey);
+            if (dismissedAt) {
+                const hoursSinceDismissal = (Date.now() - parseInt(dismissedAt)) / (1000 * 60 * 60);
+                if (hoursSinceDismissal < 24) {
+                    setDismissed(true);
+                }
             }
-        }
+        } catch {}
     }, [trigger]);
 
     const handleDismiss = () => {
         setDismissed(true);
-        localStorage.setItem(`upgrade_prompt_${trigger}_dismissed`, Date.now().toString());
+        try {
+            localStorage.setItem(`upgrade_prompt_${trigger}_dismissed`, Date.now().toString());
+        } catch {}
     };
 
     if (dismissed) return null;

@@ -45,7 +45,7 @@ export default function AdminVerificationsPage() {
     return (
         <div className="min-h-dvh bg-background text-foreground">
             <header className="sticky top-0 z-30 border-b border-border bg-background/80 backdrop-blur-sm px-6 py-4 flex items-center gap-4">
-                <Button variant="ghost" size="icon" onClick={() => router.back()} className="text-muted-foreground">
+                <Button variant="ghost" size="icon" onClick={() => router.back()} className="text-muted-foreground" aria-label="Volver">
                     <ArrowLeft className="h-5 w-5" />
                 </Button>
                 <div className="flex items-center gap-3">
@@ -59,7 +59,8 @@ export default function AdminVerificationsPage() {
                         { key: 'rejected', label: 'Rechazadas' },
                     ].map(({ key, label }) => (
                         <Button key={key} variant={filter === key ? 'default' : 'outline'} size="sm" onClick={() => setFilter(key)}
-                            className={filter === key ? '' : 'border-border text-muted-foreground'}>
+                            className={filter === key ? '' : 'border-border text-muted-foreground'}
+                            aria-pressed={filter === key}>
                             {label}
                         </Button>
                     ))}

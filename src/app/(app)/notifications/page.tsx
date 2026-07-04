@@ -51,8 +51,8 @@ function NotificationItemInner({ notification, onRead, onDelete }: { notificatio
     } else if (type === 'safety') {
       router.push('/settings/safety');
     } else if (type === 'system') {
-      // Admin notifications: use screen from data if available
-      if (data.screen) {
+      // Admin notifications: use screen from data if available (validate internal only)
+      if (data.screen && typeof data.screen === 'string' && data.screen.startsWith('/') && !data.screen.startsWith('//')) {
         router.push(data.screen);
       } else {
         const fallbackId = data.userId || data.fromUserId || data.id;

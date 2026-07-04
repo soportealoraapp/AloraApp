@@ -105,6 +105,7 @@ export default function NorthStarDashboard() {
         <button
           onClick={() => router.back()}
           className="inline-flex items-center justify-center h-10 w-10 rounded-md hover:bg-muted"
+          aria-label="Volver"
         >
           <ArrowLeft className="h-5 w-5" />
         </button>

@@ -114,7 +114,7 @@ export function StepInterests({ data, onUpdate, onNext, onPrev, userId }: StepIn
                                 const total = selectedInterests.length;
                                 const pct = total / MAX_INTERESTS;
                                 const dotColor = i <= total
-                                    ? pct >= 0.9 ? 'bg-red-500' : pct >= 0.7 ? 'bg-amber-500' : 'bg-primary'
+                                    ? pct >= 0.9 ? 'bg-destructive' : pct >= 0.7 ? 'bg-amber-500' : 'bg-primary'
                                     : 'bg-muted';
                                 return (
                                     <div

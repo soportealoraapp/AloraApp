@@ -104,7 +104,7 @@ export default function SettingsPage() {
                         className="w-full text-destructive border-destructive/30 hover:bg-destructive/5"
                         onClick={() => router.push('/settings/privacy')}
                     >
-                        Eliminar cuenta
+                        Gestionar cuenta y eliminar
                     </Button>
                     <Button
                         variant="destructive"

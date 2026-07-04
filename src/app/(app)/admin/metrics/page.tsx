@@ -86,7 +86,7 @@ export default function AdminMetricsPage() {
     return (
         <div className="min-h-dvh bg-background text-foreground">
             <header className="sticky top-0 z-30 border-b border-border bg-background/80 backdrop-blur-sm px-6 py-4 flex items-center gap-4">
-                <Button variant="ghost" size="icon" onClick={() => router.back()} className="text-muted-foreground">
+                <Button variant="ghost" size="icon" onClick={() => router.back()} className="text-muted-foreground" aria-label="Volver">
                     <ArrowLeft className="h-5 w-5" />
                 </Button>
                 <div className="flex items-center gap-3">
@@ -203,7 +203,13 @@ export default function AdminMetricsPage() {
                                     {funnel.map((step, i) => (
                                         <div key={step.event} className="flex items-center gap-4">
                                             <div className="w-36 text-xs text-muted-foreground">{step.label}</div>
-                                            <div className="flex-1 h-6 bg-muted rounded-full overflow-hidden relative">
+                                            <div className="flex-1 h-6 bg-muted rounded-full overflow-hidden relative"
+                                                role="progressbar"
+                                                aria-valuenow={Math.min(100, Math.round((step.count / Math.max(1, funnel[0]?.count)) * 100))}
+                                                aria-valuemin={0}
+                                                aria-valuemax={100}
+                                                aria-label={`${step.label}: ${step.count.toLocaleString()} usuarios`}
+                                            >
                                                 <div
                                                     className="h-full bg-gradient-to-r from-blue-500 to-blue-400 rounded-full transition-all"
                                                     style={{ width: `${Math.min(100, (step.count / Math.max(1, funnel[0]?.count)) * 100)}%` }}

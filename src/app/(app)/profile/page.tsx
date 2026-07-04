@@ -41,23 +41,24 @@ export default function ProfilePage() {
 
   useEffect(() => {
     if (!user?.id) return;
-    const fetchStats = () => {
-      fetch('/api/profile/stats')
-        .then(r => r.json())
-        .then(data => {
-          if (data.likesReceived !== undefined) {
-            setProfileStats(data);
-          }
-        })
-        .catch(() => logger.warn('Failed to fetch profile stats'));
-    };
-    fetchStats();
+    const controller = new AbortController();
+    fetch('/api/profile/stats', { signal: controller.signal })
+      .then(r => r.json())
+      .then(data => {
+        if (data.likesReceived !== undefined) {
+          setProfileStats(data);
+        }
+      })
+      .catch(() => logger.warn('Failed to fetch profile stats'));
+    return () => controller.abort();
   }, [user?.id]);
 
   useEffect(() => {
     if (!user?.id) return;
+    const controller = new AbortController();
     fetch('/api/daily-question', {
         headers: { 'x-timezone': Intl.DateTimeFormat().resolvedOptions().timeZone },
+        signal: controller.signal,
     })
       .then(r => r.json())
       .then(data => {
@@ -72,6 +73,7 @@ export default function ProfilePage() {
         }
       })
       .catch(() => logger.warn('Failed to fetch daily answer for own profile'));
+    return () => controller.abort();
   }, [user?.id]);
 
   if (loading) {

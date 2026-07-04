@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -20,6 +20,17 @@ export function MessageReactions({ reactions, currentUserId, onReact, isMe = fal
     const reactionEntries = Object.entries(reactions);
     const myReaction = reactions[currentUserId];
 
+    const handleKeyDown = useCallback((e: KeyboardEvent) => {
+        if (e.key === 'Escape') setShowPicker(false);
+    }, []);
+
+    useEffect(() => {
+        if (showPicker) {
+            document.addEventListener('keydown', handleKeyDown);
+            return () => document.removeEventListener('keydown', handleKeyDown);
+        }
+    }, [showPicker, handleKeyDown]);
+
     return (
         <div className={cn("relative flex flex-col", isMe ? "items-end" : "items-start")}>
             {reactionEntries.length > 0 && (
@@ -33,6 +44,7 @@ export function MessageReactions({ reactions, currentUserId, onReact, isMe = fal
                         <button
                             key={emoji}
                             onClick={() => onReact(emoji)}
+                            aria-label={`Reaccionar con ${emoji}${count > 1 ? `, ${count} personas` : ''}`}
                             className={cn(
                                 "flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-xs transition-colors",
                                 myReaction === emoji
@@ -50,6 +62,8 @@ export function MessageReactions({ reactions, currentUserId, onReact, isMe = fal
             <div className="relative">
                 <button
                     onClick={() => setShowPicker(!showPicker)}
+                    aria-expanded={showPicker}
+                    aria-label="Agregar reacción"
                     className="text-xs text-muted-foreground hover:text-foreground transition-colors mt-0.5"
                 >
                     {reactionEntries.length === 0 ? '+' : ''}
@@ -63,6 +77,8 @@ export function MessageReactions({ reactions, currentUserId, onReact, isMe = fal
                                 initial={{ opacity: 0, scale: 0.8, y: 5 }}
                                 animate={{ opacity: 1, scale: 1, y: 0 }}
                                 exit={{ opacity: 0, scale: 0.8, y: 5 }}
+                                role="menu"
+                                aria-label="Reacciones disponibles"
                                 className={cn(
                                     "absolute bottom-full mb-1 z-50 bg-card border border-border rounded-full shadow-lg px-2 py-1 flex gap-1",
                                     isMe ? "right-0" : "left-0"
@@ -71,6 +87,7 @@ export function MessageReactions({ reactions, currentUserId, onReact, isMe = fal
                                 {AVAILABLE_REACTIONS.map((emoji) => (
                                     <button
                                         key={emoji}
+                                        role="menuitem"
                                         onClick={() => {
                                             onReact(emoji);
                                             setShowPicker(false);

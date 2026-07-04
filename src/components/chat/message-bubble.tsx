@@ -155,7 +155,7 @@ const MemoizedMessageBubble = React.memo(function MessageBubble({ message, isMe,
               </span>
 
               {isMe && (
-                <div className="flex items-center">
+                <div className="flex items-center" aria-live="polite">
                   {isPending ? (
                     <Loader2 className="h-2.5 w-2.5 animate-spin" />
                   ) : isFailed ? (
@@ -198,6 +198,7 @@ const MemoizedMessageBubble = React.memo(function MessageBubble({ message, isMe,
             className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-4"
             onClick={() => setShowImagePreview(false)}
             role="dialog"
+            aria-modal="true"
             aria-label="Imagen ampliada"
           >
             <button
