@@ -325,8 +325,11 @@ export function DiscoverFilters({ open, onOpenChange, onApplyFilters, initialFil
             <Separator />
 
             <div className="space-y-3">
-              <Label>Intereses en Común (hasta 10)</Label>
-              <div className="space-y-4">
+              <div className="flex items-center gap-2">
+                <Label>Intereses en Común (hasta 10)</Label>
+                {selectedInterests.length >= 10 && <span className="text-xs text-muted-foreground font-medium">Máximo alcanzado</span>}
+              </div>
+              <div className={`space-y-4 transition-opacity ${selectedInterests.length >= 10 ? 'opacity-50' : ''}`}>
                 {INTEREST_CATEGORIES.map((category) => (
                   <div key={category.name} className="space-y-2">
                     <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">{category.name}</p>
@@ -345,8 +348,11 @@ export function DiscoverFilters({ open, onOpenChange, onApplyFilters, initialFil
             </div>
 
             <div className="space-y-3">
-              <Label>Valores Compartidos (hasta 5)</Label>
-                <div className="flex flex-wrap gap-2">
+              <div className="flex items-center gap-2">
+                <Label>Valores Compartidos (hasta 5)</Label>
+                {selectedValues.length >= 5 && <span className="text-xs text-muted-foreground font-medium">Máximo alcanzado</span>}
+              </div>
+                <div className={`flex flex-wrap gap-2 transition-opacity ${selectedValues.length >= 5 ? 'opacity-50' : ''}`}>
                 {VALUES.map((value) => (
                   <button key={value} onClick={() => toggleSelection(value, selectedValues, setSelectedValues, 5)}>
                     <Badge variant={selectedValues.includes(value) ? 'default' : 'secondary'} className="cursor-pointer text-xs py-1">
@@ -358,8 +364,11 @@ export function DiscoverFilters({ open, onOpenChange, onApplyFilters, initialFil
             </div>
 
             <div className="space-y-3">
-              <Label>Géneros Musicales (hasta 5)</Label>
-                <div className="flex flex-wrap gap-2">
+              <div className="flex items-center gap-2">
+                <Label>Géneros Musicales (hasta 5)</Label>
+                {selectedMusicGenres.length >= 5 && <span className="text-xs text-muted-foreground font-medium">Máximo alcanzado</span>}
+              </div>
+                <div className={`flex flex-wrap gap-2 transition-opacity ${selectedMusicGenres.length >= 5 ? 'opacity-50' : ''}`}>
                 {MUSIC_GENRES.map((genre) => (
                   <button key={genre} onClick={() => toggleSelection(genre, selectedMusicGenres, setSelectedMusicGenres, 5)}>
                     <Badge variant={selectedMusicGenres.includes(genre) ? 'default' : 'secondary'} className="cursor-pointer text-xs py-1">

@@ -3,7 +3,8 @@
 import { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { SectionTitle } from '@/components/ui/custom/SectionTitle';
-import { Loader2, MessageSquare, Heart, Users, BarChart3, TrendingUp, Activity, Ghost, Clock, ArrowUpRight } from 'lucide-react';
+import { Loader2, RefreshCw, MessageSquare, Heart, Users, BarChart3, TrendingUp, Activity, Ghost, Clock, ArrowUpRight } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 interface Metrics {
     totalMatches: number;
@@ -40,8 +41,11 @@ export default function MatchQualityPage() {
 
     if (!metrics) {
         return (
-            <div className="md:pl-sidebar p-6">
+            <div className="md:pl-sidebar p-6 flex flex-col items-center justify-center py-20 gap-4">
                 <p className="text-muted-foreground">No se pudieron cargar las métricas</p>
+                <Button variant="outline" size="sm" onClick={() => window.location.reload()}>
+                    <RefreshCw className="h-4 w-4 mr-2" /> Reintentar
+                </Button>
             </div>
         );
     }

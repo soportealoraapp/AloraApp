@@ -41,12 +41,13 @@ export function StepCreateAccount({ onAccountCreated, initialRef }: StepCreateAc
     const [showConfirm, setShowConfirm] = useState(false);
 
     const passwordChecks = {
-        minLength: password.length >= 6,
+        minLength: password.length >= 8,
+        hasUppercase: /[A-Z]/.test(password),
         hasNumber: /\d/.test(password),
-        hasLetter: /[a-zA-Z]/.test(password),
+        hasSpecial: /[^A-Za-z0-9]/.test(password),
         matches: password === confirmPassword && confirmPassword.length > 0,
     };
-    const allPasswordValid = passwordChecks.minLength && passwordChecks.hasNumber && passwordChecks.hasLetter;
+    const allPasswordValid = passwordChecks.minLength && passwordChecks.hasUppercase && passwordChecks.hasNumber && passwordChecks.hasSpecial;
 
     const isEmailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 
@@ -138,7 +139,7 @@ export function StepCreateAccount({ onAccountCreated, initialRef }: StepCreateAc
             } else if (message.includes('network') || message.includes('fetch')) {
                 setError('Error de conexión. Verifica tu internet.');
             } else {
-                setError(message);
+                setError('Error al crear la cuenta. Intenta de nuevo.');
             }
         } finally {
             setLoading(false);
@@ -229,7 +230,7 @@ export function StepCreateAccount({ onAccountCreated, initialRef }: StepCreateAc
                     <div className="relative">
                         <Input
                             type={showPassword ? "text" : "password"}
-                            placeholder="Mínimo 6 caracteres"
+                            placeholder="Mínimo 8 caracteres"
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
                             disabled={loading}
@@ -249,15 +250,19 @@ export function StepCreateAccount({ onAccountCreated, initialRef }: StepCreateAc
                         <div className="space-y-1 pt-1">
                             <div className="flex items-center gap-1.5">
                                 {passwordChecks.minLength ? <Check className="h-3 w-3 text-green-500 dark:text-green-400" /> : <X className="h-3 w-3 text-muted-foreground" />}
-                                <span className="text-xs text-muted-foreground">Mínimo 6 caracteres</span>
+                                <span className="text-xs text-muted-foreground">Mínimo 8 caracteres</span>
                             </div>
                             <div className="flex items-center gap-1.5">
-                                {passwordChecks.hasLetter ? <Check className="h-3 w-3 text-green-500 dark:text-green-400" /> : <X className="h-3 w-3 text-muted-foreground" />}
-                                <span className="text-xs text-muted-foreground">Al menos una letra</span>
+                                {passwordChecks.hasUppercase ? <Check className="h-3 w-3 text-green-500 dark:text-green-400" /> : <X className="h-3 w-3 text-muted-foreground" />}
+                                <span className="text-xs text-muted-foreground">Al menos una mayúscula</span>
                             </div>
                             <div className="flex items-center gap-1.5">
                                 {passwordChecks.hasNumber ? <Check className="h-3 w-3 text-green-500 dark:text-green-400" /> : <X className="h-3 w-3 text-muted-foreground" />}
                                 <span className="text-xs text-muted-foreground">Al menos un número</span>
+                            </div>
+                            <div className="flex items-center gap-1.5">
+                                {passwordChecks.hasSpecial ? <Check className="h-3 w-3 text-green-500 dark:text-green-400" /> : <X className="h-3 w-3 text-muted-foreground" />}
+                                <span className="text-xs text-muted-foreground">Al menos un carácter especial (!@#$...)</span>
                             </div>
                         </div>
                     )}
@@ -313,7 +318,11 @@ export function StepCreateAccount({ onAccountCreated, initialRef }: StepCreateAc
                         className="mt-1 h-4 w-4 rounded border-muted text-primary focus:ring-primary/20"
                     />
                     <Label htmlFor="terms" className="text-xs text-muted-foreground leading-relaxed cursor-pointer">
-                        Acepto los Términos de Servicio y la Política de Privacidad de Alora
+                        Acepto los{' '}
+                        <Link href="/terms" target="_blank" className="text-primary hover:underline font-medium">Términos de Servicio</Link>
+                        {' '}y la{' '}
+                        <Link href="/privacy" target="_blank" className="text-primary hover:underline font-medium">Política de Privacidad</Link>
+                        {' '}de Alora
                     </Label>
                 </motion.div>
 

@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import { ArrowLeft, ShieldCheck, CheckCircle, XCircle, ExternalLink } from 'lucide-react';
+import { ArrowLeft, RefreshCw, ShieldCheck, CheckCircle, XCircle, ExternalLink } from 'lucide-react';
 import { SafeImage } from '@/components/ui/safe-image';
 
 interface Submission {
@@ -45,7 +45,7 @@ export default function AdminVerificationsPage() {
     return (
         <div className="min-h-dvh bg-background text-foreground">
             <header className="sticky top-0 z-30 border-b border-border bg-background/80 backdrop-blur-sm px-6 py-4 flex items-center gap-4">
-                <Button variant="ghost" size="icon" onClick={() => router.push('/admin')} className="text-muted-foreground">
+                <Button variant="ghost" size="icon" onClick={() => router.back()} className="text-muted-foreground">
                     <ArrowLeft className="h-5 w-5" />
                 </Button>
                 <div className="flex items-center gap-3">
@@ -72,7 +72,10 @@ export default function AdminVerificationsPage() {
                 ) : submissions.length === 0 ? (
                     <div className="text-center py-16 text-muted-foreground">
                         <ShieldCheck className="h-12 w-12 mx-auto mb-4 text-muted-foreground/60" />
-                        <p>No hay verificaciones pendientes</p>
+                        <p>No hay verificaciones {filter === 'pending' ? 'pendientes' : filter === 'approved' ? 'aprobadas' : 'rechazadas'}</p>
+                        <Button variant="outline" size="sm" className="mt-4" onClick={() => window.location.reload()}>
+                            <RefreshCw className="h-4 w-4 mr-2" /> Reintentar
+                        </Button>
                     </div>
                 ) : (
                     submissions.map(sub => (

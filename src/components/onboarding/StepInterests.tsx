@@ -94,6 +94,7 @@ export function StepInterests({ data, onUpdate, onNext, onPrev, userId }: StepIn
                                         <button
                                             key={item}
                                             onClick={() => toggleInterest(item)}
+                                            aria-pressed={selectedInterests.includes(item)}
                                             className={`px-4 py-2 text-sm rounded-full border transition-all duration-200 ${
                                                 isSelected
                                                     ? 'bg-primary text-primary-foreground border-primary shadow-md scale-[1.02]'
@@ -141,6 +142,7 @@ export function StepInterests({ data, onUpdate, onNext, onPrev, userId }: StepIn
                                 <button
                                     key={value}
                                     onClick={() => toggleValue(value)}
+                                    aria-pressed={selectedValues.includes(value)}
                                     className={`px-4 py-2 text-sm rounded-full border transition-all duration-200 ${
                                         isSelected
                                             ? 'bg-primary text-primary-foreground border-primary shadow-md'
@@ -166,6 +168,7 @@ export function StepInterests({ data, onUpdate, onNext, onPrev, userId }: StepIn
                                 <button
                                     key={genre}
                                     onClick={() => toggleMusic(genre)}
+                                    aria-pressed={selectedMusic.includes(genre)}
                                     className={`px-4 py-2 text-sm rounded-full border transition-all duration-200 ${
                                         isSelected
                                             ? 'bg-primary text-primary-foreground border-primary shadow-md'

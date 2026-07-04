@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Skeleton } from '@/components/ui/skeleton';
-import { ArrowLeft, Users, Search, Ban, ShieldAlert, EyeOff, CheckCircle, Shield, ChevronLeft, ChevronRight } from 'lucide-react';
+import { ArrowLeft, Users, RefreshCw, Search, Ban, ShieldAlert, EyeOff, CheckCircle, Shield, ChevronLeft, ChevronRight } from 'lucide-react';
 import { SafeImage } from '@/components/ui/safe-image';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 
@@ -71,7 +71,7 @@ export default function AdminUsersPage() {
     return (
         <div className="min-h-dvh bg-background text-foreground">
             <header className="sticky top-0 z-30 border-b border-border bg-background/80 backdrop-blur-sm px-6 py-4 flex items-center gap-4">
-                <Button variant="ghost" size="icon" onClick={() => router.push('/admin')} className="text-muted-foreground">
+                <Button variant="ghost" size="icon" onClick={() => router.back()} className="text-muted-foreground">
                     <ArrowLeft className="h-5 w-5" />
                 </Button>
                 <div className="flex items-center gap-3">
@@ -86,6 +86,7 @@ export default function AdminUsersPage() {
                             className="pl-9 h-9 w-48 bg-muted border-border text-sm text-foreground"
                             value={searchInput}
                             onChange={e => setSearchInput(e.target.value)}
+                            aria-label="Buscar usuarios"
                         />
                     </div>
                     <select value={trustFilter} onChange={e => { setTrustFilter(e.target.value); setPage(1); }}
@@ -105,6 +106,9 @@ export default function AdminUsersPage() {
                     <div className="text-center py-16 text-muted-foreground">
                         <Users className="h-12 w-12 mx-auto mb-4 text-muted-foreground/60" />
                         <p>No se encontraron usuarios</p>
+                        <Button variant="outline" size="sm" className="mt-4" onClick={() => window.location.reload()}>
+                            <RefreshCw className="h-4 w-4 mr-2" /> Reintentar
+                        </Button>
                     </div>
                 ) : (
                     <>
@@ -142,19 +146,23 @@ export default function AdminUsersPage() {
                                 </div>
                                 <div className="flex gap-1.5 flex-shrink-0">
                                     <Button variant="ghost" size="sm" className="text-muted-foreground h-8 text-xs"
-                                        onClick={() => setDestructiveConfirm({ user: u, action: 'shadowban' })} title="Sombreado">
+                                        onClick={() => setDestructiveConfirm({ user: u, action: 'shadowban' })} title="Sombreado"
+                                        aria-label="Aplicar shadowban">
                                         <EyeOff className="h-3 w-3" />
                                     </Button>
                                     <Button variant="ghost" size="sm" className="text-muted-foreground h-8 text-xs"
-                                        onClick={() => setDestructiveConfirm({ user: u, action: 'suspend' })} title="Suspender">
+                                        onClick={() => setDestructiveConfirm({ user: u, action: 'suspend' })} title="Suspender"
+                                        aria-label="Suspender usuario">
                                         <ShieldAlert className="h-3 w-3" />
                                     </Button>
                                     <Button variant="ghost" size="sm" className="text-muted-foreground h-8 text-xs"
-                                        onClick={() => setRoleConfirmUser(u)} title="Cambiar rol">
+                                        onClick={() => setRoleConfirmUser(u)} title="Cambiar rol"
+                                        aria-label="Cambiar rol">
                                         <Shield className="h-3 w-3" />
                                     </Button>
                                     <Button variant="ghost" size="sm" className="text-red-500 h-8 text-xs"
-                                        onClick={() => setDestructiveConfirm({ user: u, action: 'ban' })} title="Expulsar">
+                                        onClick={() => setDestructiveConfirm({ user: u, action: 'ban' })} title="Expulsar"
+                                        aria-label="Expulsar usuario">
                                         <Ban className="h-3 w-3" />
                                     </Button>
                                 </div>

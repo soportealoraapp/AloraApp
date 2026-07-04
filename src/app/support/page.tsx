@@ -92,7 +92,7 @@ export default function SupportPage() {
                                         <Collapsible key={itemId} open={isOpen} onOpenChange={() => toggleItem(itemId)}>
                                             <CollapsibleTrigger className="w-full flex items-center justify-between py-2 text-left text-sm hover:text-primary transition-colors">
                                                 <span className="font-medium">{item.q}</span>
-                                                <ChevronRight className={`h-4 w-4 text-muted-foreground transition-transform ${isOpen ? 'rotate-90' : ''}`} />
+                                                <ChevronRight className={`h-4 w-4 text-muted-foreground transition-transform ${isOpen ? 'rotate-90' : ''}`} aria-hidden="true" />
                                             </CollapsibleTrigger>
                                             <CollapsibleContent className="pb-2">
                                                 <p className="text-sm text-muted-foreground pl-0">{item.a}</p>

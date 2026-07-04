@@ -23,7 +23,7 @@ export default function ContactPage() {
                     <CardContent className="p-6 space-y-4">
                         <div className="flex items-center gap-3">
                             <div className="p-3 rounded-2xl bg-primary/10 dark:bg-primary/20">
-                                <Mail className="h-6 w-6 text-primary dark:text-primary" />
+                                <Mail className="h-6 w-6 text-primary dark:text-primary" aria-hidden="true" />
                             </div>
                             <div>
                                 <h2 className="font-bold text-lg">Soporte de Alora</h2>

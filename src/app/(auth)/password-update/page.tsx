@@ -37,8 +37,23 @@ export default function PasswordUpdatePage() {
         e.preventDefault();
         setError(null);
 
-        if (password.length < 6) {
-            setError('La contraseña debe tener al menos 6 caracteres');
+        if (password.length < 8) {
+            setError('La contraseña debe tener al menos 8 caracteres');
+            return;
+        }
+
+        if (!/[A-Z]/.test(password)) {
+            setError('La contraseña debe contener al menos una mayúscula');
+            return;
+        }
+
+        if (!/\d/.test(password)) {
+            setError('La contraseña debe contener al menos un número');
+            return;
+        }
+
+        if (!/[^A-Za-z0-9]/.test(password)) {
+            setError('La contraseña debe contener al menos un carácter especial');
             return;
         }
 
@@ -54,8 +69,8 @@ export default function PasswordUpdatePage() {
             if (error) throw error;
             setSuccess(true);
             setTimeout(() => router.push('/login'), 3000);
-        } catch (err: any) {
-            setError(err.message || 'Error al actualizar la contraseña');
+        } catch {
+            setError('Error al actualizar la contraseña. Intenta de nuevo.');
         } finally {
             setLoading(false);
         }
@@ -98,7 +113,7 @@ export default function PasswordUpdatePage() {
             <form onSubmit={handleSubmit}>
                 <CardContent className="space-y-4">
                     {error && (
-                        <Alert variant="destructive">
+                        <Alert variant="destructive" role="alert">
                             <AlertDescription>{error}</AlertDescription>
                         </Alert>
                     )}
@@ -109,11 +124,11 @@ export default function PasswordUpdatePage() {
                             <Input
                                 id="password"
                                 type={showPassword ? "text" : "password"}
-                                placeholder="Mínimo 6 caracteres"
+                                placeholder="Mínimo 8 caracteres"
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
                                 className="pl-10 pr-10"
-                                minLength={6}
+                                minLength={8}
                                 required
                             />
                             <button
@@ -137,14 +152,13 @@ export default function PasswordUpdatePage() {
                                 value={confirmPassword}
                                 onChange={(e) => setConfirmPassword(e.target.value)}
                                 className="pl-10 pr-10"
-                                minLength={6}
+                                minLength={8}
                                 required
                             />
                             <button
                                 type="button"
                                 onClick={() => setShowConfirm(!showConfirm)}
                                 className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
-                                tabIndex={-1}
                                 aria-label={showConfirm ? "Ocultar contraseña" : "Mostrar contraseña"}
                             >
                                 {showConfirm ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}

@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Loader2, Plus, Play, Pause, CheckCircle, Trash2 } from 'lucide-react';
+import { ArrowLeft, Loader2, RefreshCw, Plus, Play, Pause, CheckCircle, Trash2 } from 'lucide-react';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { useRouter } from 'next/navigation';
 
@@ -231,13 +231,17 @@ export default function AdminExperimentsPage() {
         <Card>
           <CardContent className="p-12 text-center">
             <p className="text-muted-foreground mb-4">No hay experimentos aún</p>
-            <Button variant="outline" onClick={() => setShowCreate(true)}>Crear primer experimento</Button>
+            <div className="flex gap-2 justify-center">
+              <Button variant="outline" size="sm" onClick={() => window.location.reload()}>
+                <RefreshCw className="h-4 w-4 mr-2" /> Reintentar
+              </Button>
+              <Button variant="outline" onClick={() => setShowCreate(true)}>Crear primer experimento</Button>
+            </div>
           </CardContent>
         </Card>
       ) : (
         <div className="space-y-4">
           {experiments.map(exp => {
-            const best = exp.results?.variants?.reduce((a, b) => a.metricValue > b.metricValue ? a : b);
             return (
               <Card key={exp.id} className={`border-l-4 ${exp.status === 'running' ? 'border-l-green-500' : exp.status === 'completed' ? 'border-l-blue-500' : exp.status === 'draft' ? 'border-l-gray-300' : 'border-l-yellow-500'}`}>
                 <CardContent className="p-4">

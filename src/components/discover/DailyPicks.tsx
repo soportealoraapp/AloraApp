@@ -6,7 +6,6 @@ import { Badge } from '@/components/ui/badge';
 import { Sparkles } from 'lucide-react';
 import Link from 'next/link';
 import { SafeImage } from '@/components/ui/safe-image';
-import { cn } from '@/lib/utils';
 import { logger } from '@/lib/logger';
 
 interface DailyPick {

@@ -38,14 +38,14 @@ export function MatchTimeline({ matchId, open, onClose }: MatchTimelineProps) {
     if (!open) return null;
 
     return (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-end md:items-center justify-center">
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-end md:items-center justify-center" role="dialog" aria-modal="true" aria-label="Línea de tiempo">
             <Card className="w-full md:max-w-md md:rounded-3xl rounded-t-3xl rounded-b-none md:rounded-b-3xl max-h-[85vh] flex flex-col">
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
                     <CardTitle className="text-base flex items-center gap-2">
                         <Sparkles className="h-4 w-4 text-primary" />
                         Línea de tiempo
                     </CardTitle>
-                    <Button variant="ghost" size="icon" onClick={onClose} className="h-8 w-8">
+                    <Button variant="ghost" size="icon" onClick={onClose} className="h-8 w-8" aria-label="Cerrar">
                         <X className="h-4 w-4" />
                     </Button>
                 </CardHeader>

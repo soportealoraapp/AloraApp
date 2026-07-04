@@ -1,9 +1,10 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Users, UserCheck, TrendingUp, Target, Loader2 } from 'lucide-react';
+import { Users, UserCheck, TrendingUp, Target, Loader2, RefreshCw, ArrowLeft } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import { SectionTitle } from '@/components/ui/custom/SectionTitle';
 
 interface WomenStrategyData {
@@ -16,6 +17,7 @@ interface WomenStrategyData {
 }
 
 export default function WomenStrategyPage() {
+    const router = useRouter();
     const [data, setData] = useState<WomenStrategyData | null>(null);
     const [loading, setLoading] = useState(true);
 
@@ -41,12 +43,22 @@ export default function WomenStrategyPage() {
     }
 
     if (!data) {
-        return <div className="md:pl-sidebar p-6">No se pudieron cargar los datos</div>;
+        return (
+            <div className="md:pl-sidebar p-6 flex flex-col items-center justify-center py-20 gap-4">
+                <p className="text-muted-foreground">No se pudieron cargar los datos</p>
+                <Button variant="outline" size="sm" onClick={() => window.location.reload()}>
+                    <RefreshCw className="h-4 w-4 mr-2" /> Reintentar
+                </Button>
+            </div>
+        );
     }
 
     return (
         <div className="md:pl-sidebar p-6 space-y-6">
-            <SectionTitle title="Estrategia 1000 Mujeres" subtitle="Panel operativo para crecimiento femenino" />
+            <div className="flex items-center">
+                <Button variant="ghost" size="sm" onClick={() => router.back()} className="mr-2"><ArrowLeft className="h-4 w-4" /></Button>
+                <SectionTitle title="Estrategia 1000 Mujeres" subtitle="Panel operativo para crecimiento femenino" />
+            </div>
 
             <div className="grid gap-4 md:grid-cols-4">
                 <Card>

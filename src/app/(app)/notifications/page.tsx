@@ -3,10 +3,11 @@
 import { useNotifications } from '@/hooks/use-notifications';
 import { Button } from '@/components/ui/button';
 import { CheckCheck, Bell, Loader2, Trash2 } from 'lucide-react';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { cn } from '@/lib/utils';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { useState, useEffect, useCallback, useRef, memo } from 'react';
+import { useState, useCallback, useRef, memo } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { motion, AnimatePresence, useMotionValue, useTransform, animate } from 'framer-motion';
 import { BRAND_VOICE } from '@/lib/constants/brand-voice';
@@ -127,7 +128,7 @@ function NotificationItemInner({ notification, onRead, onDelete }: { notificatio
 }
 
 export default function NotificationsPage() {
-  const { notifications, unreadCount, loading, loadingMore, hasMore, markRead, markAllRead, deleteNotification, undoDelete, refresh, loadMore } = useNotifications({ pollIntervalMs: 30000 });
+  const { notifications, unreadCount, loading, loadingMore, hasMore, error, markRead, markAllRead, deleteNotification, undoDelete, refresh, loadMore } = useNotifications({ pollIntervalMs: 30000 });
   const [deletedNotification, setDeletedNotification] = useState<any>(null);
   const undoTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -189,6 +190,14 @@ const NotificationItem = memo(NotificationItemInner);
       </header>
 
       <main>
+        {error && notifications.length === 0 && (
+          <Alert variant="destructive" className="mx-4 mt-4">
+            <AlertDescription className="flex items-center justify-between">
+              <span>Error al cargar las notificaciones. Intenta de nuevo.</span>
+              <Button variant="outline" size="sm" onClick={() => refresh()}>Reintentar</Button>
+            </AlertDescription>
+          </Alert>
+        )}
         {notifications.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-24 text-muted-foreground">
             <Bell className="h-12 w-12 mb-4 opacity-50" />

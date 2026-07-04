@@ -200,11 +200,23 @@ export default function CompatibilityPage() {
             return (
               <Card
                 key={quiz.id}
+                role="button"
+                tabIndex={0}
                 onClick={() => {
                   if (isCompleted && result) {
                     handleOpenResult(quiz, result);
                   } else if (!loadingCompleted) {
                     handleStartQuiz(quiz);
+                  }
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    if (isCompleted && result) {
+                      handleOpenResult(quiz, result);
+                    } else if (!loadingCompleted) {
+                      handleStartQuiz(quiz);
+                    }
                   }
                 }}
                 className={cn(

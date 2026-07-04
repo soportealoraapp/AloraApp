@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { ArrowLeft, Loader2, TrendingUp, TrendingDown, Users, MessageCircle, Mic, CheckCircle, Sparkles, Crown, Activity, BarChart3 } from 'lucide-react';
+import { ArrowLeft, Loader2, RefreshCw, TrendingUp, TrendingDown, Users, MessageCircle, Mic, CheckCircle, Sparkles, Crown, Activity, BarChart3 } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import { useRouter } from 'next/navigation';
 
 interface FunnelStep {
@@ -52,8 +53,11 @@ export default function AdminActivationPage() {
 
     if (!data) {
         return (
-            <div className="md:pl-sidebar p-6">
+            <div className="md:pl-sidebar p-6 flex flex-col items-center justify-center py-20 gap-4">
                 <p className="text-muted-foreground">No se pudieron cargar las métricas</p>
+                <Button variant="outline" size="sm" onClick={() => window.location.reload()}>
+                    <RefreshCw className="h-4 w-4 mr-2" /> Reintentar
+                </Button>
             </div>
         );
     }
@@ -242,9 +246,9 @@ export default function AdminActivationPage() {
                         })}
                     </div>
                     {data.funnel.biggestDropoff && data.funnel.biggestDropoff.includes('→') && (
-                        <div className="mt-4 p-3 bg-amber-50 border border-amber-200 rounded-xl flex items-start gap-2">
-                            <TrendingDown className="h-4 w-4 text-amber-600 shrink-0 mt-0.5" />
-                            <p className="text-xs text-amber-700">
+                        <div className="mt-4 p-3 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800/30 rounded-xl flex items-start gap-2">
+                            <TrendingDown className="h-4 w-4 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
+                            <p className="text-xs text-amber-700 dark:text-amber-400">
                                 Mayor caída: <span className="font-bold">{data.funnel.biggestDropoff}</span>
                             </p>
                         </div>

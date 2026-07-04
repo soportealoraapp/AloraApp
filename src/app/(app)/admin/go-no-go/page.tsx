@@ -1,9 +1,11 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { CheckCircle, XCircle, AlertTriangle, Loader2, FileText } from 'lucide-react';
+import { CheckCircle, XCircle, AlertTriangle, Loader2, RefreshCw, FileText, ArrowLeft } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import { SectionTitle } from '@/components/ui/custom/SectionTitle';
 
 interface GoNoGoData {
@@ -15,6 +17,7 @@ interface GoNoGoData {
 }
 
 export default function GoNoGoPage() {
+    const router = useRouter();
     const [data, setData] = useState<GoNoGoData | null>(null);
     const [loading, setLoading] = useState(true);
 
@@ -31,7 +34,14 @@ export default function GoNoGoPage() {
     }
 
     if (!data) {
-        return <div className="md:pl-sidebar p-6">No se pudieron generar los datos</div>;
+        return (
+            <div className="md:pl-sidebar p-6 flex flex-col items-center justify-center py-20 gap-4">
+                <p className="text-muted-foreground">No se pudieron generar los datos</p>
+                <Button variant="outline" size="sm" onClick={() => window.location.reload()}>
+                    <RefreshCw className="h-4 w-4 mr-2" /> Reintentar
+                </Button>
+            </div>
+        );
     }
 
     const verdictConfig = {
@@ -45,7 +55,10 @@ export default function GoNoGoPage() {
 
     return (
         <div className="md:pl-sidebar p-6 space-y-6">
-            <SectionTitle title="Go / No-Go Report" subtitle="Evaluación automática de readiness para beta pública" />
+            <div className="flex items-center">
+                <Button variant="ghost" size="sm" onClick={() => router.back()} className="mr-2"><ArrowLeft className="h-4 w-4" /></Button>
+                <SectionTitle title="Go / No-Go Report" subtitle="Evaluación automática de readiness para beta pública" />
+            </div>
 
             <Card className={`${config.color} border-none`}>
                 <CardContent className="p-6 flex items-center gap-4">

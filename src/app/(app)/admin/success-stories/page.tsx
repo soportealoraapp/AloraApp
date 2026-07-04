@@ -224,6 +224,7 @@ export default function AdminSuccessStoriesPage() {
                                             variant="ghost"
                                             onClick={() => handleApprove(s)}
                                             title={s.approved ? 'Rechazar' : 'Aprobar'}
+                                            aria-label={s.approved ? "Desaprobar historia" : "Aprobar historia"}
                                         >
                                             {s.approved ? <XCircle className="h-4 w-4" /> : <CheckCircle className="h-4 w-4 text-green-500" />}
                                         </Button>
@@ -232,6 +233,7 @@ export default function AdminSuccessStoriesPage() {
                                             variant="ghost"
                                             onClick={() => startEdit(s)}
                                             title="Editar"
+                                            aria-label="Editar historia"
                                         >
                                             <Edit2 className="h-4 w-4" />
                                         </Button>
@@ -240,6 +242,7 @@ export default function AdminSuccessStoriesPage() {
                                             variant="ghost"
                                             onClick={() => handleDelete(s.id)}
                                             title="Eliminar"
+                                            aria-label="Eliminar historia"
                                         >
                                             <Trash2 className="h-4 w-4 text-destructive" />
                                         </Button>

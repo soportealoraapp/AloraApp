@@ -67,7 +67,7 @@ export function UpgradePrompt({ trigger, className }: UpgradePromptProps) {
                         <Button size="sm" variant="default" onClick={() => setShowPaywall(true)}>
                             Ver planes
                         </Button>
-                        <Button size="icon" variant="ghost" className="h-11 w-11" onClick={handleDismiss}>
+                        <Button size="icon" variant="ghost" className="h-11 w-11" onClick={handleDismiss} aria-label="Ocultar">
                             <X className="h-4 w-4" />
                         </Button>
                     </div>

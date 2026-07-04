@@ -24,8 +24,8 @@ export default function ForgotPasswordPage() {
         try {
             await authService.sendPasswordResetEmail(email);
             setSent(true);
-        } catch (err: any) {
-            setError(err.message || 'Error al enviar el correo');
+        } catch {
+            setError('Error al enviar el correo. Intenta de nuevo.');
         } finally {
             setLoading(false);
         }
@@ -64,7 +64,7 @@ export default function ForgotPasswordPage() {
             <form onSubmit={handleSubmit}>
                 <CardContent className="space-y-4">
                     {error && (
-                        <Alert variant="destructive">
+                        <Alert variant="destructive" role="alert">
                             <AlertDescription>{error}</AlertDescription>
                         </Alert>
                     )}
@@ -75,7 +75,7 @@ export default function ForgotPasswordPage() {
                             <Input
                                 id="email"
                                 type="email"
-                                placeholder="tu@email.com"
+                                placeholder="tu@ejemplo.com"
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
                                 className="pl-10"

@@ -6,6 +6,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { ArrowLeft, Eye, Lock, Sparkles, Loader2 } from 'lucide-react';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { PaywallModal } from '@/components/premium/PaywallModal';
@@ -31,6 +32,7 @@ export default function VisitorsPage() {
     const [loading, setLoading] = useState(true);
     const [loadingMore, setLoadingMore] = useState(false);
     const [showPaywall, setShowPaywall] = useState(false);
+    const [error, setError] = useState<string | null>(null);
 
     const fetchVisitors = async (offset = 0, append = false) => {
         try {
@@ -46,6 +48,7 @@ export default function VisitorsPage() {
             setIsPlus(data.isPlus || false);
         } catch (err) {
             console.error(err);
+            setError('Error al cargar los visitantes.');
         }
     };
 
@@ -77,6 +80,14 @@ export default function VisitorsPage() {
                 </div>
             </header>
             <main className="p-6 space-y-6">
+            {error && visitors.length === 0 && (
+                <Alert variant="destructive">
+                    <AlertDescription className="flex items-center justify-between">
+                        <span>{error}</span>
+                        <Button variant="outline" size="sm" onClick={() => fetchVisitors()}>Reintentar</Button>
+                    </AlertDescription>
+                </Alert>
+            )}
 
             {loading ? (
                 <div className="flex justify-center py-12">

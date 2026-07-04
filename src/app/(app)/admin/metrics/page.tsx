@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
-import { ArrowLeft, BarChart3, TrendingUp, Users, MessageSquare, Heart, Flag, Activity, Zap, Download } from 'lucide-react';
+import { ArrowLeft, BarChart3, RefreshCw, TrendingUp, Users, MessageSquare, Heart, Flag, Activity, Zap, Download } from 'lucide-react';
 
 interface Metrics {
     overview: { totalUsers: number; totalProfiles: number; totalMatches: number; totalMessages: number; totalReports: number; pendingReports: number; pendingVerifications: number };
@@ -40,7 +40,10 @@ export default function AdminMetricsPage() {
                 setRetention(retentionData.retention || []);
                 setLoading(false);
             })
-            .catch(() => setLoading(false));
+            .catch(() => {
+                setMetrics(null);
+                setLoading(false);
+            });
     }, []);
 
     const exportCSV = () => {
@@ -83,7 +86,7 @@ export default function AdminMetricsPage() {
     return (
         <div className="min-h-dvh bg-background text-foreground">
             <header className="sticky top-0 z-30 border-b border-border bg-background/80 backdrop-blur-sm px-6 py-4 flex items-center gap-4">
-                <Button variant="ghost" size="icon" onClick={() => router.push('/admin')} className="text-muted-foreground">
+                <Button variant="ghost" size="icon" onClick={() => router.back()} className="text-muted-foreground">
                     <ArrowLeft className="h-5 w-5" />
                 </Button>
                 <div className="flex items-center gap-3">
@@ -101,12 +104,19 @@ export default function AdminMetricsPage() {
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                         {[1, 2, 3, 4, 5, 6].map(i => <Skeleton key={i} className="h-28 rounded-xl bg-muted" />)}
                     </div>
+                ) : !metrics ? (
+                    <div className="flex flex-col items-center justify-center py-20 gap-4">
+                        <p className="text-muted-foreground">No se pudieron cargar las métricas</p>
+                        <Button variant="outline" size="sm" onClick={() => window.location.reload()}>
+                            <RefreshCw className="h-4 w-4 mr-2" /> Reintentar
+                        </Button>
+                    </div>
                 ) : (
                     <>
                         {/* Overview Cards */}
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                             <Card className="bg-card border-border">
-                                <CardHeader className="pb-2"><CardTitle className="text-xs text-muted-foreground uppercase">Overview</CardTitle></CardHeader>
+                                <CardHeader className="pb-2"><CardTitle className="text-xs text-muted-foreground uppercase">Resumen</CardTitle></CardHeader>
                                 <CardContent className="space-y-2">
                                     {[
                                         { label: 'Usuarios', value: metrics?.overview.totalUsers, icon: Users },
@@ -124,7 +134,7 @@ export default function AdminMetricsPage() {
                             </Card>
 
                             <Card className="bg-card border-border">
-                                <CardHeader className="pb-2"><CardTitle className="text-xs text-muted-foreground uppercase">Activity</CardTitle></CardHeader>
+                                <CardHeader className="pb-2"><CardTitle className="text-xs text-muted-foreground uppercase">Actividad</CardTitle></CardHeader>
                                 <CardContent className="space-y-2">
                                     {[
                                         { label: 'DAU', value: metrics?.activity.dau, icon: Activity },
@@ -141,7 +151,7 @@ export default function AdminMetricsPage() {
                             </Card>
 
                             <Card className="bg-card border-border">
-                                <CardHeader className="pb-2"><CardTitle className="text-xs text-muted-foreground uppercase">Daily</CardTitle></CardHeader>
+                                <CardHeader className="pb-2"><CardTitle className="text-xs text-muted-foreground uppercase">Diario</CardTitle></CardHeader>
                                 <CardContent className="space-y-2">
                                     {[
                                         { label: 'New Users', value: metrics?.daily.newUsers },
@@ -161,7 +171,7 @@ export default function AdminMetricsPage() {
 
                         {/* Queue Status */}
                         <Card className="bg-card border-border">
-                            <CardHeader><CardTitle className="text-sm text-foreground">Queue Status</CardTitle></CardHeader>
+                            <CardHeader><CardTitle className="text-sm text-foreground">Estado de Cola</CardTitle></CardHeader>
                             <CardContent className="flex gap-4">
                                 <div className="flex-1 p-4 rounded-lg bg-amber-500/5 border border-amber-500/20 text-center">
                                     <p className="text-2xl font-bold text-amber-400">{metrics?.overview.pendingReports}</p>

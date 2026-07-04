@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import { ArrowLeft, Flag, ShieldAlert, Ban, EyeOff, AlertTriangle, CheckCircle, XCircle } from 'lucide-react';
+import { ArrowLeft, Flag, RefreshCw, ShieldAlert, Ban, EyeOff, AlertTriangle, CheckCircle, XCircle } from 'lucide-react';
 import { SafeImage } from '@/components/ui/safe-image';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 
@@ -115,7 +115,7 @@ export default function AdminReportsPage() {
     return (
         <div className="min-h-dvh bg-background text-foreground">
             <header className="sticky top-0 z-30 border-b border-border bg-background/80 backdrop-blur-sm px-6 py-4 flex items-center gap-4">
-                <Button variant="ghost" size="icon" onClick={() => router.push('/admin')} className="text-muted-foreground">
+                <Button variant="ghost" size="icon" onClick={() => router.back()} className="text-muted-foreground">
                     <ArrowLeft className="h-5 w-5" />
                 </Button>
                 <div className="flex items-center gap-3">
@@ -144,6 +144,9 @@ export default function AdminReportsPage() {
                     <div className="text-center py-16 text-muted-foreground">
                         <CheckCircle className="h-12 w-12 mx-auto mb-4 text-muted-foreground/60" />
                         <p>No hay reportes {filter === 'pending' ? 'pendientes' : 'en este estado'}</p>
+                        <Button variant="outline" size="sm" className="mt-4" onClick={() => window.location.reload()}>
+                            <RefreshCw className="h-4 w-4 mr-2" /> Reintentar
+                        </Button>
                     </div>
                 ) : (
                     reports.map(report => (

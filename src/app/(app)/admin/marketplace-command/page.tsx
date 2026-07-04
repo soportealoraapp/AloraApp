@@ -1,9 +1,11 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Loader2, Users, MessageCircle, Heart, AlertTriangle, TrendingUp, Shield, MapPin } from 'lucide-react';
+import { Loader2, RefreshCw, Users, MessageCircle, Heart, AlertTriangle, Shield, ArrowLeft } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import { SectionTitle } from '@/components/ui/custom/SectionTitle';
 
 interface CommandCenterData {
@@ -14,6 +16,7 @@ interface CommandCenterData {
 }
 
 export default function MarketplaceCommandPage() {
+    const router = useRouter();
     const [data, setData] = useState<CommandCenterData | null>(null);
     const [loading, setLoading] = useState(true);
 
@@ -59,14 +62,24 @@ export default function MarketplaceCommandPage() {
     }
 
     if (!data) {
-        return <div className="md:pl-sidebar p-6">No se pudieron cargar los datos</div>;
+        return (
+            <div className="md:pl-sidebar p-6 flex flex-col items-center justify-center py-20 gap-4">
+                <p className="text-muted-foreground">No se pudieron cargar los datos</p>
+                <Button variant="outline" size="sm" onClick={() => window.location.reload()}>
+                    <RefreshCw className="h-4 w-4 mr-2" /> Reintentar
+                </Button>
+            </div>
+        );
     }
 
     const { marketplace, retention } = data;
 
     return (
         <div className="md:pl-sidebar p-6 space-y-6">
-            <SectionTitle title="Marketplace Command Center" subtitle="Vista unificada del estado del marketplace" />
+            <div className="flex items-center">
+                <Button variant="ghost" size="sm" onClick={() => router.back()} className="mr-2"><ArrowLeft className="h-4 w-4" /></Button>
+                <SectionTitle title="Marketplace Command Center" subtitle="Vista unificada del estado del marketplace" />
+            </div>
 
             {/* Health Status */}
             <Card className={`${marketplace.genderAlert === 'healthy' ? 'border-green-200 dark:border-green-800/30 bg-green-50 dark:bg-green-900/20' : marketplace.genderAlert === 'moderate_imbalance' ? 'border-yellow-200 dark:border-yellow-800/30 bg-yellow-50 dark:bg-yellow-900/20' : 'border-red-200 dark:border-red-800/30 bg-red-50 dark:bg-red-900/20'}`}>

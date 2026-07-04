@@ -70,9 +70,12 @@ export default function LoginPage() {
                     return;
                 }
                 router.push("/discover");
-            } else {
+            } else if (profileRes.status === 404) {
                 // Profile not found — user needs to complete onboarding
                 router.push("/onboarding");
+            } else {
+                // Server error — still redirect to discover (profile likely exists)
+                router.push("/discover");
             }
         } catch (error: unknown) {
             const message = error instanceof Error ? error.message : "";
@@ -85,7 +88,7 @@ export default function LoginPage() {
             } else if (message.includes("network") || message.includes("fetch")) {
                 setError("Error de conexión. Verifica tu internet e intenta de nuevo.");
             } else {
-                setError(message || "Error al iniciar sesión. Intenta de nuevo.");
+                setError("Error al iniciar sesión. Intenta de nuevo.");
             }
         } finally {
             setLoading(false);
@@ -134,7 +137,7 @@ export default function LoginPage() {
             </CardHeader>
             <CardContent>
                 {error && (
-                    <Alert variant="destructive" className="mb-4">
+                    <Alert variant="destructive" className="mb-4" role="alert">
                         <AlertDescription>{error}</AlertDescription>
                     </Alert>
                 )}

@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { ArrowLeft, Shield, TrendingUp, TrendingDown, CheckCircle, XCircle, Lightbulb } from 'lucide-react';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useRouter } from 'next/navigation';
 import { cn } from '@/lib/utils';
 
@@ -58,7 +59,12 @@ export default function TrustPage() {
     if (!trust) {
         return (
             <div className="p-6">
-                <p className="text-muted-foreground">No se pudo cargar el score de confianza</p>
+                <Alert variant="destructive">
+                    <AlertDescription className="flex items-center justify-between">
+                        <span>No se pudo cargar el score de confianza</span>
+                        <Button variant="outline" size="sm" onClick={() => window.location.reload()}>Reintentar</Button>
+                    </AlertDescription>
+                </Alert>
             </div>
         );
     }

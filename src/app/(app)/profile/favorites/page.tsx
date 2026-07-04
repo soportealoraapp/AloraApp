@@ -6,6 +6,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { ArrowLeft, Heart, Trash2, Loader2 } from 'lucide-react';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { SafeImage } from "@/components/ui/safe-image";
@@ -29,13 +30,14 @@ export default function FavoritesPage() {
     const { toast } = useToast();
     const [favorites, setFavorites] = useState<Favorite[]>([]);
     const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
         if (!user) return;
         fetch('/api/profile/favorites')
             .then(r => r.json())
             .then(data => setFavorites(data.favorites || []))
-            .catch(console.error)
+            .catch((err) => { console.error(err); setError('Error al cargar los favoritos.'); })
             .finally(() => setLoading(false));
     }, [user]);
 
@@ -66,6 +68,14 @@ export default function FavoritesPage() {
                 </div>
             </header>
             <main className="p-6 space-y-6">
+            {error && favorites.length === 0 && (
+                <Alert variant="destructive">
+                    <AlertDescription className="flex items-center justify-between">
+                        <span>{error}</span>
+                        <Button variant="outline" size="sm" onClick={() => window.location.reload()}>Reintentar</Button>
+                    </AlertDescription>
+                </Alert>
+            )}
 
             {loading ? (
                 <div className="flex justify-center py-12">

@@ -2,7 +2,7 @@
 
 import { Card } from "@/components/ui/card";
 import Link from "next/link";
-import { Shield, Users, Flag, CheckCircle, BarChart3, Beaker, Zap, Heart, Rocket, Target, BookOpen, BarChart } from "lucide-react";
+import { Shield, Users, Flag, BarChart3, Beaker, Zap, Heart, Rocket, Target, BookOpen, BarChart } from "lucide-react";
 
 const MODULES = [
   { href: "/admin/users", label: "Gestión de Usuarios", icon: Users, desc: "Ban, shadowban, verificar usuarios" },

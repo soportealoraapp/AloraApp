@@ -5,13 +5,14 @@ import { useMatches } from '@/hooks/use-matches';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Heart, MessageSquare, Loader2, Sparkles } from 'lucide-react';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { SafeImage } from '@/components/ui/safe-image';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 
 export default function MatchesPage() {
     const { user } = useAuth();
-    const { matches, newMatches, loading } = useMatches();
+    const { matches, newMatches, loading, error, refresh } = useMatches();
 
     if (!user) return null;
 
@@ -27,6 +28,14 @@ export default function MatchesPage() {
             </header>
 
             <main className="max-w-lg mx-auto px-4 py-4 space-y-6">
+                {error && matches.length === 0 && (
+                    <Alert variant="destructive">
+                        <AlertDescription className="flex items-center justify-between">
+                            <span>Error al cargar las conexiones. Intenta de nuevo.</span>
+                            <Button variant="outline" size="sm" onClick={() => refresh()}>Reintentar</Button>
+                        </AlertDescription>
+                    </Alert>
+                )}
                 {loading ? (
                     <div className="flex items-center justify-center py-20">
                         <Loader2 className="h-8 w-8 animate-spin text-primary" />

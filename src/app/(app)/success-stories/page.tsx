@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Heart, Loader2, ArrowLeft, Sparkles, Quote } from 'lucide-react';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { SafeImage } from '@/components/ui/safe-image';
@@ -21,12 +22,13 @@ export default function SuccessStoriesPage() {
     const [stories, setStories] = useState<Story[]>([]);
     const [loading, setLoading] = useState(true);
     const [expanded, setExpanded] = useState<string | null>(null);
+    const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
         fetch('/api/success-stories')
             .then(r => r.json())
             .then(data => setStories(data.stories || []))
-            .catch(console.error)
+            .catch((err) => { console.error(err); setError('Error al cargar las historias.'); })
             .finally(() => setLoading(false));
     }, []);
 
@@ -53,6 +55,14 @@ export default function SuccessStoriesPage() {
                 </div>
             </div>
 
+            {error && stories.length === 0 && (
+                <Alert variant="destructive">
+                    <AlertDescription className="flex items-center justify-between">
+                        <span>{error}</span>
+                        <Button variant="outline" size="sm" onClick={() => window.location.reload()}>Reintentar</Button>
+                    </AlertDescription>
+                </Alert>
+            )}
             {stories.length === 0 ? (
                 <Card>
                     <CardContent className="flex flex-col items-center justify-center py-16">
