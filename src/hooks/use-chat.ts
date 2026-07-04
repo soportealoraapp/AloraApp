@@ -191,7 +191,7 @@ export function useChat(matchId: string) {
             const data = await response.json();
             setMessages(prev => deduplicate([
                 ...prev.filter(m => m.id !== optimisticId),
-                { ...data, createdAt: new Date(data.created_at || data.createdAt) }
+                { ...data, createdAt: data.created_at || data.createdAt ? new Date(data.created_at || data.createdAt) : new Date() }
             ]));
 
         } catch (err) {

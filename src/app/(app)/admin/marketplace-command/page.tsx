@@ -23,11 +23,32 @@ export default function MarketplaceCommandPage() {
             fetch('/api/admin/female-retention').then(r => r.json()),
             fetch('/api/admin/activation-funnel').then(r => r.json()),
         ]).then(([marketplace, retention, activation]) => {
+            const derivedAlerts: { severity: string; message: string }[] = [];
+
+            if (marketplace.genderAlert === 'critical_imbalance') {
+                derivedAlerts.push({ severity: 'high', message: 'Desequilibrio de género crítico. La proporción requiere acción inmediata.' });
+            } else if (marketplace.genderAlert === 'moderate_imbalance') {
+                derivedAlerts.push({ severity: 'medium', message: 'Desequilibrio de género moderado. Monitorear tendencia.' });
+            }
+
+            if (retention.retentionD7 !== undefined && retention.retentionD7 < 40) {
+                derivedAlerts.push({ severity: 'high', message: `Retención D7 baja: ${retention.retentionD7}%. Evaluar experiencia de onboarding.` });
+            } else if (retention.retentionD7 !== undefined && retention.retentionD7 < 60) {
+                derivedAlerts.push({ severity: 'medium', message: `Retención D7 moderada: ${retention.retentionD7}%. Optimizar engagement.` });
+            }
+
+            if (activation?.funnel?.steps) {
+                const onboardingStep = activation.funnel.steps.find((s: any) => s.label?.includes('Onboarding'));
+                if (onboardingStep && onboardingStep.conversionRate < 50) {
+                    derivedAlerts.push({ severity: 'medium', message: 'Tasa de completitud de onboarding por debajo del 50%.' });
+                }
+            }
+
             setData({
                 marketplace,
                 retention,
                 activation,
-                alerts: [],
+                alerts: derivedAlerts,
             });
             setLoading(false);
         }).catch(() => setLoading(false));

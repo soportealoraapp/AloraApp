@@ -98,8 +98,15 @@ export async function POST(request: NextRequest) {
             select: { isShadowBanned: true }
         });
         if (senderProfileCheck?.isShadowBanned) {
-            // Silently accept but don't deliver — the sender thinks it sent
-            return NextResponse.json({ id: 'shadow-hidden', status: 'sent', content: sanitizedText }, { status: 200 });
+            return NextResponse.json({
+                id: 'shadow-hidden',
+                status: 'sent',
+                content: sanitizedText,
+                matchId,
+                senderId: user.id,
+                type: messageType || 'text',
+                createdAt: new Date().toISOString(),
+            }, { status: 200 });
         }
 
         // Women-first: in heterosexual matches, only the woman can send the first message
