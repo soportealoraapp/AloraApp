@@ -383,12 +383,14 @@ export default function DiscoverPage() {
   const rewindsUsed = isNewRewindDay ? 0 : (currentUserProfile?.rewindsUsed ?? 0);
   const rewindsRemaining = maxRewinds - rewindsUsed;
 
-  // Grid virtualization — react to viewport width changes
+  // Grid virtualization — react to viewport width changes via matchMedia
   const [gridColumns, setGridColumns] = useState(typeof window !== 'undefined' && window.innerWidth >= 640 ? 3 : 2);
   useEffect(() => {
-    const updateColumns = () => setGridColumns(window.innerWidth >= 640 ? 3 : 2);
-    window.addEventListener('resize', updateColumns);
-    return () => window.removeEventListener('resize', updateColumns);
+    const mql = window.matchMedia('(min-width: 640px)');
+    const handler = (e: MediaQueryListEvent | MediaQueryList) => setGridColumns(e.matches ? 3 : 2);
+    handler(mql);
+    mql.addEventListener('change', handler);
+    return () => mql.removeEventListener('change', handler);
   }, []);
   const gridRowCount = Math.ceil(profiles.length / gridColumns);
   const gridVirtualizer = useVirtualizer({
