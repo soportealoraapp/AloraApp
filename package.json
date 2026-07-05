@@ -16,8 +16,13 @@
   },
   "dependencies": {
     "@capacitor/android": "^8.0.0",
+    "@capacitor/app": "^8.1.0",
     "@capacitor/cli": "^8.0.0",
     "@capacitor/core": "^8.0.0",
+    "@capacitor/haptics": "^8.0.2",
+    "@capacitor/keyboard": "^8.0.5",
+    "@capacitor/push-notifications": "^8.1.1",
+    "@capacitor/status-bar": "^8.0.2",
     "@genkit-ai/googleai": "^1.14.1",
     "@genkit-ai/next": "^1.14.1",
     "@hookform/resolvers": "^4.1.3",

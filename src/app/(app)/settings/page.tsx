@@ -19,14 +19,6 @@ export default function SettingsPage() {
     const [loggingOut, setLoggingOut] = useState(false);
     const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
 
-    if (!user) {
-        return (
-            <div className="min-h-dvh bg-background flex items-center justify-center">
-                <Loader2 className="h-6 w-6 animate-spin text-primary" />
-            </div>
-        );
-    }
-
     useEffect(() => {
         const spotify = searchParams.get('spotify');
         if (spotify === 'connected') {
@@ -36,6 +28,14 @@ export default function SettingsPage() {
             toast({ title: 'Error al conectar Spotify', description: reason === 'user_denied' ? 'Conexión cancelada.' : 'No se pudo conectar. Intenta de nuevo.', variant: 'destructive' });
         }
     }, []);
+
+    if (!user) {
+        return (
+            <div className="min-h-dvh bg-background flex items-center justify-center">
+                <Loader2 className="h-6 w-6 animate-spin text-primary" />
+            </div>
+        );
+    }
 
     const handleLogout = async () => {
         setLoggingOut(true);
