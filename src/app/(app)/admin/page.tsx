@@ -1,5 +1,7 @@
 "use client";
 
+export const dynamic = 'force-dynamic';
+
 import { Card } from "@/components/ui/card";
 import Link from "next/link";
 import { Shield, Users, Flag, BarChart3, Beaker, Zap, Heart, Rocket, Target, BookOpen, BarChart } from "lucide-react";

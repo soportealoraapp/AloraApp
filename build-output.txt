@@ -1,0 +1,568 @@
+﻿   ▲ Next.js 15.3.8
+   - Environments: .env.local, .env
+
+   Creating an optimized production build ...
+> [PWA] Compile server
+> [PWA] Compile server
+> [PWA] Compile client (static)
+> [PWA] Auto register service worker with: C:\Users\Alejandro\Downloads\Alora\node_modules\next-pwa\register.js
+> [PWA] Service worker: C:\Users\Alejandro\Downloads\Alora\public\sw.js
+> [PWA]   url: /sw.js
+> [PWA]   scope: /
+node.exe : Browserslist: browsers data (caniuse-lite) is 7 months old. Please run:
+At C:\Program Files\nodejs\npx.ps1:29 char:3
++   & $NODE_EXE $NPX_CLI_JS $args
++   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (Browserslist: b...ld. Please run::String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+  npx update-browserslist-db@latest
+  Why you should do it regularly: https://github.com/browserslist/update-db#readme
+ ⚠ Compiled with warnings in 55s
+
+./node_modules/handlebars/lib/index.js
+require.extensions is not supported by webpack. Use a loader instead.
+
+Import trace for requested module:
+./node_modules/handlebars/lib/index.js
+./node_modules/dotprompt/dist/index.js
+./node_modules/@genkit-ai/core/lib/registry.js
+./node_modules/genkit/lib/registry.js
+./node_modules/genkit/lib/genkit.js
+./node_modules/genkit/lib/index.mjs
+./src/ai/copilot/compatibility-insights.ts
+./src/app/api/ai/compatibility-insights/route.ts
+
+./node_modules/handlebars/lib/index.js
+require.extensions is not supported by webpack. Use a loader instead.
+
+Import trace for requested module:
+./node_modules/handlebars/lib/index.js
+./node_modules/dotprompt/dist/index.js
+./node_modules/@genkit-ai/core/lib/registry.js
+./node_modules/genkit/lib/registry.js
+./node_modules/genkit/lib/genkit.js
+./node_modules/genkit/lib/index.mjs
+./src/ai/copilot/compatibility-insights.ts
+./src/app/api/ai/compatibility-insights/route.ts
+
+./node_modules/handlebars/lib/index.js
+require.extensions is not supported by webpack. Use a loader instead.
+
+Import trace for requested module:
+./node_modules/handlebars/lib/index.js
+./node_modules/dotprompt/dist/index.js
+./node_modules/@genkit-ai/core/lib/registry.js
+./node_modules/genkit/lib/registry.js
+./node_modules/genkit/lib/genkit.js
+./node_modules/genkit/lib/index.mjs
+./src/ai/copilot/compatibility-insights.ts
+./src/app/api/ai/compatibility-insights/route.ts
+
+   Linting and checking validity of types ...
+
+./src/ai/safety-engine/risk-engine.ts
+382:42  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./src/app/(app)/admin/marketplace-command/page.tsx
+47:73  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./src/app/(app)/chat/page.tsx
+66:44  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+89:44  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+464:60  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./src/app/(app)/chat/[id]/page.tsx
+151:8  Warning: React Hook useEffect has a missing dependency: 'fetchIcebreakers'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+245:25  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+303:30  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+357:59  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./src/app/(app)/compatibility/page.tsx
+23:29  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./src/app/(app)/compatibility/quiz/[id]/page.tsx
+91:8  Warning: React Hook useEffect has a missing dependency: 'toast'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+
+./src/app/(app)/discover/page.tsx
+303:6  Warning: React Hook useEffect has a missing dependency: 'toast'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+376:6  Warning: React Hook useEffect has a missing dependency: 'profiles'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+450:38  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+472:31  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+477:39  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+491:6  Warning: React Hook useCallback has a missing dependency: 'getEffectiveIntent'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+515:124  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+792:55  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+794:87  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+795:88  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+887:61  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+916:61  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./src/app/(app)/notifications/page.tsx
+15:84  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+26:40  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+71:29  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+71:40  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+133:66  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+162:51  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./src/app/(app)/profile/edit/page.tsx
+140:44  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+178:45  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+178:75  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+299:18  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./src/app/(app)/profile/[id]/page.tsx
+90:8  Warning: React Hook useEffect has a missing dependency: 'intent'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+
+./src/app/(app)/settings/notifications/page.tsx
+66:25  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./src/app/(app)/settings/page.tsx
+30:8  Warning: React Hook useEffect has missing dependencies: 'searchParams' and 'toast'. Either include them or remove the dependency array.  react-hooks/exhaustive-deps
+
+./src/app/(app)/settings/travel/page.tsx
+83:25  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+113:29  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./src/app/api/admin/reports/route.ts
+94:24  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./src/app/api/admin/users/route.ts
+20:22  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./src/app/api/ai/bio-improver/route.ts
+49:37  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./src/app/api/ai/compatibility-insights/route.ts
+69:45  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+76:50  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./src/app/api/ai/daily-insight/route.ts
+69:37  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+79:38  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./src/app/api/chat/[matchId]/route.ts
+151:16  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./src/app/api/match/check/route.ts
+25:21  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+41:27  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./src/app/api/match/check-batch/route.ts
+23:21  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+51:27  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./src/app/api/match/passed/route.ts
+21:18  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./src/app/api/spotify/callback/route.ts
+78:38  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+78:66  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./src/app/api/spotify/sync/route.ts
+46:33  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+47:35  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./src/app/api/uploadthing/core.ts
+41:31  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+41:55  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+52:65  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+52:89  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+63:31  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+63:55  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./src/app/layout.tsx
+44:9  Warning: Custom fonts not added in `pages/_document.js` will only load for a single page. This is discouraged. See: https://nextjs.org/docs/messages/no-page-custom-font  @next/next/no-page-custom-font
+
+./src/components/audio/VoiceIntro.tsx
+41:45  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./src/components/audio/VoiceRecorder.tsx
+54:8  Warning: React Hook useEffect has a missing dependency: 'stopRecording'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+
+./src/components/chat/chat-input.tsx
+41:41  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+58:41  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+219:6  Warning: React Hook useEffect has a missing dependency: 'cancelRecording'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+
+./src/components/chat/VoiceMessage.tsx
+66:8  Warning: React Hook useEffect has a missing dependency: 'propDuration'. Either include it or remove the dependency array. If 'setDuration' needs the current value of 'propDuration', you can also switch to useReducer instead of useState and read 'propDuration' in the reducer.  react-hooks/exhaustive-deps
+
+./src/components/daily-question/DailyQuestionCard.tsx
+87:8  Warning: React Hook useEffect has a missing dependency: 'updateCountdown'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+105:8  Warning: React Hook useEffect has a missing dependency: 'fetchOtherAnswers'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+135:25  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+165:25  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+172:45  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./src/components/legal/LegalConsent.tsx
+67:25  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./src/components/onboarding/OnboardingWizard.tsx
+65:54  Warning: React Hook useMemo has a missing dependency: 'user'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+65:55  Warning: React Hook useMemo has a complex expression in the dependency array. Extract it to a separate variable so it can be statically checked.  react-hooks/exhaustive-deps
+157:22  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+224:26  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./src/components/onboarding/StepBasicInfo.tsx
+38:11  Warning: The 'selectedModes' logical expression could make the dependencies of useMemo Hook (at line 82) change on every render. To fix this, wrap the initialization of 'selectedModes' in its own useMemo() Hook.  react-hooks/exhaustive-deps
+
+./src/components/onboarding/StepCreateAccount.tsx
+145:8  Warning: React Hook useCallback has an unnecessary dependency: 'onAccountCreated'. Either exclude it or remove the dependency array.  react-hooks/exhaustive-deps
+
+./src/components/onboarding/StepPhotos.tsx
+34:46  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+95:39  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+97:45  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+110:32  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./src/components/profile/ProfileHighlights.tsx
+13:21  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./src/components/safety/BlockDialog.tsx
+44:25  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./src/components/safety/ReportDialog.tsx
+65:25  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./src/components/ui/button.tsx
+68:23  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./src/components/ui/city-autocomplete.tsx
+59:25  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./src/components/ui/premium/FloatingMatchCard.tsx
+91:30  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+95:39  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./src/components/ui/premium/MatchScreen.tsx
+149:111  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./src/components/ui/safe-image.tsx
+38:10  Warning: Image elements must have an alt prop, either with meaningful text, or an empty string for decorative images.  jsx-a11y/alt-text
+
+./src/components/verification/VerificationUpload.tsx
+67:45  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+101:32  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./src/contexts/AuthContext.tsx
+210:8  Warning: React Hook useEffect has a missing dependency: 'supabase.auth'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+217:8  Warning: React Hook useCallback has a missing dependency: 'supabase.auth'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+
+./src/hooks/use-analytics.ts
+13:73  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+27:31  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+31:43  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./src/hooks/use-block.ts
+36:8  Warning: React Hook useCallback has a missing dependency: 'user'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+
+./src/hooks/use-chat.ts
+181:30  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./src/hooks/use-discover.ts
+12:13  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+95:19  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+98:78  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./src/hooks/use-matches.ts
+24:31  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+69:54  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+92:60  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./src/hooks/use-notifications.ts
+122:8  Warning: React Hook useEffect has a missing dependency: 'enableRealtime'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+128:63  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+149:63  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+203:67  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+212:67  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+228:31  Warning: The ref value 'pendingDeletesRef.current' will likely have changed by the time this effect cleanup function runs. If this ref points to a node rendered by React, copy 'pendingDeletesRef.current' to a variable inside the effect, and use that variable in the cleanup function.  react-hooks/exhaustive-deps
+
+./src/lib/compatibility/engine.ts
+143:74  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+143:92  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+217:35  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+217:50  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+427:18  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+432:18  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./src/lib/domain/types.ts
+156:46  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+192:15  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./src/lib/lemonsqueezy/client.ts
+44:28  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./src/lib/logger.ts
+23:31  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+98:76  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./src/lib/mobile.ts
+8:16  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./src/lib/offline-queue.ts
+11:14  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+55:62  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./src/lib/sounds.ts
+15:57  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./src/lib/supabase/services/chat.ts
+11:51  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+22:32  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+68:43  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+82:47  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+89:83  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+90:59  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+106:47  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+113:83  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+114:63  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+153:31  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+154:31  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+155:31  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+170:40  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+217:31  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+218:31  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+219:31  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+313:47  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+323:47  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./src/lib/tracking/client.ts
+3:68  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+36:69  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+49:75  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+54:50  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+55:16  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./src/lib/utils/completeness.ts
+3:48  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./src/server/actions/audit.ts
+8:15  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./src/server/actions/compatibility/getCompatibilityScore.ts
+8:95  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+8:116  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./src/server/actions/feed.ts
+128:46  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+264:28  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+401:53  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+433:66  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+434:52  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+447:43  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+448:45  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+484:33  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+494:31  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./src/server/actions/user.ts
+33:44  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+34:46  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+47:37  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+48:42  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+49:40  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+50:39  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+51:40  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+52:41  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+53:46  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+55:42  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+56:67  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+57:53  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+58:50  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./src/server/scoring/feed-scoring.ts
+50:24  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./src/server/services/analytics.ts
+41:31  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./src/server/services/daily-compatibility.ts
+131:47  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+185:16  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./src/server/services/post-match.ts
+93:38  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+93:53  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./src/server/services/push-fcm.ts
+48:21  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./src/server/utils/idempotency.ts
+11:12  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+75:19  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+91:11  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./src/types/capacitor-stubs.d.ts
+23:60  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+23:85  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+31:15  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+info  - Need to disable some ESLint rules? Learn more here: https://nextjs.org/docs/app/api-reference/config/eslint#disabling-rules
+   Collecting page data ...
+   Generating static pages (0/121) ...
+   Generating static pages (30/121) 
+   Generating static pages (60/121) 
+   Generating static pages (90/121) 
+ ✓ Generating static pages (121/121)
+   Finalizing page optimization ...
+   Collecting build traces ...
+
+Route (app)                                 Size  First Load JS
+┌ ○ /                                    7.62 kB         193 kB
+├ ○ /_not-found                            388 B         103 kB
+├ ○ /admin                               3.26 kB         117 kB
+├ ○ /admin/activation                    4.94 kB         157 kB
+├ ○ /admin/experiments                   8.05 kB         173 kB
+├ ○ /admin/go-no-go                      3.87 kB         156 kB
+├ ○ /admin/marketplace-command            4.7 kB         157 kB
+├ ○ /admin/match-quality                 4.08 kB         157 kB
+├ ○ /admin/metrics                       5.58 kB         158 kB
+├ ○ /admin/north-star                    5.99 kB         162 kB
+├ ○ /admin/reports                       4.96 kB         179 kB
+├ ○ /admin/success-stories               7.99 kB         173 kB
+├ ○ /admin/users                          5.5 kB         180 kB
+├ ○ /admin/verifications                 4.72 kB         163 kB
+├ ○ /admin/women-strategy                3.68 kB         156 kB
+├ ƒ /api/admin/activation-funnel           388 B         103 kB
+├ ƒ /api/admin/activation-insights         388 B         103 kB
+├ ƒ /api/admin/analytics                   388 B         103 kB
+├ ƒ /api/admin/experiments                 388 B         103 kB
+├ ƒ /api/admin/experiments/[id]            388 B         103 kB
+├ ƒ /api/admin/experiments/[id]/results    388 B         103 kB
+├ ƒ /api/admin/female-retention            388 B         103 kB
+├ ƒ /api/admin/go-no-go                    388 B         103 kB
+├ ƒ /api/admin/marketplace-health          388 B         103 kB
+├ ƒ /api/admin/marketplace-snapshot        388 B         103 kB
+├ ƒ /api/admin/match-quality               388 B         103 kB
+├ ƒ /api/admin/metrics                     388 B         103 kB
+├ ƒ /api/admin/product-metrics             388 B         103 kB
+├ ƒ /api/admin/reports                     388 B         103 kB
+├ ƒ /api/admin/retention-extended          388 B         103 kB
+├ ƒ /api/admin/success-stories             388 B         103 kB
+├ ƒ /api/admin/users                       388 B         103 kB
+├ ƒ /api/admin/verifications               388 B         103 kB
+├ ƒ /api/admin/women-experience            388 B         103 kB
+├ ƒ /api/ai/bio-improver                   388 B         103 kB
+├ ƒ /api/ai/compatibility-insights         388 B         103 kB
+├ ƒ /api/ai/conversation-coach             388 B         103 kB
+├ ƒ /api/ai/daily-insight                  388 B         103 kB
+├ ƒ /api/ai/icebreakers                    388 B         103 kB
+├ ƒ /api/ai/profile-coach                  388 B         103 kB
+├ ƒ /api/analytics/track                   388 B         103 kB
+├ ƒ /api/chat/[matchId]                    388 B         103 kB
+├ ƒ /api/chat/health                       388 B         103 kB
+├ ƒ /api/chat/hide                         388 B         103 kB
+├ ƒ /api/chat/mute                         388 B         103 kB
+├ ƒ /api/chat/react                        388 B         103 kB
+├ ƒ /api/chat/send                         388 B         103 kB
+├ ƒ /api/chat/timeline                     388 B         103 kB
+├ ƒ /api/chat/upload                       388 B         103 kB
+├ ƒ /api/compatibility/list                388 B         103 kB
+├ ƒ /api/compatibility/question-answers    388 B         103 kB
+├ ƒ /api/compatibility/save                388 B         103 kB
+├ ƒ /api/compatibility/score               388 B         103 kB
+├ ƒ /api/compatibility/similar             388 B         103 kB
+├ ƒ /api/cron/cleanup-notifications        388 B         103 kB
+├ ƒ /api/cron/cleanup-sessions             388 B         103 kB
+├ ƒ /api/cron/cleanup-uploads              388 B         103 kB
+├ ƒ /api/cron/cleanup-visits               388 B         103 kB
+├ ƒ /api/cron/daily-notifications          388 B         103 kB
+├ ƒ /api/cron/daily-reset                  388 B         103 kB
+├ ƒ /api/cron/subscription-cleanup         388 B         103 kB
+├ ƒ /api/daily-compatibility               388 B         103 kB
+├ ƒ /api/daily-picks                       388 B         103 kB
+├ ƒ /api/daily-question                    388 B         103 kB
+├ ƒ /api/discover                          388 B         103 kB
+├ ƒ /api/experiments/assign                388 B         103 kB
+├ ƒ /api/experiments/flags                 388 B         103 kB
+├ ƒ /api/health/[...slug]                  388 B         103 kB
+├ ƒ /api/lemonsqueezy/checkout             388 B         103 kB
+├ ƒ /api/lemonsqueezy/webhook              388 B         103 kB
+├ ƒ /api/location/search                   388 B         103 kB
+├ ƒ /api/match/activation                  388 B         103 kB
+├ ƒ /api/match/check                       388 B         103 kB
+├ ƒ /api/match/check-batch                 388 B         103 kB
+├ ƒ /api/match/feed                        388 B         103 kB
+├ ƒ /api/match/feedback                    388 B         103 kB
+├ ƒ /api/match/like                        388 B         103 kB
+├ ƒ /api/match/likes-received              388 B         103 kB
+├ ƒ /api/match/likes-sent                  388 B         103 kB
+├ ƒ /api/match/new                         388 B         103 kB
+├ ƒ /api/match/passed                      388 B         103 kB
+├ ƒ /api/match/rewind                      388 B         103 kB
+├ ƒ /api/monetization/boost                388 B         103 kB
+├ ƒ /api/monetization/boost/stats          388 B         103 kB
+├ ƒ /api/notifications                     388 B         103 kB
+├ ƒ /api/notifications/preferences         388 B         103 kB
+├ ƒ /api/notifications/register            388 B         103 kB
+├ ƒ /api/profile                           388 B         103 kB
+├ ƒ /api/profile/[userId]                  388 B         103 kB
+├ ƒ /api/profile/favorites                 388 B         103 kB
+├ ƒ /api/profile/favorites/check           388 B         103 kB
+├ ƒ /api/profile/review                    388 B         103 kB
+├ ƒ /api/profile/stats                     388 B         103 kB
+├ ƒ /api/profile/trust                     388 B         103 kB
+├ ƒ /api/profile/visitors                  388 B         103 kB
+├ ƒ /api/public/stats                      388 B         103 kB
+├ ƒ /api/push-config                       388 B         103 kB
+├ ƒ /api/referral                          388 B         103 kB
+├ ƒ /api/safety/block                      388 B         103 kB
+├ ƒ /api/safety/report                     388 B         103 kB
+├ ƒ /api/safety/status                     388 B         103 kB
+├ ƒ /api/spotify/callback                  388 B         103 kB
+├ ƒ /api/spotify/connect                   388 B         103 kB
+├ ƒ /api/spotify/disconnect                388 B         103 kB
+├ ƒ /api/spotify/sync                      388 B         103 kB
+├ ƒ /api/streak/checkin                    388 B         103 kB
+├ ƒ /api/success-stories                   388 B         103 kB
+├ ƒ /api/travel                            388 B         103 kB
+├ ƒ /api/uploadthing                       388 B         103 kB
+├ ƒ /api/user/consent                      388 B         103 kB
+├ ƒ /api/user/delete                       388 B         103 kB
+├ ƒ /api/verification/status               388 B         103 kB
+├ ƒ /api/verification/submit               388 B         103 kB
+├ ƒ /auth/callback                         388 B         103 kB
+├ ○ /chat                                17.5 kB         278 kB
+├ ƒ /chat/[id]                           26.2 kB         322 kB
+├ ○ /compatibility                       11.9 kB         262 kB
+├ ƒ /compatibility/quiz/[id]             7.68 kB         233 kB
+├ ○ /contact                             6.97 kB         187 kB
+├ ○ /discover                            40.8 kB         319 kB
+├ ○ /forgot-password                     5.04 kB         215 kB
+├ ○ /login                               6.43 kB         216 kB
+├ ○ /matches                             5.66 kB         238 kB
+├ ○ /notifications                       10.8 kB         232 kB
+├ ○ /onboarding                          2.12 kB         105 kB
+├ ○ /password-update                     5.43 kB         212 kB
+├ ○ /privacy                             3.06 kB         159 kB
+├ ○ /profile                              6.7 kB         267 kB
+├ ƒ /profile/[id]                        8.49 kB         278 kB
+├ ○ /profile/edit                        19.2 kB         311 kB
+├ ○ /profile/favorites                   4.12 kB         227 kB
+├ ○ /profile/trust                       4.97 kB         219 kB
+├ ○ /profile/visitors                    3.92 kB         238 kB
+├ ○ /refer                               4.93 kB         219 kB
+├ ○ /settings                            7.65 kB         258 kB
+├ ○ /settings/notifications              7.69 kB         160 kB
+├ ○ /settings/privacy                    26.5 kB         260 kB
+├ ○ /settings/privacy/blocked            4.18 kB         224 kB
+├ ○ /settings/privacy/rejected             388 B         103 kB
+├ ○ /settings/safety                      3.9 kB         221 kB
+├ ○ /settings/travel                     8.19 kB         244 kB
+├ ○ /settings/verification               8.29 kB         251 kB
+├ ƒ /signup                              2.11 kB         105 kB
+├ ○ /success-stories                     4.16 kB         166 kB
+├ ○ /support                             7.14 kB         163 kB
+└ ○ /terms                                  3 kB         159 kB
++ First Load JS shared by all             103 kB
+  ├ chunks/1684-11fc8845dbfb7b99.js      46.6 kB
+  ├ chunks/4bd1b696-1ef78b1a90d3c055.js  53.2 kB
+  └ other shared chunks (total)           2.7 kB
+
+
+ƒ Middleware                             98.2 kB
+
+○  (Static)   prerendered as static content
+ƒ  (Dynamic)  server-rendered on demand
+
