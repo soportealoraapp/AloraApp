@@ -6,7 +6,7 @@ const BOOST_DURATION_MINUTES = 30;
 const FREE_BOOST_COOLDOWN_DAYS = 5;
 const PLUS_BOOST_COOLDOWN_DAYS = 7;
 
-export async function POST(request: Request) {
+export async function POST(_request: Request) {
     const { createClient } = await import('@/lib/supabase/server');
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();

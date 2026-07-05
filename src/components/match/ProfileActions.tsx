@@ -7,7 +7,6 @@ import { ReportDialog } from "@/components/safety/ReportDialog";
 import { BlockDialog } from "@/components/safety/BlockDialog";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
-import { BRAND_VOICE } from "@/lib/constants/brand-voice";
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -28,7 +27,7 @@ interface ProfileActionsProps {
     onBlockSuccess?: () => void;
 }
 
-export function ProfileActions({ userId, userName, matchId, isMuted = false, onMuteChange, onBlockSuccess }: ProfileActionsProps) {
+export function ProfileActions({ userId, matchId, isMuted = false, onMuteChange, onBlockSuccess }: ProfileActionsProps) {
     const { toast } = useToast();
     const { user: currentUser } = useAuth();
     const [showMuteDialog, setShowMute] = useState(false);

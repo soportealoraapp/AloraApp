@@ -17,7 +17,7 @@ export function useWebPush(userId: string | null) {
 
         // Check if already have permission and token
         if (Notification.permission === 'granted') {
-            registerToken(userId);
+            registerToken();
             return;
         }
 
@@ -29,7 +29,7 @@ export function useWebPush(userId: string | null) {
     }, [userId]);
 }
 
-async function registerToken(userId: string) {
+async function registerToken() {
     try {
         const { getMessaging, getToken } = await import('firebase/messaging');
         const { initializeApp, getApps } = await import('firebase/app');
@@ -68,14 +68,14 @@ async function registerToken(userId: string) {
  * Request notification permission and register token.
  * Call this from UI (button click).
  */
-export async function requestWebPushPermission(userId: string): Promise<boolean> {
+export async function requestWebPushPermission(_userId: string): Promise<boolean> {
     if (typeof window === 'undefined' || !('Notification' in window)) return false;
     if (isNativePlatform()) return false;
 
     try {
         const permission = await Notification.requestPermission();
         if (permission === 'granted') {
-            await registerToken(userId);
+            await registerToken();
             return true;
         }
     } catch (error) {

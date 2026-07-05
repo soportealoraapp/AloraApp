@@ -20,7 +20,7 @@ interface StepBasicInfoProps {
     onPrev?: () => void;
 }
 
-export function StepBasicInfo({ data, onUpdate, onNext, userId, onPrev }: StepBasicInfoProps) {
+export function StepBasicInfo({ data, onUpdate, onNext, userId }: StepBasicInfoProps) {
     const [localData, setLocalData] = useState<Partial<UserProfile>>(data);
     const [citySearch, setCitySearch] = useState('');
     const [debouncedCitySearch, setDebouncedCitySearch] = useState('');

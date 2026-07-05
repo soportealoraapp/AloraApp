@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Search, Heart, X, Loader2, MessageSquare, Bell, BellOff, Trash2, MoreVertical } from "lucide-react";
+import { Search, X, Loader2, MessageSquare, Bell, BellOff, Trash2, MoreVertical } from "lucide-react";
 import { SafeImage } from "@/components/ui/safe-image";
 import { cn } from "@/lib/utils";
 import Link from "next/link";

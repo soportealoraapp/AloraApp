@@ -70,7 +70,7 @@ export function MatchTimeline({ matchId, open, onClose }: MatchTimelineProps) {
                     ) : (
                         <div className="relative pl-6 space-y-4">
                             <div className="absolute left-[11px] top-2 bottom-2 w-px bg-border" />
-                            {events.map((event, i) => (
+                            {events.map((event) => (
                                 <div key={event.id} className="relative flex items-start gap-3">
                                     <div className="absolute -left-6 mt-0.5 h-6 w-6 rounded-full bg-card border-2 border-primary/30 flex items-center justify-center text-sm z-10">
                                         {event.icon}

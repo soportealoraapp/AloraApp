@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { ArrowLeft, Shield, ShieldCheck, ShieldAlert, AlertTriangle, Info, Phone, ExternalLink, CheckCircle, Users, FileText, Loader2 } from 'lucide-react';
+import { ArrowLeft, Shield, ShieldCheck, ShieldAlert, AlertTriangle, Info, Phone, CheckCircle, Users, FileText, Loader2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import Link from 'next/link';
@@ -23,7 +23,7 @@ interface Report {
 
 export default function SafetyCenterPage() {
     const router = useRouter();
-    const { user, profile } = useAuth();
+    const { profile } = useAuth();
     const [blockedUsers, setBlockedUsers] = useState<BlockedUser[]>([]);
     const [reports, setReports] = useState<Report[]>([]);
     const [loading, setLoading] = useState(true);

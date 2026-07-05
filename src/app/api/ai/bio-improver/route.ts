@@ -4,7 +4,7 @@ import { prisma } from '@/lib/prisma';
 import { withRateLimit } from '@/server/utils/api-rate-limit';
 import { getServerUser } from '@/lib/middleware/auth';
 
-export async function POST(request: Request) {
+export async function POST(_request: Request) {
     try {
         const user = await getServerUser();
         if (!user) {

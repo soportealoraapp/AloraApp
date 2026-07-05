@@ -2,7 +2,7 @@ import * as React from "react";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 
-export function GlowInput({ className, children, ...props }: { className?: string; children: React.ReactNode }) {
+export function GlowInput({ className, children }: { className?: string; children: React.ReactNode }) {
     return (
         <div className="relative group">
             <motion.div

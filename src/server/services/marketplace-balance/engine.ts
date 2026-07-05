@@ -12,7 +12,7 @@
  */
 
 import { prisma } from '@/lib/prisma';
-import { getSaturationLevel, getSaturationRecommendation, DEFAULT_SATURATION_CONFIG, type RegionalHealth, type MarketplaceSnapshot } from './types';
+import { getSaturationLevel, getSaturationRecommendation, type RegionalHealth, type MarketplaceSnapshot } from './types';
 
 /**
  * Calculate marketplace health for a specific region.

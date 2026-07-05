@@ -4,7 +4,6 @@ import { RealtimePostgresChangesPayload } from '@supabase/supabase-js'
 import { subscribeWithReconnect } from '../realtime-reconnect'
 
 type MessageCallback = (messages: Message[]) => void
-type NewMessageCallback = (message: Message) => void
 type PresenceCallback = (online: boolean) => void
 type TypingCallback = (typingUserIds: string[]) => void
 
@@ -74,7 +73,7 @@ export const chatService = {
         })
 
         // Realtime subscription for new messages and status updates
-        const { channel, cleanup: cleanupChannel } = subscribeWithReconnect(
+        const { cleanup: cleanupChannel } = subscribeWithReconnect(
             supabase,
             `match:${matchId}`,
             (ch) =>

@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState, useCallback } from "react";
 import { Button } from "@/components/ui/button";
-import { Camera, RefreshCw, X, Upload } from "lucide-react";
+import { Camera, X, Upload } from "lucide-react";
 
 interface CameraCaptureProps {
     onCapture: (blob: Blob) => void;

@@ -6,11 +6,6 @@ import { Message } from '@/lib/domain/types';
 import { chatService, deduplicate } from '@/lib/supabase/services/chat';
 import { addToQueue } from '@/lib/offline-queue';
 
-interface TypingUser {
-    userId: string;
-    timestamp: number;
-}
-
 export function useChat(matchId: string) {
     const { user } = useAuth();
     const [messages, setMessages] = useState<Message[]>([]);

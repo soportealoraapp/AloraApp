@@ -3,12 +3,12 @@
 import { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Mic, Play, Pause, Trash2, Loader2 } from 'lucide-react';
+import { Mic, Trash2, Loader2 } from 'lucide-react';
 import { VoiceRecorder } from '@/components/audio/VoiceRecorder';
 import { VoicePlayer } from '@/components/audio/VoicePlayer';
 import { useUploadThing } from '@/utils/uploadthing';
 import { useToast } from '@/hooks/use-toast';
-import { cn } from '@/lib/utils';
+
 
 interface VoiceIntroProps {
     audioUrl?: string | null;
@@ -18,11 +18,11 @@ interface VoiceIntroProps {
     isOwn?: boolean;
 }
 
-export function VoiceIntro({ audioUrl, duration, onSave, onDelete, isOwn = true }: VoiceIntroProps) {
+export function VoiceIntro({ audioUrl, onSave, onDelete, isOwn = true }: VoiceIntroProps) {
     const [isRecording, setIsRecording] = useState(false);
     const [previewBlob, setPreviewBlob] = useState<Blob | null>(null);
     const [previewUrl, setPreviewUrl] = useState<string | null>(null);
-    const [previewDuration, setPreviewDuration] = useState(0);
+    const [, setPreviewDuration] = useState(0);
     const previewDurationRef = useRef(0);
     const [uploading, setUploading] = useState(false);
     const { toast } = useToast();

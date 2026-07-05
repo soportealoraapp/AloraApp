@@ -1,4 +1,3 @@
-import { prisma } from '@/lib/prisma';
 import { getMarketplaceHealth } from './marketplace-health';
 import { getFemaleRetentionMetrics } from './female-retention';
 import { getActivationFunnel } from './activation-funnel';

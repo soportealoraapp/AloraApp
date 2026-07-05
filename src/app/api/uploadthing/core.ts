@@ -1,7 +1,7 @@
 import { createUploadthing, type FileRouter } from "uploadthing/next";
 import { UTApi } from "uploadthing/server";
 import { createClient } from "@/lib/supabase/server";
-import { prisma } from "@/lib/prisma";
+// prisma imported elsewhere if needed
 
 export const utapi = new UTApi();
 
@@ -11,7 +11,7 @@ const f = createUploadthing({
     },
 });
 
-async function resolveUserId(req: Request) {
+async function resolveUserId(_req: Request) {
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
 
@@ -26,7 +26,7 @@ export const ourFileRouter = {
             const userId = await resolveUserId(req);
             return { userId, type: 'profile' };
         })
-        .onUploadComplete(async ({ metadata, file }) => {
+        .onUploadComplete(async ({ metadata }) => {
             return { uploadedBy: metadata.userId };
         }),
 

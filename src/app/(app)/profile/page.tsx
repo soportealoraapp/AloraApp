@@ -1,7 +1,7 @@
 "use client";
 
 import { useAuth } from "@/contexts/AuthContext";
-import { trackEvent } from "@/lib/tracking/client";
+
 import { calculateCompleteness } from "@/lib/utils/completeness";
 import { TrustBadge } from "@/components/ui/premium/TrustBadge";
 import { BadgeChipList } from "@/components/profile/BadgeChip";

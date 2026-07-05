@@ -3,7 +3,7 @@ import { createCheckout } from '@/lib/lemonsqueezy/actions';
 import { getServerUser } from '@/lib/middleware/auth';
 import { withRateLimit } from '@/server/utils/api-rate-limit';
 
-export async function POST(request: Request) {
+export async function POST(_request: Request) {
     try {
         const user = await getServerUser();
         if (!user) {

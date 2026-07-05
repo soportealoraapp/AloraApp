@@ -1,4 +1,3 @@
-import { prisma } from '@/lib/prisma';
 import { getAllRegionalHealth, getGlobalMarketplaceHealth } from './engine';
 
 export interface RegionalMetrics {
@@ -12,7 +11,7 @@ export interface RegionalMetrics {
  * Get regional health metrics for admin dashboard.
  */
 export async function getRegionalMetrics(): Promise<RegionalMetrics> {
-    const [global, regions] = await Promise.all([
+    const [, regions] = await Promise.all([
         getGlobalMarketplaceHealth(),
         getAllRegionalHealth(),
     ]);
@@ -28,7 +27,6 @@ export async function getRegionalMetrics(): Promise<RegionalMetrics> {
         }));
 
     // Group by country
-    const countryMap = new Map<string, { users: number; men: number; women: number }>();
     // Note: We'd need countryCode on profiles for proper country grouping
     // For now, use city-level data as proxy
 

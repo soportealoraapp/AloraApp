@@ -7,7 +7,7 @@ import { useToast } from '@/hooks/use-toast';
 
 export function VoicePlayer({ src, transcription }: { src: string, transcription?: string }) {
     const [playing, setPlaying] = useState(false);
-    const [loading, setLoading] = useState(true);
+    const [, setLoading] = useState(true);
     const audioRef = useRef<HTMLAudioElement | null>(null);
     const { toast } = useToast();
 

@@ -154,7 +154,12 @@ export async function GET(
         });
 
         // Strip private fields from response
-        const { incognitoMode: _, showMeInDiscover: __, dailyLikesUsed: ___, superlikesRemaining: ____, subscriptionStatus: _____, trustStatus: ______, reputationScore: _______, ...safeProfile } = profile;
+        const {
+            incognitoMode: _incognito, showMeInDiscover: _discover,
+            dailyLikesUsed: _dailyLikes, superlikesRemaining: _superlikes,
+            subscriptionStatus: _sub, trustStatus: _trust,
+            reputationScore: _rep, ...safeProfile
+        } = profile;
 
         const latestAnswer = await getLatestAnswerForUserById(targetUserId);
 

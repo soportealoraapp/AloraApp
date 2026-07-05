@@ -200,7 +200,7 @@ export default function AdminMetricsPage() {
                             </CardHeader>
                             <CardContent>
                                 <div className="space-y-3">
-                                    {funnel.map((step, i) => (
+                                    {funnel.map((step) => (
                                         <div key={step.event} className="flex items-center gap-4">
                                             <div className="w-36 text-xs text-muted-foreground">{step.label}</div>
                                             <div className="flex-1 h-6 bg-muted rounded-full overflow-hidden relative"

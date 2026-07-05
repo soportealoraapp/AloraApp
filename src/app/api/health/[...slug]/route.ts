@@ -19,7 +19,6 @@ async function checkAdmin() {
 }
 
 export async function GET(request: Request) {
-    const isDev = process.env.NODE_ENV === 'development';
     const { pathname } = new URL(request.url);
 
     if (pathname.endsWith('/live')) {

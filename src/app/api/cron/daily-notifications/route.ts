@@ -20,8 +20,6 @@ export async function GET(request: NextRequest) {
 
     try {
         // --- Daily compatibility notifications ---
-        const { notifyDailyCompatibility } = await import('@/server/services/push');
-
         const today = new Date();
         today.setHours(0, 0, 0, 0);
 

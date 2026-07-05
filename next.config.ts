@@ -19,6 +19,7 @@ const nextConfig: NextConfig = {
     config.resolve.alias = {
       ...config.resolve.alias,
       '@opentelemetry/exporter-jaeger': path.resolve(__dirname, 'src/stubs/opentelemetry-exporter-jaeger'),
+      '@genkit-ai/firebase': path.resolve(__dirname, 'src/stubs/genkit-ai-firebase'),
     };
     return config;
   },

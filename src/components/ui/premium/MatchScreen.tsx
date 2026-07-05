@@ -9,7 +9,6 @@ import { EMOTIONAL_MOTION } from '@/lib/constants/motion-config';
 import { BRAND_VOICE } from '@/lib/constants/brand-voice';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2, MessageCircle, Send, Sparkles } from 'lucide-react';
-import { useRouter } from 'next/navigation';
 import { playMatchSound } from '@/lib/sounds';
 import { hapticsNotification } from '@/lib/mobile';
 
@@ -69,7 +68,6 @@ export function MatchScreen({ userProfile, matchedProfile, onChat, onKeepSwiping
     const [sending, setSending] = useState<string | null>(null);
     const [compatScore, setCompatScore] = useState<number | null>(null);
     const [compatExplanations, setCompatExplanations] = useState<string[]>([]);
-    const router = useRouter();
     const { toast } = useToast();
     const shouldReduceMotion = useReducedMotion();
 

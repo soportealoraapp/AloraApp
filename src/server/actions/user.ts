@@ -121,21 +121,16 @@ export async function updateUserProfile(userId: string, data: Partial<UserProfil
         if (data.religion !== undefined) sanitizedData.religion = String(data.religion).substring(0, 100);
 
         const {
-            id,
             email,
-            isVerified,
-            createdAt,
-            subscriptionStatus,
-            trustStatus,
-            spotify,
-            latestAnswer,
-            compatibility,
-            completenessScore,
-            verificationStatus,
-            isCompleted: _isCompletedBlocked,
-            // Sensitive fields — must NEVER be updated via client
-            superlikesRemaining, boostExpiresAt, dailyLikesUsed, dailyLikesResetAt,
-            lastSwipeAt, incomplete_media,
+            // Fields that don't belong to Profile or must never be updated via client
+            id: _id, isVerified: _isVerified, createdAt: _createdAt,
+            subscriptionStatus: _sub, trustStatus: _trust,
+            spotify: _spotify, latestAnswer: _latest, compatibility: _compat,
+            completenessScore: _compScore, verificationStatus: _verif,
+            isCompleted: _isCompleted, superlikesRemaining: _superlikes,
+            boostExpiresAt: _boost, dailyLikesUsed: _likes,
+            dailyLikesResetAt: _reset, lastSwipeAt: _swipe,
+            incomplete_media: _media,
             ...profileUpdates
         } = sanitizedData as Partial<UserProfile>;
 
@@ -197,12 +192,16 @@ export async function completeOnboarding(userId: string, data: Partial<UserProfi
 
         // Strip ALL protected and sensitive fields — prevent field injection attacks
         const {
-            id, email, isVerified, createdAt, subscriptionStatus, trustStatus,
-            spotify, latestAnswer, compatibility, completenessScore, verificationStatus,
-            isCompleted,
-            // Sensitive fields that must NEVER be set via onboarding
-            superlikesRemaining, boostExpiresAt, dailyLikesUsed, dailyLikesResetAt,
-            lastSwipeAt, incomplete_media,
+            email,
+            // Fields that don't belong to Profile or must never be set via onboarding
+            id: _id, isVerified: _isVerified, createdAt: _createdAt,
+            subscriptionStatus: _sub, trustStatus: _trust,
+            spotify: _spotify, latestAnswer: _latest, compatibility: _compat,
+            completenessScore: _compScore, verificationStatus: _verif,
+            isCompleted: _isCompleted,
+            superlikesRemaining: _superlikes, boostExpiresAt: _boost,
+            dailyLikesUsed: _likes, dailyLikesResetAt: _reset,
+            lastSwipeAt: _swipe, incomplete_media: _media,
             ...profileUpdates
         } = data;
 

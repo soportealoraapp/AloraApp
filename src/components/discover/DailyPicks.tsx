@@ -23,7 +23,7 @@ interface DailyPicksProps {
     subscriptionStatus?: string;
 }
 
-export const DailyPicks = React.memo(function DailyPicks({ subscriptionStatus = 'free' }: DailyPicksProps) {
+export const DailyPicks = React.memo(function DailyPicks({ }: DailyPicksProps) {
     const [picks, setPicks] = useState<DailyPick[]>([]);
     const [loading, setLoading] = useState(true);
 

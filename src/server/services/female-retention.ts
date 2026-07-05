@@ -19,7 +19,6 @@ export interface FemaleRetentionMetrics {
 export async function getFemaleRetentionMetrics(): Promise<FemaleRetentionMetrics> {
     const now = new Date();
     const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-    const oneDayAgo = new Date(today.getTime() - 24 * 60 * 60 * 1000);
     const oneWeekAgo = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
     const oneMonthAgo = new Date(today.getTime() - 30 * 24 * 60 * 60 * 1000);
 

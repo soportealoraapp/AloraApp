@@ -36,7 +36,7 @@ function createCache<T>(maxSize: number) {
         get(key: string): T | undefined {
             const entry = map.get(key);
             if (!entry) return undefined;
-            const { _ts, ...value } = entry;
+            const { _ts: _, ...value } = entry;
             return value as T;
         },
         set(key: string, value: T) {

@@ -15,7 +15,7 @@ interface PhotoGridProps {
     maxPhotos?: number;
 }
 
-export function PhotoGrid({ photos, onReorder, onRemove, onCrop, maxPhotos = 6 }: PhotoGridProps) {
+export function PhotoGrid({ photos, onReorder, onRemove, onCrop }: PhotoGridProps) {
     const [dragIndex, setDragIndex] = useState<number | null>(null);
     const [overIndex, setOverIndex] = useState<number | null>(null);
     const dragRef = useRef<number | null>(null);

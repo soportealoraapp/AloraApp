@@ -1,13 +1,13 @@
 "use client";
 
-import { useState, useRef, useCallback, useEffect, useMemo } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Send, Loader2, Image as ImageIcon, X, Mic, Square } from "lucide-react";
 import { useUploadThing } from "@/utils/uploadthing";
 import { SafeImage } from "@/components/ui/safe-image";
 import { motion, AnimatePresence } from "framer-motion";
-import { cn } from "@/lib/utils";
+
 import { useToast } from "@/hooks/use-toast";
 
 interface ChatInputProps {

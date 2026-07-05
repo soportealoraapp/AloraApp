@@ -1,5 +1,4 @@
 import { prisma } from '@/lib/prisma';
-import { assignVariant } from './experiments';
 
 export interface FlagConfig {
   voiceIntroBoost: number;
@@ -13,13 +12,6 @@ const DEFAULT_FLAGS: FlagConfig = {
   verificationPriority: 20,
   activationCardEnabled: true,
   dailyPickReasoning: 'engine',
-};
-
-const FLAG_EXPERIMENTS: Record<string, string> = {
-  voiceIntroBoost: 'discover_scoring_v2',
-  verificationPriority: 'discover_scoring_v2',
-  activationCardEnabled: 'activation_card_test',
-  dailyPickReasoning: 'daily_pick_reasoning_test',
 };
 
 export async function getFlags(userId: string): Promise<FlagConfig> {

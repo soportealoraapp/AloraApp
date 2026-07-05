@@ -236,7 +236,7 @@ export function PhotoCrop({ isOpen, onClose, imageSrc, onCrop }: PhotoCropProps)
         }
     }, [handleDragMove, touchId, pinchDist]);
 
-    const handleTouchEnd = useCallback((e: React.TouchEvent) => {
+    const handleTouchEnd = useCallback(() => {
         handleDragEnd();
     }, [handleDragEnd]);
 

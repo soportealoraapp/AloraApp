@@ -4,7 +4,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { useInfiniteQuery, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/contexts/AuthContext';
 import { UserProfile } from '@/lib/domain/types';
-import { getDynamicFeed, FeedItem, FeedFilters } from '@/server/actions/feed';
+import { getDynamicFeed, FeedFilters } from '@/server/actions/feed';
 
 export interface DiscoverProfile {
     profile: UserProfile;

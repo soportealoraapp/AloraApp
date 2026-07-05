@@ -25,7 +25,6 @@ export async function GET() {
       verifiedProfiles,
       quizUsers,
       dailyQuestionTodayUsers,
-      totalMatches,
     ] = await Promise.all([
       prisma.user.count({ where: { createdAt: { gte: thirtyDaysAgo } } }),
       prisma.profile.count({ where: { voiceIntro: { not: null } } }),

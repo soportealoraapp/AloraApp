@@ -20,7 +20,7 @@ import { ScrollArea } from "../ui/scroll-area";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
 import { Separator } from "../ui/separator";
 import { RadioGroup, RadioGroupItem } from "../ui/radio-group";
-import { INTERESTS, VALUES, MUSIC_GENRES, LIFESTYLE_OPTIONS, INTEREST_CATEGORIES } from "@/lib/constants/preferences";
+import { VALUES, MUSIC_GENRES, LIFESTYLE_OPTIONS, INTEREST_CATEGORIES } from "@/lib/constants/preferences";
 
 export interface Filters {
   ageRange: [number, number];
@@ -58,7 +58,7 @@ interface DiscoverFiltersProps {
   onIntentChange?: (intent: 'dating' | 'friendship' | 'both') => void;
 }
 
-export function DiscoverFilters({ open, onOpenChange, onApplyFilters, initialFilters, browseMode, onBrowseModeChange, intent, onIntentChange }: DiscoverFiltersProps) {
+export function DiscoverFilters({ open, onOpenChange, onApplyFilters, initialFilters, browseMode, onBrowseModeChange, intent }: DiscoverFiltersProps) {
   const [ageRange, setAgeRange] = useState<[number, number]>(initialFilters.ageRange);
   const [distance, setDistance] = useState([initialFilters.distance]);
   const [seeking, setSeeking] = useState(initialFilters.seeking);

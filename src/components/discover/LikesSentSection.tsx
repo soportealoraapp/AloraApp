@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
-import { Heart, Send } from 'lucide-react';
+import { Send } from 'lucide-react';
 import { HeartArrow } from '@/components/ui/custom/HeartArrow';
 import { SafeImage } from '@/components/ui/safe-image';
 import Link from 'next/link';

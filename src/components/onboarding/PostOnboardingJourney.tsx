@@ -2,11 +2,10 @@
 
 import { useState, useEffect } from 'react';
 import { Card } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Check, ChevronRight, Sparkles, Camera, Heart, MessageCircle, Shield, Music, BookOpen } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { Check, ChevronRight, Sparkles, Camera, Heart, MessageCircle, Shield, BookOpen } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { UserProfile } from '@/lib/domain/types';
 import { useRouter } from 'next/navigation';

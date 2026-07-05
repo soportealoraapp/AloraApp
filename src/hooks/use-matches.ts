@@ -22,7 +22,7 @@ export function useMatches() {
     const { user } = useAuth();
     const queryClient = useQueryClient();
     const channelRef = useRef<any>(null);
-    const [intent, setIntent] = useState<ConnectionIntent | undefined>(undefined);
+    const [intent] = useState<ConnectionIntent | undefined>(undefined);
 
     const { data: matchesData, isLoading: loading, error: queryError } = useQuery({
         queryKey: ['matches', user?.id, intent],

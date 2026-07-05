@@ -6,7 +6,7 @@ import { UserProfile } from '@/lib/domain/types';
 import { SafeImage } from '@/components/ui/safe-image';
 import { TrustBadge } from './TrustBadge';
 import { ProfileActions } from '../../match/ProfileActions';
-import { Clock, MessageCircle, Heart, X, Music, Eye, Ban } from 'lucide-react';
+import { Clock, MessageCircle, Heart, X, Eye } from 'lucide-react';
 import { HeartArrow } from '../custom/HeartArrow';
 import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { hapticsLight, hapticsMedium, hapticsHeavy } from '@/lib/mobile';
@@ -32,7 +32,7 @@ interface FloatingMatchCardProps {
   priorInteraction?: 'like' | 'superlike' | 'pass' | null;
 }
 
-export const FloatingMatchCard = React.memo(function FloatingMatchCard({ profile, onSwipe, onFlechado, compatibility, compatibilityDetails, superlikesRemaining, explanations, hasExistingMatch, priorInteraction }: FloatingMatchCardProps) {
+export const FloatingMatchCard = React.memo(function FloatingMatchCard({ profile, onSwipe, onFlechado, superlikesRemaining, hasExistingMatch, priorInteraction }: FloatingMatchCardProps) {
   const controls = useAnimation();
   const [dragX, setDragX] = useState(0);
   const [likeBurst, setLikeBurst] = useState(false);
@@ -51,7 +51,7 @@ export const FloatingMatchCard = React.memo(function FloatingMatchCard({ profile
   }, []);
 
   // Long press handler — 500ms hold triggers context menu
-  const handleLongPressStart = useCallback((e: React.TouchEvent | React.MouseEvent) => {
+  const handleLongPressStart = useCallback((_e: React.TouchEvent | React.MouseEvent) => {
     longPressTimerRef.current = setTimeout(() => {
       hapticsHeavy();
       setShowLongPressMenu(true);

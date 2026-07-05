@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { requireAdmin } from '@/lib/middleware/admin';
-import { sendPushToUser, notifyVerificationApproved, notifyVerificationRejected } from '@/server/services/push';
+import { notifyVerificationApproved, notifyVerificationRejected } from '@/server/services/push';
 import { utapi } from '../../uploadthing/core';
 import { withRateLimit } from '@/server/utils/api-rate-limit';
 import { logger } from '@/lib/logger';

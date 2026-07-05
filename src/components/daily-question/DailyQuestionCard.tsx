@@ -10,10 +10,10 @@ import { MessageCircle, Loader2, Check, Send, Heart, Target, MessageSquare, Link
 import { useToast } from '@/hooks/use-toast';
 import { useSendLike } from '@/hooks/use-send-like';
 import { useAuth } from '@/contexts/AuthContext';
-import { DailyAnswersModal, type OtherAnswer } from '@/components/daily-question/DailyAnswersModal';
+import { DailyAnswersModal } from '@/components/daily-question/DailyAnswersModal';
 import dynamic from 'next/dynamic';
 const MatchScreen = dynamic(() => import('@/components/ui/premium/MatchScreen').then(m => m.MatchScreen), { ssr: false });
-import { AnimatePresence } from 'framer-motion';
+
 import { UserProfile } from '@/lib/domain/types';
 
 interface DailyQuestionData {

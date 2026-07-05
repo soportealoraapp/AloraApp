@@ -3,7 +3,7 @@ import { prisma } from '@/lib/prisma';
 import { withRateLimit } from '@/server/utils/api-rate-limit';
 import { decryptToken, encryptToken, refreshAccessToken, getTopTracks, getTopArtists } from '@/lib/spotify';
 
-export async function POST(request: NextRequest) {
+export async function POST(_request: NextRequest) {
   const { createClient } = await import('@/lib/supabase/server');
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { Button } from '@/components/ui/button';
+
 import { cn } from '@/lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -36,7 +36,7 @@ export function MessageReactions({ reactions, currentUserId, onReact, isMe = fal
             {reactionEntries.length > 0 && (
                 <div className={cn("flex flex-wrap gap-1 mt-1", isMe ? "justify-end" : "justify-start")}>
                     {Object.entries(
-                        reactionEntries.reduce((acc, [userId, emoji]) => {
+                        reactionEntries.reduce((acc, [, emoji]) => {
                             acc[emoji] = (acc[emoji] || 0) + 1;
                             return acc;
                         }, {} as Record<string, number>)

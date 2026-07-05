@@ -152,7 +152,7 @@ export async function analyzeMessageSafety(
     senderId: string,
     receiverId: string,
     content: string,
-    matchMessageCount: number,
+    _matchMessageCount: number,
 ): Promise<{
     assessment: RiskAssessment;
     shouldBlock: boolean;

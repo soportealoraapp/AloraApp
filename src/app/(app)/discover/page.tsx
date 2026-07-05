@@ -310,7 +310,7 @@ export default function DiscoverPage() {
     // When intent is 'both', don't filter by intent — show all profiles
     if (intent === 'both') {
       setFilters(prev => {
-        const { intent: _, ...rest } = prev;
+        const { intent: _intent, ...rest } = prev;
         return rest;
       });
     } else {
@@ -774,7 +774,7 @@ export default function DiscoverPage() {
                         {Array.from({ length: gridColumns }, (_, colIndex) => {
                           const profileIndex = rowIndex * gridColumns + colIndex;
                           if (profileIndex >= profiles.length) return <div key={colIndex} />;
-                          const { profile: p, compatibility: compat } = profiles[profileIndex];
+                           const { profile: p } = profiles[profileIndex];
                           return (
                             <Card key={p.id} className="rounded-2xl overflow-hidden shadow-sm border group">
                               <div

@@ -10,7 +10,7 @@ import { COMPATIBILITY_QUIZZES, Quiz } from '@/lib/compatibility/quizzes';
 import { useAuth } from '@/contexts/AuthContext';
 import { useSendLike } from '@/hooks/use-send-like';
 import { toast } from '@/hooks/use-toast';
-import { Loader2, CheckCircle2, Heart, MessageCircle, Zap, Target, ArrowRight, Trophy, Sparkles, Users, ChevronRight, Sun, Home, Shield, Gamepad2, Brain } from 'lucide-react';
+import { Loader2, CheckCircle2, Heart, MessageCircle, Zap, Target, ArrowRight, Trophy, Sparkles, Users, Sun, Home, Shield, Gamepad2, Brain } from 'lucide-react';
 import { ARCHETYPES } from '@/lib/compatibility/quizzes';
 import { DailyQuestionCard } from '@/components/daily-question/DailyQuestionCard';
 import { DailyCompatibilityCard } from '@/components/compatibility/DailyCompatibilityCard';

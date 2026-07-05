@@ -54,7 +54,6 @@ export function StepCreateAccount({ onAccountCreated, initialRef }: StepCreateAc
     const canSubmit = isEmailValid && allPasswordValid && passwordChecks.matches && agreedToTerms && !loading;
 
     const [showEmailSent, setShowEmailSent] = useState(false);
-    const [pendingUserId, setPendingUserId] = useState<string | null>(null);
     const [verifying, setVerifying] = useState(false);
     const [resending, setResending] = useState(false);
     const pollingRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -121,7 +120,6 @@ export function StepCreateAccount({ onAccountCreated, initialRef }: StepCreateAc
             }
 
             setShowEmailSent(true);
-            setPendingUserId(result.id);
 
             toast({
                 title: "Cuenta creada",

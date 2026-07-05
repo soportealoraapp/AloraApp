@@ -7,7 +7,6 @@ import { MAX_INTERESTS, MAX_VALUES, MAX_MUSIC_GENRES } from '@/lib/constants/pre
 export const ALLOWED_GENDERS = ['woman', 'man', 'non-binary'] as const;
 export type Gender = (typeof ALLOWED_GENDERS)[number];
 
-const ALLOWED_SEEKING = ['women', 'men', 'all', 'everyone'] as const;
 const ALLOWED_CONNECTION_INTENTS = ['dating', 'friendship'] as const;
 const MAX_PHOTOS = 6;
 const MAX_BIO_LENGTH = 500;

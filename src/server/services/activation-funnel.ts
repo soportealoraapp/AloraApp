@@ -132,7 +132,6 @@ export async function getActivationFunnel(): Promise<ActivationFunnel> {
 export async function getActivationMetrics(): Promise<ActivationMetrics> {
     const now = new Date();
     const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
-    const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
 
     const [
         funnel,

@@ -36,7 +36,7 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
       }
     }
 
-    const experiment = await prisma.experiment.update({
+    await prisma.experiment.update({
       where: { id },
       data: {
         ...(body.name && { name: body.name }),

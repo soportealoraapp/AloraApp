@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { ArrowLeft, ShieldCheck, Clock, AlertCircle, CheckCircle, Loader2, RefreshCw, TrendingUp, Users } from 'lucide-react';
+import { ArrowLeft, ShieldCheck, Clock, AlertCircle, Loader2, RefreshCw, TrendingUp, Users } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { VerificationUpload } from '@/components/verification/VerificationUpload';
@@ -17,7 +17,7 @@ const GESTURES = [
 
 export default function VerificationPage() {
     const router = useRouter();
-    const { user, profile } = useAuth();
+    const { profile } = useAuth();
     const [showUpload, setShowUpload] = useState(false);
     const [selectedGesture, setSelectedGesture] = useState<string | null>(null);
     const [verificationStatus, setVerificationStatus] = useState<'unverified' | 'pending' | 'approved' | 'rejected'>('unverified');

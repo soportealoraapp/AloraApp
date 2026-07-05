@@ -12,7 +12,6 @@ interface PushPayload {
 
 const DEDUP_WINDOW_MINUTES = 5;
 const RATE_LIMIT_PER_HOUR = 10;
-const MAX_RETRY_ATTEMPTS = 1;
 const SILENT_HOURS_START = 22; // 10 PM
 const SILENT_HOURS_END = 8;    // 8 AM
 

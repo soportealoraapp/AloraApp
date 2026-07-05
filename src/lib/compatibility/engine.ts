@@ -216,10 +216,8 @@ function scoreDailyQuestion(questionA: { category: string | null } | null, answe
  */
 function scoreLifestyle(profileA: any, profileB: any): number {
     let score = 50;
-    let factors = 0;
 
     if (profileA.smoking && profileB.smoking) {
-        factors++;
         if (profileA.smoking === profileB.smoking) score += 20;
         else if (
             (profileA.smoking === 'no' && profileB.smoking !== 'no') ||
@@ -228,19 +226,16 @@ function scoreLifestyle(profileA: any, profileB: any): number {
     }
 
     if (profileA.drinking && profileB.drinking) {
-        factors++;
         if (profileA.drinking === profileB.drinking) score += 20;
         else score -= 5;
     }
 
     if (profileA.children && profileB.children) {
-        factors++;
         if (profileA.children === profileB.children) score += 20;
         else score -= 10;
     }
 
     if (profileA.education && profileB.education) {
-        factors++;
         const eduLevels = ['secundaria', 'preparatoria', 'universidad', 'maestría', 'doctorado'];
         const levelA = eduLevels.findIndex(e => profileA.education.toLowerCase().includes(e));
         const levelB = eduLevels.findIndex(e => profileB.education.toLowerCase().includes(e));
@@ -251,7 +246,6 @@ function scoreLifestyle(profileA: any, profileB: any): number {
     }
 
     if (profileA.religion && profileB.religion) {
-        factors++;
         if (profileA.religion === profileB.religion) score += 15;
         else if (profileA.religion === 'ninguna' || profileB.religion === 'ninguna') score += 5;
         else score -= 5;

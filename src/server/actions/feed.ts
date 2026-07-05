@@ -113,12 +113,6 @@ export async function getDynamicFeed(
         // Bidirectional seeking: candidate.seeking must accept the viewer's gender
         // candidate.seeking ∈ {'women','men','all'} vs viewer.gender ∈ {'woman','man','non-binary','other'}
         const viewerGender = currentUser.profile.gender || null;
-        const candidateAcceptsViewer = (() => {
-            if (!viewerGender || viewerGender === 'non-binary' || viewerGender === 'other') return true;
-            // We can't pre-filter by inverse seeking in SQL; we apply the constraint in-memory
-            // by excluding candidates whose explicit `seeking` is opposite of the viewer.
-            return null; // marker for "check in-memory"
-        })();
 
         const searchFilter = searchTerm && searchTerm.length <= 100
             ? {
