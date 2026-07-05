@@ -126,10 +126,14 @@ export function CityAutocomplete({ value, onSelect, placeholder = "Buscar ciudad
                     placeholder={placeholder}
                     className="pl-9"
                     autoComplete="off"
+                    role="combobox"
+                    aria-expanded={isOpen && results.length > 0}
+                    aria-controls="city-listbox"
+                    aria-autocomplete="list"
                 />
             </div>
             {isOpen && results.length > 0 && (
-                <div className="absolute z-50 w-full mt-1 bg-popover border border-border rounded-lg shadow-lg max-h-60 overflow-auto" role="listbox" aria-label="Ciudades disponibles">
+                <div id="city-listbox" className="absolute z-50 w-full mt-1 bg-popover border border-border rounded-lg shadow-lg max-h-60 overflow-auto" role="listbox" aria-label="Ciudades disponibles">
                     {results.map((result, index) => (
                         <button
                             key={result.city.id}

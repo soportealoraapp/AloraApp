@@ -39,6 +39,7 @@ export default function AdminExperimentsPage() {
   const router = useRouter();
   const [experiments, setExperiments] = useState<Experiment[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [showCreate, setShowCreate] = useState(false);
   const [newName, setNewName] = useState('');
   const [newDescription, setNewDescription] = useState('');
@@ -52,9 +53,15 @@ export default function AdminExperimentsPage() {
   const loadExperiments = async () => {
     try {
       const res = await fetch('/api/admin/experiments');
-      if (res.ok) setExperiments(await res.json());
+      if (res.ok) {
+        setExperiments(await res.json());
+        setError(null);
+      } else {
+        setError('No se pudieron cargar los experimentos.');
+      }
     } catch (e) {
       console.error(e);
+      setError('Error de conexión al cargar experimentos.');
     } finally {
       setLoading(false);
     }
@@ -233,13 +240,24 @@ export default function AdminExperimentsPage() {
       {experiments.length === 0 ? (
         <Card>
           <CardContent className="p-12 text-center">
-            <p className="text-muted-foreground mb-4">No hay experimentos aún</p>
-            <div className="flex gap-2 justify-center">
-              <Button variant="outline" size="sm" onClick={() => window.location.reload()}>
-                <RefreshCw className="h-4 w-4 mr-2" /> Reintentar
-              </Button>
-              <Button variant="outline" onClick={() => setShowCreate(true)}>Crear primer experimento</Button>
-            </div>
+            {error ? (
+              <>
+                <p className="text-destructive mb-4">{error}</p>
+                <Button variant="outline" size="sm" onClick={() => window.location.reload()}>
+                  <RefreshCw className="h-4 w-4 mr-2" /> Reintentar
+                </Button>
+              </>
+            ) : (
+              <>
+                <p className="text-muted-foreground mb-4">No hay experimentos aún</p>
+                <div className="flex gap-2 justify-center">
+                  <Button variant="outline" size="sm" onClick={() => window.location.reload()}>
+                    <RefreshCw className="h-4 w-4 mr-2" /> Reintentar
+                  </Button>
+                  <Button variant="outline" onClick={() => setShowCreate(true)}>Crear primer experimento</Button>
+                </div>
+              </>
+            )}
           </CardContent>
         </Card>
       ) : (

@@ -252,6 +252,9 @@ export function StepBasicInfo({ data, onUpdate, onNext, userId, onPrev }: StepBa
                             }}
                             onFocus={() => setShowCityDropdown(true)}
                             className="rounded-2xl h-12 border-muted focus-visible:ring-primary/20 bg-background/50"
+                            role="combobox"
+                            aria-expanded={showCityDropdown && (filteredCities.length > 0 || (citySearch.length >= 2 && filteredCities.length === 0))}
+                            aria-autocomplete="list"
                         />
                         {showCityDropdown && filteredCities.length > 0 && (
                             <div className="absolute z-50 mt-1 w-full rounded-xl border bg-background shadow-lg max-h-48 overflow-y-auto" role="listbox" aria-label="Ciudades disponibles">

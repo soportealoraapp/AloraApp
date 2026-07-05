@@ -9,15 +9,53 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { SafeImage } from '@/components/ui/safe-image';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
+import { useState, useRef, useCallback } from 'react';
 
 export default function MatchesPage() {
     const { user } = useAuth();
     const { matches, newMatches, loading, error, refresh } = useMatches();
+    const [pullDistance, setPullDistance] = useState(0);
+    const [isRefreshing, setIsRefreshing] = useState(false);
+    const startYRef = useRef(0);
+    const containerRef = useRef<HTMLDivElement>(null);
+
+    const handleTouchStart = useCallback((e: React.TouchEvent) => {
+        if (containerRef.current && containerRef.current.scrollTop === 0) {
+            startYRef.current = e.touches[0].clientY;
+        }
+    }, []);
+
+    const handleTouchMove = useCallback((e: React.TouchEvent) => {
+        if (startYRef.current === 0) return;
+        const diff = e.touches[0].clientY - startYRef.current;
+        if (diff > 0) setPullDistance(Math.min(diff * 0.4, 80));
+    }, []);
+
+    const handleTouchEnd = useCallback(async () => {
+        if (pullDistance > 50) {
+            setIsRefreshing(true);
+            await refresh();
+            setIsRefreshing(false);
+        }
+        setPullDistance(0);
+        startYRef.current = 0;
+    }, [pullDistance, refresh]);
 
     if (!user) return null;
 
     return (
-        <div className="min-h-dvh bg-background pb-20 md:pb-0 md:ml-60">
+        <div
+            ref={containerRef}
+            className="min-h-dvh bg-background pb-20 md:pb-0 md:ml-60"
+            onTouchStart={handleTouchStart}
+            onTouchMove={handleTouchMove}
+            onTouchEnd={handleTouchEnd}
+        >
+            {(pullDistance > 0 || isRefreshing) && (
+                <div className="flex items-center justify-center py-2 transition-all" style={{ height: isRefreshing ? 40 : pullDistance }}>
+                    <Loader2 className={`h-5 w-5 text-primary ${isRefreshing ? 'animate-spin' : ''}`} style={{ transform: isRefreshing ? undefined : `rotate(${pullDistance * 3}deg)` }} />
+                </div>
+            )}
             <header className="sticky top-0 z-30 border-b bg-background/95 backdrop-blur-xl pt-safe">
                 <div className="flex items-center justify-between px-4 py-3 max-w-lg mx-auto">
                     <h1 className="text-xl font-headline font-bold">Conexiones</h1>

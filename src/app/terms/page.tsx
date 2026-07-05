@@ -9,10 +9,10 @@ export default function TermsPage() {
     const router = useRouter();
 
     return (
-        <div className="h-dvh flex flex-col overflow-y-auto bg-background">
+        <div className="min-h-dvh flex flex-col overflow-y-auto bg-background">
             <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b bg-background/80 px-4 backdrop-blur-md pt-safe">
                 <Button variant="ghost" size="icon" onClick={() => { if (window.history.length > 1) router.back(); else router.push('/'); }} aria-label="Volver">
-                    <ArrowLeft className="h-5 w-5" />
+                    <ArrowLeft className="h-5 w-5" aria-hidden="true" />
                 </Button>
                 <h1 className="text-xl font-bold">Términos y Condiciones</h1>
             </header>

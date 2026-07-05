@@ -19,7 +19,8 @@ const navItems = [
 
 export function BottomNav() {
   const pathname = usePathname();
-  const { unreadCount } = useNotifications({ pollIntervalMs: 60000 });
+  const { unreadCount } = useNotifications({ pollIntervalMs: 300_000 });
+
 
   return (
     <>

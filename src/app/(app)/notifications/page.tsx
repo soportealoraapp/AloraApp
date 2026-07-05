@@ -132,6 +132,32 @@ export default function NotificationsPage() {
   const { notifications, unreadCount, loading, loadingMore, hasMore, error, markRead, markAllRead, deleteNotification, undoDelete, refresh, loadMore } = useNotifications({ pollIntervalMs: 30000 });
   const [deletedNotification, setDeletedNotification] = useState<any>(null);
   const undoTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const [pullDistance, setPullDistance] = useState(0);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const startYRef = useRef(0);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  const handleTouchStart = useCallback((e: React.TouchEvent) => {
+    if (containerRef.current && containerRef.current.scrollTop === 0) {
+      startYRef.current = e.touches[0].clientY;
+    }
+  }, []);
+
+  const handleTouchMove = useCallback((e: React.TouchEvent) => {
+    if (startYRef.current === 0) return;
+    const diff = e.touches[0].clientY - startYRef.current;
+    if (diff > 0) setPullDistance(Math.min(diff * 0.4, 80));
+  }, []);
+
+  const handleTouchEnd = useCallback(async () => {
+    if (pullDistance > 50) {
+      setIsRefreshing(true);
+      await refresh();
+      setIsRefreshing(false);
+    }
+    setPullDistance(0);
+    startYRef.current = 0;
+  }, [pullDistance, refresh]);
 
   const handleDelete = useCallback((notification: any) => {
     // Save for undo
@@ -180,7 +206,18 @@ export default function NotificationsPage() {
 const NotificationItem = memo(NotificationItemInner);
 
   return (
-    <div className="min-h-dvh">
+    <div
+      ref={containerRef}
+      className="min-h-dvh"
+      onTouchStart={handleTouchStart}
+      onTouchMove={handleTouchMove}
+      onTouchEnd={handleTouchEnd}
+    >
+      {(pullDistance > 0 || isRefreshing) && (
+        <div className="flex items-center justify-center py-2 transition-all" style={{ height: isRefreshing ? 40 : pullDistance }}>
+          <Loader2 className={`h-5 w-5 text-primary ${isRefreshing ? 'animate-spin' : ''}`} style={{ transform: isRefreshing ? undefined : `rotate(${pullDistance * 3}deg)` }} />
+        </div>
+      )}
       <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b bg-background/90 px-4 backdrop-blur-md pt-safe">
         <h1 className="text-xl font-bold">Actividad</h1>
         {unreadCount > 0 && (

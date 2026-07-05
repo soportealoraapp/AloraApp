@@ -67,7 +67,7 @@ export default function SupportPage() {
     };
 
     return (
-        <div className="h-dvh flex flex-col overflow-y-auto bg-gradient-to-br from-background to-muted/30">
+        <div className="min-h-dvh flex flex-col overflow-y-auto bg-gradient-to-br from-background to-muted/30">
             <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b bg-background/80 px-4 backdrop-blur-md pt-safe">
                 <Button variant="ghost" size="icon" onClick={() => { if (window.history.length > 1) router.back(); else router.push('/'); }} aria-label="Volver">
                     <ArrowLeft className="h-5 w-5" />
@@ -82,7 +82,7 @@ export default function SupportPage() {
                         <Card key={section.title} className="rounded-3xl">
                             <CardContent className="p-4 space-y-2">
                                 <div className="flex items-center gap-2 mb-2">
-                                    <Icon className="h-4 w-4 text-primary" />
+                                    <Icon className="h-4 w-4 text-primary" aria-hidden="true" />
                                     <h2 className="font-bold text-sm">{section.title}</h2>
                                 </div>
                                 {section.items.map((item, idx) => {

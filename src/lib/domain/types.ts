@@ -136,6 +136,7 @@ export interface UserProfile extends User {
     messageResponseRate?: number | null;
     lastActiveHours?: number | null;
     voiceIntro?: string;
+    voiceIntroDuration?: number;
     quizArchetype?: string | null;
     quizScore?: number | null;
     latestAnswer?: {

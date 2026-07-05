@@ -642,6 +642,7 @@ export default function ChatWindowPage() {
                                     animate={{ opacity: 1, y: 0 }}
                                     exit={{ opacity: 0, y: 10 }}
                                     className="flex items-start gap-2 px-1"
+                                    aria-live="polite"
                                 >
                                     <div className="bg-muted rounded-2xl rounded-bl-sm px-4 py-3">
                                         <div className="flex gap-1">

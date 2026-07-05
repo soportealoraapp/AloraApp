@@ -94,15 +94,15 @@ export default function ProfileEditPage() {
             setInterests(currentProfile.interests || []);
             setValues(currentProfile.values || []);
             setMusicGenres(currentProfile.musicGenres || []);
-            setCityId((currentProfile as any).cityId || "");
-            setCountryCode((currentProfile as any).countryCode || "");
-            setStateCode((currentProfile as any).stateCode || "");
-            setLatitude((currentProfile as any).latitude || null);
-            setLongitude((currentProfile as any).longitude || null);
-            setLookingFor((currentProfile as any).lookingFor || "");
-            setConnectionModes((currentProfile as any).connectionModes || ["dating"]);
-            setVoiceIntroUrl((currentProfile as any).voiceIntro ?? undefined);
-            setVoiceIntroDuration((currentProfile as any).voiceIntroDuration ?? undefined);
+            setCityId(currentProfile.cityId || "");
+            setCountryCode(currentProfile.countryCode || "");
+            setStateCode(currentProfile.stateCode || "");
+            setLatitude(currentProfile.latitude || null);
+            setLongitude(currentProfile.longitude || null);
+            setLookingFor(currentProfile.lookingFor || "");
+            setConnectionModes(currentProfile.connectionModes || ["dating"]);
+            setVoiceIntroUrl(currentProfile.voiceIntro ?? undefined);
+            setVoiceIntroDuration(currentProfile.voiceIntroDuration ?? undefined);
             setVoiceIntroChanged(false);
         }
     }, [currentProfile]);

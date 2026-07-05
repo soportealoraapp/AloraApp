@@ -20,6 +20,7 @@ export default function AdminUsersPage() {
     const router = useRouter();
     const [users, setUsers] = useState<AdminUser[]>([]);
     const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
     const [search, setSearch] = useState('');
     const [trustFilter, setTrustFilter] = useState('all');
     const [page, setPage] = useState(1);
@@ -41,7 +42,8 @@ export default function AdminUsersPage() {
             const data = await r.json();
             setUsers(data.users || []);
             setTotalPages(data.totalPages || 1);
-        } catch (e) { console.error(e); }
+            setError(null);
+        } catch (e) { console.error(e); setError('Error de conexión al cargar usuarios.'); }
         finally { setLoading(false); }
     }, [search, trustFilter, page]);
 
@@ -105,10 +107,21 @@ export default function AdminUsersPage() {
                 ) : users.length === 0 ? (
                     <div className="text-center py-16 text-muted-foreground">
                         <Users className="h-12 w-12 mx-auto mb-4 text-muted-foreground/60" />
-                        <p>No se encontraron usuarios</p>
-                        <Button variant="outline" size="sm" className="mt-4" onClick={() => window.location.reload()}>
-                            <RefreshCw className="h-4 w-4 mr-2" /> Reintentar
-                        </Button>
+                        {error ? (
+                            <>
+                                <p className="text-destructive">{error}</p>
+                                <Button variant="outline" size="sm" className="mt-4" onClick={() => window.location.reload()}>
+                                    <RefreshCw className="h-4 w-4 mr-2" /> Reintentar
+                                </Button>
+                            </>
+                        ) : (
+                            <>
+                                <p>No se encontraron usuarios</p>
+                                <Button variant="outline" size="sm" className="mt-4" onClick={() => window.location.reload()}>
+                                    <RefreshCw className="h-4 w-4 mr-2" /> Reintentar
+                                </Button>
+                            </>
+                        )}
                     </div>
                 ) : (
                     <>

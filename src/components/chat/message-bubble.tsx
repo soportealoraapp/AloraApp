@@ -97,7 +97,8 @@ const MemoizedMessageBubble = React.memo(function MessageBubble({ message, isMe,
                 {formatTime(message.createdAt)}
               </span>
               {isMe && (
-                isPending ? <Loader2 className="h-2.5 w-2.5 animate-spin" /> :
+                <span aria-live="polite">
+                {isPending ? <Loader2 className="h-2.5 w-2.5 animate-spin" /> :
                 isFailed ? (
                   <button
                     onClick={() => onRetry?.(message)}
@@ -110,6 +111,8 @@ const MemoizedMessageBubble = React.memo(function MessageBubble({ message, isMe,
                 ) :
                 isRead ? <CheckCheck className="h-3 w-3 text-blue-300" /> :
                 <Check className={cn('h-3 w-3', isDelivered ? 'text-primary-foreground/70' : 'opacity-40')} />
+                }
+                </span>
               )}
             </div>
           </div>

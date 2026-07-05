@@ -154,11 +154,11 @@ export default function AdminMetricsPage() {
                                 <CardHeader className="pb-2"><CardTitle className="text-xs text-muted-foreground uppercase">Diario</CardTitle></CardHeader>
                                 <CardContent className="space-y-2">
                                     {[
-                                        { label: 'New Users', value: metrics?.daily.newUsers },
-                                        { label: 'New Matches', value: metrics?.daily.newMatches },
-                                        { label: 'Messages Sent', value: metrics?.daily.messagesSent },
-                                        { label: 'Reports', value: metrics?.daily.reportsFiled },
-                                        { label: 'Match Rate', value: metrics?.daily.matchRate },
+                                        { label: 'Nuevos Usuarios', value: metrics?.daily.newUsers },
+                                        { label: 'Nuevos Matches', value: metrics?.daily.newMatches },
+                                        { label: 'Mensajes Enviados', value: metrics?.daily.messagesSent },
+                                        { label: 'Reportes', value: metrics?.daily.reportsFiled },
+                                        { label: 'Tasa de Match', value: metrics?.daily.matchRate },
                                     ].map(item => (
                                         <div key={item.label} className="flex items-center justify-between text-sm">
                                             <span className="text-muted-foreground">{item.label}</span>
