@@ -24,7 +24,8 @@ export default function PasswordUpdatePage() {
     const supabaseRef = useRef(createClient());
 
     useEffect(() => {
-        supabaseRef.current.auth.getSession().then(({ data: { session } }) => {
+        supabaseRef.current.auth.getSession().then(({ data }) => {
+            const session = data.session;
             if (!session) {
                 router.replace('/login');
                 return;

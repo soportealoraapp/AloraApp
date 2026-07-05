@@ -1,7 +1,5 @@
 'use client';
 
-export const dynamic = 'force-dynamic';
-
 import { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ArrowLeft, Loader2, RefreshCw, TrendingUp, TrendingDown, Users, MessageCircle, Mic, CheckCircle, Sparkles, Crown, Activity, BarChart3 } from 'lucide-react';
