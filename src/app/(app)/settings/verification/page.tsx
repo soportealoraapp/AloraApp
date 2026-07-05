@@ -25,7 +25,8 @@ export default function VerificationPage() {
     const [statusLoading, setStatusLoading] = useState(true);
 
     useEffect(() => {
-        fetch('/api/verification/status')
+        const controller = new AbortController();
+        fetch('/api/verification/status', { signal: controller.signal })
             .then(r => r.json())
             .then(data => {
                 setVerificationStatus(data.status || 'unverified');
@@ -33,6 +34,7 @@ export default function VerificationPage() {
             })
             .catch(() => setVerificationStatus('unverified'))
             .finally(() => setStatusLoading(false));
+        return () => controller.abort();
     }, []);
 
     const handleVerificationComplete = () => {

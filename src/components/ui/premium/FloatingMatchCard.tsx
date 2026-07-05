@@ -199,6 +199,7 @@ export const FloatingMatchCard = React.memo(function FloatingMatchCard({ profile
                     : 'bg-foreground/20 w-1.5 hover:bg-foreground/40'
                 }`}
                 aria-label={`Foto ${index + 1}`}
+                aria-current={index === currentPhotoIndex ? 'true' : undefined}
               />
             ))}
           </div>
@@ -279,7 +280,7 @@ export const FloatingMatchCard = React.memo(function FloatingMatchCard({ profile
               </motion.div>
             );
           }
-          if ((profile as any).latestAnswer) {
+          if (profile.latestAnswer) {
             return (
               <motion.div
                 initial={{ scale: 0.8, opacity: 0 }}
@@ -311,13 +312,13 @@ export const FloatingMatchCard = React.memo(function FloatingMatchCard({ profile
             {(profile.completenessScore ?? 0) >= 90 && <TrustBadge type="complete" />}
           </div>
 
-          {(profile as any).latestAnswer && (
+          {profile.latestAnswer && (
             <div className="mb-2 bg-white/10 backdrop-blur-sm rounded-xl p-2.5">
               <p className="text-xs text-white/60 uppercase tracking-wider mb-0.5">
-                {(profile as any).latestAnswer.category || 'Pregunta del día'}
+                {profile.latestAnswer.category || 'Pregunta del día'}
               </p>
               <p className="text-white/90 text-xs leading-tight line-clamp-2">
-                &ldquo;{(profile as any).latestAnswer.answer}&rdquo;
+                &ldquo;{profile.latestAnswer.answer}&rdquo;
               </p>
             </div>
           )}

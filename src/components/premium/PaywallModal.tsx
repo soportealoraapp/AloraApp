@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useToast } from '@/hooks/use-toast';
 import {
     Dialog,
     DialogContent,
@@ -44,6 +45,7 @@ const TIERS = [
 
 export function PaywallModal({ isOpen, onClose }: PaywallModalProps) {
     const [loading, setLoading] = useState(false);
+    const { toast } = useToast();
 
     const handleCheckout = async () => {
         setLoading(true);
@@ -55,6 +57,7 @@ export function PaywallModal({ isOpen, onClose }: PaywallModalProps) {
             }
         } catch {
             setLoading(false);
+            toast({ title: 'Error al procesar el pago', variant: 'destructive' });
         }
     };
 

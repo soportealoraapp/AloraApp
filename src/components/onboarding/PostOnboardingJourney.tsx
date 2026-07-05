@@ -61,7 +61,7 @@ const getMissions = (profile: Partial<UserProfile>): Mission[] => [
     icon: <MessageCircle className="h-5 w-5" />,
     action: 'Responder pregunta',
     route: '/discover',
-    completed: (profile as any)?.latestAnswer?.answered ?? false,
+    completed: profile?.latestAnswer?.answered ?? false,
   },
   {
     id: 'photos',
@@ -81,7 +81,7 @@ const getMissions = (profile: Partial<UserProfile>): Mission[] => [
     icon: <BookOpen className="h-5 w-5" />,
     action: 'Hacer quiz',
     route: '/compatibility',
-    completed: ((profile as any)?.completedQuizzes ?? 0) > 0,
+    completed: (profile?.completedQuizzes ?? 0) > 0,
   },
   {
     id: 'verification',
@@ -111,7 +111,14 @@ export function PostOnboardingJourney() {
       if (profile) {
         setMissions(getMissions({
           ...profile,
-          latestAnswer: { ...(profile as any).latestAnswer, answered: true }
+          latestAnswer: {
+            questionId: profile.latestAnswer?.questionId ?? '',
+            question: profile.latestAnswer?.question ?? null,
+            category: profile.latestAnswer?.category ?? null,
+            answer: profile.latestAnswer?.answer ?? '',
+            createdAt: profile.latestAnswer?.createdAt ?? '',
+            answered: true,
+          }
         }));
       }
     };

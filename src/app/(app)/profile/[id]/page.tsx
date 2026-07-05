@@ -67,7 +67,8 @@ export default function UserProfilePage() {
 
     useEffect(() => {
       if (!id || !user || isPreview) return;
-      fetch(`/api/match/check?targetUserId=${id}&intent=${intent}`)
+      const controller = new AbortController();
+      fetch(`/api/match/check?targetUserId=${id}&intent=${intent}`, { signal: controller.signal })
         .then(r => r.json())
         .then(data => {
           setHasExistingMatch(data.matched);
@@ -85,12 +86,14 @@ export default function UserProfilePage() {
           }
         })
         .catch(() => {});
+      return () => controller.abort();
     }, [id, user, isPreview]);
 
     useEffect(() => {
       if (!id || !user || isPreview || id === user?.id) return;
       if (currentUserProfile?.subscriptionStatus !== 'plus') return;
-      fetch(`/api/compatibility/score?targetId=${id}`)
+      const controller = new AbortController();
+      fetch(`/api/compatibility/score?targetId=${id}`, { signal: controller.signal })
         .then(r => r.json())
         .then(data => {
           if (data.score !== undefined) {
@@ -98,6 +101,7 @@ export default function UserProfilePage() {
           }
         })
         .catch(() => {});
+      return () => controller.abort();
     }, [id, user, isPreview, currentUserProfile?.subscriptionStatus]);
 
     if (loading) {
@@ -326,11 +330,11 @@ export default function UserProfilePage() {
                             <h2 className="text-3xl font-bold font-headline">
                                 {profile.displayName}, {profile.age}
                             </h2>
-                            {(profile as any).quizArchetype && (
+                            {profile.quizArchetype && (
                                 <Badge variant="secondary" className="rounded-full text-xs gap-1">
                                     <Sparkles className="h-3 w-3 text-primary" />
-                                    {(profile as any).quizArchetype}
-                                    {(profile as any).quizScore && ` · ${(profile as any).quizScore}`}
+                                    {profile.quizArchetype}
+                                    {profile.quizScore && ` · ${profile.quizScore}`}
                                 </Badge>
                             )}
                         </div>
@@ -441,7 +445,7 @@ export default function UserProfilePage() {
                         </Card>
                     )}
 
-                    {(profile as any).spotify && <SpotifySection spotify={(profile as any).spotify} isOwn={false} />}
+                    {profile.spotify && <SpotifySection spotify={profile.spotify} isOwn={false} />}
 
                     {profile.personalGuide && profile.personalGuide.length > 0 && (
                         <Card>

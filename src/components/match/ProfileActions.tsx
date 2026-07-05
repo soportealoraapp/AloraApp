@@ -87,7 +87,7 @@ export function ProfileActions({ userId, userName, matchId, isMuted = false, onM
         <>
             <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="icon" className="rounded-full">
+                    <Button variant="ghost" size="icon" className="rounded-full" aria-label="Más opciones">
                         <MoreVertical className="h-5 w-5 text-muted-foreground" />
                     </Button>
                 </DropdownMenuTrigger>

@@ -100,9 +100,10 @@ export default function ChatWindowPage() {
 
     useEffect(() => {
         if (!matchId) return;
+        const controller = new AbortController();
         Promise.allSettled([
-            fetch(`/api/chat/health?matchId=${matchId}`).then(r => r.json()),
-            otherUserId ? fetch(`/api/profile/${otherUserId}`).then(r => r.json()) : Promise.resolve(null),
+            fetch(`/api/chat/health?matchId=${matchId}`, { signal: controller.signal }).then(r => r.json()),
+            otherUserId ? fetch(`/api/profile/${otherUserId}`, { signal: controller.signal }).then(r => r.json()) : Promise.resolve(null),
         ]).then(([healthResult, profileResult]) => {
             if (healthResult.status === 'fulfilled') {
                 setMatchHealth(healthResult.value.score || 0);
@@ -126,7 +127,7 @@ export default function ChatWindowPage() {
             } catch {}
         };
         const timer = setTimeout(checkFeedback, 1500);
-        return () => clearTimeout(timer);
+        return () => { controller.abort(); clearTimeout(timer); };
     }, [matchId, otherUserId]);
 
     const [autoScroll, setAutoScroll] = useState(true);
@@ -512,7 +513,7 @@ export default function ChatWindowPage() {
 
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon">
+                        <Button variant="ghost" size="icon" aria-label="Más opciones">
                             <MoreVertical className="h-5 w-5" />
                         </Button>
                     </DropdownMenuTrigger>

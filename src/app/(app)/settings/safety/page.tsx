@@ -92,7 +92,7 @@ export default function SafetyCenterPage() {
                             <div>
                                 <p className="font-bold text-foreground">Tu cuenta está segura</p>
                                 <p className="text-sm text-primary">
-                                    {(profile as any).isVerified
+                                    {profile?.isVerified
                                         ? '✓ Identidad verificada'
                                         : 'Verifica tu identidad para mayor confianza'}
                                 </p>

@@ -144,7 +144,9 @@ export interface UserProfile extends User {
         category: string | null;
         answer: string;
         createdAt: string;
+        answered?: boolean;
     } | null;
+    completedQuizzes?: number;
 }
 
 export interface Match {

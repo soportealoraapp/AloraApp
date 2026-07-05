@@ -184,9 +184,10 @@ export default function DiscoverPage() {
   // Sync with user profile on mount (swipeCount, intent, countryCode)
   useEffect(() => {
     if (!user?.id) return;
+    const controller = new AbortController();
 
     // Sync swipeCount with server
-    fetch('/api/profile')
+    fetch('/api/profile', { signal: controller.signal })
       .then(r => r.json())
       .then(data => {
         if (typeof data.dailyLikesUsed === 'number') {
@@ -209,6 +210,7 @@ export default function DiscoverPage() {
     if (currentUserProfile?.countryCode) {
       setFilters(prev => ({ ...prev, countryCode: currentUserProfile.countryCode }));
     }
+    return () => controller.abort();
   }, [user?.id, currentUserProfile?.connectionModes, currentUserProfile?.countryCode]);
 
   const lastSwipeRef = useRef<{ profileId: string; direction: string } | null>(null);
@@ -321,9 +323,10 @@ export default function DiscoverPage() {
       setCurrentInteractionState({ hasExistingMatch: false, priorInteraction: null });
       return;
     }
+    const controller = new AbortController();
     // Reset state when profile changes
     setCurrentInteractionState({ hasExistingMatch: false, priorInteraction: null });
-    fetch(`/api/match/check?targetUserId=${currentProfile.id}${intent !== 'both' ? `&intent=${intent}` : ''}`)
+    fetch(`/api/match/check?targetUserId=${currentProfile.id}${intent !== 'both' ? `&intent=${intent}` : ''}`, { signal: controller.signal })
       .then(r => r.json())
       .then(data => {
         setCurrentInteractionState({
@@ -334,6 +337,7 @@ export default function DiscoverPage() {
       .catch(() => {
         setCurrentInteractionState({ hasExistingMatch: false, priorInteraction: null });
       });
+    return () => controller.abort();
   }, [currentProfile?.id, user?.id, intent]);
 
   // Batch fetch interaction states for grid badges
@@ -567,9 +571,9 @@ export default function DiscoverPage() {
       <header className="sticky top-0 z-30 flex h-16 items-center justify-between px-4 backdrop-blur-md border-b bg-background/90 pt-safe">
         <div className="flex items-center gap-2">
           <h1 className="text-2xl font-bold tracking-tight text-foreground">Alora</h1>
-          {(currentUserProfile as any)?.travelModeEnabled && (
+          {currentUserProfile?.travelModeEnabled && (
             <span className="text-[11px] bg-primary/10 text-primary px-2 py-0.5 rounded-full font-medium flex items-center gap-1">
-              ✈️ Explorando: {(currentUserProfile as any).travelCity}
+              ✈️ Explorando: {currentUserProfile.travelCity}
             </span>
           )}
         </div>
@@ -807,7 +811,7 @@ export default function DiscoverPage() {
                                     Activa
                                   </div>
                                 )}
-                                {(p as any).latestAnswer && (
+                                {p.latestAnswer && (
                                   <div title="Respondió la pregunta del día" className="absolute top-2 right-2 bg-accent/90 backdrop-blur-sm text-accent-foreground text-[11px] font-bold px-1.5 py-0.5 rounded-full">
                                     💬 Resp.
                                   </div>

@@ -6,6 +6,7 @@ import { Music, ExternalLink, Headphones, Disc3, RefreshCw } from 'lucide-react'
 import { useState, useEffect } from 'react';
 import { SafeImage } from '@/components/ui/safe-image';
 import { useRouter } from 'next/navigation';
+import { useToast } from '@/hooks/use-toast';
 
 interface Track {
   id: string;
@@ -27,7 +28,7 @@ interface Artist {
 interface SpotifyData {
   topTracks: Track[];
   topArtists: Artist[];
-  lastSyncedAt?: string | null;
+  lastSyncedAt?: string | Date | null;
 }
 
 interface SpotifySectionProps {
@@ -36,7 +37,8 @@ interface SpotifySectionProps {
 }
 
 export function SpotifySection({ spotify, isOwn }: SpotifySectionProps) {
-  const router = useRouter();
+    const router = useRouter();
+    const { toast } = useToast();
   const [syncing, setSyncing] = useState(false);
   const [loading, setLoading] = useState(spotify === undefined);
 
@@ -97,7 +99,7 @@ export function SpotifySection({ spotify, isOwn }: SpotifySectionProps) {
                   if (isConnected) {
                     setSyncing(true);
                     fetch('/api/spotify/sync', { method: 'POST' })
-                      .then(() => window.location.reload())
+                      .then(() => router.refresh())
                       .catch(() => setSyncing(false));
                   } else {
                     window.location.href = '/api/spotify/connect';
@@ -137,8 +139,12 @@ export function SpotifySection({ spotify, isOwn }: SpotifySectionProps) {
                   const res = await fetch('/api/spotify/sync', { method: 'POST' });
                   if (res.ok) {
                     router.refresh();
+                  } else {
+                    toast({ title: 'Error al sincronizar', variant: 'destructive' });
                   }
-                } catch {}
+                } catch {
+                  toast({ title: 'Error al sincronizar', variant: 'destructive' });
+                }
                 setSyncing(false);
               }}
               disabled={syncing}

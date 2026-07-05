@@ -128,12 +128,12 @@ export default function ProfilePage() {
             <LogOut className="h-5 w-5" />
           </Button>
           <Button size="icon" variant="ghost" asChild className="shrink-0">
-            <Link href="/settings">
+            <Link href="/settings" aria-label="Configuración">
               <Settings className="h-5 w-5" />
             </Link>
           </Button>
           <Button size="icon" variant="ghost" asChild className="shrink-0">
-            <Link href={`/profile/${user?.id}?preview=1`} title="Vista previa">
+            <Link href={`/profile/${user?.id}?preview=1`} title="Vista previa" aria-label="Vista previa del perfil">
               <Eye className="h-5 w-5" />
             </Link>
           </Button>
@@ -325,7 +325,7 @@ export default function ProfilePage() {
 
           {/* 5. Spotify Section */}
           <ErrorBoundary fallback={null}>
-            <SpotifySection spotify={(profile as any).spotify ?? null} isOwn={true} />
+            <SpotifySection spotify={profile?.spotify ?? null} isOwn={true} />
           </ErrorBoundary>
 
           {/* 6. Completeness CTA — ALWAYS visible */}
@@ -341,12 +341,12 @@ export default function ProfilePage() {
                 <Progress value={completenessScore} className="h-1.5 mb-3" role="progressbar" aria-valuenow={completenessScore} aria-valuemin={0} aria-valuemax={100} aria-label="Completitud del perfil" />
                 <div className="space-y-2 text-sm">
                   {[
-                    { label: 'Foto principal', done: (profile as any)?.photos?.length > 0 },
-                    { label: 'Bio (50+ caracteres)', done: (profile as any)?.bio?.length >= 50 },
-                    { label: 'Ciudad', done: !!(profile as any)?.city },
-                    { label: 'Intereses (3+)', done: (profile as any)?.interests?.length >= 3 },
-                    { label: 'Valores (2+)', done: (profile as any)?.values?.length >= 2 },
-                    { label: 'Gustos musicales', done: (profile as any)?.musicGenres?.length > 0 },
+                    { label: 'Foto principal', done: (profile?.photos?.length ?? 0) > 0 },
+                    { label: 'Bio (50+ caracteres)', done: (profile?.bio?.length ?? 0) >= 50 },
+                    { label: 'Ciudad', done: !!profile?.city },
+                    { label: 'Intereses (3+)', done: (profile?.interests?.length ?? 0) >= 3 },
+                    { label: 'Valores (2+)', done: (profile?.values?.length ?? 0) >= 2 },
+                    { label: 'Gustos musicales', done: (profile?.musicGenres?.length ?? 0) > 0 },
                   ].map((item, i) => (
                     <div key={i} className="flex items-center gap-2">
                       {item.done ? (

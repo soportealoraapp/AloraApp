@@ -15,8 +15,16 @@ interface SecondChanceSectionProps {
   intent?: ConnectionIntent;
 }
 
+interface PassedProfile {
+  id: string;
+  displayName: string;
+  age?: number;
+  photos?: string[];
+  intent?: ConnectionIntent;
+}
+
 export const SecondChanceSection = React.memo(function SecondChanceSection({ intent = 'dating' }: SecondChanceSectionProps) {
-  const [passedProfiles, setPassedProfiles] = useState<any[]>([]);
+  const [passedProfiles, setPassedProfiles] = useState<PassedProfile[]>([]);
   const [loading, setLoading] = useState(true);
   const { sendLike } = useSendLike();
   const { toast } = useToast();

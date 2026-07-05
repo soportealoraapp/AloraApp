@@ -3,9 +3,18 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 
+interface BlockedUser {
+    id: string;
+    blockedId: string;
+    displayName?: string;
+    photoUrl?: string;
+    reason?: string;
+    createdAt?: string;
+}
+
 export function useBlock() {
     const { user } = useAuth();
-    const [blockedUsers, setBlockedUsers] = useState<any[]>([]);
+    const [blockedUsers, setBlockedUsers] = useState<BlockedUser[]>([]);
     const [loading, setLoading] = useState(true);
 
     const fetchBlocked = useCallback(async () => {

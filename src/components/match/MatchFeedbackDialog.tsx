@@ -61,7 +61,7 @@ export function MatchFeedbackDialog({ matchId, partnerName, open, onClose, onSub
     };
 
     return (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-label={`Feedback sobre ${partnerName}`}>
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-label={`Feedback sobre ${partnerName}`} onKeyDown={(e) => { if (e.key === 'Escape') onClose(); }}>
             <Card className="w-full max-w-md rounded-3xl">
                 <CardContent className="p-6 space-y-4">
                     <div className="flex items-center justify-between">
@@ -80,7 +80,7 @@ export function MatchFeedbackDialog({ matchId, partnerName, open, onClose, onSub
 
                     <div className="space-y-2">
                         <p className="text-sm font-semibold text-center">¿Qué tan buena fue la conexión?</p>
-                        <div className="flex items-center justify-center gap-1">
+                        <div className="flex items-center justify-center gap-1" role="radiogroup" aria-label="Calificación de conexión">
                             {[1, 2, 3, 4, 5].map((n) => (
                                 <button
                                     key={n}
@@ -89,6 +89,8 @@ export function MatchFeedbackDialog({ matchId, partnerName, open, onClose, onSub
                                     onClick={() => setRating(n)}
                                     className="p-1.5 transition-transform hover:scale-110 min-h-[44px] min-w-[44px] flex items-center justify-center"
                                     type="button"
+                                    role="radio"
+                                    aria-checked={rating === n}
                                     aria-label={n + ' estrella' + (n > 1 ? 's' : '')}
                                 >
                                     <Star

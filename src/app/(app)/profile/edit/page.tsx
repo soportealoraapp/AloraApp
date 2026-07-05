@@ -350,7 +350,7 @@ export default function ProfileEditPage() {
     return (
         <div onTouchStart={handleTouchStart} onTouchEnd={handleTouchEnd}>
             <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b bg-background/80 px-4 backdrop-blur-sm sm:px-6 pt-safe">
-                <Button variant="ghost" size="icon" onClick={goBack}>
+                <Button variant="ghost" size="icon" onClick={goBack} aria-label="Volver">
                     <ArrowLeft className="h-5 w-5" />
                 </Button>
                 <h1 className="text-xl font-semibold md:text-2xl font-headline">Editar Perfil</h1>

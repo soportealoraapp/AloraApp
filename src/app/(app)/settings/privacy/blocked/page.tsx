@@ -73,7 +73,7 @@ export default function BlockedUsersPage() {
                                         </p>
                                     )}
                                     <p className="text-xs text-muted-foreground">
-                                        Bloqueado el {new Date(block.createdAt).toLocaleDateString()}
+                                        Bloqueado el {block.createdAt ? new Date(block.createdAt).toLocaleDateString() : ''}
                                     </p>
                                 </div>
                                 <Button
