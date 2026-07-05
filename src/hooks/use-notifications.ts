@@ -20,6 +20,7 @@ interface UseNotificationsOptions {
     pollIntervalMs?: number;
     enabled?: boolean;
     pageSize?: number;
+    enableRealtime?: boolean;
 }
 
 interface UseNotificationsResult {
@@ -41,6 +42,7 @@ export function useNotifications({
     pollIntervalMs = 60_000,
     enabled = true,
     pageSize = 30,
+    enableRealtime = true,
 }: UseNotificationsOptions = {}): UseNotificationsResult {
     const queryClient = useQueryClient();
     const channelRef = useRef<RealtimeChannel | null>(null);
@@ -81,7 +83,7 @@ export function useNotifications({
 
     // Realtime subscription with reconnection
     useEffect(() => {
-        if (!enabled) return;
+        if (!enabled || !enableRealtime) return;
 
         const supabase = createClient();
         const { channel, cleanup } = subscribeWithReconnect(

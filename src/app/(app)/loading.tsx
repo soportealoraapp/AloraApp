@@ -1,5 +1,3 @@
-import { Logo } from '@/components/logo';
-
 export default function Loading() {
     return (
         <div className="min-h-dvh bg-background pb-20 md:pb-0 md:ml-60">

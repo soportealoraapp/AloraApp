@@ -2,11 +2,12 @@
 
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, ChevronRight, Shield, User, CreditCard, MessageCircle, Settings } from 'lucide-react';
+import { ChevronRight, Shield, User, CreditCard, MessageCircle, Settings } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { useState } from 'react';
+import { PageHeader } from '@/components/ui/page-header';
 
 const faqSections = [
     {
@@ -68,12 +69,7 @@ export default function SupportPage() {
 
     return (
         <div className="min-h-dvh flex flex-col overflow-y-auto bg-gradient-to-br from-background to-muted/30">
-            <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b bg-background/80 px-4 backdrop-blur-md pt-safe">
-                <Button variant="ghost" size="icon" onClick={() => { if (window.history.length > 1) router.back(); else router.push('/'); }} aria-label="Volver">
-                    <ArrowLeft className="h-5 w-5" />
-                </Button>
-                <h1 className="text-xl font-bold">Centro de Ayuda</h1>
-            </header>
+            <PageHeader title="Centro de Ayuda" onBack={() => { if (window.history.length > 1) router.back(); else router.push('/'); }} />
 
             <main className="max-w-lg mx-auto p-6 space-y-6">
                 {faqSections.map((section) => {

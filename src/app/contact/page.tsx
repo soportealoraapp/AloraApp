@@ -2,21 +2,17 @@
 
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Mail, ArrowLeft } from 'lucide-react';
+import { Mail } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { PageHeader } from '@/components/ui/page-header';
 
 export default function ContactPage() {
     const router = useRouter();
 
     return (
         <div className="min-h-dvh bg-gradient-to-br from-background to-muted/30">
-            <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b bg-background/80 px-4 backdrop-blur-md pt-safe">
-                <Button variant="ghost" size="icon" onClick={() => { if (window.history.length > 1) router.back(); else router.push('/'); }} aria-label="Volver">
-                    <ArrowLeft className="h-5 w-5" />
-                </Button>
-                <h1 className="text-xl font-bold">Contacto</h1>
-            </header>
+            <PageHeader title="Contacto" onBack={() => { if (window.history.length > 1) router.back(); else router.push('/'); }} />
 
             <main className="max-w-lg mx-auto p-6 space-y-6">
                 <Card className="rounded-3xl">

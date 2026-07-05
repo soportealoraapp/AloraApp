@@ -266,9 +266,13 @@ export default function DiscoverPage() {
 
 
 
+  // One-time init: tutorial check + paywall listener
   useEffect(() => {
     const tutorialDone = localStorage.getItem('swipeTutorialDone');
     if (tutorialDone) setTutorialStep(null);
+    const handler = () => setShowPaywall(true);
+    window.addEventListener('open-paywall', handler);
+    return () => window.removeEventListener('open-paywall', handler);
   }, []);
 
   // Request geolocation for distance filter (only once per session)
@@ -317,64 +321,59 @@ export default function DiscoverPage() {
     }
   }, [intent, loading, intentChanging]);
 
-  // Fetch interaction state for current profile (match/like/superlike detection)
+  // Fetch interaction state for current profile and grid badges
   useEffect(() => {
-    if (!currentProfile?.id || !user?.id) {
+    if (!user?.id) {
       setCurrentInteractionState({ hasExistingMatch: false, priorInteraction: null });
-      return;
-    }
-    const controller = new AbortController();
-    // Reset state when profile changes
-    setCurrentInteractionState({ hasExistingMatch: false, priorInteraction: null });
-    fetch(`/api/match/check?targetUserId=${currentProfile.id}${intent !== 'both' ? `&intent=${intent}` : ''}`, { signal: controller.signal })
-      .then(r => r.json())
-      .then(data => {
-        setCurrentInteractionState({
-          hasExistingMatch: data.matched || false,
-          priorInteraction: data.interactionType || null,
-        });
-      })
-      .catch(() => {
-        setCurrentInteractionState({ hasExistingMatch: false, priorInteraction: null });
-      });
-    return () => controller.abort();
-  }, [currentProfile?.id, user?.id, intent]);
-
-  // Batch fetch interaction states for grid badges
-  useEffect(() => {
-    if (browseMode !== 'grid' || !user?.id || profiles.length === 0) {
       setGridInteractionBadges(new Map());
       return;
     }
-    const profileIds = profiles.map(p => p.profile.id).filter(Boolean);
-    if (profileIds.length === 0) return;
 
     const controller = new AbortController();
-    fetch('/api/match/check-batch', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ targetUserIds: profileIds, intent: intent !== 'both' ? intent : undefined }),
-      signal: controller.signal,
-    })
-      .then(r => r.json())
-      .then(data => {
-        const map = new Map<string, { matched: boolean; interactionType: string | null }>();
-        for (const [id, state] of Object.entries(data)) {
-          const s = state as { matched: boolean; interactionType: string | null };
-          map.set(id, { matched: s.matched, interactionType: s.interactionType });
-        }
-        setGridInteractionBadges(map);
-      })
-      .catch(() => {});
-    return () => controller.abort();
-  }, [browseMode, user?.id, profiles.length, intent]);
 
-  // Listen for open-paywall events from DailyPicks, DailyCompatibilityCard, etc.
-  useEffect(() => {
-    const handler = () => setShowPaywall(true);
-    window.addEventListener('open-paywall', handler);
-    return () => window.removeEventListener('open-paywall', handler);
-  }, []);
+    // Fetch current profile interaction state (swipe mode)
+    if (currentProfile?.id) {
+      setCurrentInteractionState({ hasExistingMatch: false, priorInteraction: null });
+      fetch(`/api/match/check?targetUserId=${currentProfile.id}${intent !== 'both' ? `&intent=${intent}` : ''}`, { signal: controller.signal })
+        .then(r => r.json())
+        .then(data => {
+          setCurrentInteractionState({
+            hasExistingMatch: data.matched || false,
+            priorInteraction: data.interactionType || null,
+          });
+        })
+        .catch(() => {
+          setCurrentInteractionState({ hasExistingMatch: false, priorInteraction: null });
+        });
+    }
+
+    // Batch fetch for grid badges
+    if (browseMode === 'grid' && profiles.length > 0) {
+      const profileIds = profiles.map(p => p.profile.id).filter(Boolean);
+      if (profileIds.length > 0) {
+        fetch('/api/match/check-batch', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ targetUserIds: profileIds, intent: intent !== 'both' ? intent : undefined }),
+          signal: controller.signal,
+        })
+          .then(r => r.json())
+          .then(data => {
+            const map = new Map<string, { matched: boolean; interactionType: string | null }>();
+            for (const [id, state] of Object.entries(data)) {
+              const s = state as { matched: boolean; interactionType: string | null };
+              map.set(id, { matched: s.matched, interactionType: s.interactionType });
+            }
+            setGridInteractionBadges(map);
+          })
+          .catch(() => {});
+      }
+    } else {
+      setGridInteractionBadges(new Map());
+    }
+
+    return () => controller.abort();
+  }, [currentProfile?.id, user?.id, intent, browseMode, profiles.length]);
 
   profilesRef.current = profiles;
 

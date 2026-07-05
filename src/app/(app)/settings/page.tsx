@@ -14,10 +14,18 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 export default function SettingsPage() {
     const router = useRouter();
     const searchParams = useSearchParams();
-    const { signOut } = useAuth();
+    const { signOut, user } = useAuth();
     const { toast } = useToast();
     const [loggingOut, setLoggingOut] = useState(false);
     const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
+
+    if (!user) {
+        return (
+            <div className="min-h-dvh bg-background flex items-center justify-center">
+                <Loader2 className="h-6 w-6 animate-spin text-primary" />
+            </div>
+        );
+    }
 
     useEffect(() => {
         const spotify = searchParams.get('spotify');

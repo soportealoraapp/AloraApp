@@ -79,10 +79,8 @@ export default function LoginPage() {
             }
         } catch (error: unknown) {
             const message = error instanceof Error ? error.message : "";
-            if (message.includes("Invalid login credentials")) {
+            if (message.includes("Invalid login credentials") || message.includes("Email not confirmed")) {
                 setError("Email o contraseña incorrectos.");
-            } else if (message.includes("Email not confirmed")) {
-                setError("Por favor confirma tu email antes de iniciar sesión.");
             } else if (message.includes("rate_limit")) {
                 setError("Demasiados intentos. Espera un momento e intenta de nuevo.");
             } else if (message.includes("network") || message.includes("fetch")) {

@@ -81,7 +81,7 @@ export default function MarketplaceCommandPage() {
         <div className="md:pl-sidebar p-6 space-y-6">
             <div className="flex items-center">
                 <Button variant="ghost" size="sm" onClick={() => router.back()} className="mr-2" aria-label="Volver"><ArrowLeft className="h-4 w-4" /></Button>
-                <SectionTitle title="Marketplace Command Center" subtitle="Vista unificada del estado del marketplace" />
+                <SectionTitle title="Centro de Comandos del Marketplace" subtitle="Vista unificada del estado del marketplace" />
             </div>
 
             {/* Health Status */}
