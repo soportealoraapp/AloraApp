@@ -32,11 +32,13 @@ export default function FavoritesPage() {
 
     useEffect(() => {
         if (!user) return;
-        fetch('/api/profile/favorites')
+        const controller = new AbortController();
+        fetch('/api/profile/favorites', { signal: controller.signal })
             .then(r => r.json())
             .then(data => setFavorites(data.favorites || []))
-            .catch((err) => { console.error(err); setError('Error al cargar los favoritos.'); })
+            .catch((err) => { if (err.name !== 'AbortError') { console.error(err); setError('Error al cargar los favoritos.'); } })
             .finally(() => setLoading(false));
+        return () => controller.abort();
     }, [user]);
 
     const removeFavorite = async (profileId: string) => {

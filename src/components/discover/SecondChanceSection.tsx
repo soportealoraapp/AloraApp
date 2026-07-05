@@ -22,12 +22,14 @@ export const SecondChanceSection = React.memo(function SecondChanceSection({ int
   const { toast } = useToast();
 
   useEffect(() => {
+    const controller = new AbortController();
     setLoading(true);
-    fetch(`/api/match/passed?intent=${intent}`)
+    fetch(`/api/match/passed?intent=${intent}`, { signal: controller.signal })
       .then(r => r.json())
       .then(data => { setPassedProfiles(data.profiles || []); })
       .catch(() => { setPassedProfiles([]); })
       .finally(() => setLoading(false));
+    return () => controller.abort();
   }, [intent]);
 
   if (loading) {

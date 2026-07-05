@@ -3,6 +3,7 @@
 import React, { useEffect, useRef, useState, useMemo, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useChat } from "@/hooks/use-chat";
+import { Message } from "@/lib/domain/types";
 import { useAuth } from "@/contexts/AuthContext";
 import { useMatches } from "@/hooks/use-matches";
 import { Button } from "@/components/ui/button";
@@ -260,13 +261,13 @@ export default function ChatWindowPage() {
     const handleSendImage = async (imageUrl: string) => {
         if (!otherUserId || !user) return;
         const optimisticId = crypto.randomUUID();
-        const optimisticMsg: any = {
+        const optimisticMsg: Message = {
             id: optimisticId,
             matchId,
             senderId: user.id,
             content: imageUrl,
             type: 'image',
-            createdAt: new Date().toISOString(),
+            createdAt: new Date(),
             status: 'pending',
         };
         setMessages(prev => [...prev, optimisticMsg]);

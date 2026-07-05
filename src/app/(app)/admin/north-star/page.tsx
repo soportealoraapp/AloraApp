@@ -60,7 +60,10 @@ export default function NorthStarDashboard() {
   const router = useRouter();
   const [metrics, setMetrics] = useState<ProductMetrics | null>(null);
   const [retention, setRetention] = useState<ExtendedRetentionRow[]>([]);
-  const [activationInsights, setActivationInsights] = useState<any>(null);
+  const [activationInsights, setActivationInsights] = useState<{
+    activation: { rate: number; profilesWithPhotos: number; profilesWithBio: number; profilesWithInterest: number; profilesWithValues: number };
+    features: { voiceIntroRate: number; verificationRate: number; quizCompletionRate: number; dailyQuestionRate: number };
+  } | null>(null);
   const [experiments, setExperiments] = useState<ExperimentSummary[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -121,7 +124,7 @@ export default function NorthStarDashboard() {
         title="Impacto Quiz de Compatibilidad"
         icon={BarChart3}
         iconColor="text-indigo-500"
-        iconBg="bg-indigo-100"
+        iconBg="bg-indigo-100 dark:bg-indigo-900/30"
         metrics={metrics.compatibility}
       />
 
@@ -130,7 +133,7 @@ export default function NorthStarDashboard() {
         title="Impacto Intro de Voz"
         icon={Mic}
         iconColor="text-pink-500"
-        iconBg="bg-pink-100"
+        iconBg="bg-pink-100 dark:bg-pink-900/30"
         metrics={metrics.voiceIntro}
       />
 
@@ -139,7 +142,7 @@ export default function NorthStarDashboard() {
         title="Impacto Pregunta Diaria"
         icon={HelpCircle}
         iconColor="text-emerald-500"
-        iconBg="bg-emerald-100"
+        iconBg="bg-emerald-100 dark:bg-emerald-900/30"
         metrics={metrics.dailyQuestion}
       />
 
@@ -148,7 +151,7 @@ export default function NorthStarDashboard() {
         title="Impacto Verificación"
         icon={Sparkles}
         iconColor="text-amber-500"
-        iconBg="bg-amber-100"
+        iconBg="bg-amber-100 dark:bg-amber-900/30"
         metrics={metrics.verification}
       />
 
@@ -200,10 +203,10 @@ export default function NorthStarDashboard() {
           <CardContent>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               {[
-                { label: 'Voice intro', value: activationInsights.features.voiceIntroRate, icon: Mic, color: 'text-pink-500', bg: 'bg-pink-100' },
-                { label: 'Verificación', value: activationInsights.features.verificationRate, icon: Shield, color: 'text-amber-500', bg: 'bg-amber-100' },
-                { label: 'Quiz completado', value: activationInsights.features.quizCompletionRate, icon: BarChart3, color: 'text-indigo-500', bg: 'bg-indigo-100' },
-                { label: 'Pregunta diaria', value: activationInsights.features.dailyQuestionRate, icon: HelpCircle, color: 'text-emerald-500', bg: 'bg-emerald-100' },
+                { label: 'Voice intro', value: activationInsights.features.voiceIntroRate, icon: Mic, color: 'text-pink-500', bg: 'bg-pink-100 dark:bg-pink-900/30' },
+                { label: 'Verificación', value: activationInsights.features.verificationRate, icon: Shield, color: 'text-amber-500', bg: 'bg-amber-100 dark:bg-amber-900/30' },
+                { label: 'Quiz completado', value: activationInsights.features.quizCompletionRate, icon: BarChart3, color: 'text-indigo-500', bg: 'bg-indigo-100 dark:bg-indigo-900/30' },
+                { label: 'Pregunta diaria', value: activationInsights.features.dailyQuestionRate, icon: HelpCircle, color: 'text-emerald-500', bg: 'bg-emerald-100 dark:bg-emerald-900/30' },
               ].map((f) => {
                 const Icon = f.icon;
                 return (

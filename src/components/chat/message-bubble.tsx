@@ -68,6 +68,10 @@ const MemoizedMessageBubble = React.memo(function MessageBubble({ message, isMe,
               isFlagged && 'opacity-50 grayscale'
             )}
             onClick={() => !isFlagged && setShowImagePreview(true)}
+            onKeyDown={(e) => { if ((e.key === 'Enter' || e.key === ' ') && !isFlagged) { e.preventDefault(); setShowImagePreview(true); } }}
+            role="button"
+            tabIndex={0}
+            aria-label="Ver imagen ampliada"
           >
             <div className="relative w-[280px] h-[280px] md:w-[320px] md:h-[320px] bg-muted">
               <SafeImage

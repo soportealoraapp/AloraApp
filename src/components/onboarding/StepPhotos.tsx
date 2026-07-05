@@ -76,7 +76,15 @@ function compressImage(file: File, maxWidth = 1080, quality = 0.8): Promise<Blob
     });
 }
 
-export function StepPhotos({ userId, data, onUpdate, onNext, onPrev }: any) {
+interface StepPhotosProps {
+    userId?: string;
+    data: { photos?: string[]; incomplete_media?: boolean };
+    onUpdate: (data: { photos: string[]; incomplete_media?: boolean }) => void;
+    onNext: () => void;
+    onPrev?: () => void;
+}
+
+export function StepPhotos({ userId, data, onUpdate, onNext, onPrev }: StepPhotosProps) {
     const [photos, setPhotos] = useState<string[]>(data.photos || []);
     const { toast } = useToast();
     const [uploadProgress, setUploadProgress] = useState<Record<string, number>>({});

@@ -115,6 +115,8 @@ export function PhotoGrid({ photos, onReorder, onRemove, onCrop, maxPhotos = 6 }
                     onTouchStart={(e) => handleTouchStart(e, index)}
                     onTouchMove={handleTouchMove}
                     onTouchEnd={handleTouchEnd}
+                    aria-roledescription="elemento arrastrable"
+                    aria-label={`Foto ${index + 1} — arrastra para reordenar`}
                     className={cn(
                         "relative aspect-square rounded-lg overflow-hidden group transition-all bg-muted",
                         dragIndex === index ? "opacity-50 scale-95 z-10" : "cursor-grab active:cursor-grabbing",

@@ -8,24 +8,40 @@ import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { TrustBadge } from '../ui/premium/TrustBadge';
 
+interface Liker {
+    id: string;
+    name?: string;
+    displayName?: string;
+    age?: number;
+    photo?: string;
+    photos?: string[];
+    city?: string;
+    trustStatus?: string;
+    isVerified?: boolean;
+}
+
 export function LikesReceivedList() {
     const router = useRouter();
-    const [likers, setLikers] = useState<any[]>([]);
+    const [likers, setLikers] = useState<Liker[]>([]);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        fetchLikers();
+        const controller = new AbortController();
+        fetchLikers(controller.signal);
+        return () => controller.abort();
     }, []);
 
-    const fetchLikers = async () => {
+    const fetchLikers = async (signal?: AbortSignal) => {
         try {
-            const res = await fetch('/api/match/likes-received');
+            const res = await fetch('/api/match/likes-received', { signal });
             const data = await res.json();
             if (res.ok) {
                 setLikers(data.likers || []);
             }
         } catch (error) {
-            console.error("Error fetching likers", error);
+            if ((error as Error).name !== 'AbortError') {
+                console.error("Error fetching likers", error);
+            }
         } finally {
             setLoading(false);
         }
@@ -66,7 +82,7 @@ export function LikesReceivedList() {
                                     <div className="aspect-[4/5] relative">
                                         <SafeImage
                                             src={liker.photos?.[0] || '/placeholder.svg'}
-                                            alt={liker.displayName}
+                                            alt={liker.displayName || 'Usuario'}
                                             fill
                                             sizes="50vw"
                                             className="object-cover transition-transform duration-700 group-hover:scale-110"

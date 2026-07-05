@@ -58,10 +58,13 @@ export function MuteDialog({ isOpen, onClose, onMute, isMuted }: MuteDialogProps
                 ) : (
                     <div className="space-y-3">
                         <p className="text-xs text-muted-foreground">Solo se silencian las notificaciones push. Los mensajes seguirán llegando al chat.</p>
+                        <div role="radiogroup" aria-label="Duración del silencio" className="space-y-3">
                         {MUTE_OPTIONS.map((option) => (
                             <button
                                 key={option.label}
                                 onClick={() => setSelectedDuration(option.duration)}
+                                role="radio"
+                                aria-checked={selectedDuration === option.duration}
                                 className={cn(
                                     "w-full flex items-center gap-3 p-3 rounded-lg border transition-colors",
                                     selectedDuration === option.duration
@@ -73,6 +76,7 @@ export function MuteDialog({ isOpen, onClose, onMute, isMuted }: MuteDialogProps
                                 <span className="font-medium text-sm">{option.label}</span>
                             </button>
                         ))}
+                        </div>
                     </div>
                 )}
 

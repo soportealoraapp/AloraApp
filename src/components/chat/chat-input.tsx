@@ -239,6 +239,7 @@ export function ChatInput({ onSend, onSendImage, onSendVoice, onTyping, disabled
     } catch (error) {
       console.error("Error sending message:", error);
       setMessage(messageToSend);
+      toast({ title: 'Error al enviar mensaje', variant: 'destructive' });
     } finally {
       setSending(false);
     }
@@ -337,7 +338,7 @@ export function ChatInput({ onSend, onSendImage, onSendVoice, onTyping, disabled
             className="relative inline-block rounded-xl overflow-hidden border border-muted"
           >
             <div className="relative h-20 w-20">
-              <SafeImage src={previewImage} alt="Preview" fill sizes="(max-width: 640px) 80vw, 300px" className="object-cover" loading="lazy" />
+              <SafeImage src={previewImage} alt="Vista previa" fill sizes="(max-width: 640px) 80vw, 300px" className="object-cover" loading="lazy" />
             </div>
             {uploadingImage && (
               <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
@@ -347,6 +348,7 @@ export function ChatInput({ onSend, onSendImage, onSendVoice, onTyping, disabled
             <button
               onClick={() => { setPreviewImage(null); setUploadingImage(false); }}
               className="absolute top-1 right-1 bg-black/50 rounded-full p-0.5"
+              aria-label="Cerrar vista previa"
             >
               <X className="h-3 w-3 text-white" />
             </button>
@@ -370,6 +372,7 @@ export function ChatInput({ onSend, onSendImage, onSendVoice, onTyping, disabled
           onClick={() => fileInputRef.current?.click()}
           disabled={disabled || uploadingImage}
           className="h-11 w-11 rounded-full text-muted-foreground hover:text-foreground"
+          aria-label="Adjuntar imagen"
         >
           <ImageIcon className="h-5 w-5" />
         </Button>
@@ -388,6 +391,7 @@ export function ChatInput({ onSend, onSendImage, onSendVoice, onTyping, disabled
             size="icon"
             disabled={disabled || sending}
             className="rounded-2xl"
+            aria-label="Enviar mensaje"
           >
             {sending ? (
               <Loader2 className="h-4 w-4 animate-spin" />
@@ -403,6 +407,7 @@ export function ChatInput({ onSend, onSendImage, onSendVoice, onTyping, disabled
             disabled={disabled}
             onClick={startRecording}
             className="h-11 w-11 rounded-full text-muted-foreground hover:text-foreground"
+            aria-label="Grabar nota de voz"
           >
             <Mic className="h-5 w-5" />
           </Button>

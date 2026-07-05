@@ -25,11 +25,13 @@ export default function SuccessStoriesPage() {
     const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
-        fetch('/api/success-stories')
+        const controller = new AbortController();
+        fetch('/api/success-stories', { signal: controller.signal })
             .then(r => r.json())
             .then(data => setStories(data.stories || []))
-            .catch((err) => { console.error(err); setError('Error al cargar las historias.'); })
+            .catch((err) => { if (err.name !== 'AbortError') { console.error(err); setError('Error al cargar las historias.'); } })
             .finally(() => setLoading(false));
+        return () => controller.abort();
     }, []);
 
     if (loading) {

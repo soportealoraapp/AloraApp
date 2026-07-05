@@ -346,6 +346,7 @@ export function PhotoCrop({ isOpen, onClose, imageSrc, onCrop }: PhotoCropProps)
                             value={zoom}
                             onChange={(e) => setZoom(parseFloat(e.target.value))}
                             className="w-32 accent-primary"
+                            aria-label="Zoom"
                         />
                         <ZoomIn className="h-4 w-4 text-muted-foreground" />
                         <span className="text-xs text-muted-foreground w-8 text-right">{Math.round(zoom * 100)}%</span>
@@ -367,7 +368,7 @@ export function PhotoCrop({ isOpen, onClose, imageSrc, onCrop }: PhotoCropProps)
                             // eslint-disable-next-line @next/next/no-img-element
                             <img
                                 src={imageSrc}
-                                alt="Crop preview"
+                                alt="Vista previa del recorte"
                                 className="w-full h-full object-contain"
                                 draggable={false}
                                 style={{ transform: `scale(${zoom})`, transformOrigin: 'center center' }}
@@ -383,6 +384,8 @@ export function PhotoCrop({ isOpen, onClose, imageSrc, onCrop }: PhotoCropProps)
                             }}
                             onMouseDown={handleMouseDown}
                             onTouchStart={(e) => { e.stopPropagation(); handleTouchStart(e); }}
+                            aria-label="Área de recorte"
+                            role="img"
                         >
                             <div className="absolute inset-0 border border-white/30" />
                             {(['tl', 'tr', 'bl', 'br', 't', 'r', 'b', 'l'] as ResizeHandle[]).map(renderResizeHandle)}

@@ -8,11 +8,14 @@ import { Loader2, RefreshCw, Users, MessageCircle, Heart, AlertTriangle, Shield,
 import { Button } from '@/components/ui/button';
 import { SectionTitle } from '@/components/ui/custom/SectionTitle';
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type AdminData = Record<string, any>;
+
 interface CommandCenterData {
-    marketplace: any;
-    retention: any;
-    activation: any;
-    alerts: any[];
+    marketplace: AdminData;
+    retention: AdminData;
+    activation: AdminData;
+    alerts: { severity?: string; message: string }[];
 }
 
 export default function MarketplaceCommandPage() {
@@ -224,7 +227,7 @@ export default function MarketplaceCommandPage() {
                     </CardHeader>
                     <CardContent>
                         <ul className="space-y-2">
-                            {data.alerts.map((alert: any, i: number) => (
+                            {data.alerts.map((alert, i: number) => (
                                 <li key={i} className="text-sm flex items-start gap-2">
                                     <Badge variant={alert.severity === 'high' ? 'destructive' : 'outline'}>
                                         {alert.severity}

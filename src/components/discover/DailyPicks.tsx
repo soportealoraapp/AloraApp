@@ -28,7 +28,8 @@ export const DailyPicks = React.memo(function DailyPicks({ subscriptionStatus = 
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        fetch('/api/daily-picks')
+        const controller = new AbortController();
+        fetch('/api/daily-picks', { signal: controller.signal })
             .then(r => {
                 if (!r.ok) throw new Error(r.statusText);
                 return r.json();
@@ -36,6 +37,7 @@ export const DailyPicks = React.memo(function DailyPicks({ subscriptionStatus = 
             .then(data => setPicks(data.picks || []))
             .catch(() => logger.warn('Failed to fetch daily picks'))
             .finally(() => setLoading(false));
+        return () => controller.abort();
     }, []);
 
     if (loading) {

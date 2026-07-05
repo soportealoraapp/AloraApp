@@ -41,11 +41,13 @@ export default function TrustPage() {
 
     useEffect(() => {
         if (!user) return;
-        fetch('/api/profile/trust')
+        const controller = new AbortController();
+        fetch('/api/profile/trust', { signal: controller.signal })
             .then(r => r.json())
             .then(setTrust)
             .catch(console.error)
             .finally(() => setLoading(false));
+        return () => controller.abort();
     }, [user]);
 
     if (loading) {

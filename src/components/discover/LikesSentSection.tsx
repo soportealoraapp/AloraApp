@@ -31,12 +31,14 @@ export const LikesSentSection = React.memo(function LikesSentSection({ intent = 
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    const controller = new AbortController();
     setLoading(true);
-    fetch(`/api/match/likes-sent?intent=${intent}&limit=12`)
+    fetch(`/api/match/likes-sent?intent=${intent}&limit=12`, { signal: controller.signal })
       .then(r => r.json())
       .then(data => { setSentLikes(data.likes || []); })
       .catch(() => { setSentLikes([]); })
       .finally(() => setLoading(false));
+    return () => controller.abort();
   }, [intent]);
 
   if (loading) {

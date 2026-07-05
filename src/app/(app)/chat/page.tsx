@@ -31,7 +31,7 @@ export default function ChatPage() {
     const [showStaleOnly, setShowStaleOnly] = useState(false);
     const [dismissedStaleBanner, setDismissedStaleBanner] = useState(false);
     const [rejectDialogOpen, setRejectDialogOpen] = useState(false);
-    const [rejectTarget, setRejectTarget] = useState<any>(null);
+    const [rejectTarget, setRejectTarget] = useState<{ id: string; intent?: string } | null>(null);
     const [hideDialogOpen, setHideDialogOpen] = useState(false);
     const [hideTargetId, setHideTargetId] = useState<string | null>(null);
 

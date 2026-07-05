@@ -9,7 +9,7 @@ interface MessageRendererProps {
     isMe: boolean;
     currentUserId?: string;
     onReact: (messageId: string, emoji: string) => void;
-    onRetry: (failedMessage: any) => void;
+    onRetry: (failedMessage: Message) => void;
 }
 
 function normalizeContent(content: string | object): string {

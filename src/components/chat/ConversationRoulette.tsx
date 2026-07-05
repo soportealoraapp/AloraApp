@@ -57,10 +57,10 @@ const QUESTIONS = {
 type Category = keyof typeof QUESTIONS;
 
 const CATEGORY_LABELS: Record<Category, { label: string; color: string }> = {
-    deep: { label: 'Profunda', color: 'text-purple-500' },
+    deep: { label: 'Profunda', color: 'text-purple-500 dark:text-purple-400' },
     fun: { label: 'Divertida', color: 'text-orange-500 dark:text-orange-400' },
-    romantic: { label: 'Romántica', color: 'text-pink-500' },
-    hypothetical: { label: 'Hipotética', color: 'text-blue-500' },
+    romantic: { label: 'Romántica', color: 'text-pink-500 dark:text-pink-400' },
+    hypothetical: { label: 'Hipotética', color: 'text-blue-500 dark:text-blue-400' },
 };
 
 export function ConversationRoulette({ onSend, disabled }: ConversationRouletteProps) {
@@ -106,10 +106,10 @@ export function ConversationRoulette({ onSend, disabled }: ConversationRouletteP
                                 <p className="text-sm font-medium leading-snug">{currentQuestion}</p>
                             </div>
                             <div className="flex gap-1 flex-shrink-0">
-                                <Button size="icon" variant="ghost" className="h-8 w-8" onClick={spin}>
+                                <Button size="icon" variant="ghost" className="h-8 w-8" onClick={spin} aria-label="Cambiar pregunta">
                                     <RefreshCw className="h-4 w-4" />
                                 </Button>
-                                <Button size="icon" className="h-8 w-8" onClick={handleSend}>
+                                <Button size="icon" className="h-8 w-8" onClick={handleSend} aria-label="Enviar pregunta">
                                     <Send className="h-4 w-4" />
                                 </Button>
                             </div>

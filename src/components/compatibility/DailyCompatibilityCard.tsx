@@ -28,13 +28,9 @@ export const DailyCompatibilityCard = React.memo(function DailyCompatibilityCard
     const [data, setData] = useState<DailyCompatData | null>(null);
     const [loading, setLoading] = useState(true);
 
-    useEffect(() => {
-        fetchCompatibility();
-    }, []);
-
-    const fetchCompatibility = async () => {
+    const fetchCompatibility = async (signal?: AbortSignal) => {
         try {
-            const res = await fetch('/api/daily-compatibility');
+            const res = await fetch('/api/daily-compatibility', { signal });
             const result = await res.json();
             if (!res.ok) {
                 setData({ found: false });
@@ -42,11 +38,19 @@ export const DailyCompatibilityCard = React.memo(function DailyCompatibilityCard
             }
             setData(result);
         } catch (error) {
-            console.error('Error fetching daily compatibility:', error);
+            if ((error as Error).name !== 'AbortError') {
+                console.error('Error fetching daily compatibility:', error);
+            }
         } finally {
             setLoading(false);
         }
     };
+
+    useEffect(() => {
+        const controller = new AbortController();
+        fetchCompatibility(controller.signal);
+        return () => controller.abort();
+    }, []);
 
     if (loading) {
         return (

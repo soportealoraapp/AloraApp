@@ -8,6 +8,7 @@ import { Progress } from '@/components/ui/progress';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Check, ChevronRight, Sparkles, Camera, Heart, MessageCircle, Shield, Music, BookOpen } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
+import { UserProfile } from '@/lib/domain/types';
 import { useRouter } from 'next/navigation';
 
 interface Mission {
@@ -21,7 +22,7 @@ interface Mission {
   completed: boolean;
 }
 
-const getMissions = (profile: any): Mission[] => [
+const getMissions = (profile: Partial<UserProfile>): Mission[] => [
   {
     id: 'bio',
     day: 1,
@@ -60,7 +61,7 @@ const getMissions = (profile: any): Mission[] => [
     icon: <MessageCircle className="h-5 w-5" />,
     action: 'Responder pregunta',
     route: '/discover',
-    completed: profile?.latestAnswer?.answered ?? false,
+    completed: (profile as any)?.latestAnswer?.answered ?? false,
   },
   {
     id: 'photos',
@@ -80,7 +81,7 @@ const getMissions = (profile: any): Mission[] => [
     icon: <BookOpen className="h-5 w-5" />,
     action: 'Hacer quiz',
     route: '/compatibility',
-    completed: (profile?.completedQuizzes ?? 0) > 0,
+    completed: ((profile as any)?.completedQuizzes ?? 0) > 0,
   },
   {
     id: 'verification',
@@ -110,7 +111,7 @@ export function PostOnboardingJourney() {
       if (profile) {
         setMissions(getMissions({
           ...profile,
-          latestAnswer: { ...profile.latestAnswer, answered: true }
+          latestAnswer: { ...(profile as any).latestAnswer, answered: true }
         }));
       }
     };

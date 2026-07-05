@@ -138,6 +138,23 @@ export function VoiceMessage({ audioUrl, duration: propDuration, isOwn = false }
                     ref={progressBarRef}
                     className="flex items-center gap-1 cursor-pointer"
                     onClick={handleSeek}
+                    role="slider"
+                    aria-label="Buscar posición del audio"
+                    aria-valuenow={Math.round(progress)}
+                    aria-valuemin={0}
+                    aria-valuemax={100}
+                    tabIndex={0}
+                    onKeyDown={(e) => {
+                        if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
+                            e.preventDefault();
+                            const audio = audioRef.current;
+                            const bar = progressBarRef.current;
+                            if (!audio || !bar || duration <= 0) return;
+                            const delta = e.key === 'ArrowRight' ? 5 : -5;
+                            audio.currentTime = Math.max(0, Math.min(duration, audio.currentTime + delta));
+                            setCurrentTime(audio.currentTime);
+                        }
+                    }}
                 >
                     {barHeights.map((barHeight, i) => {
                         const isActive = (i / 20) * 100 <= progress;

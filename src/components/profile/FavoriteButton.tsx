@@ -18,10 +18,12 @@ export function FavoriteButton({ profileId, className, size = 'default' }: Favor
     const { toast } = useToast();
 
     useEffect(() => {
-        fetch(`/api/profile/favorites/check?profileId=${profileId}`)
+        const controller = new AbortController();
+        fetch(`/api/profile/favorites/check?profileId=${profileId}`, { signal: controller.signal })
             .then(r => r.json())
             .then(data => { setIsFavorited(data.isFavorited); })
             .catch(() => {});
+        return () => controller.abort();
     }, [profileId]);
 
     const toggleFavorite = async (e: React.MouseEvent) => {
@@ -62,6 +64,7 @@ export function FavoriteButton({ profileId, className, size = 'default' }: Favor
             )}
             onClick={toggleFavorite}
             disabled={loading}
+            aria-label={isFavorited ? 'Quitar de favoritos' : 'Agregar a favoritos'}
         >
             <Heart className={cn("h-5 w-5", isFavorited && "fill-current")} />
         </Button>

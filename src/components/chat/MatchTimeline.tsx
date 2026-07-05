@@ -24,15 +24,19 @@ interface MatchTimelineProps {
 export function MatchTimeline({ matchId, open, onClose }: MatchTimelineProps) {
     const [events, setEvents] = useState<TimelineEvent[]>([]);
     const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(false);
 
     useEffect(() => {
         if (!open) return;
+        const controller = new AbortController();
         setLoading(true);
-        fetch(`/api/chat/timeline?matchId=${matchId}`)
+        setError(false);
+        fetch(`/api/chat/timeline?matchId=${matchId}`, { signal: controller.signal })
             .then(r => r.json())
             .then(data => setEvents(data.events || []))
-            .catch(() => {})
+            .catch(() => { if (!controller.signal.aborted) setError(true); })
             .finally(() => setLoading(false));
+        return () => controller.abort();
     }, [matchId, open]);
 
     if (!open) return null;
@@ -53,6 +57,11 @@ export function MatchTimeline({ matchId, open, onClose }: MatchTimelineProps) {
                     {loading ? (
                         <div className="flex items-center justify-center py-8 text-muted-foreground">
                             <Loader2 className="h-5 w-5 animate-spin" />
+                        </div>
+                    ) : error ? (
+                        <div className="text-center py-8 text-sm text-muted-foreground">
+                            No se pudo cargar la línea de tiempo.{' '}
+                            <button onClick={() => window.location.reload()} className="underline font-medium text-primary">Reintentar</button>
                         </div>
                     ) : events.length === 0 ? (
                         <div className="text-center py-8 text-sm text-muted-foreground">

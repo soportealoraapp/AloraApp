@@ -60,7 +60,7 @@ export function DailyQuestionCard() {
 
     // Modal state for viewing others' answers
     const [showAnswersModal, setShowAnswersModal] = useState(false);
-    const [otherAnswers, setOtherAnswers] = useState<any[]>([]);
+    const [otherAnswers, setOtherAnswers] = useState<{ id: string; userId: string; answer: string; profile: { userId: string; displayName: string; age?: number; city?: string; isVerified?: boolean; photos?: string[] } }[]>([]);
     const [loadingAnswers, setLoadingAnswers] = useState(false);
 
     // Match screen state

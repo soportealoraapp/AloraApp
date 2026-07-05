@@ -129,11 +129,13 @@ export function CityAutocomplete({ value, onSelect, placeholder = "Buscar ciudad
                 />
             </div>
             {isOpen && results.length > 0 && (
-                <div className="absolute z-50 w-full mt-1 bg-popover border border-border rounded-lg shadow-lg max-h-60 overflow-auto">
+                <div className="absolute z-50 w-full mt-1 bg-popover border border-border rounded-lg shadow-lg max-h-60 overflow-auto" role="listbox" aria-label="Ciudades disponibles">
                     {results.map((result, index) => (
                         <button
                             key={result.city.id}
                             type="button"
+                            role="option"
+                            aria-selected={index === highlightIndex}
                             className={`w-full text-left px-4 py-3 flex items-center gap-3 hover:bg-muted/50 transition-colors ${
                                 index === highlightIndex ? 'bg-muted/50' : ''
                             }`}
