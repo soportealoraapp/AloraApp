@@ -17,6 +17,7 @@ import {
 import { RefreshCw, ShieldCheck, CheckCircle, XCircle, ExternalLink } from 'lucide-react';
 import { AdminBackButton } from '@/components/admin/AdminBackButton';
 import { SafeImage } from '@/components/ui/safe-image';
+import { useToast } from '@/hooks/use-toast';
 
 interface Submission {
     id: string; selfieUrl: string; status: string; reason: string | null; createdAt: string;
@@ -29,6 +30,7 @@ export default function AdminVerificationsPage() {
     const [filter, setFilter] = useState('pending');
     const [confirmApproveId, setConfirmApproveId] = useState<string | null>(null);
     const [confirmRejectId, setConfirmRejectId] = useState<string | null>(null);
+    const { toast } = useToast();
 
     const loadSubmissions = async (status: string) => {
         setLoading(true);
@@ -50,6 +52,11 @@ export default function AdminVerificationsPage() {
                 body: JSON.stringify({ submissionId, action, ...(reason ? { reason } : {}) }),
             });
             loadSubmissions(filter);
+            const actionLabels: Record<string, string> = {
+                approve: 'Verificación aprobada',
+                reject: 'Verificación rechazada',
+            };
+            toast({ title: 'Éxito', description: actionLabels[action] || 'Acción completada' });
         } catch (e) { console.error(e); }
     };
 
@@ -71,6 +78,9 @@ export default function AdminVerificationsPage() {
                 <div className="flex items-center gap-3">
                     <ShieldCheck className="h-5 w-5 text-emerald-400" />
                     <h1 className="text-xl font-bold">Verificaciones</h1>
+                    <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => loadSubmissions(filter)} disabled={loading} aria-label="Actualizar">
+                        <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
+                    </Button>
                 </div>
                 <div className="flex gap-2 ml-auto">
                     {[

@@ -1,25 +1,25 @@
-"use client";
+'use client';
 
-import { useAuth } from "@/contexts/AuthContext";
+import { useAuth } from '@/contexts/AuthContext';
 
-import { calculateCompleteness } from "@/lib/utils/completeness";
-import { TrustBadge } from "@/components/ui/premium/TrustBadge";
-import { BadgeChipList } from "@/components/profile/BadgeChip";
-import { Progress } from "@/components/ui/progress";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { Settings, Edit, Eye, Music, CheckCircle, ChevronRight, Shield, Sparkles, MessageCircle, X, Mic, LogOut } from "lucide-react";
-import { SafeImage } from "@/components/ui/safe-image";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { Skeleton } from "@/components/ui/skeleton";
-import { useState, useEffect } from "react";
-import { logger } from "@/lib/logger";
-import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
-import { ProfileHighlights } from "@/components/profile/ProfileHighlights";
-import { VoicePlayer } from "@/components/audio/VoicePlayer";
-import { ErrorBoundary } from "@/components/ui/error-boundary";
-import { SpotifySection } from "@/components/profile/SpotifySection";
+import { calculateCompleteness } from '@/lib/utils/completeness';
+import { TrustBadge } from '@/components/ui/premium/TrustBadge';
+import { BadgeChipList } from '@/components/profile/BadgeChip';
+import { Progress } from '@/components/ui/progress';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
+import { Settings, Edit, Eye, Music, CheckCircle, ChevronRight, Shield, Sparkles, MessageCircle, X, Mic, LogOut, Heart, BarChart2, Users } from 'lucide-react';
+import { SafeImage } from '@/components/ui/safe-image';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { Skeleton } from '@/components/ui/skeleton';
+import { useState, useEffect } from 'react';
+import { logger } from '@/lib/logger';
+import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel';
+import { ProfileHighlights } from '@/components/profile/ProfileHighlights';
+import { VoicePlayer } from '@/components/audio/VoicePlayer';
+import { ErrorBoundary } from '@/components/ui/error-boundary';
+import { SpotifySection } from '@/components/profile/SpotifySection';
 
 export default function ProfilePage() {
   const { user, profile, authLoading, profileLoading, signOut } = useAuth();
@@ -125,27 +125,38 @@ export default function ProfilePage() {
     router.push(`/discover?${queryParam}=${encodeURIComponent(tag)}`);
   };
 
+  const hasStats = profileStats && (profileStats.likesReceived > 0 || profileStats.matchesCount > 0 || profileStats.profileViews > 0);
+
   return (
     <div>
-      <header className="sticky top-0 z-30 flex h-16 items-center gap-2 border-b bg-background/90 px-3 backdrop-blur-md sm:px-6 pt-safe">
-        <h1 className="text-xl font-bold md:text-2xl text-foreground shrink-0">Mi Perfil</h1>
+      {/* Header */}
+      <header className="sticky top-0 z-30 flex h-16 items-center gap-2 border-b bg-background/90 px-3 backdrop-blur-md sm:px-6 pt-safe"
+        style={{ borderBottomColor: 'hsl(var(--border) / 0.5)' }}
+      >
+        <h1 className="text-xl font-headline font-bold text-gradient shrink-0">Mi Perfil</h1>
         <div className="ml-auto flex items-center gap-1 sm:gap-2 min-w-0">
-          <Button size="icon" variant="ghost" className="shrink-0" onClick={async () => { await signOut(); router.replace('/login'); }} title="Cerrar sesión">
+          <Button
+            size="icon"
+            variant="ghost"
+            className="shrink-0 rounded-xl hover:bg-destructive/10 hover:text-destructive"
+            onClick={async () => { await signOut(); router.replace('/login'); }}
+            aria-label="Cerrar sesión"
+          >
             <LogOut className="h-5 w-5" />
           </Button>
-          <Button size="icon" variant="ghost" asChild className="shrink-0">
-            <Link href="/settings" aria-label="Configuración">
+          <Button size="icon" variant="ghost" asChild className="shrink-0 rounded-xl" aria-label="Configuración">
+            <Link href="/settings">
               <Settings className="h-5 w-5" />
             </Link>
           </Button>
-          <Button size="icon" variant="ghost" asChild className="shrink-0">
-            <Link href={`/profile/${user?.id}?preview=1`} title="Vista previa" aria-label="Vista previa del perfil">
+          <Button size="icon" variant="ghost" asChild className="shrink-0 rounded-xl" aria-label="Vista previa del perfil">
+            <Link href={`/profile/${user?.id}?preview=1`}>
               <Eye className="h-5 w-5" />
             </Link>
           </Button>
-          <Button variant="default" size="sm" asChild className="shrink-0 text-xs sm:text-sm px-2 sm:px-4">
+          <Button variant="default" size="sm" asChild className="shrink-0 rounded-xl px-3 sm:px-4 text-xs sm:text-sm">
             <Link href="/profile/edit">
-              <Edit className="h-4 w-4 sm:mr-2" />
+              <Edit className="h-4 w-4 sm:mr-1.5" />
               <span className="hidden sm:inline">Editar</span>
             </Link>
           </Button>
@@ -185,44 +196,73 @@ export default function ProfilePage() {
               priority
             />
           )}
+          {/* Gradient overlay at bottom of photo */}
+          <div
+            className="absolute bottom-0 left-0 right-0 h-32 pointer-events-none"
+            style={{
+              background: 'linear-gradient(to top, hsl(var(--background)) 0%, transparent 100%)',
+            }}
+          />
         </div>
 
-        {/* Stats — only show when there's real data */}
-        {profileStats && (profileStats.likesReceived > 0 || profileStats.matchesCount > 0 || profileStats.profileViews > 0) && (
-        <div className="grid grid-cols-3 gap-4 px-4 py-4 border-b">
-          {profileStats.likesReceived > 0 && (
-          <Link href="/matches" className="text-center hover:opacity-80 transition-opacity">
-            <p className="text-2xl font-bold text-primary">{profileStats.likesReceived}</p>
-            <p className="text-xs text-muted-foreground">Me gusta</p>
-          </Link>
-          )}
-          {profileStats.matchesCount > 0 && (
-          <Link href="/matches" className="text-center hover:opacity-80 transition-opacity">
-            <p className="text-2xl font-bold text-primary">{profileStats.matchesCount}</p>
-            <p className="text-xs text-muted-foreground">Conexiones</p>
-          </Link>
-          )}
-          {profileStats.profileViews > 0 && (
-          <Link href="/profile/visitors" className="text-center hover:opacity-80 transition-opacity">
-            <p className="text-2xl font-bold text-primary">{profileStats.profileViews}</p>
-            <p className="text-xs text-muted-foreground">Visitas</p>
-          </Link>
-          )}
-        </div>
+        {/* Stats — with gradient separators */}
+        {hasStats && (
+          <div
+            className="grid grid-cols-3 gap-0 mx-4 -mt-1 rounded-2xl overflow-hidden border border-border/40 mb-4"
+            style={{
+              background: 'linear-gradient(135deg, hsl(335 85% 76% / 0.06) 0%, hsl(280 60% 70% / 0.04) 100%)',
+            }}
+          >
+            {profileStats.likesReceived > 0 && (
+              <Link href="/matches" className="text-center py-4 hover:bg-primary/5 transition-colors border-r border-border/40">
+                <div className="flex items-center justify-center gap-1.5 mb-0.5">
+                  <Heart className="h-3.5 w-3.5 text-primary" />
+                  <p className="text-xl font-bold text-gradient">{profileStats.likesReceived}</p>
+                </div>
+                <p className="text-xs text-muted-foreground">Me gusta</p>
+              </Link>
+            )}
+            {profileStats.matchesCount > 0 && (
+              <Link href="/matches" className="text-center py-4 hover:bg-primary/5 transition-colors border-r border-border/40">
+                <div className="flex items-center justify-center gap-1.5 mb-0.5">
+                  <Users className="h-3.5 w-3.5 text-primary" />
+                  <p className="text-xl font-bold text-gradient">{profileStats.matchesCount}</p>
+                </div>
+                <p className="text-xs text-muted-foreground">Conexiones</p>
+              </Link>
+            )}
+            {profileStats.profileViews > 0 && (
+              <Link href="/profile/visitors" className="text-center py-4 hover:bg-primary/5 transition-colors">
+                <div className="flex items-center justify-center gap-1.5 mb-0.5">
+                  <BarChart2 className="h-3.5 w-3.5 text-primary" />
+                  <p className="text-xl font-bold text-gradient">{profileStats.profileViews}</p>
+                </div>
+                <p className="text-xs text-muted-foreground">Visitas</p>
+              </Link>
+            )}
+          </div>
         )}
 
-        <div className="p-4 space-y-6">
+        <div className="p-4 space-y-5">
           {/* 2. Name + badges + bio */}
           <div className="space-y-3">
-            <div className="flex items-center gap-2">
-              <h2 className="text-3xl font-bold font-headline">{profile.displayName}, {profile.age}</h2>
+            <div className="flex items-center gap-2 flex-wrap">
+              <h2 className="text-3xl font-bold font-headline text-foreground">{profile.displayName}, {profile.age}</h2>
               {profile.isVerified && <TrustBadge type="verified" />}
               {completenessScore >= 90 && <TrustBadge type="complete" />}
               {profile.subscriptionStatus === 'plus' && <TrustBadge type="premium" />}
             </div>
 
             {!profile.isVerified && !dismissedVerification && (
-              <Card className="rounded-2xl border border-primary/20 bg-primary/5 shadow-sm hover:shadow-md transition-shadow cursor-pointer relative" onClick={() => router.push('/settings/verification')}>
+              <Card
+                className="rounded-2xl relative overflow-hidden cursor-pointer transition-all duration-200 hover:-translate-y-0.5"
+                style={{
+                  border: '1px solid hsl(335 85% 76% / 0.25)',
+                  background: 'linear-gradient(135deg, hsl(335 85% 76% / 0.07) 0%, hsl(280 60% 70% / 0.05) 100%)',
+                  boxShadow: '0 2px 12px hsl(335 85% 76% / 0.1)',
+                }}
+                onClick={() => router.push('/settings/verification')}
+              >
                 <button
                   onClick={(e) => { e.preventDefault(); e.stopPropagation(); setDismissedVerification(true); localStorage.setItem('dismissedVerification', 'true'); }}
                   className="absolute top-2 right-2 p-1 rounded-full hover:bg-primary/10 transition-colors"
@@ -232,7 +272,10 @@ export default function ProfilePage() {
                 </button>
                 <CardContent className="p-4 flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <div className="p-2 bg-primary/20 rounded-xl">
+                    <div
+                      className="p-2.5 rounded-xl"
+                      style={{ background: 'linear-gradient(135deg, hsl(335 85% 76% / 0.2) 0%, hsl(280 60% 70% / 0.15) 100%)' }}
+                    >
                       <Shield className="h-5 w-5 text-primary" />
                     </div>
                     <div>
@@ -250,11 +293,17 @@ export default function ProfilePage() {
             )}
           </div>
 
+          {/* Voice intro */}
           {profile.voiceIntro && (
-            <Card className="rounded-2xl border border-border/60 bg-card/90 shadow-sm overflow-hidden">
+            <Card
+              className="rounded-2xl overflow-hidden border"
+              style={{ borderColor: 'hsl(335 85% 76% / 0.2)', background: 'linear-gradient(135deg, hsl(335 85% 76% / 0.05) 0%, hsl(280 60% 70% / 0.03) 100%)' }}
+            >
               <CardContent className="p-5">
                 <div className="flex items-center gap-2 mb-3">
-                  <Mic className="h-4 w-4 text-primary" />
+                  <div className="p-1.5 rounded-lg bg-primary/10">
+                    <Mic className="h-4 w-4 text-primary" />
+                  </div>
                   <h3 className="font-semibold text-sm text-foreground">Presentación de voz</h3>
                 </div>
                 <VoicePlayer src={profile.voiceIntro} />
@@ -262,11 +311,11 @@ export default function ProfilePage() {
             </Card>
           )}
 
-          {/* 3. Highlights & Voice Intro */}
-          <ProfileHighlights 
-            bio={profile.bio} 
-            interests={profile.interests} 
-            values={profile.values} 
+          {/* 3. Highlights */}
+          <ProfileHighlights
+            bio={profile.bio}
+            interests={profile.interests}
+            values={profile.values}
             lookingFor={profile.lookingFor}
             musicGenres={profile.musicGenres}
             voiceIntro={profile.voiceIntro}
@@ -274,53 +323,65 @@ export default function ProfilePage() {
 
           {/* 4. Daily answer */}
           {latestAnswer && (
-            <Card className="rounded-2xl border border-border/60 bg-card/90 shadow-sm">
+            <Card
+              className="rounded-2xl border"
+              style={{ borderColor: 'hsl(280 60% 70% / 0.2)', background: 'linear-gradient(135deg, hsl(280 60% 70% / 0.05) 0%, hsl(335 85% 76% / 0.03) 100%)' }}
+            >
               <CardContent className="p-5">
                 <div className="flex items-center gap-2 mb-2">
-                  <MessageCircle className="h-4 w-4 text-primary" />
+                  <div className="p-1.5 rounded-lg bg-accent/20">
+                    <MessageCircle className="h-4 w-4 text-accent-foreground" />
+                  </div>
                   <h3 className="font-semibold text-sm text-foreground">
                     {latestAnswer.category || 'Respuesta del día'}
                   </h3>
                 </div>
-                <p className="text-xs text-muted-foreground mb-1">{latestAnswer.question}</p>
-                <p className="text-sm text-foreground leading-relaxed">"{latestAnswer.answer}"</p>
+                <p className="text-xs text-muted-foreground mb-1.5">{latestAnswer.question}</p>
+                <p className="text-sm text-foreground leading-relaxed italic">"{latestAnswer.answer}"</p>
               </CardContent>
             </Card>
           )}
 
-          {/* 4. Interests / Values / Music */}
+          {/* 5. Interests / Values / Music */}
           {((profile.interests && profile.interests.length > 0) || (profile.values && profile.values.length > 0) || (profile.musicGenres && profile.musicGenres.length > 0)) && (
-            <Card className="rounded-2xl border border-border/60 bg-card/90 shadow-sm">
-              <CardContent className="p-5 space-y-4">
+            <Card className="rounded-2xl border border-border/50 bg-card shadow-sm">
+              <CardContent className="p-5 space-y-5">
                 {profile.interests && profile.interests.length > 0 && (
                   <div>
-                    <h3 className="font-semibold text-sm mb-2">Intereses</h3>
-                    <BadgeChipList 
-                      items={profile.interests} 
-                      type="interest" 
+                    <h3 className="font-bold text-sm mb-3 text-foreground flex items-center gap-2">
+                      <span className="h-1 w-3 rounded-full bg-gradient-to-r from-primary to-violet-500 inline-block" />
+                      Intereses
+                    </h3>
+                    <BadgeChipList
+                      items={profile.interests}
+                      type="interest"
                       onItemClick={(tag) => handleTagClick(tag, 'interest')}
                     />
                   </div>
                 )}
                 {profile.values && profile.values.length > 0 && (
                   <div>
-                    <h3 className="font-semibold text-sm mb-2">Valores</h3>
-                    <BadgeChipList 
-                      items={profile.values} 
-                      type="value" 
+                    <h3 className="font-bold text-sm mb-3 text-foreground flex items-center gap-2">
+                      <span className="h-1 w-3 rounded-full bg-gradient-to-r from-emerald-400 to-teal-500 inline-block" />
+                      Valores
+                    </h3>
+                    <BadgeChipList
+                      items={profile.values}
+                      type="value"
                       onItemClick={(tag) => handleTagClick(tag, 'value')}
                     />
                   </div>
                 )}
                 {profile.musicGenres && profile.musicGenres.length > 0 && (
                   <div>
-                    <h3 className="font-semibold text-sm flex items-center gap-2 mb-2">
+                    <h3 className="font-bold text-sm flex items-center gap-2 mb-3 text-foreground">
+                      <span className="h-1 w-3 rounded-full bg-gradient-to-r from-blue-400 to-indigo-500 inline-block" />
                       <Music className="h-4 w-4" />
                       Música
                     </h3>
-                    <BadgeChipList 
-                      items={profile.musicGenres} 
-                      type="music" 
+                    <BadgeChipList
+                      items={profile.musicGenres}
+                      type="music"
                       onItemClick={(tag) => handleTagClick(tag, 'music')}
                     />
                   </div>
@@ -329,14 +390,17 @@ export default function ProfilePage() {
             </Card>
           )}
 
-          {/* 5. Spotify Section */}
+          {/* 6. Spotify Section */}
           <ErrorBoundary fallback={null}>
             <SpotifySection spotify={profile?.spotify ?? null} isOwn={true} />
           </ErrorBoundary>
 
-          {/* 6. Completeness CTA — ALWAYS visible */}
+          {/* 7. Completeness CTA */}
           {completenessScore < 100 && (
-            <Card className="rounded-2xl border border-border/60 bg-card/90 shadow-sm">
+            <Card
+              className="rounded-2xl border overflow-hidden"
+              style={{ borderColor: 'hsl(335 85% 76% / 0.2)' }}
+            >
               <CardContent className="p-5">
                 <div className="flex items-center justify-between mb-3">
                   <div className="flex items-center gap-2">
@@ -344,7 +408,21 @@ export default function ProfilePage() {
                     <span className="font-bold text-sm text-foreground">Tu perfil al {completenessScore}%</span>
                   </div>
                 </div>
-                <Progress value={completenessScore} className="h-1.5 mb-3" role="progressbar" aria-valuenow={completenessScore} aria-valuemin={0} aria-valuemax={100} aria-label="Completitud del perfil" />
+                {/* Gradient progress bar */}
+                <div className="h-2 rounded-full bg-muted overflow-hidden mb-4">
+                  <div
+                    className="h-full rounded-full transition-all duration-700"
+                    style={{
+                      width: `${completenessScore}%`,
+                      background: 'linear-gradient(90deg, hsl(335 85% 76%) 0%, hsl(280 60% 70%) 100%)',
+                    }}
+                    role="progressbar"
+                    aria-valuenow={completenessScore}
+                    aria-valuemin={0}
+                    aria-valuemax={100}
+                    aria-label="Completitud del perfil"
+                  />
+                </div>
                 <div className="space-y-2 text-sm">
                   {[
                     { label: 'Foto principal', done: (profile?.photos?.length ?? 0) > 0 },
@@ -356,15 +434,15 @@ export default function ProfilePage() {
                   ].map((item, i) => (
                     <div key={i} className="flex items-center gap-2">
                       {item.done ? (
-                        <CheckCircle className="h-4 w-4 text-primary" />
+                        <CheckCircle className="h-4 w-4 text-primary flex-shrink-0" />
                       ) : (
-                        <div className="h-4 w-4 rounded-full border-2 border-muted-foreground/30" />
+                        <div className="h-4 w-4 rounded-full border-2 border-muted-foreground/30 flex-shrink-0" />
                       )}
-                      <span className={item.done ? 'text-muted-foreground opacity-60' : ''}>{item.label}</span>
+                      <span className={item.done ? 'text-muted-foreground/60 line-through' : 'text-foreground/80'}>{item.label}</span>
                     </div>
                   ))}
                 </div>
-                <Button variant="link" asChild className="p-0 h-auto text-xs font-bold text-primary mt-3">
+                <Button variant="default" asChild className="w-full mt-4 rounded-xl h-10 text-sm">
                   <Link href="/profile/edit">Completar perfil →</Link>
                 </Button>
               </CardContent>
@@ -372,31 +450,39 @@ export default function ProfilePage() {
           )}
 
           {completenessScore >= 90 && (
-            <Card className="rounded-2xl border border-primary/20 bg-primary/5 shadow-sm">
+            <Card
+              className="rounded-2xl border overflow-hidden"
+              style={{
+                borderColor: 'hsl(335 85% 76% / 0.25)',
+                background: 'linear-gradient(135deg, hsl(335 85% 76% / 0.08) 0%, hsl(280 60% 70% / 0.06) 100%)',
+              }}
+            >
               <CardContent className="p-4 flex items-center gap-3">
                 <span className="text-2xl">⭐</span>
                 <div>
-                  <p className="font-bold text-sm text-primary">Perfil destacado</p>
-                  <p className="text-xs text-muted-foreground">Tu perfil está bien completo — ¡sigue así!</p>
+                  <p className="font-bold text-sm text-gradient">Perfil destacado</p>
+                  <p className="text-xs text-muted-foreground">Tu perfil está muy completo — ¡sigue así!</p>
                 </div>
               </CardContent>
             </Card>
           )}
 
-          {/* 6. Quick links */}
-          <div className="rounded-2xl border border-border/60 bg-card/90 shadow-sm divide-y divide-muted/30 overflow-hidden">
-            <Link href="/profile/favorites" className="flex items-center justify-between px-4 py-3.5 hover:bg-muted/20 transition-colors">
-              <span className="text-sm font-medium">Perfiles guardados</span>
-              <ChevronRight className="h-4 w-4 text-muted-foreground" />
-            </Link>
-            <Link href="/profile/trust" className="flex items-center justify-between px-4 py-3.5 hover:bg-muted/20 transition-colors">
-              <span className="text-sm font-medium">Score de confianza</span>
-              <ChevronRight className="h-4 w-4 text-muted-foreground" />
-            </Link>
-            <Link href="/profile/visitors" className="flex items-center justify-between px-4 py-3.5 hover:bg-muted/20 transition-colors">
-              <span className="text-sm font-medium">Visitantes del perfil</span>
-              <ChevronRight className="h-4 w-4 text-muted-foreground" />
-            </Link>
+          {/* 8. Quick links */}
+          <div className="rounded-2xl border border-border/50 bg-card shadow-sm overflow-hidden">
+            {[
+              { href: '/profile/favorites', label: 'Perfiles guardados' },
+              { href: '/profile/trust', label: 'Score de confianza' },
+              { href: '/profile/visitors', label: 'Visitantes del perfil' },
+            ].map((item, i) => (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={`flex items-center justify-between px-4 py-3.5 hover:bg-muted/30 transition-colors ${i > 0 ? 'border-t border-border/30' : ''}`}
+              >
+                <span className="text-sm font-medium">{item.label}</span>
+                <ChevronRight className="h-4 w-4 text-muted-foreground" />
+              </Link>
+            ))}
           </div>
         </div>
       </main>

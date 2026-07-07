@@ -10,6 +10,7 @@ interface SettingsSectionLinkProps {
   description?: string;
   badge?: string;
   iconClassName?: string;
+  bubbleBg?: string; // custom bg for premium feel
 }
 
 export function SettingsSectionLink({
@@ -19,20 +20,42 @@ export function SettingsSectionLink({
   description,
   badge,
   iconClassName,
+  bubbleBg = "bg-primary/10 border-primary/20 text-primary",
 }: SettingsSectionLinkProps) {
   return (
     <Link href={href} className="block group">
-      <div className="flex items-center justify-between rounded-xl px-3 py-3 transition-colors duration-150 -mx-3 group-hover:bg-muted/40 group-focus-within:bg-muted/40">
-        <div className="flex min-w-0 items-center gap-3">
-          <div className={cn("shrink-0 text-muted-foreground", iconClassName)}>{icon}</div>
+      <div className="flex items-center justify-between rounded-2xl px-4 py-3.5 transition-all duration-200 hover:bg-secondary/40 active:scale-[0.99]">
+        <div className="flex min-w-0 items-center gap-3.5">
+          {/* Styled Icon Bubble */}
+          <div className={cn(
+            "h-10 w-10 rounded-xl border flex items-center justify-center shrink-0 transition-transform duration-200 group-hover:scale-105", 
+            bubbleBg,
+            iconClassName
+          )}>
+            <div className="[&_svg]:h-5 [&_svg]:w-5">
+              {icon}
+            </div>
+          </div>
           <div className="min-w-0">
-            <p className="truncate text-sm font-medium text-foreground">{label}</p>
-            {description ? <p className="truncate text-xs text-muted-foreground">{description}</p> : null}
+            <p className="truncate text-sm font-semibold text-foreground group-hover:text-primary transition-colors">{label}</p>
+            {description ? <p className="truncate text-xs text-muted-foreground/80 mt-0.5">{description}</p> : null}
           </div>
         </div>
         <div className="ml-2 flex shrink-0 items-center gap-2">
-          {badge ? <Badge variant="secondary" className="text-[11px]">{badge}</Badge> : null}
-          <ChevronRight className="h-4 w-4 text-muted-foreground transition-transform duration-150 group-hover:translate-x-0.5" />
+          {badge ? (
+            <Badge 
+              variant="secondary" 
+              className="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full"
+              style={{
+                background: 'linear-gradient(135deg, hsl(335 85% 76% / 0.15) 0%, hsl(280 60% 70% / 0.1) 100%)',
+                color: 'hsl(var(--primary))',
+                border: '1px solid hsl(335 85% 76% / 0.25)'
+              }}
+            >
+              {badge}
+            </Badge>
+          ) : null}
+          <ChevronRight className="h-4 w-4 text-muted-foreground/60 transition-transform duration-200 group-hover:translate-x-0.5" />
         </div>
       </div>
     </Link>

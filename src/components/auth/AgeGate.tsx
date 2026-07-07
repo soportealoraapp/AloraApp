@@ -25,7 +25,7 @@ function setAgeGateAccepted() {
     } catch {}
 }
 
-export function AgeGate() {
+export function AgeGate({ children }: { children: React.ReactNode }) {
     const [accepted, setAccepted] = useState(() => {
         if (typeof window === 'undefined') return false;
         return getAgeGateAccepted();
@@ -42,7 +42,7 @@ export function AgeGate() {
         setAccepted(true);
     };
 
-    if (!mounted || accepted) return null;
+    if (!mounted || accepted) return <>{children}</>;
 
     if (denied) {
         return (

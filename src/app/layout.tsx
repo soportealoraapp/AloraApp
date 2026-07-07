@@ -53,13 +53,14 @@ export default async function RootLayout({
           <QueryProvider>
             <AuthProvider>
               <AnalyticsProvider>
-              <AgeGate />
+              <AgeGate>
               <AuthGate>
                 <SafetyGuard>
                   <OfflineBanner />
                   {children}
                 </SafetyGuard>
               </AuthGate>
+              </AgeGate>
             </AnalyticsProvider>
               <Toaster />
             </AuthProvider>

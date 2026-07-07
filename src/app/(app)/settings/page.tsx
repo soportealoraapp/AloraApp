@@ -3,7 +3,7 @@
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { ArrowLeft, Bell, FileText, HelpCircle, Mail, Palette, Shield, User, LogOut, Loader2, Plane } from "lucide-react";
+import { ArrowLeft, Bell, FileText, HelpCircle, Mail, Palette, Shield, User, LogOut, Loader2, Plane, Settings } from "lucide-react";
 import { ThemeToggle } from '@/components/theme-toggle';
 import { SettingsSectionLink } from '@/components/settings/SettingsSectionLink';
 import { useAuth } from '@/contexts/AuthContext';
@@ -54,69 +54,151 @@ export default function SettingsPage() {
     };
 
     return (
-        <div>
-            <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b bg-background/80 px-4 backdrop-blur-sm sm:px-6 pt-safe">
-                <Button variant="ghost" size="icon" onClick={() => router.back()} aria-label="Volver">
+        <div className="min-h-dvh bg-background pb-20 md:pb-0 md:ml-60">
+            {/* Header */}
+            <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b bg-background/90 px-4 backdrop-blur-md pt-safe"
+                style={{ borderBottomColor: 'hsl(var(--border) / 0.5)' }}
+            >
+                {/* Gradient top border accent */}
+                <div
+                    className="absolute top-0 left-0 right-0 h-px"
+                    style={{ background: 'linear-gradient(90deg, transparent, hsl(335 85% 76% / 0.5), hsl(280 60% 70% / 0.5), transparent)' }}
+                />
+                <Button variant="ghost" size="icon" onClick={() => router.back()} aria-label="Volver" className="rounded-xl">
                     <ArrowLeft className="h-5 w-5" />
                 </Button>
-                <h1 className="text-xl font-semibold md:text-2xl font-headline">Configuración</h1>
+                <div className="flex items-center gap-2">
+                    <h1 className="text-xl font-headline font-bold text-gradient">Configuración</h1>
+                </div>
             </header>
-            <main className="mx-auto max-w-3xl p-4 space-y-6 sm:p-6">
-                 <Card className="border-border/50 bg-card/80 shadow-sm">
-                    <CardHeader className="pb-2">
-                        <CardTitle className="text-lg">Cuenta</CardTitle>
+
+            <main className="mx-auto max-w-2xl p-4 space-y-6 sm:p-6">
+                {/* Cuenta */}
+                <Card className="border-border/40 bg-card/60 shadow-sm rounded-3xl overflow-hidden backdrop-blur-sm">
+                    <CardHeader className="pb-3 border-b border-border/30 bg-muted/20">
+                        <CardTitle className="text-base font-bold flex items-center gap-2">
+                            <span className="h-1.5 w-3 rounded-full bg-primary" />
+                            Cuenta
+                        </CardTitle>
                         <CardDescription className="text-xs">Edita tu perfil y tus preferencias principales.</CardDescription>
                     </CardHeader>
-                    <CardContent className="divide-y divide-muted/30 p-0">
-                        <SettingsSectionLink href="/profile/edit" icon={<User className="h-5 w-5" />} label="Editar Perfil" description="Actualiza tu información personal" />
-                        <SettingsSectionLink href="/settings/notifications" icon={<Bell className="h-5 w-5" />} label="Notificaciones" description="Controla alertas y recordatorios" />
-                        <SettingsSectionLink href="/settings/privacy" icon={<Shield className="h-5 w-5" />} label="Privacidad y Seguridad" description="Gestiona tu visibilidad y datos" />
-                        <SettingsSectionLink href="/settings/safety" icon={<Shield className="h-5 w-5 text-destructive" />} label="Centro de Seguridad" description="Revisa recomendaciones de seguridad" iconClassName="text-destructive" />
-                        <SettingsSectionLink href="/settings/travel" icon={<Plane className="h-5 w-5 text-blue-500" />} label="Modo Viaje" description="Activa tu perfil temporal" badge="Plus" />
+                    <CardContent className="divide-y divide-border/20 p-2">
+                        <SettingsSectionLink 
+                            href="/profile/edit" 
+                            icon={<User />} 
+                            label="Editar Perfil" 
+                            description="Actualiza tu información personal" 
+                            bubbleBg="bg-primary/10 border-primary/20 text-primary"
+                        />
+                        <SettingsSectionLink 
+                            href="/settings/notifications" 
+                            icon={<Bell />} 
+                            label="Notificaciones" 
+                            description="Controla alertas y recordatorios" 
+                            bubbleBg="bg-pink-500/10 border-pink-500/20 text-pink-500"
+                        />
+                        <SettingsSectionLink 
+                            href="/settings/privacy" 
+                            icon={<Shield />} 
+                            label="Privacidad y Seguridad" 
+                            description="Gestiona tu visibilidad y datos" 
+                            bubbleBg="bg-emerald-500/10 border-emerald-500/20 text-emerald-500"
+                        />
+                        <SettingsSectionLink 
+                            href="/settings/safety" 
+                            icon={<Shield />} 
+                            label="Centro de Seguridad" 
+                            description="Revisa recomendaciones de seguridad" 
+                            bubbleBg="bg-destructive/10 border-destructive/20 text-destructive"
+                        />
+                        <SettingsSectionLink 
+                            href="/settings/travel" 
+                            icon={<Plane />} 
+                            label="Modo Viaje" 
+                            description="Activa tu perfil temporal" 
+                            badge="Plus" 
+                            bubbleBg="bg-blue-500/10 border-blue-500/20 text-blue-500"
+                        />
                     </CardContent>
                 </Card>
 
-                 <Card className="border-border/50 bg-card/80 shadow-sm">
-                    <CardHeader className="pb-2">
-                        <CardTitle className="text-lg">Apariencia</CardTitle>
+                {/* Apariencia */}
+                <Card className="border-border/40 bg-card/60 shadow-sm rounded-3xl overflow-hidden backdrop-blur-sm">
+                    <CardHeader className="pb-3 border-b border-border/30 bg-muted/20">
+                        <CardTitle className="text-base font-bold flex items-center gap-2">
+                            <span className="h-1.5 w-3 rounded-full bg-violet-400" />
+                            Apariencia
+                        </CardTitle>
                         <CardDescription className="text-xs">Ajusta el look general de la app.</CardDescription>
                     </CardHeader>
-                    <CardContent>
-                        <div className="flex items-center justify-between rounded-xl p-3 -mx-3 hover:bg-muted/30 transition-colors">
-                             <div className="flex items-center gap-3">
-                                <Palette className="w-5 h-5 text-muted-foreground" />
-                                <span>Tema de la aplicación</span>
+                    <CardContent className="p-3">
+                        <div className="flex items-center justify-between rounded-2xl p-3 hover:bg-secondary/40 transition-colors">
+                            <div className="flex items-center gap-3.5">
+                                <div className="h-10 w-10 rounded-xl border flex items-center justify-center bg-violet-500/10 border-violet-500/20 text-violet-500">
+                                    <Palette className="w-5 h-5" />
+                                </div>
+                                <div>
+                                    <span className="text-sm font-semibold text-foreground">Tema de la aplicación</span>
+                                    <p className="text-[11px] text-muted-foreground/80">Cambia entre claro, oscuro y sistema</p>
+                                </div>
                             </div>
                             <ThemeToggle />
                         </div>
                     </CardContent>
                 </Card>
 
-
-                         <Card className="border-border/50 bg-card/80 shadow-sm">
-                    <CardHeader className="pb-2">
-                        <CardTitle className="text-lg">Soporte y Legal</CardTitle>
+                {/* Soporte y Legal */}
+                <Card className="border-border/40 bg-card/60 shadow-sm rounded-3xl overflow-hidden backdrop-blur-sm">
+                    <CardHeader className="pb-3 border-b border-border/30 bg-muted/20">
+                        <CardTitle className="text-base font-bold flex items-center gap-2">
+                            <span className="h-1.5 w-3 rounded-full bg-amber-400" />
+                            Soporte y Legal
+                        </CardTitle>
                         <CardDescription className="text-xs">Ayuda, contacto y documentación legal.</CardDescription>
                     </CardHeader>
-                    <CardContent className="divide-y divide-muted/30 p-0">
-                        <SettingsSectionLink href="/support" icon={<HelpCircle className="h-5 w-5" />} label="Ayuda y Soporte" description="Encuentra respuestas rápidas" />
-                        <SettingsSectionLink href="/contact" icon={<Mail className="h-5 w-5" />} label="Contacto" description="Envíanos un mensaje" />
-                        <SettingsSectionLink href="/terms" icon={<FileText className="h-5 w-5" />} label="Términos y Condiciones" description="Revisa las reglas de uso" />
-                        <SettingsSectionLink href="/privacy" icon={<FileText className="h-5 w-5" />} label="Política de Privacidad" description="Consulta cómo tratamos tus datos" />
+                    <CardContent className="divide-y divide-border/20 p-2">
+                        <SettingsSectionLink 
+                            href="/support" 
+                            icon={<HelpCircle />} 
+                            label="Ayuda y Soporte" 
+                            description="Encuentra respuestas rápidas" 
+                            bubbleBg="bg-purple-500/10 border-purple-500/20 text-purple-500"
+                        />
+                        <SettingsSectionLink 
+                            href="/contact" 
+                            icon={<Mail />} 
+                            label="Contacto" 
+                            description="Envíanos un mensaje" 
+                            bubbleBg="bg-amber-500/10 border-amber-500/20 text-amber-500"
+                        />
+                        <SettingsSectionLink 
+                            href="/terms" 
+                            icon={<FileText />} 
+                            label="Términos y Condiciones" 
+                            description="Revisa las reglas de uso" 
+                            bubbleBg="bg-gray-500/10 border-gray-500/20 text-gray-500"
+                        />
+                        <SettingsSectionLink 
+                            href="/privacy" 
+                            icon={<FileText />} 
+                            label="Política de Privacidad" 
+                            description="Consulta cómo tratamos tus datos" 
+                            bubbleBg="bg-gray-500/10 border-gray-500/20 text-gray-500"
+                        />
                     </CardContent>
                 </Card>
 
                 <div className="pt-4 space-y-3">
                     <Button
                         variant="outline"
-                        className="w-full text-destructive border-destructive/30 hover:bg-destructive/5"
+                        className="w-full text-destructive border-destructive/30 hover:bg-destructive/5 h-12 rounded-xl"
                         onClick={() => router.push('/settings/privacy')}
                     >
                         Gestionar cuenta y eliminar
                     </Button>
                     <Button
                         variant="destructive"
-                        className="w-full"
+                        className="w-full h-12 rounded-xl"
                         onClick={() => setShowLogoutConfirm(true)}
                         disabled={loggingOut}
                     >
@@ -136,16 +218,16 @@ export default function SettingsPage() {
             </main>
 
             <AlertDialog open={showLogoutConfirm} onOpenChange={setShowLogoutConfirm}>
-                <AlertDialogContent>
+                <AlertDialogContent className="rounded-3xl border-border/40 max-w-sm">
                     <AlertDialogHeader>
-                        <AlertDialogTitle>¿Cerrar sesión?</AlertDialogTitle>
-                        <AlertDialogDescription>
+                        <AlertDialogTitle className="font-headline text-lg font-bold">¿Cerrar sesión?</AlertDialogTitle>
+                        <AlertDialogDescription className="text-sm">
                             Se cerrará tu sesión y serás redirigido a la pantalla de inicio de sesión.
                         </AlertDialogDescription>
                     </AlertDialogHeader>
-                    <AlertDialogFooter>
-                        <AlertDialogCancel disabled={loggingOut}>Cancelar</AlertDialogCancel>
-                        <AlertDialogAction onClick={handleLogout} disabled={loggingOut} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                    <AlertDialogFooter className="flex flex-row gap-2 mt-4">
+                        <AlertDialogCancel disabled={loggingOut} className="flex-1 rounded-xl h-11 border-border/60">Cancelar</AlertDialogCancel>
+                        <AlertDialogAction onClick={handleLogout} disabled={loggingOut} className="flex-1 bg-destructive text-destructive-foreground hover:bg-destructive/90 rounded-xl h-11">
                             {loggingOut ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : null}
                             Cerrar Sesión
                         </AlertDialogAction>

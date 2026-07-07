@@ -84,6 +84,11 @@ html {
     --sidebar-accent-foreground: 240 5.9% 10%;
     --sidebar-border: 220 13% 91%;
     --sidebar-ring: 217.2 91.2% 59.8%;
+
+    /* Gradient brand stops */
+    --brand-from: 335 85% 76%;
+    --brand-to: 280 60% 70%;
+    --brand-mid: 310 70% 73%;
   }
 
   .dark {
@@ -169,6 +174,7 @@ html {
 }
 
 @layer utilities {
+  /* ── Glass morphism ── */
   .glass {
     @apply bg-card/90 backdrop-blur-md border border-border/20 shadow-xl;
   }
@@ -176,75 +182,166 @@ html {
     @apply bg-card/95 backdrop-blur-lg border-border/30;
   }
 
+  /* ── Card surfaces ── */
   .card-surface {
     @apply rounded-2xl border border-border/60 bg-card/90 shadow-sm;
   }
-
   .surface-soft {
     @apply rounded-2xl border border-border/50 bg-secondary/30;
   }
 
+  /* ── Brand gradient ── */
+  .gradient-brand {
+    background: linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(280 60% 70%) 100%);
+  }
+  .gradient-brand-soft {
+    background: linear-gradient(135deg, hsl(var(--primary) / 0.12) 0%, hsl(280 60% 70% / 0.08) 100%);
+  }
+  .gradient-hero {
+    background: 
+      radial-gradient(ellipse 80% 60% at 50% -10%, hsl(335 85% 76% / 0.18) 0%, transparent 70%),
+      radial-gradient(ellipse 60% 40% at 100% 60%, hsl(280 60% 70% / 0.12) 0%, transparent 60%);
+  }
+
+  /* ── Text gradient ── */
+  .text-gradient {
+    background: linear-gradient(135deg, hsl(335 85% 65%) 0%, hsl(280 60% 60%) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .dark .text-gradient {
+    background: linear-gradient(135deg, hsl(335 82% 78%) 0%, hsl(265 83% 83%) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* ── Separator with gradient ── */
+  .separator-gradient {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, hsl(var(--primary) / 0.4), hsl(280 60% 70% / 0.4), transparent);
+  }
+
+  /* ── Card glow on hover ── */
+  .card-glow {
+    @apply transition-all duration-300;
+  }
+  .card-glow:hover {
+    box-shadow: 0 8px 32px hsl(var(--primary) / 0.15), 0 2px 8px hsl(var(--primary) / 0.08);
+  }
+  .dark .card-glow:hover {
+    box-shadow: 0 8px 32px hsl(var(--primary) / 0.25), 0 2px 8px hsl(var(--primary) / 0.12);
+  }
+
+  /* ── Button primary glow ── */
+  .btn-glow {
+    box-shadow: 0 4px 20px hsl(var(--primary) / 0.35), 0 1px 4px hsl(var(--primary) / 0.2);
+  }
+  .btn-glow:hover {
+    box-shadow: 0 6px 28px hsl(var(--primary) / 0.5), 0 2px 8px hsl(var(--primary) / 0.3);
+  }
+
+  /* ── Hover lift ── */
   .hover-lift {
     @apply transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md;
   }
 
-  /* Screen-reader only utility */
+  /* ── Pill active indicator ── */
+  .nav-active-pill {
+    background: linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(280 60% 70%) 100%);
+    @apply rounded-full;
+  }
+
+  /* ── Screen-reader only utility ── */
   .sr-only {
     @apply absolute w-px h-px p-0 -m-px overflow-hidden whitespace-nowrap border-0;
     clip: rect(0, 0, 0, 0);
     clip-path: inset(50%);
   }
 
-  /* Touch target size helpers */
+  /* ── Touch target size helpers ── */
   .touch-target {
     @apply min-h-[44px] min-w-[44px] flex items-center justify-center;
   }
 
-  /* Consistent focus ring */
+  /* ── Consistent focus ring ── */
   .focus-ring {
     @apply focus-visible:ring-2 focus-visible:ring-primary/70 focus-visible:ring-offset-2 focus-visible:outline-none;
   }
 
+  /* ── Confetti animation ── */
   .animate-confetti {
     animation: confetti-fall 3s ease-out infinite;
   }
-
   @media (prefers-reduced-motion: reduce) {
     .animate-confetti {
       animation: none;
       opacity: 0;
     }
   }
-
   @keyframes confetti-fall {
-    0% {
-      transform: translateY(-100vh) rotate(0deg);
-      opacity: 1;
-    }
-
-    100% {
-      transform: translateY(100vh) rotate(360deg);
-      opacity: 0;
-    }
+    0% { transform: translateY(-100vh) rotate(0deg); opacity: 1; }
+    100% { transform: translateY(100vh) rotate(360deg); opacity: 0; }
   }
 
-  /* Page transitions */
+  /* ── Page transitions ── */
   .page-fade-in {
     animation: page-fade-in 0.2s ease-out;
   }
-
   @keyframes page-fade-in {
-    from {
-      opacity: 0;
-      transform: translateY(4px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
+    from { opacity: 0; transform: translateY(4px); }
+    to { opacity: 1; transform: translateY(0); }
   }
 
-  /* Hide scrollbar for horizontal scroll containers */
+  /* ── Float animation ── */
+  .animate-float {
+    animation: float 3s ease-in-out infinite;
+  }
+  @keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-8px); }
+  }
+
+  /* ── Glow pulse animation ── */
+  .animate-glow-pulse {
+    animation: glow-pulse 2s ease-in-out infinite;
+  }
+  @keyframes glow-pulse {
+    0%, 100% { box-shadow: 0 0 12px hsl(var(--primary) / 0.3); }
+    50% { box-shadow: 0 0 28px hsl(var(--primary) / 0.6), 0 0 8px hsl(280 60% 70% / 0.3); }
+  }
+
+  /* ── Shimmer gradient (loading states) ── */
+  .shimmer-gradient {
+    background: linear-gradient(
+      90deg,
+      hsl(var(--muted)) 0%,
+      hsl(var(--muted) / 0.5) 50%,
+      hsl(var(--muted)) 100%
+    );
+    background-size: 200% 100%;
+    animation: shimmer-slide 1.5s ease-in-out infinite;
+  }
+  @keyframes shimmer-slide {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+  }
+
+  /* ── Unread badge glow ── */
+  .badge-glow {
+    box-shadow: 0 0 0 2px hsl(var(--background)), 0 0 8px hsl(var(--primary) / 0.5);
+  }
+
+  /* ── Background decorative blobs ── */
+  .bg-blob-1 {
+    background: radial-gradient(circle at center, hsl(335 85% 76% / 0.25) 0%, transparent 70%);
+  }
+  .bg-blob-2 {
+    background: radial-gradient(circle at center, hsl(280 60% 70% / 0.2) 0%, transparent 70%);
+  }
+
+  /* ── Hide scrollbar for horizontal scroll containers ── */
   .scrollbar-hide {
     -ms-overflow-style: none;
     scrollbar-width: none;
@@ -253,7 +350,7 @@ html {
     display: none;
   }
 
-  /* Skeleton shimmer animation */
+  /* ── Skeleton shimmer animation ── */
   @keyframes shimmer {
     0% { transform: translateX(-100%); }
     100% { transform: translateX(100%); }

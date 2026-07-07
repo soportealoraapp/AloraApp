@@ -8,6 +8,7 @@ import { Flag, RefreshCw, ShieldAlert, Ban, EyeOff, AlertTriangle, CheckCircle, 
 import { AdminBackButton } from '@/components/admin/AdminBackButton';
 import { SafeImage } from '@/components/ui/safe-image';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
+import { useToast } from '@/hooks/use-toast';
 
 interface Report {
     id: string; reason: string; status: string; createdAt: string; reportCount: number; details?: string;
@@ -36,6 +37,7 @@ export default function AdminReportsPage() {
     const [loading, setLoading] = useState(true);
     const [filter, setFilter] = useState('pending');
     const [actionConfirm, setActionConfirm] = useState<{ reportId: string; action: string; userName: string } | null>(null);
+    const { toast } = useToast();
 
     const fetchReports = async (status: string) => {
         setLoading(true);
@@ -57,6 +59,14 @@ export default function AdminReportsPage() {
                 body: JSON.stringify({ reportId, action }),
             });
             fetchReports(filter);
+            const actionLabels: Record<string, string> = {
+                ignore: 'Reporte ignorado',
+                warn: 'Advertencia enviada',
+                shadowban: 'Shadowban aplicado',
+                suspend: 'Usuario suspendido',
+                ban: 'Usuario baneado',
+            };
+            toast({ title: 'Éxito', description: actionLabels[action] || 'Acción completada' });
         } catch (e) { console.error(e); }
     };
 
@@ -118,6 +128,9 @@ export default function AdminReportsPage() {
                 <div className="flex items-center gap-3">
                     <Flag className="h-5 w-5 text-red-400" />
                     <h1 className="text-xl font-bold">Reportes</h1>
+                    <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => fetchReports(filter)} disabled={loading} aria-label="Actualizar">
+                        <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
+                    </Button>
                 </div>
                 <div className="flex gap-2 ml-auto">
                     {[

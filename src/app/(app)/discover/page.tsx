@@ -569,9 +569,14 @@ export default function DiscoverPage() {
         </div>
       )}
       {/* Flechado sound / visual feedback could be triggered here */}
-      <header className="sticky top-0 z-30 flex h-16 items-center justify-between px-4 backdrop-blur-md border-b bg-background/90 pt-safe">
+      <header className="sticky top-0 z-30 flex h-16 items-center justify-between px-4 backdrop-blur-md border-b bg-background/90 pt-safe" style={{ borderBottomColor: 'hsl(var(--border) / 0.5)' }}>
+        {/* Gradient top border accent */}
+        <div
+          className="absolute top-0 left-0 right-0 h-px"
+          style={{ background: 'linear-gradient(90deg, transparent, hsl(335 85% 76% / 0.5), hsl(280 60% 70% / 0.5), transparent)' }}
+        />
         <div className="flex items-center gap-2">
-          <h1 className="text-2xl font-bold tracking-tight text-foreground">Alora</h1>
+          <h1 className="text-2xl font-headline font-bold tracking-tight text-gradient">Alora</h1>
           {currentUserProfile?.travelModeEnabled && (
             <span className="text-[11px] bg-primary/10 text-primary px-2 py-0.5 rounded-full font-medium flex items-center gap-1">
               ✈️ Explorando: {currentUserProfile.travelCity}
@@ -580,11 +585,11 @@ export default function DiscoverPage() {
         </div>
         <div className="flex items-center gap-1">
           <div className="hidden md:flex items-center gap-1">
-            <Button variant="ghost" size="icon" onClick={handleRewind} disabled={!lastSwipeRef.current || rewinding}     title={`Deshacer último swipe — ventana de 5 min (${rewindsRemaining}/${maxRewinds} disponibles)`} aria-label="Deshacer último swipe">
+            <Button variant="ghost" size="icon" onClick={handleRewind} disabled={!lastSwipeRef.current || rewinding}     title={`Deshacer último swipe — ventana de 5 min (${rewindsRemaining}/${maxRewinds} disponibles)`} aria-label="Deshacer último swipe" className="rounded-xl">
               <RotateCcw className="h-5 w-5 text-muted-foreground" />
             </Button>
             <span className="text-[11px] text-muted-foreground font-bold -ml-1">{rewindsRemaining}</span>
-            <Button variant="ghost" size="icon" onClick={() => setFilterOpen(true)} title="Filtros de búsqueda" aria-label="Filtros de búsqueda" className="relative">
+            <Button variant="ghost" size="icon" onClick={() => setFilterOpen(true)} title="Filtros de búsqueda" aria-label="Filtros de búsqueda" className="relative rounded-xl">
               <SlidersHorizontal className="h-5 w-5 text-muted-foreground" />
               {countActiveFilters(filters) > 0 && (
                 <span className="absolute -top-0.5 -right-0.5 bg-primary text-primary-foreground text-[11px] font-bold rounded-full min-w-[18px] h-[18px] flex items-center justify-center shadow-sm border border-background">
@@ -595,13 +600,13 @@ export default function DiscoverPage() {
           </div>
           <div className="md:hidden flex items-center gap-0.5">
             <div className="flex items-center">
-              <Button variant="ghost" size="icon" onClick={handleRewind} disabled={!lastSwipeRef.current || rewinding} title={`Deshacer último swipe — ventana de 5 min (${rewindsRemaining}/${maxRewinds} disponibles)`} aria-label="Deshacer último swipe" className="touch-target">
+              <Button variant="ghost" size="icon" onClick={handleRewind} disabled={!lastSwipeRef.current || rewinding} title={`Deshacer último swipe — ventana de 5 min (${rewindsRemaining}/${maxRewinds} disponibles)`} aria-label="Deshacer último swipe" className="touch-target rounded-xl">
                 <RotateCcw className="h-4 w-4 text-muted-foreground" />
               </Button>
               <span className="text-[11px] text-muted-foreground font-bold">{rewindsRemaining}</span>
             </div>
             
-            <Button variant="ghost" size="icon" onClick={() => setFilterOpen(true)} title="Filtros de búsqueda" aria-label="Filtros de búsqueda" className="relative touch-target">
+            <Button variant="ghost" size="icon" onClick={() => setFilterOpen(true)} title="Filtros de búsqueda" aria-label="Filtros de búsqueda" className="relative touch-target rounded-xl">
               <SlidersHorizontal className="h-4 w-4 text-muted-foreground" />
               {countActiveFilters(filters) > 0 && (
                 <span className="absolute -top-0.5 -right-0.5 bg-primary text-primary-foreground text-[11px] font-bold rounded-full min-w-[18px] h-[18px] flex items-center justify-center shadow-sm border border-background">
@@ -618,16 +623,16 @@ export default function DiscoverPage() {
         {/* Mode selector — 3 options: dating, friendship, both */}
         {(currentUserProfile?.connectionModes?.includes('dating') && currentUserProfile?.connectionModes?.includes('friendship')) && (
           <TooltipProvider>
-          <div className="flex gap-1 p-1 bg-muted/50 rounded-xl">
+          <div className="flex gap-1.5 p-1 bg-secondary/50 border border-border/40 rounded-2xl">
             <Tooltip>
               <TooltipTrigger asChild>
             <button
               onClick={() => { setIntent('dating'); setIntentChanging(true); }}
               aria-pressed={intent === 'dating'}
-              className={`flex-1 py-1.5 px-2 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all ${
+              className={`flex-1 py-2 px-2.5 rounded-xl text-[10px] font-bold uppercase tracking-wider transition-all duration-200 ${
                 intent === 'dating'
-                  ? 'bg-primary text-primary-foreground shadow-sm'
-                  : 'text-muted-foreground hover:text-foreground'
+                  ? 'bg-gradient-to-r from-primary to-[hsl(335_85%_72%)] text-primary-foreground shadow-glow-sm'
+                  : 'text-muted-foreground hover:text-foreground hover:bg-secondary/40'
               }`}
             >
               Citas
@@ -640,10 +645,10 @@ export default function DiscoverPage() {
             <button
               onClick={() => { setIntent('both'); setIntentChanging(true); }}
               aria-pressed={intent === 'both'}
-              className={`flex-1 py-1.5 px-2 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all ${
+              className={`flex-1 py-2 px-2.5 rounded-xl text-[10px] font-bold uppercase tracking-wider transition-all duration-200 ${
                 intent === 'both'
-                  ? 'bg-amber-500 text-white shadow-sm'
-                  : 'text-muted-foreground hover:text-foreground'
+                  ? 'bg-gradient-to-r from-amber-500 to-amber-600 text-white shadow-glow-violet/30'
+                  : 'text-muted-foreground hover:text-foreground hover:bg-secondary/40'
               }`}
             >
               Ambos
@@ -656,10 +661,10 @@ export default function DiscoverPage() {
             <button
               onClick={() => { setIntent('friendship'); setIntentChanging(true); }}
               aria-pressed={intent === 'friendship'}
-              className={`flex-1 py-1.5 px-2 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all ${
+              className={`flex-1 py-2 px-2.5 rounded-xl text-[10px] font-bold uppercase tracking-wider transition-all duration-200 ${
                 intent === 'friendship'
-                  ? 'bg-blue-500 text-white shadow-sm'
-                  : 'text-muted-foreground hover:text-foreground'
+                  ? 'bg-gradient-to-r from-blue-500 to-indigo-500 text-white shadow-glow-sm/40'
+                  : 'text-muted-foreground hover:text-foreground hover:bg-secondary/40'
               }`}
             >
               Amistad
@@ -672,8 +677,8 @@ export default function DiscoverPage() {
         )}
 
         {intent === 'dating' && !(currentUserProfile?.connectionModes?.includes('dating') && currentUserProfile?.connectionModes?.includes('friendship')) && (
-          <Card className="border-none bg-gradient-to-r from-blue-500/10 to-indigo-500/10 dark:from-blue-500/5 dark:to-indigo-500/5 rounded-2xl overflow-hidden cursor-pointer hover:bg-indigo-500/20 dark:hover:bg-indigo-500/10 transition-all" onClick={() => setIntent('friendship')}>
-            <CardContent className="p-3 flex items-center justify-between">
+          <Card className="border border-blue-500/20 bg-gradient-to-r from-blue-500/10 to-indigo-500/10 dark:from-blue-500/5 dark:to-indigo-500/5 rounded-2xl overflow-hidden cursor-pointer hover:bg-indigo-500/20 dark:hover:bg-indigo-500/10 transition-all duration-200" onClick={() => setIntent('friendship')}>
+            <CardContent className="p-3.5 flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <div className="h-10 w-10 rounded-xl bg-blue-500/20 dark:bg-blue-400/10 flex items-center justify-center text-blue-600 dark:text-blue-400">
                   <Handshake className="h-5 w-5" />
@@ -689,8 +694,8 @@ export default function DiscoverPage() {
         )}
 
         {intent === 'friendship' && !(currentUserProfile?.connectionModes?.includes('dating') && currentUserProfile?.connectionModes?.includes('friendship')) && (
-          <Card className="border-none bg-gradient-to-r from-pink-500/10 to-primary/10 dark:from-pink-500/5 dark:to-primary/5 rounded-2xl overflow-hidden cursor-pointer hover:bg-primary/20 dark:hover:bg-primary/10 transition-all" onClick={() => setIntent('dating')}>
-            <CardContent className="p-3 flex items-center justify-between">
+          <Card className="border border-primary/20 bg-gradient-to-r from-pink-500/10 to-primary/10 dark:from-pink-500/5 dark:to-primary/5 rounded-2xl overflow-hidden cursor-pointer hover:bg-primary/20 dark:hover:bg-primary/10 transition-all duration-200" onClick={() => setIntent('dating')}>
+            <CardContent className="p-3.5 flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <div className="h-10 w-10 rounded-xl bg-pink-500/20 dark:bg-pink-400/10 flex items-center justify-center text-primary dark:text-primary/80">
                   <Heart className="h-5 w-5" />
@@ -845,8 +850,8 @@ export default function DiscoverPage() {
                                   )}
                                 </div>
                               </div>
-                              <div className="flex gap-1 p-1.5">
-                                <Button size="sm" variant="ghost" className="flex-1 h-11" aria-label={`Descartar a ${p.displayName || ''}`} disabled={pendingGridActions.has(p.id)} onClick={async () => {
+                              <div className="flex gap-2 p-2 bg-muted/20 border-t border-border/30 justify-center">
+                                <Button size="icon" variant="ghost" className="h-9 w-9 rounded-full bg-card hover:bg-destructive/10 hover:text-destructive border border-border/30 shadow-sm" aria-label={`Descartar a ${p.displayName || ''}`} disabled={pendingGridActions.has(p.id)} onClick={async () => {
                                   if (pendingGridActions.has(p.id)) return;
                                   if (swipeCount >= SWIPE_LIMIT) {
                                     toast({ title: "¡Tómate un respiro!", description: "Has visto muchos perfiles. Vuelve en un momento.", variant: "default" });
@@ -865,9 +870,9 @@ export default function DiscoverPage() {
                                     setPendingGridActions(prev => { const next = new Set(prev); next.delete(p.id); return next; });
                                   }
                                 }}>
-                                  <X className="h-5 w-5 text-destructive" />
+                                  <X className="h-4 w-4 text-destructive" />
                                 </Button>
-                                <Button size="sm" variant="ghost" className="flex-1 h-11" aria-label={`Flechado a ${p.displayName || ''}`} disabled={pendingGridActions.has(p.id)} onClick={async () => {
+                                <Button size="icon" variant="ghost" className="h-9 w-9 rounded-full bg-card hover:bg-amber-500/10 hover:text-amber-600 border border-border/30 shadow-sm" aria-label={`Flechado a ${p.displayName || ''}`} disabled={pendingGridActions.has(p.id)} onClick={async () => {
                                   if (pendingGridActions.has(p.id)) return;
                                   if (swipeCount >= SWIPE_LIMIT) {
                                     toast({ title: "¡Tómate un respiro!", description: "Has visto muchos perfiles. Vuelve en un momento.", variant: "default" });
@@ -895,9 +900,9 @@ export default function DiscoverPage() {
                                     setPendingGridActions(prev => { const next = new Set(prev); next.delete(p.id); return next; });
                                   }
                                 }}>
-                                  <HeartArrow className="h-5 w-5 text-amber-500 fill-amber-500" />
+                                  <HeartArrow className="h-4 w-4 text-amber-500 fill-amber-500" />
                                 </Button>
-                                <Button size="sm" variant="ghost" className="flex-1 h-11" aria-label={`Dar like a ${p.displayName || ''}`} disabled={pendingGridActions.has(p.id)} onClick={async () => {
+                                <Button size="icon" variant="ghost" className="h-9 w-9 rounded-full bg-card hover:bg-primary/10 hover:text-primary border border-border/30 shadow-sm" aria-label={`Dar like a ${p.displayName || ''}`} disabled={pendingGridActions.has(p.id)} onClick={async () => {
                                   if (pendingGridActions.has(p.id)) return;
                                   if (swipeCount >= SWIPE_LIMIT) {
                                     toast({ title: "¡Tómate un respiro!", description: "Has visto muchos perfiles. Vuelve en un momento.", variant: "default" });
@@ -924,7 +929,7 @@ export default function DiscoverPage() {
                                     setPendingGridActions(prev => { const next = new Set(prev); next.delete(p.id); return next; });
                                   }
                                 }}>
-                                  <Heart className="h-5 w-5 text-primary fill-primary" />
+                                  <Heart className="h-4 w-4 text-primary fill-primary" />
                                 </Button>
                               </div>
                             </Card>
@@ -979,27 +984,34 @@ export default function DiscoverPage() {
               </div>
             </div>
           ) : (
-            <div className="w-full max-w-sm space-y-6">
-              <div className="text-center px-8">
-                <div className="bg-muted/50 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6">
-                  <Sparkles className="h-10 w-10 text-muted-foreground" />
-                </div>
+            <div className="w-full max-w-sm space-y-6 py-12">
+              <div className="text-center px-6">
                 {countActiveFilters(filters) > 0 ? (
-                  <>
-                    <p className="text-xl font-bold text-foreground mb-2">{BRAND_VOICE.states.noFilterResults.title}</p>
-                    <p className="text-muted-foreground mb-8 max-w-xs mx-auto">{BRAND_VOICE.states.noFilterResults.subtitle}</p>
-                    <Button onClick={() => { setFilters(DEFAULT_FILTERS); setIntent(currentUserProfile?.connectionModes?.[0] || 'dating'); }} className="px-8 py-6 rounded-2xl shadow-lg hover:shadow-xl transition-all">
+                  <div className="rounded-3xl p-8 border border-border/40 relative overflow-hidden"
+                    style={{ background: 'linear-gradient(135deg, hsl(335 85% 76% / 0.04) 0%, hsl(280 60% 70% / 0.03) 100%)' }}
+                  >
+                    <div className="bg-primary/10 w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-6 border border-primary/20">
+                      <Sparkles className="h-8 w-8 text-primary animate-float" />
+                    </div>
+                    <p className="text-lg font-headline font-bold text-foreground mb-2">{BRAND_VOICE.states.noFilterResults.title}</p>
+                    <p className="text-sm text-muted-foreground/80 mb-6 max-w-xs mx-auto">{BRAND_VOICE.states.noFilterResults.subtitle}</p>
+                    <Button onClick={() => { setFilters(DEFAULT_FILTERS); setIntent(currentUserProfile?.connectionModes?.[0] || 'dating'); }} className="rounded-full px-6">
                       Limpiar filtros
                     </Button>
-                  </>
+                  </div>
                 ) : (
-                  <>
-                    <p className="text-xl font-bold text-foreground mb-2">{BRAND_VOICE.states.noMatches.title}</p>
-                    <p className="text-muted-foreground mb-8 max-w-xs mx-auto">{BRAND_VOICE.states.noMatches.subtitle}</p>
-                    <Button onClick={() => refresh()} className="px-8 py-6 rounded-2xl shadow-lg hover:shadow-xl transition-all">
+                  <div className="rounded-3xl p-8 border border-border/40 relative overflow-hidden"
+                    style={{ background: 'linear-gradient(135deg, hsl(335 85% 76% / 0.04) 0%, hsl(280 60% 70% / 0.03) 100%)' }}
+                  >
+                    <div className="bg-primary/10 w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-6 border border-primary/20">
+                      <Heart className="h-8 w-8 text-primary fill-primary/30 animate-pulse" />
+                    </div>
+                    <p className="text-lg font-headline font-bold text-foreground mb-2">{BRAND_VOICE.states.noMatches.title}</p>
+                    <p className="text-sm text-muted-foreground/80 mb-6 max-w-xs mx-auto">{BRAND_VOICE.states.noMatches.subtitle}</p>
+                    <Button onClick={() => refresh()} className="rounded-full px-6">
                       Explorar de nuevo
                     </Button>
-                  </>
+                  </div>
                 )}
               </div>
             </div>

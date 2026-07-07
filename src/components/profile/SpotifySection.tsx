@@ -148,6 +148,7 @@ export function SpotifySection({ spotify, isOwn }: SpotifySectionProps) {
                 setSyncing(false);
               }}
               disabled={syncing}
+              aria-label="Sincronizar Spotify"
             >
               <RefreshCw className={`h-3.5 w-3.5 ${syncing ? 'animate-spin' : ''}`} />
             </Button>

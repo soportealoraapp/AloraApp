@@ -499,6 +499,7 @@ export default function ChatPage() {
                                                              handleRejectMatch(like);
                                                          }}
                                                          disabled={processingMatch === like.fromUserId}
+                                                         aria-label="Rechazar"
                                                      >
                                                          <X className="h-4 w-4" />
                                                      </Button>
@@ -510,6 +511,7 @@ export default function ChatPage() {
                                                             handleAcceptMatch(like);
                                                         }}
                                                         disabled={processingMatch === like.fromUserId}
+                                                        aria-label="Aceptar"
                                                     >
                                                         {processingMatch === like.fromUserId ? (
                                                             <Loader2 className="h-4 w-4 animate-spin" />

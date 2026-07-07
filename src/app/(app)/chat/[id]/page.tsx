@@ -506,7 +506,7 @@ export default function ChatWindowPage() {
                     variant="ghost"
                     size="icon"
                     onClick={() => setShowTimeline(true)}
-                    title="Línea de tiempo"
+                    aria-label="Línea de tiempo"
                 >
                     <History className="h-5 w-5" />
                 </Button>
@@ -722,7 +722,7 @@ export default function ChatWindowPage() {
                                 size="icon"
                                 disabled={loadingIcebreakers}
                                 className="shrink-0 h-11 w-11 rounded-full text-primary hover:bg-primary/10 min-h-[44px] min-w-[44px]"
-                                title="Sugerir rompehielos"
+                                aria-label="Sugerir rompehielos"
                             >
                                 {loadingIcebreakers ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
                             </Button>
