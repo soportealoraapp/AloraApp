@@ -136,6 +136,33 @@ export default function ChatWindowPage() {
     const messageCountRef = useRef(0);
     const icebreakersFetchedRef = useRef(false);
 
+    const fetchIcebreakers = useCallback(async () => {
+        if (!matchId || !otherUserId) return;
+        setLoadingIcebreakers(true);
+        try {
+            const response = await fetch('/api/ai/icebreakers', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ matchId })
+            });
+            
+            if (!response.ok) {
+                // If AI fails (like GEMINI_API_KEY missing), don't show error to user
+                // just fail silently and don't show the icebreakers section
+                console.warn('Icebreakers AI failed, likely missing API Key');
+                return;
+            }
+
+            const data = await response.json();
+            setIcebreakers(data.icebreakers || []);
+            setShowIcebreakers(true);
+        } catch (error) {
+            console.error('Icebreakers fetch error:', error);
+        } finally {
+            setLoadingIcebreakers(false);
+        }
+    }, [matchId, otherUserId]);
+
     // Auto-scroll to bottom on new messages (if user is near bottom)
     useEffect(() => {
         if (autoScroll && messages.length > 0) {
@@ -149,7 +176,7 @@ export default function ChatWindowPage() {
             icebreakersFetchedRef.current = true;
             fetchIcebreakers();
         }
-    }, [loading, messages.length]);
+    }, [loading, messages.length, fetchIcebreakers]);
 
     // Mark messages as read when component mounts
     useEffect(() => {
@@ -202,33 +229,6 @@ export default function ChatWindowPage() {
         if (dateStr === today) return 'Hoy';
         if (dateStr === yesterday) return 'Ayer';
         return dateStr;
-    };
-
-    const fetchIcebreakers = async () => {
-        if (!matchId || !otherUserId) return;
-        setLoadingIcebreakers(true);
-        try {
-            const response = await fetch('/api/ai/icebreakers', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ matchId })
-            });
-            
-            if (!response.ok) {
-                // If AI fails (like GEMINI_API_KEY missing), don't show error to user
-                // just fail silently and don't show the icebreakers section
-                console.warn('Icebreakers AI failed, likely missing API Key');
-                return;
-            }
-
-            const data = await response.json();
-            setIcebreakers(data.icebreakers || []);
-            setShowIcebreakers(true);
-        } catch (error) {
-            console.error('Icebreakers fetch error:', error);
-        } finally {
-            setLoadingIcebreakers(false);
-        }
     };
 
     const handleSendMessage = async (text: string) => {

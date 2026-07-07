@@ -153,11 +153,29 @@ export async function GET(request: NextRequest) {
             });
         }
 
+        const [totalMessages, totalImages, totalVoice, totalReactions] = await Promise.all([
+            prisma.message.count({ where: { matchId, deletedAt: null } }),
+            prisma.message.count({ where: { matchId, type: 'image', deletedAt: null } }),
+            prisma.message.count({ where: { matchId, type: 'voice', deletedAt: null } }),
+            prisma.message.count({ where: { matchId, NOT: { reactions: {} }, deletedAt: null } }),
+        ]);
+
+        const daysConnected = Math.max(1, Math.ceil((Date.now() - match.createdAt.getTime()) / (1000 * 60 * 60 * 24)));
+
         events.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 
-        return NextResponse.json({ events });
+        return NextResponse.json({
+            events,
+            stats: {
+                totalMessages,
+                totalImages,
+                totalVoice,
+                totalReactions,
+                daysConnected,
+            }
+        });
     } catch (error) {
         console.error('Error fetching timeline:', error);
-        return NextResponse.json({ events: [] });
+        return NextResponse.json({ events: [], stats: { totalMessages: 0, totalImages: 0, totalVoice: 0, totalReactions: 0, daysConnected: 0 } });
     }
 }

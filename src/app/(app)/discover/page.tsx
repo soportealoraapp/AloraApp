@@ -301,7 +301,7 @@ export default function DiscoverPage() {
         { enableHighAccuracy: false, timeout: 10000 }
       );
     }
-  }, []);
+  }, [toast]);
 
   const currentProfile = profiles[0]?.profile;
   const profilesRef = useRef(profiles);
@@ -374,7 +374,7 @@ export default function DiscoverPage() {
     }
 
     return () => controller.abort();
-  }, [currentProfile?.id, user?.id, intent, browseMode, profiles.length]);
+  }, [currentProfile?.id, user?.id, intent, browseMode, profiles]);
 
   profilesRef.current = profiles;
 

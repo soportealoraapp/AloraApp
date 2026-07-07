@@ -27,7 +27,7 @@ export default function SettingsPage() {
             const reason = searchParams.get('reason') || 'unknown';
             toast({ title: 'Error al conectar Spotify', description: reason === 'user_denied' ? 'Conexión cancelada.' : 'No se pudo conectar. Intenta de nuevo.', variant: 'destructive' });
         }
-    }, []);
+    }, [searchParams, toast]);
 
     if (!user) {
         return (

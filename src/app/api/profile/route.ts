@@ -50,7 +50,7 @@ export async function GET(_request: NextRequest) {
             profile.rewindsResetAt = now;
         }
 
-        const [spotifyAccount] = await Promise.all([
+        const [spotifyAccount, completedQuizzesCount] = await Promise.all([
             prisma.spotifyAccount.findUnique({
                 where: { userId: user.id },
                 select: {
@@ -61,9 +61,12 @@ export async function GET(_request: NextRequest) {
                     lastSyncedAt: true,
                 },
             }),
+            prisma.quizResult.count({
+                where: { userId: user.id }
+            }),
         ]);
 
-        return NextResponse.json({ ...profile, spotify: spotifyAccount || null });
+        return NextResponse.json({ ...profile, spotify: spotifyAccount || null, completedQuizzes: completedQuizzesCount });
     } catch (error) {
         logger.error('Error getting profile', { metadata: { error: error instanceof Error ? error.message : String(error) } });
         return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
