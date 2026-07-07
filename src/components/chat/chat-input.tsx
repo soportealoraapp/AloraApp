@@ -381,7 +381,7 @@ export function ChatInput({ onSend, onSendImage, onSendVoice, onTyping, disabled
           onChange={handleChange}
           placeholder={placeholder}
           disabled={disabled || sending}
-          className="flex-1 rounded-2xl bg-muted/50 border-muted focus-visible:ring-primary/20"
+          className="flex-1 rounded-full px-4 bg-muted/50 border-muted focus-visible:ring-primary/20"
           maxLength={1000}
           enterKeyHint="send"
         />
@@ -390,7 +390,7 @@ export function ChatInput({ onSend, onSendImage, onSendVoice, onTyping, disabled
             type="submit"
             size="icon"
             disabled={disabled || sending}
-            className="rounded-2xl"
+            className="rounded-full shrink-0 shadow-glow"
             aria-label="Enviar mensaje"
           >
             {sending ? (

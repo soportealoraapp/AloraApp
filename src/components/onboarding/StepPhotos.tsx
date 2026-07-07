@@ -226,10 +226,10 @@ export function StepPhotos({ userId, data, onUpdate, onNext, onPrev }: StepPhoto
 
             <div className="flex flex-col gap-3 mt-8">
                 <div className="flex gap-4">
-                    <Button variant="outline" onClick={onPrev} className="w-1/3 hover:bg-muted">Atrás</Button>
+                    <Button variant="outline" onClick={onPrev} className="w-1/3 h-12 rounded-2xl font-bold hover:bg-muted">Atrás</Button>
                     <Button
                         onClick={handleNext}
-                        className="w-2/3 shadow-md"
+                        className="w-2/3 h-12 rounded-2xl font-bold shadow-glow"
                         disabled={isUploading}
                     >
                         {isUploading ? <Loader2 className="h-4 w-4 animate-spin" /> : (photos.length > 0 ? "Continuar" : "Omitir por ahora")}

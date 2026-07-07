@@ -999,7 +999,7 @@ export default function DiscoverPage() {
                     </div>
                     <p className="text-lg font-headline font-bold text-foreground mb-2">{BRAND_VOICE.states.noFilterResults.title}</p>
                     <p className="text-sm text-muted-foreground/80 mb-6 max-w-xs mx-auto">{BRAND_VOICE.states.noFilterResults.subtitle}</p>
-                    <Button onClick={() => { setFilters(DEFAULT_FILTERS); setIntent(currentUserProfile?.connectionModes?.[0] || 'dating'); }} className="rounded-full px-6">
+                    <Button onClick={() => { setFilters(DEFAULT_FILTERS); setIntent(currentUserProfile?.connectionModes?.[0] || 'dating'); }} className="rounded-full px-6 font-bold shadow-glow">
                       Limpiar filtros
                     </Button>
                   </div>
@@ -1012,7 +1012,7 @@ export default function DiscoverPage() {
                     </div>
                     <p className="text-lg font-headline font-bold text-foreground mb-2">{BRAND_VOICE.states.noMatches.title}</p>
                     <p className="text-sm text-muted-foreground/80 mb-6 max-w-xs mx-auto">{BRAND_VOICE.states.noMatches.subtitle}</p>
-                    <Button onClick={() => refresh()} className="rounded-full px-6">
+                    <Button onClick={() => refresh()} className="rounded-full px-6 font-bold shadow-glow">
                       Explorar de nuevo
                     </Button>
                   </div>

@@ -298,7 +298,7 @@ export default function ChatPage() {
                                         <p className="text-sm text-muted-foreground text-center max-w-xs mb-8">
                                             {BRAND_VOICE.states.noMatches.subtitle}
                                         </p>
-                                        <Button asChild className="rounded-full px-8 h-12">
+                                        <Button asChild className="rounded-full px-8 h-12 font-bold shadow-glow">
                                             <Link href="/discover">Explorar perfiles</Link>
                                         </Button>
                                     </CardContent>

@@ -214,7 +214,7 @@ export default function MatchesPage() {
                                             Sigue explorando perfiles para encontrar tu conexión perfecta
                                         </p>
                                         <Link href="/discover">
-                                            <Button className="rounded-full px-8">
+                                            <Button className="rounded-full px-8 font-bold shadow-glow">
                                                 <Sparkles className="h-4 w-4 mr-2" />
                                                 Explorar
                                             </Button>

@@ -2,7 +2,7 @@
 
 import { motion, useReducedMotion } from 'framer-motion';
 import { AvatarGlow } from '../custom/AvatarGlow';
-import { PinkButton } from '../custom/PinkButton';
+import { Button } from '@/components/ui/button';
 import { UserProfile } from '@/lib/domain/types';
 import { useEffect, useState } from 'react';
 import { EMOTIONAL_MOTION } from '@/lib/constants/motion-config';
@@ -253,10 +253,10 @@ export function MatchScreen({ userProfile, matchedProfile, onChat, onKeepSwiping
             )}
 
             <div className="flex flex-col gap-3 z-10 w-full max-w-xs px-4 pb-6">
-                <PinkButton onClick={onChat} glow className="w-full text-lg py-6">
+                <Button onClick={onChat} size="lg" className="w-full text-lg h-14 rounded-full font-bold">
                     <MessageCircle className="h-5 w-5 mr-2" />
                     Enviar Mensaje
-                </PinkButton>
+                </Button>
                 <button onClick={onKeepSwiping} className="text-white/90 hover:text-white transition-all underline text-sm bg-white/10 px-5 py-3 min-h-[44px] rounded-full">
                     Seguir explorando
                 </button>

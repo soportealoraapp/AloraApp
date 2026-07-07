@@ -322,7 +322,7 @@ export default function NotificationsPage() {
             <p className="text-sm text-muted-foreground/80 max-w-xs mb-8">
               {BRAND_VOICE.states.noActivity.subtitle}
             </p>
-            <Button asChild variant="default" size="default" className="rounded-full px-6">
+            <Button asChild variant="default" size="default" className="rounded-full px-8 h-12 font-bold shadow-glow">
               <Link href="/profile/edit">Completar perfil</Link>
             </Button>
           </div>

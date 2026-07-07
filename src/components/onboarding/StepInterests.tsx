@@ -189,12 +189,12 @@ export function StepInterests({ data, onUpdate, onNext, onPrev, userId }: StepIn
 
             <div className="pt-4">
                 <div className="flex gap-4">
-                    <Button variant="outline" onClick={onPrev} className="w-1/3 rounded-2xl">
+                    <Button variant="outline" onClick={onPrev} className="w-1/3 h-12 rounded-2xl font-bold">
                         Atrás
                     </Button>
                     <Button
                         onClick={handleNext}
-                        className="w-2/3 rounded-2xl shadow-md"
+                        className="w-2/3 h-12 rounded-2xl font-bold shadow-glow"
                     >
                         {hasSelections ? `¡${selectedInterests.length + selectedValues.length + selectedMusic.length} selecciones! Continuar` : 'Saltar por ahora'}
                     </Button>
