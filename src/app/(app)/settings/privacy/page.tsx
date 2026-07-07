@@ -47,8 +47,8 @@ export default function PrivacySettingsPage() {
             toast({ title: "Campos requeridos", description: "Completa todos los campos.", variant: "destructive" });
             return;
         }
-        if (newPassword.length < 6) {
-            toast({ title: "Contraseña muy corta", description: "Mínimo 6 caracteres.", variant: "destructive" });
+        if (newPassword.length < 8) {
+            toast({ title: "Contraseña muy corta", description: "Mínimo 8 caracteres.", variant: "destructive" });
             return;
         }
         if (newPassword !== confirmPassword) {

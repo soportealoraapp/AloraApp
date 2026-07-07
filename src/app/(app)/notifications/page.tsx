@@ -52,7 +52,8 @@ function NotificationItemInner({ notification, onRead, onDelete }: { notificatio
       router.push('/settings/safety');
     } else if (type === 'system') {
       // Admin notifications: use screen from data if available (validate internal only)
-      if (data.screen && typeof data.screen === 'string' && data.screen.startsWith('/') && !data.screen.startsWith('//')) {
+      const ALLOWED_SCREENS = ['/discover', '/compatibility', '/settings', '/admin', '/profile'];
+      if (data.screen && typeof data.screen === 'string' && data.screen.startsWith('/') && !data.screen.startsWith('//') && ALLOWED_SCREENS.some(s => data.screen === s || data.screen.startsWith(s + '/'))) {
         router.push(data.screen);
       } else {
         const fallbackId = data.userId || data.fromUserId || data.id;

@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import { Heart, Loader2 } from 'lucide-react';
 import { SafeImage } from '@/components/ui/safe-image';
 import { useRouter } from 'next/navigation';
@@ -24,6 +25,7 @@ export function LikesReceivedList() {
     const router = useRouter();
     const [likers, setLikers] = useState<Liker[]>([]);
     const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(false);
 
     useEffect(() => {
         const controller = new AbortController();
@@ -34,13 +36,13 @@ export function LikesReceivedList() {
     const fetchLikers = async (signal?: AbortSignal) => {
         try {
             const res = await fetch('/api/match/likes-received', { signal });
+            if (!res.ok) throw new Error('Failed to fetch');
             const data = await res.json();
-            if (res.ok) {
-                setLikers(data.likers || []);
-            }
+            setLikers(data.likers || []);
         } catch (error) {
             if ((error as Error).name !== 'AbortError') {
                 console.error("Error fetching likers", error);
+                setError(true);
             }
         } finally {
             setLoading(false);
@@ -49,19 +51,30 @@ export function LikesReceivedList() {
 
     if (loading) return <div className="flex justify-center py-12"><Loader2 className="animate-spin text-primary h-8 w-8" /></div>;
 
+    if (error) return (
+        <Card className="rounded-3xl border-dashed bg-muted/20">
+            <CardContent className="py-12 text-center text-muted-foreground text-sm space-y-3">
+                <p>No se pudieron cargar los likes</p>
+                <Button variant="outline" size="sm" onClick={() => { setError(false); setLoading(true); fetchLikers(); }}>
+                    Reintentar
+                </Button>
+            </CardContent>
+        </Card>
+    );
+
     return (
         <div className="space-y-4">
             <div className="flex items-center justify-between px-1">
                 <h4 className="font-bold text-sm flex items-center gap-2">
                     <Heart className="h-4 w-4 text-primary fill-primary" />
-                    Le gustas a {likers.length} personas
+                    Le gustas a {likers.length} {likers.length === 1 ? 'persona' : 'personas'}
                 </h4>
             </div>
 
             {likers.length === 0 ? (
                 <Card className="rounded-3xl border-dashed bg-muted/20">
                     <CardContent className="py-12 text-center text-muted-foreground text-sm">
-                        Aun no tienes nuevos admiradores. Sigue explorando!
+                        Aún no tienes nuevos admiradores. ¡Sigue explorando!
                     </CardContent>
                 </Card>
             ) : (

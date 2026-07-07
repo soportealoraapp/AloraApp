@@ -1,11 +1,21 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import { ArrowLeft, RefreshCw, ShieldCheck, CheckCircle, XCircle, ExternalLink } from 'lucide-react';
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
+import { RefreshCw, ShieldCheck, CheckCircle, XCircle, ExternalLink } from 'lucide-react';
+import { AdminBackButton } from '@/components/admin/AdminBackButton';
 import { SafeImage } from '@/components/ui/safe-image';
 
 interface Submission {
@@ -14,10 +24,11 @@ interface Submission {
 }
 
 export default function AdminVerificationsPage() {
-    const router = useRouter();
     const [submissions, setSubmissions] = useState<Submission[]>([]);
     const [loading, setLoading] = useState(true);
     const [filter, setFilter] = useState('pending');
+    const [confirmApproveId, setConfirmApproveId] = useState<string | null>(null);
+    const [confirmRejectId, setConfirmRejectId] = useState<string | null>(null);
 
     const loadSubmissions = async (status: string) => {
         setLoading(true);
@@ -31,23 +42,32 @@ export default function AdminVerificationsPage() {
 
     useEffect(() => { loadSubmissions(filter); }, [filter]);
 
-    const handleAction = async (submissionId: string, action: string) => {
+    const handleAction = async (submissionId: string, action: string, reason?: string) => {
         try {
             await fetch('/api/admin/verifications', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ submissionId, action }),
+                body: JSON.stringify({ submissionId, action, ...(reason ? { reason } : {}) }),
             });
             loadSubmissions(filter);
         } catch (e) { console.error(e); }
     };
 
+    const handleRejectClick = (submissionId: string) => {
+        setConfirmRejectId(submissionId);
+    };
+
+    const confirmReject = () => {
+        if (!confirmRejectId) return;
+        const reason = window.prompt('Razón del rechazo (opcional):');
+        handleAction(confirmRejectId, 'reject', reason || undefined);
+        setConfirmRejectId(null);
+    };
+
     return (
         <div className="min-h-dvh bg-background text-foreground">
             <header className="sticky top-0 z-30 border-b border-border bg-background/80 backdrop-blur-sm px-6 py-4 flex items-center gap-4">
-                <Button variant="ghost" size="icon" onClick={() => router.back()} className="text-muted-foreground" aria-label="Volver">
-                    <ArrowLeft className="h-5 w-5" />
-                </Button>
+                <AdminBackButton />
                 <div className="flex items-center gap-3">
                     <ShieldCheck className="h-5 w-5 text-emerald-400" />
                     <h1 className="text-xl font-bold">Verificaciones</h1>
@@ -123,14 +143,48 @@ export default function AdminVerificationsPage() {
 
                             {filter === 'pending' && (
                                 <div className="flex gap-2 pt-3 border-t border-border">
-                                    <Button onClick={() => handleAction(sub.id, 'approve')}
-                                        className="bg-emerald-600 hover:bg-emerald-500 text-white text-xs">
-                                        <CheckCircle className="h-3 w-3 mr-1" /> Aprobar
-                                    </Button>
-                                    <Button onClick={() => handleAction(sub.id, 'reject')}
-                                        variant="outline" className="border-red-500/30 text-red-400 hover:text-red-300 text-xs">
-                                        <XCircle className="h-3 w-3 mr-1" /> Rechazar
-                                    </Button>
+                                    <AlertDialog open={confirmApproveId === sub.id} onOpenChange={(open) => !open && setConfirmApproveId(null)}>
+                                        <Button onClick={() => setConfirmApproveId(sub.id)}
+                                            className="bg-emerald-600 hover:bg-emerald-500 text-white text-xs">
+                                            <CheckCircle className="h-3 w-3 mr-1" /> Aprobar
+                                        </Button>
+                                        <AlertDialogContent>
+                                            <AlertDialogHeader>
+                                                <AlertDialogTitle>¿Aprobar esta verificación?</AlertDialogTitle>
+                                                <AlertDialogDescription>
+                                                    Se verificará la identidad de {sub.user.profile?.displayName || 'este usuario'} y se actualizará su perfil.
+                                                </AlertDialogDescription>
+                                            </AlertDialogHeader>
+                                            <AlertDialogFooter>
+                                                <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                                                <AlertDialogAction onClick={() => handleAction(sub.id, 'approve')}>
+                                                    Aprobar
+                                                </AlertDialogAction>
+                                            </AlertDialogFooter>
+                                        </AlertDialogContent>
+                                    </AlertDialog>
+
+                                    <AlertDialog open={confirmRejectId === sub.id} onOpenChange={(open) => !open && setConfirmRejectId(null)}>
+                                        <Button onClick={() => handleRejectClick(sub.id)}
+                                            variant="outline" className="border-red-500/30 text-red-400 hover:text-red-300 text-xs">
+                                            <XCircle className="h-3 w-3 mr-1" /> Rechazar
+                                        </Button>
+                                        <AlertDialogContent>
+                                            <AlertDialogHeader>
+                                                <AlertDialogTitle>¿Rechazar esta verificación?</AlertDialogTitle>
+                                                <AlertDialogDescription>
+                                                    Se rechazará la verificación de {sub.user.profile?.displayName || 'este usuario'}.
+                                                </AlertDialogDescription>
+                                            </AlertDialogHeader>
+                                            <AlertDialogFooter>
+                                                <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                                                <AlertDialogAction onClick={confirmReject} className="bg-red-600 hover:bg-red-500 text-white">
+                                                    Rechazar
+                                                </AlertDialogAction>
+                                            </AlertDialogFooter>
+                                        </AlertDialogContent>
+                                    </AlertDialog>
+
                                     <a href={sub.selfieUrl} target="_blank" rel="noopener noreferrer">
                                         <Button variant="ghost" size="sm" className="text-muted-foreground text-xs">
                                             <ExternalLink className="h-3 w-3 mr-1" /> Ver original

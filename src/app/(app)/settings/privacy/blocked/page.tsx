@@ -1,17 +1,29 @@
 "use client";
 
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useBlock } from "@/hooks/use-block";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { ArrowLeft, UserX } from "lucide-react";
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { AlertCircle, ArrowLeft, UserX, RefreshCw } from "lucide-react";
 import { SafeImage } from "@/components/ui/safe-image";
 import { Skeleton } from "@/components/ui/skeleton";
 import { BRAND_VOICE } from "@/lib/constants/brand-voice";
 
 export default function BlockedUsersPage() {
     const router = useRouter();
-    const { blockedUsers, loading, unblockUser } = useBlock();
+    const { blockedUsers, loading, error, refetch, unblockUser } = useBlock();
+    const [unblockTarget, setUnblockTarget] = useState<string | null>(null);
 
     if (loading) {
         return (
@@ -21,6 +33,39 @@ export default function BlockedUsersPage() {
                 </header>
                 <main className="p-4 space-y-4">
                     {[1, 2, 3].map(i => <Skeleton key={i} className="h-20 rounded-lg" />)}
+                </main>
+            </div>
+        );
+    }
+
+    if (error) {
+        return (
+            <div>
+                <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b bg-background/80 px-4 backdrop-blur-sm sm:px-6 pt-safe">
+                    <Button variant="ghost" size="icon" onClick={() => router.back()} aria-label="Volver">
+                        <ArrowLeft className="h-5 w-5" />
+                    </Button>
+                    <h1 className="text-xl font-semibold md:text-2xl font-headline">
+                        Contactos Bloqueados
+                    </h1>
+                </header>
+                <main className="p-4 space-y-4">
+                    <Card>
+                        <CardContent className="flex flex-col items-center justify-center py-12">
+                            <AlertCircle className="h-12 w-12 text-destructive mb-4" />
+                            <p className="text-destructive font-medium text-center">
+                                {error}
+                            </p>
+                            <Button
+                                variant="outline"
+                                className="mt-4"
+                                onClick={() => refetch()}
+                            >
+                                <RefreshCw className="h-4 w-4 mr-2" />
+                                Reintentar
+                            </Button>
+                        </CardContent>
+                    </Card>
                 </main>
             </div>
         );
@@ -76,12 +121,28 @@ export default function BlockedUsersPage() {
                                         Bloqueado el {block.createdAt ? new Date(block.createdAt).toLocaleDateString() : ''}
                                     </p>
                                 </div>
-                                <Button
-                                    variant="outline"
-                                    onClick={() => unblockUser(block.blockedId)}
-                                >
-                                    Desbloquear
-                                </Button>
+                                <AlertDialog open={unblockTarget === block.blockedId} onOpenChange={(open) => !open && setUnblockTarget(null)}>
+                                    <Button
+                                        variant="outline"
+                                        onClick={() => setUnblockTarget(block.blockedId)}
+                                    >
+                                        Desbloquear
+                                    </Button>
+                                    <AlertDialogContent>
+                                        <AlertDialogHeader>
+                                            <AlertDialogTitle>¿Desbloquear a esta persona?</AlertDialogTitle>
+                                            <AlertDialogDescription>
+                                                Esta acción desbloqueará a {block.displayName || `Usuario #${block.blockedId.slice(0, 8)}`} y podrá volver a interactuar contigo.
+                                            </AlertDialogDescription>
+                                        </AlertDialogHeader>
+                                        <AlertDialogFooter>
+                                            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                                            <AlertDialogAction onClick={() => unblockUser(block.blockedId)}>
+                                                Desbloquear
+                                            </AlertDialogAction>
+                                        </AlertDialogFooter>
+                                    </AlertDialogContent>
+                                </AlertDialog>
                             </CardContent>
                         </Card>
                     ))

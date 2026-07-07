@@ -1,11 +1,11 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import { ArrowLeft, Flag, RefreshCw, ShieldAlert, Ban, EyeOff, AlertTriangle, CheckCircle, XCircle } from 'lucide-react';
+import { Flag, RefreshCw, ShieldAlert, Ban, EyeOff, AlertTriangle, CheckCircle, XCircle } from 'lucide-react';
+import { AdminBackButton } from '@/components/admin/AdminBackButton';
 import { SafeImage } from '@/components/ui/safe-image';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 
@@ -32,7 +32,6 @@ const ACTION_DESCRIPTIONS: Record<string, string> = {
 };
 
 export default function AdminReportsPage() {
-    const router = useRouter();
     const [reports, setReports] = useState<Report[]>([]);
     const [loading, setLoading] = useState(true);
     const [filter, setFilter] = useState('pending');
@@ -115,9 +114,7 @@ export default function AdminReportsPage() {
     return (
         <div className="min-h-dvh bg-background text-foreground">
             <header className="sticky top-0 z-30 border-b border-border bg-background/80 backdrop-blur-sm px-6 py-4 flex items-center gap-4">
-                <Button variant="ghost" size="icon" onClick={() => router.back()} className="text-muted-foreground" aria-label="Volver">
-                    <ArrowLeft className="h-5 w-5" />
-                </Button>
+                <AdminBackButton />
                 <div className="flex items-center gap-3">
                     <Flag className="h-5 w-5 text-red-400" />
                     <h1 className="text-xl font-bold">Reportes</h1>
@@ -179,7 +176,7 @@ export default function AdminReportsPage() {
                                             <p className="text-xs text-muted-foreground mt-1 line-clamp-1">{report.details}</p>
                                         )}
                                         <div className="text-xs text-muted-foreground/60 mt-1">
-                                            Reportado por usuario verificado
+                                            Reportado por {report.reporter?.name || report.reporter?.email || 'Usuario'}
                                         </div>
                                     </div>
                                 </div>

@@ -18,18 +18,22 @@ export default function PasswordUpdatePage() {
     const [error, setError] = useState<string | null>(null);
     const [success, setSuccess] = useState(false);
     const [checkingSession, setCheckingSession] = useState(true);
+    const [tokenError, setTokenError] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirm, setShowConfirm] = useState(false);
     const router = useRouter();
     const supabaseRef = useRef(createClient());
 
     useEffect(() => {
-        supabaseRef.current.auth.getSession().then(({ data }) => {
-            const session = data.session;
-            if (!session) {
-                router.replace('/login');
+        supabaseRef.current.auth.getSession().then(({ data, error }) => {
+            if (error || !data.session) {
+                setTokenError(true);
+                setCheckingSession(false);
                 return;
             }
+            setCheckingSession(false);
+        }).catch(() => {
+            setTokenError(true);
             setCheckingSession(false);
         });
     }, [router]);
@@ -83,6 +87,27 @@ export default function PasswordUpdatePage() {
                 <CardContent className="py-8">
                     <FormSkeleton />
                 </CardContent>
+            </Card>
+        );
+    }
+
+    if (tokenError) {
+        return (
+            <Card className="w-full">
+                <CardHeader className="text-center">
+                    <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-red-100 dark:bg-red-900/30">
+                        <Lock className="h-6 w-6 text-red-600 dark:text-red-400" />
+                    </div>
+                    <CardTitle>Enlace no válido o expirado</CardTitle>
+                    <CardDescription>
+                        El enlace para restablecer tu contraseña no es válido o ha expirado. Solicita uno nuevo desde la página de inicio de sesión.
+                    </CardDescription>
+                </CardHeader>
+                <CardFooter className="justify-center">
+                    <Button variant="outline" onClick={() => router.push('/login')}>
+                        Volver al inicio de sesión
+                    </Button>
+                </CardFooter>
             </Card>
         );
     }

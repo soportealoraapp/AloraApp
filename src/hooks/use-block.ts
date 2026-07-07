@@ -16,20 +16,25 @@ export function useBlock() {
     const { user } = useAuth();
     const [blockedUsers, setBlockedUsers] = useState<BlockedUser[]>([]);
     const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
 
     const fetchBlocked = useCallback(async () => {
         if (!user) {
             setLoading(false);
             return;
         }
+        setLoading(true);
+        setError(null);
         try {
             const response = await fetch('/api/safety/block');
             if (response.ok) {
                 const users = await response.json();
                 setBlockedUsers(users);
+            } else {
+                setError('No se pudieron cargar los usuarios bloqueados');
             }
         } catch (e) {
-            console.error('Error fetching blocked users', e);
+            setError('No se pudieron cargar los usuarios bloqueados');
         } finally {
             setLoading(false);
         }
@@ -68,6 +73,8 @@ export function useBlock() {
     return {
         blockedUsers,
         loading,
+        error,
+        refetch: fetchBlocked,
         blockUser,
         unblockUser,
         isBlocked

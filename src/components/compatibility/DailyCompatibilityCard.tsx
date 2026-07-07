@@ -31,11 +31,8 @@ export const DailyCompatibilityCard = React.memo(function DailyCompatibilityCard
     const fetchCompatibility = async (signal?: AbortSignal) => {
         try {
             const res = await fetch('/api/daily-compatibility', { signal });
+            if (!res.ok) throw new Error('Failed to fetch');
             const result = await res.json();
-            if (!res.ok) {
-                setData({ found: false });
-                return;
-            }
             setData(result);
         } catch (error) {
             if ((error as Error).name !== 'AbortError') {

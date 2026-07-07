@@ -1,12 +1,12 @@
 'use client';
 
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Skeleton } from '@/components/ui/skeleton';
-import { ArrowLeft, Users, RefreshCw, Search, Ban, ShieldAlert, EyeOff, CheckCircle, Shield, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Users, RefreshCw, Search, Ban, ShieldAlert, EyeOff, CheckCircle, Shield, ChevronLeft, ChevronRight } from 'lucide-react';
+import { AdminBackButton } from '@/components/admin/AdminBackButton';
 import { SafeImage } from '@/components/ui/safe-image';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 
@@ -17,7 +17,6 @@ interface AdminUser {
 }
 
 export default function AdminUsersPage() {
-    const router = useRouter();
     const [users, setUsers] = useState<AdminUser[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -73,9 +72,7 @@ export default function AdminUsersPage() {
     return (
         <div className="min-h-dvh bg-background text-foreground">
             <header className="sticky top-0 z-30 border-b border-border bg-background/80 backdrop-blur-sm px-6 py-4 flex items-center gap-4">
-                <Button variant="ghost" size="icon" onClick={() => router.back()} className="text-muted-foreground" aria-label="Volver">
-                    <ArrowLeft className="h-5 w-5" />
-                </Button>
+                <AdminBackButton />
                 <div className="flex items-center gap-3">
                     <Users className="h-5 w-5 text-blue-400" />
                     <h1 className="text-xl font-bold">Usuarios</h1>

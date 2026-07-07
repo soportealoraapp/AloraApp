@@ -43,7 +43,10 @@ export default function ProfilePage() {
     if (!user?.id) return;
     const controller = new AbortController();
     fetch('/api/profile/stats', { signal: controller.signal })
-      .then(r => r.json())
+      .then(r => {
+        if (!r.ok) throw new Error('Failed to fetch');
+        return r.json();
+      })
       .then(data => {
         if (data.likesReceived !== undefined) {
           setProfileStats(data);
@@ -60,7 +63,10 @@ export default function ProfilePage() {
         headers: { 'x-timezone': Intl.DateTimeFormat().resolvedOptions().timeZone },
         signal: controller.signal,
     })
-      .then(r => r.json())
+      .then(r => {
+        if (!r.ok) throw new Error('Failed to fetch');
+        return r.json();
+      })
       .then(data => {
         if (data.answered && data.userAnswer) {
           setLatestAnswer({
@@ -371,7 +377,7 @@ export default function ProfilePage() {
                 <span className="text-2xl">⭐</span>
                 <div>
                   <p className="font-bold text-sm text-primary">Perfil destacado</p>
-                  <p className="text-xs text-muted-foreground">Tu perfil está en el top 10% de completitud</p>
+                  <p className="text-xs text-muted-foreground">Tu perfil está bien completo — ¡sigue así!</p>
                 </div>
               </CardContent>
             </Card>

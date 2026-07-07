@@ -58,7 +58,7 @@ export function LikesCounter({
     const isPlus = subscriptionStatus === 'plus';
 
     const remaining = isPlus ? dailyLikesLimit : Math.max(0, dailyLikesLimit - dailyLikesUsed);
-    const percentage = isPlus ? 100 : Math.round((remaining / dailyLikesLimit) * 100);
+    const percentage = isPlus ? 100 : dailyLikesLimit > 0 ? Math.round((remaining / dailyLikesLimit) * 100) : 0;
 
     const timeUntilReset = useMemo(() => {
         const diff = resetDate.getTime() - now.getTime();
@@ -80,7 +80,7 @@ export function LikesCounter({
         );
     }
 
-    const isLow = remaining <= 10;
+    const isLow = remaining <= Math.max(10, Math.floor(dailyLikesLimit * 0.15));
     const isEmpty = remaining === 0;
 
     return (

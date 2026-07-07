@@ -245,8 +245,8 @@ export default function ChatWindowPage() {
         } catch (error: any) {
             if (error?.code === 'first_message_restriction') {
                 toast({
-                    title: "Ella da el primer paso",
-                    description: "En conexiones entre hombres y mujeres, ella envía el primer mensaje. Espera a que inicie la conversación.",
+                    title: "Una persona da el primer paso",
+                    description: "En conexiones entre personas de diferente género, una persona da el primer paso. Espera a que inicie la conversación.",
                     variant: "default"
                 });
             } else {
@@ -569,7 +569,7 @@ export default function ChatWindowPage() {
                             Empieza la conversación con algo especial. Tu mensaje puede ser el inicio de algo increíble.
                         </p>
                         <p className="text-xs text-muted-foreground/80 mb-4 max-w-xs">
-                            En Alora, ella da el primer paso. Esto crea un espacio más seguro y cómodo para todas.
+                            En Alora, una persona da el primer paso. Esto crea un espacio más seguro y cómodo para todas.
                         </p>
                         <Button
                             onClick={fetchIcebreakers}

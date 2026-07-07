@@ -43,7 +43,10 @@ export default function TrustPage() {
         if (!user) return;
         const controller = new AbortController();
         fetch('/api/profile/trust', { signal: controller.signal })
-            .then(r => r.json())
+            .then(r => {
+                if (!r.ok) throw new Error('Failed to fetch');
+                return r.json();
+            })
             .then(setTrust)
             .catch(console.error)
             .finally(() => setLoading(false));

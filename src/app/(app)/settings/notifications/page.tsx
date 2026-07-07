@@ -4,7 +4,7 @@ import { useRouter } from 'next/navigation';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, AlertCircle, RefreshCw } from "lucide-react";
 import { useState, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -25,6 +25,7 @@ export default function NotificationsPage() {
     const { toast } = useToast();
     const [prefs, setPrefs] = useState<NotificationPrefs | null>(null);
     const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
     const [updating, setUpdating] = useState<string | null>(null);
     const [soundOn, setSoundOn] = useState(true);
 
@@ -34,16 +35,18 @@ export default function NotificationsPage() {
     }, []);
 
     const fetchPrefs = async () => {
+        setLoading(true);
+        setError(null);
         try {
             const res = await fetch('/api/notifications/preferences');
             if (res.ok) {
                 const data = await res.json();
                 setPrefs(data);
             } else {
-                console.error('Failed to fetch preferences:', res.status);
+                setError('No se pudieron cargar las preferencias');
             }
         } catch (error) {
-            console.error('Error fetching preferences:', error);
+            setError('No se pudieron cargar las preferencias');
         } finally {
             setLoading(false);
         }
@@ -95,6 +98,37 @@ export default function NotificationsPage() {
                                     <Skeleton className="h-5 w-10 rounded-full" />
                                 </div>
                             ))}
+                        </CardContent>
+                    </Card>
+                </main>
+            </div>
+        );
+    }
+
+    if (error) {
+        return (
+            <div className="h-dvh overflow-y-auto">
+                <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b bg-background/80 px-4 backdrop-blur-sm sm:px-6 pt-safe">
+                    <Button variant="ghost" size="icon" onClick={() => router.back()} aria-label="Volver">
+                        <ArrowLeft className="h-5 w-5" />
+                    </Button>
+                    <h1 className="text-xl font-semibold md:text-2xl font-headline">Notificaciones</h1>
+                </header>
+                <main className="p-4">
+                    <Card>
+                        <CardContent className="flex flex-col items-center justify-center py-12">
+                            <AlertCircle className="h-12 w-12 text-destructive mb-4" />
+                            <p className="text-destructive font-medium text-center">
+                                {error}
+                            </p>
+                            <Button
+                                variant="outline"
+                                className="mt-4"
+                                onClick={() => fetchPrefs()}
+                            >
+                                <RefreshCw className="h-4 w-4 mr-2" />
+                                Reintentar
+                            </Button>
                         </CardContent>
                     </Card>
                 </main>

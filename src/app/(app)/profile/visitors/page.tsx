@@ -6,6 +6,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { ArrowLeft, Eye, Lock, Sparkles, Loader2 } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
@@ -25,6 +26,7 @@ interface Visitor {
 export default function VisitorsPage() {
     const { user } = useAuth();
     const router = useRouter();
+    const { toast } = useToast();
     const [visitors, setVisitors] = useState<Visitor[]>([]);
     const [total, setTotal] = useState(0);
     const [hasMore, setHasMore] = useState(false);
@@ -37,6 +39,7 @@ export default function VisitorsPage() {
     const fetchVisitors = async (offset = 0, append = false) => {
         try {
             const res = await fetch(`/api/profile/visitors?limit=10&offset=${offset}`);
+            if (!res.ok) throw new Error('Failed to fetch');
             const data = await res.json();
             if (append) {
                 setVisitors(prev => [...prev, ...(data.visitors || [])]);
@@ -59,8 +62,13 @@ export default function VisitorsPage() {
 
     const loadMore = async () => {
         setLoadingMore(true);
-        await fetchVisitors(visitors.length, true);
-        setLoadingMore(false);
+        try {
+            await fetchVisitors(visitors.length, true);
+        } catch {
+            toast({ title: 'Error', description: 'No se pudieron cargar más visitantes.', variant: 'destructive' });
+        } finally {
+            setLoadingMore(false);
+        }
     };
 
     const hiddenCount = total - visitors.length;
@@ -76,7 +84,7 @@ export default function VisitorsPage() {
                         <h1 className="text-xl font-semibold md:text-2xl font-headline">Visitantes del perfil</h1>
                         {!isPlus && <PlusBadge label="Beneficio Plus" />}
                     </div>
-                    <p className="text-sm text-muted-foreground">{total} persona{total !== 1 ? 's' : ''} visitó tu perfil</p>
+                    <p className="text-sm text-muted-foreground">{total} persona{total !== 1 ? 's' : ''} visitaron tu perfil</p>
                 </div>
             </header>
             <main className="p-6 space-y-6">
@@ -84,7 +92,7 @@ export default function VisitorsPage() {
                 <Alert variant="destructive">
                     <AlertDescription className="flex items-center justify-between">
                         <span>{error}</span>
-                        <Button variant="outline" size="sm" onClick={() => fetchVisitors()}>Reintentar</Button>
+                        <Button variant="outline" size="sm" onClick={() => { setError(null); fetchVisitors().finally(() => setLoading(false)); }}>Reintentar</Button>
                     </AlertDescription>
                 </Alert>
             )}

@@ -32,7 +32,7 @@ export function MatchTimeline({ matchId, open, onClose }: MatchTimelineProps) {
         setLoading(true);
         setError(false);
         fetch(`/api/chat/timeline?matchId=${matchId}`, { signal: controller.signal })
-            .then(r => r.json())
+            .then(r => { if (!r.ok) throw new Error('Failed to fetch'); return r.json(); })
             .then(data => setEvents(data.events || []))
             .catch(() => { if (!controller.signal.aborted) setError(true); })
             .finally(() => setLoading(false));

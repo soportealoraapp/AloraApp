@@ -319,9 +319,9 @@ export function DailyQuestionCard() {
                 question={data.question}
                 loading={loadingAnswers}
                 answers={otherAnswers}
-                onLike={(userId) => handleAction(otherAnswers.find(a => a.userId === userId || a.profile?.userId === userId), 'like')}
-                onSuperlike={(userId) => handleAction(otherAnswers.find(a => a.userId === userId || a.profile?.userId === userId), 'superlike')}
-                onPass={(userId) => handleAction(otherAnswers.find(a => a.userId === userId || a.profile?.userId === userId), 'pass')}
+                onLike={(userId) => { const answer = otherAnswers.find(a => a.userId === userId || a.profile?.userId === userId); if (answer) handleAction(answer, 'like'); }}
+                onSuperlike={(userId) => { const answer = otherAnswers.find(a => a.userId === userId || a.profile?.userId === userId); if (answer) handleAction(answer, 'superlike'); }}
+                onPass={(userId) => { const answer = otherAnswers.find(a => a.userId === userId || a.profile?.userId === userId); if (answer) handleAction(answer, 'pass'); }}
             />
 
             {/* Match Screen animation fallback overlay */}

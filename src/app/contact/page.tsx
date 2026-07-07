@@ -86,11 +86,11 @@ export default function ContactPage() {
                                 </div>
                                 <div>
                                     <h2 className="font-bold text-lg">Mensaje preparado</h2>
-                                    <p className="text-sm text-muted-foreground">Se abrió tu cliente de email</p>
+                                    <p className="text-sm text-muted-foreground">Se abrirá tu cliente de correo con el mensaje prellenado</p>
                                 </div>
                             </div>
                             <div className="space-y-2 text-sm text-muted-foreground">
-                                <p>Tu mensaje fue preparado y se abrió en tu aplicación de correo.</p>
+                                <p>Se abrirá tu cliente de correo con el mensaje prellenado.</p>
                                 <p>Si no se abrió automáticamente, envía un email a:</p>
                                 <a href={`mailto:${SUPPORT_EMAIL}`} className="text-primary font-bold hover:underline break-all">
                                     {SUPPORT_EMAIL}
@@ -209,12 +209,12 @@ export default function ContactPage() {
                                 {sending ? (
                                     <>
                                         <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                                        Enviando...
+                                        Abriendo correo...
                                     </>
                                 ) : (
                                     <>
                                         <Send className="h-4 w-4 mr-2" />
-                                        Enviar mensaje
+                                        Enviar por correo
                                     </>
                                 )}
                             </Button>

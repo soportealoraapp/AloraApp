@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { Badge } from '@/components/ui/badge';
-import { Globe, MapPin, Loader2, ArrowLeft, Plane } from 'lucide-react';
+import { Globe, MapPin, Loader2, ArrowLeft, Plane, AlertCircle, RefreshCw } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
 import { CityAutocomplete } from '@/components/ui/city-autocomplete';
@@ -26,6 +26,7 @@ export default function TravelModePage() {
     const [startedAt, setStartedAt] = useState<string | null>(null);
     const [selectedCityId, setSelectedCityId] = useState<string | null>(null);
     const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
     const [saving, setSaving] = useState(false);
     const [showPaywall, setShowPaywall] = useState(false);
 
@@ -36,15 +37,21 @@ export default function TravelModePage() {
     }, []);
 
     const fetchStatus = async () => {
+        setLoading(true);
+        setError(null);
         try {
             const res = await fetch('/api/travel');
+            if (!res.ok) {
+                setError('No se pudieron cargar los datos de viaje');
+                return;
+            }
             const data = await res.json();
             setEnabled(data.enabled || false);
             setCity(data.city || '');
             setCountryCode(data.countryCode || '');
             setStartedAt(data.startedAt || null);
         } catch (error) {
-            console.error('Error fetching travel status:', error);
+            setError('No se pudieron cargar los datos de viaje');
         } finally {
             setLoading(false);
         }
@@ -120,8 +127,55 @@ export default function TravelModePage() {
 
     if (loading) {
         return (
-            <div className="p-6 flex justify-center py-20">
-                <Loader2 className="animate-spin text-primary h-8 w-8" />
+            <div className="h-dvh overflow-y-auto bg-muted/50">
+                <div className="p-6 space-y-6">
+                    <div className="flex items-center gap-4">
+                        <Button variant="ghost" size="icon" onClick={() => router.back()} aria-label="Volver">
+                            <ArrowLeft className="h-5 w-5" />
+                        </Button>
+                        <div className="flex-1">
+                            <h1 className="text-2xl font-bold">Modo Viaje</h1>
+                            <p className="text-sm text-muted-foreground">Explora personas en otra ciudad</p>
+                        </div>
+                    </div>
+                    <div className="flex justify-center py-20">
+                        <Loader2 className="animate-spin text-primary h-8 w-8" />
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
+    if (error) {
+        return (
+            <div className="h-dvh overflow-y-auto bg-muted/50">
+                <div className="p-6 space-y-6">
+                    <div className="flex items-center gap-4">
+                        <Button variant="ghost" size="icon" onClick={() => router.back()} aria-label="Volver">
+                            <ArrowLeft className="h-5 w-5" />
+                        </Button>
+                        <div className="flex-1">
+                            <h1 className="text-2xl font-bold">Modo Viaje</h1>
+                            <p className="text-sm text-muted-foreground">Explora personas en otra ciudad</p>
+                        </div>
+                    </div>
+                    <Card>
+                        <CardContent className="flex flex-col items-center justify-center py-12">
+                            <AlertCircle className="h-12 w-12 text-destructive mb-4" />
+                            <p className="text-destructive font-medium text-center">
+                                {error}
+                            </p>
+                            <Button
+                                variant="outline"
+                                className="mt-4"
+                                onClick={() => fetchStatus()}
+                            >
+                                <RefreshCw className="h-4 w-4 mr-2" />
+                                Reintentar
+                            </Button>
+                        </CardContent>
+                    </Card>
+                </div>
             </div>
         );
     }

@@ -84,17 +84,21 @@ export default function SafetyCenterPage() {
                 ) : (<>
                 {/* Trust Status */}
                 {profile && (
-                    <Card className="border-primary/20 bg-primary/10">
+                    <Card className={profile?.isVerified ? "border-primary/20 bg-primary/10" : "border-border"}>
                         <CardContent className="flex items-center gap-4 p-6">
-                            <div className="rounded-full bg-primary/20 p-3">
-                                <ShieldCheck className="h-6 w-6 text-primary" />
+                            <div className={profile?.isVerified ? "rounded-full bg-primary/20 p-3" : "rounded-full bg-muted p-3"}>
+                                {profile?.isVerified
+                                    ? <ShieldCheck className="h-6 w-6 text-primary" />
+                                    : <ShieldAlert className="h-6 w-6 text-muted-foreground" />}
                             </div>
                             <div>
-                                <p className="font-bold text-foreground">Tu cuenta está segura</p>
-                                <p className="text-sm text-primary">
+                                <p className="font-bold text-foreground">
+                                    {profile?.isVerified ? "Tu cuenta está verificada" : "Verifica tu identidad"}
+                                </p>
+                                <p className={profile?.isVerified ? "text-sm text-primary" : "text-sm text-muted-foreground"}>
                                     {profile?.isVerified
-                                        ? '✓ Identidad verificada'
-                                        : 'Verifica tu identidad para mayor confianza'}
+                                        ? '✓ Identidad verificada — esto genera mayor confianza en otros usuarios'
+                                        : 'Tu identidad no ha sido verificada aún. Verificalo para generar más confianza.'}
                                 </p>
                             </div>
                         </CardContent>

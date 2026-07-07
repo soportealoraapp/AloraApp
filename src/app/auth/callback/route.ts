@@ -58,7 +58,8 @@ export async function GET(request: Request) {
                         path: '/',
                         maxAge: 0,
                         sameSite: 'lax',
-                        httpOnly: false,
+                        httpOnly: true,
+                        secure: true,
                     });
                 }
             } catch (err) {

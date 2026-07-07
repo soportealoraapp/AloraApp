@@ -1,11 +1,11 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
-import { ArrowLeft, BarChart3, RefreshCw, TrendingUp, Users, MessageSquare, Heart, Flag, Activity, Zap, Download } from 'lucide-react';
+import { BarChart3, RefreshCw, TrendingUp, Users, MessageSquare, Heart, Flag, Activity, Zap, Download } from 'lucide-react';
+import { AdminBackButton } from '@/components/admin/AdminBackButton';
 
 interface Metrics {
     overview: { totalUsers: number; totalProfiles: number; totalMatches: number; totalMessages: number; totalReports: number; pendingReports: number; pendingVerifications: number };
@@ -22,7 +22,6 @@ interface RetentionRow {
 }
 
 export default function AdminMetricsPage() {
-    const router = useRouter();
     const [metrics, setMetrics] = useState<Metrics | null>(null);
     const [loading, setLoading] = useState(true);
     const [funnel, setFunnel] = useState<FunnelStep[]>([]);
@@ -67,7 +66,7 @@ export default function AdminMetricsPage() {
             ['Reports Today', metrics.daily.reportsFiled],
             ['Match Rate', metrics.daily.matchRate],
         ];
-        const csv = rows.map(r => r.join(',')).join('\n');
+        const csv = rows.map(r => r.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(',')).join('\n');
         const blob = new Blob([csv], { type: 'text/csv' });
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
@@ -86,9 +85,7 @@ export default function AdminMetricsPage() {
     return (
         <div className="min-h-dvh bg-background text-foreground">
             <header className="sticky top-0 z-30 border-b border-border bg-background/80 backdrop-blur-sm px-6 py-4 flex items-center gap-4">
-                <Button variant="ghost" size="icon" onClick={() => router.back()} className="text-muted-foreground" aria-label="Volver">
-                    <ArrowLeft className="h-5 w-5" />
-                </Button>
+                <AdminBackButton />
                 <div className="flex items-center gap-3">
                     <BarChart3 className="h-5 w-5 text-blue-400" />
                     <h1 className="text-xl font-bold">Métricas</h1>

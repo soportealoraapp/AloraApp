@@ -77,6 +77,8 @@ export function DailyAnswersModal({
 
     const currentAnswer = answers[currentIndex];
 
+    if (!currentAnswer) return null;
+
     const handleAction = (userId: string, type: 'like' | 'superlike' | 'pass') => {
         if (type === 'like') onLike(userId);
         else if (type === 'superlike') onSuperlike(userId);

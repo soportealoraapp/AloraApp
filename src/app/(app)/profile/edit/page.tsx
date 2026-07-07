@@ -27,7 +27,7 @@ const lifestyleOptions = {
     smoking: [...LIFESTYLE_OPTIONS.smoking],
     drinking: [...LIFESTYLE_OPTIONS.drinking],
     children: [...LIFESTYLE_OPTIONS.children],
-    religion: ["Ninguna", "Cristiana", "Católica", "Musulmana", "Judía", "Budista", "Otra"],
+    religion: [...LIFESTYLE_OPTIONS.religion],
 };
 
 const zodiacSigns = ["Aries", "Tauro", "Géminis", "Cáncer", "Leo", "Virgo", "Libra", "Escorpio", "Sagitario", "Capricornio", "Acuario", "Piscis"];
@@ -97,8 +97,8 @@ export default function ProfileEditPage() {
             setCityId(currentProfile.cityId || "");
             setCountryCode(currentProfile.countryCode || "");
             setStateCode(currentProfile.stateCode || "");
-            setLatitude(currentProfile.latitude || null);
-            setLongitude(currentProfile.longitude || null);
+            setLatitude(currentProfile.latitude ?? null);
+            setLongitude(currentProfile.longitude ?? null);
             setLookingFor(currentProfile.lookingFor || "");
             setConnectionModes(currentProfile.connectionModes || ["dating"]);
             setVoiceIntroUrl(currentProfile.voiceIntro ?? undefined);
