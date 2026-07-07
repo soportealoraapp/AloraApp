@@ -7,6 +7,7 @@ import { motion } from "framer-motion";
 import { UserProfile } from "@/lib/domain/types";
 import { INTEREST_CATEGORIES, VALUES, MUSIC_GENRES, MAX_INTERESTS } from "@/lib/constants/preferences";
 import { BadgeChipList, getEmoji } from "@/components/profile/BadgeChip";
+import { hapticsLight } from "@/lib/mobile";
 
 interface StepInterestsProps {
     userId?: string;
@@ -22,6 +23,7 @@ export function StepInterests({ data, onUpdate, onNext, onPrev, userId }: StepIn
     const [selectedMusic, setSelectedMusic] = useState<string[]>(data.musicGenres || []);
 
     const toggleInterest = (interest: string) => {
+        hapticsLight();
         if (selectedInterests.includes(interest)) {
             setSelectedInterests(selectedInterests.filter(i => i !== interest));
         } else {
@@ -32,6 +34,7 @@ export function StepInterests({ data, onUpdate, onNext, onPrev, userId }: StepIn
     };
 
     const toggleValue = (value: string) => {
+        hapticsLight();
         if (selectedValues.includes(value)) {
             setSelectedValues(selectedValues.filter(v => v !== value));
         } else {
@@ -42,6 +45,7 @@ export function StepInterests({ data, onUpdate, onNext, onPrev, userId }: StepIn
     };
 
     const toggleMusic = (genre: string) => {
+        hapticsLight();
         if (selectedMusic.includes(genre)) {
             setSelectedMusic(selectedMusic.filter(g => g !== genre));
         } else {

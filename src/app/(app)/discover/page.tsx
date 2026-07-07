@@ -30,6 +30,7 @@ import { SecondChanceSection } from "@/components/discover/SecondChanceSection";
 import { LikesSentSection } from "@/components/discover/LikesSentSection";
 import { PaywallModal } from "@/components/premium/PaywallModal";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { hapticsLight, hapticsMedium, hapticsHeavy } from "@/lib/mobile";
 
 
 
@@ -853,6 +854,7 @@ export default function DiscoverPage() {
                               <div className="flex gap-2 p-2 bg-muted/20 border-t border-border/30 justify-center">
                                 <Button size="icon" variant="ghost" className="h-9 w-9 rounded-full bg-card hover:bg-destructive/10 hover:text-destructive border border-border/30 shadow-sm" aria-label={`Descartar a ${p.displayName || ''}`} disabled={pendingGridActions.has(p.id)} onClick={async () => {
                                   if (pendingGridActions.has(p.id)) return;
+                                  hapticsLight();
                                   if (swipeCount >= SWIPE_LIMIT) {
                                     toast({ title: "¡Tómate un respiro!", description: "Has visto muchos perfiles. Vuelve en un momento.", variant: "default" });
                                     return;
@@ -874,6 +876,7 @@ export default function DiscoverPage() {
                                 </Button>
                                 <Button size="icon" variant="ghost" className="h-9 w-9 rounded-full bg-card hover:bg-amber-500/10 hover:text-amber-600 border border-border/30 shadow-sm" aria-label={`Flechado a ${p.displayName || ''}`} disabled={pendingGridActions.has(p.id)} onClick={async () => {
                                   if (pendingGridActions.has(p.id)) return;
+                                  hapticsHeavy();
                                   if (swipeCount >= SWIPE_LIMIT) {
                                     toast({ title: "¡Tómate un respiro!", description: "Has visto muchos perfiles. Vuelve en un momento.", variant: "default" });
                                     return;
@@ -904,6 +907,7 @@ export default function DiscoverPage() {
                                 </Button>
                                 <Button size="icon" variant="ghost" className="h-9 w-9 rounded-full bg-card hover:bg-primary/10 hover:text-primary border border-border/30 shadow-sm" aria-label={`Dar like a ${p.displayName || ''}`} disabled={pendingGridActions.has(p.id)} onClick={async () => {
                                   if (pendingGridActions.has(p.id)) return;
+                                  hapticsMedium();
                                   if (swipeCount >= SWIPE_LIMIT) {
                                     toast({ title: "¡Tómate un respiro!", description: "Has visto muchos perfiles. Vuelve en un momento.", variant: "default" });
                                     return;

@@ -125,7 +125,7 @@ export default function MatchesPage() {
                                     </span>
                                 </div>
                                 <p className="text-xs text-muted-foreground mb-3">Da like para crear una conexión</p>
-                                <div className="flex gap-4 overflow-x-auto pb-3 -mx-4 px-4 snap-x scrollbar-hide">
+                                <div className="flex gap-4 overflow-x-auto pb-3 -mx-4 px-4 snap-x snap-mandatory scroll-smooth overscroll-x-contain scrollbar-hide">
                                     <AnimatePresence>
                                         {newMatches.map((match, i) => (
                                             <motion.div

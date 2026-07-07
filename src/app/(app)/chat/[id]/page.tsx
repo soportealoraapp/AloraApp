@@ -31,6 +31,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { ReportDialog } from "@/components/safety/ReportDialog";
 import { BlockDialog } from "@/components/safety/BlockDialog";
 import { SafeImage } from "@/components/ui/safe-image";
+import { hapticsLight } from "@/lib/mobile";
 
 export default function ChatWindowPage() {
     const params = useParams();
@@ -232,6 +233,7 @@ export default function ChatWindowPage() {
 
     const handleSendMessage = async (text: string) => {
         if (!otherUserId) return;
+        hapticsLight();
         try {
             await sendMessage(text, otherUserId);
 
@@ -261,6 +263,7 @@ export default function ChatWindowPage() {
 
     const handleSendImage = async (imageUrl: string) => {
         if (!otherUserId || !user) return;
+        hapticsLight();
         const optimisticId = crypto.randomUUID();
         const optimisticMsg: Message = {
             id: optimisticId,
@@ -299,6 +302,7 @@ export default function ChatWindowPage() {
 
     const handleSendVoice = async (audioUrl: string, duration: number) => {
         if (!otherUserId || !user) return;
+        hapticsLight();
         const optimisticId = crypto.randomUUID();
         const optimisticMsg: any = {
             id: optimisticId,
