@@ -8,6 +8,8 @@ import { usePathname } from 'next/navigation';
 import { Loader2 } from 'lucide-react';
 import { useCapacitor } from '@/hooks/use-capacitor';
 import { useEdgeSwipeBack } from '@/hooks/use-edge-swipe-back';
+import { AnimatePresence } from 'framer-motion';
+import { PageTransition } from '@/components/layout/page-transition';
 
 function PageFallback() {
   return (
@@ -38,7 +40,11 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       >
         <ErrorBoundary>
           <Suspense fallback={<PageFallback />}>
-            {children}
+            <AnimatePresence mode="wait">
+              <PageTransition>
+                {children}
+              </PageTransition>
+            </AnimatePresence>
           </Suspense>
         </ErrorBoundary>
       </main>
