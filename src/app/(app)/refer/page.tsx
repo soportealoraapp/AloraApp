@@ -63,9 +63,9 @@ export default function ReferPage() {
                 <Button variant="ghost" size="icon" onClick={() => router.back()} aria-label="Volver">
                     <ArrowLeft className="h-5 w-5" />
                 </Button>
-                <h1 className="text-xl font-semibold md:text-2xl font-headline">Recomienda y Gana</h1>
+                <h1 className="font-headline text-xl font-bold text-gradient md:text-2xl">Recomienda y Gana</h1>
             </header>
-            <main className="p-4 space-y-6">
+            <main className="app-page-content-narrow">
                 <Card className="text-center">
                     <CardHeader>
                         <div className="mx-auto bg-primary/10 rounded-full h-20 w-20 flex items-center justify-center mb-4">
@@ -109,7 +109,7 @@ export default function ReferPage() {
                             </Button>
                         </div>
 
-                        <div className="bg-muted/50 rounded-2xl p-4 space-y-3 text-left">
+                        <div className="surface-soft p-4 space-y-3 text-left">
                             <h4 className="font-bold text-sm flex items-center gap-2">
                                 <Users className="h-4 w-4 text-primary" /> ¿Cómo funciona?
                             </h4>

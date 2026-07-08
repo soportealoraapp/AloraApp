@@ -325,7 +325,7 @@ export default function ProfileEditPage() {
                 <header className="app-page-header gap-4 sm:px-6">
                     <Skeleton className="h-8 w-48" />
                 </header>
-                <main className="p-4 space-y-4">
+                <main className="app-page-content-narrow space-y-4">
                     {[1, 2, 3].map(i => <Skeleton key={i} className="h-32 rounded-lg" />)}
                 </main>
             </div>
@@ -353,7 +353,7 @@ export default function ProfileEditPage() {
                 <Button variant="ghost" size="icon" onClick={goBack} aria-label="Volver">
                     <ArrowLeft className="h-5 w-5" />
                 </Button>
-                <h1 className="text-xl font-semibold md:text-2xl font-headline">Editar Perfil</h1>
+                <h1 className="font-headline text-xl font-bold text-gradient md:text-2xl">Editar Perfil</h1>
                 <Button onClick={handleSave} disabled={loading} className="ml-auto">
                     {loading ? (
                         <>
@@ -366,7 +366,7 @@ export default function ProfileEditPage() {
                 </Button>
             </header>
 
-            <main className="p-4 space-y-6 pb-24">
+            <main className="app-page-content space-y-6 pb-24">
                 <Card>
                     <CardHeader>
                         <CardTitle>Fotos ({photos.length}/6)</CardTitle>

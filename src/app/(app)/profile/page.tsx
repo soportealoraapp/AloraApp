@@ -208,13 +208,13 @@ export default function ProfilePage() {
         {/* Stats — with gradient separators */}
         {hasStats && (
           <div
-            className="grid grid-cols-3 gap-0 mx-4 -mt-1 rounded-2xl overflow-hidden border border-border/40 mb-4"
+            className="mx-4 mb-4 -mt-1 grid auto-cols-fr grid-flow-col gap-0 overflow-hidden rounded-2xl border border-border/40"
             style={{
               background: 'linear-gradient(135deg, hsl(335 85% 76% / 0.06) 0%, hsl(280 60% 70% / 0.04) 100%)',
             }}
           >
             {profileStats.likesReceived > 0 && (
-              <Link href="/matches" className="text-center py-4 hover:bg-primary/5 transition-colors border-r border-border/40">
+              <Link href="/matches" className="border-r border-border/40 px-2 py-4 text-center transition-colors hover:bg-primary/5 last:border-r-0">
                 <div className="flex items-center justify-center gap-1.5 mb-0.5">
                   <Heart className="h-3.5 w-3.5 text-primary" />
                   <p className="text-xl font-bold text-gradient">{profileStats.likesReceived}</p>
@@ -223,7 +223,7 @@ export default function ProfilePage() {
               </Link>
             )}
             {profileStats.matchesCount > 0 && (
-              <Link href="/matches" className="text-center py-4 hover:bg-primary/5 transition-colors border-r border-border/40">
+              <Link href="/matches" className="border-r border-border/40 px-2 py-4 text-center transition-colors hover:bg-primary/5 last:border-r-0">
                 <div className="flex items-center justify-center gap-1.5 mb-0.5">
                   <Users className="h-3.5 w-3.5 text-primary" />
                   <p className="text-xl font-bold text-gradient">{profileStats.matchesCount}</p>
@@ -232,7 +232,7 @@ export default function ProfilePage() {
               </Link>
             )}
             {profileStats.profileViews > 0 && (
-              <Link href="/profile/visitors" className="text-center py-4 hover:bg-primary/5 transition-colors">
+              <Link href="/profile/visitors" className="px-2 py-4 text-center transition-colors hover:bg-primary/5">
                 <div className="flex items-center justify-center gap-1.5 mb-0.5">
                   <BarChart2 className="h-3.5 w-3.5 text-primary" />
                   <p className="text-xl font-bold text-gradient">{profileStats.profileViews}</p>
@@ -243,7 +243,7 @@ export default function ProfilePage() {
           </div>
         )}
 
-        <div className="p-4 space-y-5">
+        <div className="app-page-content space-y-5">
           {/* 2. Name + badges + bio */}
           <div className="space-y-3">
             <div className="flex items-center gap-2 flex-wrap">
@@ -344,7 +344,7 @@ export default function ProfilePage() {
 
           {/* 5. Interests / Values / Music */}
           {((profile.interests && profile.interests.length > 0) || (profile.values && profile.values.length > 0) || (profile.musicGenres && profile.musicGenres.length > 0)) && (
-            <Card className="rounded-2xl border border-border/50 bg-card shadow-sm">
+            <Card className="app-prose-section rounded-2xl">
               <CardContent className="p-5 space-y-5">
                 {profile.interests && profile.interests.length > 0 && (
                   <div>
@@ -468,7 +468,7 @@ export default function ProfilePage() {
           )}
 
           {/* 8. Quick links */}
-          <div className="rounded-2xl border border-border/50 bg-card shadow-sm overflow-hidden">
+          <div className="app-prose-section rounded-2xl overflow-hidden">
             {[
               { href: '/profile/favorites', label: 'Perfiles guardados' },
               { href: '/profile/trust', label: 'Score de confianza' },

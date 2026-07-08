@@ -211,7 +211,7 @@ export default function PrivacySettingsPage() {
                 <header className="app-page-header gap-4 sm:px-6">
                     <Skeleton className="h-8 w-48" />
                 </header>
-                <main className="p-4 space-y-4">
+                <main className="app-page-content-narrow space-y-4">
                     {[1, 2, 3].map(i => <Skeleton key={i} className="h-24 rounded-lg" />)}
                 </main>
             </div>
@@ -219,17 +219,17 @@ export default function PrivacySettingsPage() {
     }
 
     return (
-        <div className="h-dvh overflow-y-auto">
+        <div className="app-page-shell">
             <header className="app-page-header gap-4 sm:px-6">
                 <Button variant="ghost" size="icon" onClick={() => router.back()} aria-label="Volver">
                     <ArrowLeft className="h-5 w-5" />
                 </Button>
-                <h1 className="text-xl font-semibold md:text-2xl font-headline">
+                <h1 className="font-headline text-xl font-bold text-gradient md:text-2xl">
                     Privacidad y Seguridad
                 </h1>
             </header>
 
-            <main className="p-4 space-y-6">
+            <main className="app-page-content-narrow space-y-6">
                 <Card>
                     <CardHeader>
                         <CardTitle className="flex items-center gap-2">

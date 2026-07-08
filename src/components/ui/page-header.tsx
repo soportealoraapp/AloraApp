@@ -11,13 +11,13 @@ interface PageHeaderProps {
 
 export function PageHeader({ title, onBack, rightAction, className }: PageHeaderProps) {
     return (
-        <header className={cn("sticky top-0 z-30 flex h-16 items-center gap-4 border-b bg-background/80 px-4 backdrop-blur-sm sm:px-6 pt-safe", className)}>
+        <header className={cn("app-page-header gap-4 sm:px-6", className)}>
             {onBack && (
                 <Button variant="ghost" size="icon" onClick={onBack} aria-label="Volver">
                     <ArrowLeft className="h-5 w-5" />
                 </Button>
             )}
-            <h1 className="text-xl font-semibold md:text-2xl font-headline flex-1 min-w-0">{title}</h1>
+            <h1 className="min-w-0 flex-1 truncate font-headline text-xl font-bold text-gradient md:text-2xl">{title}</h1>
             {rightAction}
         </header>
     );

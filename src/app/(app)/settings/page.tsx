@@ -31,7 +31,7 @@ export default function SettingsPage() {
 
     if (!user) {
         return (
-            <div className="min-h-dvh bg-background flex items-center justify-center">
+            <div className="app-page-shell items-center justify-center">
                 <Loader2 className="h-6 w-6 animate-spin text-primary" />
             </div>
         );
@@ -54,7 +54,7 @@ export default function SettingsPage() {
     };
 
     return (
-        <div className="min-h-dvh bg-background">
+        <div className="app-page-shell">
             {/* Header */}
             <header className="app-page-header gap-4"
                 style={{ borderBottomColor: 'hsl(var(--border) / 0.5)' }}
@@ -72,9 +72,9 @@ export default function SettingsPage() {
                 </div>
             </header>
 
-            <main className="mx-auto max-w-3xl space-y-5 px-4 py-4 sm:px-6 sm:py-5">
+            <main className="app-page-content">
                 {/* Cuenta */}
-                <Card className="border-border/40 bg-card/60 shadow-sm rounded-3xl overflow-hidden backdrop-blur-sm">
+                <Card className="app-prose-section rounded-3xl overflow-hidden">
                     <CardHeader className="pb-3 border-b border-border/30 bg-muted/20">
                         <CardTitle className="text-base font-bold flex items-center gap-2">
                             <span className="h-1.5 w-3 rounded-full bg-primary" />
@@ -123,7 +123,7 @@ export default function SettingsPage() {
                 </Card>
 
                 {/* Apariencia */}
-                <Card className="border-border/40 bg-card/60 shadow-sm rounded-3xl overflow-hidden backdrop-blur-sm">
+                <Card className="app-prose-section rounded-3xl overflow-hidden">
                     <CardHeader className="pb-3 border-b border-border/30 bg-muted/20">
                         <CardTitle className="text-base font-bold flex items-center gap-2">
                             <span className="h-1.5 w-3 rounded-full bg-violet-400" />
@@ -148,7 +148,7 @@ export default function SettingsPage() {
                 </Card>
 
                 {/* Soporte y Legal */}
-                <Card className="border-border/40 bg-card/60 shadow-sm rounded-3xl overflow-hidden backdrop-blur-sm">
+                <Card className="app-prose-section rounded-3xl overflow-hidden">
                     <CardHeader className="pb-3 border-b border-border/30 bg-muted/20">
                         <CardTitle className="text-base font-bold flex items-center gap-2">
                             <span className="h-1.5 w-3 rounded-full bg-amber-400" />

@@ -251,11 +251,11 @@ export default function NotificationsPage() {
 
   if (loading) {
     return (
-      <div className="min-h-dvh">
+      <div className="app-page-shell">
         <header className="app-page-header justify-between">
           <Skeleton className="h-6 w-32" />
         </header>
-        <main className="max-w-xl mx-auto p-4 space-y-4">
+        <main className="app-page-content-narrow">
           {[1, 2, 3, 4, 5].map(i => (
             <div key={i} className="flex gap-4 items-center">
               <Skeleton className="h-2 w-2 rounded-full" />
@@ -276,7 +276,7 @@ export default function NotificationsPage() {
   return (
     <div
       ref={containerRef}
-      className="min-h-dvh bg-background pb-20 md:pb-0 md:ml-60"
+      className="app-page-shell"
       onTouchStart={handleTouchStart}
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
@@ -288,7 +288,7 @@ export default function NotificationsPage() {
       )}
       
       {/* Header */}
-      <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b bg-background/90 px-4 backdrop-blur-md pt-safe"
+      <header className="app-page-header justify-between"
         style={{ borderBottomColor: 'hsl(var(--border) / 0.5)' }}
       >
         <div>
@@ -301,7 +301,7 @@ export default function NotificationsPage() {
         )}
       </header>
 
-      <main className="max-w-xl mx-auto">
+      <main className="app-page-content-narrow !space-y-0 !px-0 !py-0">
         {error && notifications.length === 0 && (
           <Alert variant="destructive" className="mx-4 mt-4 rounded-2xl">
             <AlertDescription className="flex items-center justify-between">

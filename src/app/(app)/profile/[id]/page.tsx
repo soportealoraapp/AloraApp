@@ -122,7 +122,7 @@ export default function UserProfilePage() {
 
     if (!profile) {
         return (
-            <div className="h-screen flex items-center justify-center">
+            <div className="app-page-shell items-center justify-center">
                 <div className="text-center">
                     <p className="text-muted-foreground mb-4">Perfil no encontrado</p>
                     <Button onClick={() => goBack()}>Volver</Button>
@@ -250,7 +250,7 @@ export default function UserProfilePage() {
                     <ArrowLeft className="h-5 w-5" />
                 </Button>
                 <div className="flex items-center gap-2">
-                    <h1 className="text-xl font-semibold md:text-2xl font-headline">
+                    <h1 className="font-headline text-xl font-bold text-gradient md:text-2xl">
                         {profile.displayName}
                     </h1>
                     {profile.isVerified && <TrustBadge type="verified" />}
@@ -295,10 +295,10 @@ export default function UserProfilePage() {
                     )}
                 </div>
 
-                <div className="p-4 space-y-6">
+                <div className="app-page-content space-y-6">
                     {/* Compatibility Score Hero */}
                     {compatibility && (
-                        <Card className="rounded-2xl border border-primary/20 bg-gradient-to-br from-primary/5 to-transparent">
+                        <Card className="app-prose-section rounded-2xl border-primary/20 bg-gradient-to-br from-primary/5 to-transparent">
                             <CardContent className="p-5">
                                 <div className="flex items-center justify-between mb-3">
                                     <div className="flex items-center gap-2">
@@ -346,7 +346,7 @@ export default function UserProfilePage() {
                     </div>
 
                     {profile.latestAnswer?.question && profile.latestAnswer?.answer && (
-                        <Card className="rounded-2xl border border-primary/10 bg-primary/5">
+                        <Card className="app-prose-section rounded-2xl border-primary/10 bg-primary/5">
                             <CardContent className="p-5">
                                 <div className="flex items-center gap-2 mb-2">
                                     <MessageSquare className="h-4 w-4 text-primary" />
@@ -362,7 +362,7 @@ export default function UserProfilePage() {
                     )}
 
                     {profile.voiceIntro && (
-                        <Card className="rounded-2xl border border-border/60 bg-card/90 shadow-sm overflow-hidden">
+                        <Card className="app-prose-section rounded-2xl overflow-hidden">
                             <CardContent className="p-5">
                                 <div className="flex items-center gap-2 mb-3">
                                     <Mic className="h-4 w-4 text-primary" />

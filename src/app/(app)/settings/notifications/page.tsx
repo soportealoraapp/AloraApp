@@ -75,14 +75,14 @@ export default function NotificationsPage() {
 
     if (loading) {
         return (
-            <div className="h-dvh overflow-y-auto">
+            <div className="app-page-shell">
                 <header className="app-page-header gap-4 sm:px-6">
                     <Button variant="ghost" size="icon" onClick={() => router.back()} aria-label="Volver">
                         <ArrowLeft className="h-5 w-5" />
                     </Button>
-                    <h1 className="text-xl font-semibold md:text-2xl font-headline">Notificaciones</h1>
+                    <h1 className="font-headline text-xl font-bold text-gradient md:text-2xl">Notificaciones</h1>
                 </header>
-                <main className="p-4">
+                <main className="app-page-content-narrow">
                     <Card>
                         <CardHeader>
                             <Skeleton className="h-5 w-40" />
@@ -107,14 +107,14 @@ export default function NotificationsPage() {
 
     if (error) {
         return (
-            <div className="h-dvh overflow-y-auto">
+            <div className="app-page-shell">
                 <header className="app-page-header gap-4 sm:px-6">
                     <Button variant="ghost" size="icon" onClick={() => router.back()} aria-label="Volver">
                         <ArrowLeft className="h-5 w-5" />
                     </Button>
-                    <h1 className="text-xl font-semibold md:text-2xl font-headline">Notificaciones</h1>
+                    <h1 className="font-headline text-xl font-bold text-gradient md:text-2xl">Notificaciones</h1>
                 </header>
-                <main className="p-4">
+                <main className="app-page-content-narrow">
                     <Card>
                         <CardContent className="flex flex-col items-center justify-center py-12">
                             <AlertCircle className="h-12 w-12 text-destructive mb-4" />
@@ -147,20 +147,20 @@ export default function NotificationsPage() {
     ];
 
         return (
-            <div className="h-dvh overflow-y-auto">
+            <div className="app-page-shell">
                 <header className="app-page-header gap-4 sm:px-6">
                 <Button variant="ghost" size="icon" onClick={() => router.back()} aria-label="Volver">
                     <ArrowLeft className="h-5 w-5" />
                 </Button>
-                <h1 className="text-xl font-semibold md:text-2xl font-headline">Notificaciones</h1>
+                <h1 className="font-headline text-xl font-bold text-gradient md:text-2xl">Notificaciones</h1>
             </header>
-            <main className="p-4">
+            <main className="app-page-content-narrow">
                 <Card>
                     <CardHeader>
                         <CardTitle>Notificaciones Push</CardTitle>
                         <CardDescription>Elige cómo quieres que te notifiquemos.</CardDescription>
                     </CardHeader>
-                    <CardContent className="space-y-4 divide-y">
+                    <CardContent className="space-y-4 divide-y divide-border/20">
                         {settings.map(setting => (
                             <div key={setting.key} className="flex items-center justify-between pt-4 first:pt-0">
                                 <div className="flex-grow">

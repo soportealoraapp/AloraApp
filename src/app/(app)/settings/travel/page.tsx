@@ -127,14 +127,14 @@ export default function TravelModePage() {
 
     if (loading) {
         return (
-            <div className="h-dvh overflow-y-auto bg-muted/50">
-                <div className="p-6 space-y-6">
+            <div className="app-page-shell bg-muted/50">
+                <div className="app-page-content space-y-6">
                     <div className="flex items-center gap-4">
                         <Button variant="ghost" size="icon" onClick={() => router.back()} aria-label="Volver">
                             <ArrowLeft className="h-5 w-5" />
                         </Button>
                         <div className="flex-1">
-                            <h1 className="text-2xl font-bold">Modo Viaje</h1>
+                            <h1 className="font-headline text-2xl font-bold text-gradient">Modo Viaje</h1>
                             <p className="text-sm text-muted-foreground">Explora personas en otra ciudad</p>
                         </div>
                     </div>
@@ -148,14 +148,14 @@ export default function TravelModePage() {
 
     if (error) {
         return (
-            <div className="h-dvh overflow-y-auto bg-muted/50">
-                <div className="p-6 space-y-6">
+            <div className="app-page-shell bg-muted/50">
+                <div className="app-page-content space-y-6">
                     <div className="flex items-center gap-4">
                         <Button variant="ghost" size="icon" onClick={() => router.back()} aria-label="Volver">
                             <ArrowLeft className="h-5 w-5" />
                         </Button>
                         <div className="flex-1">
-                            <h1 className="text-2xl font-bold">Modo Viaje</h1>
+                            <h1 className="font-headline text-2xl font-bold text-gradient">Modo Viaje</h1>
                             <p className="text-sm text-muted-foreground">Explora personas en otra ciudad</p>
                         </div>
                     </div>
@@ -181,15 +181,15 @@ export default function TravelModePage() {
     }
 
     return (
-        <div className="h-dvh overflow-y-auto bg-muted/50">
-            <div className="p-6 space-y-6">
+        <div className="app-page-shell bg-muted/50">
+            <div className="app-page-content space-y-6">
             <div className="flex items-center gap-4">
                 <Button variant="ghost" size="icon" onClick={() => router.back()} aria-label="Volver">
                     <ArrowLeft className="h-5 w-5" />
                 </Button>
                 <div className="flex-1">
                     <div className="flex items-center gap-2">
-                        <h1 className="text-2xl font-bold">Modo Viaje</h1>
+                        <h1 className="font-headline text-2xl font-bold text-gradient">Modo Viaje</h1>
                         <PlusBadge label="Beneficio Plus" />
                     </div>
                     <p className="text-sm text-muted-foreground">Explora personas en otra ciudad</p>
