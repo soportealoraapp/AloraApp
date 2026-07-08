@@ -215,7 +215,7 @@ export default function ChatPage() {
     if (loading && matches.length === 0) {
         return (
             <div className="animate-in fade-in duration-500">
-                <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b bg-background/80 px-4 backdrop-blur-sm sm:px-6 pt-safe">
+                <header className="app-page-header gap-4 sm:px-6">
                     <h1 className="text-xl font-headline font-bold text-gradient">Conversaciones</h1>
                 </header>
                 <main className="p-4 space-y-4">
@@ -242,7 +242,7 @@ export default function ChatPage() {
                 </div>
             )}
 
-            <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b bg-background/90 px-4 backdrop-blur-md sm:px-6 pt-safe glass">
+            <header className="app-page-header gap-4 sm:px-6 glass">
                 <div
                     className="absolute top-0 left-0 right-0 h-px"
                     style={{ background: 'linear-gradient(90deg, transparent, hsl(335 85% 76% / 0.5), hsl(280 60% 70% / 0.5), transparent)' }}

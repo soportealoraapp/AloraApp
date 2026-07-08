@@ -68,10 +68,10 @@ export default function SupportPage() {
     };
 
     return (
-        <div className="min-h-dvh flex flex-col overflow-y-auto bg-gradient-to-br from-background to-muted/30">
+        <div className="app-page-shell bg-gradient-to-br from-background to-muted/30">
             <PageHeader title="Centro de Ayuda" onBack={() => { if (window.history.length > 1) router.back(); else router.push('/'); }} />
 
-            <main className="max-w-lg mx-auto p-6 space-y-6">
+            <main className="app-page-content-narrow">
                 {faqSections.map((section) => {
                     const Icon = section.icon;
                     return (

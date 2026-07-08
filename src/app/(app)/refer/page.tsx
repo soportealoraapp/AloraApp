@@ -59,7 +59,7 @@ export default function ReferPage() {
 
     return (
         <div>
-            <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b bg-background/80 px-4 backdrop-blur-sm sm:px-6 pt-safe">
+            <header className="app-page-header gap-4 sm:px-6">
                 <Button variant="ghost" size="icon" onClick={() => router.back()} aria-label="Volver">
                     <ArrowLeft className="h-5 w-5" />
                 </Button>

@@ -107,7 +107,7 @@ export default function UserProfilePage() {
     if (loading) {
         return (
             <div>
-                <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b bg-background/80 px-4 backdrop-blur-sm sm:px-6 pt-safe">
+                <header className="app-page-header gap-4 sm:px-6">
                     <Skeleton className="h-8 w-48" />
                 </header>
                 <main className="pb-24 md:pb-4">
@@ -245,7 +245,7 @@ export default function UserProfilePage() {
 
     return (
         <div>
-            <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b bg-background/80 px-4 backdrop-blur-sm sm:px-6 pt-safe">
+            <header className="app-page-header gap-4 sm:px-6">
                 <Button variant="ghost" size="icon" onClick={() => goBack()} aria-label="Volver">
                     <ArrowLeft className="h-5 w-5" />
                 </Button>

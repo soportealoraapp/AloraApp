@@ -9,10 +9,10 @@ export default function PrivacyPage() {
     const goBack = () => { if (window.history.length > 1) router.back(); else router.push('/'); };
 
     return (
-        <div className="min-h-dvh flex flex-col overflow-y-auto bg-background">
+        <div className="app-page-shell">
             <PageHeader title="Política de Privacidad" onBack={goBack} />
 
-            <main className="max-w-3xl mx-auto p-6 space-y-6 w-full">
+            <main className="app-page-content-wide">
                 <p className="text-sm text-muted-foreground">Última actualización: 3 de junio de 2026</p>
 
                 <section className="space-y-4">

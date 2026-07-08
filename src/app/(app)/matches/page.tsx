@@ -64,7 +64,7 @@ export default function MatchesPage() {
             )}
 
             {/* Sticky Glass Header */}
-            <header className="sticky top-0 z-30 flex h-16 items-center border-b bg-background/90 px-4 backdrop-blur-md pt-safe glass">
+            <header className="app-page-header justify-between glass">
                 <div
                     className="absolute top-0 left-0 right-0 h-px"
                     style={{ background: 'linear-gradient(90deg, transparent, hsl(335 85% 76% / 0.5), hsl(280 60% 70% / 0.5), transparent)' }}

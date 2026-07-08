@@ -322,7 +322,7 @@ export default function ProfileEditPage() {
     if (!currentProfile) {
         return (
             <div>
-                <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b bg-background/80 px-4 backdrop-blur-sm sm:px-6 pt-safe">
+                <header className="app-page-header gap-4 sm:px-6">
                     <Skeleton className="h-8 w-48" />
                 </header>
                 <main className="p-4 space-y-4">
@@ -349,7 +349,7 @@ export default function ProfileEditPage() {
 
     return (
         <div onTouchStart={handleTouchStart} onTouchEnd={handleTouchEnd}>
-            <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b bg-background/80 px-4 backdrop-blur-sm sm:px-6 pt-safe">
+            <header className="app-page-header gap-4 sm:px-6">
                 <Button variant="ghost" size="icon" onClick={goBack} aria-label="Volver">
                     <ArrowLeft className="h-5 w-5" />
                 </Button>

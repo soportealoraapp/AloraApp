@@ -174,6 +174,31 @@ html {
 }
 
 @layer utilities {
+  .app-page-shell {
+    @apply min-h-dvh flex flex-col overflow-y-auto bg-background;
+  }
+
+  .app-page-header {
+    @apply sticky top-0 z-30 flex h-16 items-center border-b bg-background/90 px-4 pt-safe backdrop-blur-md;
+    border-bottom-color: hsl(var(--border) / 0.5);
+  }
+
+  .app-page-content {
+    @apply mx-auto w-full max-w-3xl px-4 py-4 space-y-5 sm:px-6 sm:py-5;
+  }
+
+  .app-page-content-narrow {
+    @apply mx-auto w-full max-w-lg px-4 py-4 space-y-5 sm:px-6 sm:py-5;
+  }
+
+  .app-page-content-wide {
+    @apply mx-auto w-full max-w-4xl px-4 py-4 space-y-6 sm:px-6 sm:py-6;
+  }
+
+  .app-prose-section {
+    @apply rounded-3xl border border-border/40 bg-card/70 p-5 shadow-sm backdrop-blur-sm;
+  }
+
   /* ── Glass morphism ── */
   .glass {
     @apply bg-card/90 backdrop-blur-md border border-border/20 shadow-xl;

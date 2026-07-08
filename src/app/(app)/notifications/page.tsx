@@ -252,7 +252,7 @@ export default function NotificationsPage() {
   if (loading) {
     return (
       <div className="min-h-dvh">
-        <header className="sticky top-0 z-30 flex h-16 items-center border-b bg-background/90 px-4 backdrop-blur-md pt-safe">
+        <header className="app-page-header justify-between">
           <Skeleton className="h-6 w-32" />
         </header>
         <main className="max-w-xl mx-auto p-4 space-y-4">

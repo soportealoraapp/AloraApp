@@ -31,7 +31,7 @@ export function DiscoverHeader({
   maxRewinds
 }: DiscoverHeaderProps) {
   return (
-    <header className="sticky top-0 z-30 flex h-16 items-center justify-between px-4 backdrop-blur-md border-b bg-background/90 pt-safe glass" style={{ borderBottomColor: 'hsl(var(--border) / 0.5)' }}>
+    <header className="app-page-header justify-between glass" style={{ borderBottomColor: 'hsl(var(--border) / 0.5)' }}>
       {/* Visual Accent */}
       <div
         className="absolute top-0 left-0 right-0 h-px"

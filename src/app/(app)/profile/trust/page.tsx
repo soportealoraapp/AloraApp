@@ -76,7 +76,7 @@ export default function TrustPage() {
 
     return (
         <div className="bg-background min-h-dvh">
-            <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b bg-background/80 px-4 backdrop-blur-sm pt-safe">
+            <header className="app-page-header gap-4">
                 <Button variant="ghost" size="icon" onClick={() => router.back()} aria-label="Volver">
                     <ArrowLeft className="h-5 w-5" />
                 </Button>

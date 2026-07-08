@@ -85,7 +85,7 @@ export default function ProfilePage() {
   if (loading) {
     return (
       <div>
-        <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b bg-background/80 px-4 backdrop-blur-sm sm:px-6 pt-safe">
+        <header className="app-page-header gap-4 sm:px-6">
           <Skeleton className="h-8 w-32" />
         </header>
         <main className="pb-24 md:pb-4">
@@ -101,7 +101,7 @@ export default function ProfilePage() {
   if (!profile) {
     return (
       <div>
-        <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b bg-background/80 px-4 backdrop-blur-sm sm:px-6 pt-safe">
+        <header className="app-page-header gap-4 sm:px-6">
           <h1 className="text-xl font-bold md:text-2xl text-foreground">Mi Perfil</h1>
         </header>
         <main className="pb-24 md:pb-4 flex flex-col items-center justify-center min-h-[60vh] gap-4 px-4 text-center">
@@ -130,7 +130,7 @@ export default function ProfilePage() {
   return (
     <div>
       {/* Header */}
-      <header className="sticky top-0 z-30 flex h-16 items-center gap-2 border-b bg-background/90 px-3 backdrop-blur-md sm:px-6 pt-safe"
+      <header className="app-page-header gap-2 px-3 sm:px-6"
         style={{ borderBottomColor: 'hsl(var(--border) / 0.5)' }}
       >
         <h1 className="text-xl font-headline font-bold text-gradient shrink-0">Mi Perfil</h1>

@@ -56,7 +56,7 @@ export default function SettingsPage() {
     return (
         <div className="min-h-dvh bg-background">
             {/* Header */}
-            <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b bg-background/90 px-4 backdrop-blur-md pt-safe"
+            <header className="app-page-header gap-4"
                 style={{ borderBottomColor: 'hsl(var(--border) / 0.5)' }}
             >
                 {/* Gradient top border accent */}
