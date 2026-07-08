@@ -230,7 +230,7 @@ export default function ChatPage() {
     return (
         <div 
             ref={containerRef}
-            className="min-h-dvh flex flex-col overflow-y-auto bg-background"
+            className="flex min-h-dvh flex-col overflow-y-auto bg-background"
             onTouchStart={handleTouchStart}
             onTouchMove={handleTouchMove}
             onTouchEnd={handleTouchEnd}
@@ -250,7 +250,7 @@ export default function ChatPage() {
                 <h1 className="text-xl font-headline font-bold text-gradient">Conversaciones</h1>
             </header>
 
-            <main className="p-4 space-y-6 flex-1">
+            <main className="mx-auto flex-1 w-full max-w-3xl space-y-5 px-4 py-4 md:px-6 md:py-5">
                 <div className="relative group">
                     <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground group-focus-within:text-primary transition-colors" />
                     <Input
@@ -346,7 +346,7 @@ export default function ChatPage() {
                         </TabsTrigger>
                     </TabsList>
 
-                    <TabsContent value="conversations" className="space-y-3 mt-4 animate-in fade-in duration-300">
+                    <TabsContent value="conversations" className="mt-4 space-y-3 animate-in fade-in duration-300">
                         {filteredMatches.length === 0 ? (
                             <Card className="rounded-3xl border border-dashed bg-muted/10 py-12">
                                 <CardContent className="flex flex-col items-center justify-center">
@@ -486,7 +486,7 @@ export default function ChatPage() {
                         )}
                     </TabsContent>
 
-                    <TabsContent value="new" className="space-y-6 mt-4 animate-in fade-in duration-300">
+                    <TabsContent value="new" className="mt-4 space-y-5 animate-in fade-in duration-300">
                         <LikesReceivedList />
 
                         <div className="pt-6 border-t border-border/40">

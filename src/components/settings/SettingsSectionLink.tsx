@@ -23,8 +23,8 @@ export function SettingsSectionLink({
   bubbleBg = "bg-primary/10 border-primary/20 text-primary",
 }: SettingsSectionLinkProps) {
   return (
-    <Link href={href} className="block group">
-      <div className="flex items-center justify-between rounded-2xl px-4 py-3.5 transition-all duration-200 hover:bg-secondary/40 active:scale-[0.99]">
+    <Link href={href} className="group block">
+      <div className="flex items-center justify-between rounded-2xl px-4 py-4 transition-all duration-200 hover:bg-secondary/40 active:scale-[0.99]">
         <div className="flex min-w-0 items-center gap-3.5">
           {/* Styled Icon Bubble */}
           <div className={cn(
@@ -38,7 +38,7 @@ export function SettingsSectionLink({
           </div>
           <div className="min-w-0">
             <p className="truncate text-sm font-semibold text-foreground group-hover:text-primary transition-colors">{label}</p>
-            {description ? <p className="truncate text-xs text-muted-foreground/80 mt-0.5">{description}</p> : null}
+            {description ? <p className="mt-0.5 line-clamp-2 text-xs text-muted-foreground/80">{description}</p> : null}
           </div>
         </div>
         <div className="ml-2 flex shrink-0 items-center gap-2">

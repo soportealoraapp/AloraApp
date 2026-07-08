@@ -8,7 +8,7 @@ export default function AuthLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="flex min-h-dvh flex-col items-center justify-center bg-background p-4 relative overflow-hidden">
+    <div className="relative flex min-h-dvh flex-col items-center justify-start overflow-hidden bg-background px-4 pb-6 pt-[max(1rem,env(safe-area-inset-top))] md:justify-center md:p-4">
       {/* Decorative background blobs */}
       <div
         className="pointer-events-none absolute top-0 left-0 w-[500px] h-[500px] opacity-70"
@@ -51,7 +51,7 @@ export default function AuthLayout({
       </div>
 
       {/* Main content */}
-      <main className="w-full max-w-md relative z-10">
+      <main className="relative z-10 w-full max-w-md flex-1 pt-20 md:flex-none md:pt-0">
         {children}
       </main>
     </div>

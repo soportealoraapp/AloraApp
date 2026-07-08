@@ -51,7 +51,7 @@ export default function MatchesPage() {
     return (
         <div
             ref={containerRef}
-            className="min-h-dvh bg-background pb-20 md:pb-0 md:ml-60 flex flex-col overflow-y-auto"
+            className="flex min-h-dvh flex-col overflow-y-auto bg-background"
             onTouchStart={handleTouchStart}
             onTouchMove={handleTouchMove}
             onTouchEnd={handleTouchEnd}
@@ -87,7 +87,7 @@ export default function MatchesPage() {
                 </div>
             </header>
 
-            <main className="max-w-lg mx-auto w-full px-4 py-6 space-y-8 flex-1">
+            <main className="mx-auto flex-1 w-full max-w-2xl space-y-8 px-4 py-5 md:px-6 md:py-6">
                 {error && matches.length === 0 && (
                     <Alert variant="destructive" className="rounded-2xl border-none bg-destructive/10 text-destructive animate-in slide-in-from-top-2">
                         <AlertDescription className="flex items-center justify-between font-medium">
@@ -218,7 +218,7 @@ export default function MatchesPage() {
                                     </div>
                                 </div>
                             ) : (
-                                <div className="grid grid-cols-2 gap-4">
+                                <div className="grid grid-cols-2 gap-3 sm:gap-4">
                                     <AnimatePresence>
                                         {matches.map((match, i) => {
                                             const otherUser = match.partner;

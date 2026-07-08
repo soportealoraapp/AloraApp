@@ -318,7 +318,7 @@ export default function DiscoverPage() {
   const rewindsRemaining = maxRewinds - rewindsUsed;
 
   return (
-    <div className="min-h-dvh flex flex-col bg-gradient-to-br from-background to-muted/30 pb-20 md:pb-0 overflow-y-auto">
+    <div className="flex min-h-dvh flex-col bg-gradient-to-br from-background to-muted/30 overflow-y-auto">
       <DiscoverHeader 
         currentUserProfile={currentUserProfile}
         lastSwipe={lastSwipeRef.current}
@@ -330,7 +330,7 @@ export default function DiscoverPage() {
         maxRewinds={maxRewinds}
       />
 
-      <div className="px-4 pt-4 max-w-sm mx-auto w-full space-y-4">
+      <div className="mx-auto w-full max-w-md px-4 pt-4 space-y-4 md:max-w-2xl">
         <DiscoverIntentSelector 
           intent={intent}
           setIntent={setIntent}
@@ -351,7 +351,7 @@ export default function DiscoverPage() {
         />
       </div>
 
-      <main className="flex-1 flex flex-col items-center justify-center p-4 relative min-h-[400px]">
+      <main className="relative flex min-h-[400px] flex-1 flex-col items-center justify-center px-4 py-4 md:px-6">
         {profiles.length > 0 ? (
           <DiscoverFeed 
             profiles={profiles}
@@ -383,7 +383,7 @@ export default function DiscoverPage() {
       </main>
 
       {/* Secondary content as progressive loading */}
-      <div className="px-4 pb-4 max-w-sm mx-auto w-full space-y-3">
+      <div className="mx-auto w-full max-w-md space-y-3 px-4 pb-6 md:max-w-2xl">
         <Suspense fallback={null}><DailyCompatibilityCard /></Suspense>
         <Suspense fallback={null}><PostOnboardingJourney /></Suspense>
         <Suspense fallback={null}><DailyPicks subscriptionStatus={currentUserProfile?.subscriptionStatus ?? 'free'} /></Suspense>

@@ -54,7 +54,7 @@ export default function SettingsPage() {
     };
 
     return (
-        <div className="min-h-dvh bg-background pb-20 md:pb-0 md:ml-60">
+        <div className="min-h-dvh bg-background">
             {/* Header */}
             <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b bg-background/90 px-4 backdrop-blur-md pt-safe"
                 style={{ borderBottomColor: 'hsl(var(--border) / 0.5)' }}
@@ -72,7 +72,7 @@ export default function SettingsPage() {
                 </div>
             </header>
 
-            <main className="mx-auto max-w-2xl p-4 space-y-6 sm:p-6">
+            <main className="mx-auto max-w-3xl space-y-5 px-4 py-4 sm:px-6 sm:py-5">
                 {/* Cuenta */}
                 <Card className="border-border/40 bg-card/60 shadow-sm rounded-3xl overflow-hidden backdrop-blur-sm">
                     <CardHeader className="pb-3 border-b border-border/30 bg-muted/20">
