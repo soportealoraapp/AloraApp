@@ -24,9 +24,10 @@ interface SentLike {
 
 interface LikesSentSectionProps {
   intent?: ConnectionIntent;
+  sentLikesCount?: number;
 }
 
-export const LikesSentSection = React.memo(function LikesSentSection({ intent = 'dating' }: LikesSentSectionProps) {
+export const LikesSentSection = React.memo(function LikesSentSection({ intent = 'dating', sentLikesCount }: LikesSentSectionProps) {
   const [sentLikes, setSentLikes] = useState<SentLike[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -67,7 +68,9 @@ export const LikesSentSection = React.memo(function LikesSentSection({ intent = 
       <CardContent className="p-6">
         <div className="flex items-center gap-2 mb-2">
           <Send className="h-5 w-5 text-primary" />
-          <h3 className="font-bold text-lg">Likes Enviados</h3>
+          <h3 className="font-bold text-lg">
+            Likes Enviados{sentLikesCount !== undefined ? ` (${sentLikesCount})` : ''}
+          </h3>
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>

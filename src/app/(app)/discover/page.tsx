@@ -373,7 +373,7 @@ export default function DiscoverPage() {
         <Suspense fallback={null}><DailyCompatibilityCard /></Suspense>
         <Suspense fallback={null}><PostOnboardingJourney /></Suspense>
         <Suspense fallback={null}><DailyPicks subscriptionStatus={currentUserProfile?.subscriptionStatus ?? 'free'} /></Suspense>
-        <Suspense fallback={null}><LikesSentSection intent={intent === 'both' ? 'dating' : intent} /></Suspense>
+        <Suspense fallback={null}><LikesSentSection intent={intent === 'both' ? 'dating' : intent} sentLikesCount={sentLikesCount} /></Suspense>
       </div>
 
       <DiscoverFilters

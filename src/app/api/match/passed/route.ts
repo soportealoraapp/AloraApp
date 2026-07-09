@@ -17,6 +17,8 @@ export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
     const intent = searchParams.get('intent');
+    const limit = Math.min(parseInt(searchParams.get('limit') || '20'), 50);
+    const cursor = searchParams.get('cursor');
 
     const where: any = {
       fromUserId: user.id,
@@ -24,11 +26,12 @@ export async function GET(request: Request) {
       deletedAt: null,
     };
     if (intent) where.intent = intent;
+    if (cursor) where.createdAt = { lt: new Date(cursor) };
 
     const passes = await prisma.interaction.findMany({
       where,
       orderBy: { createdAt: 'desc' },
-      take: 20,
+      take: limit + 1,
       include: {
         toUser: {
           select: {
@@ -47,7 +50,7 @@ export async function GET(request: Request) {
       },
     });
 
-    const profiles = passes
+    const mapped = passes
       .filter(p => p.toUser?.profile)
       .map(p => ({
         id: p.toUser.id,
@@ -56,7 +59,13 @@ export async function GET(request: Request) {
         passedAt: p.createdAt,
       }));
 
-    return NextResponse.json({ profiles });
+    const hasMore = mapped.length > limit;
+    const profiles = hasMore ? mapped.slice(0, limit) : mapped;
+    const nextCursor = hasMore && profiles.length > 0
+      ? new Date(profiles[profiles.length - 1].passedAt).toISOString()
+      : null;
+
+    return NextResponse.json({ profiles, hasMore, nextCursor });
   } catch (error) {
     console.error('Error fetching passed profiles:', error);
     return NextResponse.json({ profiles: [] });

@@ -166,6 +166,10 @@ model Profile {
   lastBoostAt    DateTime?
   totalBoosts    Int       @default(0)
 
+  // Weekly mission streak (engagement re-engagement)
+  missionStreak      Int       @default(0)
+  missionStreakWeek  DateTime?
+
   // Travel mode
   travelModeEnabled Boolean   @default(false)
   travelCity        String?
