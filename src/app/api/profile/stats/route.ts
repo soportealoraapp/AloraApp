@@ -31,9 +31,11 @@ export async function GET() {
           isActive: true,
         },
       }),
-      prisma.profileVisit.count({
-        where: { visitedId: user.id },
-      }),
+      prisma.$queryRaw<{ count: bigint }[]>`
+        SELECT COUNT(DISTINCT "visitorId") as count
+        FROM "profile_visits"
+        WHERE "visitedId" = ${user.id}
+      `,
     ]);
 
     return NextResponse.json({

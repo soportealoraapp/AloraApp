@@ -101,7 +101,7 @@ export default function VisitorsPage() {
                 <div className="flex justify-center py-12">
                     <Loader2 className="h-8 w-8 animate-spin text-primary" />
                 </div>
-            ) : visitors.length === 0 ? (
+            ) : visitors.length === 0 && total === 0 ? (
                 <Card>
                     <CardContent className="flex flex-col items-center justify-center py-12">
                         <Eye className="h-12 w-12 text-muted-foreground mb-4" />

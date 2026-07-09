@@ -147,6 +147,13 @@ export interface UserProfile extends User {
         createdAt: string;
         answered?: boolean;
     } | null;
+    prompts?: {
+        id: string;
+        promptId: string;
+        question: string;
+        answer: string;
+        position: number;
+    }[];
     completedQuizzes?: number;
 }
 

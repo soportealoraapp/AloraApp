@@ -4,6 +4,7 @@ import { logger } from '@/lib/logger';
 import { recordProfileVisit } from '@/server/services/visit-tracker';
 import { notifyProfileVisit } from '@/server/services/push';
 import { getLatestAnswerForUserById } from '@/server/services/daily-question';
+import { getUserPrompts } from '@/server/services/prompts';
 import { withRateLimit } from '@/server/utils/api-rate-limit';
 
 // GET /api/profile/[userId]
@@ -162,6 +163,7 @@ export async function GET(
         } = profile;
 
         const latestAnswer = await getLatestAnswerForUserById(targetUserId);
+        const prompts = await getUserPrompts(targetUserId);
 
         return NextResponse.json({
             ...safeProfile,
@@ -177,6 +179,7 @@ export async function GET(
                     createdAt: latestAnswer.createdAt.toISOString(),
                 }
                 : null,
+            prompts: prompts || [],
         });
     } catch (error) {
         logger.error('Error getting profile', { metadata: { error: error instanceof Error ? error.message : String(error) } });

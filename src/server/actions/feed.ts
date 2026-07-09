@@ -367,6 +367,7 @@ export async function getDynamicFeed(
              FROM "daily_answers" da
              JOIN "daily_questions" dq ON dq.id = da."questionId"
              WHERE da."userId" IN (${Prisma.join(resultCandidateIds.map(id => Prisma.sql`${id}`))})
+             AND (da."expiresAt" IS NULL OR da."expiresAt" > now())
              ORDER BY da."userId", da."createdAt" DESC`
         ) : [];
         const latestAnswerMap = new Map<string, typeof candidateDailyAnswers[0]>();

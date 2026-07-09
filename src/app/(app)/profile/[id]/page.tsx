@@ -13,6 +13,7 @@ import { Badge } from "@/components/ui/badge";
 import { ArrowLeft, Heart, MessageSquare, Sparkles, MapPin, Cigarette, GlassWater, Baby, Star, BookOpen, X, UserCheck, Loader2, Mic, Church } from "lucide-react";
 import { HeartArrow } from "@/components/ui/custom/HeartArrow";
 import { ProfileHighlights } from "@/components/profile/ProfileHighlights";
+import { PromptCards } from "@/components/profile/PromptCards";
 import { FavoriteButton } from "@/components/profile/FavoriteButton";
 import { TrustBadge } from "@/components/ui/premium/TrustBadge";
 import { VoicePlayer } from "@/components/audio/VoicePlayer";
@@ -359,6 +360,10 @@ export default function UserProfilePage() {
                                 <p className="text-xs text-muted-foreground mt-2">Usa esta respuesta para iniciar una conversación</p>
                             </CardContent>
                         </Card>
+                    )}
+
+                    {profile.prompts && profile.prompts.length > 0 && (
+                        <PromptCards prompts={profile.prompts} />
                     )}
 
                     {profile.voiceIntro && (

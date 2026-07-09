@@ -63,6 +63,7 @@ model User {
   notifications          Notification[]
   notificationPreference NotificationPreference?
   dailyAnswers           DailyAnswer[]
+  prompts                UserPrompt[]
 
   // Analytics
   analyticsEvents AnalyticsEvent[]
@@ -553,10 +554,39 @@ model DailyAnswer {
   question   DailyQuestion @relation(fields: [questionId], references: [id])
   answer     String
   createdAt  DateTime      @default(now())
+  expiresAt  DateTime?
 
   @@unique([userId, questionId])
   @@index([userId])
+  @@index([expiresAt])
   @@map("daily_answers")
+}
+
+model PromptTemplate {
+  id       String      @id @default(uuid())
+  text     String      @unique
+  category String
+  order    Int         @default(0)
+  createdAt DateTime   @default(now())
+  prompts  UserPrompt[]
+
+  @@index([category])
+  @@map("prompt_templates")
+}
+
+model UserPrompt {
+  id        String        @id @default(uuid())
+  userId    String
+  user      User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  promptId  String
+  prompt    PromptTemplate @relation(fields: [promptId], references: [id], onDelete: Cascade)
+  answer    String
+  position  Int           @default(0)
+  createdAt DateTime      @default(now())
+
+  @@unique([userId, promptId])
+  @@index([userId])
+  @@map("user_prompts")
 }
 
 model NotificationPreference {

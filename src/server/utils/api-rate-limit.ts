@@ -19,6 +19,7 @@ const LIMITS: Record<string, { limit: number; windowSeconds: number }> = {
     adminAction: { limit: 30, windowSeconds: 60 },
     profileView: { limit: 60, windowSeconds: 60 },
     profileRead: { limit: 30, windowSeconds: 60 },
+    profileWrite: { limit: 10, windowSeconds: 60 },
     matchFeed: { limit: 30, windowSeconds: 60 },
     reaction: { limit: 30, windowSeconds: 60 },
     notification: { limit: 30, windowSeconds: 60 },

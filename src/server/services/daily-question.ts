@@ -95,10 +95,11 @@ export async function getUserAnswer(userId: string, questionId: string) {
 }
 
 export async function submitAnswer(userId: string, questionId: string, answer: string) {
+    const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000); // answer visible for 24h
     return prisma.dailyAnswer.upsert({
         where: { userId_questionId: { userId, questionId } },
-        update: { answer },
-        create: { userId, questionId, answer }
+        update: { answer, expiresAt },
+        create: { userId, questionId, answer, expiresAt }
     });
 }
 
@@ -122,7 +123,7 @@ export async function getDailyQuestionForUser(userId: string) {
 
 export async function getLatestAnswer(userId: string): Promise<{ questionId: string; answer: string; createdAt: Date } | null> {
     const row = await prisma.dailyAnswer.findFirst({
-        where: { userId },
+        where: { userId, expiresAt: { gt: new Date() } },
         orderBy: { createdAt: 'desc' },
         select: { questionId: true, answer: true, createdAt: true },
     });
@@ -131,7 +132,7 @@ export async function getLatestAnswer(userId: string): Promise<{ questionId: str
 
 export async function getLatestAnswerForUserById(targetUserId: string) {
     return prisma.dailyAnswer.findFirst({
-        where: { userId: targetUserId },
+        where: { userId: targetUserId, expiresAt: { gt: new Date() } },
         orderBy: { createdAt: 'desc' },
         select: { questionId: true, answer: true, createdAt: true, question: { select: { question: true, category: true } } },
     });

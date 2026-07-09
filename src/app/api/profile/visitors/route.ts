@@ -26,7 +26,8 @@ export async function GET(request: NextRequest) {
             select: { subscriptionStatus: true },
         });
 
-        const effectiveLimit = isPlus?.subscriptionStatus === 'plus' ? limit : 3;
+        const FREE_VISITOR_LIMIT = 5; // LinkedIn-style: see your last 5 visitors for free
+        const effectiveLimit = isPlus?.subscriptionStatus === 'plus' ? limit : FREE_VISITOR_LIMIT;
 
         // Get distinct visitor IDs with their most recent visit, then fetch full data
         const distinctVisitorIds = await prisma.$queryRaw<{ visitorId: string }[]>`
@@ -77,13 +78,14 @@ export async function GET(request: NextRequest) {
             orderBy: { createdAt: 'desc' },
         });
 
-        // Deduplicate: keep only the most recent visit per visitorId
+        // Deduplicate: keep only the most recent visit per visitorId.
+        // Visitors without photos are still shown (avatar fallback handles empty photos).
         const seen = new Set<string>();
         const result = visitors
             .filter(v => {
                 if (seen.has(v.visitorId)) return false;
                 seen.add(v.visitorId);
-                return v.visitor.profile && v.visitor.profile.photos && v.visitor.profile.photos.length > 0;
+                return !!v.visitor.profile;
             })
             .map(v => ({
                 id: v.visitorId,

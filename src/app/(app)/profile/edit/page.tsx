@@ -12,7 +12,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { getEmoji } from "@/components/profile/BadgeChip";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ArrowLeft, Upload, Loader2, MapPin } from "lucide-react";
+import { ArrowLeft, Upload, Loader2, MapPin, Plus, Trash2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Skeleton } from "@/components/ui/skeleton";
 import { CityAutocomplete } from "@/components/ui/city-autocomplete";
@@ -77,6 +77,86 @@ export default function ProfileEditPage() {
     const [voiceIntroDuration, setVoiceIntroDuration] = useState<number | undefined>(undefined);
     const [voiceIntroChanged, setVoiceIntroChanged] = useState(false);
     const isDirtyRef = useRef(false);
+
+    const MAX_USER_PROMPTS = 5;
+    const PROMPT_ANSWER_MAX = 140;
+    const [userPrompts, setUserPrompts] = useState<{ id: string; promptId: string; question: string; answer: string; position: number }[]>([]);
+    const [promptTemplates, setPromptTemplates] = useState<{ id: string; text: string; category: string }[]>([]);
+    const [selectedTemplateId, setSelectedTemplateId] = useState<string>('');
+    const [newPromptAnswer, setNewPromptAnswer] = useState('');
+    const [promptBusy, setPromptBusy] = useState(false);
+
+    useEffect(() => {
+        if (!user) return;
+        const loadPrompts = fetch('/api/prompts').then(r => r.ok ? r.json() : null).then(d => { if (d?.prompts) setUserPrompts(d.prompts); }).catch(() => {});
+        const loadTemplates = fetch('/api/prompts/templates').then(r => r.ok ? r.json() : null).then(d => { if (d?.templates) setPromptTemplates(d.templates); }).catch(() => {});
+        Promise.all([loadPrompts, loadTemplates]);
+    }, [user]);
+
+    const availableTemplates = promptTemplates.filter(t => !userPrompts.some(p => p.promptId === t.id));
+
+    const savePrompt = async () => {
+        if (!selectedTemplateId || !newPromptAnswer.trim()) return;
+        setPromptBusy(true);
+        try {
+            const res = await fetch('/api/prompts', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ promptId: selectedTemplateId, answer: newPromptAnswer.trim(), position: userPrompts.length }),
+            });
+            if (!res.ok) {
+                const err = await res.json().catch(() => ({}));
+                throw new Error(err.error || 'No se pudo guardar');
+            }
+            const data = await res.json();
+            setUserPrompts(prev => [...prev, data.prompt].sort((a, b) => a.position - b.position));
+            setSelectedTemplateId('');
+            setNewPromptAnswer('');
+            toast({ title: 'Pregunta añadida' });
+        } catch (e: any) {
+            toast({ variant: 'destructive', title: 'Error', description: e.message });
+        } finally {
+            setPromptBusy(false);
+        }
+    };
+
+    const updatePrompt = async (promptId: string, answer: string) => {
+        if (!answer.trim()) return;
+        setPromptBusy(true);
+        try {
+            const res = await fetch('/api/prompts', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ promptId, answer: answer.trim() }),
+            });
+            if (!res.ok) throw new Error('No se pudo actualizar');
+            const data = await res.json();
+            setUserPrompts(prev => prev.map(p => p.promptId === promptId ? data.prompt : p));
+            toast({ title: 'Respuesta actualizada' });
+        } catch (e: any) {
+            toast({ variant: 'destructive', title: 'Error', description: e.message });
+        } finally {
+            setPromptBusy(false);
+        }
+    };
+
+    const deletePrompt = async (id: string) => {
+        setPromptBusy(true);
+        try {
+            const res = await fetch('/api/prompts', {
+                method: 'DELETE',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id }),
+            });
+            if (!res.ok) throw new Error('No se pudo eliminar');
+            setUserPrompts(prev => prev.filter(p => p.id !== id));
+            toast({ title: 'Pregunta eliminada' });
+        } catch (e: any) {
+            toast({ variant: 'destructive', title: 'Error', description: e.message });
+        } finally {
+            setPromptBusy(false);
+        }
+    };
 
     useEffect(() => {
         if (currentProfile) {
@@ -700,10 +780,90 @@ export default function ProfileEditPage() {
                     </CardContent>
                 </Card>
 
-                <Card>
+                <Card className="app-prose-section rounded-2xl">
                     <CardHeader>
-                        <CardTitle>Presentación de voz</CardTitle>
-                    </CardHeader>
+                        <CardTitle>Preguntas ({userPrompts.length}/{MAX_USER_PROMPTS})</CardTitle>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                            <p className="text-xs text-muted-foreground">
+                                Responde de 3 a 5 preguntas para mostrar tu personalidad en tu perfil (estilo Parejas).
+                            </p>
+
+                            {userPrompts.map((p) => (
+                                <div key={p.id} className="border border-primary/10 rounded-xl p-3 space-y-2">
+                                    <div className="flex items-start justify-between gap-2">
+                                        <p className="text-sm font-medium text-foreground">{p.question}</p>
+                                        <Button
+                                            variant="ghost"
+                                            size="icon"
+                                            className="shrink-0 h-7 w-7"
+                                            onClick={() => deletePrompt(p.id)}
+                                            disabled={promptBusy}
+                                            aria-label="Eliminar pregunta"
+                                        >
+                                            <Trash2 className="h-4 w-4 text-destructive" />
+                                        </Button>
+                                    </div>
+                                    <Textarea
+                                        defaultValue={p.answer}
+                                        maxLength={PROMPT_ANSWER_MAX}
+                                        onBlur={(e) => {
+                                            if (e.target.value.trim() && e.target.value.trim() !== p.answer) {
+                                                updatePrompt(p.promptId, e.target.value);
+                                            }
+                                        }}
+                                        placeholder="Escribe tu respuesta..."
+                                        className="min-h-[60px] text-sm resize-none"
+                                    />
+                                </div>
+                            ))}
+
+                            {userPrompts.length < MAX_USER_PROMPTS && availableTemplates.length > 0 && (
+                                <div className="border border-dashed border-primary/30 rounded-xl p-3 space-y-2 bg-primary/5">
+                                    <Select value={selectedTemplateId} onValueChange={setSelectedTemplateId}>
+                                        <SelectTrigger>
+                                            <SelectValue placeholder="Elige una pregunta..." />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            {availableTemplates.map((t) => (
+                                                <SelectItem key={t.id} value={t.id}>{t.text}</SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                    <Textarea
+                                        value={newPromptAnswer}
+                                        onChange={(e) => setNewPromptAnswer(e.target.value)}
+                                        maxLength={PROMPT_ANSWER_MAX}
+                                        placeholder="Tu respuesta..."
+                                        className="min-h-[60px] text-sm resize-none"
+                                    />
+                                    <div className="flex items-center justify-between">
+                                        <span className="text-xs text-muted-foreground">{newPromptAnswer.length}/{PROMPT_ANSWER_MAX}</span>
+                                        <Button
+                                            size="sm"
+                                            onClick={savePrompt}
+                                            disabled={!selectedTemplateId || !newPromptAnswer.trim() || promptBusy}
+                                        >
+                                            {promptBusy ? <Loader2 className="h-3 w-3 mr-1 animate-spin" /> : <Plus className="h-3 w-3 mr-1" />}
+                                            Añadir
+                                        </Button>
+                                    </div>
+                                </div>
+                            )}
+
+                            {userPrompts.length >= MAX_USER_PROMPTS && (
+                                <p className="text-xs text-muted-foreground text-center">Has alcanzado el máximo de {MAX_USER_PROMPTS} preguntas.</p>
+                            )}
+                            {userPrompts.length < MAX_USER_PROMPTS && availableTemplates.length === 0 && (
+                                <p className="text-xs text-muted-foreground text-center">No hay más preguntas disponibles.</p>
+                            )}
+                        </CardContent>
+                    </Card>
+
+                    <Card className="app-prose-section rounded-2xl">
+                        <CardHeader>
+                            <CardTitle>Presentación de voz</CardTitle>
+                        </CardHeader>
                     <CardContent>
                         <p className="text-xs text-muted-foreground mb-3">
                             Graba una presentación de máximo 30 segundos para que otros te conozcan

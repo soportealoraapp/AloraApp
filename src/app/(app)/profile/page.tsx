@@ -20,6 +20,8 @@ import { ProfileHighlights } from '@/components/profile/ProfileHighlights';
 import { VoicePlayer } from '@/components/audio/VoicePlayer';
 import { ErrorBoundary } from '@/components/ui/error-boundary';
 import { SpotifySection } from '@/components/profile/SpotifySection';
+import { PromptCards } from '@/components/profile/PromptCards';
+import { dailyQuestionCategoryLabel } from '@/lib/daily-question-categories';
 
 export default function ProfilePage() {
   const { user, profile, authLoading, profileLoading, signOut } = useAuth();
@@ -34,6 +36,17 @@ export default function ProfilePage() {
   } | null>(null);
   const [dismissedVerification, setDismissedVerification] = useState(false);
   const [profileStats, setProfileStats] = useState<{ likesReceived: number; matchesCount: number; profileViews: number } | null>(null);
+  const [prompts, setPrompts] = useState<{ id: string; promptId: string; question: string; answer: string; position: number }[]>([]);
+
+  useEffect(() => {
+    if (!user?.id) return;
+    const controller = new AbortController();
+    fetch('/api/prompts', { signal: controller.signal })
+      .then(r => r.ok ? r.json() : null)
+      .then(data => { if (data?.prompts) setPrompts(data.prompts); })
+      .catch(() => {});
+    return () => controller.abort();
+  }, [user?.id]);
 
   useEffect(() => {
     setDismissedVerification(localStorage.getItem('dismissedVerification') === 'true');
@@ -333,7 +346,7 @@ export default function ProfilePage() {
                     <MessageCircle className="h-4 w-4 text-accent-foreground" />
                   </div>
                   <h3 className="font-semibold text-sm text-foreground">
-                    {latestAnswer.category || 'Respuesta del día'}
+                    {dailyQuestionCategoryLabel(latestAnswer.category)}
                   </h3>
                 </div>
                 <p className="text-xs text-muted-foreground mb-1.5">{latestAnswer.question}</p>
@@ -341,6 +354,9 @@ export default function ProfilePage() {
               </CardContent>
             </Card>
           )}
+
+          {/* 4b. Profile prompts (Tinder / Parejas style) */}
+          {prompts.length > 0 && <PromptCards prompts={prompts} />}
 
           {/* 5. Interests / Values / Music */}
           {((profile.interests && profile.interests.length > 0) || (profile.values && profile.values.length > 0) || (profile.musicGenres && profile.musicGenres.length > 0)) && (
