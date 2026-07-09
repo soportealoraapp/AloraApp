@@ -1,0 +1,16 @@
+name: Cron Likes Reset (11:11)
+
+on:
+  schedule:
+    - cron: '*/15 * * * *'   # cada 15 min (horario UTC de GitHub Actions)
+  workflow_dispatch: {}      # permite ejecutar manualmente para probar
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Llamar al endpoint de reset de likes/superlikes
+        run: |
+          curl -fsS -X GET \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
+            "${{ secrets.CRON_URL }}"
