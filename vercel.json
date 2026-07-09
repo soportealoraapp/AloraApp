@@ -5,6 +5,10 @@
       "schedule": "0 0 * * *"
     },
     {
+      "path": "/api/cron/likes-reset",
+      "schedule": "*/15 * * * *"
+    },
+    {
       "path": "/api/cron/daily-notifications",
       "schedule": "0 10 * * *"
     },

@@ -13,8 +13,8 @@ interface UpgradePromptProps {
 
 const TRIGGER_CONFIG = {
     likes_exhausted: {
-        title: 'Likes agotados',
-        description: 'Con Alora+ tienes likes ilimitados para conectar sin límites.',
+        title: 'Destellos agotados',
+        description: 'Con Alora+ recibes señales del universo ilimitadas para conectar sin límites.',
     },
     travel_mode: {
         title: 'Explora otras ciudades',

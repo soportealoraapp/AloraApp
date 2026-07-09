@@ -1,11 +1,13 @@
 'use client';
 
 import { useState, useEffect, useMemo, useRef } from 'react';
-import { Heart } from 'lucide-react';
+import { Heart, Sparkles, Stars } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
+import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { UpgradePrompt } from '@/components/premium/UpgradePrompt';
 import { LikesCounterModal } from './LikesCounterModal';
+import { getElevenElevenBoundaries, getElevenElevenLabel, formatCountdown } from '@/lib/eleven-eleven';
 
 interface LikesCounterProps {
     dailyLikesUsed: number;
@@ -50,28 +52,17 @@ export function LikesCounter({
         }
     }, [resetAt, onReset]);
 
-    const resetDate = useMemo(() => {
-        const d = new Date(resetAt);
-        // If the reset date is in the past, or we want specifically "midnight tomorrow"
-        // we can adjust here, but usually the backend sends the correct next reset time.
-        return d;
-    }, [resetAt]);
-
     const isPlus = subscriptionStatus === 'plus';
 
     const remaining = isPlus ? dailyLikesLimit : Math.max(0, dailyLikesLimit - dailyLikesUsed);
     const percentage = isPlus ? 100 : dailyLikesLimit > 0 ? Math.round((remaining / dailyLikesLimit) * 100) : 0;
 
-    const timeUntilReset = useMemo(() => {
-        const diff = resetDate.getTime() - now.getTime();
-        if (diff <= 0) return "00:00:00";
-        
-        const hours = Math.floor(diff / (1000 * 60 * 60));
-        const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-        const seconds = Math.floor((diff % (1000 * 60)) / 1000);
-        
-        return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-    }, [resetDate, now]);
+    const { next: nextBoundary } = useMemo(
+        () => getElevenElevenBoundaries(now, Intl.DateTimeFormat().resolvedOptions().timeZone),
+        [now]
+    );
+    const nextLabel = getElevenElevenLabel(nextBoundary);
+    const timeUntilReset = formatCountdown(nextBoundary, now);
 
     if (isPlus) {
         return (
@@ -82,7 +73,7 @@ export function LikesCounter({
         );
     }
 
-    const isLow = remaining <= Math.max(10, Math.floor(dailyLikesLimit * 0.15));
+    const isLow = remaining <= Math.max(2, Math.floor(dailyLikesLimit * 0.25));
     const isEmpty = remaining === 0;
 
     return (
@@ -95,12 +86,12 @@ export function LikesCounter({
                             isEmpty ? "text-muted-foreground" : isLow ? "text-warning" : "text-primary fill-primary"
                         )} />
                         <span className="text-xs font-medium text-foreground/80">
-                            {remaining} de {dailyLikesLimit} Me gusta para dar hoy
+                            {remaining} de {dailyLikesLimit} Destellos para hoy
                         </span>
                     </div>
                     {timeUntilReset && (
                     <span className="text-[11px] text-muted-foreground" aria-live="polite">
-                        Se reinician en {timeUntilReset}
+                        Se activan a las {nextLabel}
                     </span>
                     )}
                 </div>
@@ -113,7 +104,26 @@ export function LikesCounter({
                     )}
                 />
             </button>
-            {isEmpty && <UpgradePrompt trigger="likes_exhausted" className="mt-2" />}
+            {isEmpty && (
+                <div className="mt-2 rounded-2xl p-4 bg-gradient-to-br from-purple-100/90 to-pink-100/70 dark:from-purple-900/40 dark:to-pink-900/30 border border-purple-200/70 dark:border-purple-800/50 text-center space-y-1.5 shadow-sm">
+                    <div className="flex items-center justify-center gap-1.5 text-purple-600 dark:text-purple-300">
+                        <Stars className="h-3.5 w-3.5" />
+                        <span className="text-[10px] font-bold uppercase tracking-[0.18em]">Señales del universo</span>
+                    </div>
+                    <p className="text-xs text-foreground/80 leading-snug">Tus próximas señales del universo se activan en:</p>
+                    <p className="text-2xl font-black text-purple-700 dark:text-purple-200 tabular-nums">{timeUntilReset}</p>
+                    <p className="text-[11px] text-muted-foreground">(A las {nextLabel})</p>
+                    <Button
+                        size="sm"
+                        variant="outline"
+                        className="mt-1 h-9 rounded-full border-purple-300 text-purple-700 hover:bg-purple-200/50 dark:text-purple-200 dark:border-purple-700 dark:hover:bg-purple-800/40"
+                        onClick={() => setShowModal(true)}
+                    >
+                        <Sparkles className="h-3.5 w-3.5 mr-1.5" />
+                        Ver planes
+                    </Button>
+                </div>
+            )}
 
             <LikesCounterModal
                 isOpen={showModal}

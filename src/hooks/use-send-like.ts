@@ -21,7 +21,10 @@ export function useSendLike(onMatchCreated?: (intent: ConnectionIntent) => void)
         try {
             const response = await authFetch('/api/match/like', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: {
+                    'Content-Type': 'application/json',
+                    'x-timezone': Intl.DateTimeFormat().resolvedOptions().timeZone,
+                },
                 body: JSON.stringify({ toUserId, type, intent }),
             });
 

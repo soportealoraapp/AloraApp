@@ -11,6 +11,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Heart, Sparkles, Clock, Send } from 'lucide-react';
 import { PaywallModal } from '@/components/premium/PaywallModal';
+import { getElevenElevenBoundaries, getElevenElevenLabel, formatCountdown } from '@/lib/eleven-eleven';
 
 interface LikesCounterModalProps {
     isOpen: boolean;
@@ -22,7 +23,7 @@ interface LikesCounterModalProps {
     resetAt?: Date | string;
 }
 
-export function LikesCounterModal({ isOpen, onClose, remaining, dailyLikesLimit, superlikesRemaining, sentLikesCount, resetAt }: LikesCounterModalProps) {
+export function LikesCounterModal({ isOpen, onClose, remaining, dailyLikesLimit, superlikesRemaining, sentLikesCount }: LikesCounterModalProps) {
     const [timeUntilReset, setTimeUntilReset] = useState<string | null>(null);
     const [showPaywall, setShowPaywall] = useState(false);
 
@@ -31,27 +32,21 @@ export function LikesCounterModal({ isOpen, onClose, remaining, dailyLikesLimit,
 
         const updateTimer = () => {
             const now = new Date();
-            const targetDate = resetAt ? new Date(resetAt) : new Date(new Date().setHours(24, 0, 0, 0));
+            const { next: targetDate } = getElevenElevenBoundaries(now, Intl.DateTimeFormat().resolvedOptions().timeZone);
             const diff = targetDate.getTime() - now.getTime();
 
             if (diff <= 0) {
-                setTimeUntilReset('00:00:00');
+                setTimeUntilReset('00h 00m');
                 return;
             }
 
-            const hours = Math.floor(diff / (1000 * 60 * 60));
-            const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-            const seconds = Math.floor((diff % (1000 * 60)) / 1000);
-
-            setTimeUntilReset(
-                `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`
-            );
+            setTimeUntilReset(formatCountdown(targetDate, now));
         };
 
         updateTimer();
         const interval = setInterval(updateTimer, 1000);
         return () => clearInterval(interval);
-    }, [isOpen, resetAt]);
+    }, [isOpen]);
 
     const isLow = remaining <= 10;
     const isEmpty = remaining === 0;
@@ -67,14 +62,14 @@ export function LikesCounterModal({ isOpen, onClose, remaining, dailyLikesLimit,
 
                     <div className="p-6 space-y-6">
                         <div className="text-center">
-                            <div className="mx-auto w-16 h-16 rounded-full bg-gradient-to-br from-pink-100 to-pink-200 dark:from-pink-900/30 dark:to-pink-900/20 flex items-center justify-center mb-4">
-                                <Heart className={isEmpty ? "h-8 w-8 text-muted-foreground" : "h-8 w-8 text-primary fill-primary"} />
+                            <div className="mx-auto w-16 h-16 rounded-full bg-gradient-to-br from-purple-100 to-pink-200 dark:from-purple-900/40 dark:to-pink-900/30 flex items-center justify-center mb-4">
+                                <Heart className={isEmpty ? "h-8 w-8 text-purple-400" : "h-8 w-8 text-primary fill-primary"} />
                             </div>
                             <h2 className="text-lg font-bold text-foreground" id="likes-modal-title">
-                                {isEmpty ? 'Me gusta agotados' : 'Me gusta para dar hoy'}
+                                {isEmpty ? 'Tus señales se agotaron' : 'Destellos para hoy'}
                             </h2>
                             <p className="text-3xl font-bold mt-2">
-                                <span className={isEmpty ? "text-muted-foreground" : isLow ? "text-warning" : "text-primary"}>
+                                <span className={isEmpty ? "text-purple-500" : isLow ? "text-warning" : "text-primary"}>
                                     {remaining}
                                 </span>
                                 <span className="text-lg text-muted-foreground"> / {dailyLikesLimit}</span>
@@ -82,13 +77,16 @@ export function LikesCounterModal({ isOpen, onClose, remaining, dailyLikesLimit,
                         </div>
 
                         <div className="grid grid-cols-2 gap-3">
-                            <div className="bg-muted/50 rounded-xl p-4 text-center">
-                                <div className="flex items-center justify-center gap-2 text-muted-foreground mb-1">
+                            <div className="bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/10 rounded-xl p-4 text-center border border-purple-200/50 dark:border-purple-800/40">
+                                <div className="flex items-center justify-center gap-2 text-purple-600 dark:text-purple-300 mb-1">
                                     <Clock className="h-4 w-4" />
-                                    <span className="text-xs font-medium uppercase tracking-wider">Reinician</span>
+                                    <span className="text-xs font-medium uppercase tracking-wider">Se activan</span>
                                 </div>
                                 <p className="text-xl font-mono font-bold text-foreground">
                                     {timeUntilReset || '...'}
+                                </p>
+                                <p className="text-[10px] text-muted-foreground mt-0.5">
+                                    (A las {getElevenElevenLabel(getElevenElevenBoundaries(new Date(), Intl.DateTimeFormat().resolvedOptions().timeZone).next)})
                                 </p>
                             </div>
                             <div className="bg-primary/5 rounded-xl p-4 text-center border border-primary/10">
@@ -119,7 +117,7 @@ export function LikesCounterModal({ isOpen, onClose, remaining, dailyLikesLimit,
                                     }}
                                 >
                                     <Sparkles className="h-4 w-4 mr-2" />
-                                    {isEmpty ? 'Obtener más Me gusta con Alora+' : 'Subir de nivel con Alora+'}
+                                    {isEmpty ? 'Recibe más señales con Alora+' : 'Subir de nivel con Alora+'}
                                 </Button>
                             )}
                             <Button variant="outline" className="w-full rounded-2xl" onClick={onClose}>

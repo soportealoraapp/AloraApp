@@ -7,6 +7,7 @@ import { AnalyticsEvents } from '@/lib/tracking/events';
 import { LikeSchema } from '@/lib/schemas/validation';
 import { detectSpamBehavior } from '@/server/services/anti-abuse';
 import { FREE_DAILY_LIKES_LIMIT } from '@/lib/constants/preferences';
+import { getElevenElevenBoundaries } from '@/lib/eleven-eleven';
 import { logger } from '@/lib/logger';
 
 // POST /api/match/like
@@ -45,29 +46,29 @@ export async function POST(request: NextRequest) {
             if (profileBefore && profileBefore.subscriptionStatus === 'free') {
                 isFreeUser = true;
                 const now = new Date();
-                const lastReset = profileBefore.dailyLikesResetAt;
-                const isNewDay = !lastReset || now.toDateString() !== lastReset.toDateString();
+                const tz = request.headers.get('x-timezone') || undefined;
+                const { last: lastBoundary, next: nextBoundary } = getElevenElevenBoundaries(now, tz);
+                const lastReset = profileBefore.dailyLikesResetAt ? new Date(profileBefore.dailyLikesResetAt) : null;
+                const isNewWindow = !lastReset || lastReset < lastBoundary;
 
-                if (isNewDay) {
+                if (isNewWindow) {
                     await prisma.profile.update({
                         where: { userId: user.id },
-                        data: { dailyLikesUsed: 0, dailyLikesResetAt: now, superlikesRemaining: 3 }
+                        data: { dailyLikesUsed: 0, dailyLikesResetAt: lastBoundary, superlikesRemaining: 3 }
                     });
                     if (profileBefore.dailyLikesUsed > 0) {
                         notifyLikesRestored(user.id)
                             .catch((err) => console.warn('[match/like] notifyLikesRestored failed:', err));
                     }
                 } else if (profileBefore.dailyLikesUsed >= FREE_DAILY_LIKES_LIMIT) {
-                    const tomorrow = new Date(now);
-                    tomorrow.setDate(tomorrow.getDate() + 1);
-                    tomorrow.setHours(0, 0, 0, 0);
-                    const retryAfter = Math.ceil((tomorrow.getTime() - now.getTime()) / 1000);
+                    const retryAfter = Math.ceil((nextBoundary.getTime() - now.getTime()) / 1000);
+                    const label = nextBoundary.getUTCHours() >= 12 ? 'PM' : 'AM';
 
                     return NextResponse.json(
                         {
                             error: 'Daily like limit reached',
                             retryAfter,
-                            message: `Has alcanzado el límite de ${FREE_DAILY_LIKES_LIMIT} Me gusta diarios. Tus Me gusta se reinician mañana.`
+                            message: `Has agotado tus señales del universo. Se renovarán a las 11:11 ${label}. ✨`
                         },
                         { status: 429 }
                     );
@@ -75,10 +76,10 @@ export async function POST(request: NextRequest) {
 
                 // Superlike limit pre-check for free users
                 if (interactionType === 'superlike') {
-                    const currentSuperlikes = isNewDay ? 3 : profileBefore.superlikesRemaining;
+                    const currentSuperlikes = isNewWindow ? 3 : profileBefore.superlikesRemaining;
                     if (currentSuperlikes <= 0) {
                         return NextResponse.json(
-                            { error: 'Flechado limit reached', message: 'Has agotado tus Flechados diarios.' },
+                            { error: 'Flechado limit reached', message: 'Has agotado tus Flechados del día.' },
                             { status: 429 }
                         );
                     }

@@ -18,6 +18,7 @@ import { DiscoverIntentSelector } from "./components/DiscoverIntentSelector";
 import { DiscoverFeed } from "./components/DiscoverFeed";
 import { DiscoverEmptyState } from "./components/DiscoverEmptyState";
 import { LikesCounter } from "@/components/discover/LikesCounter";
+import { getElevenElevenBoundaries } from "@/lib/eleven-eleven";
 
 // Dynamic sections for code splitting and better performance
 const MatchScreen = dynamic(() => import("@/components/ui/premium/MatchScreen").then(m => m.MatchScreen), { ssr: false });
@@ -40,7 +41,7 @@ const DEFAULT_FILTERS: Filters = {
   intent: 'dating',
 };
 
-const SWIPE_LIMIT = 50;
+const SWIPE_LIMIT = 11;
 
 // Helper functions for search params and filtering logic
 function filtersToSearchParams(filters: Filters, intent: string): URLSearchParams {
@@ -261,7 +262,7 @@ export default function DiscoverPage() {
     if (!profileToActOn || !currentUserProfile || pendingSwipe) return;
 
     if (action !== 'superlike' && swipeCount >= SWIPE_LIMIT) {
-      toast({ title: "¡Tómate un respiro!", description: "Has visto muchos perfiles hoy. Vuelve mañana.", variant: "default" });
+      toast({ title: "✨ Tus señales se renovarán pronto", description: "El universo recarga tus destellos a las 11:11. Vuelve a esa hora mágica.", variant: "default" });
       return;
     }
 
@@ -328,10 +329,7 @@ export default function DiscoverPage() {
           dailyLikesLimit={SWIPE_LIMIT}
           superlikesRemaining={currentUserProfile?.superlikesRemaining ?? 0}
           sentLikesCount={sentLikesCount}
-          resetAt={currentUserProfile?.dailyLikesResetAt
-            ? new Date(new Date(currentUserProfile.dailyLikesResetAt).setHours(24, 0, 0, 0))
-            : new Date(new Date().setHours(24, 0, 0, 0))
-          }
+          resetAt={getElevenElevenBoundaries(new Date(), Intl.DateTimeFormat().resolvedOptions().timeZone).next}
           subscriptionStatus={currentUserProfile?.subscriptionStatus ?? 'free'}
           onReset={() => refresh()}
         />

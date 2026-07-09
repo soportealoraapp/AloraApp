@@ -320,9 +320,18 @@ export async function notifyReportResolved(userId: string) {
 
 export async function notifyLikesRestored(userId: string) {
     return sendPushToUser(userId, {
-        title: '❤️ Tus likes ya están listos',
-        body: '¡Tus 50 Me gusta del día se renovaron! Sal a descubrir personas increíbles.',
+        title: '✨ Tus señales del universo se renovaron',
+        body: 'A las 11:11, el universo conspira a tu favor. ¡Sal a descubrir conexiones!',
         data: { type: 'likes_restored' },
+        channel: 'engagement',
+    });
+}
+
+export async function notifyElevenEleven(userId: string) {
+    return sendPushToUser(userId, {
+        title: '✨ Pide un deseo…',
+        body: 'y encuentra un match. Tus señales del universo se acaban de activar.',
+        data: { type: 'eleven_eleven' },
         channel: 'engagement',
     });
 }

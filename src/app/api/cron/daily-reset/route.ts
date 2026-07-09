@@ -28,17 +28,6 @@ export async function GET(request: NextRequest) {
             console.error('[cron/daily-reset] Question rotation failed:', err);
         }
 
-        // Reset daily likes and superlikes for profiles that haven't been reset today
-        const { count: likesReset } = await prisma.profile.updateMany({
-            where: {
-                dailyLikesResetAt: { lt: today },
-            },
-            data: {
-                dailyLikesUsed: 0,
-                dailyLikesResetAt: today,
-            },
-        });
-
         // Reset rewinds for profiles that haven't been reset today
         const { count: rewindsReset } = await prisma.profile.updateMany({
             where: {
@@ -47,17 +36,6 @@ export async function GET(request: NextRequest) {
             data: {
                 rewindsUsed: 0,
                 rewindsResetAt: today,
-            },
-        });
-
-        // Reset superlikes for free users (3 per day)
-        const { count: superlikesReset } = await prisma.profile.updateMany({
-            where: {
-                subscriptionStatus: 'free',
-                dailyLikesResetAt: { lt: today },
-            },
-            data: {
-                superlikesRemaining: 3,
             },
         });
 
@@ -109,9 +87,7 @@ export async function GET(request: NextRequest) {
         return NextResponse.json({
             date: today.toISOString(),
             rotatedQuestion: rotatedQuestion ? { newId: rotatedQuestion.newId, previousId: rotatedQuestion.previousId } : null,
-            likesReset,
             rewindsReset,
-            superlikesReset,
             streaksNotified,
             dailyQuestionNotified,
         });

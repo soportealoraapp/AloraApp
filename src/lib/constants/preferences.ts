@@ -78,4 +78,4 @@ export const MAX_VALUES = 5;
 export const MAX_MUSIC_GENRES = 5;
 
 export const AGE_GATE_KEY = 'alora_age_gate';
-export const FREE_DAILY_LIKES_LIMIT = 50;
+export const FREE_DAILY_LIKES_LIMIT = 11;
