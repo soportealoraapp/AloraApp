@@ -7,7 +7,7 @@ import { AnalyticsEvents } from '@/lib/tracking/events';
 import { LikeSchema } from '@/lib/schemas/validation';
 import { detectSpamBehavior } from '@/server/services/anti-abuse';
 import { FREE_DAILY_LIKES_LIMIT } from '@/lib/constants/preferences';
-import { getElevenElevenBoundaries } from '@/lib/eleven-eleven';
+import { getElevenElevenBoundaries, getElevenElevenLabel } from '@/lib/eleven-eleven';
 import { logger } from '@/lib/logger';
 
 // POST /api/match/like
@@ -62,7 +62,7 @@ export async function POST(request: NextRequest) {
                     }
                 } else if (profileBefore.dailyLikesUsed >= FREE_DAILY_LIKES_LIMIT) {
                     const retryAfter = Math.ceil((nextBoundary.getTime() - now.getTime()) / 1000);
-                    const label = nextBoundary.getUTCHours() >= 12 ? 'PM' : 'AM';
+                    const label = getElevenElevenLabel(nextBoundary, tz).split(' ')[1];
 
                     return NextResponse.json(
                         {

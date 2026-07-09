@@ -103,7 +103,7 @@ function NotificationItemInner({ notification, onRead, onDelete }: { notificatio
       router.push('/discover');
     } else if (type === 'daily_compatibility') {
       router.push('/compatibility');
-    } else if (type === 'boost_available' || type === 'likes_restored') {
+    } else if (type === 'boost_available' || type === 'likes_restored' || type === 'eleven_eleven' || type === 'promotion') {
       router.push('/discover');
     } else if (type === 'verification') {
       router.push('/settings/verification');

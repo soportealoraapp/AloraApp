@@ -88,6 +88,7 @@ export function PostOnboardingJourney() {
     const progress = missions.length > 0 ? (completedCount / missions.length) * 100 : 0;
     const nextMission = missions.find(m => !m.completed);
     const boostActive = data.boostUntil && new Date(data.boostUntil).getTime() > Date.now();
+    const daysUntilBoost = data.streak > 0 ? 7 - (data.streak % 7) : 7;
 
     const boostDate = boostActive
         ? new Date(data.boostUntil!).toLocaleDateString('es-MX', { day: 'numeric', month: 'short' })
@@ -105,27 +106,38 @@ export function PostOnboardingJourney() {
                         <p className="text-xs text-muted-foreground">{completedCount}/{missions.length} misiones completadas</p>
                     </div>
                 </div>
-                <div className="flex items-center gap-2">
-                    {data.streak > 0 && (
-                        <Badge variant="secondary" className="text-xs flex items-center gap-1">
-                            <Flame className="h-3 w-3 text-orange-500" />
-                            {data.streak}
-                        </Badge>
-                    )}
-                    <Badge variant="secondary" className="text-xs">
-                        {Math.round(progress)}%
-                    </Badge>
-                </div>
+            <div className="flex items-center gap-2">
+                <Badge variant="secondary" className="text-xs flex items-center gap-1">
+                    <Flame className="h-3 w-3 text-orange-500" />
+                    {data.streak} {data.streak === 1 ? 'día' : 'días'}
+                </Badge>
+                <Badge variant="secondary" className="text-xs">
+                    {Math.round(progress)}%
+                </Badge>
             </div>
+        </div>
 
-            <Progress value={progress} className="h-1.5 mb-3" role="progressbar" aria-valuenow={progress} aria-valuemin={0} aria-valuemax={100} aria-label="Progreso de misiones" />
+        <Progress value={progress} className="h-1.5 mb-3" role="progressbar" aria-valuenow={progress} aria-valuemin={0} aria-valuemax={100} aria-label="Progreso de misiones" />
 
-            {boostActive && (
-                <div className="mb-3 flex items-center gap-2 rounded-xl bg-primary/10 border border-primary/20 px-3 py-2">
-                    <Zap className="h-4 w-4 text-primary" />
-                    <p className="text-xs font-medium text-foreground">Boost de visibilidad activo hasta el {boostDate}</p>
-                </div>
-            )}
+        <div className="mb-3 rounded-xl bg-orange-500/10 border border-orange-500/20 px-3 py-2">
+            <p className="text-xs font-medium text-foreground">
+                {boostActive
+                    ? '🔥 ¡Boost de visibilidad activo! Sigue entrando cada día para mantener tu racha.'
+                    : `🔥 Llevas ${data.streak} ${data.streak === 1 ? 'día' : 'días'} de racha. Entra ${daysUntilBoost} ${daysUntilBoost === 1 ? 'día' : 'días'} más y desbloqueas un boost de visibilidad gratis.`}
+            </p>
+        </div>
+
+        {boostActive ? (
+            <div className="mb-3 flex items-center gap-2 rounded-xl bg-primary/10 border border-primary/20 px-3 py-2">
+                <Zap className="h-4 w-4 text-primary" />
+                <p className="text-xs font-medium text-foreground">Boost de visibilidad activo hasta el {boostDate}</p>
+            </div>
+        ) : (
+            <div className="mb-3 flex items-center gap-2 rounded-xl bg-muted/40 border border-border/50 px-3 py-2">
+                <Zap className="h-4 w-4 text-muted-foreground" />
+                <p className="text-xs font-medium text-muted-foreground">Tu próximo boost de visibilidad llega el día 7 de tu racha.</p>
+            </div>
+        )}
 
             {nextMission && (
                 <motion.div

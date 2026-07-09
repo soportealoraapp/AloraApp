@@ -61,7 +61,7 @@ export function LikesCounter({
         () => getElevenElevenBoundaries(now, Intl.DateTimeFormat().resolvedOptions().timeZone),
         [now]
     );
-    const nextLabel = getElevenElevenLabel(nextBoundary);
+    const nextLabel = getElevenElevenLabel(nextBoundary, Intl.DateTimeFormat().resolvedOptions().timeZone);
     const timeUntilReset = formatCountdown(nextBoundary, now);
 
     if (isPlus) {

@@ -52,11 +52,23 @@ function wallClockParts(ref: Date, timezone?: string): WallParts {
     };
 }
 
+/** Milliseconds that `timeZone` is ahead of UTC at `date` (positive = ahead). */
+function getTimezoneOffsetMs(timeZone: string, date: Date): number {
+    const utcDate = new Date(date.toLocaleString('en-US', { timeZone: 'UTC' }));
+    const tzDate = new Date(date.toLocaleString('en-US', { timeZone }));
+    return tzDate.getTime() - utcDate.getTime();
+}
+
 /** Absolute Date for 11:11 AM (pm=false) or 11:11 PM (pm=true) on `ref`'s calendar date in `timezone`. */
 function elevenElevenOn(ref: Date, pm: boolean, timezone?: string): Date {
     const wc = wallClockParts(ref, timezone);
     const hour = pm ? 23 : 11;
-    return new Date(Date.UTC(wc.year, wc.month, wc.day, hour, 11, 0, 0));
+    // Build the wall-clock time as if it were UTC, then shift by the real tz offset
+    // so the resulting Date is the true UTC instant of that local 11:11.
+    const wall = new Date(Date.UTC(wc.year, wc.month, wc.day, hour, 11, 0, 0));
+    if (!timezone || timezone === 'UTC') return wall;
+    const offset = getTimezoneOffsetMs(timezone, wall);
+    return new Date(wall.getTime() - offset);
 }
 
 export function getElevenElevenBoundaries(now: Date = new Date(), timezone?: string): ElevenElevenBoundaries {
@@ -80,9 +92,9 @@ export function getElevenElevenBoundaries(now: Date = new Date(), timezone?: str
     return { last, next };
 }
 
-/** Human label like "11:11 PM" / "11:11 AM" (the boundary is built at UTC hour 11 or 23). */
-export function getElevenElevenLabel(date: Date): string {
-    const hour = date.getUTCHours();
+/** Human label like "11:11 PM" / "11:11 AM" in `timezone` (defaults to the Date's local time). */
+export function getElevenElevenLabel(date: Date, timezone?: string): string {
+    const hour = timezone ? wallClockParts(date, timezone).hour : date.getHours();
     return `11:11 ${hour >= 12 ? 'PM' : 'AM'}`;
 }
 

@@ -86,7 +86,7 @@ export function LikesCounterModal({ isOpen, onClose, remaining, dailyLikesLimit,
                                     {timeUntilReset || '...'}
                                 </p>
                                 <p className="text-[10px] text-muted-foreground mt-0.5">
-                                    (A las {getElevenElevenLabel(getElevenElevenBoundaries(new Date(), Intl.DateTimeFormat().resolvedOptions().timeZone).next)})
+                                    (A las {getElevenElevenLabel(getElevenElevenBoundaries(new Date(), Intl.DateTimeFormat().resolvedOptions().timeZone).next, Intl.DateTimeFormat().resolvedOptions().timeZone)})
                                 </p>
                             </div>
                             <div className="bg-primary/5 rounded-xl p-4 text-center border border-primary/10">
