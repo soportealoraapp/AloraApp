@@ -18,7 +18,7 @@ export async function GET(_request: NextRequest) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const rateLimitResponse = await withRateLimit(user.id, 'profileUpdate');
+    const rateLimitResponse = await withRateLimit(user.id, 'profileRead');
     if (rateLimitResponse) return rateLimitResponse;
 
     try {

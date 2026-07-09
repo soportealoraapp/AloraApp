@@ -61,3 +61,6 @@ service-account*.json
 # firebase
 firebase-debug.log
 firestore-debug.log
+
+#passkey
+recovery-codes.txt

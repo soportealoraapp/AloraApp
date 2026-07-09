@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, Heart, MessageSquare, Sparkles, MapPin, Cigarette, GlassWater, Baby, Star, BookOpen, X, UserCheck, Loader2, Mic, Church, Check, Send } from "lucide-react";
+import { ArrowLeft, Heart, MessageSquare, Sparkles, MapPin, Cigarette, GlassWater, Baby, Star, BookOpen, X, UserCheck, Loader2, Mic, Church, Check, Send, Smile } from "lucide-react";
 import { HeartArrow } from "@/components/ui/custom/HeartArrow";
 import { ProfileHighlights } from "@/components/profile/ProfileHighlights";
 import { PromptCards } from "@/components/profile/PromptCards";
@@ -62,10 +62,18 @@ export default function UserProfilePage() {
 
     const source = searchParams.get("source");
     const isPreview = searchParams.get("preview") === "1";
-    const intent = (searchParams.get("intent") as 'dating' | 'friendship' | null) || 'dating';
+    const intent = (searchParams.get("intent") as 'dating' | 'friendship' | 'both' | null) || 'dating';
     const isFromNewMatch = source === "new-match";
 
     const { profile, loading } = useProfile(id as string);
+
+    // Effective intent for this profile — drives whether romantic (Flechado) actions are shown
+    const effectiveIntent: 'dating' | 'friendship' =
+      intent !== 'both'
+        ? intent
+        : (profile?.connectionModes?.length === 1 && profile.connectionModes[0] === 'friendship'
+            ? 'friendship'
+            : 'dating');
 
     const goBack = () => {
         if (typeof window !== 'undefined' && window.history.length > 1) {
@@ -207,7 +215,7 @@ export default function UserProfilePage() {
 
         setProcessing(true);
         try {
-            const result = await sendLike(id as string, "like", intent);
+            const result = await sendLike(id as string, "like", effectiveIntent);
             setIsLiked(true);
 
             if (result.matched) {
@@ -230,7 +238,7 @@ export default function UserProfilePage() {
 
         setProcessing(true);
         try {
-            const result = await sendLike(id as string, "superlike", intent);
+            const result = await sendLike(id as string, "superlike", effectiveIntent);
             setIsSuperMatched(true);
             setIsLiked(true);
 
@@ -253,7 +261,7 @@ export default function UserProfilePage() {
     const handleAcceptMatch = async () => {
         setProcessing(true);
         try {
-            const result = await sendLike(id as string, "like", intent, false);
+            const result = await sendLike(id as string, "like", effectiveIntent, false);
 
             toast({
                 title: `¡Nueva conexión con ${profile.displayName}! 🎉`,
@@ -274,7 +282,7 @@ export default function UserProfilePage() {
     const handleDeclineMatch = async () => {
         setProcessing(true);
         try {
-            await sendLike(id as string, "pass", intent);
+            await sendLike(id as string, "pass", effectiveIntent);
             toast({ title: "Perfil archivado", description: "Buscaremos mejores conexiones para ti." });
             goBack();
         } catch {
@@ -293,7 +301,7 @@ export default function UserProfilePage() {
         if (processing) return;
         setProcessing(true);
         try {
-            await sendLike(id as string, "pass", intent);
+            await sendLike(id as string, "pass", effectiveIntent);
         } catch {
             // Pass is best-effort, still go back
         } finally {
@@ -646,7 +654,7 @@ export default function UserProfilePage() {
                                     <X className="h-7 w-7" />
                                 </button>
 
-                                {/* Like */}
+                                {/* Like / Amigo */}
                                 <button
                                     onClick={handleLike}
                                     disabled={isLiked || processing}
@@ -656,30 +664,35 @@ export default function UserProfilePage() {
                                             ? 'bg-primary border-primary text-primary-foreground'
                                             : 'bg-background border-primary/30 hover:bg-primary hover:border-primary hover:text-primary-foreground text-primary'
                                     )}
-                                    aria-label="Like"
+                                    aria-label={effectiveIntent === 'friendship' ? 'Enviar like de amistad' : 'Like'}
+                                    title={effectiveIntent === 'friendship' ? 'Amigo' : 'Dar Like'}
                                 >
                                     {processing ? (
                                         <Loader2 className="h-8 w-8 animate-spin" />
+                                    ) : effectiveIntent === 'friendship' ? (
+                                        <Smile className={cn('h-8 w-8', isLiked && 'fill-current')} />
                                     ) : (
                                         <Heart className={cn('h-8 w-8', isLiked && 'fill-current')} />
                                     )}
                                 </button>
 
-                                {/* Flechado (Super Like) */}
-                                <button
-                                    onClick={handleSuperMatch}
-                                    disabled={isSuperMatched || processing}
-                                    className={cn(
-                                        'h-16 w-16 rounded-full border-2 flex items-center justify-center shadow-lg transition-all active:scale-95',
-                                        isSuperMatched
-                                            ? 'bg-amber-400 border-amber-400 text-white'
-                                            : 'bg-background border-amber-400/40 hover:bg-amber-50 dark:hover:bg-amber-950/30 hover:border-amber-400 text-amber-500'
-                                    )}
-                                    aria-label="Flechado"
-                                    title="Flechado: destaca tu interés"
-                                >
-                                    <HeartArrow className="h-6 w-6" />
-                                </button>
+                                {/* Flechado (Super Like) — only in dating mode */}
+                                {effectiveIntent !== 'friendship' && (
+                                    <button
+                                        onClick={handleSuperMatch}
+                                        disabled={isSuperMatched || processing}
+                                        className={cn(
+                                            'h-16 w-16 rounded-full border-2 flex items-center justify-center shadow-lg transition-all active:scale-95',
+                                            isSuperMatched
+                                                ? 'bg-amber-400 border-amber-400 text-white'
+                                                : 'bg-background border-amber-400/40 hover:bg-amber-50 dark:hover:bg-amber-950/30 hover:border-amber-400 text-amber-500'
+                                        )}
+                                        aria-label="Flechado"
+                                        title="Flechado: destaca tu interés"
+                                    >
+                                        <HeartArrow className="h-6 w-6" />
+                                    </button>
+                                )}
                             </div>
                         )}
                     </div>

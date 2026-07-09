@@ -164,19 +164,24 @@ export default function DiscoverPage() {
     return 'dating';
   }, [intent]);
 
+  // Effective intent for the profile currently shown in swipe mode (drives the action buttons)
+  const currentEffectiveIntent: ConnectionIntent =
+    getEffectiveIntent(profiles[0]?.profile?.connectionModes);
+
   // Sync swipeCount and intent with server profile
   useEffect(() => {
     if (!user?.id) return;
-    fetch('/api/profile').then(r => r.json()).then(data => {
-      if (typeof data.dailyLikesUsed === 'number') setSwipeCount(data.dailyLikesUsed);
-    }).catch(() => {});
+    // swipeCount comes from the already-loaded AuthContext profile (no extra /api/profile fetch)
+    if (typeof currentUserProfile?.dailyLikesUsed === 'number') {
+      setSwipeCount(currentUserProfile.dailyLikesUsed);
+    }
 
     if (currentUserProfile?.connectionModes?.length) {
       const modes = currentUserProfile.connectionModes;
       if (modes.includes('dating') && modes.includes('friendship')) setIntent('both');
       else if (modes[0] === 'dating' || modes[0] === 'friendship') setIntent(modes[0]);
     }
-  }, [user?.id, currentUserProfile?.connectionModes]);
+  }, [user?.id, currentUserProfile?.connectionModes, currentUserProfile?.dailyLikesUsed]);
 
   // Geolocation for distance filtering
   useEffect(() => {
@@ -344,6 +349,7 @@ export default function DiscoverPage() {
             hasMore={hasMore}
             browseMode={browseMode}
             intent={intent}
+            effectiveIntent={currentEffectiveIntent}
             intentChanging={intentChanging}
             onSwipe={handleSwipe}
             onFlechado={handleFlechado}

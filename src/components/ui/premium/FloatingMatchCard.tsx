@@ -6,7 +6,7 @@ import { UserProfile } from '@/lib/domain/types';
 import { SafeImage } from '@/components/ui/safe-image';
 import { TrustBadge } from './TrustBadge';
 import { ProfileActions } from '../../match/ProfileActions';
-import { Clock, MessageCircle, Heart, X, Eye } from 'lucide-react';
+import { Clock, MessageCircle, Heart, X, Eye, Smile } from 'lucide-react';
 import { HeartArrow } from '../custom/HeartArrow';
 import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { hapticsLight, hapticsMedium, hapticsHeavy } from '@/lib/mobile';
@@ -30,9 +30,11 @@ interface FloatingMatchCardProps {
   hasExistingMatch?: boolean;
   /** Whether the current user already sent a like/superlike to this profile */
   priorInteraction?: 'like' | 'superlike' | 'pass' | null;
+  /** Effective connection intent for this profile ('dating' | 'friendship') — drices which action buttons are shown */
+  effectiveIntent?: 'dating' | 'friendship';
 }
 
-export const FloatingMatchCard = React.memo(function FloatingMatchCard({ profile, onSwipe, onFlechado, superlikesRemaining, hasExistingMatch, priorInteraction }: FloatingMatchCardProps) {
+export const FloatingMatchCard = React.memo(function FloatingMatchCard({ profile, onSwipe, onFlechado, superlikesRemaining, hasExistingMatch, priorInteraction, effectiveIntent = 'dating' }: FloatingMatchCardProps) {
   const controls = useAnimation();
   const [dragX, setDragX] = useState(0);
   const [likeBurst, setLikeBurst] = useState(false);
@@ -209,7 +211,11 @@ export const FloatingMatchCard = React.memo(function FloatingMatchCard({ profile
         {dragX > 50 && (
           <div className="absolute inset-0 z-30 bg-primary/20 flex items-center justify-start p-8">
             <div className="bg-card rounded-full p-4 shadow-xl">
-              <Heart className="h-10 w-10 text-primary fill-primary" />
+              {effectiveIntent === 'friendship' ? (
+                <Smile className="h-10 w-10 text-primary fill-primary" />
+              ) : (
+                <Heart className="h-10 w-10 text-primary fill-primary" />
+              )}
             </div>
           </div>
         )}
@@ -248,7 +254,7 @@ export const FloatingMatchCard = React.memo(function FloatingMatchCard({ profile
           <motion.div
             initial={{ scale: 0.8, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
-            className="absolute top-4 left-4 z-20 bg-amber-500/90 backdrop-blur-md text-white px-2.5 py-1 rounded-full text-[11px] font-bold flex items-center gap-1 border border-amber-400/30 shadow-sm"
+            className="absolute top-4 left-4 z-20 bg-primary/90 backdrop-blur-md text-primary-foreground px-2.5 py-1 rounded-full text-[11px] font-bold flex items-center gap-1 border border-primary/30 shadow-sm"
           >
             <HeartArrow className="h-3 w-3" /> Flechado enviado
           </motion.div>
@@ -328,7 +334,7 @@ export const FloatingMatchCard = React.memo(function FloatingMatchCard({ profile
         </div>
       </SoftCard>
 
-      {/* Action buttons: Pass (left), Flechado (center), Like (right) */}
+      {/* Action buttons: Pass (left) + Like/Amigo (right). Flechado only in dating mode. */}
       <div className="flex items-center justify-center gap-5 pt-4 pb-2 z-20 select-none">
         <div className="flex flex-col items-center gap-1.5">
           <button
@@ -341,56 +347,84 @@ export const FloatingMatchCard = React.memo(function FloatingMatchCard({ profile
           </button>
           <span className="text-[10px] font-medium text-foreground/70">Pasar</span>
         </div>
-        {onFlechado && (
+
+        {effectiveIntent === 'friendship' ? (
           <div className="flex flex-col items-center gap-1.5">
             <button
-              onClick={handleFlechadoClick}
-              className="bg-accent hover:bg-accent/80 text-accent-foreground rounded-full w-20 h-20 flex items-center justify-center shadow-xl transition-transform hover:scale-105 active:scale-95 border border-accent/30 focus-visible:ring-2 focus-visible:ring-primary/70 relative touch-manipulation"
-              aria-label="Flechado"
-              title={`Flechado: destaca tu interés (${superlikesRemaining ?? 0} restantes hoy)`}
+              onClick={handleLike}
+              className="bg-primary hover:bg-primary/90 text-primary-foreground rounded-full w-20 h-20 flex items-center justify-center shadow-xl transition-transform hover:scale-105 active:scale-95 focus-visible:ring-2 focus-visible:ring-primary/70 relative touch-manipulation"
+              aria-label="Enviar like de amistad"
+              title="Amigo (deslizar a la derecha)"
             >
-              <HeartArrow className="h-9 w-9" />
+              <Smile className="h-9 w-9 fill-current" />
               <AnimatePresence>
                 {likeBurst && (
                   <motion.div
                     initial={{ scale: 0.5, opacity: 0 }}
-                    animate={{ scale: 1.5, opacity: 1 }}
-                    exit={{ scale: 2, opacity: 0 }}
-                    className="absolute inset-0 flex items-center justify-center pointer-events-none"
+                    animate={{ scale: 2, opacity: 0 }}
+                    className="absolute inset-0 flex items-center justify-center text-primary pointer-events-none"
                   >
-                    <span className="text-4xl">💘</span>
+                    <Smile className="h-10 w-10 fill-current" />
                   </motion.div>
                 )}
               </AnimatePresence>
-              <span className="absolute -top-1 -right-1 bg-primary text-primary-foreground text-[11px] font-bold rounded-full min-w-[20px] h-5 flex items-center justify-center px-1 shadow-sm border border-background">
-                {superlikesRemaining ?? 0}
-              </span>
             </button>
-            <span className="text-[10px] font-medium text-foreground/70">Flechado</span>
+            <span className="text-[10px] font-medium text-foreground/70">Amigo</span>
           </div>
-        )}
-        <div className="flex flex-col items-center gap-1.5">
-          <button
-            onClick={handleLike}
-            className="bg-primary hover:bg-primary/90 text-primary-foreground rounded-full w-16 h-16 flex items-center justify-center shadow-xl transition-transform hover:scale-105 active:scale-95 focus-visible:ring-2 focus-visible:ring-primary/70 relative touch-manipulation"
-            aria-label="Dar like"
-            title="Dar Like (deslizar a la derecha)"
-          >
-            <Heart className="h-8 w-8 fill-current" />
-            <AnimatePresence>
-              {likeBurst && (
-                <motion.div
-                  initial={{ scale: 0.5, opacity: 0 }}
-                  animate={{ scale: 2, opacity: 0 }}
-                  className="absolute inset-0 flex items-center justify-center text-primary pointer-events-none"
+        ) : (
+          <>
+            {onFlechado && (
+              <div className="flex flex-col items-center gap-1.5">
+                <button
+                  onClick={handleFlechadoClick}
+                  className="bg-accent hover:bg-accent/80 text-accent-foreground rounded-full w-20 h-20 flex items-center justify-center shadow-xl transition-transform hover:scale-105 active:scale-95 border border-accent/30 focus-visible:ring-2 focus-visible:ring-primary/70 relative touch-manipulation"
+                  aria-label="Flechado"
+                  title={`Flechado: destaca tu interés (${superlikesRemaining ?? 0} restantes hoy)`}
                 >
-                  <Heart className="h-10 w-10 fill-current" />
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </button>
-          <span className="text-[10px] font-medium text-foreground/70">Like</span>
-        </div>
+                  <HeartArrow className="h-9 w-9" />
+                  <AnimatePresence>
+                    {likeBurst && (
+                      <motion.div
+                        initial={{ scale: 0.5, opacity: 0 }}
+                        animate={{ scale: 1.5, opacity: 1 }}
+                        exit={{ scale: 2, opacity: 0 }}
+                        className="absolute inset-0 flex items-center justify-center pointer-events-none"
+                      >
+                        <span className="text-4xl">💘</span>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                  <span className="absolute -top-1 -right-1 bg-primary text-primary-foreground text-[11px] font-bold rounded-full min-w-[20px] h-5 flex items-center justify-center px-1 shadow-sm border border-background">
+                    {superlikesRemaining ?? 0}
+                  </span>
+                </button>
+                <span className="text-[10px] font-medium text-foreground/70">Flechado</span>
+              </div>
+            )}
+            <div className="flex flex-col items-center gap-1.5">
+              <button
+                onClick={handleLike}
+                className="bg-primary hover:bg-primary/90 text-primary-foreground rounded-full w-16 h-16 flex items-center justify-center shadow-xl transition-transform hover:scale-105 active:scale-95 focus-visible:ring-2 focus-visible:ring-primary/70 relative touch-manipulation"
+                aria-label="Dar like"
+                title="Dar Like (deslizar a la derecha)"
+              >
+                <Heart className="h-8 w-8 fill-current" />
+                <AnimatePresence>
+                  {likeBurst && (
+                    <motion.div
+                      initial={{ scale: 0.5, opacity: 0 }}
+                      animate={{ scale: 2, opacity: 0 }}
+                      className="absolute inset-0 flex items-center justify-center text-primary pointer-events-none"
+                    >
+                      <Heart className="h-10 w-10 fill-current" />
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </button>
+              <span className="text-[10px] font-medium text-foreground/70">Like</span>
+            </div>
+          </>
+        )}
       </div>
 
       {/* Long Press Context Menu */}
@@ -418,10 +452,19 @@ export const FloatingMatchCard = React.memo(function FloatingMatchCard({ profile
                 className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-muted transition-colors text-sm"
                 onClick={(e) => { e.stopPropagation(); setShowLongPressMenu(false); onSwipe('right'); }}
               >
-                <Heart className="h-4 w-4 text-primary" />
-                <span>Dar Like</span>
+                {effectiveIntent === 'friendship' ? (
+                  <>
+                    <Smile className="h-4 w-4 text-primary" />
+                    <span>Amigo</span>
+                  </>
+                ) : (
+                  <>
+                    <Heart className="h-4 w-4 text-primary" />
+                    <span>Dar Like</span>
+                  </>
+                )}
               </button>
-              {onFlechado && (
+              {onFlechado && effectiveIntent !== 'friendship' && (
                 <button
                   className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-muted transition-colors text-sm"
                   onClick={(e) => { e.stopPropagation(); setShowLongPressMenu(false); onFlechado(); }}

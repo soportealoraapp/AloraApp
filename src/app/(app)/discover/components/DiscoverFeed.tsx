@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import dynamic from "next/dynamic";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { Button } from "@/components/ui/button";
-import { Loader2, X, Heart, ArrowRight, ArrowLeft } from "lucide-react";
+import { Loader2, X, Heart, ArrowRight, ArrowLeft, Smile } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { SafeImage } from "@/components/ui/safe-image";
 import { HeartArrow } from "@/components/ui/custom/HeartArrow";
@@ -24,6 +24,7 @@ interface DiscoverFeedProps {
   hasMore: boolean;
   browseMode: 'swipe' | 'grid';
   intent: 'dating' | 'friendship' | 'both';
+  effectiveIntent?: 'dating' | 'friendship';
   intentChanging: boolean;
   onSwipe: (direction: 'left' | 'right') => void;
   onFlechado: () => void;
@@ -49,6 +50,7 @@ export function DiscoverFeed({
   hasMore,
   browseMode,
   intent,
+  effectiveIntent,
   intentChanging,
   onSwipe,
   onFlechado,
@@ -150,20 +152,27 @@ export function DiscoverFeed({
                       if (!profileData) return <div key={colIndex} />;
                       const p = profileData.profile;
                       
-                      return (
-                        <DiscoverGridItem
-                          key={p.id}
-                          profile={p}
-                          intent={intent}
-                          isPending={pendingGridActions.has(p.id)}
-                          badge={gridInteractionBadges.get(p.id)}
-                          onAction={async (action: 'like' | 'pass' | 'superlike') => {
-                            setPendingGridActions(prev => new Set(prev).add(p.id));
-                            await onAction(p.id, action);
-                            setPendingGridActions(prev => { const next = new Set(prev); next.delete(p.id); return next; });
-                          }}
-                        />
-                      );
+                       return (
+                         <DiscoverGridItem
+                           key={p.id}
+                           profile={p}
+                           intent={intent}
+                           effectiveIntent={
+                             intent !== 'both'
+                               ? intent
+                               : (p.connectionModes?.length === 1 && p.connectionModes[0] === 'friendship'
+                                   ? 'friendship'
+                                   : 'dating')
+                           }
+                           isPending={pendingGridActions.has(p.id)}
+                           badge={gridInteractionBadges.get(p.id)}
+                           onAction={async (action: 'like' | 'pass' | 'superlike') => {
+                             setPendingGridActions(prev => new Set(prev).add(p.id));
+                             await onAction(p.id, action);
+                             setPendingGridActions(prev => { const next = new Set(prev); next.delete(p.id); return next; });
+                           }}
+                         />
+                       );
                     })}
                   </div>
                 </div>
@@ -221,7 +230,7 @@ export function DiscoverFeed({
                 transition={{ type: "spring", stiffness: 260, damping: 25 }}
                 className="w-full h-full z-10"
               >
-                <FloatingMatchCard
+                 <FloatingMatchCard
                   profile={profiles[0].profile}
                   compatibility={profiles[0]?.compatibility}
                   explanations={profiles[0]?.score?.explanation}
@@ -230,6 +239,7 @@ export function DiscoverFeed({
                   superlikesRemaining={currentUserProfile?.superlikesRemaining}
                   hasExistingMatch={currentInteractionState.hasExistingMatch}
                   priorInteraction={currentInteractionState.priorInteraction}
+                  effectiveIntent={effectiveIntent}
                 />
               </motion.div>
             )}
@@ -245,7 +255,7 @@ export function DiscoverFeed({
 /**
  * Individual grid item for the Discover feed.
  */
-function DiscoverGridItem({ profile, intent, isPending, badge, onAction }: any) {
+function DiscoverGridItem({ profile, intent, effectiveIntent, isPending, badge, onAction }: any) {
   const router = useRouter();
   
   return (
@@ -297,26 +307,42 @@ function DiscoverGridItem({ profile, intent, isPending, badge, onAction }: any) 
         >
           <X className="h-5 w-5" />
         </Button>
-        <Button 
-          size="icon" 
-          variant="ghost" 
-          className="h-11 w-11 rounded-full bg-background/90 hover:bg-amber-500/10 text-amber-500 border border-border/40 shadow-sm transition-all active:scale-90" 
-          disabled={isPending} 
-          onClick={(e) => { e.stopPropagation(); hapticsHeavy(); onAction('superlike'); }}
-          aria-label="Flechado"
-        >
-          <HeartArrow className="h-5 w-5 fill-amber-500" />
-        </Button>
-        <Button 
-          size="icon" 
-          variant="ghost" 
-          className="h-11 w-11 rounded-full bg-background/90 hover:bg-primary/10 text-primary border border-border/40 shadow-sm transition-all active:scale-90" 
-          disabled={isPending} 
-          onClick={(e) => { e.stopPropagation(); hapticsMedium(); onAction('like'); }}
-          aria-label="Me gusta"
-        >
-          <Heart className="h-5 w-5 fill-primary" />
-        </Button>
+        {effectiveIntent === 'friendship' ? (
+          <Button 
+            size="icon" 
+            variant="ghost" 
+            className="h-11 w-11 rounded-full bg-background/90 hover:bg-primary/10 text-primary border border-border/40 shadow-sm transition-all active:scale-90" 
+            disabled={isPending} 
+            onClick={(e) => { e.stopPropagation(); hapticsMedium(); onAction('like'); }}
+            aria-label="Amigo"
+            title="Enviar like de amistad"
+          >
+            <Smile className="h-5 w-5 fill-primary" />
+          </Button>
+        ) : (
+          <>
+            <Button 
+              size="icon" 
+              variant="ghost" 
+              className="h-11 w-11 rounded-full bg-background/90 hover:bg-amber-500/10 text-amber-500 border border-border/40 shadow-sm transition-all active:scale-90" 
+              disabled={isPending} 
+              onClick={(e) => { e.stopPropagation(); hapticsHeavy(); onAction('superlike'); }}
+              aria-label="Flechado"
+            >
+              <HeartArrow className="h-5 w-5 fill-amber-500" />
+            </Button>
+            <Button 
+              size="icon" 
+              variant="ghost" 
+              className="h-11 w-11 rounded-full bg-background/90 hover:bg-primary/10 text-primary border border-border/40 shadow-sm transition-all active:scale-90" 
+              disabled={isPending} 
+              onClick={(e) => { e.stopPropagation(); hapticsMedium(); onAction('like'); }}
+              aria-label="Me gusta"
+            >
+              <Heart className="h-5 w-5 fill-primary" />
+            </Button>
+          </>
+        )}
       </div>
     </Card>
   );

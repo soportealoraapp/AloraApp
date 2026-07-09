@@ -31,11 +31,11 @@ export const DailyPicks = React.memo(function DailyPicks({ }: DailyPicksProps) {
         const controller = new AbortController();
         fetch('/api/daily-picks', { signal: controller.signal })
             .then(r => {
-                if (!r.ok) throw new Error(r.statusText);
+                if (!r.ok) throw new Error(`HTTP ${r.status}`);
                 return r.json();
             })
             .then(data => setPicks(data.picks || []))
-            .catch(() => logger.warn('Failed to fetch daily picks'))
+            .catch((err) => logger.warn('Failed to fetch daily picks', { metadata: { error: err instanceof Error ? err.message : String(err) } }))
             .finally(() => setLoading(false));
         return () => controller.abort();
     }, []);

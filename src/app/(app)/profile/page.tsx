@@ -77,11 +77,12 @@ export default function ProfilePage() {
         signal: controller.signal,
     })
       .then(r => {
-        if (!r.ok) throw new Error('Failed to fetch');
+        if (r.status === 404) return null; // no active question — expected, not an error
+        if (!r.ok) throw new Error(`HTTP ${r.status}`);
         return r.json();
       })
       .then(data => {
-        if (data.answered && data.userAnswer) {
+        if (data?.answered && data.userAnswer) {
           setLatestAnswer({
             questionId: data.questionId,
             question: data.question,
@@ -91,7 +92,7 @@ export default function ProfilePage() {
           });
         }
       })
-      .catch(() => logger.warn('Failed to fetch daily answer for own profile'));
+      .catch((err) => logger.warn('Failed to fetch daily answer for own profile', { metadata: { error: err instanceof Error ? err.message : String(err) } }));
     return () => controller.abort();
   }, [user?.id]);
 
