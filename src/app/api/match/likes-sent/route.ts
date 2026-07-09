@@ -87,10 +87,19 @@ export async function GET(request: NextRequest) {
             });
 
         const nextCursor = hasMore && sliced.length > 0
-            ? new Date(sliced[sliced.length - 1].createdAt).toISOString()
-            : null;
+          ? new Date(sliced[sliced.length - 1].createdAt).toISOString()
+          : null;
 
-        return NextResponse.json({ likes: sentLikes, hasMore, nextCursor });
+        const total = await prisma.interaction.count({
+          where: {
+            fromUserId: user.id,
+            type: { in: ['like', 'superlike'] },
+            deletedAt: null,
+            ...(intent ? { intent } : {}),
+          },
+        });
+
+        return NextResponse.json({ likes: sentLikes, hasMore, nextCursor, total });
     } catch (error) {
         console.error('Error getting sent likes:', error);
         return NextResponse.json({ error: 'Internal server error' }, { status: 500 });

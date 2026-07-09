@@ -9,7 +9,7 @@ import {
     DialogDescription,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Heart, Sparkles, Clock } from 'lucide-react';
+import { Heart, Sparkles, Clock, Send } from 'lucide-react';
 import { PaywallModal } from '@/components/premium/PaywallModal';
 
 interface LikesCounterModalProps {
@@ -18,10 +18,11 @@ interface LikesCounterModalProps {
     remaining: number;
     dailyLikesLimit: number;
     superlikesRemaining: number;
+    sentLikesCount?: number;
     resetAt?: Date | string;
 }
 
-export function LikesCounterModal({ isOpen, onClose, remaining, dailyLikesLimit, superlikesRemaining, resetAt }: LikesCounterModalProps) {
+export function LikesCounterModal({ isOpen, onClose, remaining, dailyLikesLimit, superlikesRemaining, sentLikesCount, resetAt }: LikesCounterModalProps) {
     const [timeUntilReset, setTimeUntilReset] = useState<string | null>(null);
     const [showPaywall, setShowPaywall] = useState(false);
 
@@ -98,6 +99,13 @@ export function LikesCounterModal({ isOpen, onClose, remaining, dailyLikesLimit,
                                     <span className="text-xl font-bold text-primary">{superlikesRemaining}</span>
                                     <span className="text-xl" role="img" aria-label="flechado">💘</span>
                                 </div>
+                            </div>
+                            <div className="bg-muted/50 rounded-xl p-4 text-center col-span-2">
+                                <div className="flex items-center justify-center gap-2 text-muted-foreground mb-1">
+                                    <Send className="h-4 w-4" />
+                                    <span className="text-xs font-medium uppercase tracking-wider">Enviados</span>
+                                </div>
+                                <p className="text-xl font-bold text-foreground">{sentLikesCount ?? 0}</p>
                             </div>
                         </div>
 

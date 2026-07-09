@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useMemo, useRef } from 'react';
-import { Heart } from 'lucide-react';
+import { Heart, Send } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
 import { cn } from '@/lib/utils';
 import { UpgradePrompt } from '@/components/premium/UpgradePrompt';
@@ -11,6 +11,7 @@ interface LikesCounterProps {
     dailyLikesUsed: number;
     dailyLikesLimit: number;
     superlikesRemaining: number;
+    sentLikesCount?: number;
     resetAt: Date | string;
     subscriptionStatus?: string;
     className?: string;
@@ -21,6 +22,7 @@ export function LikesCounter({
     dailyLikesUsed,
     dailyLikesLimit,
     superlikesRemaining,
+    sentLikesCount,
     resetAt,
     subscriptionStatus = 'free',
     className,
@@ -76,6 +78,12 @@ export function LikesCounter({
             <div className={cn("flex items-center gap-2 text-xs text-muted-foreground", className)}>
                 <Heart className="h-3.5 w-3.5 text-primary fill-primary" />
                 <span className="font-medium">Me gusta ilimitados</span>
+                {typeof sentLikesCount === 'number' && sentLikesCount > 0 && (
+                    <span className="flex items-center gap-1 text-foreground/70">
+                        <Send className="h-3 w-3" />
+                        {sentLikesCount} enviados
+                    </span>
+                )}
             </div>
         );
     }
@@ -110,6 +118,12 @@ export function LikesCounter({
                         isLow && !isEmpty && "[&>div]:bg-orange-500"
                     )}
                 />
+                {typeof sentLikesCount === 'number' && sentLikesCount > 0 && (
+                    <div className="flex items-center gap-1 text-[11px] text-muted-foreground mt-1">
+                        <Send className="h-3 w-3" />
+                        <span>{sentLikesCount} enviados</span>
+                    </div>
+                )}
             </button>
             {isEmpty && <UpgradePrompt trigger="likes_exhausted" className="mt-2" />}
 
@@ -119,6 +133,7 @@ export function LikesCounter({
                 remaining={remaining}
                 dailyLikesLimit={dailyLikesLimit}
                 superlikesRemaining={superlikesRemaining}
+                sentLikesCount={sentLikesCount}
                 resetAt={resetAt}
             />
         </>

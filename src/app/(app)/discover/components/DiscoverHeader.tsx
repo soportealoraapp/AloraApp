@@ -7,28 +7,23 @@ import { cn } from "@/lib/utils";
 
 interface DiscoverHeaderProps {
   currentUserProfile: UserProfile | null;
-  lastSwipe: any;
-  rewinding: boolean;
-  onRewind: () => void;
+  onOpenSecondChance: () => void;
+  passedCount: number;
   onOpenFilters: () => void;
   activeFiltersCount: number;
-  rewindsRemaining: number;
-  maxRewinds: number;
 }
 
 /**
  * DiscoverHeader provides the top navigation bar for the Discover page.
- * It includes brand branding, travel mode status, and action buttons for rewinding and filtering.
+ * It includes branding, travel mode status, and action buttons for a
+ * second chance (passed profiles) and filtering.
  */
 export function DiscoverHeader({
   currentUserProfile,
-  lastSwipe,
-  rewinding,
-  onRewind,
+  onOpenSecondChance,
+  passedCount,
   onOpenFilters,
-  activeFiltersCount,
-  rewindsRemaining,
-  maxRewinds
+  activeFiltersCount
 }: DiscoverHeaderProps) {
   return (
     <header className="app-page-header justify-between glass" style={{ borderBottomColor: 'hsl(var(--border) / 0.5)' }}>
@@ -37,7 +32,7 @@ export function DiscoverHeader({
         className="absolute top-0 left-0 right-0 h-px"
         style={{ background: 'linear-gradient(90deg, transparent, hsl(335 85% 76% / 0.5), hsl(280 60% 70% / 0.5), transparent)' }}
       />
-      
+
       <div className="flex items-center gap-2">
         <h1 className="text-2xl font-headline font-bold tracking-tight text-gradient">Alora</h1>
         {currentUserProfile?.travelModeEnabled && (
@@ -48,27 +43,28 @@ export function DiscoverHeader({
       </div>
 
       <div className="flex items-center gap-1">
-        {/* Rewind Action */}
+        {/* Second Chance Action */}
         <div className="flex items-center">
-          <Button 
-            variant="ghost" 
-            size="icon" 
-            onClick={onRewind} 
-            disabled={!lastSwipe || rewinding} 
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={onOpenSecondChance}
             className="touch-target rounded-xl transition-all active:scale-90"
-            title={`Deshacer último swipe — ventana de 5 min (${rewindsRemaining}/${maxRewinds} disponibles)`}
-            aria-label="Deshacer último swipe"
+            title="Segunda oportunidad — perfiles que descartaste"
+            aria-label="Segunda oportunidad"
           >
-            <RotateCcw className={cn("h-5 w-5 text-muted-foreground", rewinding && "animate-spin")} />
+            <RotateCcw className="h-5 w-5 text-muted-foreground" />
           </Button>
-          <span className="text-[11px] text-muted-foreground font-bold -ml-1 mr-1">{rewindsRemaining}</span>
+          {passedCount > 0 && (
+            <span className="text-[11px] text-muted-foreground font-bold -ml-1 mr-1">{passedCount}</span>
+          )}
         </div>
 
         {/* Filter Action */}
-        <Button 
-          variant="ghost" 
-          size="icon" 
-          onClick={onOpenFilters} 
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={onOpenFilters}
           className="relative touch-target rounded-xl transition-all active:scale-90"
           title="Filtros de búsqueda"
           aria-label="Filtros de búsqueda"

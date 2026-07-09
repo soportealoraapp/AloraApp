@@ -24,7 +24,7 @@ const MatchScreen = dynamic(() => import("@/components/ui/premium/MatchScreen").
 const DailyCompatibilityCard = dynamic(() => import("@/components/compatibility/DailyCompatibilityCard").then(m => m.DailyCompatibilityCard), { ssr: false });
 const PostOnboardingJourney = dynamic(() => import("@/components/onboarding/PostOnboardingJourney").then(m => m.PostOnboardingJourney), { ssr: false });
 const DailyPicks = dynamic(() => import("@/components/discover/DailyPicks").then(m => m.DailyPicks), { ssr: false });
-const SecondChanceSection = dynamic(() => import("@/components/discover/SecondChanceSection").then(m => m.SecondChanceSection), { ssr: false });
+const SecondChanceModal = dynamic(() => import("@/components/discover/SecondChanceModal").then(m => m.SecondChanceModal), { ssr: false });
 const LikesSentSection = dynamic(() => import("@/components/discover/LikesSentSection").then(m => m.LikesSentSection), { ssr: false });
 const PaywallModal = dynamic(() => import("@/components/premium/PaywallModal").then(m => m.PaywallModal), { ssr: false });
 
@@ -143,7 +143,6 @@ export default function DiscoverPage() {
   const [showMatchScreen, setShowMatchScreen] = useState(false);
   const [showPaywall, setShowPaywall] = useState(false);
   const [swipeCount, setSwipeCount] = useState(0);
-  const [rewinding, setRewinding] = useState(false);
   const [rewindedProfileId, setRewindedProfileId] = useState<string | null>(null);
   const [tutorialStep, setTutorialStep] = useState<number | null>(() => {
     if (typeof window !== 'undefined' && localStorage.getItem('swipeTutorialDone')) return null;
@@ -153,7 +152,9 @@ export default function DiscoverPage() {
   const [intentChanging, setIntentChanging] = useState(false);
   const [gridInteractionBadges, setGridInteractionBadges] = useState<Map<string, any>>(new Map());
   const [currentInteractionState, setCurrentInteractionState] = useState<any>({ hasExistingMatch: false, priorInteraction: null });
-  const lastSwipeRef = useRef<{ profileId: string; direction: string } | null>(null);
+  const [passedCount, setPassedCount] = useState(0);
+  const [sentLikesCount, setSentLikesCount] = useState(0);
+  const [secondChanceOpen, setSecondChanceOpen] = useState(false);
   const geoRequestedRef = useRef(false);
 
   const getEffectiveIntent = useCallback((targetConnectionModes?: string[]): ConnectionIntent => {
@@ -198,6 +199,26 @@ export default function DiscoverPage() {
     }
     if (!loading && intentChanging) setIntentChanging(false);
   }, [intent, loading, intentChanging]);
+
+  // Fetch counts for the Second Chance badge and the sent-likes counter
+  useEffect(() => {
+    if (!user?.id) return;
+    const intentParam = intent === 'both' ? 'dating' : intent;
+
+    const c1 = new AbortController();
+    fetch(`/api/match/passed?intent=${intentParam}`, { signal: c1.signal })
+      .then(r => r.ok ? r.json() : null)
+      .then(d => { if (d?.profiles) setPassedCount(d.profiles.length); })
+      .catch(() => {});
+
+    const c2 = new AbortController();
+    fetch(`/api/match/likes-sent?intent=${intentParam}&limit=1`, { signal: c2.signal })
+      .then(r => r.ok ? r.json() : null)
+      .then(d => { if (typeof d?.total === 'number') setSentLikesCount(d.total); })
+      .catch(() => {});
+
+    return () => { c1.abort(); c2.abort(); };
+  }, [user?.id, intent]);
 
   // Batch fetch interaction state for current profile and grid badges
   useEffect(() => {
@@ -257,7 +278,6 @@ export default function DiscoverPage() {
       track(analyticsEvent, { targetUserId: profileToActOn.id, intent: profileIntent });
       
       const result = await sendLike(profileToActOn.id, action, profileIntent, false);
-      lastSwipeRef.current = { profileId: profileToActOn.id, direction };
 
       if (result?.matched) {
         track(AnalyticsEvents.MATCH_CREATED, { partnerId: profileToActOn.id, intent: profileIntent });
@@ -277,34 +297,6 @@ export default function DiscoverPage() {
   const handleSwipe = useCallback((dir: 'left' | 'right') => executeAction(dir === 'right' ? 'like' : 'pass', dir), [executeAction]);
   const handleFlechado = useCallback(() => executeAction('superlike', 'flechado'), [executeAction]);
 
-  const handleRewind = async () => {
-    if (!lastSwipeRef.current || rewinding) return;
-    setRewinding(true);
-    try {
-      const res = await fetch('/api/match/rewind', { method: 'POST' });
-      if (res.ok) {
-        const data = await res.json();
-        const restoredUserId = data.undone?.targetUserId;
-        if (restoredUserId) {
-          const profileRes = await fetch(`/api/profile/${restoredUserId}`);
-          if (profileRes.ok) {
-            const restoredProfile = await profileRes.json();
-            setRewindedProfileId(restoredUserId);
-            setProfiles(prev => [{ profile: restoredProfile.profile || restoredProfile, compatibility: null }, ...prev] as any);
-            setTimeout(() => setRewindedProfileId(null), 800);
-          }
-        }
-        setSwipeCount(prev => Math.max(0, prev - 1));
-        lastSwipeRef.current = null;
-        toast({ title: "Deshecho", description: "Último swipe revertido correctamente." });
-      }
-    } catch {
-      toast({ title: "Error", description: "No se pudo conectar con el servidor.", variant: "destructive" });
-    } finally {
-      setRewinding(false);
-    }
-  };
-
   const handleRelaxFilters = useCallback(() => {
     hapticsMedium();
     setFilters(prev => ({ ...prev, distance: 100, ageRange: [18, 60], verifiedOnly: false, highCompatibility: false, activeToday: false }));
@@ -312,22 +304,15 @@ export default function DiscoverPage() {
   }, [toast]);
 
   const activeFiltersCount = countActiveFilters(filters);
-  const maxRewinds = currentUserProfile?.subscriptionStatus === 'plus' ? 3 : 1;
-  const isNewRewindDay = !currentUserProfile?.rewindsResetAt || new Date().toDateString() !== new Date(currentUserProfile.rewindsResetAt).toDateString();
-  const rewindsUsed = isNewRewindDay ? 0 : (currentUserProfile?.rewindsUsed ?? 0);
-  const rewindsRemaining = maxRewinds - rewindsUsed;
 
   return (
     <div className="flex min-h-dvh flex-col bg-gradient-to-br from-background to-muted/30 overflow-y-auto">
       <DiscoverHeader 
         currentUserProfile={currentUserProfile}
-        lastSwipe={lastSwipeRef.current}
-        rewinding={rewinding}
-        onRewind={handleRewind}
+        onOpenSecondChance={() => setSecondChanceOpen(true)}
+        passedCount={passedCount}
         onOpenFilters={() => setFilterOpen(true)}
         activeFiltersCount={activeFiltersCount}
-        rewindsRemaining={rewindsRemaining}
-        maxRewinds={maxRewinds}
       />
 
       <div className="mx-auto w-full max-w-md px-4 pt-4 space-y-4 md:max-w-2xl">
@@ -342,6 +327,7 @@ export default function DiscoverPage() {
           dailyLikesUsed={swipeCount}
           dailyLikesLimit={SWIPE_LIMIT}
           superlikesRemaining={currentUserProfile?.superlikesRemaining ?? 0}
+          sentLikesCount={sentLikesCount}
           resetAt={currentUserProfile?.dailyLikesResetAt
             ? new Date(new Date(currentUserProfile.dailyLikesResetAt).setHours(24, 0, 0, 0))
             : new Date(new Date().setHours(24, 0, 0, 0))
@@ -387,7 +373,6 @@ export default function DiscoverPage() {
         <Suspense fallback={null}><DailyCompatibilityCard /></Suspense>
         <Suspense fallback={null}><PostOnboardingJourney /></Suspense>
         <Suspense fallback={null}><DailyPicks subscriptionStatus={currentUserProfile?.subscriptionStatus ?? 'free'} /></Suspense>
-        <Suspense fallback={null}><SecondChanceSection intent={intent === 'both' ? 'dating' : intent} /></Suspense>
         <Suspense fallback={null}><LikesSentSection intent={intent === 'both' ? 'dating' : intent} /></Suspense>
       </div>
 
@@ -413,6 +398,11 @@ export default function DiscoverPage() {
         />
       )}
       <PaywallModal isOpen={showPaywall} onClose={() => setShowPaywall(false)} />
+      <SecondChanceModal
+        open={secondChanceOpen}
+        onOpenChange={setSecondChanceOpen}
+        intent={intent === 'both' ? 'dating' : intent}
+      />
     </div>
   );
 }

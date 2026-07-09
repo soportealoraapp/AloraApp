@@ -60,7 +60,7 @@ const getMissions = (profile: Partial<UserProfile>): Mission[] => [
     icon: <MessageCircle className="h-5 w-5" />,
     action: 'Responder pregunta',
     route: '/discover',
-    completed: profile?.latestAnswer?.answered ?? false,
+    completed: !!profile?.latestAnswer,
   },
   {
     id: 'photos',
@@ -124,6 +124,9 @@ export function PostOnboardingJourney() {
     window.addEventListener('daily-question-answered', handleAnswered);
     return () => window.removeEventListener('daily-question-answered', handleAnswered);
   }, [profile]);
+
+  // Avoid flashing "0/0" before the profile is available.
+  if (!profile) return null;
 
   const completedCount = missions.filter(m => m.completed).length;
   const progress = missions.length > 0 ? (completedCount / missions.length) * 100 : 0;

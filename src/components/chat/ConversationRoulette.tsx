@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Dice1, RefreshCw, Send, Sparkles } from 'lucide-react';
+import { Dice1, RefreshCw, Send, Sparkles, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface ConversationRouletteProps {
@@ -106,6 +106,9 @@ export function ConversationRoulette({ onSend, disabled }: ConversationRouletteP
                                 <p className="text-sm font-medium leading-snug">{currentQuestion}</p>
                             </div>
                             <div className="flex gap-1 flex-shrink-0">
+                                <Button size="icon" variant="ghost" className="h-8 w-8" onClick={() => setCurrentQuestion(null)} aria-label="Cancelar pregunta">
+                                    <X className="h-4 w-4" />
+                                </Button>
                                 <Button size="icon" variant="ghost" className="h-8 w-8" onClick={spin} aria-label="Cambiar pregunta">
                                     <RefreshCw className="h-4 w-4" />
                                 </Button>
@@ -125,7 +128,7 @@ export function ConversationRoulette({ onSend, disabled }: ConversationRouletteP
                     className="w-full"
                 >
                     <Dice1 className={cn("h-4 w-4 mr-2", isSpinning && "animate-spin")} />
-                    {isSpinning ? 'Buscando...' : '🎲 Pregunta aleatoria'}
+                    {isSpinning ? 'Buscando...' : 'Pregunta aleatoria'}
                 </Button>
             )}
         </div>
