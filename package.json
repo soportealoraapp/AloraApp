@@ -12,7 +12,8 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest",
     "test:e2e": "playwright test",
-    "audit:alora": "npx tsx scripts/audit-alora.ts"
+    "audit:alora": "npx tsx scripts/audit-alora.ts",
+    "normalize:notifications": "npx tsx scripts/normalize-notifications-es.ts"
   },
   "dependencies": {
     "@capacitor/android": "^8.0.0",
