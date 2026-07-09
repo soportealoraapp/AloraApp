@@ -1,69 +1,113 @@
 import { prisma } from '@/lib/prisma';
 
-const QUESTIONS = [
-    { question: "¿Qué significa una relación sana para ti?", category: "values" },
-    { question: "¿Cuál es tu mayor meta este año?", category: "goals" },
-    { question: "¿Qué valor nunca negociarías?", category: "values" },
-    { question: "¿Cómo prefieres resolver un conflicto?", category: "communication" },
-    { question: "¿Qué te hace sentir más conectado/a con alguien?", category: "connection" },
-    { question: "¿Cuál es tu forma favorita de pasar un domingo?", category: "lifestyle" },
-    { question: "¿Qué aprendiste de tu última relación?", category: "growth" },
-    { question: "¿Qué buscas en una primera cita?", category: "dating" },
-    { question: "¿Qué opinas sobre la vulnerabilidad en una relación?", category: "values" },
-    { question: "¿Cuál es tu lenguaje del amor principal?", category: "connection" },
-    { question: "¿Qué buscas en tu próxima relación?", category: "goals" },
-    { question: "¿Cómo te describes en tres palabras?", category: "personality" },
-    { question: "¿Qué actividad te gustaría compartir con tu pareja?", category: "lifestyle" },
-    { question: "¿Qué es lo más importante que buscas en una pareja?", category: "values" },
-    { question: "¿Cómo te gustaría que sea tu vida en 5 años?", category: "goals" },
-    { question: "¿Cuál es tu mayor miedo en una relación?", category: "growth" },
-    { question: "¿Prefieres las palabras o los hechos para demostrar amor?", category: "communication" },
-    { question: "¿Qué hábito de tu pareja más admiras?", category: "values" },
-    { question: "¿Cómo manejas el estrés en una relación?", category: "communication" },
-    { question: "¿Qué lugar(es) te gustaría visitar con tu pareja?", category: "lifestyle" },
-    { question: "¿Cuál es tu forma favorita de recibir cariño?", category: "connection" },
-    { question: "¿Qué opinas sobre las relaciones a distancia?", category: "values" },
-    { question: "¿Cómo celebras los logros de tu pareja?", category: "connection" },
-    { question: "¿Qué role juega la familia en tu vida amorosa?", category: "values" },
-    { question: "¿Cuál es tu mayor fortaleza en una relación?", category: "personality" },
-    { question: "¿Cómo te gustaría conocer a tu pareja ideal?", category: "dating" },
-    { question: "¿Qué opinas sobre compartir redes sociales en pareja?", category: "values" },
-    { question: "¿Qué actividad nueva te gustaría probar con tu pareja?", category: "lifestyle" },
-    { question: "¿Cómo defines el éxito en una relación?", category: "goals" },
-    { question: "¿Qué es algo que nunca harías en una relación?", category: "values" },
-    { question: "¿Cuál es tu mayor sueño compartido?", category: "goals" },
-    { question: "¿Cómo manejas los desacuerdos financieros en pareja?", category: "communication" },
-    { question: "¿Qué pequeño gesto te hace sentir amado/a?", category: "connection" },
-    { question: "¿Cuál ha sido tu mayor aprendizaje en el amor?", category: "growth" },
-    { question: "¿Qué tipo de energía buscas en una relación?", category: "connection" },
-    { question: "¿Prefieres una cita tranquila en casa o una aventura?", category: "lifestyle" },
-    { question: "¿Qué es para ti una comunicación sana?", category: "communication" },
-    { question: "¿Cuál es tu mayor fortaleza como pareja?", category: "personality" },
-    { question: "¿Qué no puede faltar en tu vida diaria?", category: "lifestyle" },
-    { question: "¿Cómo sabes que alguien es la persona indicada?", category: "values" },
-    { question: "¿Qué lugar te hace sentir en paz?", category: "lifestyle" },
-    { question: "¿Cuál es tu mayor meta a largo plazo?", category: "goals" },
-    { question: "¿Qué importancia le das a la familia?", category: "values" },
-    { question: "¿Cómo celebras los pequeños logros?", category: "growth" },
-    { question: "¿Qué es lo que más te enamora de una persona?", category: "connection" },
-    { question: "¿Prefieres planes espontáneos o todo organizado?", category: "personality" },
-    { question: "¿Cuál es tu cita ideal para un domingo lluvioso?", category: "lifestyle" },
-    { question: "¿Qué valoras más: la honestidad o la lealtad?", category: "values" },
-    { question: "¿Cómo te cuidas cuando estás triste?", category: "growth" },
-    { question: "¿Qué canción te hace pensar en el amor?", category: "connection" },
-    { question: "¿Cuál es tu mayor sueño profesional?", category: "goals" },
-    { question: "¿Qué te hace reír sin parar?", category: "personality" },
-    { question: "¿Cómo mantienes viva la chispa en una relación?", category: "connection" },
-    { question: "¿Qué hábito te gustaría compartir con tu pareja?", category: "lifestyle" },
-    { question: "¿Cuál es tu mayor red flag en alguien?", category: "values" },
-    { question: "¿Qué te gustaría aprender de tu próxima pareja?", category: "growth" },
-    { question: "¿Prefieres mensajes largos o llamadas?", category: "communication" },
-    { question: "¿Cuál es tu forma favorita de dar las buenas noches?", category: "connection" },
-    { question: "¿Qué meta tienes para este mes?", category: "goals" },
-    { question: "¿Cómo defines el éxito personal?", category: "goals" },
-    { question: "¿Qué cualidad admiras más en los demás?", category: "personality" },
-    { question: "¿Cuál es tu mayor miedo a superar?", category: "growth" },
-];
+/**
+ * Questions organized by category. This is the single source of truth; the
+ * flat `QUESTIONS` list is derived below in a round-robin order so that
+ * consecutive days naturally vary in category.
+ */
+export const QUESTION_BANK: Record<string, string[]> = {
+    values: [
+        "¿Qué significa una relación sana para ti?",
+        "¿Qué valor nunca negociarías?",
+        "¿Qué opinas sobre la vulnerabilidad en una relación?",
+        "¿Qué es lo más importante que buscas en una pareja?",
+        "¿Qué hábito de tu pareja más admiras?",
+        "¿Qué opinas sobre las relaciones a distancia?",
+        "¿Qué role juega la familia en tu vida amorosa?",
+        "¿Qué opinas sobre compartir redes sociales en pareja?",
+        "¿Cómo sabes que alguien es la persona indicada?",
+        "¿Qué importancia le das a la familia?",
+        "¿Qué valoras más: la honestidad o la lealtad?",
+        "¿Cuál es tu mayor red flag en alguien?",
+        "¿Qué es algo que nunca harías en una relación?",
+    ],
+    goals: [
+        "¿Cuál es tu mayor meta este año?",
+        "¿Qué buscas en tu próxima relación?",
+        "¿Cómo te gustaría que sea tu vida en 5 años?",
+        "¿Cómo defines el éxito en una relación?",
+        "¿Cuál es tu mayor sueño compartido?",
+        "¿Cuál es tu mayor meta a largo plazo?",
+        "¿Cuál es tu mayor sueño profesional?",
+        "¿Qué meta tienes para este mes?",
+        "¿Cómo defines el éxito personal?",
+    ],
+    communication: [
+        "¿Cómo prefieres resolver un conflicto?",
+        "¿Prefieres las palabras o los hechos para demostrar amor?",
+        "¿Cómo manejas el estrés en una relación?",
+        "¿Cómo manejas los desacuerdos financieros en pareja?",
+        "¿Qué es para ti una comunicación sana?",
+        "¿Prefieres mensajes largos o llamadas?",
+    ],
+    connection: [
+        "¿Qué te hace sentir más conectado/a con alguien?",
+        "¿Cuál es tu lenguaje del amor principal?",
+        "¿Cuál es tu forma favorita de recibir cariño?",
+        "¿Cómo celebras los logros de tu pareja?",
+        "¿Qué pequeño gesto te hace sentir amado/a?",
+        "¿Qué tipo de energía buscas en una relación?",
+        "¿Qué es lo que más te enamora de una persona?",
+        "¿Qué canción te hace pensar en el amor?",
+        "¿Cómo mantienes viva la chispa en una relación?",
+        "¿Cuál es tu forma favorita de dar las buenas noches?",
+    ],
+    lifestyle: [
+        "¿Cuál es tu forma favorita de pasar un domingo?",
+        "¿Qué actividad te gustaría compartir con tu pareja?",
+        "¿Qué lugar(es) te gustaría visitar con tu pareja?",
+        "¿Qué actividad nueva te gustaría probar con tu pareja?",
+        "¿Prefieres una cita tranquila en casa o una aventura?",
+        "¿Qué no puede faltar en tu vida diaria?",
+        "¿Qué lugar te hace sentir en paz?",
+        "¿Cuál es tu cita ideal para un domingo lluvioso?",
+        "¿Qué hábito te gustaría compartir con tu pareja?",
+    ],
+    growth: [
+        "¿Qué aprendiste de tu última relación?",
+        "¿Cuál es tu mayor miedo en una relación?",
+        "¿Cuál ha sido tu mayor aprendizaje en el amor?",
+        "¿Cómo celebras los pequeños logros?",
+        "¿Cómo te cuidas cuando estás triste?",
+        "¿Qué te gustaría aprender de tu próxima pareja?",
+        "¿Cuál es tu mayor miedo a superar?",
+    ],
+    dating: [
+        "¿Qué buscas en una primera cita?",
+        "¿Cómo te gustaría conocer a tu pareja ideal?",
+    ],
+    personality: [
+        "¿Cómo te describes en tres palabras?",
+        "¿Cuál es tu mayor fortaleza en una relación?",
+        "¿Cuál es tu mayor fortaleza como pareja?",
+        "¿Prefieres planes espontáneos o todo organizado?",
+        "¿Qué te hace reír sin parar?",
+        "¿Qué cualidad admiras más en los demás?",
+    ],
+};
+
+export const QUESTION_CATEGORIES = Object.keys(QUESTION_BANK);
+
+/** Flat list with round-robin ordering so consecutive questions differ in category. */
+export const QUESTIONS: { question: string; category: string }[] = (() => {
+    const byCategory = QUESTION_CATEGORIES.map((cat) =>
+        QUESTION_BANK[cat].map((q) => ({ question: q, category: cat }))
+    );
+    const result: { question: string; category: string }[] = [];
+    let i = 0;
+    let added = true;
+    while (added) {
+        added = false;
+        for (const list of byCategory) {
+            if (i < list.length) {
+                result.push(list[i]);
+                added = true;
+            }
+        }
+        i++;
+    }
+    return result;
+})();
 
 export async function ensureQuestionsSeeded() {
     for (const q of QUESTIONS) {
@@ -76,13 +120,22 @@ export async function ensureQuestionsSeeded() {
 }
 
 export async function rotateDailyQuestion(): Promise<{ previousId: string | null; newId: string } | null> {
-    // Deactivate current active question
     const current = await prisma.dailyQuestion.findFirst({ where: { isActive: true } });
+
+    // Idempotent per UTC day: if the active question was already rotated today,
+    // leave it as-is so a double cron run doesn't skip a question.
+    const todayStart = new Date();
+    todayStart.setUTCHours(0, 0, 0, 0);
+    if (current?.activatedAt && new Date(current.activatedAt) >= todayStart) {
+        return { previousId: null, newId: current.id };
+    }
+
+    // Deactivate current active question
     if (current) {
         await prisma.dailyQuestion.update({ where: { id: current.id }, data: { isActive: false } });
     }
 
-    // Get all questions ordered by ID for stable rotation
+    // Get all questions ordered by creation for stable rotation (seeded round-robin)
     const allQuestions = await prisma.dailyQuestion.findMany({ orderBy: { createdAt: 'asc' } });
     if (allQuestions.length === 0) {
         await ensureQuestionsSeeded();
@@ -93,9 +146,20 @@ export async function rotateDailyQuestion(): Promise<{ previousId: string | null
         return { previousId: null, newId: first.id };
     }
 
-    // Find current index, rotate to next
+    // Rotate to the next question, preferring one with a different category
+    // than today's so consecutive days vary in theme (independent of DB order).
     const currentIndex = allQuestions.findIndex(q => q.id === current?.id);
-    const nextIndex = (currentIndex + 1) % allQuestions.length;
+    const currentCategory = current?.category;
+    let nextIndex = (currentIndex + 1) % allQuestions.length;
+    if (currentCategory) {
+        for (let step = 1; step <= allQuestions.length; step++) {
+            const idx = (currentIndex + step) % allQuestions.length;
+            if (allQuestions[idx].category !== currentCategory) {
+                nextIndex = idx;
+                break;
+            }
+        }
+    }
     const next = allQuestions[nextIndex];
 
     await prisma.dailyQuestion.update({ where: { id: next.id }, data: { isActive: true, activatedAt: new Date() } });
@@ -158,6 +222,21 @@ export async function getLatestAnswer(userId: string): Promise<{ questionId: str
         select: { questionId: true, answer: true, createdAt: true },
     });
     return row;
+}
+
+export async function getAnswerForToday(userId: string) {
+    const question = await getTodayQuestion();
+    if (!question) return null;
+
+    const answer = await getUserAnswer(userId, question.id);
+    if (!answer) return null;
+
+    return {
+        questionId: question.id,
+        question: question.question,
+        category: question.category,
+        answer: answer.answer,
+    };
 }
 
 export async function getLatestAnswerForUserById(targetUserId: string) {

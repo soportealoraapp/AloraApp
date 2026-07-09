@@ -104,7 +104,7 @@ export async function computeWeeklyMissions(
             id: 'conversation',
             title: 'Inicia una conversación',
             description: 'Consigue un match esta semana',
-            route: '/chat',
+            route: '/matches',
             icon: 'chat',
             completed: matchesWeek >= 1,
         },

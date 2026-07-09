@@ -8,7 +8,8 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useMatches } from "@/hooks/use-matches";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { ArrowLeft, MoreVertical, Sparkles, Loader2, Circle, History } from "lucide-react";
+import { ArrowLeft, MoreVertical, Sparkles, Loader2, Circle, History, Send, Check } from "lucide-react";
+import { Textarea } from "@/components/ui/textarea";
 import { ChatInput } from "@/components/chat/chat-input";
 import { MessageRenderer } from "@/components/chat/MessageRenderer";
 import { MuteDialog } from "@/components/chat/MuteDialog";
@@ -88,6 +89,14 @@ export default function ChatWindowPage() {
     const [matchHealth, setMatchHealth] = useState(0);
     const [partnerAnswer, setPartnerAnswer] = useState<{ question: string; answer: string } | null>(null);
 
+    // Daily question answering within chat
+    const [dailyQuestion, setDailyQuestion] = useState<string | null>(null);
+    const [dailyQuestionId, setDailyQuestionId] = useState<string | null>(null);
+    const [myDailyAnswer, setMyDailyAnswer] = useState('');
+    const [showDailyComposer, setShowDailyComposer] = useState(false);
+    const [dailySubmitting, setDailySubmitting] = useState(false);
+    const [dailyAnswered, setDailyAnswered] = useState(false);
+
     const match = matches.find((m) => m.id === matchId);
     const otherUserId = match?.users.find((id) => id !== user?.id);
     const partner = match?.partner;
@@ -130,6 +139,46 @@ export default function ChatWindowPage() {
         const timer = setTimeout(checkFeedback, 1500);
         return () => { controller.abort(); clearTimeout(timer); };
     }, [matchId, otherUserId]);
+
+    // Load today's daily question so the user can answer it from chat
+    useEffect(() => {
+        if (!user) return;
+        const controller = new AbortController();
+        fetch('/api/daily-question', { signal: controller.signal })
+            .then(r => r.ok ? r.json() : null)
+            .then((data) => {
+                if (data?.question) {
+                    setDailyQuestion(data.question);
+                    setDailyQuestionId(data.questionId);
+                    if (data.userAnswer) {
+                        setMyDailyAnswer(data.userAnswer);
+                        setDailyAnswered(true);
+                    }
+                }
+            })
+            .catch(() => {});
+        return () => controller.abort();
+    }, [user]);
+
+    const handleSubmitDailyAnswer = async () => {
+        if (!dailyQuestionId || !myDailyAnswer.trim() || dailySubmitting) return;
+        setDailySubmitting(true);
+        try {
+            const res = await fetch('/api/daily-question', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ questionId: dailyQuestionId, answer: myDailyAnswer.trim() }),
+            });
+            if (!res.ok) throw new Error('Error al guardar');
+            setDailyAnswered(true);
+            setShowDailyComposer(false);
+            toast({ title: 'Respuesta guardada', description: 'Tu respuesta ya se ve en tu perfil.' });
+        } catch {
+            toast({ title: 'Error', description: 'No se pudo guardar tu respuesta.', variant: 'destructive' });
+        } finally {
+            setDailySubmitting(false);
+        }
+    };
 
     const [autoScroll, setAutoScroll] = useState(true);
     const { track } = useAnalytics();
@@ -554,6 +603,48 @@ export default function ChatWindowPage() {
                         <p className="text-xs font-bold text-primary uppercase tracking-wider mb-1">Su respuesta del día</p>
                         <p className="text-xs text-muted-foreground mb-2 italic">&ldquo;{partnerAnswer.question}&rdquo;</p>
                         <p className="text-sm font-medium text-foreground leading-relaxed">&ldquo;{partnerAnswer.answer}&rdquo;</p>
+
+                        {dailyQuestion && (
+                            <div className="mt-3 pt-3 border-t border-primary/10">
+                                {showDailyComposer ? (
+                                    <div className="space-y-2">
+                                        <p className="text-xs font-medium text-foreground">{dailyQuestion}</p>
+                                        <Textarea
+                                            value={myDailyAnswer}
+                                            onChange={(e) => setMyDailyAnswer(e.target.value)}
+                                            placeholder="Comparte tu respuesta..."
+                                            className="min-h-[60px] max-h-[140px] resize-none text-sm"
+                                            maxLength={300}
+                                        />
+                                        <div className="flex items-center justify-between">
+                                            <span className="text-xs text-muted-foreground">{myDailyAnswer.length}/300</span>
+                                            <div className="flex items-center gap-2">
+                                                <Button size="sm" variant="ghost" onClick={() => setShowDailyComposer(false)}>Cancelar</Button>
+                                                <Button
+                                                    size="sm"
+                                                    onClick={handleSubmitDailyAnswer}
+                                                    disabled={!myDailyAnswer.trim() || dailySubmitting}
+                                                    className="bg-gradient-to-r from-primary to-primary/80"
+                                                >
+                                                    {dailySubmitting ? <Loader2 className="h-3 w-3 mr-1 animate-spin" /> : <Send className="h-3 w-3 mr-1" />}
+                                                    Enviar
+                                                </Button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <Button
+                                        size="sm"
+                                        variant="ghost"
+                                        className="w-full text-primary"
+                                        onClick={() => setShowDailyComposer(true)}
+                                    >
+                                        {dailyAnswered ? <Check className="h-3 w-3 mr-1" /> : <Sparkles className="h-3 w-3 mr-1" />}
+                                        {dailyAnswered ? 'Editar tu respuesta del día' : 'Responde la pregunta del día'}
+                                    </Button>
+                                )}
+                            </div>
+                        )}
                     </div>
                 )}
 

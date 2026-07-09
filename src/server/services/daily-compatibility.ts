@@ -38,34 +38,39 @@ export async function getDailyCompatibility(userId: string, timezone?: string): 
         select: { metadata: true }
     });
 
+    // Matched users must never be featured as a "new connection"
+    const matchedIds = await getMatchedUserIds(userId);
+
     if (existing) {
         const meta = existing.metadata as Record<string, unknown>;
         const candidateId = meta.candidateId as string;
         const score = meta.score as number;
 
-        // Fetch the candidate profile
-        const candidateProfile = await prisma.profile.findUnique({
-            where: { userId: candidateId },
-            select: {
-                userId: true,
-                displayName: true,
-                photos: true,
-                age: true,
-                city: true,
-                bio: true,
-                values: true,
-                interests: true,
-            }
-        });
-
-        if (candidateProfile) {
-            const userProfile = await prisma.profile.findUnique({
-                where: { userId },
-                select: { values: true, interests: true }
+        // If the cached candidate is now a match, discard and recalculate below
+        if (candidateId && !matchedIds.has(candidateId)) {
+            const candidateProfile = await prisma.profile.findUnique({
+                where: { userId: candidateId },
+                select: {
+                    userId: true,
+                    displayName: true,
+                    photos: true,
+                    age: true,
+                    city: true,
+                    bio: true,
+                    values: true,
+                    interests: true,
+                }
             });
 
-            if (userProfile) {
-                return buildResult(candidateProfile, score, userProfile.values || [], userProfile.interests || []);
+            if (candidateProfile) {
+                const userProfile = await prisma.profile.findUnique({
+                    where: { userId },
+                    select: { values: true, interests: true }
+                });
+
+                if (userProfile) {
+                    return buildResult(candidateProfile, score, userProfile.values || [], userProfile.interests || []);
+                }
             }
         }
     }
@@ -99,6 +104,11 @@ export async function getDailyCompatibility(userId: string, timezone?: string): 
     const interactedSet = new Set(interactedIds.map(i => i.toUserId));
     interactedSet.add(userId);
 
+    // Never feature someone the user already matched with
+    for (const id of matchedIds) {
+        interactedSet.add(id);
+    }
+
     // Exclude recently shown candidates (last 7 days)
     const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
     const recentShown = await prisma.analyticsEvent.findMany({
@@ -131,7 +141,7 @@ export async function getDailyCompatibility(userId: string, timezone?: string): 
     const candidateProfiles = new Map<string, any>();
 
     for (const like of incomingLikes) {
-        if (like.fromUser.profile && !recentCandidateIds.has(like.fromUserId)) {
+        if (like.fromUser.profile && !recentCandidateIds.has(like.fromUserId) && !interactedSet.has(like.fromUserId)) {
             candidateProfiles.set(like.fromUserId, like.fromUser.profile);
         }
     }
@@ -179,6 +189,23 @@ export async function getDailyCompatibility(userId: string, timezone?: string): 
 
     const userProfile = user.profile;
     return buildResult(best.candidate, best.score, userProfile.values || [], userProfile.interests || []);
+}
+
+async function getMatchedUserIds(userId: string): Promise<Set<string>> {
+    const matches = await prisma.match.findMany({
+        where: {
+            OR: [{ user1Id: userId }, { user2Id: userId }],
+            isActive: true,
+        },
+        select: { user1Id: true, user2Id: true },
+    });
+
+    const ids = new Set<string>();
+    for (const m of matches) {
+        if (m.user1Id !== userId) ids.add(m.user1Id);
+        if (m.user2Id !== userId) ids.add(m.user2Id);
+    }
+    return ids;
 }
 
 function buildResult(

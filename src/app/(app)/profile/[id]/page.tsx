@@ -9,8 +9,9 @@ import { BadgeChipList } from "@/components/profile/BadgeChip";
 import { SpotifySection } from "@/components/profile/SpotifySection";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, Heart, MessageSquare, Sparkles, MapPin, Cigarette, GlassWater, Baby, Star, BookOpen, X, UserCheck, Loader2, Mic, Church } from "lucide-react";
+import { ArrowLeft, Heart, MessageSquare, Sparkles, MapPin, Cigarette, GlassWater, Baby, Star, BookOpen, X, UserCheck, Loader2, Mic, Church, Check, Send } from "lucide-react";
 import { HeartArrow } from "@/components/ui/custom/HeartArrow";
 import { ProfileHighlights } from "@/components/profile/ProfileHighlights";
 import { PromptCards } from "@/components/profile/PromptCards";
@@ -49,6 +50,14 @@ export default function UserProfilePage() {
     const [processing, setProcessing] = useState(false);
     const [hasExistingMatch, setHasExistingMatch] = useState(false);
     const [existingMatchId, setExistingMatchId] = useState<string | null>(null);
+
+    // Daily question (match context) — only relevant when viewing a match
+    const [dailyQuestion, setDailyQuestion] = useState<string | null>(null);
+    const [dailyQuestionId, setDailyQuestionId] = useState<string | null>(null);
+    const [matchAnswer, setMatchAnswer] = useState<string | null>(null);
+    const [myAnswer, setMyAnswer] = useState('');
+    const [answerSubmitting, setAnswerSubmitting] = useState(false);
+    const [answerDone, setAnswerDone] = useState(false);
     const [compatibility, setCompatibility] = useState<{ score: number; breakdown?: Record<string, number>; explanations?: string[] } | null>(null);
 
     const source = searchParams.get("source");
@@ -104,6 +113,55 @@ export default function UserProfilePage() {
         .catch(() => {});
       return () => controller.abort();
     }, [id, user, isPreview, currentUserProfile?.subscriptionStatus]);
+
+    // Load today's daily question + the match's answer to it (only when matched)
+    useEffect(() => {
+      if (!id || !user || isPreview || !hasExistingMatch) return;
+      const controller = new AbortController();
+      (async () => {
+        try {
+          const [mine, theirs] = await Promise.all([
+            fetch('/api/daily-question', { signal: controller.signal })
+              .then(r => r.ok ? r.json() : null)
+              .catch(() => null),
+            fetch(`/api/daily-question/answer?userId=${id}`, { signal: controller.signal })
+              .then(r => r.ok ? r.json() : null)
+              .catch(() => null),
+          ]);
+          if (mine?.question) {
+            setDailyQuestion(mine.question);
+            setDailyQuestionId(mine.questionId);
+            if (mine.userAnswer) {
+              setMyAnswer(mine.userAnswer);
+              setAnswerDone(true);
+            }
+          }
+          if (theirs?.answer) {
+            setMatchAnswer(theirs.answer);
+          }
+        } catch {}
+      })();
+      return () => controller.abort();
+    }, [id, user, isPreview, hasExistingMatch]);
+
+    const handleSubmitDailyAnswer = async () => {
+      if (!dailyQuestionId || !myAnswer.trim() || answerSubmitting) return;
+      setAnswerSubmitting(true);
+      try {
+        const res = await fetch('/api/daily-question', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ questionId: dailyQuestionId, answer: myAnswer.trim() }),
+        });
+        if (!res.ok) throw new Error('Error al guardar');
+        setAnswerDone(true);
+        toast({ title: 'Respuesta guardada', description: 'Tu respuesta ya se ve en tu perfil.' });
+      } catch {
+        toast({ title: 'Error', description: 'No se pudo guardar tu respuesta.', variant: 'destructive' });
+      } finally {
+        setAnswerSubmitting(false);
+      }
+    };
 
     if (loading) {
         return (
@@ -346,7 +404,7 @@ export default function UserProfilePage() {
                         </div>
                     </div>
 
-                    {profile.latestAnswer?.question && profile.latestAnswer?.answer && (
+                    {profile.latestAnswer?.question && profile.latestAnswer?.answer && !hasExistingMatch && (
                         <Card className="app-prose-section rounded-2xl border-primary/10 bg-primary/5">
                             <CardContent className="p-5">
                                 <div className="flex items-center gap-2 mb-2">
@@ -358,6 +416,59 @@ export default function UserProfilePage() {
                                     <p className="text-sm text-foreground leading-relaxed">&ldquo;{profile.latestAnswer.answer}&rdquo;</p>
                                 </div>
                                 <p className="text-xs text-muted-foreground mt-2">Usa esta respuesta para iniciar una conversación</p>
+                            </CardContent>
+                        </Card>
+                    )}
+
+                    {hasExistingMatch && dailyQuestion && (
+                        <Card className="app-prose-section rounded-2xl border-primary/10 bg-primary/5">
+                            <CardContent className="p-5 space-y-3">
+                                <div className="flex items-center gap-2">
+                                    <MessageSquare className="h-4 w-4 text-primary" />
+                                    <p className="text-xs font-bold text-primary uppercase tracking-wider">Pregunta del día</p>
+                                </div>
+                                <p className="text-sm font-medium text-foreground">{dailyQuestion}</p>
+
+                                {matchAnswer && (
+                                    <div className="bg-card/50 rounded-xl p-3 border border-primary/10">
+                                        <p className="text-xs font-medium text-muted-foreground mb-1">Su respuesta:</p>
+                                        <p className="text-sm text-foreground leading-relaxed">&ldquo;{matchAnswer}&rdquo;</p>
+                                    </div>
+                                )}
+
+                                {answerDone ? (
+                                    <div className="bg-primary/10 rounded-xl p-3 border border-primary/20">
+                                        <div className="flex items-start gap-2">
+                                            <Check className="h-4 w-4 text-primary mt-0.5 shrink-0" />
+                                            <div>
+                                                <p className="text-xs font-medium text-foreground mb-1">Tu respuesta:</p>
+                                                <p className="text-sm text-foreground">{myAnswer}</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <div className="space-y-2">
+                                        <Textarea
+                                            value={myAnswer}
+                                            onChange={(e) => setMyAnswer(e.target.value)}
+                                            placeholder="Comparte tu respuesta..."
+                                            className="min-h-[70px] max-h-[160px] resize-none text-sm"
+                                            maxLength={300}
+                                        />
+                                        <div className="flex items-center justify-between">
+                                            <span className="text-xs text-muted-foreground">{myAnswer.length}/300</span>
+                                            <Button
+                                                size="sm"
+                                                onClick={handleSubmitDailyAnswer}
+                                                disabled={!myAnswer.trim() || answerSubmitting}
+                                                className="bg-gradient-to-r from-primary to-primary/80"
+                                            >
+                                                {answerSubmitting ? <Loader2 className="h-3 w-3 mr-1 animate-spin" /> : <Send className="h-3 w-3 mr-1" />}
+                                                Enviar
+                                            </Button>
+                                        </div>
+                                    </div>
+                                )}
                             </CardContent>
                         </Card>
                     )}
