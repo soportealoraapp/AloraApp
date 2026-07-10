@@ -319,8 +319,6 @@ export default function DiscoverPage() {
           passedCount={passedCount}
           onOpenFilters={() => setFilterOpen(true)}
           activeFiltersCount={activeFiltersCount}
-          browseMode={browseMode}
-          onBrowseModeChange={setBrowseMode}
         />
 
       <div className="mx-auto w-full max-w-md px-4 pt-4 space-y-4 md:max-w-2xl">
@@ -328,7 +326,6 @@ export default function DiscoverPage() {
           intent={intent}
           setIntent={setIntent}
           setIntentChanging={setIntentChanging}
-          currentUserProfile={currentUserProfile}
         />
 
         <LikesCounter

@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, Heart, MessageSquare, Sparkles, MapPin, Cigarette, GlassWater, Baby, Star, BookOpen, X, UserCheck, Loader2, Mic, Church, Check, Send, Smile } from "lucide-react";
+import { ArrowLeft, Heart, MessageSquare, Sparkles, MapPin, Cigarette, GlassWater, Baby, Star, BookOpen, X, UserCheck, Loader2, Mic, Church, Check, Send, Smile, Activity } from "lucide-react";
 import { HeartArrow } from "@/components/ui/custom/HeartArrow";
 import { ProfileHighlights } from "@/components/profile/ProfileHighlights";
 import { PromptCards } from "@/components/profile/PromptCards";
@@ -33,7 +33,25 @@ const detailIcons: { [key: string]: React.ElementType } = {
     drinking: GlassWater,
     children: Baby,
     religion: Church,
+    status: Activity,
 };
+
+/**
+ * Computes the public connection-mode label from a profile's connectionModes.
+ * Mirrors the 3-option model used in the discover intent selector.
+ */
+function getConnectionModeLabel(modes?: string[]): { label: string; className: string } | null {
+    if (!modes || modes.length === 0) return null;
+    const hasDating = modes.includes('dating');
+    const hasFriendship = modes.includes('friendship');
+    if (hasDating && hasFriendship) {
+        return { label: 'Ambos', className: 'bg-gradient-to-r from-amber-500 to-amber-600 text-white' };
+    }
+    if (hasFriendship) {
+        return { label: 'Amistad', className: 'bg-gradient-to-r from-blue-500 to-indigo-500 text-white' };
+    }
+    return { label: 'Citas', className: 'bg-gradient-to-r from-primary to-[hsl(335_85%_72%)] text-primary-foreground' };
+}
 
 export default function UserProfilePage() {
     const params = useParams();
@@ -208,6 +226,7 @@ export default function UserProfilePage() {
         { label: "Alcohol", value: profile.drinking, icon: "drinking" },
         { label: "Hijos", value: profile.children, icon: "children" },
         { label: "Religión", value: profile.religion, icon: "religion" },
+        { label: "Estado", value: profile.status, icon: "status" },
     ].filter((detail) => detail.value);
 
     const handleLike = async () => {
@@ -321,6 +340,14 @@ export default function UserProfilePage() {
                         {profile.displayName}
                     </h1>
                     {profile.isVerified && <TrustBadge type="verified" />}
+                    {(() => {
+                        const mode = getConnectionModeLabel(profile.connectionModes);
+                        return mode ? (
+                            <Badge className={`rounded-full text-[10px] gap-1 border-none ${mode.className}`}>
+                                {mode.label}
+                            </Badge>
+                        ) : null;
+                    })()}
                 </div>
                 <div className="ml-auto">
                     {user?.id !== id && <FavoriteButton profileId={id as string} />}
@@ -404,6 +431,14 @@ export default function UserProfilePage() {
                                     {profile.quizScore && ` · ${profile.quizScore}`}
                                 </Badge>
                             )}
+                            {(() => {
+                                const mode = getConnectionModeLabel(profile.connectionModes);
+                                return mode ? (
+                                    <Badge className={`rounded-full text-xs gap-1 border-none ${mode.className}`}>
+                                        {mode.label}
+                                    </Badge>
+                                ) : null;
+                            })()}
                         </div>
                         <div className="flex items-center gap-4 text-muted-foreground mt-2">
                             <p className="flex items-center gap-2">
