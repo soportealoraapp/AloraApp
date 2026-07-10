@@ -32,6 +32,11 @@ export function useMatches() {
                 authFetch(`/api/match/feed${suffix}`),
                 authFetch(`/api/match/new${suffix}`),
             ]);
+            // Don't retry rate-limited requests — hammering the endpoint just
+            // re-triggers the 429 and amplifies the problem.
+            if (newMatchesResponse.status === 429 || matchesResponse.status === 429) {
+                throw new Error('RATE_LIMITED');
+            }
             if (!matchesResponse.ok || !newMatchesResponse.ok) {
                 throw new Error('Error al cargar matches');
             }
@@ -42,7 +47,14 @@ export function useMatches() {
             return { matches: matches as Match[], newMatches: newMatches as LikePreview[] };
         },
         enabled: !!user?.id,
-        staleTime: 15_000,
+        staleTime: 60_000,
+        refetchOnWindowFocus: false,
+        refetchOnReconnect: false,
+        retry: (failureCount, error) => {
+            // Never retry rate-limit responses; otherwise allow a single retry.
+            if (error instanceof Error && error.message === 'RATE_LIMITED') return false;
+            return failureCount < 1;
+        },
         placeholderData: (prev) => prev,
     });
 
