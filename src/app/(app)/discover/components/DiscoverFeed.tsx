@@ -204,7 +204,7 @@ export function DiscoverFeed({
                   <div className="bg-foreground/90 text-background px-5 py-3 rounded-2xl text-sm font-medium shadow-xl max-w-[260px] glass border-border/20">
                     {tutorialStep === 1 && <p className="flex items-center gap-2"><ArrowRight className="h-4 w-4" /> Desliza a la derecha para <strong>Like</strong></p>}
                     {tutorialStep === 2 && <p className="flex items-center gap-2"><ArrowLeft className="h-4 w-4" /> Desliza a la izquierda para <strong>Pasar</strong></p>}
-                    {tutorialStep === 3 && <p className="flex items-center gap-2"><HeartArrow className="h-4 w-4 text-amber-500 fill-amber-500" /> El <strong>Flechado</strong> destaca tu interés.</p>}
+                    {tutorialStep === 3 && <p className="flex items-center gap-2"><HeartArrow className="h-4 w-4 text-primary fill-primary" /> El <strong>Flechado</strong> destaca tu interés.</p>}
                     <div className="flex justify-between items-center mt-2.5 pt-2 border-t border-background/20">
                       <span className="text-xs opacity-50">{tutorialStep}/3</span>
                       <button onClick={tutorialStep === 3 ? dismissTutorial : nextTutorialStep} className="text-[11px] font-bold underline hover:opacity-80 transition-opacity">
@@ -244,7 +244,9 @@ export function DiscoverFeed({
               </motion.div>
             )}
             
-            <div ref={sentinelRef} className="h-4 w-full" />
+            <div ref={sentinelRef} className="h-4 w-full flex items-center justify-center">
+              {loadingMore && <Loader2 className="h-6 w-6 animate-spin text-primary/60" />}
+            </div>
           </motion.div>
         )}
       </AnimatePresence>
@@ -324,12 +326,12 @@ function DiscoverGridItem({ profile, intent, effectiveIntent, isPending, badge, 
             <Button 
               size="icon" 
               variant="ghost" 
-              className="h-11 w-11 rounded-full bg-background/90 hover:bg-amber-500/10 text-amber-500 border border-border/40 shadow-sm transition-all active:scale-90" 
+              className="h-11 w-11 rounded-full bg-background/90 hover:bg-primary/10 text-primary border border-border/40 shadow-sm transition-all active:scale-90" 
               disabled={isPending} 
               onClick={(e) => { e.stopPropagation(); hapticsHeavy(); onAction('superlike'); }}
               aria-label="Flechado"
             >
-              <HeartArrow className="h-5 w-5 fill-amber-500" />
+              <HeartArrow className="h-5 w-5 fill-primary" />
             </Button>
             <Button 
               size="icon" 

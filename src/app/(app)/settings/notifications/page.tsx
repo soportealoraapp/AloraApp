@@ -171,6 +171,7 @@ export default function NotificationsPage() {
                                     checked={prefs?.[setting.key] ?? false}
                                     onCheckedChange={(v) => togglePref(setting.key, v)}
                                     disabled={updating === setting.key}
+                                    aria-label={`${setting.label}. ${setting.description}`}
                                 />
                             </div>
                         ))}

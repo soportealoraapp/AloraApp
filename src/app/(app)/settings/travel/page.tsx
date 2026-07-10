@@ -214,6 +214,7 @@ export default function TravelModePage() {
                             checked={enabled}
                             onCheckedChange={handleToggle}
                             disabled={saving}
+                            aria-label="Activar Modo Viaje. Aparecerás en la ciudad que elijas"
                         />
                     </div>
                 </CardHeader>

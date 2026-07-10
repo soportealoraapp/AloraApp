@@ -3,7 +3,7 @@
 import { useAuth } from '@/contexts/AuthContext';
 import { useMatches } from '@/hooks/use-matches';
 import { Button } from '@/components/ui/button';
-import { Heart, MessageSquare, Loader2, Sparkles, UserPlus } from 'lucide-react';
+import { Heart, MessageSquare, Loader2, Sparkles, UserPlus, RefreshCw } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { SafeImage } from '@/components/ui/safe-image';
 import Link from 'next/link';
@@ -84,6 +84,16 @@ export default function MatchesPage() {
                             <span className="text-white text-xs font-black">{matches.length}</span>
                         </div>
                     )}
+                    <Button
+                        variant="ghost"
+                        size="icon"
+                        className="rounded-full"
+                        onClick={() => refresh()}
+                        disabled={loading || isRefreshing}
+                        aria-label="Actualizar conexiones"
+                    >
+                        <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+                    </Button>
                 </div>
             </header>
 
@@ -150,7 +160,7 @@ export default function MatchesPage() {
                                                                 />
                                                             </div>
                                                             {match.type === 'superlike' && (
-                                                                <div className="absolute -bottom-1 -right-1 bg-amber-500 text-white rounded-full p-1.5 shadow-md border-2 border-background animate-in zoom-in duration-500">
+                                                                 <div className="absolute -bottom-1 -right-1 bg-primary text-primary-foreground rounded-full p-1.5 shadow-md border-2 border-background animate-in zoom-in duration-500">
                                                                     <span className="text-[10px]">💘</span>
                                                                 </div>
                                                             )}

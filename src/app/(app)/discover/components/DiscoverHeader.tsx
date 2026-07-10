@@ -1,7 +1,7 @@
 'use client';
 
 import { Button } from "@/components/ui/button";
-import { RotateCcw, SlidersHorizontal } from "lucide-react";
+import { RotateCcw, SlidersHorizontal, LayoutGrid, Square } from "lucide-react";
 import { UserProfile } from "@/lib/domain/types";
 import { cn } from "@/lib/utils";
 
@@ -11,6 +11,8 @@ interface DiscoverHeaderProps {
   passedCount: number;
   onOpenFilters: () => void;
   activeFiltersCount: number;
+  browseMode: 'swipe' | 'grid';
+  onBrowseModeChange: (mode: 'swipe' | 'grid') => void;
 }
 
 /**
@@ -23,7 +25,9 @@ export function DiscoverHeader({
   onOpenSecondChance,
   passedCount,
   onOpenFilters,
-  activeFiltersCount
+  activeFiltersCount,
+  browseMode,
+  onBrowseModeChange
 }: DiscoverHeaderProps) {
   return (
     <header className="app-page-header justify-between glass" style={{ borderBottomColor: 'hsl(var(--border) / 0.5)' }}>
@@ -35,6 +39,35 @@ export function DiscoverHeader({
 
       <div className="flex items-center gap-2">
         <h1 className="text-2xl font-headline font-bold tracking-tight text-gradient">Alora</h1>
+
+        {/* Swipe / Grid view toggle */}
+        <div className="hidden sm:flex items-center rounded-full border border-border/40 bg-muted/30 p-0.5">
+          <button
+            type="button"
+            aria-label="Vista de tarjetas"
+            aria-pressed={browseMode === 'swipe'}
+            onClick={() => onBrowseModeChange('swipe')}
+            className={cn(
+              "h-8 w-8 rounded-full flex items-center justify-center transition-colors",
+              browseMode === 'swipe' ? "bg-background shadow-sm text-primary" : "text-muted-foreground hover:text-foreground"
+            )}
+          >
+            <Square className="h-4 w-4" />
+          </button>
+          <button
+            type="button"
+            aria-label="Vista de cuadrícula"
+            aria-pressed={browseMode === 'grid'}
+            onClick={() => onBrowseModeChange('grid')}
+            className={cn(
+              "h-8 w-8 rounded-full flex items-center justify-center transition-colors",
+              browseMode === 'grid' ? "bg-background shadow-sm text-primary" : "text-muted-foreground hover:text-foreground"
+            )}
+          >
+            <LayoutGrid className="h-4 w-4" />
+          </button>
+        </div>
+
         {currentUserProfile?.travelModeEnabled && (
           <span className="text-[11px] bg-primary/10 text-primary px-2 py-0.5 rounded-full font-medium flex items-center gap-1 animate-in fade-in slide-in-from-left-2">
             ✈️ {currentUserProfile.travelCity}

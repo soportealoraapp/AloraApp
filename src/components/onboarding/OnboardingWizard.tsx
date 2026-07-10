@@ -10,6 +10,7 @@ import { StepBasicInfo } from "./StepBasicInfo";
 import { StepInterests } from "./StepInterests";
 import { StepCreateAccount } from "./StepCreateAccount";
 import { StepPhotos } from "./StepPhotos";
+import { Button } from "@/components/ui/button";
 import { UserProfile } from "@/lib/domain/types";
 import { Heart, Cloud, Loader2, ArrowLeft } from "lucide-react";
 import { REFERRAL_COOKIE, REFERRAL_SESSION_KEY, REFERRAL_CODE_PATTERN } from "@/lib/referral/constants";
@@ -175,8 +176,22 @@ export function OnboardingWizard({ initialRef }: { initialRef?: string } = {}) {
         setStep(2);
     }, []);
 
-    const handleCompleteOnboarding = useCallback(async () => {
+    const [completionWarning, setCompletionWarning] = useState<string | null>(null);
+
+    const handleCompleteOnboarding = useCallback(async (force = false) => {
         if (hasCompletedRef.current) return;
+        if (!force) {
+            const fd = formDataRef.current as Partial<UserProfile> & { photos?: string[] };
+            const missing: string[] = [];
+            if (!fd.displayName?.trim()) missing.push('tu nombre');
+            if (!fd.photos || fd.photos.length === 0) missing.push('al menos una foto');
+            if (missing.length > 0) {
+                setCompletionWarning(`Añade ${missing.join(' y ')} para un perfil más completo.`);
+                setSyncStatus('idle');
+                return;
+            }
+        }
+        setCompletionWarning(null);
         hasCompletedRef.current = true;
         if (debounceRef.current) clearTimeout(debounceRef.current);
         if (effectiveUserId) {
@@ -279,7 +294,7 @@ export function OnboardingWizard({ initialRef }: { initialRef?: string } = {}) {
                             <span className="text-xs text-destructive">Error al guardar</span>
                         )}
                     </div>
-                    <Progress value={((step - 1) / (totalSteps - 1)) * 100} className="h-1.5" role="progressbar" aria-valuenow={((step - 1) / (totalSteps - 1)) * 100} aria-valuemin={0} aria-valuemax={100} aria-label="Progreso de registro" />
+                    <Progress value={(step / totalSteps) * 100} className="h-1.5" role="progressbar" aria-valuenow={(step / totalSteps) * 100} aria-valuemin={0} aria-valuemax={100} aria-label="Progreso de registro" />
                     <div className="flex justify-between items-center mt-2">
                         <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
                             {STEP_WELCOME[step - 1]}
@@ -287,6 +302,30 @@ export function OnboardingWizard({ initialRef }: { initialRef?: string } = {}) {
                         <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
                             Paso {step} de {totalSteps}
                         </p>
+                    </div>
+                </div>
+            )}
+
+            {completionWarning && (
+                <div className="mb-6 rounded-2xl border border-amber-300/40 bg-amber-50/60 dark:bg-amber-950/20 p-4">
+                    <p className="text-sm font-medium text-amber-800 dark:text-amber-200 mb-3">{completionWarning}</p>
+                    <div className="flex gap-2">
+                        <Button
+                            size="sm"
+                            variant="outline"
+                            className="rounded-full"
+                            onClick={() => handleCompleteOnboarding(true)}
+                        >
+                            Completar de todos modos
+                        </Button>
+                        <Button
+                            size="sm"
+                            variant="ghost"
+                            className="rounded-full"
+                            onClick={() => setCompletionWarning(null)}
+                        >
+                            Seguir editando
+                        </Button>
                     </div>
                 </div>
             )}

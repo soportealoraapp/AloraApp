@@ -1,7 +1,7 @@
 'use client';
 
 import { Button } from "@/components/ui/button";
-import { Heart, Sparkles, RefreshCcw } from "lucide-react";
+import { Heart, Sparkles, RefreshCcw, TriangleAlert } from "lucide-react";
 import { BRAND_VOICE } from "@/lib/constants/brand-voice";
 import { motion } from "framer-motion";
 
@@ -9,17 +9,45 @@ interface DiscoverEmptyStateProps {
   hasActiveFilters: boolean;
   onRefresh: () => void;
   onRelaxFilters: () => void;
+  error?: string | null;
 }
 
 /**
  * DiscoverEmptyState is shown when no profiles are found in the Discover feed.
  * It provides context-aware CTAs like "Relajar filtros" or "Explorar de nuevo".
+ * When `error` is set it shows a recoverable error state instead.
  */
 export function DiscoverEmptyState({
   hasActiveFilters,
   onRefresh,
-  onRelaxFilters
+  onRelaxFilters,
+  error
 }: DiscoverEmptyStateProps) {
+  if (error) {
+    return (
+      <motion.div
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        className="w-full max-w-sm space-y-6 py-12"
+      >
+        <div className="text-center px-6">
+          <div className="rounded-3xl p-8 border border-destructive/30 relative overflow-hidden glass">
+            <div className="relative z-10">
+              <div className="bg-destructive/10 w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-6 border border-destructive/20">
+                <TriangleAlert className="h-8 w-8 text-destructive" />
+              </div>
+              <p className="text-lg font-headline font-bold text-foreground mb-2">No pudimos cargar los perfiles</p>
+              <p className="text-sm text-muted-foreground/80 mb-6 max-w-xs mx-auto">{error}</p>
+              <Button onClick={onRefresh} className="rounded-full px-8 h-12 font-bold shadow-glow hover:scale-105 transition-transform">
+                <RefreshCcw className="h-4 w-4 mr-2" /> Reintentar
+              </Button>
+            </div>
+          </div>
+        </div>
+      </motion.div>
+    );
+  }
+
   return (
     <motion.div 
       initial={{ opacity: 0, scale: 0.95 }}

@@ -6,7 +6,7 @@ import { UserProfile } from '@/lib/domain/types';
 import { SafeImage } from '@/components/ui/safe-image';
 import { TrustBadge } from './TrustBadge';
 import { ProfileActions } from '../../match/ProfileActions';
-import { Clock, MessageCircle, Heart, X, Eye, Smile } from 'lucide-react';
+import { Clock, MessageCircle, Heart, X, Eye, Smile, ChevronLeft, ChevronRight } from 'lucide-react';
 import { HeartArrow } from '../custom/HeartArrow';
 import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { hapticsLight, hapticsMedium, hapticsHeavy } from '@/lib/mobile';
@@ -140,10 +140,13 @@ export const FloatingMatchCard = React.memo(function FloatingMatchCard({ profile
       onMouseUp={handleLongPressEnd}
       onMouseLeave={handleLongPressEnd}
     >
-      <SoftCard className="flex-1 min-h-0 overflow-hidden relative border-none shadow-xl rounded-2xl bg-card">
+      <SoftCard className="group flex-1 min-h-0 overflow-hidden relative border-none shadow-xl rounded-2xl bg-card select-none">
         {photos.length > 0 ? (
           <div
-            className="absolute inset-0 z-10"
+            role="button"
+            tabIndex={0}
+            aria-label={photos.length > 1 ? `Foto ${currentPhotoIndex + 1} de ${photos.length}. Usa las flechas izquierda y derecha para cambiar de foto.` : 'Foto de perfil'}
+            className="absolute inset-0 z-10 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/70 rounded-2xl"
             onClick={(e) => {
               // Tap-left/right to cycle photos
               const rect = e.currentTarget.getBoundingClientRect();
@@ -156,8 +159,37 @@ export const FloatingMatchCard = React.memo(function FloatingMatchCard({ profile
                 setCurrentPhotoIndex(prev => prev + 1);
               }
             }}
+            onKeyDown={(e) => {
+              if (e.key === 'ArrowLeft' && currentPhotoIndex > 0) {
+                e.preventDefault();
+                setCurrentPhotoIndex(prev => prev - 1);
+              } else if (e.key === 'ArrowRight' && currentPhotoIndex < photos.length - 1) {
+                e.preventDefault();
+                setCurrentPhotoIndex(prev => prev + 1);
+              }
+            }}
           />
         ) : null}
+
+        {/* Photo navigation affordances (discoverable on hover/focus) */}
+        {photos.length > 1 && (
+          <>
+            {currentPhotoIndex > 0 && (
+              <div className="absolute left-2 top-1/2 -translate-y-1/2 z-20 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" aria-hidden="true">
+                <div className="bg-card/80 backdrop-blur-sm rounded-full p-2 shadow-md">
+                  <ChevronLeft className="h-5 w-5 text-foreground/70" />
+                </div>
+              </div>
+            )}
+            {currentPhotoIndex < photos.length - 1 && (
+              <div className="absolute right-2 top-1/2 -translate-y-1/2 z-20 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" aria-hidden="true">
+                <div className="bg-card/80 backdrop-blur-sm rounded-full p-2 shadow-md">
+                  <ChevronRight className="h-5 w-5 text-foreground/70" />
+                </div>
+              </div>
+            )}
+          </>
+        )}
         {photos.length > 0 ? (
           photos.map((photo, index) => (
             Math.abs(index - currentPhotoIndex) <= 1 && (
@@ -209,7 +241,7 @@ export const FloatingMatchCard = React.memo(function FloatingMatchCard({ profile
 
         {/* Swipe indicators during drag */}
         {dragX > 50 && (
-          <div className="absolute inset-0 z-30 bg-primary/20 flex items-center justify-start p-8">
+          <div className="absolute inset-0 z-30 bg-primary/20 flex flex-col items-start justify-center gap-3 p-8">
             <div className="bg-card rounded-full p-4 shadow-xl">
               {effectiveIntent === 'friendship' ? (
                 <Smile className="h-10 w-10 text-primary fill-primary" />
@@ -217,15 +249,26 @@ export const FloatingMatchCard = React.memo(function FloatingMatchCard({ profile
                 <Heart className="h-10 w-10 text-primary fill-primary" />
               )}
             </div>
+            <span className="rounded-full bg-card px-4 py-1.5 text-lg font-black uppercase tracking-wider text-primary shadow-xl">
+              {effectiveIntent === 'friendship' ? 'Amigo' : 'Me gusta'}
+            </span>
           </div>
         )}
         {dragX < -50 && (
-          <div className="absolute inset-0 z-30 bg-destructive/20 flex items-center justify-end p-8">
+          <div className="absolute inset-0 z-30 bg-destructive/20 flex flex-col items-end justify-center gap-3 p-8">
             <div className="bg-card rounded-full p-4 shadow-xl">
               <X className="h-10 w-10 text-destructive" />
             </div>
+            <span className="rounded-full bg-card px-4 py-1.5 text-lg font-black uppercase tracking-wider text-destructive shadow-xl">
+              Pasar
+            </span>
           </div>
         )}
+
+        {/* Screen-reader announcement of the in-flight swipe action */}
+        <div className="sr-only" aria-live="assertive">
+          {dragX > 50 ? (effectiveIntent === 'friendship' ? 'Amigo' : 'Me gusta') : dragX < -50 ? 'Pasar' : ''}
+        </div>
 
         <div className="absolute top-4 right-4 z-20">
           <ProfileActions userId={profile.id} userName={profile.displayName} />
@@ -421,7 +464,7 @@ export const FloatingMatchCard = React.memo(function FloatingMatchCard({ profile
                   )}
                 </AnimatePresence>
               </button>
-              <span className="text-[10px] font-medium text-foreground/70">Like</span>
+              <span className="text-[10px] font-medium text-foreground/70">Me gusta</span>
             </div>
           </>
         )}
@@ -460,7 +503,7 @@ export const FloatingMatchCard = React.memo(function FloatingMatchCard({ profile
                 ) : (
                   <>
                     <Heart className="h-4 w-4 text-primary" />
-                    <span>Dar Like</span>
+                    <span>Me gusta</span>
                   </>
                 )}
               </button>
@@ -469,7 +512,7 @@ export const FloatingMatchCard = React.memo(function FloatingMatchCard({ profile
                   className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-muted transition-colors text-sm"
                   onClick={(e) => { e.stopPropagation(); setShowLongPressMenu(false); onFlechado(); }}
                 >
-                  <HeartArrow className="h-4 w-4 text-amber-500" />
+                  <HeartArrow className="h-4 w-4 text-primary" />
                   <span>Flechado</span>
                 </button>
               )}

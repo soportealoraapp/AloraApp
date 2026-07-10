@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Search, X, Loader2, MessageSquare, Bell, BellOff, Trash2, MoreVertical, Sparkles, Heart } from "lucide-react";
+import { Search, X, Loader2, MessageSquare, Bell, BellOff, Trash2, MoreVertical, Sparkles, Heart, RefreshCw } from "lucide-react";
 import { SafeImage } from "@/components/ui/safe-image";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
@@ -20,6 +20,7 @@ const LikesReceivedList = dynamic(() => import("@/components/match/LikesReceived
 import { BRAND_VOICE } from "@/lib/constants/brand-voice";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { hapticsLight, hapticsMedium } from "@/lib/mobile";
 
 /**
@@ -28,7 +29,7 @@ import { hapticsLight, hapticsMedium } from "@/lib/mobile";
  */
 export default function ChatPage() {
     const { user } = useAuth();
-    const { matches, newMatches, loading, sendLike, refresh } = useMatches();
+    const { matches, newMatches, loading, error, sendLike, refresh } = useMatches();
     const [searchTerm, setSearchTerm] = useState("");
     const { toast } = useToast();
     const [processingMatch, setProcessingMatch] = useState<string | null>(null);
@@ -248,9 +249,27 @@ export default function ChatPage() {
                     style={{ background: 'linear-gradient(90deg, transparent, hsl(335 85% 76% / 0.5), hsl(280 60% 70% / 0.5), transparent)' }}
                 />
                 <h1 className="text-xl font-headline font-bold text-gradient">Conversaciones</h1>
+                <Button
+                    variant="ghost"
+                    size="icon"
+                    className="rounded-full ml-auto"
+                    onClick={() => refresh()}
+                    disabled={loading || isRefreshing}
+                    aria-label="Actualizar conversaciones"
+                >
+                    <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+                </Button>
             </header>
 
             <main className="mx-auto flex-1 w-full max-w-3xl space-y-5 px-4 py-4 md:px-6 md:py-5">
+                {error && matches.length === 0 && (
+                    <Alert variant="destructive" className="rounded-2xl border-none bg-destructive/10 text-destructive animate-in slide-in-from-top-2">
+                        <AlertDescription className="flex items-center justify-between font-medium">
+                            <span>Error al sincronizar conversaciones.</span>
+                            <Button variant="ghost" size="sm" onClick={() => refresh()} className="font-bold hover:bg-destructive/20">Reintentar</Button>
+                        </AlertDescription>
+                    </Alert>
+                )}
                 <div className="relative group">
                     <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground group-focus-within:text-primary transition-colors" />
                     <Input

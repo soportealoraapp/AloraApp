@@ -23,7 +23,7 @@ const buttonVariants = cva(
       size: {
         default: "h-11 px-5 py-2",
         sm: "h-9 rounded-lg px-4 text-xs",
-        lg: "h-13 rounded-full px-9 text-base",
+        lg: "h-12 rounded-full px-9 text-base",
         icon: "h-11 w-11",
       },
     },
@@ -58,6 +58,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       <motion.button
         className={cn(buttonVariants({ variant, size, className }))}
         ref={ref}
+        type="button"
         whileHover={{ scale: 1.02, y: -1 }}
         whileTap={{ scale: 0.97 }}
         transition={{

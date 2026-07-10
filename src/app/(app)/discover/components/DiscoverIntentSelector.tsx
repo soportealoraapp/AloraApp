@@ -6,6 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Heart, Handshake, ArrowRight } from "lucide-react";
 import { UserProfile } from "@/lib/domain/types";
 import { motion } from "framer-motion";
+import { useRouter } from "next/navigation";
 
 interface DiscoverIntentSelectorProps {
   intent: 'dating' | 'friendship' | 'both';
@@ -24,6 +25,7 @@ export function DiscoverIntentSelector({
   setIntentChanging,
   currentUserProfile
 }: DiscoverIntentSelectorProps) {
+  const router = useRouter();
   const hasBothModes = currentUserProfile?.connectionModes?.includes('dating') && currentUserProfile?.connectionModes?.includes('friendship');
 
   const handleIntentChange = (newIntent: 'dating' | 'friendship' | 'both') => {
@@ -113,13 +115,17 @@ export function DiscoverIntentSelector({
     );
   }
 
-  // Single mode view (toggle to the other one)
+  // Single mode view — guide the user to enable the other mode in their profile
+  // instead of silently switching to a mode their profile isn't support.
   return (
     <div className="animate-in fade-in zoom-in duration-300">
       {intent === 'dating' && (
         <Card 
           className="border border-blue-500/20 bg-gradient-to-r from-blue-500/10 to-indigo-500/10 dark:from-blue-500/5 dark:to-indigo-500/5 rounded-2xl overflow-hidden cursor-pointer hover:bg-indigo-500/20 dark:hover:bg-indigo-500/10 transition-all duration-300 group" 
-          onClick={() => handleIntentChange('friendship')}
+          onClick={() => router.push('/settings')}
+          role="button"
+          tabIndex={0}
+          onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); router.push('/settings'); } }}
         >
           <CardContent className="p-3.5 flex items-center justify-between">
             <div className="flex items-center gap-3">
@@ -127,8 +133,8 @@ export function DiscoverIntentSelector({
                 <Handshake className="h-5 w-5" />
               </div>
               <div>
-                <p className="text-xs font-black uppercase tracking-widest text-blue-700 dark:text-blue-400">Modo Amistad</p>
-                <p className="text-[10px] text-blue-600/80 dark:text-blue-400/60">Busca conexiones platónicas</p>
+                <p className="text-xs font-black uppercase tracking-widest text-blue-700 dark:text-blue-400">Activa el modo Amistad</p>
+                <p className="text-[10px] text-blue-600/80 dark:text-blue-400/60">Habilita conexiones platónicas en tu perfil</p>
               </div>
             </div>
             <ArrowRight className="h-4 w-4 text-blue-400 dark:text-blue-500 group-hover:translate-x-1 transition-transform" />
@@ -139,7 +145,10 @@ export function DiscoverIntentSelector({
       {intent === 'friendship' && (
         <Card 
           className="border border-primary/20 bg-gradient-to-r from-pink-500/10 to-primary/10 dark:from-pink-500/5 dark:to-primary/5 rounded-2xl overflow-hidden cursor-pointer hover:bg-primary/20 dark:hover:bg-primary/10 transition-all duration-300 group" 
-          onClick={() => handleIntentChange('dating')}
+          onClick={() => router.push('/settings')}
+          role="button"
+          tabIndex={0}
+          onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); router.push('/settings'); } }}
         >
           <CardContent className="p-3.5 flex items-center justify-between">
             <div className="flex items-center gap-3">
@@ -147,8 +156,8 @@ export function DiscoverIntentSelector({
                 <Heart className="h-5 w-5" />
               </div>
               <div>
-                <p className="text-xs font-black uppercase tracking-widest text-primary dark:text-primary/80">Modo Citas</p>
-                <p className="text-[10px] text-primary/80 dark:text-primary/50">Vuelve a buscar tu alma gemela</p>
+                <p className="text-xs font-black uppercase tracking-widest text-primary dark:text-primary/80">Activa el modo Citas</p>
+                <p className="text-[10px] text-primary/80 dark:text-primary/50">Habilita citas en tu perfil</p>
               </div>
             </div>
             <ArrowRight className="h-4 w-4 text-primary/40 dark:text-primary/30 group-hover:translate-x-1 transition-transform" />

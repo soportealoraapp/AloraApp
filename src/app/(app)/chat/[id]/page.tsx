@@ -8,7 +8,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useMatches } from "@/hooks/use-matches";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { ArrowLeft, MoreVertical, Sparkles, Loader2, Circle, History, Send, Check } from "lucide-react";
+import { ArrowLeft, MoreVertical, Sparkles, Loader2, Circle, History, Send, Check, MessageSquare } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import { ChatInput } from "@/components/chat/chat-input";
 import { MessageRenderer } from "@/components/chat/MessageRenderer";
@@ -495,6 +495,23 @@ export default function ChatWindowPage() {
                         </div>
                     ))}
                 </main>
+            </div>
+        );
+    }
+
+    if (!match && !loading) {
+        return (
+            <div className="flex flex-col items-center justify-center min-h-dvh gap-4 px-6 text-center">
+                <div className="bg-muted/50 w-16 h-16 rounded-2xl flex items-center justify-center">
+                    <MessageSquare className="h-8 w-8 text-muted-foreground" />
+                </div>
+                <div>
+                    <p className="text-lg font-headline font-bold text-foreground mb-1">Conversación no encontrada</p>
+                    <p className="text-sm text-muted-foreground">Esta conexión pudo haber expirado o no existe.</p>
+                </div>
+                <Button variant="outline" className="rounded-full" onClick={() => router.back()}>
+                    <ArrowLeft className="h-4 w-4 mr-2" /> Volver
+                </Button>
             </div>
         );
     }

@@ -91,7 +91,7 @@ export default function VerificationPage() {
     }
 
     return (
-        <div className="h-dvh overflow-y-auto">
+        <div className="app-page-shell">
             <header className="app-page-header gap-4 sm:px-6">
                 <Button variant="ghost" size="icon" onClick={() => router.back()} aria-label="Volver">
                     <ArrowLeft className="h-5 w-5" />
@@ -99,7 +99,7 @@ export default function VerificationPage() {
                 <h1 className="text-xl font-semibold md:text-2xl font-headline">Verificación de Identidad</h1>
             </header>
 
-            <main className="p-4 max-w-lg mx-auto space-y-6">
+            <main className="app-page-content max-w-lg">
                 {verificationStatus === 'rejected' ? (
                     <Card className="border-red-200 dark:border-red-800 bg-red-50/50 dark:bg-red-950/30">
                         <CardContent className="p-6">

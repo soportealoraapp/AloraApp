@@ -96,7 +96,7 @@ export const LikesSentSection = React.memo(function LikesSentSection({ intent = 
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
                   {like.type === 'superlike' && (
-                    <div className="absolute top-2 right-2 bg-amber-500/90 backdrop-blur-sm text-white rounded-full p-1 shadow-sm">
+                      <div className="absolute top-2 right-2 bg-primary/90 backdrop-blur-sm text-primary-foreground rounded-full p-1 shadow-sm">
                       <HeartArrow className="h-3 w-3" />
                     </div>
                   )}

@@ -77,8 +77,6 @@ export function DailyAnswersModal({
 
     const currentAnswer = answers[currentIndex];
 
-    if (!currentAnswer) return null;
-
     const handleAction = (userId: string, type: 'like' | 'superlike' | 'pass') => {
         if (type === 'like') onLike(userId);
         else if (type === 'superlike') onSuperlike(userId);
@@ -204,7 +202,7 @@ export function DailyAnswersModal({
                                     </button>
                                     <button
                                         onClick={() => handleAction(currentAnswer.profile.userId, 'superlike')}
-                                        className="bg-accent hover:bg-accent/90 text-white rounded-full w-14 h-14 flex items-center justify-center shadow-lg transition-transform hover:scale-110 active:scale-95 border border-accent/20"
+                                        className="bg-primary hover:bg-primary/90 text-primary-foreground rounded-full w-14 h-14 flex items-center justify-center shadow-lg transition-transform hover:scale-110 active:scale-95 border border-primary/20"
                                         aria-label="Flechado"
                                     >
                                         <HeartArrow className="h-6 w-6" />

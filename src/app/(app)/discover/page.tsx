@@ -313,13 +313,15 @@ export default function DiscoverPage() {
 
   return (
     <div className="flex min-h-dvh flex-col bg-gradient-to-br from-background to-muted/30 overflow-y-auto">
-      <DiscoverHeader 
-        currentUserProfile={currentUserProfile}
-        onOpenSecondChance={() => setSecondChanceOpen(true)}
-        passedCount={passedCount}
-        onOpenFilters={() => setFilterOpen(true)}
-        activeFiltersCount={activeFiltersCount}
-      />
+        <DiscoverHeader 
+          currentUserProfile={currentUserProfile}
+          onOpenSecondChance={() => setSecondChanceOpen(true)}
+          passedCount={passedCount}
+          onOpenFilters={() => setFilterOpen(true)}
+          activeFiltersCount={activeFiltersCount}
+          browseMode={browseMode}
+          onBrowseModeChange={setBrowseMode}
+        />
 
       <div className="mx-auto w-full max-w-md px-4 pt-4 space-y-4 md:max-w-2xl">
         <DiscoverIntentSelector 
@@ -368,6 +370,7 @@ export default function DiscoverPage() {
             hasActiveFilters={activeFiltersCount > 0}
             onRefresh={refresh}
             onRelaxFilters={handleRelaxFilters}
+            error={error}
           />
         )}
       </main>

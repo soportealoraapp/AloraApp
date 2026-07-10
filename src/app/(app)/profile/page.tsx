@@ -15,6 +15,7 @@ import { useRouter } from 'next/navigation';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useState, useEffect } from 'react';
 import { logger } from '@/lib/logger';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel';
 import { ProfileHighlights } from '@/components/profile/ProfileHighlights';
 import { VoicePlayer } from '@/components/audio/VoicePlayer';
@@ -34,7 +35,8 @@ export default function ProfilePage() {
     answer: string;
     createdAt: string;
   } | null>(null);
-  const [dismissedVerification, setDismissedVerification] = useState(false);
+    const [dismissedVerification, setDismissedVerification] = useState(false);
+    const [logoutOpen, setLogoutOpen] = useState(false);
   const [profileStats, setProfileStats] = useState<{ likesReceived: number; matchesCount: number; profileViews: number } | null>(null);
   const [prompts, setPrompts] = useState<{ id: string; promptId: string; question: string; answer: string; position: number }[]>([]);
 
@@ -108,9 +110,29 @@ export default function ProfilePage() {
             {[1, 2, 3].map(i => <Skeleton key={i} className="h-24 rounded-lg" />)}
           </div>
         </main>
-      </div>
-    );
-  }
+
+    <AlertDialog open={logoutOpen} onOpenChange={setLogoutOpen}>
+      <AlertDialogContent className="rounded-3xl border-none glass">
+        <AlertDialogHeader>
+          <AlertDialogTitle className="font-headline text-xl">¿Cerrar sesión?</AlertDialogTitle>
+          <AlertDialogDescription className="text-muted-foreground">
+            Tendrás que iniciar sesión de nuevo para ver tus conexiones.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter className="gap-2">
+          <AlertDialogCancel className="rounded-full font-bold">Cancelar</AlertDialogCancel>
+          <AlertDialogAction
+            onClick={async () => { await signOut(); router.replace('/login'); }}
+            className="bg-destructive text-white hover:bg-destructive/90 rounded-full font-bold"
+          >
+            Cerrar sesión
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+    </div>
+  );
+}
 
   if (!profile) {
     return (
@@ -153,7 +175,7 @@ export default function ProfilePage() {
             size="icon"
             variant="ghost"
             className="shrink-0 rounded-xl hover:bg-destructive/10 hover:text-destructive"
-            onClick={async () => { await signOut(); router.replace('/login'); }}
+            onClick={() => setLogoutOpen(true)}
             aria-label="Cerrar sesión"
           >
             <LogOut className="h-5 w-5" />

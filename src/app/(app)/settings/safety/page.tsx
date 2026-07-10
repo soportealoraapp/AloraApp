@@ -67,7 +67,7 @@ export default function SafetyCenterPage() {
     ];
 
     return (
-        <div className="h-dvh overflow-y-auto">
+        <div className="app-page-shell">
             <header className="app-page-header gap-4 sm:px-6">
                 <Button variant="ghost" size="icon" onClick={() => router.back()} aria-label="Volver">
                     <ArrowLeft className="h-5 w-5" />
@@ -75,7 +75,7 @@ export default function SafetyCenterPage() {
                 <h1 className="text-xl font-semibold md:text-2xl font-headline">Centro de Seguridad</h1>
             </header>
 
-            <main className="p-4 space-y-6 max-w-2xl mx-auto">
+            <main className="app-page-content">
                 {loading ? (
                     <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
                         <Loader2 className="animate-spin h-8 w-8 mb-4" />

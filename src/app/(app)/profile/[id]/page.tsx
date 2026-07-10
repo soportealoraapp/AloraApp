@@ -664,8 +664,8 @@ export default function UserProfilePage() {
                                             ? 'bg-primary border-primary text-primary-foreground'
                                             : 'bg-background border-primary/30 hover:bg-primary hover:border-primary hover:text-primary-foreground text-primary'
                                     )}
-                                    aria-label={effectiveIntent === 'friendship' ? 'Enviar like de amistad' : 'Like'}
-                                    title={effectiveIntent === 'friendship' ? 'Amigo' : 'Dar Like'}
+                                    aria-label={effectiveIntent === 'friendship' ? 'Enviar like de amistad' : 'Me gusta'}
+                                    title={effectiveIntent === 'friendship' ? 'Amigo' : 'Me gusta'}
                                 >
                                     {processing ? (
                                         <Loader2 className="h-8 w-8 animate-spin" />
@@ -683,9 +683,9 @@ export default function UserProfilePage() {
                                         disabled={isSuperMatched || processing}
                                         className={cn(
                                             'h-16 w-16 rounded-full border-2 flex items-center justify-center shadow-lg transition-all active:scale-95',
-                                            isSuperMatched
-                                                ? 'bg-amber-400 border-amber-400 text-white'
-                                                : 'bg-background border-amber-400/40 hover:bg-amber-50 dark:hover:bg-amber-950/30 hover:border-amber-400 text-amber-500'
+                                        isSuperMatched
+                                            ? 'bg-primary border-primary text-primary-foreground'
+                                            : 'bg-background border-primary/40 hover:bg-primary/10 dark:hover:bg-primary/10 hover:border-primary text-primary'
                                         )}
                                         aria-label="Flechado"
                                         title="Flechado: destaca tu interés"

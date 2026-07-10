@@ -22,7 +22,7 @@ import { cn } from "@/lib/utils";
 
 export default function PrivacySettingsPage() {
     const router = useRouter();
-    const { user, profile, signOut } = useAuth();
+    const { user, profile, signOut, refreshProfile } = useAuth();
     const { toast } = useToast();
 
     const [loading, setLoading] = useState(true);
@@ -130,6 +130,7 @@ export default function PrivacySettingsPage() {
         try {
             await preferencesService.toggleIncognito(user.id);
             setIncognitoMode(value);
+            await refreshProfile();
 
             toast({
                 title: value ? "Modo Incógnito Activado" : "Modo Incógnito Desactivado",
@@ -157,6 +158,7 @@ export default function PrivacySettingsPage() {
         try {
             await preferencesService.toggleShowMe(user.id);
             setShowMe(value);
+            await refreshProfile();
 
             toast({
                 title: value ? "Perfil Visible" : "Perfil Oculto",
@@ -185,6 +187,7 @@ export default function PrivacySettingsPage() {
             const result = await setVerifiedOnlyFilter(user.id, value);
             if (!result.success) throw new Error(result.error || 'toggle failed');
             setVerifiedOnly(value);
+            await refreshProfile();
 
             toast({
                 title: value ? "Solo Verificados" : "Todos los Perfiles",
@@ -256,6 +259,7 @@ export default function PrivacySettingsPage() {
                                 checked={incognitoMode}
                                 onCheckedChange={handleToggleIncognito}
                                 disabled={saving || profile?.subscriptionStatus !== 'plus'}
+                                aria-label="Modo Incógnito. Tu perfil no aparecerá en descubrir, solo tus matches actuales te verán"
                             />
                         </div>
 
@@ -286,6 +290,7 @@ export default function PrivacySettingsPage() {
                                 checked={showMe}
                                 onCheckedChange={handleToggleShowMe}
                                 disabled={saving || (profile?.subscriptionStatus === 'plus' && incognitoMode)}
+                                aria-label="Mostrar mi perfil en Descubrir. Aparecer en la sección de descubrir para que otros te encuentren"
                             />
                         </div>
 
@@ -303,6 +308,7 @@ export default function PrivacySettingsPage() {
                                 checked={verifiedOnly}
                                 onCheckedChange={handleToggleVerifiedOnly}
                                 disabled={saving}
+                                aria-label="Solo mostrar perfiles verificados. Solo ver perfiles con verificación de identidad"
                             />
                         </div>
                     </CardContent>
