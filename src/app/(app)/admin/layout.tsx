@@ -3,19 +3,27 @@
 export const dynamic = 'force-dynamic';
 
 import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
+
+const ADMIN_LOGIN_PATH = '/admin/login';
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const { user, authLoading } = useAuth();
   const router = useRouter();
+  const pathname = usePathname();
   const [isAuthorized, setIsAuthorized] = useState<boolean | null>(null);
 
+  const isLoginPage = pathname === ADMIN_LOGIN_PATH;
+
   useEffect(() => {
+    // La página de login se renderiza sin guardas de rol.
+    if (isLoginPage) return;
+
     if (authLoading) return;
 
     if (!user) {
-      router.replace('/discover');
+      router.replace(ADMIN_LOGIN_PATH);
       return;
     }
 
@@ -26,12 +34,12 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         const res = await fetch('/api/admin/verifications?limit=1');
         if (!cancelled) {
           setIsAuthorized(res.ok);
-          if (!res.ok) router.replace('/discover');
+          if (!res.ok) router.replace(ADMIN_LOGIN_PATH);
         }
       } catch {
         if (!cancelled) {
           setIsAuthorized(false);
-          router.replace('/discover');
+          router.replace(ADMIN_LOGIN_PATH);
         }
       }
     };
@@ -39,7 +47,12 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     checkAdmin();
 
     return () => { cancelled = true; };
-  }, [user, authLoading, router]);
+  }, [user, authLoading, router, isLoginPage, pathname]);
+
+  // Renderizar la página de login directamente.
+  if (isLoginPage) {
+    return <>{children}</>;
+  }
 
   if (authLoading || isAuthorized === null) {
     return (

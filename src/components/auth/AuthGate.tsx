@@ -6,7 +6,7 @@ import { useEffect, useState } from "react";
 import { Loader2, RefreshCw, AlertTriangle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
-const PUBLIC_ROUTES = ['/login', '/signup', '/auth/callback', '/', '/onboarding', '/terms', '/privacy', '/support', '/contact'];
+const PUBLIC_ROUTES = ['/login', '/signup', '/auth/callback', '/', '/onboarding', '/terms', '/privacy', '/support', '/contact', '/admin/login'];
 
 export function AuthGate({ children }: { children: React.ReactNode }) {
     const { user, profile, authLoading: loading } = useAuth();

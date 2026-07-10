@@ -145,6 +145,7 @@ export async function middleware(request: NextRequest) {
         pathname.startsWith('/refer');
 
     const isAdminRoute = pathname.startsWith('/admin');
+    const isAdminLogin = pathname === '/admin/login';
 
     const isAuthRoute = pathname.startsWith('/login') ||
         pathname.startsWith('/signup') ||
@@ -169,12 +170,12 @@ export async function middleware(request: NextRequest) {
                 { status: 401 }
             ));
         }
-        if (isAppRoute) {
+        if (isAppRoute && !isAdminLogin) {
             return applySecurityHeaders(NextResponse.redirect(new URL('/login', modifiedRequest.url)));
         }
     }
 
-    if (isAppRoute && user) {
+    if (isAppRoute && user && !isAdminLogin && !isAdminRoute) {
         try {
             const supabase = await createClient(modifiedRequest, response);
             const isCompleted = await getCachedProfileCompleted(supabase, user.id);
@@ -187,7 +188,7 @@ export async function middleware(request: NextRequest) {
         }
     }
 
-    if (isAdminRoute && user) {
+    if (isAdminRoute && user && !isAdminLogin) {
         const role = await getCachedAdminRole(user.id);
         if (role !== 'admin' && role !== 'super_admin') {
             return applySecurityHeaders(NextResponse.redirect(new URL('/discover', modifiedRequest.url)));
