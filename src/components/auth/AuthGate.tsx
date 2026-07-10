@@ -39,7 +39,11 @@ export function AuthGate({ children }: { children: React.ReactNode }) {
         if (timedOut && !user) return;
 
         if (!user && !isPublicRoute) {
-            router.replace('/login');
+            if (pathname.startsWith('/admin') && pathname !== '/admin/login') {
+                router.replace('/admin/login');
+            } else {
+                router.replace('/login');
+            }
         } else if (user && profile && (pathname === '/login' || pathname === '/signup')) {
             if (!profile.isCompleted) {
                 router.replace('/onboarding');

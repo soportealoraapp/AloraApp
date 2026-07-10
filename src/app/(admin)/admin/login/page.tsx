@@ -13,27 +13,30 @@ import { Eye, EyeOff, Loader2, Lock, ShieldCheck, ArrowRight } from "lucide-reac
 export default function AdminLoginPage() {
     const router = useRouter();
     const searchParams = useSearchParams();
-    const [email, setEmail] = useState(ADMIN_EMAIL);
+    const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
+    const [showPassword, setShowPassword] = useState(false);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
-    const [showPassword, setShowPassword] = useState(false);
 
     useEffect(() => {
         const denied = searchParams.get("denied");
+        const timeout = searchParams.get("timeout");
         if (denied) {
             setError("No tienes permisos de administrador para acceder a esta sección.");
+        } else if (timeout) {
+            setError("Sesión cerrada por inactividad.");
         }
     }, [searchParams]);
 
     const handleLogin = useCallback(async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!password) return;
+        if (!email.trim() || !password) return;
 
         setLoading(true);
         setError("");
 
-        // Solo el correo oficial puede acceder al panel de administración.
+        // Solo el correo oficial del administrador puede acceder al panel.
         if (email.trim().toLowerCase() !== ADMIN_EMAIL.toLowerCase()) {
             setError("Credenciales incorrectas.");
             setLoading(false);
@@ -42,6 +45,9 @@ export default function AdminLoginPage() {
 
         try {
             await authService.signIn(email, password);
+
+            // Cerrar cualquier otra sesión activa del administrador.
+            await authService.signOutOthers();
 
             // Verificar que el usuario tenga rol de administrador antes de entrar.
             const res = await fetch("/api/admin/verifications?limit=1");
@@ -106,16 +112,15 @@ export default function AdminLoginPage() {
                         <Input
                             id="email"
                             type="email"
+                            placeholder="soporte.alora.app@gmail.com"
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
                             required
                             disabled={loading}
                             autoComplete="username"
-                            readOnly
-                            className="bg-muted/40"
                         />
                         <p className="text-xs text-muted-foreground">
-                            Solo el correo oficial de soporte puede iniciar sesión.
+                            Solo el correo oficial del administrador.
                         </p>
                     </div>
 
@@ -150,7 +155,7 @@ export default function AdminLoginPage() {
                     <Button
                         type="submit"
                         className="w-full font-bold text-base h-12 rounded-xl mt-2"
-                        disabled={loading || !password}
+                        disabled={loading || !email.trim() || !password}
                     >
                         {loading ? (
                             <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Verificando...</>

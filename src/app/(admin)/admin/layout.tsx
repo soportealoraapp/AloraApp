@@ -5,8 +5,11 @@ export const dynamic = 'force-dynamic';
 import { useEffect, useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
+import { authService } from '@/lib/supabase/services/auth';
 
 const ADMIN_LOGIN_PATH = '/admin/login';
+const INACTIVITY_LIMIT_MS = 15 * 60 * 1000; // 15 minutos
+const ACTIVITY_EVENTS = ['mousemove', 'keydown', 'click', 'scroll', 'touchstart'] as const;
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const { user, authLoading } = useAuth();
@@ -48,6 +51,36 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
     return () => { cancelled = true; };
   }, [user, authLoading, router, isLoginPage, pathname]);
+
+  // Cierre automático de sesión por inactividad (solo cuando el admin está autorizado).
+  useEffect(() => {
+    if (isAuthorized !== true) return;
+
+    let timer: ReturnType<typeof setTimeout>;
+
+    const logout = async () => {
+      try {
+        await authService.signOut();
+      } finally {
+        router.replace(`${ADMIN_LOGIN_PATH}?timeout=1`);
+      }
+    };
+
+    const reset = () => {
+      clearTimeout(timer);
+      timer = setTimeout(logout, INACTIVITY_LIMIT_MS);
+    };
+
+    reset();
+    ACTIVITY_EVENTS.forEach((evt) =>
+      window.addEventListener(evt, reset, { passive: true }),
+    );
+
+    return () => {
+      clearTimeout(timer);
+      ACTIVITY_EVENTS.forEach((evt) => window.removeEventListener(evt, reset));
+    };
+  }, [isAuthorized, router]);
 
   // Renderizar la página de login directamente.
   if (isLoginPage) {

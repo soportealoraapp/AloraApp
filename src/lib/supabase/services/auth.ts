@@ -71,6 +71,12 @@ export const authService = {
         await supabase.auth.signOut()
     },
 
+    async signOutOthers() {
+        const supabase = getClient()
+        // Revoca todas las demás sesiones activas del usuario, dejando solo la actual.
+        await supabase.auth.signOut({ scope: 'others' })
+    },
+
     async sendPasswordResetEmail(email: string) {
         const supabase = getClient()
         const { error } = await supabase.auth.resetPasswordForEmail(email, {

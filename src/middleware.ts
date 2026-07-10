@@ -15,6 +15,10 @@ import { NextResponse, NextRequest } from 'next/server';
 import { updateSession, createClient } from '@/lib/supabase/middleware';
 import { getCSP, SECURITY_HEADERS } from '@/lib/security';
 
+// Node.js runtime: el guard de rol de admin usa Prisma, que no está disponible
+// en el edge runtime (causaba un 500 en las rutas de admin autenticadas).
+export const runtime = 'nodejs';
+
 // LRU-style in-memory caches with max size and TTL eviction
 const MAX_CACHE_SIZE = 1000;
 
@@ -171,7 +175,8 @@ export async function middleware(request: NextRequest) {
             ));
         }
         if (isAppRoute && !isAdminLogin) {
-            return applySecurityHeaders(NextResponse.redirect(new URL('/login', modifiedRequest.url)));
+            const redirectTarget = isAdminRoute ? '/admin/login' : '/login';
+            return applySecurityHeaders(NextResponse.redirect(new URL(redirectTarget, modifiedRequest.url)));
         }
     }
 
