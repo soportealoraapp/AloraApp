@@ -268,25 +268,25 @@ export async function getActiveUsersOverTime(days: number = 90): Promise<ActiveU
 
     // Single raw query for DAU per day
     const raw = await prisma.$queryRaw<{ date: string; cnt: bigint }[]>`
-        SELECT DATE("created_at") as date, COUNT(DISTINCT "user_id") as cnt
+        SELECT DATE("createdAt") as date, COUNT(DISTINCT "userId") as cnt
         FROM "analytics_events"
-        WHERE event = 'daily_active' AND "created_at" >= ${since}
-        GROUP BY DATE("created_at")
+        WHERE event = 'daily_active' AND "createdAt" >= ${since}
+        GROUP BY DATE("createdAt")
         ORDER BY date ASC
     `;
 
     // Single raw query for WAU (distinct users active in rolling 7-day windows)
     const wauRaw = await prisma.$queryRaw<{ date: string; cnt: bigint }[]>`
         WITH daily_dates AS (
-            SELECT DISTINCT DATE("created_at") as date
+            SELECT DISTINCT DATE("createdAt") as date
             FROM "analytics_events"
-            WHERE event = 'daily_active' AND "created_at" >= ${since}
+            WHERE event = 'daily_active' AND "createdAt" >= ${since}
         )
-        SELECT dd.date, COUNT(DISTINCT ae."user_id") as cnt
+        SELECT dd.date, COUNT(DISTINCT ae."userId") as cnt
         FROM daily_dates dd
         JOIN "analytics_events" ae ON ae.event = 'weekly_active'
-            AND ae."created_at" >= (dd.date::timestamp - INTERVAL '7 days')
-            AND ae."created_at" <= dd.date::timestamp
+            AND ae."createdAt" >= (dd.date::timestamp - INTERVAL '7 days')
+            AND ae."createdAt" <= dd.date::timestamp
         GROUP BY dd.date
         ORDER BY dd.date ASC
     `;
@@ -295,15 +295,15 @@ export async function getActiveUsersOverTime(days: number = 90): Promise<ActiveU
     // Single raw query for MAU (distinct users active in rolling 30-day windows)
     const mauRaw = await prisma.$queryRaw<{ date: string; cnt: bigint }[]>`
         WITH daily_dates AS (
-            SELECT DISTINCT DATE("created_at") as date
+            SELECT DISTINCT DATE("createdAt") as date
             FROM "analytics_events"
-            WHERE event = 'daily_active' AND "created_at" >= ${since}
+            WHERE event = 'daily_active' AND "createdAt" >= ${since}
         )
-        SELECT dd.date, COUNT(DISTINCT ae."user_id") as cnt
+        SELECT dd.date, COUNT(DISTINCT ae."userId") as cnt
         FROM daily_dates dd
         JOIN "analytics_events" ae ON ae.event = 'monthly_active'
-            AND ae."created_at" >= (dd.date::timestamp - INTERVAL '30 days')
-            AND ae."created_at" <= dd.date::timestamp
+            AND ae."createdAt" >= (dd.date::timestamp - INTERVAL '30 days')
+            AND ae."createdAt" <= dd.date::timestamp
         GROUP BY dd.date
         ORDER BY dd.date ASC
     `;

@@ -24,10 +24,10 @@ export interface ExtendedRetentionRow {
 export async function getCompatibilityImpact(days = 30): Promise<SegmentMetric[]> {
   const since = new Date(Date.now() - days * 24 * 60 * 60 * 1000);
 
-  const quizTakerIds = await prisma.$queryRaw<{ user_id: string }[]>`
-    SELECT DISTINCT user_id FROM quiz_results WHERE created_at >= ${since}
+  const quizTakerIds = await prisma.$queryRaw<{ userId: string }[]>`
+    SELECT DISTINCT "userId" FROM "quiz_results" WHERE "createdAt" >= ${since}
   `;
-  const takerSet = new Set(quizTakerIds.map(r => r.user_id));
+  const takerSet = new Set(quizTakerIds.map(r => r.userId));
 
   const users = await prisma.user.findMany({
     where: { createdAt: { gte: since } },
@@ -73,10 +73,10 @@ export async function getVoiceIntroImpact(days = 30): Promise<SegmentMetric[]> {
 export async function getDailyQuestionImpact(days = 30): Promise<SegmentMetric[]> {
   const since = new Date(Date.now() - days * 24 * 60 * 60 * 1000);
 
-  const dqAnswerers = await prisma.$queryRaw<{ user_id: string }[]>`
-    SELECT DISTINCT user_id FROM daily_answers WHERE created_at >= ${since}
+  const dqAnswerers = await prisma.$queryRaw<{ userId: string }[]>`
+    SELECT DISTINCT "userId" FROM "daily_answers" WHERE "createdAt" >= ${since}
   `;
-  const dqSet = new Set(dqAnswerers.map(r => r.user_id));
+  const dqSet = new Set(dqAnswerers.map(r => r.userId));
 
   const users = await prisma.user.findMany({
     where: { createdAt: { gte: since } },
@@ -130,24 +130,24 @@ async function computeSegmentMetric(userIds: string[], label: string, since: Dat
     d7_active: bigint;
   }[]>`
     SELECT
-      (SELECT COUNT(*) FROM matches m
-       WHERE m.created_at >= ${since} AND m.is_active = true
-       AND (m.user1_id = ANY(${ids}::text[]) OR m.user2_id = ANY(${ids}::text[]))
+      (SELECT COUNT(*) FROM "matches" m
+       WHERE m."createdAt" >= ${since} AND m."isActive" = true
+       AND (m."user1Id" = ANY(${ids}::text[]) OR m."user2Id" = ANY(${ids}::text[]))
       ) as match_count,
-      (SELECT COUNT(*) FROM messages msg
-       WHERE msg.created_at >= ${since} AND msg.sender_id = ANY(${ids}::text[])
+      (SELECT COUNT(*) FROM "messages" msg
+       WHERE msg."createdAt" >= ${since} AND msg."senderId" = ANY(${ids}::text[])
       ) as message_count,
-      (SELECT COUNT(DISTINCT u.id) FROM users u
-       JOIN analytics_events ae ON ae.user_id = u.id AND ae.event = 'daily_active'
-         AND ae.created_at >= u.created_at
-         AND ae.created_at < u.created_at + INTERVAL '1 day'
-       WHERE u.id = ANY(${ids}::text[]) AND u.created_at >= ${since}
+      (SELECT COUNT(DISTINCT u."id") FROM "users" u
+       JOIN "analytics_events" ae ON ae."userId" = u."id" AND ae."event" = 'daily_active'
+         AND ae."createdAt" >= u."createdAt"
+         AND ae."createdAt" < u."createdAt" + INTERVAL '1 day'
+       WHERE u."id" = ANY(${ids}::text[]) AND u."createdAt" >= ${since}
       ) as d1_active,
-      (SELECT COUNT(DISTINCT u.id) FROM users u
-       JOIN analytics_events ae ON ae.user_id = u.id AND ae.event = 'weekly_active'
-         AND ae.created_at >= u.created_at
-         AND ae.created_at < u.created_at + INTERVAL '7 days'
-       WHERE u.id = ANY(${ids}::text[]) AND u.created_at >= ${since}
+      (SELECT COUNT(DISTINCT u."id") FROM "users" u
+       JOIN "analytics_events" ae ON ae."userId" = u."id" AND ae."event" = 'weekly_active'
+         AND ae."createdAt" >= u."createdAt"
+         AND ae."createdAt" < u."createdAt" + INTERVAL '7 days'
+       WHERE u."id" = ANY(${ids}::text[]) AND u."createdAt" >= ${since}
       ) as d7_active
   `;
 
@@ -284,9 +284,9 @@ export async function getActivationBySegment(days = 30): Promise<{
   const overall = [registration, onboarding, profileLike, match, message];
 
   // Quiz takers
-  const quizUserIds = (await prisma.$queryRaw<{ user_id: string }[]>`
-    SELECT DISTINCT user_id FROM quiz_results WHERE created_at >= ${since}
-  `).map(r => r.user_id);
+  const quizUserIds = (await prisma.$queryRaw<{ userId: string }[]>`
+    SELECT DISTINCT "userId" FROM "quiz_results" WHERE "createdAt" >= ${since}
+  `).map(r => r.userId);
 
   const [quizOnboarding, quizProfile, quizMatch, quizMessage] = await Promise.all([
     prisma.analyticsEvent.count({ where: { event: 'onboarding_completed', createdAt: { gte: since }, userId: { in: quizUserIds } } }),

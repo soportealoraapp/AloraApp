@@ -68,15 +68,24 @@ export default function NorthStarDashboard() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    const getJson = async (url: string) => {
+      try {
+        const res = await fetch(url);
+        if (!res.ok) return null;
+        return await res.json();
+      } catch {
+        return null;
+      }
+    };
     Promise.all([
-      fetch('/api/admin/product-metrics?days=30').then(r => r.json()),
-      fetch('/api/admin/retention-extended?days=30').then(r => r.json()),
-      fetch('/api/admin/activation-insights').then(r => r.json()),
-      fetch('/api/admin/experiments').then(r => r.json()),
+      getJson('/api/admin/product-metrics?days=30'),
+      getJson('/api/admin/retention-extended?days=30'),
+      getJson('/api/admin/activation-insights'),
+      getJson('/api/admin/experiments'),
     ])
       .then(([metricsData, retentionData, activationData, experimentsData]) => {
         setMetrics(metricsData);
-        setRetention(retentionData.rows || []);
+        setRetention(retentionData?.rows || []);
         setActivationInsights(activationData);
         if (Array.isArray(experimentsData)) setExperiments(experimentsData);
       })
@@ -246,7 +255,7 @@ export default function NorthStarDashboard() {
                 </tr>
               </thead>
               <tbody>
-                {metrics.activationBySegment.steps.map((step, i) => (
+                {metrics?.activationBySegment?.steps?.map((step, i) => (
                   <tr key={step} className="border-b last:border-0">
                     <td className="py-2 pr-4 font-medium">{step}</td>
                     <td className="text-right py-2 px-3">{metrics.activationBySegment.overall[i]?.toLocaleString()}</td>

@@ -37,11 +37,11 @@ async function getMetricForUsers(userIds: string[], metric: string, days = 30): 
     }
     case 'd7_retention': {
       const ret = await prisma.$queryRaw<{ cnt: bigint }[]>`
-        SELECT COUNT(DISTINCT u.id) as cnt FROM users u
-        JOIN analytics_events ae ON ae.user_id = u.id AND ae.event = 'daily_active'
-          AND ae.created_at >= u.created_at
-          AND ae.created_at < u.created_at + INTERVAL '7 days'
-        WHERE u.id = ANY(${userIds}::text[]) AND u.created_at >= ${since}
+        SELECT COUNT(DISTINCT u."id") as cnt FROM "users" u
+        JOIN "analytics_events" ae ON ae."userId" = u."id" AND ae."event" = 'daily_active'
+          AND ae."createdAt" >= u."createdAt"
+          AND ae."createdAt" < u."createdAt" + INTERVAL '7 days'
+        WHERE u."id" = ANY(${userIds}::text[]) AND u."createdAt" >= ${since}
       `;
       const active = Number(ret[0]?.cnt || 0);
       return userIds.length > 0 ? (active / userIds.length) * 100 : 0;

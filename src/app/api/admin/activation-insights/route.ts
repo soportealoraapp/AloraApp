@@ -29,9 +29,8 @@ export async function GET() {
       prisma.user.count({ where: { createdAt: { gte: thirtyDaysAgo } } }),
       prisma.profile.count({ where: { voiceIntro: { not: null } } }),
       prisma.profile.count({ where: { isVerified: true } }),
-      prisma.quizResult.groupBy({ by: ['userId'] }).then(r => r.length),
-      prisma.dailyAnswer.groupBy({ by: ['userId'], where: { createdAt: { gte: new Date(now.getTime() - 24 * 60 * 60 * 1000) } } }).then(r => r.length),
-      prisma.match.count({ where: { createdAt: { gte: thirtyDaysAgo }, isActive: true } }),
+      prisma.quizResult.count({ where: { createdAt: { gte: thirtyDaysAgo } } }),
+      prisma.dailyAnswer.count({ where: { createdAt: { gte: new Date(now.getTime() - 24 * 60 * 60 * 1000) } } }),
     ]);
 
     // Activation scores for all users in period
@@ -73,59 +72,59 @@ export async function GET() {
     const segmentQuery = await prisma.$queryRaw<{
       segment: string; user_count: bigint; match_count: bigint
     }[]>`
-      SELECT 'con_quiz' as segment, COUNT(DISTINCT qr.user_id) as user_count,
-        COUNT(DISTINCT m.id) as match_count
-      FROM quiz_results qr
-      LEFT JOIN matches m ON (m.user1_id = qr.user_id OR m.user2_id = qr.user_id)
-        AND m.created_at >= ${thirtyDaysAgo} AND m.is_active = true
+      SELECT 'con_quiz' as segment, COUNT(DISTINCT qr."userId") as user_count,
+        COUNT(DISTINCT m."id") as match_count
+      FROM "quiz_results" qr
+      LEFT JOIN "matches" m ON (m."user1Id" = qr."userId" OR m."user2Id" = qr."userId")
+        AND m."createdAt" >= ${thirtyDaysAgo} AND m."isActive" = true
       UNION ALL
-      SELECT 'sin_quiz' as segment, COUNT(DISTINCT u.id) as user_count,
-        COUNT(DISTINCT m.id) as match_count
-      FROM users u
-      LEFT JOIN matches m ON (m.user1_id = u.id OR m.user2_id = u.id)
-        AND m.created_at >= ${thirtyDaysAgo} AND m.is_active = true
-      WHERE u.created_at >= ${thirtyDaysAgo}
-        AND u.id NOT IN (SELECT DISTINCT user_id FROM quiz_results)
+      SELECT 'sin_quiz' as segment, COUNT(DISTINCT u."id") as user_count,
+        COUNT(DISTINCT m."id") as match_count
+      FROM "users" u
+      LEFT JOIN "matches" m ON (m."user1Id" = u."id" OR m."user2Id" = u."id")
+        AND m."createdAt" >= ${thirtyDaysAgo} AND m."isActive" = true
+      WHERE u."createdAt" >= ${thirtyDaysAgo}
+        AND u."id" NOT IN (SELECT DISTINCT "userId" FROM "quiz_results")
     `;
 
     // Voice match rates
     const voiceSegmentQuery = await prisma.$queryRaw<{
       segment: string; user_count: bigint; match_count: bigint
     }[]>`
-      SELECT 'con_voz' as segment, COUNT(DISTINCT p.user_id) as user_count,
-        COUNT(DISTINCT m.id) as match_count
-      FROM profiles p
-      LEFT JOIN matches m ON (m.user1_id = p.user_id OR m.user2_id = p.user_id)
-        AND m.created_at >= ${thirtyDaysAgo} AND m.is_active = true
-      WHERE p.voice_intro IS NOT NULL
+      SELECT 'con_voz' as segment, COUNT(DISTINCT p."userId") as user_count,
+        COUNT(DISTINCT m."id") as match_count
+      FROM "profiles" p
+      LEFT JOIN "matches" m ON (m."user1Id" = p."userId" OR m."user2Id" = p."userId")
+        AND m."createdAt" >= ${thirtyDaysAgo} AND m."isActive" = true
+      WHERE p."voiceIntro" IS NOT NULL
       UNION ALL
-      SELECT 'sin_voz' as segment, COUNT(DISTINCT u.id) as user_count,
-        COUNT(DISTINCT m.id) as match_count
-      FROM users u
-      LEFT JOIN matches m ON (m.user1_id = u.id OR m.user2_id = u.id)
-        AND m.created_at >= ${thirtyDaysAgo} AND m.is_active = true
-      WHERE u.created_at >= ${thirtyDaysAgo}
-        AND u.id NOT IN (SELECT DISTINCT user_id FROM profiles WHERE voice_intro IS NOT NULL)
+      SELECT 'sin_voz' as segment, COUNT(DISTINCT u."id") as user_count,
+        COUNT(DISTINCT m."id") as match_count
+      FROM "users" u
+      LEFT JOIN "matches" m ON (m."user1Id" = u."id" OR m."user2Id" = u."id")
+        AND m."createdAt" >= ${thirtyDaysAgo} AND m."isActive" = true
+      WHERE u."createdAt" >= ${thirtyDaysAgo}
+        AND u."id" NOT IN (SELECT DISTINCT "userId" FROM "profiles" WHERE "voiceIntro" IS NOT NULL)
     `;
 
     // Verified match rates
     const verifiedSegmentQuery = await prisma.$queryRaw<{
       segment: string; user_count: bigint; match_count: bigint
     }[]>`
-      SELECT 'verificado' as segment, COUNT(DISTINCT p.user_id) as user_count,
-        COUNT(DISTINCT m.id) as match_count
-      FROM profiles p
-      LEFT JOIN matches m ON (m.user1_id = p.user_id OR m.user2_id = p.user_id)
-        AND m.created_at >= ${thirtyDaysAgo} AND m.is_active = true
-      WHERE p.is_verified = true
+      SELECT 'verificado' as segment, COUNT(DISTINCT p."userId") as user_count,
+        COUNT(DISTINCT m."id") as match_count
+      FROM "profiles" p
+      LEFT JOIN "matches" m ON (m."user1Id" = p."userId" OR m."user2Id" = p."userId")
+        AND m."createdAt" >= ${thirtyDaysAgo} AND m."isActive" = true
+      WHERE p."isVerified" = true
       UNION ALL
-      SELECT 'no_verificado' as segment, COUNT(DISTINCT u.id) as user_count,
-        COUNT(DISTINCT m.id) as match_count
-      FROM users u
-      LEFT JOIN matches m ON (m.user1_id = u.id OR m.user2_id = u.id)
-        AND m.created_at >= ${thirtyDaysAgo} AND m.is_active = true
-      WHERE u.created_at >= ${thirtyDaysAgo}
-        AND u.id NOT IN (SELECT DISTINCT user_id FROM profiles WHERE is_verified = true)
+      SELECT 'no_verificado' as segment, COUNT(DISTINCT u."id") as user_count,
+        COUNT(DISTINCT m."id") as match_count
+      FROM "users" u
+      LEFT JOIN "matches" m ON (m."user1Id" = u."id" OR m."user2Id" = u."id")
+        AND m."createdAt" >= ${thirtyDaysAgo} AND m."isActive" = true
+      WHERE u."createdAt" >= ${thirtyDaysAgo}
+        AND u."id" NOT IN (SELECT DISTINCT "userId" FROM "profiles" WHERE "isVerified" = true)
     `;
 
     function parseSegment(rows: { segment: string; user_count: bigint; match_count: bigint }[], label: string) {
