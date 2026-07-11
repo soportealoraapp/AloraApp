@@ -84,7 +84,7 @@ export default function AdminMetricsPage() {
 
     return (
         <div className="min-h-dvh bg-background text-foreground">
-            <header className="sticky top-0 z-30 border-b border-border bg-background/80 backdrop-blur-sm px-6 py-4 flex items-center gap-4">
+            <header className="border-b border-border bg-background/80 px-6 py-4 flex items-center gap-4">
                 <AdminBackButton />
                 <div className="flex items-center gap-3">
                     <BarChart3 className="h-5 w-5 text-blue-400" />

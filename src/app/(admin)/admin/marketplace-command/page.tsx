@@ -18,9 +18,26 @@ interface CommandCenterData {
     alerts: { severity?: string; message: string }[];
 }
 
+interface RegionalSnapshot {
+    region: string;
+    saturationLevel: string;
+    ratio: number;
+    totalUsers: number;
+    recommendation: string;
+    activeMen: number;
+    activeWomen: number;
+}
+
+interface MarketplaceSnapshot {
+    global: RegionalSnapshot;
+    regions: RegionalSnapshot[];
+    alerts: { severity?: string; message: string }[];
+}
+
 export default function MarketplaceCommandPage() {
     const router = useRouter();
     const [data, setData] = useState<CommandCenterData | null>(null);
+    const [snapshot, setSnapshot] = useState<MarketplaceSnapshot | null>(null);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
@@ -28,7 +45,9 @@ export default function MarketplaceCommandPage() {
             fetch('/api/admin/marketplace-health').then(r => r.json()),
             fetch('/api/admin/female-retention').then(r => r.json()),
             fetch('/api/admin/activation-funnel').then(r => r.json()),
-        ]).then(([marketplace, retention, activation]) => {
+            fetch('/api/admin/marketplace-snapshot').then(r => r.json()).catch(() => null),
+        ]).then(([marketplace, retention, activation, snapshotData]) => {
+            setSnapshot(snapshotData);
             const derivedAlerts: { severity: string; message: string }[] = [];
 
             if (marketplace.genderAlert === 'critical_imbalance') {
@@ -215,6 +234,53 @@ export default function MarketplaceCommandPage() {
                         </div>
                     </CardContent>
                 </Card>
+
+                {snapshot && snapshot.regions.length > 0 && (
+                    <Card>
+                        <CardHeader>
+                            <CardTitle className="text-base flex items-center gap-2">
+                                <Shield className="h-4 w-4 text-emerald-500" /> Balance por región
+                            </CardTitle>
+                        </CardHeader>
+                        <CardContent className="space-y-3">
+                            {snapshot.regions.map((region) => (
+                                <div key={region.region} className="flex items-center justify-between gap-4 border-b border-border/50 pb-3 last:border-0 last:pb-0">
+                                    <div>
+                                        <p className="font-medium text-sm">{region.region}</p>
+                                        <p className="text-xs text-muted-foreground">{region.totalUsers} activos · {region.ratio}:1 H/M</p>
+                                        <p className="text-xs text-muted-foreground">{region.recommendation}</p>
+                                    </div>
+                                    <Badge
+                                        variant={region.saturationLevel === 'critical' ? 'destructive' : 'outline'}
+                                        className={region.saturationLevel === 'critical' ? '' : region.saturationLevel === 'warning' ? 'border-amber-500/30 text-amber-400' : 'border-green-500/30 text-green-400'}
+                                    >
+                                        {region.saturationLevel}
+                                    </Badge>
+                                </div>
+                            ))}
+                        </CardContent>
+                    </Card>
+                )}
+
+                {snapshot && snapshot.alerts && snapshot.alerts.length > 0 && (
+                    <Card className="border-amber-200">
+                        <CardHeader>
+                            <CardTitle className="text-sm flex items-center gap-2 text-amber-600">
+                                <AlertTriangle className="h-4 w-4" /> Alertas de saturación (regional)
+                            </CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                            <ul className="space-y-2">
+                                {snapshot.alerts.map((alert, i: number) => (
+                                    <li key={i} className="text-sm flex items-start gap-2">
+                                        <Badge variant={alert.severity === 'high' ? 'destructive' : 'outline'}>{alert.severity}</Badge>
+                                        {alert.message}
+                                    </li>
+                                ))}
+                            </ul>
+                        </CardContent>
+                    </Card>
+                )}
             </div>
 
             {/* Alerts */}
