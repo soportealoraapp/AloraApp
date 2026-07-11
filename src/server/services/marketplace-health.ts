@@ -15,7 +15,7 @@ export async function getMarketplaceHealth() {
         prisma.profile.count({ where: { gender: 'woman' } }),
         prisma.profile.count({ where: { lastActiveAt: { gte: oneWeekAgo } } }),
         prisma.profile.count({ where: { isVerified: true } }),
-        prisma.profile.count({ where: { subscriptionStatus: { in: ['plus', 'premium'] } } }),
+        prisma.profile.count({ where: { subscriptionStatus: 'plus' } }),
     ]);
 
     // Conversation metrics
@@ -32,7 +32,6 @@ export async function getMarketplaceHealth() {
         where: { createdAt: { gte: oneWeekAgo2 } },
         select: { matchId: true, senderId: true, createdAt: true },
         orderBy: { createdAt: 'asc' },
-        take: 500,
     });
 
     let responseCount = 0;
@@ -54,7 +53,6 @@ export async function getMarketplaceHealth() {
     const matchesWithMsgs = await prisma.match.findMany({
         where: { messages: { some: {} } },
         select: { id: true },
-        take: 50,
     });
     const matchIds = matchesWithMsgs.map(m => m.id);
     const messageCounts = await prisma.message.groupBy({

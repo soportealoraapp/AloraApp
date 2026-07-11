@@ -64,10 +64,24 @@ export interface FunnelStep {
     conversionRate: number | null;
 }
 
+/**
+ * Signups are sourced from real user-account creation (createdAt) rather than a
+ * 'signup' analytics event, which was never emitted. This keeps the funnel and
+ * retention metrics truthful.
+ */
+async function getSignupsSince(since: Date): Promise<{ userId: string; createdAt: Date }[]> {
+    const users = await prisma.user.findMany({
+        where: { createdAt: { gte: since } },
+        select: { id: true, createdAt: true },
+        orderBy: { createdAt: 'asc' },
+    });
+    return users.map(u => ({ userId: u.id, createdAt: u.createdAt }));
+}
+
 export async function getFunnelData(days: number = 30): Promise<FunnelStep[]> {
     const since = new Date(Date.now() - days * 24 * 60 * 60 * 1000);
-    const startCount = await prisma.analyticsEvent.count({
-        where: { event: 'signup', createdAt: { gte: since } },
+    const startCount = await prisma.user.count({
+        where: { createdAt: { gte: since } },
     });
 
     const steps: { label: string; event: AnalyticsEventType }[] = [
@@ -113,11 +127,7 @@ export interface RetentionRow {
 export async function getRetentionData(days: number = 30): Promise<RetentionRow[]> {
     const since = new Date(Date.now() - days * 24 * 60 * 60 * 1000);
 
-    const signups = await prisma.analyticsEvent.findMany({
-        where: { event: 'signup', createdAt: { gte: since } },
-        select: { userId: true, createdAt: true },
-        orderBy: { createdAt: 'asc' },
-    });
+    const signups = await getSignupsSince(since);
 
     const rows: RetentionRow[] = [];
     const dayBuckets = new Map<string, { userIds: Set<string>; date: Date }>();
@@ -149,29 +159,14 @@ export async function getRetentionData(days: number = 30): Promise<RetentionRow[
     const allUserIdsArray = Array.from(allUserIds);
     if (allUserIdsArray.length === 0) return [];
 
-    // Batch: fetch all daily_active events for all users in the range
+    // Batch: fetch all daily_active events for all users in the range.
+    // D7/D30 retention is derived from daily_active presence within the
+    // 7-day / 30-day windows (the separate weekly_active/monthly_active
+    // events were never emitted, leaving those columns at 0).
     const allDailyActive = await prisma.analyticsEvent.findMany({
         where: {
             userId: { in: allUserIdsArray },
             event: 'daily_active',
-            createdAt: { gte: since, lte: new Date(Date.now() + 31 * 24 * 60 * 60 * 1000) },
-        },
-        select: { userId: true, createdAt: true },
-    });
-
-    const allWeeklyActive = await prisma.analyticsEvent.findMany({
-        where: {
-            userId: { in: allUserIdsArray },
-            event: 'weekly_active',
-            createdAt: { gte: since, lte: new Date(Date.now() + 31 * 24 * 60 * 60 * 1000) },
-        },
-        select: { userId: true, createdAt: true },
-    });
-
-    const allMonthlyActive = await prisma.analyticsEvent.findMany({
-        where: {
-            userId: { in: allUserIdsArray },
-            event: 'monthly_active',
             createdAt: { gte: since, lte: new Date(Date.now() + 31 * 24 * 60 * 60 * 1000) },
         },
         select: { userId: true, createdAt: true },
@@ -189,13 +184,13 @@ export async function getRetentionData(days: number = 30): Promise<RetentionRow[
             e.createdAt < range.d1Date
         ).length;
 
-        const d7Count = allWeeklyActive.filter(e =>
+        const d7Count = allDailyActive.filter(e =>
             e.userId && userSet.has(e.userId) &&
             e.createdAt >= range.d1Date &&
             e.createdAt < range.d7Date
         ).length;
 
-        const d30Count = allMonthlyActive.filter(e =>
+        const d30Count = allDailyActive.filter(e =>
             e.userId && userSet.has(e.userId) &&
             e.createdAt >= range.d7Date &&
             e.createdAt < range.d30Date

@@ -51,14 +51,9 @@ export async function POST(request: Request) {
             case 'subscription_updated': {
                 const status = body.data?.attributes?.status;
                 if (status === 'active') {
-                    // Idempotency check: skip if user already has active Plus
-                    const profile = await prisma.profile.findUnique({
-                        where: { userId },
-                        select: { subscriptionStatus: true, subscriptionExpiresAt: true },
-                    });
-                    if (profile?.subscriptionStatus === 'plus' && profile.subscriptionExpiresAt && profile.subscriptionExpiresAt > new Date()) {
-                        return NextResponse.json({ received: true, skipped: true, reason: 'already_active' });
-                    }
+                    // Always reconcile on active status. grantPlus is idempotent
+                    // (sets status + expiry = now + duration), so renewals correctly
+                    // extend subscriptionExpiresAt instead of silently expiring.
                     const subscriptionId = body.data?.id;
                     const interval = body.data?.attributes?.interval;
                     const intervalCount = body.data?.attributes?.interval_count;

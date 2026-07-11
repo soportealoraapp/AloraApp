@@ -171,11 +171,11 @@ async function computeSegmentMetric(userIds: string[], label: string, since: Dat
 export async function getExtendedRetention(days = 30): Promise<ExtendedRetentionRow[]> {
   const since = new Date(Date.now() - days * 24 * 60 * 60 * 1000);
 
-  const signups = await prisma.analyticsEvent.findMany({
-    where: { event: 'signup', createdAt: { gte: since } },
-    select: { userId: true, createdAt: true },
+  const signups = await prisma.user.findMany({
+    where: { createdAt: { gte: since } },
+    select: { id: true, createdAt: true },
     orderBy: { createdAt: 'asc' },
-  });
+  }).then(users => users.map(u => ({ userId: u.id, createdAt: u.createdAt })));
 
   const dayBuckets = new Map<string, { userIds: Set<string>; date: Date }>();
   for (const s of signups) {

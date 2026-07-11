@@ -116,7 +116,7 @@ export async function POST(request: NextRequest) {
 
         // Spam detection
         if (interactionType !== 'pass') {
-            const spamCheck = await detectSpamBehavior(user.id, 'like');
+            const spamCheck = await detectSpamBehavior(user.id, interactionType);
             if (spamCheck.isSpam) {
                 return NextResponse.json({ error: 'Spam detected', message: spamCheck.reason }, { status: 429 });
             }

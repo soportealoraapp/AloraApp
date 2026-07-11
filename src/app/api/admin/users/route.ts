@@ -87,6 +87,15 @@ export async function PATCH(request: NextRequest) {
             case 'unban':
                 await prisma.profile.update({ where: { userId }, data: { trustStatus: 'clean', isShadowBanned: false } });
                 await prisma.user.update({ where: { id: userId }, data: { isActive: true, deletedAt: null } });
+                // Restore matches that the ban deactivated (ban sets isActive=false + deletedAt).
+                await prisma.match.updateMany({
+                    where: {
+                        OR: [{ user1Id: userId }, { user2Id: userId }],
+                        isActive: false,
+                        deletedAt: { not: null },
+                    },
+                    data: { isActive: true, stage: 'active', deletedAt: null },
+                });
                 break;
             case 'verify':
                 await prisma.profile.update({ where: { userId }, data: { isVerified: true } });

@@ -3,7 +3,6 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
-import { preferencesService } from "@/lib/preferences-service";
 import { setVerifiedOnlyFilter } from "@/server/actions/user";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -109,9 +108,11 @@ export default function PrivacySettingsPage() {
             if (!user) return;
 
             try {
-                const prefs = await preferencesService.getPreferences(user.id);
-                setIncognitoMode(prefs.incognito);
-                setShowMe(prefs.showMe);
+                const res = await fetch('/api/preferences', { method: 'GET' });
+                if (!res.ok) throw new Error('load failed');
+                const prefs = await res.json();
+                setIncognitoMode(!!prefs.incognito);
+                setShowMe(prefs.showMe !== false);
                 setVerifiedOnly(!!(prefs as { verifiedOnly?: boolean }).verifiedOnly);
             } catch (error) {
                 console.error("Error loading preferences:", error);
@@ -128,7 +129,18 @@ export default function PrivacySettingsPage() {
 
         setSaving(true);
         try {
-            await preferencesService.toggleIncognito(user.id);
+            const res = await fetch('/api/preferences', {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ incognito: value }),
+            });
+            if (!res.ok) {
+                const data = await res.json().catch(() => ({}));
+                if (data?.error === 'subscription_required') {
+                    throw new Error('subscription_required');
+                }
+                throw new Error('update failed');
+            }
             setIncognitoMode(value);
             await refreshProfile();
 
@@ -140,11 +152,19 @@ export default function PrivacySettingsPage() {
             });
         } catch (error) {
             console.error("Error toggling incognito:", error);
-            toast({
-                variant: "destructive",
-                title: "Error",
-                description: "No se pudo cambiar el modo incógnito",
-            });
+            if ((error as Error)?.message === 'subscription_required') {
+                toast({
+                    variant: "destructive",
+                    title: "Alora Plus requerido",
+                    description: "El Modo Incógnito es exclusivo de Alora Plus.",
+                });
+            } else {
+                toast({
+                    variant: "destructive",
+                    title: "Error",
+                    description: "No se pudo cambiar el modo incógnito",
+                });
+            }
             setIncognitoMode(!value);
         } finally {
             setSaving(false);
@@ -156,7 +176,12 @@ export default function PrivacySettingsPage() {
 
         setSaving(true);
         try {
-            await preferencesService.toggleShowMe(user.id);
+            const res = await fetch('/api/preferences', {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ showMe: value }),
+            });
+            if (!res.ok) throw new Error('update failed');
             setShowMe(value);
             await refreshProfile();
 

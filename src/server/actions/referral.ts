@@ -3,6 +3,9 @@
 import { prisma } from '@/lib/prisma';
 import { REFERRAL_CODE_PATTERN } from '@/lib/referral/constants';
 import { getCurrentUserId } from '@/lib/auth/session';
+import { grantPlus } from '@/lib/subscription-helper';
+
+const REFERRAL_PLUS_DAYS = 7;
 
 export interface RedeemReferralResult {
     ok: boolean;
@@ -102,6 +105,17 @@ export async function redeemReferral(rawCode: string): Promise<RedeemReferralRes
             },
         }),
     ]);
+
+    // Fulfill the advertised "both get a free week of Premium" benefit.
+    // Idempotent per user: grantPlus only extends if not already active.
+    try {
+        await Promise.all([
+            grantPlus(userId, REFERRAL_PLUS_DAYS),
+            grantPlus(referral.referrerId, REFERRAL_PLUS_DAYS),
+        ]);
+    } catch (err) {
+        console.error('[referral] failed to grant Plus benefit:', err);
+    }
 
     return { ok: true, referrerId: referral.referrerId };
 }

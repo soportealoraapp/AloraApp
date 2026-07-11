@@ -30,6 +30,8 @@ export default function AdminUsersPage() {
     const debounceRef = useRef<NodeJS.Timeout | null>(null);
     const [searchInput, setSearchInput] = useState('');
     const [plusConfirmUser, setPlusConfirmUser] = useState<AdminUser | null>(null);
+    const [verifyConfirmUser, setVerifyConfirmUser] = useState<AdminUser | null>(null);
+    const [unbanConfirmUser, setUnbanConfirmUser] = useState<AdminUser | null>(null);
     const [roleReason, setRoleReason] = useState('');
     const { toast } = useToast();
 
@@ -208,13 +210,13 @@ export default function AdminUsersPage() {
                                         <Crown className="h-3 w-3" />
                                     </Button>
                                     <Button variant="ghost" size="sm" className="text-emerald-400 h-8 text-xs"
-                                        onClick={() => runAction(u.id, 'verify', { successLabel: 'Usuario verificado' })} title="Verificar"
+                                        onClick={() => setVerifyConfirmUser(u)} title="Verificar"
                                         aria-label="Verificar usuario">
                                         <BadgeCheck className="h-3 w-3" />
                                     </Button>
                                     {(u.profile?.trustStatus === 'banned' || u.profile?.isShadowBanned) && (
                                         <Button variant="ghost" size="sm" className="text-sky-400 h-8 text-xs"
-                                            onClick={() => runAction(u.id, 'unban', { successLabel: 'Usuario reactivado' })} title="Reactivar"
+                                            onClick={() => setUnbanConfirmUser(u)} title="Reactivar"
                                             aria-label="Reactivar usuario">
                                             <RotateCcw className="h-3 w-3" />
                                         </Button>
@@ -342,6 +344,50 @@ export default function AdminUsersPage() {
                                 Otorgar Plus (30 días)
                             </AlertDialogAction>
                         )}
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
+
+            <AlertDialog open={!!verifyConfirmUser} onOpenChange={(open) => { if (!open) setVerifyConfirmUser(null); }}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>Verificar usuario</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            ¿Confirmas que deseas verificar a {verifyConfirmUser?.profile?.displayName || verifyConfirmUser?.email}? Esto marca su identidad como confirmada públicamente.
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel onClick={() => setVerifyConfirmUser(null)}>Cancelar</AlertDialogCancel>
+                        <AlertDialogAction onClick={() => {
+                            if (verifyConfirmUser) {
+                                runAction(verifyConfirmUser.id, 'verify', { successLabel: 'Usuario verificado' });
+                                setVerifyConfirmUser(null);
+                            }
+                        }}>
+                            Confirmar
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
+
+            <AlertDialog open={!!unbanConfirmUser} onOpenChange={(open) => { if (!open) setUnbanConfirmUser(null); }}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>Reactivar usuario</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            ¿Confirmas que deseas reactivar a {unbanConfirmUser?.profile?.displayName || unbanConfirmUser?.email}? Se restaurarán sus matches desactivados por el ban.
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel onClick={() => setUnbanConfirmUser(null)}>Cancelar</AlertDialogCancel>
+                        <AlertDialogAction onClick={() => {
+                            if (unbanConfirmUser) {
+                                runAction(unbanConfirmUser.id, 'unban', { successLabel: 'Usuario reactivado' });
+                                setUnbanConfirmUser(null);
+                            }
+                        }}>
+                            Confirmar
+                        </AlertDialogAction>
                     </AlertDialogFooter>
                 </AlertDialogContent>
             </AlertDialog>

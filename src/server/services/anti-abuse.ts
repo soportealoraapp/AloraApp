@@ -112,7 +112,7 @@ export async function calculateReputation(userId: string): Promise<number> {
     if (messages > 50) score += 5;      // Active communicator
     if (messages > 200) score += 5;
     if (matches > 5) score += 5;        // Popular
-    if (profile.subscriptionStatus === 'premium') score += 10;
+    if (profile.subscriptionStatus === 'plus') score += 10;
 
     return Math.max(0, Math.min(100, score));
 }
@@ -133,12 +133,15 @@ export async function detectSpamBehavior(userId: string, action: string): Promis
     const since = new Date(Date.now() - windowMinutes * 60000);
 
     switch (action) {
-        case 'like': {
+        case 'like':
+        case 'superlike': {
+            const type = action === 'superlike' ? 'superlike' : 'like';
             const recentLikes = await prisma.interaction.count({
-                where: { fromUserId: userId, type: 'like', createdAt: { gte: since } },
+                where: { fromUserId: userId, type, createdAt: { gte: since } },
             });
-            if (recentLikes > 30) {
-                return { isSpam: true, reason: 'Mass liking detected' };
+            const threshold = action === 'superlike' ? 20 : 30;
+            if (recentLikes > threshold) {
+                return { isSpam: true, reason: `Mass ${action} detected` };
             }
             return { isSpam: false };
         }
