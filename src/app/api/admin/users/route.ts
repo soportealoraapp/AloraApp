@@ -1,12 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { requireSuperAdmin } from '@/lib/middleware/admin';
+import { requireAdmin } from '@/lib/middleware/admin';
 import { grantPlus, revokePlus } from '@/lib/subscription-helper';
 import { withRateLimit } from '@/server/utils/api-rate-limit';
 import { logger } from '@/lib/logger';
 
 export async function GET(request: NextRequest) {
-    const auth = await requireSuperAdmin();
+    const auth = await requireAdmin();
     if (auth) return auth;
 
     try {
@@ -52,7 +52,7 @@ export async function GET(request: NextRequest) {
 }
 
 export async function PATCH(request: NextRequest) {
-    const auth = await requireSuperAdmin();
+    const auth = await requireAdmin();
     if (auth) return auth;
     const { createClient } = await import('@/lib/supabase/server');
     const supabase = await createClient();
@@ -71,7 +71,8 @@ export async function PATCH(request: NextRequest) {
 
         switch (action) {
             case 'ban':
-                await prisma.profile.update({ where: { userId }, data: { trustStatus: 'banned', reputationScore: 0 } });
+                await prisma.profile.update({ where: { userId }, data: { trustStatus: 'banned', reputationScore: 0, isShadowBanned: true } });
+                await prisma.user.update({ where: { id: userId }, data: { isActive: false, deletedAt: new Date() } });
                 await prisma.match.updateMany({
                     where: { OR: [{ user1Id: userId }, { user2Id: userId }], isActive: true },
                     data: { isActive: false, stage: 'unmatched', deletedAt: new Date() },
@@ -85,6 +86,7 @@ export async function PATCH(request: NextRequest) {
                 break;
             case 'unban':
                 await prisma.profile.update({ where: { userId }, data: { trustStatus: 'clean', isShadowBanned: false } });
+                await prisma.user.update({ where: { id: userId }, data: { isActive: true, deletedAt: null } });
                 break;
             case 'verify':
                 await prisma.profile.update({ where: { userId }, data: { isVerified: true } });

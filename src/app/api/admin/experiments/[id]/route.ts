@@ -1,11 +1,11 @@
 import { NextResponse } from 'next/server';
-import { requireSuperAdmin } from '@/lib/middleware/admin';
+import { requireAdmin } from '@/lib/middleware/admin';
 import { prisma } from '@/lib/prisma';
 import { withRateLimit } from '@/server/utils/api-rate-limit';
 
 export async function PUT(request: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const auth = await requireSuperAdmin();
+  const auth = await requireAdmin();
   if (auth) return auth;
 
   const { createClient } = await import('@/lib/supabase/server');
@@ -80,7 +80,7 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
 
 export async function DELETE(request: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const auth = await requireSuperAdmin();
+  const auth = await requireAdmin();
   if (auth) return auth;
 
   const { createClient } = await import('@/lib/supabase/server');

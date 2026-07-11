@@ -58,7 +58,7 @@ export default function MatchQualityPage() {
         { title: 'Tasa de Respuesta', value: `${metrics.responseRate}%`, icon: Activity, color: 'text-orange-500' },
         { title: 'Compatibilidad Promedio', value: `${metrics.compatibilityCorrelation}%`, icon: Users, color: 'text-cyan-500' },
         { title: 'Tasa de Ghosting', value: `${metrics.ghostingRate}%`, icon: Ghost, color: 'text-red-500' },
-        { title: 'Conversaciones Largas', value: metrics.longConversations, icon: MessageSquare, color: 'text-indigo-500' },
+        { title: 'Conversaciones Iniciadas', value: metrics.longConversations, icon: MessageSquare, color: 'text-indigo-500' },
         { title: 'Tiempo Respuesta Prom.', value: `${metrics.avgResponseTime}h`, icon: Clock, color: 'text-yellow-500' },
         { title: 'Conversiones Plus', value: metrics.plusConversions, icon: ArrowUpRight, color: 'text-emerald-500' },
     ];

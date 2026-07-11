@@ -1,11 +1,11 @@
 import { NextResponse } from 'next/server';
-import { requireSuperAdmin } from '@/lib/middleware/admin';
+import { requireAdmin } from '@/lib/middleware/admin';
 import { computeExperimentResults } from '@/server/services/experiment-results';
 import { withRateLimit } from '@/server/utils/api-rate-limit';
 
 export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const auth = await requireSuperAdmin();
+  const auth = await requireAdmin();
   if (auth) return auth;
 
   const { createClient } = await import('@/lib/supabase/server');

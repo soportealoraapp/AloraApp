@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Users, RefreshCw, Search, Ban, ShieldAlert, EyeOff, CheckCircle, Shield, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Users, RefreshCw, Search, Ban, ShieldAlert, EyeOff, CheckCircle, Shield, ChevronLeft, ChevronRight, Crown, BadgeCheck, RotateCcw } from 'lucide-react';
 import { AdminBackButton } from '@/components/admin/AdminBackButton';
 import { SafeImage } from '@/components/ui/safe-image';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
@@ -29,6 +29,8 @@ export default function AdminUsersPage() {
     const [destructiveConfirm, setDestructiveConfirm] = useState<{ user: AdminUser; action: string } | null>(null);
     const debounceRef = useRef<NodeJS.Timeout | null>(null);
     const [searchInput, setSearchInput] = useState('');
+    const [plusConfirmUser, setPlusConfirmUser] = useState<AdminUser | null>(null);
+    const [roleReason, setRoleReason] = useState('');
     const { toast } = useToast();
 
     const fetchUsers = useCallback(async () => {
@@ -60,22 +62,30 @@ export default function AdminUsersPage() {
         return () => { if (debounceRef.current) clearTimeout(debounceRef.current); };
     }, [searchInput]);
 
-    const handleAction = async (userId: string, action: string, value?: string) => {
+    const runAction = async (
+        userId: string,
+        action: string,
+        opts?: { value?: string; reason?: string; successLabel?: string },
+    ) => {
         try {
-            await fetch('/api/admin/users', {
+            const r = await fetch('/api/admin/users', {
                 method: 'PATCH',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ userId, action, value }),
+                body: JSON.stringify({ userId, action, value: opts?.value, reason: opts?.reason }),
             });
+            const data = await r.json().catch(() => ({}));
+            if (!r.ok) {
+                toast({ title: 'Error', description: data?.error || 'No se pudo completar la acción', variant: 'destructive' });
+                return false;
+            }
             fetchUsers();
-            const actionLabels: Record<string, string> = {
-                ban: 'Usuario baneado',
-                suspend: 'Usuario suspendido',
-                shadowban: 'Shadowban aplicado',
-                set_role: 'Rol actualizado',
-            };
-            toast({ title: 'Éxito', description: actionLabels[action] || 'Acción completada' });
-        } catch (e) { console.error(e); }
+            toast({ title: 'Éxito', description: opts?.successLabel || 'Acción completada' });
+            return true;
+        } catch (e) {
+            console.error(e);
+            toast({ title: 'Error', description: 'Error de conexión', variant: 'destructive' });
+            return false;
+        }
     };
 
     return (
@@ -154,6 +164,11 @@ export default function AdminUsersPage() {
                                         {u.profile?.isVerified && (
                                             <CheckCircle className="h-3.5 w-3.5 text-emerald-400" />
                                         )}
+                                        {u.profile?.subscriptionStatus === 'plus' && (
+                                            <Badge variant="outline" className="text-xs border-amber-500/30 text-amber-400">
+                                                Plus
+                                            </Badge>
+                                        )}
                                         <Badge variant="outline" className={`text-xs ${u.profile?.trustStatus === 'clean' ? 'border-green-500/30 text-green-400' : u.profile?.trustStatus === 'watchlist' ? 'border-amber-500/30 text-amber-400' : 'border-red-500/30 text-red-400'}`}>
                                             {u.profile?.trustStatus}
                                         </Badge>
@@ -187,6 +202,23 @@ export default function AdminUsersPage() {
                                         aria-label="Expulsar usuario">
                                         <Ban className="h-3 w-3" />
                                     </Button>
+                                    <Button variant="ghost" size="sm" className="text-amber-400 h-8 text-xs"
+                                        onClick={() => setPlusConfirmUser(u)} title="Gestionar Alora Plus"
+                                        aria-label="Gestionar Alora Plus">
+                                        <Crown className="h-3 w-3" />
+                                    </Button>
+                                    <Button variant="ghost" size="sm" className="text-emerald-400 h-8 text-xs"
+                                        onClick={() => runAction(u.id, 'verify', { successLabel: 'Usuario verificado' })} title="Verificar"
+                                        aria-label="Verificar usuario">
+                                        <BadgeCheck className="h-3 w-3" />
+                                    </Button>
+                                    {(u.profile?.trustStatus === 'banned' || u.profile?.isShadowBanned) && (
+                                        <Button variant="ghost" size="sm" className="text-sky-400 h-8 text-xs"
+                                            onClick={() => runAction(u.id, 'unban', { successLabel: 'Usuario reactivado' })} title="Reactivar"
+                                            aria-label="Reactivar usuario">
+                                            <RotateCcw className="h-3 w-3" />
+                                        </Button>
+                                    )}
                                 </div>
                             </div>
                         ))}
@@ -220,12 +252,22 @@ export default function AdminUsersPage() {
                                 : `¿Seguro que deseas promover a ${roleConfirmUser?.profile?.displayName || roleConfirmUser?.email} a admin? Esta acción otorga acceso total al panel de administración.`
                             }
                         </AlertDialogDescription>
+                        <div className="mt-4">
+                            <Input
+                                placeholder="Motivo del cambio (obligatorio)"
+                                value={roleReason}
+                                onChange={e => setRoleReason(e.target.value)}
+                                aria-label="Motivo del cambio de rol"
+                            />
+                        </div>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
-                        <AlertDialogCancel onClick={() => setRoleConfirmUser(null)}>Cancelar</AlertDialogCancel>
+                        <AlertDialogCancel onClick={() => { setRoleReason(''); setRoleConfirmUser(null); }}>Cancelar</AlertDialogCancel>
                         <AlertDialogAction onClick={() => {
                             if (roleConfirmUser) {
-                                handleAction(roleConfirmUser.id, 'set_role', roleConfirmUser.role === 'admin' ? 'user' : 'admin');
+                                const newRole = roleConfirmUser.role === 'admin' ? 'user' : 'admin';
+                                runAction(roleConfirmUser.id, 'set_role', { value: newRole, reason: roleReason, successLabel: 'Rol actualizado' });
+                                setRoleReason('');
                                 setRoleConfirmUser(null);
                             }
                         }}>
@@ -256,12 +298,50 @@ export default function AdminUsersPage() {
                         <AlertDialogCancel onClick={() => setDestructiveConfirm(null)}>Cancelar</AlertDialogCancel>
                         <AlertDialogAction onClick={() => {
                             if (destructiveConfirm) {
-                                handleAction(destructiveConfirm.user.id, destructiveConfirm.action);
+                                runAction(destructiveConfirm.user.id, destructiveConfirm.action, {
+                                    successLabel: destructiveConfirm.action === 'ban' ? 'Usuario expulsado' :
+                                        destructiveConfirm.action === 'suspend' ? 'Usuario suspendido' : 'Shadowban aplicado',
+                                });
                                 setDestructiveConfirm(null);
                             }
                         }}>
                             Confirmar
                         </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
+
+            <AlertDialog open={!!plusConfirmUser} onOpenChange={(open) => { if (!open) setPlusConfirmUser(null); }}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>Gestionar Alora Plus</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            {plusConfirmUser?.profile?.subscriptionStatus === 'plus'
+                                ? `${plusConfirmUser?.profile?.displayName || plusConfirmUser?.email} tiene Alora Plus activo. Puedes revocarlo en cualquier momento.`
+                                : `Otorga Alora Plus (30 días) a ${plusConfirmUser?.profile?.displayName || plusConfirmUser?.email}.`}
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel onClick={() => setPlusConfirmUser(null)}>Cancelar</AlertDialogCancel>
+                        {plusConfirmUser?.profile?.subscriptionStatus === 'plus' ? (
+                            <AlertDialogAction onClick={() => {
+                                if (plusConfirmUser) {
+                                    runAction(plusConfirmUser.id, 'revoke_plus', { successLabel: 'Alora Plus revocado' });
+                                    setPlusConfirmUser(null);
+                                }
+                            }}>
+                                Revocar Plus
+                            </AlertDialogAction>
+                        ) : (
+                            <AlertDialogAction onClick={() => {
+                                if (plusConfirmUser) {
+                                    runAction(plusConfirmUser.id, 'grant_plus', { successLabel: 'Alora Plus otorgado' });
+                                    setPlusConfirmUser(null);
+                                }
+                            }}>
+                                Otorgar Plus (30 días)
+                            </AlertDialogAction>
+                        )}
                     </AlertDialogFooter>
                 </AlertDialogContent>
             </AlertDialog>

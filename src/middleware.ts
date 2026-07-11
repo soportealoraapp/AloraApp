@@ -60,6 +60,8 @@ function createCache<T>(maxSize: number) {
 const profileCache = createCache<{ isCompleted: boolean; ts: number }>(MAX_CACHE_SIZE);
 const roleCache = createCache<{ role: string; ts: number }>(MAX_CACHE_SIZE);
 const lastActiveCache = createCache<number>(MAX_CACHE_SIZE);
+const banCache = createCache<{ disabled: boolean; ts: number }>(MAX_CACHE_SIZE);
+const BAN_CACHE_TTL = 30_000; // 30 seconds
 const PROFILE_CACHE_TTL = 10_000; // 10 seconds — short TTL to avoid stale redirect after onboarding completion
 const ROLE_CACHE_TTL = 30_000; // 30 seconds — reduced from 5min to limit stale privilege access
 const LAST_ACTIVE_THROTTLE = 300_000; // 5 minutes - update lastActiveAt at most every 5 min
@@ -95,6 +97,20 @@ async function getCachedAdminRole(userId: string): Promise<string | null> {
     const role = dbUser?.role ?? 'user';
     roleCache.set(userId, { role, ts: Date.now() });
     return role;
+}
+
+async function getCachedBanState(userId: string): Promise<boolean> {
+    const cached = banCache.get(userId);
+    if (cached && Date.now() - cached.ts < BAN_CACHE_TTL) return cached.disabled;
+
+    const { prisma } = await import('@/lib/prisma');
+    const dbUser = await prisma.user.findUnique({
+        where: { id: userId },
+        select: { isActive: true, deletedAt: true, profile: { select: { trustStatus: true } } },
+    });
+    const disabled = !dbUser?.isActive || !!dbUser?.deletedAt || dbUser?.profile?.trustStatus === 'banned';
+    banCache.set(userId, { disabled, ts: Date.now() });
+    return disabled;
 }
 
 function maybeUpdateLastActive(userId: string) {
@@ -177,6 +193,18 @@ export async function middleware(request: NextRequest) {
         if (isAppRoute && !isAdminLogin) {
             const redirectTarget = isAdminRoute ? '/admin/login' : '/login';
             return applySecurityHeaders(NextResponse.redirect(new URL(redirectTarget, modifiedRequest.url)));
+        }
+    }
+
+    // Hard-ban enforcement: blocked/disabled users are kept out of the app.
+    if (user && (isAppRoute || isAdminRoute)) {
+        try {
+            const disabled = await getCachedBanState(user.id);
+            if (disabled) {
+                return applySecurityHeaders(NextResponse.redirect(new URL('/suspended', modifiedRequest.url)));
+            }
+        } catch {
+            // DB error — let the request through rather than locking users out
         }
     }
 

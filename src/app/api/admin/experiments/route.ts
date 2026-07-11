@@ -1,11 +1,11 @@
 import { NextResponse } from 'next/server';
-import { requireSuperAdmin } from '@/lib/middleware/admin';
+import { requireAdmin } from '@/lib/middleware/admin';
 import { prisma } from '@/lib/prisma';
 import { computeExperimentResults } from '@/server/services/experiment-results';
 import { withRateLimit } from '@/server/utils/api-rate-limit';
 
 export async function GET() {
-  const auth = await requireSuperAdmin();
+  const auth = await requireAdmin();
   if (auth) return auth;
 
   const { createClient } = await import('@/lib/supabase/server');
@@ -24,7 +24,7 @@ export async function GET() {
 
     const withResults = await Promise.all(
       experiments.map(async (exp) => {
-        if (exp.status === 'running') {
+        if (exp.status === 'running' || exp.status === 'completed') {
           try {
             const results = await computeExperimentResults(exp.id);
             return { ...exp, results };
@@ -44,7 +44,7 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
-  const auth = await requireSuperAdmin();
+  const auth = await requireAdmin();
   if (auth) return auth;
 
   const { createClient } = await import('@/lib/supabase/server');

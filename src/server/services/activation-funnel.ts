@@ -140,8 +140,8 @@ export async function getActivationMetrics(): Promise<ActivationMetrics> {
         verifiedCount,
         recentUsers,
         plusUsers,
-        newUsersLast30,
         completenessAgg,
+        totalUsers,
     ] = await Promise.all([
         getActivationFunnel(),
         prisma.profile.count({ where: { voiceIntro: { not: null } } }),
@@ -152,10 +152,10 @@ export async function getActivationMetrics(): Promise<ActivationMetrics> {
             select: { userId: true, createdAt: true, metadata: true },
         }),
         prisma.profile.count({ where: { subscriptionStatus: 'plus' } }),
-        prisma.user.count({ where: { createdAt: { gte: thirtyDaysAgo } } }),
         prisma.profile.aggregate({
             _avg: { reputationScore: true }
         }),
+        prisma.user.count(),
     ]);
 
     // D1 retention
@@ -183,8 +183,8 @@ export async function getActivationMetrics(): Promise<ActivationMetrics> {
     const d7Active = d7Cohort.filter(u => d7ActiveUserIds.has(u.id)).length;
     const d7Total = d7Cohort.length;
 
-    const plusConversionRate = newUsersLast30 > 0
-        ? Math.round((plusUsers / (newUsersLast30 * 5)) * 1000) / 10
+    const plusConversionRate = totalUsers > 0
+        ? Math.round((plusUsers / totalUsers) * 1000) / 10
         : 0;
 
     return {

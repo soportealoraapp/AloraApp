@@ -16,16 +16,27 @@ interface WomenStrategyData {
     verificationRate: number;
 }
 
+interface WomenExperienceData {
+    avgTimeToFirstMatch: number;
+    avgTimeToFirstConversation: number;
+    avgReplyRate: number;
+    avgConversationLength: number;
+    verificationRate: number;
+    vsMale: { timeToMatch: number; replyRate: number; conversationLength: number };
+}
+
 export default function WomenStrategyPage() {
     const router = useRouter();
     const [data, setData] = useState<WomenStrategyData | null>(null);
+    const [audit, setAudit] = useState<WomenExperienceData | null>(null);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         Promise.all([
             fetch('/api/admin/female-retention').then(r => r.json()),
             fetch('/api/admin/marketplace-health').then(r => r.json()),
-        ]).then(([retention, health]) => {
+            fetch('/api/admin/women-experience').then(r => r.json()).catch(() => null),
+        ]).then(([retention, health, experience]) => {
             setData({
                 totalWomen: health.femaleUsers || 0,
                 activeWomen: retention.activeFemaleD7 || 0,
@@ -34,6 +45,7 @@ export default function WomenStrategyPage() {
                 conversionToActive: Math.round(retention.retentionD1 || 0),
                 verificationRate: retention.verificationRate || 0,
             });
+            setAudit(experience);
             setLoading(false);
         }).catch(() => setLoading(false));
     }, []);
@@ -106,6 +118,35 @@ export default function WomenStrategyPage() {
                     </CardContent>
                 </Card>
             </div>
+
+            {audit && (
+                <Card>
+                    <CardHeader>
+                        <CardTitle>Auditoría de Experiencia (Mujeres vs Hombres)</CardTitle>
+                    </CardHeader>
+                    <CardContent className="grid gap-4 md:grid-cols-2">
+                        <div className="p-3 bg-muted/50 rounded-lg">
+                            <h4 className="font-medium text-sm">Tiempo a primer match</h4>
+                            <p className="text-2xl font-bold">{audit.avgTimeToFirstMatch}h</p>
+                            <p className="text-xs text-muted-foreground">Hombres: {audit.vsMale.timeToMatch}h</p>
+                        </div>
+                        <div className="p-3 bg-muted/50 rounded-lg">
+                            <h4 className="font-medium text-sm">Tasa de respuesta</h4>
+                            <p className="text-2xl font-bold">{audit.avgReplyRate}%</p>
+                            <p className="text-xs text-muted-foreground">Hombres: {audit.vsMale.replyRate}%</p>
+                        </div>
+                        <div className="p-3 bg-muted/50 rounded-lg">
+                            <h4 className="font-medium text-sm">Largo de conversación</h4>
+                            <p className="text-2xl font-bold">{audit.avgConversationLength} msgs</p>
+                            <p className="text-xs text-muted-foreground">Hombres: {audit.vsMale.conversationLength} msgs</p>
+                        </div>
+                        <div className="p-3 bg-muted/50 rounded-lg">
+                            <h4 className="font-medium text-sm">Tiempo a primera conversación</h4>
+                            <p className="text-2xl font-bold">{audit.avgTimeToFirstConversation}h</p>
+                        </div>
+                    </CardContent>
+                </Card>
+            )}
 
             <Card>
                 <CardHeader>

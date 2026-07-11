@@ -212,7 +212,7 @@ export default function AdminActivationPage() {
                 <CardHeader>
                     <CardTitle className="text-base flex items-center gap-2">
                         <Crown className="h-4 w-4 text-amber-500" />
-                        Conversión Plus
+                        Usuarios con Plus
                     </CardTitle>
                 </CardHeader>
                 <CardContent>

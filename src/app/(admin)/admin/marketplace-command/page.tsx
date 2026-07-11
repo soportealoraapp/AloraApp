@@ -44,8 +44,8 @@ export default function MarketplaceCommandPage() {
             }
 
             if (activation?.funnel?.steps) {
-                const onboardingStep = activation.funnel.steps.find((s: any) => s.label?.includes('Onboarding'));
-                if (onboardingStep && onboardingStep.conversionRate < 50) {
+                const onboardingStep = activation.funnel.steps.find((s: { name?: string; conversionFromPrevious?: number }) => (s.name || '').toLowerCase().includes('onboarding'));
+                if (onboardingStep && onboardingStep.conversionFromPrevious < 50) {
                     derivedAlerts.push({ severity: 'medium', message: 'Tasa de completitud de onboarding por debajo del 50%.' });
                 }
             }

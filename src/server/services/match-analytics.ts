@@ -57,7 +57,7 @@ export async function getMatchQualityMetrics(): Promise<MatchQualityMetrics> {
         ? (matchesWithOneOrZero / totalMatches) * 100
         : 0;
 
-    // Long conversations (>20 messages)
+    // Conversations started (any match with at least one message)
     const longConversations = await prisma.match.count({
         where: {
             messages: { some: {} },

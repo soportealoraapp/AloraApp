@@ -53,11 +53,16 @@ export default function AdminReportsPage() {
 
     const handleAction = async (reportId: string, action: string) => {
         try {
-            await fetch('/api/admin/reports', {
+            const r = await fetch('/api/admin/reports', {
                 method: 'PATCH',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ reportId, action }),
             });
+            const data = await r.json().catch(() => ({}));
+            if (!r.ok) {
+                toast({ title: 'Error', description: data?.error || 'No se pudo completar la acción', variant: 'destructive' });
+                return;
+            }
             fetchReports(filter);
             const actionLabels: Record<string, string> = {
                 ignore: 'Reporte ignorado',
@@ -67,7 +72,28 @@ export default function AdminReportsPage() {
                 ban: 'Usuario baneado',
             };
             toast({ title: 'Éxito', description: actionLabels[action] || 'Acción completada' });
-        } catch (e) { console.error(e); }
+        } catch (e) { console.error(e); toast({ title: 'Error', description: 'Error de conexión', variant: 'destructive' }); }
+    };
+
+    const renderDetails = (details?: string) => {
+        if (!details) return null;
+        try {
+            const obj = JSON.parse(details);
+            const entries = Object.entries(obj).filter(([, v]) => v !== undefined && v !== null && v !== '');
+            if (entries.length === 0) return null;
+            return (
+                <div className="text-xs text-muted-foreground mt-1 space-y-0.5">
+                    {entries.map(([k, v]) => (
+                        <div key={k}>
+                            <span className="capitalize">{k.replace(/_/g, ' ')}:</span>{' '}
+                            {typeof v === 'object' ? JSON.stringify(v) : String(v)}
+                        </div>
+                    ))}
+                </div>
+            );
+        } catch {
+            return <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{details}</p>;
+        }
     };
 
     const executeAction = (reportId: string, action: string) => {
@@ -135,7 +161,6 @@ export default function AdminReportsPage() {
                 <div className="flex gap-2 ml-auto">
                     {[
                         { key: 'pending', label: 'Pendientes' },
-                        { key: 'reviewed', label: 'Revisados' },
                         { key: 'dismissed', label: 'Descartados' },
                         { key: 'resolved', label: 'Resueltos' },
                     ].map(({ key, label }) => (
@@ -185,9 +210,7 @@ export default function AdminReportsPage() {
                                             <span>Reportes: {report.reportCount}</span>
                                             <span>{new Date(report.createdAt).toLocaleDateString()}</span>
                                         </div>
-                                        {report.details && (
-                                            <p className="text-xs text-muted-foreground mt-1 line-clamp-1">{report.details}</p>
-                                        )}
+                                        {renderDetails(report.details)}
                                         <div className="text-xs text-muted-foreground/60 mt-1">
                                             Reportado por {report.reporter?.name || report.reporter?.email || 'Usuario'}
                                         </div>

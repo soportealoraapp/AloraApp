@@ -125,7 +125,11 @@ export async function PATCH(request: NextRequest) {
                 updates.status = 'resolved';
                 await prisma.profile.update({
                     where: { userId: report.reportedId },
-                    data: { trustStatus: 'banned', isShadowBanned: true, reputationScore: 0 },
+                    data: { trustStatus: 'banned', isShadowBanned: true, reputationScore: 0, isVerified: false },
+                });
+                await prisma.user.update({
+                    where: { id: report.reportedId },
+                    data: { isActive: false, deletedAt: new Date() },
                 });
                 await prisma.match.updateMany({
                     where: { OR: [{ user1Id: report.reportedId }, { user2Id: report.reportedId }], isActive: true },

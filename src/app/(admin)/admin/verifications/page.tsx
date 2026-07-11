@@ -46,18 +46,23 @@ export default function AdminVerificationsPage() {
 
     const handleAction = async (submissionId: string, action: string, reason?: string) => {
         try {
-            await fetch('/api/admin/verifications', {
+            const r = await fetch('/api/admin/verifications', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ submissionId, action, ...(reason ? { reason } : {}) }),
             });
+            const data = await r.json().catch(() => ({}));
+            if (!r.ok) {
+                toast({ title: 'Error', description: data?.error || 'No se pudo completar la acción', variant: 'destructive' });
+                return;
+            }
             loadSubmissions(filter);
             const actionLabels: Record<string, string> = {
                 approve: 'Verificación aprobada',
                 reject: 'Verificación rechazada',
             };
             toast({ title: 'Éxito', description: actionLabels[action] || 'Acción completada' });
-        } catch (e) { console.error(e); }
+        } catch (e) { console.error(e); toast({ title: 'Error', description: 'Error de conexión', variant: 'destructive' }); }
     };
 
     const handleRejectClick = (submissionId: string) => {

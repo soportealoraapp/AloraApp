@@ -196,6 +196,11 @@ export default function AdminMetricsPage() {
                                 </Button>
                             </CardHeader>
                             <CardContent>
+                                {funnel.length === 0 || (funnel[0]?.count ?? 0) === 0 ? (
+                                    <p className="text-sm text-muted-foreground py-4">
+                                        Sin datos de funnel. Los eventos de registro (signup / onboarding) no están siendo registrados, por lo que las tasas de conversión no se pueden calcular.
+                                    </p>
+                                ) : (
                                 <div className="space-y-3">
                                     {funnel.map((step) => (
                                         <div key={step.event} className="flex items-center gap-4">
@@ -227,6 +232,7 @@ export default function AdminMetricsPage() {
                                         </div>
                                     ))}
                                 </div>
+                                )}
                             </CardContent>
                         </Card>
 
